@@ -355,5 +355,3 @@ MIT License
 ![lang](https://img.shields.io/badge/lang-TypeScript-informational)
 
 ---
-
-> 必要であれば、上記READMEを**英語版**に整形、あるいは**Seesaaブログ**向けにも再整形可能です。JSONスキーマやCLIの実装雛形も用意できます。
