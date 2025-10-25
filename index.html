@@ -1,72 +1,557 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LiteGraph Factory Simulator – Standalone</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/css/litegraph.min.css" integrity="sha512-cW9ZCxqs9VK2Ae7bg9Gb4WTRkOFpOmGYkdwV0hNvZpBcS7WccWsv6oElVCycB1Bw1Eu5Jdg7Heh6dV6nHkeS5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="assets/css/style.css" />
+<meta charset="utf-8" />
+<title>2状態DESシミュレータ (LiteGraph.js, 1ファイル版)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/css/litegraph.min.css">
+<style>
+  html,body{height:100%;margin:0;background:#0f1115;color:#e6e6e6;font-family:system-ui,Segoe UI,Helvetica,Arial,sans-serif;}
+  #app{display:grid;grid-template-columns:1fr 340px;height:100%;}
+  #graph{position:relative;background:#1b1f2a;}
+  #controls{padding:12px;border-left:1px solid #2a3142;display:flex;flex-direction:column;gap:12px}
+  #controls h2{margin:0 0 2px;font-size:18px;color:#b6c3ff}
+  .row{display:flex;flex-wrap:wrap;gap:8px}
+  button,select,input[type="number"],input[type="text"]{
+    background:#22293a;border:1px solid #3a4157;color:#e6e6e6;border-radius:8px;padding:8px 10px;font-size:13px
+  }
+  button:hover{filter:brightness(1.06)}
+  button.primary{background:#4158d0;border-color:#5670ff}
+  button.warn{background:#8a2b2b;border-color:#b23f3f}
+  .card{background:#161a24;border:1px solid #2a3142;border-radius:12px;padding:10px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Consolas,Monaco,monospace}
+  #stats table{width:100%;font-size:12px;border-collapse:collapse}
+  #stats td{padding:4px 0;border-bottom:1px dashed #2a3142}
+  #footer{opacity:.7;font-size:12px}
+  .hint{opacity:.8;font-size:12px;line-height:1.5}
+  .badge{display:inline-block;border:1px solid #3a4157;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:11px;background:#1c2230}
+</style>
 </head>
 <body>
-  <header id="controls" aria-label="シミュレーション操作">
-    <button id="btnStart" type="button">Start</button>
-    <button id="btnStop" type="button">Stop</button>
-    <button id="btnReset" type="button">Reset</button>
-    <label>
-      Speed ×
-      <input type="number" id="speedInput" value="1" min="0.1" max="100" step="0.1" aria-label="シミュレーション速度" />
-    </label>
-    <span>Time: <span id="simTime">0.00 s</span></span>
-    <select id="exampleSelect" title="レイアウト例を読み込み">
-      <option value="">例を読み込み…</option>
-      <option value="simple">シンプル(直列)</option>
-      <option value="branch">分岐(スプリット)</option>
-      <option value="buffer">バッファ付き</option>
-    </select>
-  </header>
-
-  <section id="fileControls" aria-label="ファイル操作">
-    <button id="btnSave" type="button">Save</button>
-    <button id="btnLoad" type="button">Load</button>
-    <button id="btnAuto" type="button">Autosave: <span id="autoState">OFF</span></button>
-    <input type="file" id="fileInput" accept=".json" />
-  </section>
-
-  <main>
-    <canvas id="graph" role="application" aria-label="ファクトリーシミュレーター"></canvas>
-  </main>
-
-  <aside id="hud" aria-live="polite">
-    <div>Throughput (all Sinks): <span id="tp">0</span></div>
-    <div>WIP (in flight): <span id="wip">0</span></div>
-    <div>Last Work: <span id="lastWork">-</span></div>
-  </aside>
-
-  <aside id="inspector" hidden>
-    <h3>ノード編集</h3>
-    <div class="row">
-      <label for="inspTitle">Title</label>
-      <input id="inspTitle" type="text" />
-    </div>
-    <div id="inspProps"></div>
-    <div class="btns">
-      <button id="btnOpenScript" type="button" title="スクリプトエディタ">Script…</button>
-      <button id="btnApply" type="button">適用</button>
-    </div>
-  </aside>
-
-  <section id="scriptEditorModal" role="dialog" aria-modal="true" aria-labelledby="scriptNodeTitle">
-    <div id="scriptEditorContainer">
-      <div id="scriptHeader"><span id="scriptNodeTitle">Script Editor</span></div>
-      <textarea id="scriptEditorTextarea"></textarea>
-      <div id="scriptEditorControls">
-        <button id="scriptEditorSave" type="button">Save</button>
-        <button id="scriptEditorCancel" type="button">Cancel</button>
+<div id="app">
+  <div id="graph">
+    <canvas id="graphcanvas"></canvas>
+  </div>
+  <div id="controls">
+    <div class="card">
+      <h2>実行</h2>
+      <div class="row">
+        <button id="btnRun" class="primary">▶ 走らせる</button>
+        <button id="btnPause">⏸ 一時停止</button>
+        <button id="btnReset" class="warn">⟲ リセット</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <label>地平線 H[s]: <input id="horizon" type="number" min="1" value="600" style="width:90px"></label>
+        <label>倍速: <select id="speed">
+          <option value="1">×1</option>
+          <option value="5">×5</option>
+          <option value="20">×20</option>
+          <option value="100" selected>×100</option>
+          <option value="1000">×1000</option>
+        </select></label>
       </div>
     </div>
-  </section>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js" integrity="sha512-EVbWcv16O3MHuvb6jVWeItPxX2VINeodIZ6hO6PvxI6Bfq5lHppZArYrusS4x+h0/pk3jfbQfVIAtF+wNCz7Lw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" src="assets/js/app.js"></script>
+    <div class="card">
+      <h2>グラフ</h2>
+      <div class="row">
+        <button id="btnCompile">🔧 コンパイル</button>
+        <button id="btnSave">💾 保存</button>
+        <button id="btnLoad">📂 読込</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button id="btnSampleLine">サンプル：直列</button>
+        <button id="btnSampleBranch">サンプル：分岐</button>
+        <button id="btnSampleJoin">サンプル：合流</button>
+      </div>
+      <div class="hint" style="margin-top:8px">
+        ・ノードは右クリックメニュー「Add Node」から追加（sim/ 以下）<br>
+        ・Station の <span class="badge">routing</span> は <b>roundrobin</b> / <b>random</b><br>
+        ・Join2 は 2入力AND合流、`tauP`/`tauT` を持つ工程として扱います
+      </div>
+    </div>
+
+    <div id="stats" class="card">
+      <h2>統計</h2>
+      <table>
+        <tr><td>シミュレータ時刻</td><td class="mono" id="st_time">0.00 s</td></tr>
+        <tr><td>完了数（Sink）</td><td class="mono" id="st_done">0</td></tr>
+        <tr><td>スループット（実測）</td><td class="mono" id="st_q">0 /s</td></tr>
+        <tr><td>WIP（在制品/占有数）</td><td class="mono" id="st_wip">0</td></tr>
+        <tr><td>ボトルネック推定 τ<sub>max</sub></td><td class="mono" id="st_bneck">-</td></tr>
+      </table>
+    </div>
+
+    <div id="footer" class="hint">
+      <b>2状態（P/T）モデル</b>：<br>
+      P = 「前工程から搬送開始 → 後工程待ち」<br>
+      T = 「後工程への搬送開始 → 前工程待ち」<br>
+      待ち時間を半サイクルに内包し、工程×2個の状態で簡潔に表現します。
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
+<script>
+/* ============================================================
+   2状態DES シミュレーション（イベント駆動・簡潔実装）
+   ------------------------------------------------------------
+   - Token: {id, birth}
+   - Entities: Source, Station, Join2, Sink
+   - Station: capacity=1, P→T→deliver(可能なら即時、不可なら待機)
+   - deliver待機: targetキューに積んで、targetが空いたら取り出し
+   ============================================================ */
+
+// ---------- 小道具 ----------
+const fmt = (x, d=2)=> (typeof x==='number' ? x.toFixed(d) : String(x));
+let UID = 1; const nextId = ()=> UID++;
+
+// ---------- 事件スケジューラ ----------
+class Scheduler {
+  constructor(){ this.t=0; this.events=[]; this.running=false; this.horizon=600; }
+  clear(){ this.t=0; this.events.length=0; this.running=false; }
+  schedule(at, fn, tag=""){ this.events.push({at, fn, tag}); this.events.sort((a,b)=>a.at-b.at); }
+  step(maxEvents=1000){
+    let n=0;
+    while(n<maxEvents && this.events.length && this.t <= this.horizon){
+      const e = this.events.shift();
+      this.t = e.at; e.fn(this);
+      n++;
+    }
+    return n;
+  }
+}
+
+// ---------- シミュレーション本体 ----------
+class Simulation {
+  constructor(){ 
+    this.sched = new Scheduler();
+    this.entities = new Map(); // id -> entity
+    this.waitQ = new Map();    // targetId -> [{from, token}]
+    this.done = 0;
+  }
+  reset(){
+    this.sched.clear();
+    this.waitQ.clear();
+    this.done = 0;
+    for(const e of this.entities.values()){ e.reset && e.reset(this); }
+  }
+  addEntity(e){ this.entities.set(e.id, e); }
+  getEntity(id){ return this.entities.get(id); }
+
+  deliverOrQueue(from, to, token){
+    const target = (typeof to==='number') ? this.getEntity(to) : to;
+    if(target.canAccept()){
+      target.accept(token);
+      from.onDelivered && from.onDelivered(); // アップストリーム解除
+      return true;
+    }else{
+      if(!this.waitQ.has(target.id)) this.waitQ.set(target.id, []);
+      this.waitQ.get(target.id).push({from, token});
+      from.onBlocked && from.onBlocked(target.id);
+      return false;
+    }
+  }
+  tryServeWaiters(targetId){
+    const target = this.getEntity(targetId);
+    const q = this.waitQ.get(targetId);
+    if(!q || !q.length) return;
+    if(!target.canAccept()) return;
+    const {from, token} = q.shift();
+    target.accept(token);
+    from.onDelivered && from.onDelivered();
+  }
+
+  totalWIP(){
+    let w=0;
+    for(const e of this.entities.values()){ if(e.wip) w += e.wip(); }
+    return w;
+  }
+}
+
+// ---------- エンティティ基底 ----------
+class Entity {
+  constructor(sim, node){
+    this.sim = sim; this.node = node; this.id = node?.id || nextId();
+    this.out = []; // 出力先 entity.id の配列
+  }
+  canAccept(){ return true; }
+  wip(){ return 0; }
+  reset(){}
+}
+
+// ---------- Source（一定間隔でトークン生成） ----------
+class Source extends Entity {
+  constructor(sim, node){
+    super(sim, node);
+    this.period = Number(node?.properties?.period || 5);
+    this.burst  = Number(node?.properties?.burst  || 1);
+    this.active = false;
+    this.nextIndex = 0;
+  }
+  reset(){ this.active=false; }
+  start(){
+    this.active=true;
+    const emit = ()=>{
+      if(!this.active) return;
+      for(let k=0;k<this.burst;k++){
+        const token = {id: nextId(), birth: this.sim.sched.t};
+        const to = this.pickNext();
+        this.sim.deliverOrQueue(this, to, token);
+      }
+      this.sim.sched.schedule(this.sim.sched.t + this.period, emit, "source_emit");
+    };
+    this.sim.sched.schedule(this.sim.sched.t + 0.0001, emit, "source_start");
+  }
+  pickNext(){
+    if(!this.out.length) return null;
+    const idx = this.nextIndex % this.out.length;
+    this.nextIndex++;
+    return this.out[idx];
+  }
+  onDelivered(){}
+  onBlocked(){}
+}
+
+// ---------- Sink（完了） ----------
+class Sink extends Entity{
+  canAccept(){ return true; }
+  accept(token){
+    // 完了
+    this.sim.done++;
+  }
+}
+
+// ---------- Station（P→Tの2状態, capacity=1） ----------
+class Station extends Entity{
+  constructor(sim, node){
+    super(sim, node);
+    this.tauP = Number(node?.properties?.tauP || 5);
+    this.tauT = Number(node?.properties?.tauT || 3);
+    this.routing = (node?.properties?.routing || "roundrobin").toLowerCase();
+    this.state = "idle"; // idle | P | T | blocked
+    this.token = null;
+    this.nextIndex = 0;
+    this.blockedTarget = null;
+    this.lastTStart = 0;
+  }
+  reset(){ this.state="idle"; this.token=null; this.blockedTarget=null; }
+  canAccept(){ return this.state==="idle"; }
+  wip(){ return (this.state==="idle")?0:1; }
+
+  accept(token){
+    // 開始: P
+    this.state="P"; this.token=token;
+    const t_end = this.sim.sched.t + this.tauP;
+    this.sim.sched.schedule(t_end, ()=>this.onPdone(), "Pdone");
+  }
+  onPdone(){
+    // 次: T
+    this.state="T";
+    this.lastTStart = this.sim.sched.t;
+    const t_end = this.sim.sched.t + this.tauT;
+    this.sim.sched.schedule(t_end, ()=>this.onTtryDeliver(), "Tdone");
+  }
+  chooseNext(){
+    if(this.out.length===0) return null;
+    if(this.routing==="random"){
+      const idx = Math.floor(Math.random()*this.out.length);
+      return this.out[idx];
+    }else{ // roundrobin
+      const idx = this.nextIndex % this.out.length; this.nextIndex++;
+      return this.out[idx];
+    }
+  }
+  onTtryDeliver(){
+    const to = this.chooseNext();
+    if(to==null){ // 接続なし→捨てる
+      this.state="idle"; this.token=null;
+      this.sim.tryServeWaiters(this.id); // 自分に待機してる上流があれば受け入れ
+      return;
+    }
+    const ok = this.sim.deliverOrQueue(this, to, this.token);
+    if(ok){
+      // 受け渡し完了
+      this.state="idle"; this.token=null;
+      this.sim.tryServeWaiters(this.id);
+    }else{
+      // 下流が空いたら取りに来てもらう（ブロック）
+      this.state="blocked";
+      this.blockedTarget = (typeof to==='number')?to:to.id;
+    }
+  }
+  onBlocked(targetId){ /* NOP: 可視化用に保持済み */ }
+  onDelivered(){
+    // 下流に渡せた
+    this.state="idle"; this.token=null; this.blockedTarget=null;
+    this.sim.tryServeWaiters(this.id);
+  }
+}
+
+// ---------- Join2（2入力AND→1出力, capacity=1） ----------
+class Join2 extends Entity{
+  constructor(sim, node){
+    super(sim, node);
+    this.tauP = Number(node?.properties?.tauP || 2);
+    this.tauT = Number(node?.properties?.tauT || 1);
+    this.buffer = new Set(); // 入力到着をマーク（2つ必要）
+    this.state = "idle";
+    this.token = null;       // 出力へ流す“合成トークン”
+  }
+  reset(){ this.buffer.clear(); this.state="idle"; this.token=null; }
+  canAccept(){
+    // 2つ目までは受け取れる（ただし自分が加工中なら待ってもらう）
+    if(this.state!=="idle") return false;
+    return this.buffer.size < 2;
+  }
+  wip(){ return (this.state==="idle")? (this.buffer.size>0?1:0) : 1; }
+
+  accept(token){
+    this.buffer.add(token.id); // 印のみ（中身は不要）
+    if(this.buffer.size>=2 && this.state==="idle"){
+      // P開始
+      this.state="P";
+      this.buffer.clear();
+      const t_end = this.sim.sched.t + this.tauP;
+      this.sim.sched.schedule(t_end, ()=>this.onPdone(), "joinPdone");
+    }
+  }
+  onPdone(){
+    this.state="T";
+    const t_end = this.sim.sched.t + this.tauT;
+    this.sim.sched.schedule(t_end, ()=>this.onTtryDeliver(), "joinTdone");
+  }
+  onTtryDeliver(){
+    if(!this.out.length){ this.state="idle"; return; }
+    const to = this.out[0];
+    const token = {id: nextId(), birth: this.sim.sched.t}; // 合流後の1トークン
+    const ok = this.sim.deliverOrQueue(this, to, token);
+    if(ok){
+      this.state="idle";
+      this.sim.tryServeWaiters(this.id);
+    }else{
+      this.state="blocked";
+      this.blockedTarget = (typeof to==='number')?to:to.id;
+    }
+  }
+  onDelivered(){ this.state="idle"; this.blockedTarget=null; this.sim.tryServeWaiters(this.id); }
+}
+
+// ---------- LiteGraph ノード定義 ----------
+function registerLGNodes(){
+  // Source
+  function LGSource(){ this.addOutput("out"); this.properties={period:5, burst:1, title:"Source"}; }
+  LGSource.title="Source"; LGSource.desc="一定間隔でワーク生成";
+  LGSource.prototype.onDrawForeground=function(ctx){ ctx.fillStyle="#9fe59f"; ctx.fillText("period="+this.properties.period+"s", 10, this.size[1]-8); }
+  LiteGraph.registerNodeType("sim/Source", LGSource);
+
+  // Station
+  function LGStation(){
+    this.addInput("in");
+    this.addOutput("out", LiteGraph.EVENT); // 複数接続OK
+    this.widgets_up = true;
+    this.properties={tauP:5,tauT:3,routing:"roundrobin", title:"Station"};
+    this.addWidget("number","tauP",this.properties.tauP,"tauP");
+    this.addWidget("number","tauT",this.properties.tauT,"tauT");
+    this.addWidget("combo","routing",this.properties.routing,"routing",{values:["roundrobin","random"]});
+  }
+  LGStation.title="Station"; LGStation.desc="P→Tの2状態工程";
+  LGStation.prototype.onDrawForeground=function(ctx){
+    ctx.fillStyle="#b6c3ff";
+    ctx.fillText(`P=${this.properties.tauP}s T=${this.properties.tauT}s`, 10, this.size[1]-8);
+  }
+  LiteGraph.registerNodeType("sim/Station", LGStation);
+
+  // Join2
+  function LGJoin2(){
+    this.addInput("in1"); this.addInput("in2");
+    this.addOutput("out");
+    this.properties={tauP:2,tauT:1,title:"Join2(AND)"};
+    this.addWidget("number","tauP",this.properties.tauP,"tauP");
+    this.addWidget("number","tauT",this.properties.tauT,"tauT");
+  }
+  LGJoin2.title="Join2"; LGJoin2.desc="2入力AND合流→1出力";
+  LGJoin2.prototype.onDrawForeground=function(ctx){
+    ctx.fillStyle="#ffd28a";
+    ctx.fillText(`τP=${this.properties.tauP} τT=${this.properties.tauT}`, 10, this.size[1]-8);
+  }
+  LiteGraph.registerNodeType("sim/Join2", LGJoin2);
+
+  // Sink
+  function LGSink(){ this.addInput("in"); this.properties={title:"Sink"}; }
+  LGSink.title="Sink"; LGSink.desc="完成カウント";
+  LiteGraph.registerNodeType("sim/Sink", LGSink);
+}
+
+// ---------- LiteGraph セットアップ ----------
+const canvas = new LGraphCanvas("#graphcanvas");
+const graph = new LGraph();
+canvas.graph = graph;
+canvas.ds.scale = 1.1;
+registerLGNodes();
+
+// ---------- シミュレーション⇄グラフのコンパイル ----------
+function compileGraph(sim){
+  sim.entities.clear();
+  // 1) ノード生成
+  for(const n of graph._nodes){
+    if(n.type === "sim/Source"){ sim.addEntity(new Source(sim, n)); }
+    else if(n.type === "sim/Station"){ sim.addEntity(new Station(sim, n)); }
+    else if(n.type === "sim/Join2"){ sim.addEntity(new Join2(sim, n)); }
+    else if(n.type === "sim/Sink"){ sim.addEntity(new Sink(sim, n)); }
+  }
+  // 2) 配線
+  for(const id in graph.links){
+    const L = graph.links[id];
+    const a = sim.getEntity(L.origin_id);
+    const b = sim.getEntity(L.target_id);
+    if(a && b) a.out.push(b.id);
+  }
+  // 3) 初期化
+  sim.reset();
+  // 4) 自動開始（Sourceのstart）
+  for(const e of sim.entities.values()){
+    if(e instanceof Source){ e.start(); }
+  }
+  // 5) ボトルネック推定
+  let tmax = 0;
+  for(const e of sim.entities.values()){
+    if(e instanceof Station || e instanceof Join2){
+      const tau = (e.tauP||0)+(e.tauT||0);
+      tmax = Math.max(tmax, tau);
+    }
+  }
+  document.getElementById("st_bneck").textContent = tmax? (fmt(tmax,2)+" s") : "-";
+}
+
+// ---------- UI ----------
+const sim = new Simulation();
+
+function runLoop(){
+  if(!sim.sched.running) return;
+  const speed = Number(document.getElementById("speed").value);
+  sim.sched.horizon = Number(document.getElementById("horizon").value);
+  // 1フレームで複数イベントを処理（速度×）
+  const MAX_PER_FRAME = 500 * speed;
+  sim.sched.step(MAX_PER_FRAME);
+
+  // 統計更新
+  document.getElementById("st_time").textContent = fmt(sim.sched.t,2)+" s";
+  const q = sim.sched.t>0 ? sim.done / sim.sched.t : 0;
+  document.getElementById("st_done").textContent = String(sim.done);
+  document.getElementById("st_q").textContent = fmt(q,5)+" /s";
+  document.getElementById("st_wip").textContent = String(sim.totalWIP());
+
+  if(sim.sched.running && sim.sched.t <= sim.sched.horizon && sim.sched.events.length>0){
+    requestAnimationFrame(runLoop);
+  }else{
+    sim.sched.running = false;
+  }
+}
+
+// Buttons
+document.getElementById("btnCompile").onclick = ()=>{
+  compileGraph(sim);
+  alert("グラフをコンパイルしました。左上の『走らせる』で実行できます。");
+};
+document.getElementById("btnRun").onclick = ()=>{
+  if(sim.entities.size===0){ compileGraph(sim); }
+  sim.sched.running = true;
+  requestAnimationFrame(runLoop);
+};
+document.getElementById("btnPause").onclick = ()=>{ sim.sched.running=false; };
+document.getElementById("btnReset").onclick = ()=>{
+  sim.reset();
+  document.getElementById("st_time").textContent = "0.00 s";
+  document.getElementById("st_done").textContent = "0";
+  document.getElementById("st_q").textContent = "0 /s";
+  document.getElementById("st_wip").textContent = "0";
+};
+
+document.getElementById("btnSave").onclick = ()=>{
+  const data = JSON.stringify(graph.serialize(), null, 2);
+  const blob = new Blob([data], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "graph.json";
+  a.click();
+};
+document.getElementById("btnLoad").onclick = ()=>{
+  const inp = document.createElement("input");
+  inp.type="file"; inp.accept="application/json";
+  inp.onchange = (ev)=>{
+    const f = ev.target.files[0];
+    const fr = new FileReader();
+    fr.onload = ()=>{
+      graph.clear();
+      graph.configure(JSON.parse(fr.result));
+      graph.start();
+    };
+    fr.readAsText(f);
+  };
+  inp.click();
+};
+
+// ---------- サンプル生成 ----------
+function clearAndCenter(){
+  graph.clear();
+  canvas.ds.offset = [0,0]; canvas.ds.scale=1.1;
+}
+document.getElementById("btnSampleLine").onclick = ()=>{
+  clearAndCenter();
+  const s = LiteGraph.createNode("sim/Source"); s.pos=[10,80]; s.properties.period=4;
+  const a = LiteGraph.createNode("sim/Station"); a.pos=[220,60]; a.properties.tauP=5; a.properties.tauT=3;
+  const b = LiteGraph.createNode("sim/Station"); b.pos=[420,60]; b.properties.tauP=4; b.properties.tauT=4;
+  const k = LiteGraph.createNode("sim/Sink");    k.pos=[640,60];
+  graph.add(s); graph.add(a); graph.add(b); graph.add(k);
+  s.connect(0,a,0); a.connect(0,b,0); b.connect(0,k,0);
+};
+
+document.getElementById("btnSampleBranch").onclick = ()=>{
+  clearAndCenter();
+  const s = LiteGraph.createNode("sim/Source"); s.pos=[10,120]; s.properties.period=3;
+  const a = LiteGraph.createNode("sim/Station"); a.pos=[220,120]; a.properties.tauP=4; a.properties.tauT=2; a.properties.routing="roundrobin";
+  const b1= LiteGraph.createNode("sim/Station"); b1.pos=[440,40];  b1.properties.tauP=5; b1.properties.tauT=2;
+  const b2= LiteGraph.createNode("sim/Station"); b2.pos=[440,200]; b2.properties.tauP=6; b2.properties.tauT=3;
+  const k = LiteGraph.createNode("sim/Sink");    k.pos=[660,120];
+  graph.add(s); graph.add(a); graph.add(b1); graph.add(b2); graph.add(k);
+  s.connect(0,a,0); a.connect(0,b1,0); a.connect(0,b2,0); b1.connect(0,k,0); b2.connect(0,k,0);
+};
+
+document.getElementById("btnSampleJoin").onclick = ()=>{
+  clearAndCenter();
+  const s = LiteGraph.createNode("sim/Source"); s.pos=[10,120]; s.properties.period=3;
+  const a1= LiteGraph.createNode("sim/Station"); a1.pos=[220,40];  a1.properties.tauP=3; a1.properties.tauT=2;
+  const a2= LiteGraph.createNode("sim/Station"); a2.pos=[220,200]; a2.properties.tauP=4; a2.properties.tauT=2.5;
+  const j = LiteGraph.createNode("sim/Join2");   j.pos=[440,120];  j.properties.tauP=2; j.properties.tauT=1;
+  const b = LiteGraph.createNode("sim/Station"); b.pos=[660,120];  b.properties.tauP=5; b.properties.tauT=3;
+  const k = LiteGraph.createNode("sim/Sink");    k.pos=[880,120];
+  graph.add(s); graph.add(a1); graph.add(a2); graph.add(j); graph.add(b); graph.add(k);
+  s.connect(0,a1,0); s.connect(0,a2,0); a1.connect(0,j,0); a2.connect(0,j,1); j.connect(0,b,0); b.connect(0,k,0);
+};
+
+// 初期サンプル
+document.getElementById("btnSampleLine").click();
+
+// --------- 監視：ノード描画に状態バッジ（簡易） ----------
+const drawNodeOverlay = canvas.drawNode;
+canvas.drawNode = function(canvas_ctx, node, other){
+  drawNodeOverlay.call(this, canvas_ctx, node, other);
+  const ent = sim.getEntity(node.id);
+  if(!ent) return;
+  const s = (ent instanceof Station||ent instanceof Join2) ? ent.state : (ent instanceof Source? (ent.active?"active":"idle") : "");
+  if(!s) return;
+  canvas_ctx.save();
+  canvas_ctx.fillStyle = "#00000088";
+  canvas_ctx.fillRect(node.size[0]-64, 0, 64, 20);
+  canvas_ctx.fillStyle = "#d6e1ff";
+  canvas_ctx.font = "12px monospace";
+  canvas_ctx.fillText(s, node.size[0]-58, 14);
+  canvas_ctx.restore();
+};
+
+// --------- 実行ループ開始・グラフ起動 ---------
+graph.start();
+</script>
 </body>
 </html>
