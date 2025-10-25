@@ -92,8 +92,6 @@
 
 ## 図解（Mermaid）
 
-> GitHubのMarkdownは Mermaid をサポートしています。下記ブロックはそのままREADMEで図として表示されます。
-
 ### 直列ライン（基本）
 
 ```mermaid
