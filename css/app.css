@@ -1,0 +1,120 @@
+:root{
+  /* Light theme */
+  --bg:#ffffff;
+  --panel-bg:rgba(255,255,255,0.8);
+  --panel-border:rgba(0,0,0,0.08);
+  --text:#222428;
+  --muted:#566074;
+  --accent:#3b82f6;
+  --accent-2:#2563eb;
+  --input-bg:#ffffff;
+  --input-border:#d0d7e2;
+  --radius:12px;
+  --radius-sm:10px;
+  --shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+html,body{
+  margin:0;height:100%;overflow:hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Canvas with subtle grid */
+#graph{
+  width:100%;height:100%;
+  background-color: #ffffff; /* solid white backdrop under canvas */
+  background-image: none;
+}
+
+/* Control panels */
+#controls,#fileControls{
+  position:absolute;z-index:100;color:var(--text);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding:10px 12px;
+  backdrop-filter: blur(8px);
+}
+#controls{top:10px;left:10px;}
+#fileControls{top:10px;right:10px;}
+
+/* Inputs & buttons */
+#controls button,#controls input,#controls select,
+#fileControls button,
+#scriptEditorControls button{
+  margin-right:8px;
+  padding:8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text);
+  cursor:pointer;
+  transition: all .18s ease;
+}
+#controls button,
+#fileControls button,
+#scriptEditorControls button{
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border: none;
+  color: #fff;
+}
+#controls button:hover,
+#fileControls button:hover,
+#scriptEditorControls button:hover{
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+#controls button:active,
+#fileControls button:active,
+#scriptEditorControls button:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+#controls input,#controls select{
+  background: var(--input-bg);
+  color: var(--text);
+}
+#controls input:focus,#controls select:focus{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(110,168,254,0.25);
+}
+
+#speedInput{width:72px;text-align:right;}
+#simTime{margin-left:12px;font-weight:600;color:var(--muted);}
+
+#fileInput{display:none;}
+
+/* Script Editor Modal */
+#scriptEditorModal{
+  display:none;position:absolute;top:0;left:0;width:100%;height:100%;
+  background: rgba(0,0,0,0.25);
+  z-index:1000; backdrop-filter: blur(3px);
+}
+#scriptEditorContainer{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width: min(900px, 92%); height: min(720px, 90%);
+  background:#ffffff;border:1px solid var(--panel-border);
+  padding:12px;box-sizing:border-box;display:flex;flex-direction:column;
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+#scriptEditorTextarea{
+  flex:1;width:100%;height:100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size:14px;line-height:1.5;
+  box-sizing:border-box;color:var(--text);
+  background:#ffffff;border:1px solid var(--input-border);
+  border-radius: var(--radius-sm); padding:12px;
+}
+#scriptEditorControls{text-align:right;margin-top:10px;}
+#scriptEditorControls button{margin-left:10px;}
+
+/* Scrollbar (WebKit) */
+*::-webkit-scrollbar{width:12px;height:12px}
+*::-webkit-scrollbar-thumb{background:#2a3242;border-radius:10px;border:3px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-track{background:transparent}
