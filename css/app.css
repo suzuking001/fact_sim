@@ -1,0 +1,263 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap');
+
+:root{
+  /* Light theme */
+  --bg:#ffffff;
+  --panel-bg:rgba(255,255,255,0.8);
+  --panel-border:rgba(0,0,0,0.08);
+  --text:#222428;
+  --muted:#566074;
+  --accent:#3b82f6;
+  --accent-2:#2563eb;
+  --input-bg:#ffffff;
+  --input-border:#d0d7e2;
+  --radius:12px;
+  --radius-sm:10px;
+  --shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+html,body{
+  margin:0;height:100%;overflow:hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Canvas with subtle grid */
+#graph{
+  width:100%;height:100%;
+  background-color: #ffffff; /* solid white backdrop under canvas */
+  background-image: none;
+}
+
+/* Control panels */
+#controls,#fileControls{
+  position:absolute;z-index:100;color:var(--text);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding:10px 12px;
+  backdrop-filter: blur(8px);
+}
+#controls{top:10px;left:10px;}
+#fileControls{top:10px;right:10px;}
+
+/* Inputs & buttons */
+#controls button,#controls input,#controls select,
+#fileControls button,
+#scriptEditorControls button,
+#addNodePanel button,#addNodePanel select{
+  margin-right:8px;
+  padding:8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text);
+  cursor:pointer;
+  transition: all .18s ease;
+}
+#controls button,
+#fileControls button,
+#scriptEditorControls button,
+#addNodePanel button{
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border: none;
+  color: #fff;
+}
+#controls button:hover,
+#fileControls button:hover,
+#scriptEditorControls button:hover,
+#addNodePanel button:hover{
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+#controls button:active,
+#fileControls button:active,
+#scriptEditorControls button:active,
+#addNodePanel button:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+#controls input,#controls select{
+  background: var(--input-bg);
+  color: var(--text);
+}
+#controls input:focus,#controls select:focus{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(110,168,254,0.25);
+}
+
+#speedInput{width:72px;text-align:right;}
+#simTime{margin-left:12px;font-weight:600;color:var(--muted);}
+
+#fileInput{display:none;}
+
+/* Script Editor Modal */
+#scriptEditorModal{
+  display:none;position:absolute;top:0;left:0;width:100%;height:100%;
+  background: rgba(0,0,0,0.25);
+  z-index:1000; backdrop-filter: blur(3px);
+}
+#scriptEditorContainer{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width: min(900px, 92%); height: min(720px, 90%);
+  background:#ffffff;border:1px solid var(--panel-border);
+  padding:12px;box-sizing:border-box;display:flex;flex-direction:column;
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+#scriptEditorTextarea{
+  flex:1;width:100%;height:100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size:14px;line-height:1.5;
+  box-sizing:border-box;color:var(--text);
+  background:#ffffff;border:1px solid var(--input-border);
+  border-radius: var(--radius-sm); padding:12px;
+}
+#scriptEditorControls{text-align:right;margin-top:10px;}
+#scriptEditorControls button{margin-left:10px;}
+
+/* Scrollbar (WebKit) */
+*::-webkit-scrollbar{width:12px;height:12px}
+*::-webkit-scrollbar-thumb{background:#2a3242;border-radius:10px;border:3px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-track{background:transparent}
+
+/* === Sidebar & Toggle (right-side menu) === */
+#sidebar{
+  position: fixed;
+  top: 0; right: 0; height: 100%; width: 280px;
+  background: var(--panel-bg);
+  border-left: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 64px 12px 12px; box-sizing: border-box; position: fixed;
+  z-index: 1000; backdrop-filter: blur(8px);
+  transform: translateX(0);
+  transition: transform .2s ease;
+  overflow-y: auto;
+}
+/* Fully hide the sidebar when collapsed */
+body.sidebar-hidden #sidebar{ transform: translateX(100%); }
+
+/* Keep canvas interactive and visible with sidebar */
+#graph{ position: absolute; inset: 0; }
+body:not(.sidebar-hidden) #graph{ right: 280px; }
+
+/* Controls inside sidebar use normal flow (override older absolute rules) */
+#sidebar #controls,
+#sidebar #fileControls{
+  position: static !important; left: auto; top: auto; right: auto;
+  z-index: auto; background: transparent; border: 0; box-shadow: none; padding: 0;
+}
+/* Give inner groups a card look */
+#sidebar #controls, #sidebar #fileControls{
+  background: #fff; border: 1px solid var(--panel-border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+#sidebar #controls > *, #sidebar #fileControls > *{ margin-bottom: 8px; }
+#sidebar .sidebar-spacer{ flex: 1 1 auto; }
+
+/* Hamburger toggle button (outside sidebar) */
+#menuToggle{
+  position: fixed; top: 10px; right: 10px;
+  z-index: 2000; width: 40px; height: 40px;
+  border-radius: 10px; border: 1px solid var(--panel-border);
+  background: #ffffff; color: var(--muted);
+  cursor: pointer; box-shadow: var(--shadow); opacity: .7;
+}
+#menuToggle:hover{ opacity: .95; }
+
+/* Speed slider styles */
+.control-group{ display:flex; flex-direction:column; gap:6px; }
+#speedRange{ width:100%; accent-color: var(--accent); }
+#speedRange{ box-sizing: border-box; margin: 0; }
+#sidebar input, #sidebar select, #sidebar button{ max-width: 100%; }
+#sidebar .control-group label{ display:flex; align-items: center; justify-content: space-between; }
+/* Sidebar header branding */
+#sidebarHeader{
+  display:flex; align-items:center; justify-content:center;
+  padding: 14px 16px; margin-bottom: 6px;
+  background: linear-gradient(120deg, #111827, #1f2937);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 20px rgba(15,23,42,0.35);
+  color:#f4f6fb;
+  text-transform: uppercase;
+  letter-spacing: .35rem;
+}
+#sidebarHeader .brand{
+  font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: .3rem;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+#sidebarHeader .brand .accent{
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(120deg,#3b82f6,#06b6d4);
+  color:#fff;
+  letter-spacing:.15rem;
+  font-size:0.9rem;
+}
+/* Button row to keep actions tidy */
+.btn-row{ display:flex; gap: 8px; flex-wrap: wrap; }
+.btn-row > button{ flex: 1 1 auto; min-width: 80px; }
+
+/* Inline node title editor */
+#nodeTitleEditor{
+  position:absolute; display:none; z-index:1500;
+  padding:6px 10px; border:1px solid var(--input-border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow);
+  background:#fff; color:var(--text);
+  font: 14px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  min-width: 160px; max-width: 320px;
+}
+
+
+/* Add Node panel adopts same styling as propPanel */
+#addNodePanel{
+  background: #fff; border: 1px solid var(--panel-border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 10px 12px; margin-top: 8px;
+  display:flex; flex-direction: column; gap: 10px;
+}
+#addNodePanel .panelHeader{ font-weight: 600; color: var(--muted); }
+#addNodePanel .field{ display:flex; flex-direction: column; gap:6px; }
+#addNodePanel select{ width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--input-border); border-radius: var(--radius-sm); background:#fff; color:var(--text); }
+#addNodePanel .propFields{ display:flex; flex-direction: column; gap:10px; }
+#addNodePanel .propFields .placeholder{ color: var(--muted); font-size:13px; }
+#addNodePanel .propFields .field label{ font-size: 12px; color: var(--muted); }
+#addNodePanel .propFields input,
+#addNodePanel .propFields textarea,
+#addNodePanel .propFields select{
+  width:100%; box-sizing:border-box; padding:8px 10px;
+  border:1px solid var(--input-border); border-radius: var(--radius-sm);
+  background:#fff; color:var(--text);
+}
+#addNodePanel .propFields textarea{ resize: vertical; min-height:60px; }
+
+/* === About / Licenses modal === */
+#aboutModal{
+  display:none; position:fixed; inset:0; z-index:2000;
+  background: rgba(0,0,0,0.25); backdrop-filter: blur(3px);
+}
+#aboutContainer{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:min(840px, 92%); max-height: 80vh; overflow:auto;
+  background:#fff; border:1px solid var(--panel-border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding:12px; box-sizing:border-box;
+}
+.aboutHeader{ display:flex; align-items:center; justify-content: space-between; }
+.aboutHeader h2{ margin:0; font-size:18px; }
+.aboutHeader button{ margin-left:10px; }
+.aboutBody{ font-size:14px; color: var(--text); }
+.aboutBody pre.license{ white-space: pre-wrap; background:#fafafa; padding:10px; border:1px solid var(--panel-border); border-radius: var(--radius-sm); }
+#speedFactor{ font-weight: 600; color: var(--muted); margin-left: 6px; }

@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>LiteGraph Simulator (ver 3.0 - Persistent Script Editor)</title>
+
+  <!-- LiteGraph -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/css/litegraph.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
+  <script src="js/nodes-config.js"></script>
+
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+<button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
+<div id="sidebar">
+    <div id="sidebarHeader"><span class="brand">fact sim <span class="accent">mini</span></span></div>
+    <div id="controls">
+      <div class="btn-row">
+        <button id="btnStart">Start</button>
+        <button id="btnStop">Stop</button>
+        <button id="btnReset">Reset</button>
+      </div>
+      <div class="control-group">
+        <label for="speedRange">Speed <span id="speedFactor">1.0x</span></label>
+        <input type="range" id="speedRange" value="1" min="0.1" max="10" step="0.1">
+      </div>
+      <span>Time: <span id="simTime">0.00 s</span></span>
+      <select id="exampleSelect" title="Examples">
+        <option value="">Load example…</option>
+        <option value="simple">Simple</option>
+        <option value="branch">Branch</option>
+      </select>
+    </div>
+    <!-- Add Node panel -->
+    <div id="addNodePanel">
+      <div class="panelHeader">Add Node</div>
+      <div class="field">
+        <label for="nodeKindSelect">Type</label>
+        <select id="nodeKindSelect">
+          <option value="equip">Equipment</option>
+          <option value="source">Source</option>
+          <option value="sink">Sink</option>
+          <option value="split">Split</option>
+          <option value="merge2">Merge2</option>
+        </select>
+      </div>
+      <div id="addNodeProps" class="propFields"></div>
+      <button id="btnAddNode">Add Node</button>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div id="fileControls">
+      <button id="btnSave">Save</button>
+      <button id="btnLoad">Load</button>
+      <input type="file" id="fileInput" accept=".json">
+      <button id="btnAbout">About / Licenses</button>
+    </div>
+  </div>
+  <canvas id="graph"></canvas>
+  <input id="nodeTitleEditor" type="text" aria-label="Edit node title" />
+  <!-- Script Editor Modal -->
+  <div id="scriptEditorModal">
+    <div id="scriptEditorContainer">
+      <textarea id="scriptEditorTextarea"></textarea>
+      <div id="scriptEditorControls">
+        <button id="scriptEditorSave">Save</button>
+        <button id="scriptEditorCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- About / Licenses Modal -->
+  <div id="aboutModal" aria-hidden="true" role="dialog">
+    <div id="aboutContainer" role="document" aria-label="About and Licenses">
+      <div class="aboutHeader">
+        <h2>About / Licenses</h2>
+        <button id="aboutClose" aria-label="Close">Close</button>
+      </div>
+      <div class="aboutBody">
+        <p>This application uses the following third-party software:</p>
+        <hr>
+        <h3>litegraph.js</h3>
+        <p>
+          Copyright (c) 20132024 Javi Agenjo and contributors<br>
+          Homepage: <a href="https://github.com/jagenjo/litegraph.js" target="_blank" rel="noopener">https://github.com/jagenjo/litegraph.js</a><br>
+          License: MIT License
+        </p>
+        <pre class="license">
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+        </pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+    <script src="js/nodes/work.js"></script>
+  <script src="js/nodes/sigports.js"></script>
+  <script src="js/nodes/menu.js"></script>
+  <script src="js/nodes/equipment.js"></script>
+  <script src="js/nodes/source.js"></script>
+  <script src="js/nodes/split.js"></script>
+  <script src="js/nodes/merge2.js"></script>
+  <script src="js/nodes/sink.js"></script>
+  <script src="js/nodes/register.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
