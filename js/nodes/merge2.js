@@ -1,5 +1,25 @@
-// Merge2 node: two-input merge that processes in two stages (process1, process2)
+﻿// Merge2 node: two-input merge that processes in two stages (process1, process2)
 // Inherits timing helpers and menu utilities via EquipmentNode
+
+const MERGE2_DEFAULT_SCRIPT = `// work: Work object (work.id, work.type, etc.)
+// signalArr: array of sigIn values
+
+if(work.type === 'A'){
+  this.properties.processTime = 5.0;
+  this.properties.processTime2 = 5.0;
+  this.properties.downTime = 3.0;
+}else if(work.type === 'B'){
+  this.properties.processTime = 4.0;
+  this.properties.processTime2 = 4.0;
+  this.properties.downTime = 2.0;
+}else{
+  // default
+  this.properties.processTime = 10.0;
+  this.properties.processTime2 = 10.0;
+  this.properties.downTime = 2.0;
+}
+
+return true;`;
 
 class Merge2Node extends EquipmentNode{
   constructor(title='Merge2'){
@@ -23,6 +43,29 @@ class Merge2Node extends EquipmentNode{
     // initial colors (IDLE = yellow)
     this.color = '#f1c40f';
     this.bgcolor = '#fff9db';
+
+    if(this.properties.script === defaultScript()){
+      this.properties.script = MERGE2_DEFAULT_SCRIPT;
+    }
+    const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
+    if(typeof this.properties.processTime2 === 'undefined')
+      this.properties.processTime2 = this.properties.processTime;
+    this.properties.processTime2 = clamp(this.properties.processTime2);
+    // ensure flip menu wrapper is reapplied (menuMixin runs after class definition)
+    if(this.constructor && this.constructor.prototype.__flipMenuPatched) delete this.constructor.prototype.__flipMenuPatched;
+    if(window.enableFlipIO) window.enableFlipIO(this);
+  }
+
+  _triggerProcessAnimation(slotIndex, durationMs, info){
+    if(!durationMs || durationMs <= 0) return;
+    try{
+      if(window.WorkLinkAnimator && this.graph){
+        const port = this.inputs && this.inputs[slotIndex];
+        if(port && port.link != null){
+          window.WorkLinkAnimator.spawn(this.graph, port.link, 'work', durationMs, info);
+        }
+      }
+    }catch(_e){}
   }
 
   onExecute(){
@@ -46,6 +89,7 @@ class Merge2Node extends EquipmentNode{
           this._payload = this._work1; // ids must match
           this._handoffOffered = false;
           this._state = 'WAIT';
+          this._setWaitIcon(true);
         }
         break;
 
@@ -72,6 +116,7 @@ class Merge2Node extends EquipmentNode{
           this.setOutputData(0, null);
           this._payload = null;
           this._state = 'DOWN';
+          this._setWaitIcon(false);
           this._until = now + this.properties.downTime*1000;
         }else{
           if(this._downReady()) this.setOutputData(0, this._payload);
@@ -108,7 +153,9 @@ class Merge2Node extends EquipmentNode{
           this._work1 = w1;
           this._currentWork = w1; // so upstream can detect acceptance
           this._state = 'PROCESS1';
-          this._until = now + this.properties.processTime*1000;
+          const duration1 = Math.max(0, this.properties.processTime*1000);
+          this._until = now + duration1;
+          this._triggerProcessAnimation(0, duration1, { id: w1.id, t: w1.type });
           this._lastIn1Ref = w1;
           break;
         } else {
@@ -131,7 +178,9 @@ class Merge2Node extends EquipmentNode{
           this._work2 = w2;
           this._currentWork = w2;
           this._state = 'PROCESS2';
-          this._until = now + this.properties.processTime*1000;
+          const duration2 = Math.max(0, (this.properties.processTime2||0)*1000);
+          this._until = now + duration2;
+          this._triggerProcessAnimation(1, duration2, { id: w2.id, t: w2.type });
           this._lastIn2Ref = w2;
           this._awaitingIn2 = false;
           break;
@@ -161,13 +210,51 @@ class Merge2Node extends EquipmentNode{
       this._work1 ? `In1: ID=${this._work1.id} Type=${this._work1.type}` : 'In1: (none)',
       this._work2 ? `In2: ID=${this._work2.id} Type=${this._work2.type}` : 'In2: (none)',
       `Remain(s): ${remSec}`,
-      `Proc(s): ${this.properties.processTime}  Down(s): ${this.properties.downTime}`
+      `Proc1(s): ${this.properties.processTime}  Proc2(s): ${this.properties.processTime2}`,
+      `Down(s): ${this.properties.downTime}`
     ];
     drawStateBelow(ctx, this, lines, 8, 6);
+  }
+
+  onPropertyChanged(n){
+    EquipmentNode.prototype.onPropertyChanged && EquipmentNode.prototype.onPropertyChanged.call(this, n);
+    if(n === 'processTime2'){
+      const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
+      this.properties.processTime2 = clamp(this.properties.processTime2);
+    }
   }
 }
 
 menuMixin(Merge2Node);
+(function(proto){
+  const prev = proto.getExtraMenuOptions;
+  proto.getExtraMenuOptions = function(){
+    let opts = prev ? prev.call(this) : [];
+    if(!Array.isArray(opts)) opts = [];
+    if(this.properties && Object.prototype.hasOwnProperty.call(this.properties,'flipIO')){
+      const label = this.properties.flipIO ? 'Ports: reset alignment' : 'Ports: flip horizontally';
+      let entry = opts.find(o=>o && typeof o.content==='string' && o.content.indexOf('Ports:')===0);
+      const toggle = ()=>{
+        this.properties.flipIO = !this.properties.flipIO;
+        if(window.refreshFlipIO) window.refreshFlipIO(this);
+      };
+      if(entry){
+        entry.content = label;
+        entry.callback = toggle;
+      }else{
+        opts.push({ content: label, callback: toggle });
+      }
+    }
+    return opts;
+  };
+})(Merge2Node.prototype);
 // Ensure palette/menu shows proper name
 Merge2Node.title = 'Merge2';
 window.Merge2Node = Merge2Node;
+
+
+
+
+
+
+

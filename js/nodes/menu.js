@@ -1,11 +1,22 @@
 // Right-click menu helpers (script/properties/signals)
 
 function defaultScript(){
-  return `// work: Work object, signalArr: array of signals
-// this._state values: IDLE, PROCESS, WAIT, DOWN
-// Return true to accept work into PROCESS state.
+  return `// work: Work object (work.id, work.type, etc.)
+// signalArr: array of sigIn values
 
-// Default: すべて受け入れる（必要ならここに条件を記述）
+if(work.type === 'A'){
+  this.properties.processTime = 5.0;
+  this.properties.downTime = 3.0;
+}else if(work.type === 'B'){
+  this.properties.processTime = 4.0;
+  this.properties.downTime = 2.0;
+}else{
+  // default
+  this.properties.processTime = 10.0;
+  this.properties.downTime = 2.0;
+}
+
+// Return true to accept this work item into PROCESS
 return true;`;
 }
 
@@ -46,8 +57,19 @@ function menuMixin(cls){
       });
     }
     const extra = this.properties.sigExtra || 0;
-    opts.push({ content: 'Add Sig Port', callback: ()=>{ this.properties.sigExtra++; syncSigPorts(this); this.setDirtyCanvas(true,true); } });
-    opts.push({ content: 'Remove Sig Port', disabled: extra===0, callback: ()=>{ if(extra===0) return; this.properties.sigExtra--; syncSigPorts(this); this.setDirtyCanvas(true,true); } });
+    const applySigChange = ()=>{
+      if(typeof this._syncSignalPorts === 'function') this._syncSignalPorts();
+      else { syncSigPorts(this, 0); if(this.setDirtyCanvas) this.setDirtyCanvas(true,true); }
+    };
+    opts.push({
+      content: 'Add SIG IN/OUT',
+      callback: ()=>{ this.properties.sigExtra++; applySigChange(); }
+    });
+    opts.push({
+      content: 'Remove SIG IN/OUT',
+      disabled: extra===0,
+      callback: ()=>{ if(extra===0) return; this.properties.sigExtra--; applySigChange(); }
+    });
     return opts;
   };
 }

@@ -1,0 +1,325 @@
+{
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "factory/source",
+      "pos": {
+        "0": 60,
+        "1": 200,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 86
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn2",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut2",
+          "type": "string",
+          "links": null
+        }
+      ],
+      "title": "Source",
+      "properties": {
+        "interval": 2,
+        "sequence": "A,B",
+        "sigExtra": 0,
+        "sigEnabled": true
+      }
+    },
+    {
+      "id": 2,
+      "type": "factory/equip",
+      "pos": {
+        "0": 360,
+        "1": 200,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 86
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 1
+        },
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn2",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut2",
+          "type": "string",
+          "links": null
+        }
+      ],
+      "properties": {
+        "processTime": 1,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Example: simple type filter\nif(work.type!==\"A\") return false;\n\n// Custom logic can be added here.\nreturn true;",
+        "sigExtra": 0,
+        "sigEnabled": true
+      }
+    },
+    {
+      "id": 3,
+      "type": "factory/equip",
+      "pos": {
+        "0": 660,
+        "1": 200,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 86
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 2
+        },
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn2",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut2",
+          "type": "string",
+          "links": null
+        }
+      ],
+      "properties": {
+        "processTime": 1,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Example: simple type filter\nif(work.type!==\"A\") return false;\n\n// Custom logic can be added here.\nreturn true;",
+        "sigExtra": 0,
+        "sigEnabled": true
+      }
+    },
+    {
+      "id": 4,
+      "type": "factory/sink",
+      "pos": {
+        "0": 960,
+        "1": 200,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 86
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 3
+        },
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn2",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": null
+        },
+        {
+          "name": "sigOut2",
+          "type": "string",
+          "links": null
+        }
+      ],
+      "title": "Sink",
+      "properties": {
+        "sigEnabled": true
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      0
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      0
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

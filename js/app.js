@@ -218,6 +218,16 @@ document.getElementById('btnReset').onclick = ()=>{
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'ratio', label:'Ratio (0-1)', type:'number', min:0, max:1, step:0.1, default:0.5 }
       ]
+    },
+    agvroute:{
+      type:'factory/agvroute',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'AGV Route', target:'title' },
+        { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
+        { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
+        { key:'agvCapacity', label:'AGV Capacity', type:'number', min:1, step:1, default:2 },
+        { key:'agvIds', label:'Initial AGV IDs', type:'textarea', default:'AGV-1,AGV-2' }
+      ]
     }
   };
 

@@ -1,0 +1,163 @@
+﻿000: // Merge2 node: two-input merge that processes in two stages (process1, process2)
+001: // Inherits timing helpers and menu utilities via EquipmentNode
+002: 
+003: class Merge2Node extends EquipmentNode{
+004:   constructor(title='Merge2'){
+005:     super(title);
+006:     this.title = 'Merge2';
+007:     // Rebuild ports: two work inputs, one work output
+008:     this.inputs = [];
+009:     this.addInput('workIn1', 0);
+010:     this.addInput('workIn2', 0);
+011:     // keep single workOut from EquipmentNode constructor
+012:     // State & internals
+013:     this._state = 'IDLE';
+014:     this._until = 0;
+015:     this._work1 = null;
+016:     this._work2 = null;
+017:     this._payload = null;
+018:     this._handoffOffered = false;
+019:     this._lastIn1Ref = null;
+020:     this._lastIn2Ref = null;
+021:     // initial colors (IDLE = yellow)
+022:     this.color = '#f1c40f';
+023:     this.bgcolor = '#fff9db';
+024:   }
+025: 
+026:   onExecute(){
+027:     // clear currentWork when truly idle
+028:     if(this._state === 'IDLE') this._currentWork = null;
+029: 
+030:     const now = simNow();
+031:     switch(this._state){
+032:       case 'PROCESS1':
+033:         if(now >= this._until){
+034:           // Wait for 2nd input availability (do not change to PROCESS2 until accepted)
+035:           const in2 = (this.inputs && this.inputs[1]) ? this.inputs[1] : null;
+036:           const link2 = !!(in2 && in2.link != null);
+037:           if(link2){
+038:             const w2 = this.getInputData(1);
+039:             if(w2 && typeof w2 === 'object' && this._lastIn2Ref !== w2){
+040:               // compare IDs
+041:               if(!this._work1 || w2.id !== this._work1.id){
+042:                 try{ alert(`Merge2 ID mismatch: in1=${this._work1?this._work1.id:'-'} in2=${w2.id}`); }catch(_e){}
+043:                 try{ this.graph && this.graph.stop && this.graph.stop(); }catch(_e){}
+044:                 this._state = 'ERROR';
+045:                 break;
+046:               }
+047:               // accept second work and start PROCESS2
+048:               this._work2 = w2;
+049:               this._currentWork = w2; // so upstream can detect acceptance
+050:               this._state = 'PROCESS2';
+051:               this._until = now + this.properties.processTime*1000;
+052:               this._lastIn2Ref = w2;
+053:             }
+054:           }
+055:         }
+056:         break;
+057: 
+058:       case 'PROCESS2':
+059:         if(now >= this._until){
+060:           // finished both 竊・prepare to handoff
+061:           this._payload = this._work1; // ids must match
+062:           this._handoffOffered = false;
+063:           this._state = 'WAIT';
+064:         }
+065:         break;
+066: 
+067:       case 'WAIT': {
+068:         // Same handoff logic as Equipment
+069:         if(!this._handoffOffered){
+070:           if(this._downReady()){
+071:             this.setOutputData(0, this._payload);
+072:             this._handoffOffered = true;
+073:           }
+074:           break;
+075:         }
+076:         let accepted = false;
+077:         if(this.outputs.length && this.outputs[0].links){
+078:           for(const id of this.outputs[0].links){
+079:             const link = this.graph.links[id]; if(!link) continue;
+080:             const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+081:             if(typeof t._state === 'undefined'){ accepted = true; break; }
+082:             if(t._currentWork === this._payload || t._payload === this._payload){ accepted = true; break; }
+083:           }
+084:         }
+085:         if(accepted){
+086:           // clear latched output and go DOWN
+087:           this.setOutputData(0, null);
+088:           this._payload = null;
+089:           this._state = 'DOWN';
+090:           this._until = now + this.properties.downTime*1000;
+091:         }else{
+092:           if(this._downReady()) this.setOutputData(0, this._payload);
+093:         }
+094:         break;
+095:       }
+096: 
+097:       case 'DOWN':
+098:         if(now >= this._until){
+099:           // Reset for next pair
+100:           this._state = 'IDLE';
+101:           this._work1 = null; this._work2 = null; this._payload = null;
+102:           this._currentWork = null;
+103:           this._lastIn1Ref = null; this._lastIn2Ref = null;
+104:           this._handoffOffered = false;
+105:         }
+106:         break;
+107: 
+108:       case 'ERROR':
+109:         // stay here; user can reset the graph
+110:         break;
+111: 
+112:       case 'IDLE': {
+113:         // accept from input1 only
+114:         const in1 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
+115:         const link1 = !!(in1 && in1.link != null);
+116:         if(!link1){ this._lastIn1Ref = null; break; }
+117:         const w1 = this.getInputData(0);
+118:         if(!w1){ this._lastIn1Ref = null; break; }
+119:         if(typeof w1 !== 'object') break;
+120:         if(this._lastIn1Ref === w1) break; // not a new arrival
+121:         // accept first work and start PROCESS1
+122:         this._work1 = w1;
+123:         this._currentWork = w1; // so upstream can detect acceptance
+124:         this._state = 'PROCESS1';
+125:         this._until = now + this.properties.processTime*1000;
+126:         this._lastIn1Ref = w1;
+127:         break;
+128:       }
+129:     }
+130: 
+131:     // color mapping for visual feedback
+132:     switch(this._state){
+133:       case 'PROCESS1':
+134:       case 'PROCESS2': this.color = '#2ecc71'; this.bgcolor = '#e8f8f2'; break;
+135:       case 'WAIT':     this.color = '#f39c12'; this.bgcolor = '#fff6e6'; break;
+136:       case 'DOWN':     this.color = '#3498db'; this.bgcolor = '#e8f1fb'; break;
+137:       case 'IDLE':     this.color = '#f1c40f'; this.bgcolor = '#fff9db'; break;
+138:       case 'ERROR':    this.color = '#e74c3c'; this.bgcolor = '#fdecea'; break;
+139:     }
+140:     if(this._state !== 'IDLE' || this._payload) this.setDirtyCanvas(true,true);
+141:   }
+142: 
+143:   // show status below the node
+144:   onDrawForeground(ctx){
+145:     const now = simNow();
+146:     const rem = Math.max(0, this._until - now);
+147:     const remSec = (rem/1000).toFixed(1);
+148:     const lines = [
+149:       `State: ${this._state}`,
+150:       this._work1 ? `In1: ID=${this._work1.id} Type=${this._work1.type}` : 'In1: (none)',
+151:       this._work2 ? `In2: ID=${this._work2.id} Type=${this._work2.type}` : 'In2: (none)',
+152:       `Remain(s): ${remSec}`,
+153:       `Proc(s): ${this.properties.processTime}  Down(s): ${this.properties.downTime}`
+154:     ];
+155:     drawStateBelow(ctx, this, lines, 8, 6);
+156:   }
+157: }
+158: 
+159: menuMixin(Merge2Node);
+160: // Ensure palette/menu shows proper name
+161: Merge2Node.title = 'Merge2';
+162: window.Merge2Node = Merge2Node;

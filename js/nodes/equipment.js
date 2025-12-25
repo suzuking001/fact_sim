@@ -1,9 +1,10 @@
 ﻿// Equipment node
 const EQUIP_UI = {
-  baseSize: [320, 360],
-  widgetPaddingX: 40,
-  widgetSpacingBottom: { proc: 110, down: 70 },
-  widgetMinWidth: 160
+  baseSize: [150, 50],
+  widgetPaddingX: 30,
+  widgetSpacingBottom: { top: 60, gap: 28 },
+  widgetMinWidth: 120,
+  signalHeightStep: 16
 };
 /*
  * EquipmentNode（装置ノード）
@@ -50,7 +51,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       script: defaultScript(),
       sigExtra: 0,
       sigEnabled: true,
-      sigVisible: false,
+
     };    // 現在の状態／時刻境界／保持データ
     this._state = 'IDLE';
     this._until = 0;
@@ -65,37 +66,40 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     this.color = '#f1c40f';   // border (yellow)
     this.bgcolor = '#fff9db'; // fill   (light yellow)
 
-    // Inline property widgets (always visible on node)
+    try{ this._syncSignalPorts(); }catch(e){}
+    if(window.enableFlipIO) window.enableFlipIO(this);
+  }
+  _setWaitIcon(active, type="work"){
     try{
-      // normalize to 0.1s precision
-      const r01 = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
-      this.properties.processTime = r01(this.properties.processTime);
-      this.properties.downTime = r01(this.properties.downTime);
-
-      // place widgets near the bottom to avoid overlapping IN/OUT ports
-      this.widgets_start_y = 120;
-      this.serialize_widgets = true;
-
-      this._sigToggle = this.addWidget(
-        'toggle', 'Signals', this.properties.sigVisible ? 1 : 0,
-        (v)=>{ this.properties.sigVisible = !!v; this._applySigVisibility(); }
-      );
-      if(this._sigToggle) this._sigToggle.serialize = false;
-
-      this._wProc = this.addWidget(
-        'number', 'Proc(s)', this.properties.processTime,
-        (v)=>{ v = r01(v); this.properties.processTime = v; if(this._wProc) this._wProc.value = v; if(this.onPropertyChanged) this.onPropertyChanged('processTime'); this.setDirtyCanvas(true,true); },
-        { min: 0, step: 0.1, precision: 1, width: EQUIP_UI.widgetMinWidth }
-      );
-      this._wDown = this.addWidget(
-        'number', 'Down(s)', this.properties.downTime,
-        (v)=>{ v = r01(v); this.properties.downTime = v; if(this._wDown) this._wDown.value = v; if(this.onPropertyChanged) this.onPropertyChanged('downTime'); this.setDirtyCanvas(true,true); },
-        { min: 0, step: 0.1, precision: 1, width: EQUIP_UI.widgetMinWidth }
-      );
-      this._applySigVisibility();
-      this._reflowWidgets();
-      if(this.computeSize) this.computeSize();
-    }catch(e){}
+      if(!window.WorkLinkAnimator || !this.graph) return;
+      const out = this.outputs && this.outputs[0];
+      if(!out || !out.links) return;
+      if(active){
+        if(this._waitIconLinks) return;
+        this._waitIconLinks = out.links.slice();
+        this._waitIconLinks.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type));
+      }else{
+        if(!this._waitIconLinks) return;
+        this._waitIconLinks.forEach(id=> window.WorkLinkAnimator.hidePortIcon(this.graph, id));
+        this._waitIconLinks = null;
+      }
+    }catch(_e){}
+  }
+  _spawnSinkTransfer(duration, payload){
+    if(!duration || duration <= 0) return;
+    try{
+      if(!window.WorkLinkAnimator || !this.graph) return;
+      const info = payload ? { id: payload.id, t: payload.type } : null;
+      const out = this.outputs && this.outputs[0];
+      if(!out || !out.links) return;
+      out.links.forEach(id=>{
+        const link = this.graph.links[id]; if(!link) return;
+        const target = this.graph.getNodeById(link.target_id);
+        const sinkCtor = window.SinkNode;
+        const isSink = sinkCtor ? (target instanceof sinkCtor) : (target && target.title === 'Sink');
+        if(isSink) window.WorkLinkAnimator.spawn(this.graph, id, 'work', duration, info);
+      });
+    }catch(_e){}
   }
   // スクリプトを（必要なら）コンパイルして実行。true で受け入れ、false で素通し
   _evalScript(w, s){
@@ -107,7 +111,6 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     catch(e){ console.error(e); return false; }
   }
   _emit(i,state){
-    if(!this.properties.sigVisible) return;
     if(!this.properties.sigEnabled){ this.setOutputData(i+1, null); return; }
     if(this._last[i] !== state){ this.setOutputData(i+1, state); this._last[i] = state; }
     else this.setOutputData(i+1, null);
@@ -129,7 +132,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     switch(this._state){
       case 'PROCESS':
         // 加工中: 規定時間を過ぎたら WAIT へ
-        if(now >= this._until){ this._state = 'WAIT'; this._handoffOffered = false; }
+        if(now >= this._until){ this._state = 'WAIT'; this._handoffOffered = false; this._setWaitIcon(true); }
         break;
       case 'WAIT': {
         // 排出待ち: まず一度だけ "出力オファー" を提示し、その後 本当に受け取られたかを検知して遷移
@@ -152,11 +155,14 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           }
         }
         if(accepted){
-          // 受け渡し確定 → 出力をクリアしてラッチ値を消す → DOWN へ
-          this.setOutputData(0, null); // リンク上の前回データを明示的にクリア
-          this._payload = null;
+          // ???????????????? DOWN ?
+          const payload = this._payload;
+          this.setOutputData(0, null); // ???????????
           this._state = 'DOWN';
-          this._until = now + this.properties.downTime*1000; // 秒→ms
+          const downMs = Math.max(0, this.properties.downTime*1000);
+          this._until = now + downMs; // ms
+          this._spawnSinkTransfer(downMs, payload);
+          this._payload = null;
         }else{
           // まだ受け取られていない → オファーを再提示して WAIT 維持
           if(this._downReady()) this.setOutputData(0, this._payload);
@@ -165,7 +171,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       }
       case 'DOWN':
         // ダウン中: 規定時間経過で IDLE へ復帰
-        if(now >= this._until) this._state = 'IDLE';
+        if(now >= this._until){ this._state = 'IDLE'; this._setWaitIcon(false); }
         break;
       case 'IDLE': {
         // IDLE 相当: 入力があれば受入判定
@@ -186,17 +192,25 @@ class EquipmentNode extends LiteGraph.LGraphNode{
         this._currentWork = w;
         this._payload = w;
         this._state = 'PROCESS';
-        this._until = now + this.properties.processTime*1000; // ms
+        const durationMs = Math.max(0, this.properties.processTime*1000);
+        this._until = now + durationMs; // ms
         this._lastInRef = w; // remember last accepted input to avoid duplicate starts
+        try{
+          if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
+            const inPort = this.inputs && this.inputs[0];
+            if(inPort && inPort.link != null){
+              const info = (w && typeof w === 'object') ? { id: w.id, t: w.type } : null;
+              window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
+            }
+          }
+        }catch(_e){}
 
       }
     }
 
     // 状態シグナルを sigOut* に通知（エッジのみ）
-    if(this.properties.sigVisible){
-      const n = 3 + (this.properties.sigExtra||0);
-      for(let i=0;i<n;i++) this._emit(i, this._state);
-    }
+    const n = this.properties.sigExtra || 0;
+    for(let i=0;i<n;i++) this._emit(i, this._state);
     switch(this._state){
       case 'PROCESS': this.color = '#2ecc71'; this.bgcolor = '#e8f8f2'; break;
       case 'WAIT':    this.color = '#f39c12'; this.bgcolor = '#fff6e6'; break;
@@ -207,35 +221,22 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     // 状態が動いている間は描画を更新
     if(this._state !== 'IDLE' || this._payload) this.setDirtyCanvas(true,true);
   }
-  _reflowWidgets(){
-    const width = Math.max(EQUIP_UI.widgetMinWidth, this.size[0] - EQUIP_UI.widgetPaddingX * 2);
-    const offsetX = (this.size[0] - width) * 0.5;
-    if(this._sigToggle){
-      this._sigToggle.y = this.size[1] - (EQUIP_UI.widgetSpacingBottom.proc + 40);
-      this._sigToggle.options = this._sigToggle.options || {};
-      this._sigToggle.options.x = offsetX;
-    }
-    const procY = this.size[1] - EQUIP_UI.widgetSpacingBottom.proc;
-    const downY = this.size[1] - EQUIP_UI.widgetSpacingBottom.down;
-    if(this._wProc){
-      this._wProc.y = procY;
-      this._wProc.options = this._wProc.options || {};
-      this._wProc.options.width = width;
-      this._wProc.options.x = offsetX;
-    }
-    if(this._wDown){
-      this._wDown.y = downY;
-      this._wDown.options = this._wDown.options || {};
-      this._wDown.options.width = width;
-      this._wDown.options.x = offsetX;
-    }
-  }
-  _applySigVisibility(){
-    if(typeof this.properties.sigVisible === 'undefined') this.properties.sigVisible = false;
-    const visible = !!this.properties.sigVisible;
-    syncSigPorts(this, visible ? 3 : 0);
-    if(this._sigToggle) this._sigToggle.value = visible ? 1 : 0;
+  _reflowWidgets(){}
+  _syncSignalPorts(){
+    syncSigPorts(this, 0);
+    this._updateNodeSize();
+    window.refreshFlipIO(this);
     this.setDirtyCanvas(true,true);
+  }
+  _updateNodeSize(){
+    const extra = this.properties.sigExtra || 0;
+    const targetHeight = EQUIP_UI.baseSize[1] + extra * EQUIP_UI.signalHeightStep;
+    if(this.size[1] !== targetHeight){
+      this.size[1] = targetHeight;
+      if(this.computeSize) this.computeSize();
+    }
+    this._reflowWidgets();
+    window.refreshFlipIO(this);
   }
   onResize(size){
     try{ this._reflowWidgets(); }catch(e){}
@@ -244,19 +245,10 @@ class EquipmentNode extends LiteGraph.LGraphNode{
   onPropertyChanged(n){
     try{
       const r01 = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
-      if(n==='processTime'){
-        this.properties.processTime = r01(this.properties.processTime);
-        if(this._wProc) this._wProc.value = this.properties.processTime;
-      }
-      if(n==='downTime'){
-        this.properties.downTime = r01(this.properties.downTime);
-        if(this._wDown) this._wDown.value = this.properties.downTime;
-      }
-      if(n==='sigVisible'){
-        this._applySigVisibility();
-      }
+      if(n==='processTime') this.properties.processTime = r01(this.properties.processTime);
+      if(n==='downTime') this.properties.downTime = r01(this.properties.downTime);
       if(n==='sigExtra'){
-        syncSigPorts(this, this.properties.sigVisible ? 3 : 0);
+        this._syncSignalPorts();
       }
     }catch(e){}
   }
@@ -290,6 +282,18 @@ class EquipmentNode extends LiteGraph.LGraphNode{
 
 menuMixin(EquipmentNode);
 window.EquipmentNode = EquipmentNode;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,4 @@
-// Work data model and global counter (browser global scope)
-// Keep 'var' so it attaches to window and is shared across files
+// Work / AGV data models and shared counters (attach to window scope)
 var workCounter = 0;
 
 class Work{
@@ -10,6 +9,20 @@ class Work{
   toString(){ return `ID:${this.id},Type:${this.type}`; }
 }
 
-// expose for other scripts (optional – class is also global in browsers)
-window.Work = Work;
+class AGV{
+  constructor(id, capacity = 1){
+    this.id = id;
+    this.capacity = Math.max(1, capacity|0);
+    this.cargo = [];
+    this.meta = {};
+  }
+  hasCapacity(){
+    return this.cargo.length < this.capacity;
+  }
+  toString(){
+    return `AGV(${this.id}) load=${this.cargo.length}/${this.capacity}`;
+  }
+}
 
+window.Work = Work;
+window.AGV = AGV;

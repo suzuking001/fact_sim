@@ -1,4 +1,4 @@
-// Split node
+﻿// Split node
 
 class SplitNode extends EquipmentNode{
   constructor(){
@@ -6,6 +6,7 @@ class SplitNode extends EquipmentNode{
     this.title = 'Split';
     this.addOutput('workB', 0);
     this.properties.ratio = 0.5;
+    window.refreshFlipIO(this);
   }
   _sendNow(w){ this.setOutputData(Math.random()<this.properties.ratio?0:1, w); }
   onDrawForeground(ctx){
@@ -28,3 +29,4 @@ menuMixin(SplitNode);
 // Ensure palette/menu shows proper name
 SplitNode.title = 'Split';
 window.SplitNode = SplitNode;
+

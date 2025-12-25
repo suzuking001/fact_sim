@@ -16,6 +16,10 @@ window.NODES_CONFIG = {
     // Default process/down times (seconds)
     processTimeSec: 2,
     downTimeSec: 3,
+  },
+  agvRoute: {
+    processTimeSec: 3,
+    downTimeSec: 0.5,
+    agvCapacity: 2,
   }
 };
-

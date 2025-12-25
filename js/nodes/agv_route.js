@@ -1,0 +1,473 @@
+// AGV Route node (generalised max_load = n)
+// Follows work_node_memo spec: agv_process -> workIn_idle_k/process_k (repeat) -> workOut_wait_k/down_k (repeat) -> agvOut_wait/down -> agvIn_idle
+
+const AGV_ROUTE_DEFAULTS = {
+  processTime: 3,
+  downTime: 0.5,
+  agvCapacity: 2,
+  agvIds: 'AGV-1,AGV-2'
+};
+
+class AGVRouteNode extends LiteGraph.LGraphNode{
+  constructor(){
+    super();
+    this.title = 'AGV Route';
+    this.resizable = true;
+    this.size = [280, 150];
+    // ports: workIn, agvIn -> workOut, agvOut
+    this._workInIndex = this.inputs.length;  this.addInput('workIn', 'work');
+    this._agvInIndex  = this.inputs.length;  this.addInput('agvIn', 'AGV');
+    this._workOutIndex= this.outputs.length; this.addOutput('workOut', 'work');
+    this._agvOutIndex = this.outputs.length; this.addOutput('agvOut', 'AGV');
+    if(window.enableFlipIO) window.enableFlipIO(this);
+
+    this.properties = {
+      processTime: window.NODES_CONFIG?.agvRoute?.processTimeSec ?? AGV_ROUTE_DEFAULTS.processTime,
+      downTime: window.NODES_CONFIG?.agvRoute?.downTimeSec ?? AGV_ROUTE_DEFAULTS.downTime,
+      agvCapacity: window.NODES_CONFIG?.agvRoute?.agvCapacity ?? AGV_ROUTE_DEFAULTS.agvCapacity,
+      agvIds: AGV_ROUTE_DEFAULTS.agvIds,
+      sigExtra: 0,
+      sigEnabled: true
+    };
+    this._lastSig = [];
+
+    this._currentAgv = null;
+    this._departingAgv = null;
+    this._departingAccepted = false;
+    this._pendingUnload = [];
+    this._workOffer = null;
+    this._loadIndex = 0;
+    this._unloadIndex = 0;
+    this._until = 0;
+    this._stateName = 'agvIn_idle';
+    this._state = 'IDLE';
+    this._lastWorkInRef = null;
+    this._lastAgvInRef = null;
+    this._agvSpawnQueue = [];
+    this._rebuildAgvPool();
+    this._setState('agvIn_idle','IDLE');
+    this._syncSignalOutputs();
+  }
+
+  _rebuildAgvPool(){
+    const ids = (this.properties.agvIds || '').split(/[,\n]+/).map(t=>t.trim()).filter(Boolean);
+    this._agvSpawnQueue = ids.map(id=> new AGV(id, this.properties.agvCapacity || 1));
+  }
+
+  _hasWorkInLink(){ const port = this.inputs[this._workInIndex]; return !!(port && port.link!=null); }
+  _hasWorkOutLink(){ const port = this.outputs[this._workOutIndex]; return !!(port && port.links && port.links.length); }
+  _hasAgvOutLink(){ const port = this.outputs[this._agvOutIndex]; return !!(port && port.links && port.links.length); }
+
+  canAcceptAgv(){ return !this._currentAgv && !this._departingAgv; }
+
+  _setState(name, kind){
+    // 状態名は work_node_memo に準拠（agv_process → workIn_* → workOut_* → agvOut_* → agvIn_idle）
+    this._stateName = name;
+    switch(kind){
+      case 'PROCESS': this.color='#2ecc71'; this.bgcolor='#e8f8f2'; this._state='PROCESS'; break;
+      case 'WAIT':    this.color='#f39c12'; this.bgcolor='#fff6e6'; this._state='WAIT'; break;
+      case 'DOWN':    this.color='#3498db'; this.bgcolor='#e8f1fb'; this._state='DOWN'; break;
+      case 'IDLE':    this.color='#f1c40f'; this.bgcolor='#fff9db'; this._state='IDLE'; break;
+      default:        this.color='#bdc3c7'; this.bgcolor='#f7f7f7'; this._state='IDLE';
+    }
+    this.setDirtyCanvas(true,true);
+  }
+
+  _emit(i,state){
+    // signal outputs start after workOut/agvOut
+    const base = 2;
+    const idx = base + i;
+    if(!this.properties.sigEnabled) { if(this.outputs[idx]) this.setOutputData(idx, null); return; }
+    if(!this.outputs || idx >= this.outputs.length) return;
+    if(this._lastSig[i] !== state){ this.setOutputData(idx, state); this._lastSig[i] = state; }
+    else this.setOutputData(idx, null);
+  }
+
+  _syncSignalOutputs(){
+    const extra = Math.max(0, this.properties.sigExtra || 0);
+    const needed = 2 + extra;
+    // ensure outputs array exists
+    this.outputs = this.outputs || [];
+    while(this.outputs.length < needed){
+      const idx = this.outputs.length - 2;
+      this.addOutput(`sigOut${idx}`, 0);
+    }
+  }
+
+  _captureAgvInput(){
+    const port = this.inputs[this._agvInIndex];
+    if(!port || port.link == null) return;
+    const agv = this.getInputData(this._agvInIndex);
+    if(!agv){ this._lastAgvInRef = null; return; }
+    if(this._lastAgvInRef === agv) return;
+    if(this.canAcceptAgv(agv)){
+      const a = agv instanceof AGV ? agv : new AGV(String(agv.id ?? agv), this.properties.agvCapacity);
+      if(!Array.isArray(a.cargo)) a.cargo = [];
+      a.capacity = Math.max(1, a.capacity || this.properties.agvCapacity || 1);
+      this._currentAgv = a;
+      this._departingAgv = null;
+      this._departingAccepted = false;
+      this._loadIndex = Array.isArray(a.cargo) ? a.cargo.length : 0;
+      this._unloadIndex = 0;
+      this._pendingUnload = [];
+      this._workOffer = null;
+      this._lastAgvInRef = agv;
+      this._setState('agv_process','PROCESS');
+      const now = simNow();
+      this._until = now + Math.max(0,(this.properties.processTime||0)*1000);
+      this._triggerAnim(this._agvInIndex, 'agv', this._until - now, { id:a.id, t:'AGV' });
+      if(this._until === now) this._handleAgvProcess(now);
+    }
+  }
+
+  _maybeSpawnAgv(){
+    if(this._currentAgv || this._departingAgv) return;
+    if(!this._agvSpawnQueue.length) return;
+    const agv = this._agvSpawnQueue.shift();
+    this._lastAgvInRef = null;
+    this._captureAgvInputHelper(agv);
+  }
+  _captureAgvInputHelper(agv){
+    if(!agv) return;
+    if(!(agv instanceof AGV)) agv = new AGV(String(agv.id ?? agv), this.properties.agvCapacity);
+    if(!Array.isArray(agv.cargo)) agv.cargo = [];
+    agv.capacity = Math.max(1, agv.capacity || this.properties.agvCapacity || 1);
+    this._currentAgv = agv;
+    this._departingAgv = null;
+    this._departingAccepted = false;
+    this._loadIndex = Array.isArray(agv.cargo) ? agv.cargo.length : 0;
+    this._unloadIndex = 0;
+    this._pendingUnload = [];
+    this._workOffer = null;
+    this._setState('agv_process','PROCESS');
+    const now = simNow();
+    this._until = now + Math.max(0,(this.properties.processTime||0)*1000);
+    this._triggerAnim(this._agvInIndex, 'agv', this._until-now, { id: agv.id, t:'AGV' });
+    if(this._until === now) this._handleAgvProcess(now);
+  }
+
+  _triggerAnim(slot, type, duration, info){
+    if(!duration || duration<=0 || !window.WorkLinkAnimator || !this.graph) return;
+    const port = this.inputs && this.inputs[slot];
+    if(!port || port.link==null) return;
+    try{ window.WorkLinkAnimator.spawn(this.graph, port.link, type, duration, info); }catch(_e){}
+  }
+
+  _enterWorkInIdle(){
+    // 積載待ち（capacity に達するまで workIn_idle_k を繰り返す）
+    if(!this._currentAgv){
+      this._enterAgvOutWait();
+      return;
+    }
+    const cap = this._currentAgv.capacity || 1;
+    if(!this._hasWorkInLink() || this._loadIndex >= cap){
+      this._beginUnloadPhase();
+      return;
+    }
+    const ord = this._loadIndex + 1;
+    this._setState(`workIn_idle_${ord}`,'IDLE');
+  }
+
+  _startWorkInProcess(){
+    // 前工程からの搬送アニメ＋processTime 経過で次の idle or unload へ
+    const ord = this._loadIndex;
+    this._setState(`workIn_process_${ord}`,'PROCESS');
+    const now = simNow();
+    const duration = Math.max(0,(this.properties.processTime||0)*1000);
+    this._until = now + duration;
+    const w = this._currentAgv && this._currentAgv.cargo[this._currentAgv.cargo.length-1];
+    if(w) this._triggerAnim(this._workInIndex,'work',duration,{id:w.id, t:w.type});
+    if(duration===0) this._handleWorkInProcess(now);
+  }
+
+  _handleWorkInProcess(now){
+    if(now < this._until) return;
+    const cap = this._currentAgv ? this._currentAgv.capacity : 0;
+    if(this._hasWorkInLink() && this._currentAgv && this._loadIndex < cap){
+      this._enterWorkInIdle();
+    }else{
+      this._beginUnloadPhase();
+    }
+  }
+
+  _beginUnloadPhase(){
+    // 排出準備：cargo を pending に移し、workOut_wait_1 から順次出荷
+    if(!this._currentAgv){
+      this._enterAgvOutWait();
+      return;
+    }
+    this._pendingUnload = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.slice() : [];
+    this._unloadIndex = 0;
+    this._workOffer = null;
+    this._until = simNow();
+    if(!this._pendingUnload.length || !this._hasWorkOutLink()){
+      // そのままAGV出発へ
+      this._pendingUnload.length = 0;
+      this._enterAgvOutWait();
+      return;
+    }
+    this._setState('workOut_wait_1','WAIT');
+  }
+
+  _startWorkOutDown(){
+    if(!this._pendingUnload.length){
+      this._enterAgvOutWait();
+      return;
+    }
+    const ord = this._unloadIndex + 1;
+    this._setState(`workOut_down_${ord}`,'DOWN');
+    this._workOffer = this._pendingUnload[0];
+    const now = simNow();
+    this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    this._emitWorkOffer();
+    if(this._until === now) this._completeWorkOutOffer();
+  }
+
+  _emitWorkOffer(){
+    try{ this.setOutputData(this._workOutIndex, this._workOffer); }catch(_e){}
+  }
+
+  _completeWorkOutOffer(){
+    if(!this._workOffer) return;
+    this._pendingUnload.shift();
+    if(this._currentAgv && Array.isArray(this._currentAgv.cargo)){
+      this._currentAgv.cargo.shift();
+    }
+    this._workOffer = null;
+    this._unloadIndex++;
+    try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
+    if(this._pendingUnload.length){
+      const nextOrd = this._unloadIndex + 1;
+      this._setState(`workOut_wait_${nextOrd}`,'WAIT');
+    }else{
+      this._enterAgvOutWait();
+    }
+  }
+
+  _enterAgvOutWait(){
+    this._pendingUnload.length = 0;
+    this._workOffer = null;
+    try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
+    if(!this._currentAgv){
+      this._setState('agvIn_idle','IDLE');
+      return;
+    }
+    if(!this._hasAgvOutLink()){
+      this._resetToIdle();
+      return;
+    }
+    this._setState('agvOut_wait','WAIT');
+  }
+
+  _startAgvOutDown(){
+    if(!this._currentAgv){
+      this._resetToIdle();
+      return;
+    }
+    this._setState('agvOut_down','DOWN');
+    const now = simNow();
+    this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    this._departingAgv = this._currentAgv;
+    this._departingAccepted = false;
+    this._currentAgv = null;
+    this._offerDepartingAgv();
+  }
+
+  _downstreamWorkReady(){
+    const out = this.outputs[this._workOutIndex];
+    if(!out || !out.links) return false;
+    for(const id of out.links){
+      const link = this.graph.links[id]; if(!link) continue;
+      const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+      if(typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
+    }
+    return true;
+  }
+
+  _workAccepted(){
+    if(!this._workOffer) return false;
+    const out = this.outputs[this._workOutIndex];
+    if(!out || !out.links) return false;
+    for(const id of out.links){
+      const link = this.graph.links[id]; if(!link) continue;
+      const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+      if(typeof t._state === 'undefined') return true;
+      if(t._currentWork === this._workOffer || t._payload === this._workOffer) return true;
+      if(Array.isArray(t._workQueue) && t._workQueue.includes(this._workOffer)) return true;
+    }
+    return false;
+  }
+
+  _downstreamAgvReady(agv){
+    const out = this.outputs[this._agvOutIndex];
+    if(!out || !out.links) return false;
+    for(const id of out.links){
+      const link = this.graph.links[id]; if(!link) continue;
+      const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+      if(typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
+      if(typeof t.canAcceptAgv === 'function' && !t.canAcceptAgv(agv)) return false;
+    }
+    return true;
+  }
+
+  _offerDepartingAgv(){
+    if(!this._departingAgv) return;
+    const out = this.outputs[this._agvOutIndex];
+    if(!out || !out.links) return;
+    try{ this.setOutputData(this._agvOutIndex, this._departingAgv); }catch(_e){}
+  }
+
+  _agvAccepted(agv){
+    const out = this.outputs[this._agvOutIndex];
+    if(!out || !out.links) return false;
+    for(const id of out.links){
+      const link = this.graph.links[id]; if(!link) continue;
+      const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+      if(t._currentAgv === agv) return true;
+    }
+    return false;
+  }
+
+  _resetToIdle(){
+    this._departingAgv = null;
+    this._departingAccepted = false;
+    this._currentAgv = null;
+    this._pendingUnload.length = 0;
+    this._workOffer = null;
+    this._loadIndex = 0;
+    this._unloadIndex = 0;
+    this._setState('agvIn_idle','IDLE');
+  }
+
+  _captureWorkInput(){
+    if(!this._currentAgv) return;
+    if(!this._stateName.startsWith('workIn_idle')){ this._lastWorkInRef = null; return; }
+    if(!this._hasWorkInLink()){
+      this._beginUnloadPhase();
+      return;
+    }
+    const w = this.getInputData(this._workInIndex);
+    if(!w){ this._lastWorkInRef = null; return; }
+    if(this._lastWorkInRef === w) return;
+    this._lastWorkInRef = w;
+    if(this._currentAgv.cargo.length < this._currentAgv.capacity){
+      this._currentAgv.cargo.push(w);
+      this._loadIndex = this._currentAgv.cargo.length;
+      this._startWorkInProcess();
+    }
+  }
+
+  _handleAgvProcess(now){
+    if(now < this._until) return;
+    this._enterWorkInIdle();
+  }
+
+  _handleWorkOutWait(){
+    // safety: 初回は必ず workOut_wait_1 から始める
+    if(this._pendingUnload.length && this._unloadIndex === 0 && !this._workOffer && this._stateName !== 'workOut_wait_1'){
+      this._setState('workOut_wait_1','WAIT');
+    }
+    if(!this._pendingUnload.length){
+      this._enterAgvOutWait();
+      return;
+    }
+    if(this._downstreamWorkReady()){
+      this._startWorkOutDown();
+    }
+  }
+
+  _handleWorkOutDown(now){
+    if(this._workOffer){
+      // keep the offer visible every frame so downstream nodes can latch onto it
+      this._emitWorkOffer();
+      if(this._workAccepted()){
+        this._completeWorkOutOffer();
+        return;
+      }
+      if(now >= this._until){
+        this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+      }
+      return;
+    }
+    if(now >= this._until && !this._workOffer){
+      if(this._pendingUnload.length){
+        this._setState(`workOut_wait_${this._unloadIndex+1}`,'WAIT');
+      }else{
+        this._enterAgvOutWait();
+      }
+    }
+  }
+
+  _handleAgvOutWait(){
+    if(!this._currentAgv){
+      this._setState('agvIn_idle','IDLE');
+      return;
+    }
+    if(this._downstreamAgvReady(this._currentAgv)){
+      this._startAgvOutDown();
+    }
+  }
+
+  _handleAgvOutDown(now){
+    if(!this._departingAgv){
+      if(this._stateName !== 'agvIn_idle') this._setState('agvIn_idle','IDLE');
+      return;
+    }
+    if(!this._departingAccepted){
+      if(this._downstreamAgvReady(this._departingAgv)) this._offerDepartingAgv();
+      if(this._agvAccepted(this._departingAgv)){
+        this._departingAccepted = true;
+        try{ this.setOutputData(this._agvOutIndex, null); }catch(_e){}
+      }
+    }
+    if(this._departingAccepted){
+      if(now >= this._until){
+        this._departingAgv = null;
+        this._setState('agvIn_idle','IDLE');
+      }
+    }else if(now >= this._until){
+      this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    }
+  }
+
+  onExecute(){
+    // 1) 最新の輸送状態を取り込み（AGV/Work入力, 自動スポーン）
+    const now = simNow();
+    this._captureAgvInput();   // 前工程のAGV到着 → agv_process開始
+    this._captureWorkInput();  // workIn_idle_k のときはワークを積載
+    this._maybeSpawnAgv();     // 自前プールから補充（agvIn未接続でも動作可）
+
+    // 2) 状態名ごとにタイムチャートを進める
+    if(this._stateName === 'agv_process') this._handleAgvProcess(now);               // 到着～積載待ち突入
+    else if(this._stateName.startsWith('workIn_process')) this._handleWorkInProcess(now); // 積載プロセス
+    else if(this._stateName.startsWith('workOut_wait')) this._handleWorkOutWait();   // 排出待機
+    else if(this._stateName.startsWith('workOut_down')) this._handleWorkOutDown(now);// 排出中
+    else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait();             // AGV受渡し待ち
+    else if(this._stateName === 'agvOut_down') this._handleAgvOutDown(now);          // AGV受渡し中
+
+    // 3) 余剰信号ポートに状態を通知（SigExtra > 0 のとき）
+    const sigCount = this.properties.sigExtra || 0;
+    for(let i=0;i<sigCount;i++) this._emit(i, this._state);
+
+    // 4) 状態変化があれば描画更新
+    if(this._state !== 'IDLE' || this._currentAgv) this.setDirtyCanvas(true,true);
+  }
+
+  onPropertyChanged(name){
+    const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
+    if(name === 'agvIds'){
+      this._rebuildAgvPool();
+    }
+    if(name === 'agvCapacity'){
+      const n = Math.max(1, Math.round(parseFloat(this.properties.agvCapacity)||1));
+      this.properties.agvCapacity = n;
+      if(this._currentAgv) this._currentAgv.capacity = n;
+    }
+    if(name === 'sigExtra') this._syncSignalOutputs();
+    if(name === 'processTime') this.properties.processTime = clamp(this.properties.processTime);
+    if(name === 'downTime') this.properties.downTime = clamp(this.properties.downTime);
+  }
+
+}
+
+window.AGVRouteNode = AGVRouteNode;

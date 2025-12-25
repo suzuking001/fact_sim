@@ -1,6 +1,6 @@
 // Signal ports helpers: add/remove and keep in sync with properties.sigExtra
 
-function syncSigPorts(node, base = 3){
+function syncSigPorts(node, base = 0){
   const need = base + (node.properties.sigExtra || 0);
   let curIn = node.inputs.filter(i=>i.name.startsWith('sigIn')).length;
   let curOut = node.outputs.filter(o=>o.name.startsWith('sigOut')).length;
@@ -26,4 +26,3 @@ function removeSigOutput(node, idx){
 }
 
 window.syncSigPorts = syncSigPorts;
-
