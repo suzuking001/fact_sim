@@ -1,4 +1,4 @@
-// App wiring: script editor UI, graph init, examples, save/load, controls
+﻿// App wiring: script editor UI, graph init, examples, save/load, controls
 
 // Script editor UI
 const scriptEditorTextarea = document.getElementById('scriptEditorTextarea');
@@ -62,7 +62,34 @@ function makeExample(kind){
   try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
 }
 
-document.getElementById('exampleSelect').addEventListener('change', e=>{ const v=e.target.value; if(!v) return; makeExample(v); });
+function applyExampleData(data){
+  if(!graph) return;
+  graph.stop();
+  graph.clear();
+  graph.configure(data);
+  simStart = null; simAccum = 0; updateSimTime();
+  try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
+}
+
+function loadExampleFromFile(path){
+  if(!graph) return;
+  fetch(path)
+    .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
+    .then(data=>{ applyExampleData(data); })
+    .catch(err=>{ alert('JSON読込失敗'); console.error(err); });
+}
+
+document.getElementById('exampleSelect').addEventListener('change', e=>{
+  const v = e.target.value; if(!v) return;
+  if(v === 'sample_line1'){
+    const data = window.EXAMPLES && window.EXAMPLES.sample_line1;
+    if(data) applyExampleData(data);
+    else loadExampleFromFile('sample/sample_line1.json');
+    return;
+  }
+  makeExample(v);
+});
+
 
 // Save / Load
 document.getElementById('btnSave').onclick = ()=>{
@@ -316,3 +343,7 @@ document.getElementById('btnReset').onclick = ()=>{
     }catch(e){ console.error(e); }
   });
 })();
+
+
+
+
