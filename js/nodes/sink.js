@@ -26,7 +26,7 @@ class SinkNode extends LiteGraph.LGraphNode{
     if(d){
       this._recv.push(d);
       this._lastWork = d;
-      const elapsed = simAccum + (simStart ? (simNow() - simStart) : 0);
+      const elapsed = simNow();
       this._lastAt = elapsed;
       this._recordSample(elapsed);
       this.tooltip = `Got:${this._recv.length}`;

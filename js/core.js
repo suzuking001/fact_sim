@@ -3,34 +3,45 @@
 // Canvas element
 const graphElement = document.getElementById('graph');
 
-// Time management (real-time scaled clock)
+// Time management (fixed dt simulation clock)
+const SIM_DT_SEC = 0.1;
+const SIM_DT_MS = SIM_DT_SEC * 1000;
 let speed = 1;
-let realAnchor = Date.now();
-let simAnchor = realAnchor;
+let simTimeMs = 0;
+let simAccumMs = 0;
+let simRunning = false;
+let simRafId = null;
+let lastRealMs = 0;
 
 function simNow(){
-  return simAnchor + (Date.now() - realAnchor) * speed;
+  return simTimeMs;
 }
 
 function setSpeed(v){
   if(isNaN(v)) return;
+  if(v <= 1){
+    v = Math.round(v * 10) / 10;
+    if(v < 0.1) v = 0.1;
+  }else{
+    v = Math.round(v);
+  }
   // clamp to reasonable range
-  if(v < 0.1) v = 0.1; if(v > 100) v = 100;
-  const now = Date.now();
-  simAnchor = simNow();
-  realAnchor = now;
+  if(v > 100) v = 100;
   speed = v;
   updateSimTime();
   // reflect to UI controls
   try{
     const range = document.getElementById('speedRange');
-    if(range && document.activeElement !== range){
+    if(range){
       const max = parseFloat(range.max||'10');
       const min = parseFloat(range.min||'0.1');
-      if(v >= min && v <= max){ range.value = String(v); }
+      if(v >= min && v <= max){
+        range.step = (v <= 1 ? '0.1' : '1');
+        range.value = (v < 1 ? v.toFixed(1) : String(v));
+      }
     }
     const sf = document.getElementById('speedFactor');
-    if(sf) sf.textContent = v.toFixed(1) + 'x';
+    if(sf) sf.textContent = (v < 1 ? v.toFixed(1) : String(v)) + 'x';
   }catch(e){}
 }
 
@@ -41,18 +52,70 @@ function setSpeed(v){
   if(range){
     range.addEventListener('input', e => setSpeed(parseFloat(e.target.value)));
     // initialize UI label
-    try{ const sf=document.getElementById('speedFactor'); if(sf) sf.textContent = parseFloat(range.value).toFixed(1) + 'x'; }catch(e){}
+    try{
+      const sf=document.getElementById('speedFactor');
+      if(sf){
+        const v = parseFloat(range.value);
+        sf.textContent = (v < 1 ? v.toFixed(1) : String(parseInt(range.value,10))) + 'x';
+      }
+    }catch(e){}
+    try{
+      const v = parseFloat(range.value);
+      range.step = (v <= 1 ? '0.1' : '1');
+    }catch(e){}
   }else if(num){
     num.addEventListener('input', e => setSpeed(parseFloat(e.target.value)));
   }
 })();
 
-let simInterval, simStart, simAccum = 0;
-
 function updateSimTime(){
-  const elapsed = simAccum + (simStart ? simNow() - simStart : 0);
-  document.getElementById('simTime').textContent = (elapsed/1000).toFixed(1) + ' s';
+  document.getElementById('simTime').textContent = (simTimeMs/1000).toFixed(1) + ' s';
+  const dtEl = document.getElementById('simDt');
+  if(dtEl) dtEl.textContent = `Δt: ${SIM_DT_SEC.toFixed(1)} s (fixed)`;
 }
+
+function resetSimClock(){
+  simTimeMs = 0;
+  simAccumMs = 0;
+  lastRealMs = 0;
+  updateSimTime();
+}
+
+function startSimLoop(stepFn){
+  if(simRunning) return;
+  simRunning = true;
+  lastRealMs = 0;
+  const tick = (ts)=>{
+    if(!simRunning) return;
+    if(!lastRealMs) lastRealMs = ts;
+    let delta = ts - lastRealMs;
+    if(delta < 0) delta = 0;
+    lastRealMs = ts;
+    simAccumMs += delta * speed;
+    const maxSteps = 200;
+    let steps = 0;
+    while(simAccumMs >= SIM_DT_MS && steps < maxSteps){
+      if(typeof stepFn === 'function') stepFn();
+      simTimeMs += SIM_DT_MS;
+      simAccumMs -= SIM_DT_MS;
+      steps++;
+    }
+    if(steps === maxSteps) simAccumMs = 0; // avoid spiral of death
+    updateSimTime();
+    simRafId = window.requestAnimationFrame(tick);
+  };
+  simRafId = window.requestAnimationFrame(tick);
+}
+
+function stopSimLoop(){
+  simRunning = false;
+  if(simRafId){ window.cancelAnimationFrame(simRafId); simRafId = null; }
+  updateSimTime();
+}
+
+function isSimRunning(){ return simRunning; }
+function getSimDtSec(){ return SIM_DT_SEC; }
+function getSimDtMs(){ return SIM_DT_MS; }
 
 // Drawing helpers
 function drawState(ctx, lines, x=8, y=16){
@@ -85,5 +148,11 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
 // Export globals needed elsewhere
 window.updateSimTime = updateSimTime;
 window.simNow = simNow;
+window.resetSimClock = resetSimClock;
+window.startSimLoop = startSimLoop;
+window.stopSimLoop = stopSimLoop;
+window.isSimRunning = isSimRunning;
+window.getSimDtSec = getSimDtSec;
+window.getSimDtMs = getSimDtMs;
 window.drawState = drawState;
 window.drawStateBelow = drawStateBelow;

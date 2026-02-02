@@ -178,6 +178,15 @@ body:not(.sidebar-hidden) #graph{ right: 280px; }
 #speedRange{ box-sizing: border-box; margin: 0; }
 #sidebar input, #sidebar select, #sidebar button{ max-width: 100%; }
 #sidebar .control-group label{ display:flex; align-items: center; justify-content: space-between; }
+/* Fixed dt display */
+.sim-meta{
+  font-size: 12px;
+  color: var(--muted);
+  background: #f7f8fb;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
 /* Sidebar header branding */
 #sidebarHeader{
   display:flex; align-items:center; justify-content:center;

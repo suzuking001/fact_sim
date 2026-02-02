@@ -15,10 +15,43 @@ document.getElementById('scriptEditorCancel').onclick = ()=>{
 
 // Graph init
 let graph, canvas;
+
+function configureGraphClock(g){
+  if(!g) return;
+  const dt = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
+  g.fixedtime_lapse = dt;
+  g.fixedtime = 0;
+  g.globaltime = 0;
+  g.elapsed_time = 0;
+  g.iteration = 0;
+  g.status = LGraph.STATUS_STOPPED;
+}
+
+function startSimulation(){
+  if(!graph) return;
+  if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;
+  graph.status = LGraph.STATUS_RUNNING;
+  graph.starttime = LiteGraph.getTime();
+  graph.last_update_time = graph.starttime;
+  graph.sendEventToAllNodes("onStart");
+  window.startSimLoop(()=> graph.runStep(1, !graph.catch_errors));
+}
+
+function stopSimulation(){
+  if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
+    window.stopSimLoop();
+  }
+  if(graph && graph.status !== LGraph.STATUS_STOPPED){
+    graph.status = LGraph.STATUS_STOPPED;
+    graph.sendEventToAllNodes("onStop");
+  }
+}
 function initGraph(){
-  if(graph) graph.stop();
-  workCounter = 0; simStart = null; simAccum = 0; realAnchor = Date.now(); simAnchor = realAnchor; updateSimTime();
+  if(graph) stopSimulation();
+  workCounter = 0;
+  if(typeof window.resetSimClock === 'function') window.resetSimClock();
   graph = new LGraph();
+  configureGraphClock(graph);
   canvas = new LGraphCanvas(graphElement, graph);
   // Make the canvas background white (node area backdrop)
   canvas.bgcolor = "#ffffff";
@@ -37,7 +70,7 @@ initGraph();
 
 // Examples
 function makeExample(kind){
-  if(!graph) return; graph.stop(); graph.clear();
+  if(!graph) return; stopSimulation(); graph.clear(); if(typeof window.resetSimClock === 'function') window.resetSimClock();
   if(kind==='simple'){
     const s=LiteGraph.createNode('factory/source'); s.pos=[60,200];
     const e1=LiteGraph.createNode('factory/equip'); e1.pos=[360,200]; e1.properties.processTime=1;
@@ -55,7 +88,7 @@ function makeExample(kind){
     s.connect(0,sp,0); sp.connect(0,a,0); sp.connect(1,b,0); a.connect(0,k,0); b.connect(0,k,0);
   }
   // reset time display (no auto start)
-  simStart = null; simAccum = 0; updateSimTime();
+  updateSimTime();
   try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
 }
 
@@ -79,13 +112,13 @@ document.getElementById('fileInput').addEventListener('change', e => {
 
 // Controls
 document.getElementById('btnStart').onclick = ()=>{
-  if(!simInterval){ graph.start(); simStart = simNow(); simInterval = setInterval(updateSimTime, 100); }
+  startSimulation();
 };
 document.getElementById('btnStop').onclick = ()=>{
-  if(simInterval){ graph.stop(); simAccum += simNow() - simStart; clearInterval(simInterval); simInterval=null; updateSimTime(); }
+  stopSimulation();
 };
 document.getElementById('btnReset').onclick = ()=>{
-  if(simInterval){ graph.stop(); clearInterval(simInterval); simInterval=null; }
+  stopSimulation();
   initGraph();
 };
 
