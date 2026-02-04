@@ -48,7 +48,6 @@ function setSpeed(v){
 // Bind speed control (range slider preferred; fall back to numeric input if present)
 (function(){
   const range = document.getElementById('speedRange');
-  const num = document.getElementById('speedInput');
   if(range){
     range.addEventListener('input', e => setSpeed(parseFloat(e.target.value)));
     // initialize UI label
@@ -63,8 +62,6 @@ function setSpeed(v){
       const v = parseFloat(range.value);
       range.step = (v <= 1 ? '0.1' : '1');
     }catch(e){}
-  }else if(num){
-    num.addEventListener('input', e => setSpeed(parseFloat(e.target.value)));
   }
 })();
 
@@ -115,21 +112,6 @@ function stopSimLoop(){
 
 function isSimRunning(){ return simRunning; }
 function getSimDtSec(){ return SIM_DT_SEC; }
-function getSimDtMs(){ return SIM_DT_MS; }
-
-// Drawing helpers
-function drawState(ctx, lines, x=8, y=16){
-  try{
-    ctx.save();
-    ctx.font = '12px sans-serif';
-    let w = 0; for(const t of lines){ w = Math.max(w, ctx.measureText(String(t)).width); }
-    const lh = 14; const pad = 6; const h = lines.length * lh + pad*2;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x-4, y-12, w+pad*2, h);
-    ctx.fillStyle = '#fff';
-    let yy = y; for(const t of lines){ ctx.fillText(String(t), x, yy); yy += lh; }
-  }catch(e){}
-  finally{ try{ ctx.restore(); }catch(_e){} }
-}
 
 function drawStateBelow(ctx, node, lines, x=8, margin=6){
   try{
@@ -153,6 +135,4 @@ window.startSimLoop = startSimLoop;
 window.stopSimLoop = stopSimLoop;
 window.isSimRunning = isSimRunning;
 window.getSimDtSec = getSimDtSec;
-window.getSimDtMs = getSimDtMs;
-window.drawState = drawState;
 window.drawStateBelow = drawStateBelow;

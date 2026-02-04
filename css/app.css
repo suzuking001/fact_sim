@@ -91,7 +91,6 @@ html,body{
   box-shadow: 0 0 0 3px rgba(110,168,254,0.25);
 }
 
-#speedInput{width:72px;text-align:right;}
 #simTime{margin-left:12px;font-weight:600;color:var(--muted);}
 
 #fileInput{display:none;}
