@@ -126,6 +126,15 @@ document.getElementById('exampleSelect').addEventListener('change', e=>{
   makeExample(v);
 });
 
+// Default example: sample_line1
+(function(){
+  const sel = document.getElementById('exampleSelect');
+  if(sel) sel.value = 'sample_line1';
+  const data = window.EXAMPLES && window.EXAMPLES.sample_line1;
+  if(data) applyExampleData(data);
+  else loadExampleFromFile('sample/sample_line1.json');
+})();
+
 
 // Save / Load
 document.getElementById('btnSave').onclick = ()=>{
