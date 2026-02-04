@@ -37,6 +37,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._pendingUnload = [];
     this._workOffer = null;
     this._workOfferArmed = false;
+    this._agvWaitIconLinks = null;
     this._loadIndex = 0;
     this._unloadIndex = 0;
     this._until = 0;
@@ -154,6 +155,36 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     try{ window.WorkLinkAnimator.spawn(this.graph, port.link, type, duration, info); }catch(_e){}
   }
 
+  _setAgvOutWaitIcon(active){
+    try{
+      if(!window.WorkLinkAnimator || !this.graph) return;
+      const out = this.outputs && this.outputs[this._agvOutIndex];
+      if(!out || !out.links) return;
+      if(active){
+        if(this._agvWaitIconLinks) return;
+        this._agvWaitIconLinks = out.links.slice();
+        const info = this._currentAgv ? { id: this._currentAgv.id } : null;
+        this._agvWaitIconLinks.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, 'agv', info));
+      }else{
+        if(!this._agvWaitIconLinks) return;
+        this._agvWaitIconLinks.forEach(id=> window.WorkLinkAnimator.hidePortIcon(this.graph, id));
+        this._agvWaitIconLinks = null;
+      }
+    }catch(_e){}
+  }
+
+  _refreshAgvWaitIcon(){
+    const shouldShow =
+      !!this._currentAgv &&
+      !this._departingAgv &&
+      (this._stateName.startsWith('workIn_idle') ||
+       this._stateName.startsWith('workIn_process') ||
+       this._stateName.startsWith('workOut_wait') ||
+       this._stateName.startsWith('workOut_down') ||
+       this._stateName === 'agvOut_wait');
+    this._setAgvOutWaitIcon(shouldShow);
+  }
+
   _enterWorkInIdle(){
     // 積載待ち（capacity に達するまで workIn_idle_k を繰り返す）
     if(!this._currentAgv){
@@ -252,6 +283,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._workOffer = null;
     this._workOfferArmed = false;
     try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
+    this._setAgvOutWaitIcon(false);
     if(!this._currentAgv){
       this._setState('agvIn_idle','IDLE');
       return;
@@ -261,6 +293,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       return;
     }
     this._setState('agvOut_wait','WAIT');
+    this._setAgvOutWaitIcon(true);
   }
 
   _startAgvOutDown(){
@@ -268,6 +301,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       this._resetToIdle();
       return;
     }
+    this._setAgvOutWaitIcon(false);
     this._setState('agvOut_down','DOWN');
     const now = simNow();
     this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
@@ -339,6 +373,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._pendingUnload.length = 0;
     this._workOffer = null;
     this._workOfferArmed = false;
+    this._setAgvOutWaitIcon(false);
     this._loadIndex = 0;
     this._unloadIndex = 0;
     this._setState('agvIn_idle','IDLE');
@@ -453,6 +488,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     else if(this._stateName.startsWith('workOut_down')) this._handleWorkOutDown(now);// 排出中
     else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait();             // AGV受渡し待ち
     else if(this._stateName === 'agvOut_down') this._handleAgvOutDown(now);          // AGV受渡し中
+
+    this._refreshAgvWaitIcon();
 
     // 3) 余剰信号ポートに状態を通知（SigExtra > 0 のとき）
     const sigCount = this.properties.sigExtra || 0;

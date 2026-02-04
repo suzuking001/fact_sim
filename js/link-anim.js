@@ -91,7 +91,16 @@ class LinkAnimator{
       const startDir = this._getSlotDir(originNode, link.origin_slot, false);
       let x, y;
         if(anim.tail){
-          if(originNode._state !== 'WAIT') return false;
+          const allowAgvWait =
+            anim.type === 'agv' &&
+            originNode &&
+            typeof originNode._stateName === 'string' &&
+            (originNode._stateName.startsWith('workIn_idle') ||
+             originNode._stateName.startsWith('workIn_process') ||
+             originNode._stateName.startsWith('workOut_wait') ||
+             originNode._stateName.startsWith('workOut_down') ||
+             originNode._stateName === 'agvOut_wait');
+          if(originNode._state !== 'WAIT' && !allowAgvWait) return false;
           x = start[0];
           y = start[1];
       }else{
