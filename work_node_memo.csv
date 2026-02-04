@@ -1,0 +1,105 @@
+﻿状態遷移表,,,,,,
+,,,,,,
+ノード名称：equipment_node,,,,,,
+状態名称,説明,状態開始_前工程の条件,状態開始_自工程の条件,状態開始_後工程の条件,状態色,備考
+process,"前工程(workIn)から搬送開始 
+→ 後工程(workOut)待ちに到達",前工程(workIn)がworkを出力,自工程がidle状態である,無し,緑,無し
+wait,後工程(workOut)待ち,無し,自工程がprocess状態完了,無し,橙,無し
+down,"後工程(workOut)への搬送開始 
+→ 前工程(workIn)待ちに到達",無し,"自工程がwait状態である
+自工程がworkを後工程(workOut)へ出力",後工程(workOut)がidle状態で受け入れ可,青,無し
+idle,前工程(workIn)待ち,無し,自工程がdown状態完了,無し,黄,無し
+,,,,,,
+,,,,,,
+,,,,,,
+ノード名称：mage2_node(workIn_num=2),,,,,,
+状態名称,説明,状態開始_前工程の条件,状態開始_自工程の条件,状態開始_後工程の条件,状態色,備考
+process1,"前工程(workIn1)から搬送開始 
+→ 前工程(workIn2)待ちに到達",前工程(workIn1)がworkを出力,自工程がworkIn1_idle状態である,無し,緑,無し
+workIn2_idle,前工程(workIn2)待ち,無し,自工程がprocess1完了,無し,黄,無し
+process2,"前工程(workIn2)から搬送開始 
+→ 後工程(workOut)待ちに到達",前工程(workIn2)がworkを出力,自工程がworkIn2_idle状態である,無し,緑,無し
+wait,後工程(workOut)待ち（排出先待ち）,無し,自工程がprocess2完了,無し,橙,無し
+down,"後工程(workOut)への搬送開始 
+→ 前工程(workIn1)待ちに到達",無し,"自工程がwait状態である
+自工程がworkを後工程(workOut)へ出力",後工程(workOut)がidle状態で受け入れ可,青,無し
+workIn1_idle,前工程(workIn1)待ち,無し,自工程がdown状態完了,無し,黄,無し
+,,,,,,
+,,,,,,
+,,,,,,
+ノード名称：agv_route_node（max_load=1）,,,,,,
+状態名称,説明,状態開始_前工程の条件,状態開始_自工程の条件,状態開始_後工程の条件,状態色,備考
+agv_process,"前工程(agvIn)から搬送開始 
+→ 前工程(workIn)待ちに到達",前工程(agvIn)がagvを出力,自工程がagvIn_idle状態である,無し,緑,無し
+workIn_idle,前工程(workIn)からのワーク待ち（AGV積載待ち）,無し,"自工程がagv_process完了かつ
+workInポートに接続あり",無し,黄,workInポートに接続ない場合はスキップ
+workIn_process,"前工程(workIn)から搬送開始 
+→ 後工程(workOut)待ちに到達",前工程(workIn)がworkを出力,"自工程がworkIn_idle状態である
+workInポートに接続あり",無し,緑,workInポートに接続ない場合はスキップ
+workOut_wait,後工程(workOut)待ち（排出先待ち）,無し,"自工程がworkIn_process完了かつ
+workOutポートに接続あり",無し,橙,workOutポートに接続ない場合はスキップ
+workOut_down,"後工程(workOut)へ搬送開始
+ → 後工程(agvOut)待ちに到達",無し,"自工程がworkOut_wait状態である
+自工程がworkを後工程(workOut)へ出力
+workOutポートに接続あり",後工程(workOut)がidle状態で受け入れ可,青,workOutポートに接続ない場合はスキップ
+agvOut_wait,後工程(agvOut)待ち,無し,workOut_down完了,無し,橙,無し
+agvOut_down,"後工程(agvOut)への搬送開始
+ → 前工程(agvIn)待ちに到達",無し,"自工程がagvOut_wait状態である
+自工程がagvを後工程(agvOut)へ出力",後工程(agvOut)がagvIn_idle状態で受け入れ可,青,無し
+agvIn_idle,前工程(agvIn)待ち,無し,自工程がagvOut_down状態完了,無し,黄,無し
+,,,,,,
+ノード名称：agv_route_node（max_load=n）,,,,,,
+状態名称,説明,状態開始_前工程の条件,状態開始_自工程の条件,状態開始_後工程の条件,状態色,備考
+agv_process,"前工程(agvIn)から搬送開始 
+→ 前工程(workIn)待ちに到達",前工程(agvIn)がagvを出力,自工程がagvIn_idle状態である,無し,緑,無し
+workIn_idle_1,前工程(workIn)からのワーク待ち（AGV積載待ち）,無し,"自工程がagv_process完了かつ
+workInポートに接続あり",無し,黄,workInポートに接続ない場合はスキップ
+workIn_process_1,"前工程(workIn)から搬送開始 
+→ 後工程(workOut)待ちに到達",前工程(workIn)がworkを出力,"自工程がworkIn_idle_1状態である
+workInポートに接続あり",無し,緑,workInポートに接続ない場合はスキップ
+workIn_idle_2,前工程(workIn)からのワーク待ち（AGV積載待ち）,無し,"自工程がworkIn_process_1完了かつ
+workInポートに接続あり",無し,黄,workInポートに接続ない場合はスキップ
+workIn_process_2,"前工程(workIn)から搬送開始 
+→ 後工程(workOut)待ちに到達",前工程(workIn)がworkを出力,"自工程がworkIn_idle_2状態である
+workInポートに接続あり",無し,緑,workInポートに接続ない場合はスキップ
+workIn_idle_3,前工程(workIn)からのワーク待ち（AGV積載待ち）,無し,"自工程がworkIn_process_2完了かつ
+workInポートに接続あり",無し,黄,workInポートに接続ない場合はスキップ
+workIn_process_3,"前工程(workIn)から搬送開始 
+→ 後工程(workOut)待ちに到達",前工程(workIn)がworkを出力,"自工程がworkIn_idle_3状態である
+workInポートに接続あり",無し,緑,workInポートに接続ない場合はスキップ
+…,,,,,,
+workIn_idle_n,前工程(workIn)からのワーク待ち（AGV積載待ち）,無し,"自工程がworkIn_process_n-1完了かつ
+workInポートに接続あり",無し,黄,workInポートに接続ない場合はスキップ
+workIn_process_n,"前工程(workIn)から搬送開始 
+→ 後工程(workOut)待ちに到達",前工程(workIn)がworkを出力,"自工程がworkIn_idle_n状態である
+workInポートに接続あり",無し,緑,workInポートに接続ない場合はスキップ
+workOut_wait_1,後工程(workOut)待ち（排出先待ち）,無し,"自工程がworkIn_process_n完了かつ
+workOutポートに接続あり",無し,橙,workOutポートに接続ない場合はスキップ
+workOut_down_1,"後工程(workOut)へ搬送開始
+ → 後工程(agvOut)待ちに到達",無し,"自工程がworkOut_wait_1状態である
+自工程がworkを後工程(workOut)へ出力
+workOutポートに接続あり",後工程(workOut)がidle状態で受け入れ可,青,workOutポートに接続ない場合はスキップ
+workOut_wait_2,後工程(workOut)待ち（排出先待ち）,無し,"自工程がworkOut_down_1完了かつ
+workOutポートに接続あり",無し,橙,workOutポートに接続ない場合はスキップ
+workOut_down_2,"後工程(workOut)へ搬送開始
+ → 後工程(agvOut)待ちに到達",無し,"自工程がworkOut_wait_2状態である
+自工程がworkを後工程(workOut)へ出力
+workOutポートに接続あり",後工程(workOut)がidle状態で受け入れ可,青,workOutポートに接続ない場合はスキップ
+workOut_wait_3,後工程(workOut)待ち（排出先待ち）,無し,"自工程がworkOut_down_2完了かつ
+workOutポートに接続あり",無し,橙,workOutポートに接続ない場合はスキップ
+workOut_down_3,"後工程(workOut)へ搬送開始
+ → 後工程(agvOut)待ちに到達",無し,"自工程がworkOut_wait_3状態である
+自工程がworkを後工程(workOut)へ出力
+workOutポートに接続あり",後工程(workOut)がidle状態で受け入れ可,青,workOutポートに接続ない場合はスキップ
+…,,,,,,
+workOut_wait_n,後工程(workOut)待ち（排出先待ち）,無し,"自工程がworkOut_down_n-1完了かつ
+workOutポートに接続あり",無し,橙,workOutポートに接続ない場合はスキップ
+workOut_down_n,"後工程(workOut)へ搬送開始
+ → 後工程(agvOut)待ちに到達",無し,"自工程がworkOut_wait_n状態である
+自工程がworkを後工程(workOut)へ出力
+workOutポートに接続あり",後工程(workOut)がidle状態で受け入れ可,青,workOutポートに接続ない場合はスキップ
+agvOut_wait,後工程(agvOut)待ち,無し,workOut_down_n完了,無し,橙,無し
+agvOut_down,"後工程(agvOut)への搬送開始
+ → 前工程(agvIn)待ちに到達",無し,"自工程がagvOut_wait状態である
+自工程がagvを後工程(agvOut)へ出力",後工程(agvOut)がagvIn_idle状態で受け入れ可,青,無し
+agvIn_idle,前工程(agvIn)待ち,無し,自工程がagvOut_down状態完了,無し,黄,無し

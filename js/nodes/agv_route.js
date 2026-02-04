@@ -36,6 +36,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._departingAccepted = false;
     this._pendingUnload = [];
     this._workOffer = null;
+    this._workOfferArmed = false;
     this._loadIndex = 0;
     this._unloadIndex = 0;
     this._until = 0;
@@ -199,6 +200,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._pendingUnload = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.slice() : [];
     this._unloadIndex = 0;
     this._workOffer = null;
+    this._workOfferArmed = false;
     this._until = simNow();
     if(!this._pendingUnload.length || !this._hasWorkOutLink()){
       // そのままAGV出発へ
@@ -217,10 +219,10 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const ord = this._unloadIndex + 1;
     this._setState(`workOut_down_${ord}`,'DOWN');
     this._workOffer = this._pendingUnload[0];
+    this._workOfferArmed = false;
     const now = simNow();
     this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
-    this._emitWorkOffer();
-    if(this._until === now) this._completeWorkOutOffer();
+    if(this._until === now) this._workOfferArmed = true;
   }
 
   _emitWorkOffer(){
@@ -234,6 +236,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       this._currentAgv.cargo.shift();
     }
     this._workOffer = null;
+    this._workOfferArmed = false;
     this._unloadIndex++;
     try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
     if(this._pendingUnload.length){
@@ -247,6 +250,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   _enterAgvOutWait(){
     this._pendingUnload.length = 0;
     this._workOffer = null;
+    this._workOfferArmed = false;
     try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
     if(!this._currentAgv){
       this._setState('agvIn_idle','IDLE');
@@ -334,6 +338,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._currentAgv = null;
     this._pendingUnload.length = 0;
     this._workOffer = null;
+    this._workOfferArmed = false;
     this._loadIndex = 0;
     this._unloadIndex = 0;
     this._setState('agvIn_idle','IDLE');
@@ -377,23 +382,27 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   }
 
   _handleWorkOutDown(now){
-    if(this._workOffer){
-      // keep the offer visible every frame so downstream nodes can latch onto it
-      this._emitWorkOffer();
-      if(this._workAccepted()){
-        this._completeWorkOutOffer();
-        return;
-      }
-      if(now >= this._until){
-        this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
-      }
-      return;
-    }
-    if(now >= this._until && !this._workOffer){
+    if(!this._workOffer){
       if(this._pendingUnload.length){
         this._setState(`workOut_wait_${this._unloadIndex+1}`,'WAIT');
       }else{
         this._enterAgvOutWait();
+      }
+      return;
+    }
+
+    if(!this._workOfferArmed){
+      if(now >= this._until){
+        this._workOfferArmed = true;
+      }else{
+        return;
+      }
+    }
+
+    if(this._downstreamWorkReady()){
+      this._emitWorkOffer();
+      if(this._workAccepted()){
+        this._completeWorkOutOffer();
       }
     }
   }
