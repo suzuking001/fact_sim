@@ -16,6 +16,16 @@ document.getElementById('scriptEditorCancel').onclick = ()=>{
 // Graph init
 let graph, canvas;
 
+let toastTimer = null;
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  if(!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> toast.classList.remove('show'), 1000);
+}
+
 const history = {
   undo: [],
   redo: [],
@@ -121,6 +131,7 @@ function installBoxSelect(c){
   window.addEventListener('mouseup', (e)=>{
     if(!selecting) return;
     selecting = false;
+    c.__rectSelectForce = false;
     const rect = c.dragging_rectangle;
     c.dragging_rectangle = null;
     if(rect && c.graph){
@@ -145,20 +156,30 @@ function installBoxSelect(c){
   c.__boxSelectHooked = true;
 }
 
+function doCopy(){
+  if(!canvas) return;
+  if(canvas.selected_nodes && Object.keys(canvas.selected_nodes).length){
+    canvas.copyToClipboard();
+    showToast('コピーしました');
+  }
+}
+
+function doPaste(){
+  if(!canvas) return;
+  if(!canvas.__last_mouse){
+    const scale = canvas.ds.scale || 1;
+    const cx = canvas.ds.offset[0] + (canvas.canvas.width * 0.5 / scale);
+    const cy = canvas.ds.offset[1] + (canvas.canvas.height * 0.5 / scale);
+    canvas.graph_mouse[0] = cx; canvas.graph_mouse[1] = cy;
+  }
+  canvas.pasteFromClipboard(false);
+  showToast('ペーストしました');
+}
+
 function installClipboardHandlers(c){
   if(!c || c.__clipboardHooked) return;
   const el = c.canvas;
   if(!el) return;
-
-  const toast = document.getElementById('toast');
-  let toastTimer = null;
-  const showToast = (msg)=>{
-    if(!toast) return;
-    toast.textContent = msg;
-    toast.classList.add('show');
-    if(toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=> toast.classList.remove('show'), 1000);
-  };
 
   const updateMouse = (e)=>{
     try{
@@ -181,11 +202,8 @@ function installClipboardHandlers(c){
     const mod = e.metaKey || e.ctrlKey;
     if(!mod) return;
     if(e.code === 'KeyC'){
-      if(c.selected_nodes && Object.keys(c.selected_nodes).length){
-        c.copyToClipboard();
-        showToast('コピーしました');
-        e.preventDefault();
-      }
+      doCopy();
+      e.preventDefault();
     }else if(e.code === 'KeyZ'){
       if(e.shiftKey){
         redo();
@@ -200,20 +218,27 @@ function installClipboardHandlers(c){
       showToast('やり直しました');
       e.preventDefault();
     }else if(e.code === 'KeyV'){
-      if(!c.__last_mouse){
-        const scale = c.ds.scale || 1;
-        const cx = c.ds.offset[0] + (c.canvas.width * 0.5 / scale);
-        const cy = c.ds.offset[1] + (c.canvas.height * 0.5 / scale);
-        c.graph_mouse[0] = cx; c.graph_mouse[1] = cy;
-      }
-      c.pasteFromClipboard(false);
-      showToast('ペーストしました');
+      doPaste();
       e.preventDefault();
     }
   }, true);
 
   c.__clipboardHooked = true;
 }
+
+function bindHistoryButtons(){
+  const btnUndo = document.getElementById('btnUndo');
+  const btnRedo = document.getElementById('btnRedo');
+  if(btnUndo) btnUndo.addEventListener('click', ()=>{
+    undo();
+    showToast('元に戻しました');
+  });
+  if(btnRedo) btnRedo.addEventListener('click', ()=>{
+    redo();
+    showToast('やり直しました');
+  });
+}
+
 
 function configureGraphClock(g){
   if(!g) return;
@@ -257,6 +282,7 @@ function initGraph(){
   canvas.multi_select = true;
   installBoxSelect(canvas);
   installClipboardHandlers(canvas);
+  bindHistoryButtons();
   // expose for other helpers that hook into canvas
   window.canvas = canvas;
   if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(canvas);

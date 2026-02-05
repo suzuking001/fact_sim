@@ -30,16 +30,6 @@
         <label>Fixed Δt</label>
         <div id="simDt" class="sim-meta">Δt: 0.1 s (fixed)</div>
       </div>
-      <div class="control-group">
-        <label>Shortcuts</label>
-        <div class="shortcuts">
-          <div class="shortcut-row"><span class="shortcut-action">矩形選択</span><span class="shortcut-key">Ctrl + ドラッグ</span></div>
-          <div class="shortcut-row"><span class="shortcut-action">コピー</span><span class="shortcut-key">Ctrl + C</span></div>
-          <div class="shortcut-row"><span class="shortcut-action">ペースト</span><span class="shortcut-key">Ctrl + V</span></div>
-          <div class="shortcut-row"><span class="shortcut-action">元に戻す</span><span class="shortcut-key">Ctrl + Z</span></div>
-          <div class="shortcut-row"><span class="shortcut-action">やり直し</span><span class="shortcut-key">Ctrl + Y / Ctrl + Shift + Z</span></div>
-        </div>
-      </div>
       <select id="exampleSelect" title="Examples">
         <option value="">Load example…</option>
         <option value="simple">Simple</option>
@@ -63,6 +53,36 @@
       </div>
       <div id="addNodeProps" class="propFields"></div>
       <button id="btnAddNode">Add Node</button>
+    </div>
+    <div id="shortcutPanel">
+      <div class="panelHeader">Shortcuts</div>
+      <div class="shortcuts">
+        <div class="shortcut-row">
+          <span class="shortcut-action">矩形選択</span>
+          <span class="shortcut-key">Ctrl + ドラッグ</span>
+          <span class="shortcut-spacer"></span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">コピー</span>
+          <span class="shortcut-key">Ctrl + C</span>
+          <span class="shortcut-spacer"></span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">ペースト</span>
+          <span class="shortcut-key">Ctrl + V</span>
+          <span class="shortcut-spacer"></span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">元に戻す</span>
+          <span class="shortcut-key">Ctrl + Z</span>
+          <button id="btnUndo" class="shortcut-btn">実行</button>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">やり直し</span>
+          <span class="shortcut-key">Ctrl + Y / Ctrl + Shift + Z</span>
+          <button id="btnRedo" class="shortcut-btn">実行</button>
+        </div>
+      </div>
     </div>
     <div class="sidebar-spacer"></div>
     <div id="fileControls">

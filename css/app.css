@@ -127,7 +127,7 @@ html,body{
 /* === Sidebar & Toggle (right-side menu) === */
 #sidebar{
   position: fixed;
-  top: 0; right: 0; height: 100%; width: 280px;
+  top: 0; right: 0; height: 100%; width: 340px;
   background: var(--panel-bg);
   border-left: 1px solid var(--panel-border);
   box-shadow: var(--shadow);
@@ -143,7 +143,7 @@ body.sidebar-hidden #sidebar{ transform: translateX(100%); }
 
 /* Keep canvas interactive and visible with sidebar */
 #graph{ position: absolute; inset: 0; }
-body:not(.sidebar-hidden) #graph{ right: 280px; }
+body:not(.sidebar-hidden) #graph{ right: 340px; }
 
 /* Controls inside sidebar use normal flow (override older absolute rules) */
 #sidebar #controls,
@@ -194,10 +194,10 @@ body:not(.sidebar-hidden) #graph{ right: 280px; }
   gap: 6px;
 }
 .shortcut-row{
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  column-gap: 12px;
   font-size: 12px;
   color: var(--muted);
   background: #f7f8fb;
@@ -205,9 +205,25 @@ body:not(.sidebar-hidden) #graph{ right: 280px; }
   border-radius: 8px;
   padding: 6px 8px;
 }
+.shortcut-action{ color: var(--text); font-weight: 600; }
 .shortcut-key{
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   color: #111827;
+}
+.shortcut-btn{
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.shortcut-spacer{
+  display: inline-block;
+  width: 56px;
+  height: 1px;
 }
 /* Sidebar header branding */
 #sidebarHeader{
@@ -275,14 +291,16 @@ body:not(.sidebar-hidden) #graph{ right: 280px; }
 }
 
 
-/* Add Node panel adopts same styling as propPanel */
-#addNodePanel{
+/* Add Node + Shortcut panel cards */
+#addNodePanel,
+#shortcutPanel{
   background: #fff; border: 1px solid var(--panel-border);
   border-radius: var(--radius); box-shadow: var(--shadow);
   padding: 10px 12px; margin-top: 8px;
   display:flex; flex-direction: column; gap: 10px;
 }
-#addNodePanel .panelHeader{ font-weight: 600; color: var(--muted); }
+#addNodePanel .panelHeader,
+#shortcutPanel .panelHeader{ font-weight: 600; color: var(--muted); }
 #addNodePanel .field{ display:flex; flex-direction: column; gap:6px; }
 #addNodePanel select{ width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--input-border); border-radius: var(--radius-sm); background:#fff; color:var(--text); }
 #addNodePanel .propFields{ display:flex; flex-direction: column; gap:10px; }
