@@ -38,6 +38,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._workOffer = null;
     this._workOfferArmed = false;
     this._agvWaitIconLinks = null;
+    this._currentWork = null;
+    this._payload = null;
     this._loadIndex = 0;
     this._unloadIndex = 0;
     this._until = 0;
@@ -215,6 +217,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   _handleWorkInProcess(now){
     if(now < this._until) return;
     const cap = this._currentAgv ? this._currentAgv.capacity : 0;
+    this._currentWork = null;
+    this._payload = null;
     if(this._hasWorkInLink() && this._currentAgv && this._loadIndex < cap){
       this._enterWorkInIdle();
     }else{
@@ -374,6 +378,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._workOffer = null;
     this._workOfferArmed = false;
     this._setAgvOutWaitIcon(false);
+    this._currentWork = null;
+    this._payload = null;
     this._loadIndex = 0;
     this._unloadIndex = 0;
     this._setState('agvIn_idle','IDLE');
@@ -391,6 +397,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     if(this._lastWorkInRef === w) return;
     this._lastWorkInRef = w;
     if(this._currentAgv.cargo.length < this._currentAgv.capacity){
+      this._currentWork = w;
+      this._payload = w;
       this._currentAgv.cargo.push(w);
       this._loadIndex = this._currentAgv.cargo.length;
       this._startWorkInProcess();
