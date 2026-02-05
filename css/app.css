@@ -186,6 +186,29 @@ body:not(.sidebar-hidden) #graph{ right: 280px; }
   border-radius: 8px;
   padding: 6px 8px;
 }
+
+/* Shortcut list */
+.shortcuts{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shortcut-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  background: #f7f8fb;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.shortcut-key{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color: #111827;
+}
 /* Sidebar header branding */
 #sidebarHeader{
   display:flex; align-items:center; justify-content:center;
@@ -226,6 +249,29 @@ body:not(.sidebar-hidden) #graph{ right: 280px; }
   background:#fff; color:var(--text);
   font: 14px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   min-width: 160px; max-width: 320px;
+}
+
+/* Toast notification */
+#toast{
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(17,24,39,0.92);
+  color: #f9fafb;
+  font-size: 13px;
+  letter-spacing: .02em;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 3000;
+}
+#toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
 }
 
 

@@ -16,6 +16,205 @@ document.getElementById('scriptEditorCancel').onclick = ()=>{
 // Graph init
 let graph, canvas;
 
+const history = {
+  undo: [],
+  redo: [],
+  lock: false,
+  last: null,
+  max: 50
+};
+
+function pushHistory(){
+  if(history.lock || !graph) return;
+  let snap;
+  try{ snap = JSON.stringify(graph.serialize()); }catch(_e){ return; }
+  if(history.last === snap) return;
+  history.undo.push(snap);
+  if(history.undo.length > history.max) history.undo.shift();
+  history.redo = [];
+  history.last = snap;
+}
+
+function resetHistory(){
+  if(!graph) return;
+  try{
+    history.lock = true;
+    const snap = JSON.stringify(graph.serialize());
+    history.undo = [snap];
+    history.redo = [];
+    history.last = snap;
+  }finally{
+    history.lock = false;
+  }
+}
+
+function applySnapshot(snap){
+  if(!graph || !snap) return;
+  history.lock = true;
+  try{
+    graph.clear();
+    graph.configure(JSON.parse(snap));
+    configureGraphClock(graph);
+    try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(_e){}
+  }finally{
+    history.lock = false;
+  }
+}
+
+function undo(){
+  if(history.lock || history.undo.length <= 1) return;
+  const cur = history.undo.pop();
+  history.redo.push(cur);
+  const prev = history.undo[history.undo.length - 1];
+  history.last = prev;
+  applySnapshot(prev);
+}
+
+function redo(){
+  if(history.lock || history.redo.length === 0) return;
+  const snap = history.redo.pop();
+  history.undo.push(snap);
+  history.last = snap;
+  applySnapshot(snap);
+}
+
+function rectsOverlap(a, b){
+  return !(a[0] > b[0] + b[2] ||
+           a[0] + a[2] < b[0] ||
+           a[1] > b[1] + b[3] ||
+           a[1] + a[3] < b[1]);
+}
+
+function installBoxSelect(c){
+  if(!c || c.__boxSelectHooked) return;
+  const el = c.canvas;
+  if(!el) return;
+  let selecting = false;
+
+  const getCanvasPos = (e)=>{
+    try{ return c.convertEventToCanvas(e); }
+    catch(_e){ return [e.offsetX || 0, e.offsetY || 0]; }
+  };
+
+  el.addEventListener('mousedown', (e)=>{
+    if(e.button !== 0) return;
+    const useCtrl = e.ctrlKey || e.metaKey;
+    if(!useCtrl) return;
+    const p = getCanvasPos(e);
+    const node = c.getNodeOnPos(p[0], p[1]);
+    if(node) return;
+    selecting = true;
+    c.dragging_rectangle = new Float32Array([p[0], p[1], 1, 1]);
+    c.setDirty(true, true);
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  el.addEventListener('mousemove', (e)=>{
+    if(!selecting || !c.dragging_rectangle) return;
+    const p = getCanvasPos(e);
+    c.dragging_rectangle[2] = p[0] - c.dragging_rectangle[0];
+    c.dragging_rectangle[3] = p[1] - c.dragging_rectangle[1];
+    c.setDirty(true);
+  }, true);
+
+  window.addEventListener('mouseup', (e)=>{
+    if(!selecting) return;
+    selecting = false;
+    const rect = c.dragging_rectangle;
+    c.dragging_rectangle = null;
+    if(rect && c.graph){
+      const x = rect[2] < 0 ? rect[0] + rect[2] : rect[0];
+      const y = rect[3] < 0 ? rect[1] + rect[3] : rect[1];
+      const w = Math.abs(rect[2]);
+      const h = Math.abs(rect[3]);
+      if(w > 10 && h > 10){
+        const r = [x, y, w, h];
+        const nodes = [];
+        const nb = new Float32Array(4);
+        for(const n of c.graph._nodes){
+          n.getBounding(nb);
+          if(rectsOverlap(r, nb)) nodes.push(n);
+        }
+        c.selectNodes(nodes, false);
+      }
+    }
+    c.setDirty(true, true);
+  }, true);
+
+  c.__boxSelectHooked = true;
+}
+
+function installClipboardHandlers(c){
+  if(!c || c.__clipboardHooked) return;
+  const el = c.canvas;
+  if(!el) return;
+
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+  const showToast = (msg)=>{
+    if(!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> toast.classList.remove('show'), 1000);
+  };
+
+  const updateMouse = (e)=>{
+    try{
+      const rect = el.getBoundingClientRect();
+      if(e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom){
+        return;
+      }
+      const p = (typeof c.convertEventToCanvasOffset === 'function')
+        ? c.convertEventToCanvasOffset(e)
+        : c.convertEventToCanvas(e);
+      c.graph_mouse[0] = p[0];
+      c.graph_mouse[1] = p[1];
+      c.__last_mouse = p;
+    }catch(_e){}
+  };
+  el.addEventListener('mousemove', updateMouse, true);
+
+  window.addEventListener('keydown', (e)=>{
+    if(e.target && (e.target.localName === 'input' || e.target.localName === 'textarea')) return;
+    const mod = e.metaKey || e.ctrlKey;
+    if(!mod) return;
+    if(e.code === 'KeyC'){
+      if(c.selected_nodes && Object.keys(c.selected_nodes).length){
+        c.copyToClipboard();
+        showToast('コピーしました');
+        e.preventDefault();
+      }
+    }else if(e.code === 'KeyZ'){
+      if(e.shiftKey){
+        redo();
+        showToast('やり直しました');
+      }else{
+        undo();
+        showToast('元に戻しました');
+      }
+      e.preventDefault();
+    }else if(e.code === 'KeyY'){
+      redo();
+      showToast('やり直しました');
+      e.preventDefault();
+    }else if(e.code === 'KeyV'){
+      if(!c.__last_mouse){
+        const scale = c.ds.scale || 1;
+        const cx = c.ds.offset[0] + (c.canvas.width * 0.5 / scale);
+        const cy = c.ds.offset[1] + (c.canvas.height * 0.5 / scale);
+        c.graph_mouse[0] = cx; c.graph_mouse[1] = cy;
+      }
+      c.pasteFromClipboard(false);
+      showToast('ペーストしました');
+      e.preventDefault();
+    }
+  }, true);
+
+  c.__clipboardHooked = true;
+}
+
 function configureGraphClock(g){
   if(!g) return;
   const dt = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
@@ -52,8 +251,12 @@ function initGraph(){
   workCounter = 0;
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
   graph = new LGraph();
+  graph.onAfterChange = ()=> pushHistory();
   configureGraphClock(graph);
   canvas = new LGraphCanvas(graphElement, graph);
+  canvas.multi_select = true;
+  installBoxSelect(canvas);
+  installClipboardHandlers(canvas);
   // expose for other helpers that hook into canvas
   window.canvas = canvas;
   if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(canvas);
@@ -69,12 +272,13 @@ function initGraph(){
   const src = LiteGraph.createNode('factory/source'); src.pos=[60,180];
   const eq  = LiteGraph.createNode('factory/equip');  eq.pos=[360,180];
   graph.add(src); graph.add(eq); src.connect(0,eq,0);
+  resetHistory();
 }
 initGraph();
 
 // Examples
 function makeExample(kind){
-  if(!graph) return; stopSimulation(); graph.clear(); if(typeof window.resetSimClock === 'function') window.resetSimClock();
+  if(!graph) return; stopSimulation(); history.lock = true; graph.clear(); history.lock = false; if(typeof window.resetSimClock === 'function') window.resetSimClock();
   if(kind==='simple'){
     const s=LiteGraph.createNode('factory/source'); s.pos=[60,200];
     const e1=LiteGraph.createNode('factory/equip'); e1.pos=[360,200]; e1.properties.processTime=1;
@@ -94,17 +298,21 @@ function makeExample(kind){
   // reset time display (no auto start)
   updateSimTime();
   try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
+  resetHistory();
 }
 
 function applyExampleData(data){
   if(!graph) return;
   stopSimulation();
+  history.lock = true;
   graph.clear();
   graph.configure(data);
+  history.lock = false;
   configureGraphClock(graph);
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
   updateSimTime();
   try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
+  resetHistory();
 }
 
 function loadExampleFromFile(path){
@@ -148,7 +356,20 @@ document.getElementById('btnLoad').onclick = ()=> document.getElementById('fileI
 document.getElementById('fileInput').addEventListener('change', e => {
   const f = e.target.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = () => { try{ graph.clear(); graph.configure(JSON.parse(r.result)); } catch(err){ alert('JSON読込失敗'); console.error(err); } };
+  r.onload = () => {
+    try{
+      history.lock = true;
+      graph.clear();
+      graph.configure(JSON.parse(r.result));
+      history.lock = false;
+      configureGraphClock(graph);
+      resetHistory();
+    }catch(err){
+      history.lock = false;
+      alert('JSON読込失敗');
+      console.error(err);
+    }
+  };
   r.readAsText(f);
 });
 
