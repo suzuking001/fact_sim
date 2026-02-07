@@ -94,32 +94,17 @@ class Merge2Node extends EquipmentNode{
         break;
 
       case 'WAIT': {
-        // Same handoff logic as Equipment
-        if(!this._handoffOffered){
-          if(this._downReady()){
-            this.setOutputData(0, this._payload);
-            this._handoffOffered = true;
-          }
-          break;
-        }
-        let accepted = false;
-        if(this.outputs.length && this.outputs[0].links){
-          for(const id of this.outputs[0].links){
-            const link = this.graph.links[id]; if(!link) continue;
-            const t = this.graph.getNodeById(link.target_id); if(!t) continue;
-            if(typeof t._state === 'undefined'){ accepted = true; break; }
-            if(t._currentWork === this._payload || t._payload === this._payload){ accepted = true; break; }
-          }
-        }
-        if(accepted){
-          // clear latched output and go DOWN
-          this.setOutputData(0, null);
-          this._payload = null;
-          this._state = 'DOWN';
+        // WAIT: downstream ready -> start DOWN and emit immediately
+        if(this._downReady()){
+          const payload = this._payload;
           this._setWaitIcon(false);
+          this._state = 'DOWN';
           this._until = now + this.properties.downTime*1000;
+          this.setOutputData(0, payload);
+          try{ this._spawnSinkTransfer && this._spawnSinkTransfer(this.properties.downTime*1000, payload); }catch(_e){}
+          this._payload = null;
         }else{
-          if(this._downReady()) this.setOutputData(0, this._payload);
+          this.setOutputData(0, null);
         }
         break;
       }
@@ -127,6 +112,7 @@ class Merge2Node extends EquipmentNode{
       case 'DOWN':
         if(now >= this._until){
           // Reset for next pair
+          this.setOutputData(0, null);
           this._state = 'IDLE';
           this._work1 = null; this._work2 = null; this._payload = null;
           this._currentWork = null;
@@ -222,6 +208,14 @@ class Merge2Node extends EquipmentNode{
       const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
       this.properties.processTime2 = clamp(this.properties.processTime2);
     }
+  }
+
+  // Downstream readiness check for upstream nodes
+  canAcceptWorkInput(slotIndex){
+    if(this._state !== 'IDLE') return false;
+    if(slotIndex === 0) return !this._awaitingIn2;
+    if(slotIndex === 1) return !!this._awaitingIn2;
+    return false;
   }
 }
 

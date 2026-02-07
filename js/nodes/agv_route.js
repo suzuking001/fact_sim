@@ -326,6 +326,10 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     for(const id of out.links){
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+      if(typeof t.canAcceptWorkInput === 'function'){
+        if(!t.canAcceptWorkInput(link.target_slot, this._workOffer)) return false;
+        continue;
+      }
       if(typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
     }
     return true;

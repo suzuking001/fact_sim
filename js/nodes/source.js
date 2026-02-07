@@ -52,6 +52,10 @@ class SourceNode extends LiteGraph.LGraphNode{
       for(const lid of out.links){
         const link = this.graph.links[lid]; if(!link) continue;
         const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+        if(typeof t.canAcceptWorkInput === 'function'){
+          if(t.canAcceptWorkInput(link.target_slot, null)){ ready = true; break; }
+          continue;
+        }
         if(typeof t._state === 'undefined' || t._state === 'IDLE'){ ready = true; break; }
       }
     }

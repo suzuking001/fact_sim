@@ -135,43 +135,29 @@ class EquipmentNode extends LiteGraph.LGraphNode{
         if(now >= this._until){ this._state = 'WAIT'; this._handoffOffered = false; this._setWaitIcon(true); }
         break;
       case 'WAIT': {
-        // 排出待ち: まず一度だけ "出力オファー" を提示し、その後 本当に受け取られたかを検知して遷移
-        if(!this._handoffOffered){
-          if(this._downReady()){
-            this.setOutputData(0, this._payload); // オファー提示
-            this._handoffOffered = true;
-          }
-          break; // 次フレーム以降で受け取り検知
-        }
-        // 受け取り検知: 接続先ノードが _currentWork か _payload に同一オブジェクトを保持しているか
-        let accepted = false;
-        if(this.outputs.length && this.outputs[0].links){
-          for(const id of this.outputs[0].links){
-            const link = this.graph.links[id]; if(!link) continue;
-            const t = this.graph.getNodeById(link.target_id); if(!t) continue;
-            // Sink 等（_state未定義）は提示時点で受理されたとみなす
-            if(typeof t._state === 'undefined'){ accepted = true; break; }
-            if(t._currentWork === this._payload || t._payload === this._payload){ accepted = true; break; }
-          }
-        }
-        if(accepted){
-          // ???????????????? DOWN ?
+        // 排出待ち: 後工程が受入可能になったら即 DOWN 開始（搬送開始）
+        if(this._downReady()){
           const payload = this._payload;
-          this.setOutputData(0, null); // ???????????
+          this._setWaitIcon(false);
           this._state = 'DOWN';
           const downMs = Math.max(0, this.properties.downTime*1000);
           this._until = now + downMs; // ms
+          // 搬送開始時に即座に workOut を出力
+          this.setOutputData(0, payload);
           this._spawnSinkTransfer(downMs, payload);
           this._payload = null;
         }else{
-          // まだ受け取られていない → オファーを再提示して WAIT 維持
-          if(this._downReady()) this.setOutputData(0, this._payload);
+          this.setOutputData(0, null);
         }
         break;
       }
       case 'DOWN':
         // ダウン中: 規定時間経過で IDLE へ復帰
-        if(now >= this._until){ this._state = 'IDLE'; this._setWaitIcon(false); }
+        if(now >= this._until){
+          this.setOutputData(0, null);
+          this._state = 'IDLE';
+          this._setWaitIcon(false);
+        }
         break;
       case 'IDLE': {
         // IDLE 相当: 入力があれば受入判定
@@ -258,7 +244,13 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     // → ワークは装置内で滞留（WAIT を維持）
     if(!this.outputs.length || !this.outputs[0].links) return false;
     for(const id of this.outputs[0].links){
-      const t = this.graph.getNodeById(this.graph.links[id].target_id);
+      const link = this.graph.links[id];
+      if(!link) continue;
+      const t = this.graph.getNodeById(link.target_id);
+      if(t && typeof t.canAcceptWorkInput === 'function'){
+        if(!t.canAcceptWorkInput(link.target_slot, this._payload)) return false;
+        continue;
+      }
       // _state を持たないノード（Sink 等）は常に受入可能とみなす
       if(t && typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
     }
