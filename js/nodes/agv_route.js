@@ -260,6 +260,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._workOfferAccepted = false;
     const now = simNow();
     this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    // Immediately place the work on the output link so downstream can accept next tick
+    this._emitWorkOffer();
   }
 
   _emitWorkOffer(){
@@ -436,14 +438,12 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       }
       return;
     }
-    if(this._downstreamWorkReady()){
-      if(!this._workOfferAccepted){
-        // Offer immediately on DOWN start
-        if(this._workOfferArmed) this._emitWorkOffer();
-        if(this._workAccepted()){
-          this._workOfferAccepted = true;
-          try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
-        }
+    if(!this._workOfferAccepted){
+      // Keep offering while waiting for acceptance
+      if(this._workOfferArmed) this._emitWorkOffer();
+      if(this._workAccepted()){
+        this._workOfferAccepted = true;
+        try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
       }
     }
     // Complete after the downTime has elapsed AND work was accepted
