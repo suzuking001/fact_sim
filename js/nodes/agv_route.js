@@ -37,6 +37,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._pendingUnload = [];
     this._workOffer = null;
     this._workOfferArmed = false;
+    this._workOfferAccepted = false;
     this._agvWaitIconLinks = null;
     this._currentWork = null;
     this._payload = null;
@@ -254,10 +255,11 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const ord = this._unloadIndex + 1;
     this._setState(`workOut_down_${ord}`,'DOWN');
     this._workOffer = this._pendingUnload[0];
-    this._workOfferArmed = false;
+    // start offering immediately on entering DOWN (movement starts now)
+    this._workOfferArmed = true;
+    this._workOfferAccepted = false;
     const now = simNow();
     this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
-    if(this._until === now) this._workOfferArmed = true;
   }
 
   _emitWorkOffer(){
@@ -272,6 +274,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     }
     this._workOffer = null;
     this._workOfferArmed = false;
+    this._workOfferAccepted = false;
     this._unloadIndex++;
     try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
     if(this._pendingUnload.length){
@@ -433,20 +436,19 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       }
       return;
     }
-
-    if(!this._workOfferArmed){
-      if(now >= this._until){
-        this._workOfferArmed = true;
-      }else{
-        return;
+    if(this._downstreamWorkReady()){
+      if(!this._workOfferAccepted){
+        // Offer immediately on DOWN start
+        if(this._workOfferArmed) this._emitWorkOffer();
+        if(this._workAccepted()){
+          this._workOfferAccepted = true;
+          try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
+        }
       }
     }
-
-    if(this._downstreamWorkReady()){
-      this._emitWorkOffer();
-      if(this._workAccepted()){
-        this._completeWorkOutOffer();
-      }
+    // Complete after the downTime has elapsed AND work was accepted
+    if(this._workOfferAccepted && now >= this._until){
+      this._completeWorkOutOffer();
     }
   }
 
