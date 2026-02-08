@@ -95,6 +95,15 @@
   <canvas id="graph"></canvas>
   <input id="nodeTitleEditor" type="text" aria-label="Edit node title" />
   <div id="toast" role="status" aria-live="polite"></div>
+  <!-- Timing Chart Dock -->
+  <div id="timelineDock">
+    <div id="timelineResizeHandle" aria-label="Resize timing chart"></div>
+    <div id="timelineHeader">
+      <span class="timelineTitle">Timing Chart</span>
+      <button id="timelineFollowBtn" class="timelineBtn">Follow: ON</button>
+    </div>
+    <canvas id="timelineCanvas"></canvas>
+  </div>
   <!-- Script Editor Modal -->
   <div id="scriptEditorModal">
     <div id="scriptEditorContainer">
@@ -163,6 +172,7 @@ SOFTWARE.
   <script src="js/nodes/sink.js"></script>
   <script src="js/nodes/register.js"></script>
   <script src="sample/sample_line1.js"></script>
+  <script src="js/timeline.js"></script>
   <script src="js/app.js"></script>
 
 </body>

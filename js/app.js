@@ -15,6 +15,65 @@ document.getElementById('scriptEditorCancel').onclick = ()=>{
 
 // Graph init
 let graph, canvas;
+let timelineChart = null;
+
+function initTimeline(){
+  const tCanvas = document.getElementById('timelineCanvas');
+  if(!tCanvas || typeof TimelineChart === 'undefined') return;
+  timelineChart = new TimelineChart(tCanvas);
+  window.timelineChart = timelineChart;
+
+  const followBtn = document.getElementById('timelineFollowBtn');
+  if(followBtn){
+    timelineChart.onFollowChange = (v)=>{
+      followBtn.textContent = v ? 'Follow: ON' : 'Follow: OFF';
+    };
+    followBtn.addEventListener('click', ()=>{
+      timelineChart.setFollow(!timelineChart.follow);
+      timelineChart.draw();
+    });
+  }
+
+  const dock = document.getElementById('timelineDock');
+  const handle = document.getElementById('timelineResizeHandle');
+  if(dock && handle){
+    let resizing = false;
+    let startY = 0;
+    let startH = 0;
+    const minH = 120;
+    const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
+    const setHeight = (h)=>{
+      const maxH = Math.max(minH, window.innerHeight - 120);
+      const next = clamp(h, minH, maxH);
+      document.documentElement.style.setProperty('--timeline-height', `${Math.round(next)}px`);
+      if(timelineChart) timelineChart.resize();
+      window.dispatchEvent(new Event('resize'));
+    };
+    handle.addEventListener('mousedown', (e)=>{
+      resizing = true;
+      startY = e.clientY;
+      startH = dock.getBoundingClientRect().height;
+      document.body.style.cursor = 'ns-resize';
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e)=>{
+      if(!resizing) return;
+      const dy = startY - e.clientY;
+      setHeight(startH + dy);
+    });
+    window.addEventListener('mouseup', ()=>{
+      if(!resizing) return;
+      resizing = false;
+      document.body.style.cursor = '';
+    });
+  }
+
+  window.addEventListener('resize', ()=> timelineChart && timelineChart.resize());
+}
+
+function attachTimeline(){
+  if(timelineChart && graph) timelineChart.attachGraph(graph);
+}
 
 let toastTimer = null;
 function showToast(msg){
@@ -258,7 +317,10 @@ function startSimulation(){
   graph.starttime = LiteGraph.getTime();
   graph.last_update_time = graph.starttime;
   graph.sendEventToAllNodes("onStart");
-  window.startSimLoop(()=> graph.runStep(1, !graph.catch_errors));
+  window.startSimLoop(()=>{
+    graph.runStep(1, !graph.catch_errors);
+    if(timelineChart) timelineChart.onStep();
+  });
 }
 
 function stopSimulation(){
@@ -299,7 +361,9 @@ function initGraph(){
   const eq  = LiteGraph.createNode('factory/equip');  eq.pos=[360,180];
   graph.add(src); graph.add(eq); src.connect(0,eq,0);
   resetHistory();
+  attachTimeline();
 }
+initTimeline();
 initGraph();
 
 // Examples
@@ -325,6 +389,7 @@ function makeExample(kind){
   updateSimTime();
   try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
   resetHistory();
+  attachTimeline();
 }
 
 function applyExampleData(data){
@@ -339,6 +404,7 @@ function applyExampleData(data){
   updateSimTime();
   try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
   resetHistory();
+  attachTimeline();
 }
 
 function loadExampleFromFile(path){
@@ -390,6 +456,7 @@ document.getElementById('fileInput').addEventListener('change', e => {
       history.lock = false;
       configureGraphClock(graph);
       resetHistory();
+      attachTimeline();
     }catch(err){
       history.lock = false;
       alert('JSON読込失敗');

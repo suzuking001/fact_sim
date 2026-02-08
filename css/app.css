@@ -14,6 +14,8 @@
   --radius:12px;
   --radius-sm:10px;
   --shadow:0 10px 30px rgba(0,0,0,0.15);
+  --timeline-height:220px;
+  --timeline-header:28px;
 }
 
 html,body{
@@ -138,12 +140,18 @@ html,body{
   transition: transform .2s ease;
   overflow-y: auto;
 }
+/* When timeline is visible, reduce sidebar height to avoid overlap */
+body:not(.timeline-hidden) #sidebar{
+  bottom: var(--timeline-height);
+  height: calc(100% - var(--timeline-height));
+}
 /* Fully hide the sidebar when collapsed */
 body.sidebar-hidden #sidebar{ transform: translateX(100%); }
 
 /* Keep canvas interactive and visible with sidebar */
 #graph{ position: absolute; inset: 0; }
 body:not(.sidebar-hidden) #graph{ right: 340px; }
+body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 
 /* Controls inside sidebar use normal flow (override older absolute rules) */
 #sidebar #controls,
@@ -288,6 +296,63 @@ body:not(.sidebar-hidden) #graph{ right: 340px; }
 #toast.show{
   opacity: 1;
   transform: translateX(-50%) translateY(-4px);
+}
+
+/* === Timing chart dock === */
+#timelineDock{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: var(--timeline-height);
+  background: #f8fafc;
+  border-top: 1px solid var(--panel-border);
+  box-shadow: 0 -10px 24px rgba(0,0,0,0.08);
+  z-index: 1400;
+  display: flex;
+  flex-direction: column;
+}
+body.timeline-hidden #timelineDock{ display: none; }
+
+#timelineResizeHandle{
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  z-index: 2;
+}
+
+#timelineHeader{
+  height: var(--timeline-header);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  background: #111827;
+  color: #f9fafb;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#timelineHeader .timelineTitle{
+  font-weight: 700;
+}
+#timelineHeader .timelineBtn{
+  border: 1px solid rgba(255,255,255,0.2);
+  background: #1f2937;
+  color: #f9fafb;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+#timelineHeader .timelineBtn:hover{ filter: brightness(1.08); }
+
+#timelineCanvas{
+  flex: 1;
+  width: 100%;
+  height: calc(100% - var(--timeline-header));
+  display: block;
+  background: #ffffff;
+  touch-action: none;
 }
 
 
