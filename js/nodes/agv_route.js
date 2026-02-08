@@ -64,6 +64,15 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   _hasAgvOutLink(){ const port = this.outputs[this._agvOutIndex]; return !!(port && port.links && port.links.length); }
 
   canAcceptAgv(){ return !this._currentAgv && !this._departingAgv; }
+  canAcceptWorkInput(slotIndex){
+    if(slotIndex !== this._workInIndex) return false;
+    if(!this._currentAgv) return false;
+    if(!this._stateName || !this._stateName.startsWith('workIn_idle')) return false;
+    const cap = this._currentAgv.capacity || 0;
+    const load = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
+    if(cap <= 0 || load >= cap) return false;
+    return true;
+  }
 
   _setState(name, kind){
     // 状態名は work_node_memo に準拠（agv_process → workIn_* → workOut_* → agvOut_* → agvIn_idle）
@@ -298,7 +307,9 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       return;
     }
     if(!this._hasAgvOutLink()){
-      this._resetToIdle();
+      // No downstream: stay waiting with AGV retained
+      this._setState('agvOut_wait','WAIT');
+      this._setAgvOutWaitIcon(false);
       return;
     }
     this._setState('agvOut_wait','WAIT');
