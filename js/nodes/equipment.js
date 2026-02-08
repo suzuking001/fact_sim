@@ -242,10 +242,14 @@ class EquipmentNode extends LiteGraph.LGraphNode{
   _downReady(){
     // 出力先が無い（ポート自体が無い、またはリンク未接続）の場合は受け渡し不可
     // → ワークは装置内で滞留（WAIT を維持）
-    if(!this.outputs.length || !this.outputs[0].links) return false;
-    for(const id of this.outputs[0].links){
+    if(!this.outputs.length) return false;
+    const out = this.outputs[0];
+    if(!out || !out.links || out.links.length === 0) return false;
+    let hasValidLink = false;
+    for(const id of out.links){
       const link = this.graph.links[id];
       if(!link) continue;
+      hasValidLink = true;
       const t = this.graph.getNodeById(link.target_id);
       if(t && typeof t.canAcceptWorkInput === 'function'){
         if(!t.canAcceptWorkInput(link.target_slot, this._payload)) return false;
@@ -254,7 +258,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       // _state を持たないノード（Sink 等）は常に受入可能とみなす
       if(t && typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
     }
-    return true;
+    return hasValidLink;
   }
   // ノード下部に状態をオーバーレイ表示
   onDrawForeground(ctx){
