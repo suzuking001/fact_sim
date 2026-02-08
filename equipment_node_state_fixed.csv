@@ -1,0 +1,5 @@
+﻿状態名称,説明,状態開始_前工程の条件,状態開始_自工程の条件,状態開始_後工程の条件,次の状態,状態色,備考
+process,"前工程(workIn)から搬送開始 → 後工程(workOut)待ちに到達","前工程(workIn)が新規workを出力","自工程がidle状態 かつ スクリプト受入(true)","無し","wait（processTime経過で）","緑",""
+wait,"後工程(workOut)待ち","無し","自工程がprocess状態完了","無し","down（workOut接続あり かつ 後工程受入可のとき）／wait継続（それ以外）","橙",""
+down,"後工程(workOut)への搬送開始 → 前工程(workIn)待ちに到達","無し","自工程がwait状態 かつ workOutへ搬送開始","workOut接続あり かつ 後工程が受入可能","idle（downTime経過で）","青",""
+idle,"前工程(workIn)待ち","無し","自工程がdown状態完了","無し","process（新規work受入時）／idle継続（work無し or スクリプトfalse）","黄","スクリプトfalse時は素通しでidle継続"
