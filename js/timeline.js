@@ -181,6 +181,58 @@
       this._selectionEl.textContent = `Work: ${w}  AGV: ${a}  Node: ${n}`;
     }
 
+    exportCsv(){
+      const now = this._lastNow || this._nowSec();
+      const cutoff = now - this.historySec;
+      const rows = [];
+      rows.push([
+        'node','seg','start','offset','process','wait','down','idle','workId','agvId'
+      ]);
+      const esc = (v)=>{
+        if(v === null || typeof v === 'undefined') return '';
+        const s = String(v);
+        if(/[,"\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+        return s;
+      };
+      this.entries.forEach((entry)=>{
+        if(!entry || !entry.segments || !entry.segments.length) return;
+        let segIndex = 0;
+        for(const seg of entry.segments){
+          const s = Math.max(seg.start, cutoff);
+          const e = Math.min(seg.end, now);
+          if(e <= cutoff || e <= s) continue;
+          const dur = Math.max(0, e - s);
+          segIndex++;
+          const state = seg.state || 'other';
+          const proc = state === 'process' ? dur : 0;
+          const wait = state === 'wait' ? dur : 0;
+          const down = state === 'down' ? dur : 0;
+          const idle = state === 'idle' ? dur : 0;
+          rows.push([
+            esc(entry.label || ''),
+            segIndex,
+            s.toFixed(3),
+            s.toFixed(3),
+            proc ? proc.toFixed(3) : 0,
+            wait ? wait.toFixed(3) : 0,
+            down ? down.toFixed(3) : 0,
+            idle ? idle.toFixed(3) : 0,
+            esc(seg.workId ?? ''),
+            esc(seg.agvId ?? '')
+          ]);
+        }
+      });
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+      a.download = `timeline_${stamp}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
     _setSelectedWorkId(id){
       this.selectedWorkId = (id === null || typeof id === 'undefined') ? null : id;
       if(this.selectedWorkId !== null) this.selectedAgvId = null;

@@ -33,6 +33,14 @@ function initTimeline(){
       timelineChart.draw();
     });
   }
+  const exportBtn = document.getElementById('timelineExportBtn');
+  if(exportBtn){
+    exportBtn.addEventListener('click', ()=>{
+      if(timelineChart && typeof timelineChart.exportCsv === 'function'){
+        timelineChart.exportCsv();
+      }
+    });
+  }
 
   const dock = document.getElementById('timelineDock');
   const handle = document.getElementById('timelineResizeHandle');
