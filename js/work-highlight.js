@@ -1,4 +1,4 @@
-// Highlight nodes that are processing a selected Work ID (from timeline)
+// Highlight nodes that are processing a selected Work/AGV ID (from timeline)
 (function(){
   if(typeof LiteGraph === 'undefined' || !LiteGraph.LGraphCanvas) return;
 
@@ -19,16 +19,32 @@
     );
   }
 
+  function pickAgvId(node){
+    const pick = (obj)=>{
+      if(!obj || typeof obj !== 'object') return null;
+      const id = obj.id;
+      return (id === undefined || id === null) ? null : id;
+    };
+    return (
+      pick(node?._currentAgv) ??
+      pick(node?._departingAgv) ??
+      null
+    );
+  }
+
   const originalDrawNode = LiteGraph.LGraphCanvas.prototype.drawNode;
   LiteGraph.LGraphCanvas.prototype.drawNode = function(node, ctx){
     originalDrawNode.call(this, node, ctx);
     try{
-      const selected = window.selectedWorkId;
-      if(selected === null || typeof selected === 'undefined') return;
+      const selectedWork = window.selectedWorkId;
+      const selectedAgv = window.selectedAgvId;
+      if((selectedWork === null || typeof selectedWork === 'undefined') &&
+         (selectedAgv === null || typeof selectedAgv === 'undefined')) return;
       const wid = pickWorkId(node);
-      if(wid === null || typeof wid === 'undefined') return;
-      // allow numeric/string equivalence
-      if(wid != selected) return;
+      const aid = pickAgvId(node);
+      const matchWork = (wid !== null && typeof wid !== 'undefined' && selectedWork !== null && typeof selectedWork !== 'undefined' && wid == selectedWork);
+      const matchAgv = (aid !== null && typeof aid !== 'undefined' && selectedAgv !== null && typeof selectedAgv !== 'undefined' && aid == selectedAgv);
+      if(!matchWork && !matchAgv) return;
       let gx = node.pos[0];
       let gy = node.pos[1];
       let gw = node.size ? node.size[0] : (LiteGraph.NODE_WIDTH || 140);
@@ -44,16 +60,16 @@
       const y = gy - node.pos[1];
       const w = gw;
       const h = gh;
-      const padOuter = 6 / scale;
-      const padInner = 2 / scale;
+      const padOuter = 3 / scale;
+      const padInner = 1 / scale;
       ctx.save();
-      ctx.lineWidth = 6 / scale;
-      ctx.strokeStyle = '#ffd166';
-      ctx.shadowColor = 'rgba(255,105,0,0.85)';
-      ctx.shadowBlur = 20 / scale;
+      ctx.lineWidth = 3 / scale;
+      ctx.strokeStyle = matchAgv ? '#67e8f9' : '#ffd166';
+      ctx.shadowColor = matchAgv ? 'rgba(6,182,212,0.85)' : 'rgba(255,105,0,0.85)';
+      ctx.shadowBlur = 10 / scale;
       ctx.strokeRect(x - padOuter, y - padOuter, w + padOuter * 2, h + padOuter * 2);
-      ctx.lineWidth = 2 / scale;
-      ctx.strokeStyle = '#ff4500';
+      ctx.lineWidth = 1 / scale;
+      ctx.strokeStyle = matchAgv ? '#06b6d4' : '#ff4500';
       ctx.shadowBlur = 0;
       ctx.strokeRect(x - padInner, y - padInner, w + padInner * 2, h + padInner * 2);
       ctx.restore();

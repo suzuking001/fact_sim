@@ -39,6 +39,7 @@
       this.follow = true;
       this.offsetSec = 0;
       this.selectedWorkId = null;
+      this.selectedAgvId = null;
       this._selectionEl = document.getElementById('timelineSelection');
       this.onFollowChange = null;
       this._lastNow = 0;
@@ -46,6 +47,7 @@
       this.width = 0;
       this.height = 0;
       this._installEvents();
+      this._updateSelectionLabel();
       this.resize();
     }
 
@@ -157,11 +159,46 @@
       );
     }
 
+    _agvIdFromNode(node){
+      const pick = (obj)=>{
+        if(!obj || typeof obj !== 'object') return null;
+        const id = obj.id;
+        return (id === undefined || id === null) ? null : id;
+      };
+      return (
+        pick(node?._currentAgv) ??
+        pick(node?._departingAgv) ??
+        null
+      );
+    }
+
+    _updateSelectionLabel(){
+      if(!this._selectionEl) return;
+      const w = (this.selectedWorkId === null) ? '-' : this.selectedWorkId;
+      const a = (this.selectedAgvId === null) ? '-' : this.selectedAgvId;
+      this._selectionEl.textContent = `Work: ${w}  AGV: ${a}`;
+    }
+
     _setSelectedWorkId(id){
       this.selectedWorkId = (id === null || typeof id === 'undefined') ? null : id;
-      if(this._selectionEl){
-        this._selectionEl.textContent = this.selectedWorkId === null ? 'Work: -' : `Work: ${this.selectedWorkId}`;
-      }
+      if(this.selectedWorkId !== null) this.selectedAgvId = null;
+      this._updateSelectionLabel();
+      window.selectedWorkId = this.selectedWorkId;
+      window.selectedAgvId = this.selectedAgvId;
+      try{
+        if(window.canvas && typeof window.canvas.setDirty === 'function'){
+          window.canvas.setDirty(true, true);
+        }else if(window.canvas && typeof window.canvas.draw === 'function'){
+          window.canvas.draw(true, true);
+        }
+      }catch(_e){}
+    }
+
+    _setSelectedAgvId(id){
+      this.selectedAgvId = (id === null || typeof id === 'undefined') ? null : id;
+      if(this.selectedAgvId !== null) this.selectedWorkId = null;
+      this._updateSelectionLabel();
+      window.selectedAgvId = this.selectedAgvId;
       window.selectedWorkId = this.selectedWorkId;
       try{
         if(window.canvas && typeof window.canvas.setDirty === 'function'){
@@ -176,25 +213,28 @@
       const key = this._nodeKey(node);
       let entry = this.entries.get(key);
       if(!entry){
-        entry = { node, label: this._nodeLabel(node), segments: [], lastState: null, lastWorkId: null };
+        entry = { node, label: this._nodeLabel(node), segments: [], lastState: null, lastWorkId: null, lastAgvId: null };
         this.entries.set(key, entry);
       }
       entry.node = node;
       entry.label = this._nodeLabel(node);
       const state = this._stateFromNode(node);
       const workId = this._workIdFromNode(node);
+      const agvId = this._agvIdFromNode(node);
       if(entry.lastState === null){
-        entry.segments.push({ start: now, end: now, state, workId });
+        entry.segments.push({ start: now, end: now, state, workId, agvId });
         entry.lastState = state;
         entry.lastWorkId = workId;
+        entry.lastAgvId = agvId;
         return;
       }
-      if(state !== entry.lastState || workId !== entry.lastWorkId){
+      if(state !== entry.lastState || workId !== entry.lastWorkId || agvId !== entry.lastAgvId){
         const last = entry.segments[entry.segments.length - 1];
         if(last) last.end = now;
-        entry.segments.push({ start: now, end: now, state, workId });
+        entry.segments.push({ start: now, end: now, state, workId, agvId });
         entry.lastState = state;
         entry.lastWorkId = workId;
+        entry.lastAgvId = agvId;
         return;
       }
       const seg = entry.segments[entry.segments.length - 1];
@@ -311,8 +351,15 @@
         }else{
           this._setSelectedWorkId(found.workId);
         }
+      }else if(found && found.agvId !== null && typeof found.agvId !== 'undefined'){
+        if(this.selectedAgvId !== null && found.agvId === this.selectedAgvId){
+          this._setSelectedAgvId(null);
+        }else{
+          this._setSelectedAgvId(found.agvId);
+        }
       }else{
         this._setSelectedWorkId(null);
+        this._setSelectedAgvId(null);
       }
       this.draw();
     }
@@ -396,8 +443,11 @@
             const x1 = Math.max(this.leftGutter, sx);
             const x2 = Math.min(this.leftGutter + chartW, ex);
             if(x2 <= x1) continue;
-            const match = (this.selectedWorkId !== null && seg.workId === this.selectedWorkId);
-            const dim = (this.selectedWorkId !== null && !match);
+            const hasSel = (this.selectedWorkId !== null || this.selectedAgvId !== null);
+            const match =
+              (this.selectedWorkId !== null && seg.workId === this.selectedWorkId) ||
+              (this.selectedAgvId !== null && seg.agvId === this.selectedAgvId);
+            const dim = (hasSel && !match);
             ctx.fillStyle = STATE_COLORS[seg.state] || STATE_COLORS.other;
             ctx.globalAlpha = dim ? 0.2 : 1;
             ctx.fillRect(x1, y + 2, x2 - x1, this.rowHeight - 4);
