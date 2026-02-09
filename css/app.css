@@ -325,6 +325,7 @@ body.timeline-hidden #timelineDock{ display: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   padding: 0 10px;
   background: #111827;
   color: #f9fafb;
@@ -334,6 +335,15 @@ body.timeline-hidden #timelineDock{ display: none; }
 }
 #timelineHeader .timelineTitle{
   font-weight: 700;
+}
+#timelineHeader .timelineSelection{
+  flex: 1 1 auto;
+  text-align: center;
+  font-weight: 600;
+  color: #e5e7eb;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 11px;
 }
 #timelineHeader .timelineBtn{
   border: 1px solid rgba(255,255,255,0.2);

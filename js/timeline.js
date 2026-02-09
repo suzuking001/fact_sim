@@ -38,6 +38,8 @@
       this.historySec = 600;
       this.follow = true;
       this.offsetSec = 0;
+      this.selectedWorkId = null;
+      this._selectionEl = document.getElementById('timelineSelection');
       this.onFollowChange = null;
       this._lastNow = 0;
       this._drag = null;
@@ -138,26 +140,61 @@
       return 'other';
     }
 
+    _workIdFromNode(node){
+      const pick = (obj)=>{
+        if(!obj || typeof obj !== 'object') return null;
+        const id = obj.id;
+        return (id === undefined || id === null) ? null : id;
+      };
+      return (
+        pick(node?._currentWork) ??
+        pick(node?._payload) ??
+        pick(node?._workOffer) ??
+        pick(node?._work1) ??
+        pick(node?._work2) ??
+        pick(node?._lastWork) ??
+        null
+      );
+    }
+
+    _setSelectedWorkId(id){
+      this.selectedWorkId = (id === null || typeof id === 'undefined') ? null : id;
+      if(this._selectionEl){
+        this._selectionEl.textContent = this.selectedWorkId === null ? 'Work: -' : `Work: ${this.selectedWorkId}`;
+      }
+      window.selectedWorkId = this.selectedWorkId;
+      try{
+        if(window.canvas && typeof window.canvas.setDirty === 'function'){
+          window.canvas.setDirty(true, true);
+        }else if(window.canvas && typeof window.canvas.draw === 'function'){
+          window.canvas.draw(true, true);
+        }
+      }catch(_e){}
+    }
+
     _recordNode(node, now){
       const key = this._nodeKey(node);
       let entry = this.entries.get(key);
       if(!entry){
-        entry = { node, label: this._nodeLabel(node), segments: [], lastState: null };
+        entry = { node, label: this._nodeLabel(node), segments: [], lastState: null, lastWorkId: null };
         this.entries.set(key, entry);
       }
       entry.node = node;
       entry.label = this._nodeLabel(node);
       const state = this._stateFromNode(node);
+      const workId = this._workIdFromNode(node);
       if(entry.lastState === null){
-        entry.segments.push({ start: now, end: now, state });
+        entry.segments.push({ start: now, end: now, state, workId });
         entry.lastState = state;
+        entry.lastWorkId = workId;
         return;
       }
-      if(state !== entry.lastState){
+      if(state !== entry.lastState || workId !== entry.lastWorkId){
         const last = entry.segments[entry.segments.length - 1];
         if(last) last.end = now;
-        entry.segments.push({ start: now, end: now, state });
+        entry.segments.push({ start: now, end: now, state, workId });
         entry.lastState = state;
+        entry.lastWorkId = workId;
         return;
       }
       const seg = entry.segments[entry.segments.length - 1];
@@ -212,12 +249,16 @@
           y: e.clientY,
           offset: this.offsetSec,
           scroll: this.scrollY,
-          rect
+          rect,
+          moved: false
         };
         e.preventDefault();
       });
       window.addEventListener('mousemove', (e)=>{
         if(!this._drag) return;
+        if(Math.abs(e.clientX - this._drag.x) > 3 || Math.abs(e.clientY - this._drag.y) > 3){
+          this._drag.moved = true;
+        }
         const dx = e.clientX - this._drag.x;
         const chartW = Math.max(1, this.width - this.leftGutter - 8);
         const scale = chartW / this.windowSec;
@@ -226,13 +267,54 @@
         this.setFollow(false);
         this.draw();
       });
-      window.addEventListener('mouseup', ()=>{
+      window.addEventListener('mouseup', (e)=>{
+        if(this._drag && !this._drag.moved){
+          this._handleClick(e);
+        }
         this._drag = null;
       });
       el.addEventListener('dblclick', ()=>{
         this.setFollow(true);
         this.draw();
       });
+    }
+
+    _handleClick(e){
+      const rect = this.canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      if(x < this.leftGutter || y < this.topPadding) return;
+      const rowStep = this.rowHeight + this.rowGap;
+      const rowIdx = Math.floor((y + this.scrollY - this.topPadding) / rowStep);
+      const nodes = this._nodeList();
+      if(rowIdx < 0 || rowIdx >= nodes.length) return;
+      const node = nodes[rowIdx];
+      const entry = this.entries.get(this._nodeKey(node));
+      if(!entry || !entry.segments.length){
+        this._setSelectedWorkId(null);
+        return;
+      }
+      const chartW = Math.max(1, this.width - this.leftGutter - 8);
+      const scale = chartW / this.windowSec;
+      const t = this.offsetSec + (x - this.leftGutter) / scale;
+      let found = null;
+      for(let i=entry.segments.length - 1; i>=0; i--){
+        const seg = entry.segments[i];
+        if(t >= seg.start && t <= seg.end){
+          found = seg;
+          break;
+        }
+      }
+      if(found && found.workId !== null && typeof found.workId !== 'undefined'){
+        if(this.selectedWorkId !== null && found.workId === this.selectedWorkId){
+          this._setSelectedWorkId(null);
+        }else{
+          this._setSelectedWorkId(found.workId);
+        }
+      }else{
+        this._setSelectedWorkId(null);
+      }
+      this.draw();
     }
 
     draw(){
@@ -314,8 +396,18 @@
             const x1 = Math.max(this.leftGutter, sx);
             const x2 = Math.min(this.leftGutter + chartW, ex);
             if(x2 <= x1) continue;
+            const match = (this.selectedWorkId !== null && seg.workId === this.selectedWorkId);
+            const dim = (this.selectedWorkId !== null && !match);
             ctx.fillStyle = STATE_COLORS[seg.state] || STATE_COLORS.other;
+            ctx.globalAlpha = dim ? 0.2 : 1;
             ctx.fillRect(x1, y + 2, x2 - x1, this.rowHeight - 4);
+            if(match){
+              ctx.globalAlpha = 1;
+              ctx.strokeStyle = '#111827';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(x1 + 0.5, y + 2.5, x2 - x1 - 1, this.rowHeight - 5);
+            }
+            ctx.globalAlpha = 1;
           }
         }
       }
