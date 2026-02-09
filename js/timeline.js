@@ -40,6 +40,7 @@
       this.offsetSec = 0;
       this.selectedWorkId = null;
       this.selectedAgvId = null;
+      this.selectedNodeId = null;
       this._selectionEl = document.getElementById('timelineSelection');
       this.onFollowChange = null;
       this._lastNow = 0;
@@ -176,15 +177,18 @@
       if(!this._selectionEl) return;
       const w = (this.selectedWorkId === null) ? '-' : this.selectedWorkId;
       const a = (this.selectedAgvId === null) ? '-' : this.selectedAgvId;
-      this._selectionEl.textContent = `Work: ${w}  AGV: ${a}`;
+      const n = (this.selectedNodeId === null) ? '-' : this.selectedNodeId;
+      this._selectionEl.textContent = `Work: ${w}  AGV: ${a}  Node: ${n}`;
     }
 
     _setSelectedWorkId(id){
       this.selectedWorkId = (id === null || typeof id === 'undefined') ? null : id;
       if(this.selectedWorkId !== null) this.selectedAgvId = null;
+      this.selectedNodeId = null;
       this._updateSelectionLabel();
       window.selectedWorkId = this.selectedWorkId;
       window.selectedAgvId = this.selectedAgvId;
+      window.selectedNodeId = this.selectedNodeId;
       try{
         if(window.canvas && typeof window.canvas.setDirty === 'function'){
           window.canvas.setDirty(true, true);
@@ -197,9 +201,30 @@
     _setSelectedAgvId(id){
       this.selectedAgvId = (id === null || typeof id === 'undefined') ? null : id;
       if(this.selectedAgvId !== null) this.selectedWorkId = null;
+      this.selectedNodeId = null;
       this._updateSelectionLabel();
       window.selectedAgvId = this.selectedAgvId;
       window.selectedWorkId = this.selectedWorkId;
+      window.selectedNodeId = this.selectedNodeId;
+      try{
+        if(window.canvas && typeof window.canvas.setDirty === 'function'){
+          window.canvas.setDirty(true, true);
+        }else if(window.canvas && typeof window.canvas.draw === 'function'){
+          window.canvas.draw(true, true);
+        }
+      }catch(_e){}
+    }
+
+    _setSelectedNodeId(id){
+      this.selectedNodeId = (id === null || typeof id === 'undefined') ? null : id;
+      if(this.selectedNodeId !== null){
+        this.selectedWorkId = null;
+        this.selectedAgvId = null;
+      }
+      this._updateSelectionLabel();
+      window.selectedNodeId = this.selectedNodeId;
+      window.selectedWorkId = this.selectedWorkId;
+      window.selectedAgvId = this.selectedAgvId;
       try{
         if(window.canvas && typeof window.canvas.setDirty === 'function'){
           window.canvas.setDirty(true, true);
@@ -323,15 +348,26 @@
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      if(x < this.leftGutter || y < this.topPadding) return;
+      if(y < this.topPadding) return;
       const rowStep = this.rowHeight + this.rowGap;
       const rowIdx = Math.floor((y + this.scrollY - this.topPadding) / rowStep);
       const nodes = this._nodeList();
       if(rowIdx < 0 || rowIdx >= nodes.length) return;
       const node = nodes[rowIdx];
+      if(x < this.leftGutter){
+        const nid = (node && typeof node.id !== 'undefined') ? node.id : this._nodeKey(node);
+        if(this.selectedNodeId !== null && this.selectedNodeId == nid){
+          this._setSelectedNodeId(null);
+        }else{
+          this._setSelectedNodeId(nid);
+        }
+        this.draw();
+        return;
+      }
       const entry = this.entries.get(this._nodeKey(node));
       if(!entry || !entry.segments.length){
         this._setSelectedWorkId(null);
+        this._setSelectedAgvId(null);
         return;
       }
       const chartW = Math.max(1, this.width - this.leftGutter - 8);
@@ -345,21 +381,40 @@
           break;
         }
       }
-      if(found && found.workId !== null && typeof found.workId !== 'undefined'){
-        if(this.selectedWorkId !== null && found.workId === this.selectedWorkId){
-          this._setSelectedWorkId(null);
-        }else{
-          this._setSelectedWorkId(found.workId);
-        }
-      }else if(found && found.agvId !== null && typeof found.agvId !== 'undefined'){
-        if(this.selectedAgvId !== null && found.agvId === this.selectedAgvId){
-          this._setSelectedAgvId(null);
-        }else{
-          this._setSelectedAgvId(found.agvId);
+      if(found && (found.workId !== null || found.agvId !== null)){
+        const hasWork = (found.workId !== null && typeof found.workId !== 'undefined');
+        const hasAgv = (found.agvId !== null && typeof found.agvId !== 'undefined');
+        if(hasWork && hasAgv){
+          // Toggle between Work and AGV for the same segment
+          if(this.selectedWorkId !== null && this.selectedWorkId == found.workId){
+            if(this.selectedAgvId !== null && this.selectedAgvId == found.agvId){
+              this._setSelectedWorkId(null);
+              this._setSelectedAgvId(null);
+            }else{
+              this._setSelectedAgvId(found.agvId);
+            }
+          }else if(this.selectedAgvId !== null && this.selectedAgvId == found.agvId){
+            this._setSelectedWorkId(found.workId);
+          }else{
+            this._setSelectedWorkId(found.workId);
+          }
+        }else if(hasWork){
+          if(this.selectedWorkId !== null && this.selectedWorkId == found.workId){
+            this._setSelectedWorkId(null);
+          }else{
+            this._setSelectedWorkId(found.workId);
+          }
+        }else if(hasAgv){
+          if(this.selectedAgvId !== null && this.selectedAgvId == found.agvId){
+            this._setSelectedAgvId(null);
+          }else{
+            this._setSelectedAgvId(found.agvId);
+          }
         }
       }else{
         this._setSelectedWorkId(null);
         this._setSelectedAgvId(null);
+        this._setSelectedNodeId(null);
       }
       this.draw();
     }
@@ -427,7 +482,15 @@
         ctx.beginPath();
         ctx.rect(0, y, this.leftGutter - 6, this.rowHeight);
         ctx.clip();
-        ctx.fillStyle = '#111827';
+        const isNodeSelected = (this.selectedNodeId !== null && ((node && typeof node.id !== 'undefined' ? node.id : key) == this.selectedNodeId));
+        if(isNodeSelected){
+          ctx.fillStyle = '#ede9fe';
+          ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
+          ctx.strokeStyle = '#7c3aed';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(1, y + 1, this.leftGutter - 8, this.rowHeight - 2);
+        }
+        ctx.fillStyle = isNodeSelected ? '#5b21b6' : '#111827';
         ctx.font = '12px sans-serif';
         ctx.textBaseline = 'middle';
         ctx.fillText(label, 8, y + this.rowHeight / 2);

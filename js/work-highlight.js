@@ -38,13 +38,17 @@
     try{
       const selectedWork = window.selectedWorkId;
       const selectedAgv = window.selectedAgvId;
+      const selectedNode = window.selectedNodeId;
       if((selectedWork === null || typeof selectedWork === 'undefined') &&
-         (selectedAgv === null || typeof selectedAgv === 'undefined')) return;
+         (selectedAgv === null || typeof selectedAgv === 'undefined') &&
+         (selectedNode === null || typeof selectedNode === 'undefined')) return;
       const wid = pickWorkId(node);
       const aid = pickAgvId(node);
       const matchWork = (wid !== null && typeof wid !== 'undefined' && selectedWork !== null && typeof selectedWork !== 'undefined' && wid == selectedWork);
       const matchAgv = (aid !== null && typeof aid !== 'undefined' && selectedAgv !== null && typeof selectedAgv !== 'undefined' && aid == selectedAgv);
-      if(!matchWork && !matchAgv) return;
+      const nodeId = (node && typeof node.id !== 'undefined') ? node.id : null;
+      const matchNode = (selectedNode !== null && typeof selectedNode !== 'undefined' && nodeId !== null && nodeId == selectedNode);
+      if(!matchWork && !matchAgv && !matchNode) return;
       let gx = node.pos[0];
       let gy = node.pos[1];
       let gw = node.size ? node.size[0] : (LiteGraph.NODE_WIDTH || 140);
@@ -64,12 +68,15 @@
       const padInner = 1 / scale;
       ctx.save();
       ctx.lineWidth = 3 / scale;
-      ctx.strokeStyle = matchAgv ? '#67e8f9' : '#ffd166';
-      ctx.shadowColor = matchAgv ? 'rgba(6,182,212,0.85)' : 'rgba(255,105,0,0.85)';
+      const outerColor = matchNode ? '#a78bfa' : (matchAgv ? '#67e8f9' : '#ffd166');
+      const glowColor = matchNode ? 'rgba(167,139,250,0.85)' : (matchAgv ? 'rgba(6,182,212,0.85)' : 'rgba(255,105,0,0.85)');
+      const innerColor = matchNode ? '#7c3aed' : (matchAgv ? '#06b6d4' : '#ff4500');
+      ctx.strokeStyle = outerColor;
+      ctx.shadowColor = glowColor;
       ctx.shadowBlur = 10 / scale;
       ctx.strokeRect(x - padOuter, y - padOuter, w + padOuter * 2, h + padOuter * 2);
       ctx.lineWidth = 1 / scale;
-      ctx.strokeStyle = matchAgv ? '#06b6d4' : '#ff4500';
+      ctx.strokeStyle = innerColor;
       ctx.shadowBlur = 0;
       ctx.strokeRect(x - padInner, y - padInner, w + padInner * 2, h + padInner * 2);
       ctx.restore();
