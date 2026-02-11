@@ -146,6 +146,15 @@ class LinkAnimator{
 
   const originalSetOutputData = LiteGraph.LGraphNode.prototype.setOutputData;
   LiteGraph.LGraphNode.prototype.setOutputData = function(slot, data){
+    // Track output changes to allow same-tick settle passes
+    const out = this.outputs && this.outputs[slot];
+    if(out){
+      const prev = out.__lastSet;
+      if(prev !== data){
+        out.__lastSet = data;
+        if(this.graph) this.graph.__outputDirty = true;
+      }
+    }
     if(this.outputs && this.outputs[slot] && !data){
       this.outputs[slot].__animToken = null;
     }

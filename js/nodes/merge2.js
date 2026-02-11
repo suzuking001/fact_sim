@@ -73,105 +73,117 @@ class Merge2Node extends EquipmentNode{
     if(this._state === 'IDLE') this._currentWork = null;
 
     const now = simNow();
-    switch(this._state){
-      case 'PROCESS1':
-        if(now >= this._until){
-          // Expose as IDLE so upstream of input2 will offer; accept in IDLE branch
-          this._awaitingIn2 = true;
-          this._state = 'IDLE';
-          this._currentWork = null;
-        }
-        break;
-
-      case 'PROCESS2':
-        if(now >= this._until){
-          // finished both → prepare to handoff
-          this._payload = this._work1; // ids must match
-          this._handoffOffered = false;
-          this._state = 'WAIT';
-          this._setWaitIcon(true);
-        }
-        break;
-
-      case 'WAIT': {
-        // WAIT: downstream ready -> start DOWN and emit immediately
-        if(this._downReady()){
-          const payload = this._payload;
-          this._setWaitIcon(false);
-          this._state = 'DOWN';
-          this._until = now + this.properties.downTime*1000;
-          this.setOutputData(0, payload);
-          try{ this._spawnSinkTransfer && this._spawnSinkTransfer(this.properties.downTime*1000, payload); }catch(_e){}
-          this._payload = null;
-        }else{
-          this.setOutputData(0, null);
-        }
-        break;
-      }
-
-      case 'DOWN':
-        if(now >= this._until){
-          // Reset for next pair
-          this.setOutputData(0, null);
-          this._state = 'IDLE';
-          this._work1 = null; this._work2 = null; this._payload = null;
-          this._currentWork = null;
-          this._lastIn1Ref = null; this._lastIn2Ref = null;
-          this._handoffOffered = false;
-        }
-        break;
-
-      case 'ERROR':
-        // stay here; user can reset the graph
-        break;
-
-      case 'IDLE': {
-        if(!this._awaitingIn2){
-          // accept from input1
-          const in1 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
-          const link1 = !!(in1 && in1.link != null);
-          if(!link1){ this._lastIn1Ref = null; break; }
-          const w1 = this.getInputData(0);
-          if(!w1){ this._lastIn1Ref = null; break; }
-          if(typeof w1 !== 'object') break;
-          if(this._lastIn1Ref === w1) break; // not a new arrival
-          // accept first work and start PROCESS1
-          this._work1 = w1;
-          this._currentWork = w1; // so upstream can detect acceptance
-          this._state = 'PROCESS1';
-          const duration1 = Math.max(0, this.properties.processTime*1000);
-          this._until = now + duration1;
-          this._triggerProcessAnimation(0, duration1, { id: w1.id, t: w1.type });
-          this._lastIn1Ref = w1;
+    let guard = 0;
+    let again = true;
+    while(again && guard++ < 6){
+      again = false;
+      switch(this._state){
+        case 'PROCESS1':
+          if(now >= this._until){
+            // Expose as IDLE so upstream of input2 will offer; accept in IDLE branch
+            this._awaitingIn2 = true;
+            this._state = 'IDLE';
+            this._currentWork = null;
+            again = true;
+          }
           break;
-        } else {
-          // awaiting second input
-          const in2 = (this.inputs && this.inputs[1]) ? this.inputs[1] : null;
-          const link2 = !!(in2 && in2.link != null);
-          if(!link2){ this._lastIn2Ref = null; break; }
-          const w2 = this.getInputData(1);
-          if(!w2){ this._lastIn2Ref = null; break; }
-          if(typeof w2 !== 'object') break;
-          if(this._lastIn2Ref === w2) break; // not a new arrival
-          // compare IDs
-          if(!this._work1 || w2.id !== this._work1.id){
-            try{ alert(`Merge2 ID mismatch: in1=${this._work1?this._work1.id:'-'} in2=${w2.id}`); }catch(_e){}
-            try{ this.graph && this.graph.stop && this.graph.stop(); }catch(_e){}
-            this._state = 'ERROR';
+
+        case 'PROCESS2':
+          if(now >= this._until){
+            // finished both → prepare to handoff
+            this._payload = this._work1; // ids must match
+            this._handoffOffered = false;
+            this._state = 'WAIT';
+            this._setWaitIcon(true);
+            again = true;
+          }
+          break;
+
+        case 'WAIT': {
+          // WAIT: downstream ready -> start DOWN and emit immediately
+          if(this._downReady()){
+            const payload = this._payload;
+            this._setWaitIcon(false);
+            this._state = 'DOWN';
+            this._until = now + this.properties.downTime*1000;
+            this.setOutputData(0, payload);
+            try{ this._spawnSinkTransfer && this._spawnSinkTransfer(this.properties.downTime*1000, payload); }catch(_e){}
+            this._payload = null;
+          }else{
+            this.setOutputData(0, null);
+          }
+          break;
+        }
+
+        case 'DOWN':
+          if(now >= this._until){
+            // Reset for next pair
+            this.setOutputData(0, null);
+            this._state = 'IDLE';
+            this._work1 = null; this._work2 = null; this._payload = null;
+            this._currentWork = null;
+            this._lastIn1Ref = null; this._lastIn2Ref = null;
+            this._handoffOffered = false;
+            again = true;
+          }
+          break;
+
+        case 'ERROR':
+          // stay here; user can reset the graph
+          break;
+
+        case 'IDLE': {
+          if(!this._awaitingIn2){
+            // accept from input1
+            const in1 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
+            const link1 = !!(in1 && in1.link != null);
+            if(!link1){ this._lastIn1Ref = null; break; }
+            const w1 = this.getInputData(0);
+            if(!w1){ this._lastIn1Ref = null; break; }
+            if(typeof w1 !== 'object') break;
+            if(this._lastIn1Ref === w1) break; // not a new arrival
+            // accept first work and start PROCESS1
+            this._work1 = w1;
+            this._currentWork = w1; // so upstream can detect acceptance
+            this._state = 'PROCESS1';
+            const duration1 = Math.max(0, this.properties.processTime*1000);
+            this._until = now + duration1;
+            this._triggerProcessAnimation(0, duration1, { id: w1.id, t: w1.type });
+            this._lastIn1Ref = w1;
+            if(duration1 === 0) again = true;
+            break;
+          } else {
+            // awaiting second input
+            const in2 = (this.inputs && this.inputs[1]) ? this.inputs[1] : null;
+            const link2 = !!(in2 && in2.link != null);
+            if(!link2){ this._lastIn2Ref = null; break; }
+            const w2 = this.getInputData(1);
+            if(!w2){ this._lastIn2Ref = null; break; }
+            if(typeof w2 !== 'object') break;
+            if(this._lastIn2Ref === w2) break; // not a new arrival
+            // compare IDs
+            if(!this._work1 || w2.id !== this._work1.id){
+              try{ alert(`Merge2 ID mismatch: in1=${this._work1?this._work1.id:'-'} in2=${w2.id}`); }catch(_e){}
+              try{ this.graph && this.graph.stop && this.graph.stop(); }catch(_e){}
+              this._state = 'ERROR';
+              break;
+            }
+            // accept second work and start PROCESS2
+            this._work2 = w2;
+            this._currentWork = w2;
+            this._state = 'PROCESS2';
+            const duration2 = Math.max(0, (this.properties.processTime2||0)*1000);
+            this._until = now + duration2;
+            this._triggerProcessAnimation(1, duration2, { id: w2.id, t: w2.type });
+            this._lastIn2Ref = w2;
+            this._awaitingIn2 = false;
+            if(duration2 === 0) again = true;
             break;
           }
-          // accept second work and start PROCESS2
-          this._work2 = w2;
-          this._currentWork = w2;
-          this._state = 'PROCESS2';
-          const duration2 = Math.max(0, (this.properties.processTime2||0)*1000);
-          this._until = now + duration2;
-          this._triggerProcessAnimation(1, duration2, { id: w2.id, t: w2.type });
-          this._lastIn2Ref = w2;
-          this._awaitingIn2 = false;
-          break;
         }
       }
+      // If we just started DOWN, keep output visible at least one tick.
+      if(this._state === 'DOWN') break;
     }
 
     // color mapping for visual feedback

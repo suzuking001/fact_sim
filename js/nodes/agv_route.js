@@ -514,6 +514,22 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait();             // AGV受渡し待ち
     else if(this._stateName === 'agvOut_down') this._handleAgvOutDown(now);          // AGV受渡し中
 
+    // 2.5) 0.1s の WAIT/IDLE 滞留を避けるための即時再評価（安全ガード付き）
+    let settle = 0;
+    while(settle++ < 4){
+      const prev = this._stateName;
+      if(this._stateName.startsWith('workIn_idle')){
+        this._captureWorkInput();
+      }
+      if(this._stateName.startsWith('workOut_wait')){
+        this._handleWorkOutWait();
+      }else if(this._stateName === 'agvOut_wait'){
+        this._handleAgvOutWait();
+      }
+      if(this._stateName === prev) break;
+      if(this._stateName.startsWith('workOut_down') || this._stateName === 'agvOut_down') break;
+    }
+
     this._refreshAgvWaitIcon();
 
     // 3) 余剰信号ポートに状態を通知（SigExtra > 0 のとき）

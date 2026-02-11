@@ -129,69 +129,83 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     }
 
     const now = simNow();
-    switch(this._state){
-      case 'PROCESS':
-        // 加工中: 規定時間を過ぎたら WAIT へ
-        if(now >= this._until){ this._state = 'WAIT'; this._handoffOffered = false; this._setWaitIcon(true); }
-        break;
-      case 'WAIT': {
-        // 排出待ち: 後工程が受入可能になったら即 DOWN 開始（搬送開始）
-        if(this._downReady()){
-          const payload = this._payload;
-          this._setWaitIcon(false);
-          this._state = 'DOWN';
-          const downMs = Math.max(0, this.properties.downTime*1000);
-          this._until = now + downMs; // ms
-          // 搬送開始時に即座に workOut を出力
-          this.setOutputData(0, payload);
-          this._spawnSinkTransfer(downMs, payload);
-          this._payload = null;
-        }else{
-          this.setOutputData(0, null);
-        }
-        break;
-      }
-      case 'DOWN':
-        // ダウン中: 規定時間経過で IDLE へ復帰
-        if(now >= this._until){
-          this.setOutputData(0, null);
-          this._state = 'IDLE';
-          this._setWaitIcon(false);
-        }
-        break;
-      case 'IDLE': {
-        // IDLE 相当: 入力があれば受入判定
-        const in0 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
-        const hasLink = !!(in0 && in0.link != null);
-        if(!hasLink) break;
-        const w = this.getInputData(0);
-        if(!w){ this._lastInRef = null; break; }
-        if(typeof w !== 'object') break;
-        // 直近に観測した参照と同一なら新規受入れではない（LiteGraphのリンクは値を保持するため）
-        if(this._lastInRef === w) break;
-        // スクリプトが false を返した場合は素通し（受けずに右へ）
-        if(!this._evalScript(w, sig)){
-          this.setOutputData(0, w);
+    let guard = 0;
+    let again = true;
+    while(again && guard++ < 6){
+      again = false;
+      switch(this._state){
+        case 'PROCESS':
+          // 加工中: 規定時間を過ぎたら WAIT へ
+          if(now >= this._until){
+            this._state = 'WAIT';
+            this._handoffOffered = false;
+            this._setWaitIcon(true);
+            again = true; // allow immediate WAIT->DOWN if ready
+          }
+          break;
+        case 'WAIT': {
+          // 排出待ち: 後工程が受入可能になったら即 DOWN 開始（搬送開始）
+          if(this._downReady()){
+            const payload = this._payload;
+            this._setWaitIcon(false);
+            this._state = 'DOWN';
+            const downMs = Math.max(0, this.properties.downTime*1000);
+            this._until = now + downMs; // ms
+            // 搬送開始時に即座に workOut を出力
+            this.setOutputData(0, payload);
+            this._spawnSinkTransfer(downMs, payload);
+            this._payload = null;
+          }else{
+            this.setOutputData(0, null);
+          }
           break;
         }
-        // 受入れ → PROCESS 開始
-        this._currentWork = w;
-        this._payload = w;
-        this._state = 'PROCESS';
-        const durationMs = Math.max(0, this.properties.processTime*1000);
-        this._until = now + durationMs; // ms
-        this._lastInRef = w; // remember last accepted input to avoid duplicate starts
-        try{
-          if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
-            const inPort = this.inputs && this.inputs[0];
-            if(inPort && inPort.link != null){
-              const info = (w && typeof w === 'object') ? { id: w.id, t: w.type } : null;
-              window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
-            }
+        case 'DOWN':
+          // ダウン中: 規定時間経過で IDLE へ復帰
+          if(now >= this._until){
+            this.setOutputData(0, null);
+            this._state = 'IDLE';
+            this._setWaitIcon(false);
+            again = true; // allow immediate IDLE accept if input already present
           }
-        }catch(_e){}
-
+          break;
+        case 'IDLE': {
+          // IDLE 相当: 入力があれば受入判定
+          const in0 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
+          const hasLink = !!(in0 && in0.link != null);
+          if(!hasLink) break;
+          const w = this.getInputData(0);
+          if(!w){ this._lastInRef = null; break; }
+          if(typeof w !== 'object') break;
+          // 直近に観測した参照と同一なら新規受入れではない（LiteGraphのリンクは値を保持するため）
+          if(this._lastInRef === w) break;
+          // スクリプトが false を返した場合は素通し（受けずに右へ）
+          if(!this._evalScript(w, sig)){
+            this.setOutputData(0, w);
+            break;
+          }
+          // 受入れ → PROCESS 開始
+          this._currentWork = w;
+          this._payload = w;
+          this._state = 'PROCESS';
+          const durationMs = Math.max(0, this.properties.processTime*1000);
+          this._until = now + durationMs; // ms
+          this._lastInRef = w; // remember last accepted input to avoid duplicate starts
+          try{
+            if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
+              const inPort = this.inputs && this.inputs[0];
+              if(inPort && inPort.link != null){
+                const info = (w && typeof w === 'object') ? { id: w.id, t: w.type } : null;
+                window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
+              }
+            }
+          }catch(_e){}
+          if(durationMs === 0) again = true; // allow immediate PROCESS->WAIT chain
+          break;
+        }
       }
+      // If we just started DOWN, keep output visible at least one tick.
+      if(this._state === 'DOWN') break;
     }
 
     // 状態シグナルを sigOut* に通知（エッジのみ）

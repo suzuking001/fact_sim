@@ -404,7 +404,19 @@ function startSimulation(){
   graph.last_update_time = graph.starttime;
   graph.sendEventToAllNodes("onStart");
   window.startSimLoop(()=>{
+    // First pass advances simulation time
+    graph.__outputDirty = false;
     graph.runStep(1, !graph.catch_errors);
+    // Always run one settle pass (dt=0) so downstream can react within the same tick,
+    // even if no output changed (state-only readiness changes).
+    graph.__outputDirty = false;
+    graph.runStep(0, !graph.catch_errors);
+    // Additional settle passes only if outputs keep changing
+    let settle = 0;
+    while(graph.__outputDirty && settle++ < 5){
+      graph.__outputDirty = false;
+      graph.runStep(0, !graph.catch_errors);
+    }
     if(timelineChart) timelineChart.onStep();
   });
 }
