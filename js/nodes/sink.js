@@ -12,6 +12,7 @@ class SinkNode extends LiteGraph.LGraphNode{
     this._history = [];
     this._maxSamples = 60;
     this._prevAt = null;
+    this._lastInRef = null; // prevent duplicate intake on same link value
     this.properties = this.properties || {};
     if(window.enableFlipIO) window.enableFlipIO(this);
   }
@@ -23,14 +24,19 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
   onExecute(){
     const d = this.getInputData(0);
-    if(d){
-      this._recv.push(d);
-      this._lastWork = d;
-      const elapsed = simNow();
-      this._lastAt = elapsed;
-      this._recordSample(elapsed);
-      this.tooltip = `Got:${this._recv.length}`;
+    if(!d){
+      this._lastInRef = null;
+      return;
     }
+    // Avoid re-counting the same work object across settle passes or held outputs
+    if(this._lastInRef === d) return;
+    this._lastInRef = d;
+    this._recv.push(d);
+    this._lastWork = d;
+    const elapsed = simNow();
+    this._lastAt = elapsed;
+    this._recordSample(elapsed);
+    this.tooltip = `Got:${this._recv.length}`;
   }
   onDrawForeground(ctx){
     this._drawHistory(ctx);
