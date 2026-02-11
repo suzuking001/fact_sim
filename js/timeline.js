@@ -186,7 +186,7 @@
       const cutoff = now - this.historySec;
       const rows = [];
       rows.push([
-        'node','seg','start','offset','process','wait','down','idle','workId','agvId'
+        'node','nodeId','nodeOrder','start','end','duration','state','workId','agvId'
       ]);
       const esc = (v)=>{
         if(v === null || typeof v === 'undefined') return '';
@@ -194,34 +194,36 @@
         if(/[,"\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
         return s;
       };
-      this.entries.forEach((entry)=>{
-        if(!entry || !entry.segments || !entry.segments.length) return;
-        let segIndex = 0;
+      const nodes = this._nodeList();
+      const orderMap = new Map();
+      nodes.forEach((n, i)=>{
+        orderMap.set(this._nodeKey(n), i + 1);
+      });
+      for(const n of nodes){
+        const key = this._nodeKey(n);
+        const entry = this.entries.get(key);
+        if(!entry || !entry.segments || !entry.segments.length) continue;
+        const nodeId = (n && typeof n.id !== 'undefined') ? n.id : '';
+        const nodeOrder = orderMap.get(key) || '';
         for(const seg of entry.segments){
           const s = Math.max(seg.start, cutoff);
           const e = Math.min(seg.end, now);
           if(e <= cutoff || e <= s) continue;
           const dur = Math.max(0, e - s);
-          segIndex++;
           const state = seg.state || 'other';
-          const proc = state === 'process' ? dur : 0;
-          const wait = state === 'wait' ? dur : 0;
-          const down = state === 'down' ? dur : 0;
-          const idle = state === 'idle' ? dur : 0;
           rows.push([
             esc(entry.label || ''),
-            segIndex,
+            esc(nodeId),
+            nodeOrder,
             s.toFixed(3),
-            s.toFixed(3),
-            proc ? proc.toFixed(3) : 0,
-            wait ? wait.toFixed(3) : 0,
-            down ? down.toFixed(3) : 0,
-            idle ? idle.toFixed(3) : 0,
+            e.toFixed(3),
+            dur.toFixed(3),
+            state,
             esc(seg.workId ?? ''),
             esc(seg.agvId ?? '')
           ]);
         }
-      });
+      }
       const csv = rows.map(r=>r.join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
