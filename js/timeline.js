@@ -109,13 +109,30 @@
 
     _nodeList(){
       if(!this.graph || !Array.isArray(this.graph._nodes)) return [];
-      const nodes = this.graph._nodes.slice();
+      const nodes = this.graph._nodes.slice().filter(n => this._isTimelineNode(n));
       nodes.sort((a,b)=>{
         const oa = (typeof a.order === 'number') ? a.order : (typeof a.id === 'number' ? a.id : 0);
         const ob = (typeof b.order === 'number') ? b.order : (typeof b.id === 'number' ? b.id : 0);
         return oa - ob;
       });
       return nodes;
+    }
+
+    _isTimelineNode(node){
+      if(!node) return false;
+      // Exclude Source/Sink nodes from timeline (always waiting; not informative)
+      try{
+        const srcCtor = (typeof window !== 'undefined') ? window.SourceNode : null;
+        const sinkCtor = (typeof window !== 'undefined') ? window.SinkNode : null;
+        if(srcCtor && node instanceof srcCtor) return false;
+        if(sinkCtor && node instanceof sinkCtor) return false;
+      }catch(_e){}
+      const type = String(node.type || '').toLowerCase();
+      if(type === 'source' || type.endsWith('/source')) return false;
+      if(type === 'sink' || type.endsWith('/sink')) return false;
+      const title = String(node.title || '').toLowerCase();
+      if(title === 'source' || title === 'sink') return false;
+      return true;
     }
 
     _nodeKey(node){

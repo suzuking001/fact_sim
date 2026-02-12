@@ -169,8 +169,12 @@ function installBoxSelect(c){
   let selecting = false;
 
   const getCanvasPos = (e)=>{
-    try{ return c.convertEventToCanvas(e); }
-    catch(_e){ return [e.offsetX || 0, e.offsetY || 0]; }
+    try{
+      // graph coordinates (accounts for zoom/pan)
+      return c.convertEventToCanvasOffset(e);
+    }catch(_e){
+      return [e.offsetX || 0, e.offsetY || 0];
+    }
   };
 
   el.addEventListener('mousedown', (e)=>{
@@ -221,6 +225,36 @@ function installBoxSelect(c){
   }, true);
 
   c.__boxSelectHooked = true;
+}
+
+function installBoxSelectOverlay(c){
+  if(!c || c.__boxSelectOverlayHooked) return;
+  const prev = c.onDrawOverlay;
+  c.onDrawOverlay = function(ctx){
+    try{
+      if(typeof prev === 'function') prev.call(this, ctx);
+      const rect = this.dragging_rectangle;
+      if(!rect) return;
+      const x = rect[2] < 0 ? rect[0] + rect[2] : rect[0];
+      const y = rect[3] < 0 ? rect[1] + rect[3] : rect[1];
+      const w = Math.abs(rect[2]);
+      const h = Math.abs(rect[3]);
+      if(w < 1 || h < 1) return;
+      ctx.save();
+      // Draw in graph space, but keep stroke width/dash visible under zoom
+      if(this.ds && typeof this.ds.toCanvasContext === 'function'){
+        this.ds.toCanvasContext(ctx);
+      }
+      const scale = (this.ds && this.ds.scale) ? this.ds.scale : 1;
+      ctx.lineWidth = 2.5 / scale;
+      ctx.strokeStyle = 'rgba(200, 200, 200, 0.95)';
+      ctx.setLineDash([6 / scale, 4 / scale]);
+      ctx.strokeRect(x + 0.5 / scale, y + 0.5 / scale, w, h);
+      ctx.setLineDash([]);
+      ctx.restore();
+    }catch(_e){}
+  };
+  c.__boxSelectOverlayHooked = true;
 }
 
 function doCopy(){
@@ -441,6 +475,7 @@ function initGraph(){
   canvas = new LGraphCanvas(graphElement, graph);
   canvas.multi_select = true;
   installBoxSelect(canvas);
+  installBoxSelectOverlay(canvas);
   installClipboardHandlers(canvas);
   bindHistoryButtons();
   installFitHandlers(canvas);
