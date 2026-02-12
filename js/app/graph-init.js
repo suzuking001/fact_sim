@@ -24,7 +24,10 @@ function initGraph(){
     canvas.canvas.width = r.width*d; canvas.canvas.height = r.height*d;
     canvas.resize(r.width, r.height); canvas.draw(true);
   }
-  window.addEventListener('resize', resize); resize();
+  const controller = resetListenerController('__graphResizeController');
+  const opts = listenerOptions(false, controller);
+  window.addEventListener('resize', resize, opts);
+  resize();
   // Place initial nodes lower so they don't hide under menus
   const src = LiteGraph.createNode('factory/source'); src.pos=[60,180];
   const eq  = LiteGraph.createNode('factory/equip');  eq.pos=[360,180];

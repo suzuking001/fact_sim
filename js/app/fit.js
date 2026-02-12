@@ -62,6 +62,8 @@ function installFitHandlers(c){
   const el = c.canvas;
   if(!el) return;
   let lastMid = 0;
+  const controller = resetListenerController('__fitController');
+  const opts = listenerOptions(true, controller);
   el.addEventListener('mousedown', (e)=>{
     if(e.button !== 1) return;
     const now = performance.now();
@@ -74,6 +76,6 @@ function installFitHandlers(c){
     }
     lastMid = now;
     e.preventDefault();
-  }, true);
+  }, opts);
   c.__fitHooked = true;
 }

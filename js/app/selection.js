@@ -12,6 +12,8 @@ function installBoxSelect(c){
   const el = c.canvas;
   if(!el) return;
   let selecting = false;
+  const controller = resetListenerController('__boxSelectController');
+  const opts = listenerOptions(true, controller);
 
   const getCanvasPos = (e)=>{
     try{
@@ -34,7 +36,7 @@ function installBoxSelect(c){
     c.setDirty(true, true);
     e.preventDefault();
     e.stopPropagation();
-  }, true);
+  }, opts);
 
   el.addEventListener('mousemove', (e)=>{
     if(!selecting || !c.dragging_rectangle) return;
@@ -42,7 +44,7 @@ function installBoxSelect(c){
     c.dragging_rectangle[2] = p[0] - c.dragging_rectangle[0];
     c.dragging_rectangle[3] = p[1] - c.dragging_rectangle[1];
     c.setDirty(true);
-  }, true);
+  }, opts);
 
   window.addEventListener('mouseup', (e)=>{
     if(!selecting) return;
@@ -67,7 +69,7 @@ function installBoxSelect(c){
       }
     }
     c.setDirty(true, true);
-  }, true);
+  }, opts);
 
   c.__boxSelectHooked = true;
 }
@@ -126,6 +128,8 @@ function installClipboardHandlers(c){
   if(!c || c.__clipboardHooked) return;
   const el = c.canvas;
   if(!el) return;
+  const controller = resetListenerController('__clipboardController');
+  const opts = listenerOptions(true, controller);
 
   const updateMouse = (e)=>{
     try{
@@ -141,7 +145,7 @@ function installClipboardHandlers(c){
       c.__last_mouse = p;
     }catch(_e){}
   };
-  el.addEventListener('mousemove', updateMouse, true);
+  el.addEventListener('mousemove', updateMouse, opts);
 
   window.addEventListener('keydown', (e)=>{
     if(e.target && (e.target.localName === 'input' || e.target.localName === 'textarea')) return;
@@ -167,7 +171,7 @@ function installClipboardHandlers(c){
       doPaste();
       e.preventDefault();
     }
-  }, true);
+  }, opts);
 
   c.__clipboardHooked = true;
 }
@@ -175,12 +179,18 @@ function installClipboardHandlers(c){
 function bindHistoryButtons(){
   const btnUndo = document.getElementById('btnUndo');
   const btnRedo = document.getElementById('btnRedo');
-  if(btnUndo) btnUndo.addEventListener('click', ()=>{
-    undo();
-    showToast('元に戻しました');
-  });
-  if(btnRedo) btnRedo.addEventListener('click', ()=>{
-    redo();
-    showToast('やり直しました');
-  });
+  if(btnUndo && !btnUndo.__historyHooked){
+    btnUndo.addEventListener('click', ()=>{
+      undo();
+      showToast('元に戻しました');
+    });
+    btnUndo.__historyHooked = true;
+  }
+  if(btnRedo && !btnRedo.__historyHooked){
+    btnRedo.addEventListener('click', ()=>{
+      redo();
+      showToast('やり直しました');
+    });
+    btnRedo.__historyHooked = true;
+  }
 }
