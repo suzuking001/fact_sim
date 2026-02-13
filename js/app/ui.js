@@ -216,6 +216,14 @@ function beginNodePlacement(node){
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
+    join:{
+      type:'factory/join',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Join', target:'title' },
+        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:5 },
+        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:6 }
+      ]
+    },
     source:{
       type:'factory/source',
       props:[
@@ -236,6 +244,14 @@ function beginNodePlacement(node){
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'ratio', label:'Ratio (0-1)', type:'number', min:0, max:1, step:0.1, default:0.5 }
+      ]
+    },
+    branch:{
+      type:'factory/branch',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Branch', target:'title' },
+        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
+        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
     agvroute:{
