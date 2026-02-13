@@ -349,13 +349,13 @@ A. 「待ち境界」で計測するため、詳細作業の合算誤差が累�
 ---
 
 ## ライセンス
-MIT License
+Apache License 2.0
 
 ---
 
 ### バッジ例（任意で使用）
 ![build](https://img.shields.io/badge/build-passing-brightgreen)
-![license](https://img.shields.io/badge/license-MIT-blue)
+![license](https://img.shields.io/badge/license-Apache-2.0-blue)
 ![lang](https://img.shields.io/badge/lang-TypeScript-informational)
 
 ---
