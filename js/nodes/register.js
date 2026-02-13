@@ -1,4 +1,4 @@
-// Register node types to LiteGraph
+﻿// Register node types to LiteGraph
 
 function afterRegister(){
   LiteGraph.registerNodeType('factory/source', SourceNode);
@@ -6,7 +6,9 @@ function afterRegister(){
   LiteGraph.registerNodeType('factory/split',  SplitNode);
   LiteGraph.registerNodeType('factory/agvroute', AGVRouteNode);
   LiteGraph.registerNodeType('factory/sink',   SinkNode);
-  LiteGraph.registerNodeType('factory/merge2', Merge2Node);
+  LiteGraph.registerNodeType('factory/merge',  MergeNode);
+  LiteGraph.registerNodeType('factory/merge2', MergeNode);
 }
 
 afterRegister();
+

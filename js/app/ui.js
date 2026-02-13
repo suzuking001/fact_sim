@@ -207,11 +207,12 @@ function beginNodePlacement(node){
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
-    merge2:{
-      type:'factory/merge2',
+    merge:{
+      type:'factory/merge',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Merge2', target:'title' },
+        { key:'title', label:'Title', type:'text', default:'Merge', target:'title' },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
+        { key:'processTime2', label:'Process Time N (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
