@@ -1,5 +1,7 @@
 ﻿// Simulation clock wiring for graph
 
+var App = window.App || (window.App = {});
+
 function configureGraphClock(g){
   if(!g) return;
   const dt = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
@@ -12,27 +14,27 @@ function configureGraphClock(g){
 }
 
 function startSimulation(){
-  if(!graph) return;
+  if(!App.graph) return;
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;
-  graph.status = LGraph.STATUS_RUNNING;
-  graph.starttime = LiteGraph.getTime();
-  graph.last_update_time = graph.starttime;
-  graph.sendEventToAllNodes('onStart');
+  App.graph.status = LGraph.STATUS_RUNNING;
+  App.graph.starttime = LiteGraph.getTime();
+  App.graph.last_update_time = App.graph.starttime;
+  App.graph.sendEventToAllNodes('onStart');
   window.startSimLoop(()=>{
     // First pass advances simulation time
-    graph.__outputDirty = false;
-    graph.runStep(1, !graph.catch_errors);
+    App.graph.__outputDirty = false;
+    App.graph.runStep(1, !App.graph.catch_errors);
     // Always run one settle pass (dt=0) so downstream can react within the same tick,
     // even if no output changed (state-only readiness changes).
-    graph.__outputDirty = false;
-    graph.runStep(0, !graph.catch_errors);
+    App.graph.__outputDirty = false;
+    App.graph.runStep(0, !App.graph.catch_errors);
     // Additional settle passes only if outputs keep changing
     let settle = 0;
-    while(graph.__outputDirty && settle++ < 5){
-      graph.__outputDirty = false;
-      graph.runStep(0, !graph.catch_errors);
+    while(App.graph.__outputDirty && settle++ < 5){
+      App.graph.__outputDirty = false;
+      App.graph.runStep(0, !App.graph.catch_errors);
     }
-    if(timelineChart) timelineChart.onStep();
+    if(App.timelineChart) App.timelineChart.onStep();
   });
 }
 
@@ -40,8 +42,9 @@ function stopSimulation(){
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
     window.stopSimLoop();
   }
-  if(graph && graph.status !== LGraph.STATUS_STOPPED){
-    graph.status = LGraph.STATUS_STOPPED;
-    graph.sendEventToAllNodes('onStop');
+  if(App.graph && App.graph.status !== LGraph.STATUS_STOPPED){
+    App.graph.status = LGraph.STATUS_STOPPED;
+    App.graph.sendEventToAllNodes('onStop');
   }
 }
+

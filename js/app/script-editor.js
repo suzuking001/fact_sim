@@ -22,3 +22,4 @@ if(scriptEditorCancel){
     window.editingNode = null;
   };
 }
+

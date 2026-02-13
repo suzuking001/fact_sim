@@ -1,37 +1,40 @@
 ﻿// Graph initialization
 
+var App = window.App || (window.App = {});
+
 function initGraph(){
-  if(graph) stopSimulation();
+  if(App.graph) stopSimulation();
   workCounter = 0;
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
-  graph = new LGraph();
-  graph.onAfterChange = ()=> pushHistory();
-  configureGraphClock(graph);
-  canvas = new LGraphCanvas(graphElement, graph);
-  canvas.multi_select = true;
-  installBoxSelect(canvas);
-  installBoxSelectOverlay(canvas);
-  installClipboardHandlers(canvas);
+  App.graph = new LGraph();
+  App.graph.onAfterChange = ()=> pushHistory();
+  configureGraphClock(App.graph);
+  App.canvas = new LGraphCanvas(graphElement, App.graph);
+  App.canvas.multi_select = true;
+  installBoxSelect(App.canvas);
+  installBoxSelectOverlay(App.canvas);
+  installClipboardHandlers(App.canvas);
   bindHistoryButtons();
-  installFitHandlers(canvas);
+  installFitHandlers(App.canvas);
   // expose for other helpers that hook into canvas
-  window.canvas = canvas;
-  if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(canvas);
+  window.canvas = App.canvas;
+  if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(App.canvas);
   // Make the canvas background white (node area backdrop)
-  canvas.bgcolor = '#ffffff';
+  App.canvas.bgcolor = '#ffffff';
   function resize(){
-    const r = canvas.canvas.getBoundingClientRect(), d = window.devicePixelRatio||1;
-    canvas.canvas.width = r.width*d; canvas.canvas.height = r.height*d;
-    canvas.resize(r.width, r.height); canvas.draw(true);
+    const r = App.canvas.canvas.getBoundingClientRect(), d = window.devicePixelRatio||1;
+    App.canvas.canvas.width = r.width*d; App.canvas.canvas.height = r.height*d;
+    App.canvas.resize(r.width, r.height); App.canvas.draw(true);
   }
-  const controller = resetListenerController('__graphResizeController');
-  const opts = listenerOptions(false, controller);
+  const controller = App.resetListenerController('__graphResizeController');
+  const opts = App.listenerOptions(false, controller);
   window.addEventListener('resize', resize, opts);
   resize();
   // Place initial nodes lower so they don't hide under menus
   const src = LiteGraph.createNode('factory/source'); src.pos=[60,180];
   const eq  = LiteGraph.createNode('factory/equip');  eq.pos=[360,180];
-  graph.add(src); graph.add(eq); src.connect(0,eq,0);
+  App.graph.add(src); App.graph.add(eq); src.connect(0,eq,0);
   resetHistory();
   attachTimeline();
 }
+

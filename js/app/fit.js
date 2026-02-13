@@ -1,17 +1,19 @@
 ﻿// Fit-to-screen helpers
 
+var App = window.App || (window.App = {});
+
 function fitToScreen(){
-  if(!canvas || !graph) return;
-  if(!graph._nodes || graph._nodes.length === 0){
+  if(!App.canvas || !App.graph) return;
+  if(!App.graph._nodes || App.graph._nodes.length === 0){
     try{
-      if(canvas.ds && canvas.ds.reset) canvas.ds.reset();
-      canvas.setDirty(true,true);
+      if(App.canvas.ds && App.canvas.ds.reset) App.canvas.ds.reset();
+      App.canvas.setDirty(true,true);
     }catch(_e){}
     return;
   }
   const b = new Float32Array(4);
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  for(const n of graph._nodes){
+  for(const n of App.graph._nodes){
     if(!n) continue;
     if(typeof n.getBounding === 'function'){
       n.getBounding(b);
@@ -31,30 +33,30 @@ function fitToScreen(){
     }
   }
   if(!isFinite(minX) || !isFinite(minY)) return;
-  const rect = canvas.canvas.getBoundingClientRect();
-  const cw = rect.width || canvas.canvas.clientWidth || canvas.canvas.width || 800;
-  const ch = rect.height || canvas.canvas.clientHeight || canvas.canvas.height || 600;
+  const rect = App.canvas.canvas.getBoundingClientRect();
+  const cw = rect.width || App.canvas.canvas.clientWidth || App.canvas.canvas.width || 800;
+  const ch = rect.height || App.canvas.canvas.clientHeight || App.canvas.canvas.height || 600;
   const margin = 32;
   const w = Math.max(1, maxX - minX);
   const h = Math.max(1, maxY - minY);
   let scale = Math.min((cw - margin * 2) / w, (ch - margin * 2) / h);
-  if(canvas.ds){
-    if(canvas.ds.max_scale) scale = Math.min(scale, canvas.ds.max_scale);
-    if(canvas.ds.min_scale && scale < canvas.ds.min_scale){
+  if(App.canvas.ds){
+    if(App.canvas.ds.max_scale) scale = Math.min(scale, App.canvas.ds.max_scale);
+    if(App.canvas.ds.min_scale && scale < App.canvas.ds.min_scale){
       // allow fit to go beyond min_scale when needed
-      canvas.ds.min_scale = scale;
+      App.canvas.ds.min_scale = scale;
     }
   }
   if(!isFinite(scale) || scale <= 0) scale = 1;
   const cx = minX + w / 2;
   const cy = minY + h / 2;
-  if(canvas.ds){
-    canvas.ds.scale = scale;
-    canvas.ds.offset[0] = (cw / 2) / scale - cx;
-    canvas.ds.offset[1] = (ch / 2) / scale - cy;
+  if(App.canvas.ds){
+    App.canvas.ds.scale = scale;
+    App.canvas.ds.offset[0] = (cw / 2) / scale - cx;
+    App.canvas.ds.offset[1] = (ch / 2) / scale - cy;
   }
-  canvas.setDirty(true,true);
-  showToast('画面フィット');
+  App.canvas.setDirty(true,true);
+  App.showToast('画面フィット');
 }
 
 function installFitHandlers(c){
@@ -62,8 +64,8 @@ function installFitHandlers(c){
   const el = c.canvas;
   if(!el) return;
   let lastMid = 0;
-  const controller = resetListenerController('__fitController');
-  const opts = listenerOptions(true, controller);
+  const controller = App.resetListenerController('__fitController');
+  const opts = App.listenerOptions(true, controller);
   el.addEventListener('mousedown', (e)=>{
     if(e.button !== 1) return;
     const now = performance.now();
@@ -79,3 +81,4 @@ function installFitHandlers(c){
   }, opts);
   c.__fitHooked = true;
 }
+

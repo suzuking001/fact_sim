@@ -1,45 +1,49 @@
 ﻿// Shared app state and small UI helpers
 
-let graph, canvas;
-let timelineChart = null;
+var App = window.App || (window.App = {});
 
-let toastTimer = null;
-function showToast(msg){
+App.graph = null;
+App.canvas = null;
+App.timelineChart = null;
+App.toastTimer = null;
+App._controllers = App._controllers || {};
+
+App.showToast = function(msg){
   const toast = document.getElementById('toast');
   if(!toast) return;
   toast.textContent = msg;
   toast.classList.add('show');
-  if(toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=> toast.classList.remove('show'), 1000);
-}
+  if(App.toastTimer) clearTimeout(App.toastTimer);
+  App.toastTimer = setTimeout(()=> toast.classList.remove('show'), 1000);
+};
 
-const history = {
+App.history = {
   undo: [],
   redo: [],
   lock: false,
   last: null,
-  max: 50
+  max: 50,
+  debounceMs: 150,
+  _timer: null
 };
 
-function resetListenerController(key){
+App.resetListenerController = function(key){
   try{
-    const prev = window[key];
+    const prev = App._controllers[key];
     if(prev && typeof prev.abort === 'function') prev.abort();
   }catch(_e){}
   if(typeof AbortController !== 'function'){
     const dummy = { signal: null, abort: ()=>{} };
-    window[key] = dummy;
+    App._controllers[key] = dummy;
     return dummy;
   }
   const controller = new AbortController();
-  window[key] = controller;
+  App._controllers[key] = controller;
   return controller;
-}
+};
 
-function listenerOptions(capture, controller){
+App.listenerOptions = function(capture, controller){
   if(controller && controller.signal) return { capture: !!capture, signal: controller.signal };
   return !!capture;
-}
+};
 
-window.resetListenerController = resetListenerController;
-window.listenerOptions = listenerOptions;

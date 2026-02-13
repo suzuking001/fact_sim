@@ -1,5 +1,7 @@
 ﻿// Selection tools (box select) and clipboard handlers
 
+var App = window.App || (window.App = {});
+
 function rectsOverlap(a, b){
   return !(a[0] > b[0] + b[2] ||
            a[0] + a[2] < b[0] ||
@@ -12,8 +14,8 @@ function installBoxSelect(c){
   const el = c.canvas;
   if(!el) return;
   let selecting = false;
-  const controller = resetListenerController('__boxSelectController');
-  const opts = listenerOptions(true, controller);
+  const controller = App.resetListenerController('__boxSelectController');
+  const opts = App.listenerOptions(true, controller);
 
   const getCanvasPos = (e)=>{
     try{
@@ -105,31 +107,31 @@ function installBoxSelectOverlay(c){
 }
 
 function doCopy(){
-  if(!canvas) return;
-  if(canvas.selected_nodes && Object.keys(canvas.selected_nodes).length){
-    canvas.copyToClipboard();
-    showToast('コピーしました');
+  if(!App.canvas) return;
+  if(App.canvas.selected_nodes && Object.keys(App.canvas.selected_nodes).length){
+    App.canvas.copyToClipboard();
+    App.showToast('コピーしました');
   }
 }
 
 function doPaste(){
-  if(!canvas) return;
-  if(!canvas.__last_mouse){
-    const scale = canvas.ds.scale || 1;
-    const cx = canvas.ds.offset[0] + (canvas.canvas.width * 0.5 / scale);
-    const cy = canvas.ds.offset[1] + (canvas.canvas.height * 0.5 / scale);
-    canvas.graph_mouse[0] = cx; canvas.graph_mouse[1] = cy;
+  if(!App.canvas) return;
+  if(!App.canvas.__last_mouse){
+    const scale = App.canvas.ds.scale || 1;
+    const cx = App.canvas.ds.offset[0] + (App.canvas.canvas.width * 0.5 / scale);
+    const cy = App.canvas.ds.offset[1] + (App.canvas.canvas.height * 0.5 / scale);
+    App.canvas.graph_mouse[0] = cx; App.canvas.graph_mouse[1] = cy;
   }
-  canvas.pasteFromClipboard(false);
-  showToast('ペーストしました');
+  App.canvas.pasteFromClipboard(false);
+  App.showToast('ペーストしました');
 }
 
 function installClipboardHandlers(c){
   if(!c || c.__clipboardHooked) return;
   const el = c.canvas;
   if(!el) return;
-  const controller = resetListenerController('__clipboardController');
-  const opts = listenerOptions(true, controller);
+  const controller = App.resetListenerController('__clipboardController');
+  const opts = App.listenerOptions(true, controller);
 
   const updateMouse = (e)=>{
     try{
@@ -157,15 +159,15 @@ function installClipboardHandlers(c){
     }else if(e.code === 'KeyZ'){
       if(e.shiftKey){
         redo();
-        showToast('やり直しました');
+        App.showToast('やり直しました');
       }else{
         undo();
-        showToast('元に戻しました');
+        App.showToast('元に戻しました');
       }
       e.preventDefault();
     }else if(e.code === 'KeyY'){
       redo();
-      showToast('やり直しました');
+      App.showToast('やり直しました');
       e.preventDefault();
     }else if(e.code === 'KeyV'){
       doPaste();
@@ -182,15 +184,16 @@ function bindHistoryButtons(){
   if(btnUndo && !btnUndo.__historyHooked){
     btnUndo.addEventListener('click', ()=>{
       undo();
-      showToast('元に戻しました');
+      App.showToast('元に戻しました');
     });
     btnUndo.__historyHooked = true;
   }
   if(btnRedo && !btnRedo.__historyHooked){
     btnRedo.addEventListener('click', ()=>{
       redo();
-      showToast('やり直しました');
+      App.showToast('やり直しました');
     });
     btnRedo.__historyHooked = true;
   }
 }
+

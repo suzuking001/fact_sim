@@ -1,5 +1,7 @@
 ﻿// UI wiring (controls, modals, sidebar, title editor, add node panel)
 
+var App = window.App || (window.App = {});
+
 // Controls
 const btnStart = document.getElementById('btnStart');
 if(btnStart) btnStart.onclick = ()=>{ startSimulation(); };
@@ -47,7 +49,7 @@ if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
     body.classList.toggle('sidebar-hidden');
     try{ localStorage.setItem('sidebar-hidden', body.classList.contains('sidebar-hidden') ? '1' : '0'); }catch(e){}
     updateAria();
-    try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
+    try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
   });
 })();
 
@@ -90,7 +92,7 @@ if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
     c.__titleEditHooked = true;
   }
   window.__attachTitleEditor = install;
-  if(window.canvas) install(window.canvas);
+  if(App.canvas) install(App.canvas);
 })();
 
 // Add Node (from sidebar select + button)
@@ -230,8 +232,9 @@ if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
         });
         if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
       }
-      graph.add(node);
-      try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(e){}
+      App.graph.add(node);
+      try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
     }catch(e){ console.error(e); }
   });
 })();
+

@@ -1,55 +1,85 @@
 ﻿// Undo/redo history
 
-function pushHistory(){
-  if(history.lock || !graph) return;
+var App = window.App || (window.App = {});
+
+function _captureHistory(){
+  if(App.history.lock || !App.graph) return;
   let snap;
-  try{ snap = JSON.stringify(graph.serialize()); }catch(_e){ return; }
-  if(history.last === snap) return;
-  history.undo.push(snap);
-  if(history.undo.length > history.max) history.undo.shift();
-  history.redo = [];
-  history.last = snap;
+  try{ snap = JSON.stringify(App.graph.serialize()); }catch(_e){ return; }
+  if(App.history.last === snap) return;
+  App.history.undo.push(snap);
+  if(App.history.undo.length > App.history.max) App.history.undo.shift();
+  App.history.redo = [];
+  App.history.last = snap;
+}
+
+function flushHistory(){
+  if(App.history._timer){
+    clearTimeout(App.history._timer);
+    App.history._timer = null;
+    _captureHistory();
+  }
+}
+
+function pushHistory(){
+  if(App.history.lock || !App.graph) return;
+  const delay = App.history.debounceMs || 0;
+  if(delay <= 0){
+    _captureHistory();
+    return;
+  }
+  if(App.history._timer) clearTimeout(App.history._timer);
+  App.history._timer = setTimeout(()=>{
+    App.history._timer = null;
+    _captureHistory();
+  }, delay);
 }
 
 function resetHistory(){
-  if(!graph) return;
+  if(!App.graph) return;
   try{
-    history.lock = true;
-    const snap = JSON.stringify(graph.serialize());
-    history.undo = [snap];
-    history.redo = [];
-    history.last = snap;
+    App.history.lock = true;
+    if(App.history._timer){
+      clearTimeout(App.history._timer);
+      App.history._timer = null;
+    }
+    const snap = JSON.stringify(App.graph.serialize());
+    App.history.undo = [snap];
+    App.history.redo = [];
+    App.history.last = snap;
   }finally{
-    history.lock = false;
+    App.history.lock = false;
   }
 }
 
 function applySnapshot(snap){
-  if(!graph || !snap) return;
-  history.lock = true;
+  if(!App.graph || !snap) return;
+  App.history.lock = true;
   try{
-    graph.clear();
-    graph.configure(JSON.parse(snap));
-    configureGraphClock(graph);
-    try{ if(canvas && canvas.draw) canvas.draw(true,true); }catch(_e){}
+    App.graph.clear();
+    App.graph.configure(JSON.parse(snap));
+    configureGraphClock(App.graph);
+    try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
   }finally{
-    history.lock = false;
+    App.history.lock = false;
   }
 }
 
 function undo(){
-  if(history.lock || history.undo.length <= 1) return;
-  const cur = history.undo.pop();
-  history.redo.push(cur);
-  const prev = history.undo[history.undo.length - 1];
-  history.last = prev;
+  flushHistory();
+  if(App.history.lock || App.history.undo.length <= 1) return;
+  const cur = App.history.undo.pop();
+  App.history.redo.push(cur);
+  const prev = App.history.undo[App.history.undo.length - 1];
+  App.history.last = prev;
   applySnapshot(prev);
 }
 
 function redo(){
-  if(history.lock || history.redo.length === 0) return;
-  const snap = history.redo.pop();
-  history.undo.push(snap);
-  history.last = snap;
+  flushHistory();
+  if(App.history.lock || App.history.redo.length === 0) return;
+  const snap = App.history.redo.pop();
+  App.history.undo.push(snap);
+  App.history.last = snap;
   applySnapshot(snap);
 }
