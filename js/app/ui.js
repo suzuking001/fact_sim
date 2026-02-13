@@ -95,6 +95,103 @@ if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
   if(App.canvas) install(App.canvas);
 })();
 
+// Node placement mode (follow cursor, click to place)
+function installPlacementHandlers(c){
+  if(!c || c.__placementHooked) return;
+  const controller = App.resetListenerController('__placementController');
+  const opts = App.listenerOptions(true, controller);
+  const el = c.canvas;
+  if(!el) return;
+
+  const getCanvasPos = (e)=>{
+    try{
+      const rect = el.getBoundingClientRect();
+      if(e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom){
+        return null;
+      }
+      if(typeof c.convertEventToCanvasOffset === 'function') return c.convertEventToCanvasOffset(e);
+      if(typeof c.convertEventToCanvas === 'function') return c.convertEventToCanvas(e);
+      return [e.offsetX || 0, e.offsetY || 0];
+    }catch(_e){ return null; }
+  };
+
+  el.addEventListener('mousemove', (e)=>{
+    if(!App.placement || !App.placement.active) return;
+    const p = getCanvasPos(e);
+    if(!p) return;
+    const n = App.placement.node;
+    if(!n) return;
+    const w = n.size ? n.size[0] : 0;
+    const h = n.size ? n.size[1] : 0;
+    n.pos = [p[0] - w/2, p[1] - h/2];
+    if(typeof n.setDirtyCanvas === 'function') n.setDirtyCanvas(true,true);
+    c.setDirty(true,true);
+  }, opts);
+
+  el.addEventListener('mousedown', (e)=>{
+    if(!App.placement || !App.placement.active) return;
+    if(e.button === 0){
+      App.placement.active = false;
+      App.placement.node = null;
+      c.setDirty(true,true);
+      e.preventDefault();
+      e.stopPropagation();
+    }else if(e.button === 2){
+      const n = App.placement.node;
+      App.placement.active = false;
+      App.placement.node = null;
+      if(App.graph && n) App.graph.remove(n);
+      c.setDirty(true,true);
+      e.preventDefault();
+      e.stopPropagation();
+    }else{
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, opts);
+
+  window.addEventListener('keydown', (e)=>{
+    if(!App.placement || !App.placement.active) return;
+    if(e.key === 'Escape'){
+      const n = App.placement.node;
+      App.placement.active = false;
+      App.placement.node = null;
+      if(App.graph && n) App.graph.remove(n);
+      c.setDirty(true,true);
+      e.preventDefault();
+    }
+  }, opts);
+
+  c.__placementHooked = true;
+}
+
+function _defaultGraphPos(){
+  if(!App.canvas) return [0,0];
+  const scale = App.canvas.ds?.scale || 1;
+  const cx = App.canvas.ds.offset[0] + (App.canvas.canvas.width * 0.5 / scale);
+  const cy = App.canvas.ds.offset[1] + (App.canvas.canvas.height * 0.5 / scale);
+  return [cx, cy];
+}
+
+function beginNodePlacement(node){
+  if(!App.graph || !App.canvas || !node) return;
+  if(App.placement && App.placement.active){
+    const prev = App.placement.node;
+    if(App.graph && prev) App.graph.remove(prev);
+  }
+  App.placement.active = true;
+  App.placement.node = node;
+  App.graph.add(node);
+  const p = App.canvas.__last_mouse || _defaultGraphPos();
+  const w = node.size ? node.size[0] : 0;
+  const h = node.size ? node.size[1] : 0;
+  node.pos = [p[0] - w/2, p[1] - h/2];
+  if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
+  App.canvas.selectNode(node);
+  App.canvas.setDirty(true,true);
+  App.showToast('左クリックで配置 / 右クリック or Escでキャンセル');
+}
+
 // Add Node (from sidebar select + button)
 (function(){
   const sel = document.getElementById('nodeKindSelect');
@@ -232,8 +329,7 @@ if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
         });
         if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
       }
-      App.graph.add(node);
-      try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
+      beginNodePlacement(node);
     }catch(e){ console.error(e); }
   });
 })();

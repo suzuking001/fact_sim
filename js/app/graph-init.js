@@ -16,6 +16,7 @@ function initGraph(){
   installClipboardHandlers(App.canvas);
   bindHistoryButtons();
   installFitHandlers(App.canvas);
+  if(typeof installPlacementHandlers === 'function') installPlacementHandlers(App.canvas);
   // expose for other helpers that hook into canvas
   window.canvas = App.canvas;
   if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(App.canvas);

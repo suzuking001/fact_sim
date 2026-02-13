@@ -7,6 +7,7 @@ App.canvas = null;
 App.timelineChart = null;
 App.toastTimer = null;
 App._controllers = App._controllers || {};
+App.placement = App.placement || { active: false, node: null };
 
 App.showToast = function(msg){
   const toast = document.getElementById('toast');
