@@ -4,17 +4,94 @@ class SplitNode extends EquipmentNode{
   constructor(){
     super('Split');
     this.title = 'Split';
-    // Rename default output and add a second output
     if(this.outputs && this.outputs[0]) this.outputs[0].name = 'workOut1';
-    this.addOutput('workOut2', 0);
-    // Keep ratio for backward compatibility (unused)
+    this._ensureMinWorkOutputs(2);
     this.properties.ratio = 0.5;
+    window.refreshFlipIO(this);
+  }
+  _isWorkOutputName(name){
+    const s = String(name || '');
+    return s === 'workOut' || /^workOut\d+$/.test(s);
+  }
+  _workOutputSlots(){
+    const slots = [];
+    if(!this.outputs) return slots;
+    for(let i=0;i<this.outputs.length;i++){
+      const out = this.outputs[i];
+      if(out && this._isWorkOutputName(out.name)) slots.push(i);
+    }
+    return slots;
+  }
+  _workOutputs(){
+    return this._workOutputSlots().map(slotIndex=>({ slotIndex, out: this.outputs[slotIndex] }));
+  }
+  _normalizeWorkOutputNames(){
+    const slots = this._workOutputSlots();
+    for(let i=0;i<slots.length;i++){
+      const out = this.outputs[slots[i]];
+      if(out) out.name = `workOut${i+1}`;
+    }
+  }
+  _ensureMinWorkOutputs(minCount=2){
+    let slots = this._workOutputSlots();
+    while(slots.length < minCount){
+      this.addOutput(`workOut${slots.length+1}`, 0);
+      slots = this._workOutputSlots();
+    }
+    this._normalizeWorkOutputNames();
+  }
+  _addWorkOutput(){
+    this.addOutput('workOut', 0);
+    this._normalizeWorkOutputNames();
+    window.refreshFlipIO(this);
+    this.setDirtyCanvas(true,true);
+  }
+  _removeWorkOutput(){
+    const slots = this._workOutputSlots();
+    if(slots.length <= 2) return;
+    const idx = slots[slots.length - 1];
+    const out = this.outputs && this.outputs[idx];
+    if(out && out.links){
+      [...out.links].forEach(id=>{
+        try{ this.graph && this.graph.removeLink(id); }catch(_e){}
+      });
+    }
+    this.removeOutput(idx);
+    this._normalizeWorkOutputNames();
+    window.refreshFlipIO(this);
+    this.setDirtyCanvas(true,true);
+  }
+  onConfigure(){
+    this._ensureMinWorkOutputs(2);
     window.refreshFlipIO(this);
   }
   _cloneWork(w){
     if(!w || typeof w !== 'object') return w;
     const c = new Work(w.id, w.type);
     return Object.assign(c, w);
+  }
+
+  _setWaitIcon(active, type='work'){
+    try{
+      if(!window.WorkLinkAnimator || !this.graph) return;
+      if(active){
+        if(this._waitIconLinksSplit) return;
+        const links = [];
+        const addLinks = (out)=>{
+          if(!out || !out.links) return;
+          out.links.forEach(id=>{
+            if(links.indexOf(id) < 0) links.push(id);
+          });
+        };
+        this._workOutputs().forEach(({out})=> addLinks(out));
+        this._waitIconLinksSplit = links;
+        this._waitIconLinksSplit.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type));
+      }else{
+        if(!this._waitIconLinksSplit) return;
+        this._waitIconLinksSplit.forEach(id=> window.WorkLinkAnimator.hidePortIcon(this.graph, id));
+        this._waitIconLinksSplit = null;
+      }
+    }catch(_e){}
   }
 
   _spawnSplitTransfer(duration, payload, slotIndex){
@@ -35,7 +112,8 @@ class SplitNode extends EquipmentNode{
   }
 
   _downReadySplit(){
-    if(!this.outputs || this.outputs.length < 2) return false;
+    const entries = this._workOutputs();
+    if(entries.length < 2) return false;
     const payload = this._payload;
     const readyFor = (out)=>{
       if(!out || !out.links || out.links.length === 0) return false;
@@ -52,10 +130,14 @@ class SplitNode extends EquipmentNode{
       }
       return true;
     };
-    return readyFor(this.outputs[0]) && readyFor(this.outputs[1]);
+    for(const {out} of entries){
+      if(!readyFor(out)) return false;
+    }
+    return true;
   }
 
   onExecute(){
+    this._ensureMinWorkOutputs(2);
     // Clear currentWork when truly idle
     if(this._state === 'IDLE') this._currentWork = null;
 
@@ -82,30 +164,29 @@ class SplitNode extends EquipmentNode{
           }
           break;
         case 'WAIT': {
+          const workOuts = this._workOutputs();
           if(this._downReadySplit()){
             const payload = this._payload;
             this._setWaitIcon(false);
             this._state = 'DOWN';
             const downMs = Math.max(0, this.properties.downTime*1000);
             this._until = now + downMs;
-            // Output split works simultaneously
-            const w1 = payload;
-            const w2 = this._cloneWork(payload);
-            this.setOutputData(0, w1);
-            this.setOutputData(1, w2);
-            this._spawnSplitTransfer(downMs, w1, 0);
-            this._spawnSplitTransfer(downMs, w2, 1);
+            // Output split works simultaneously to all workOut ports
+            for(let i=0;i<workOuts.length;i++){
+              const {slotIndex} = workOuts[i];
+              const wOut = (i === 0) ? payload : this._cloneWork(payload);
+              this.setOutputData(slotIndex, wOut);
+              this._spawnSplitTransfer(downMs, wOut, slotIndex);
+            }
             this._payload = null;
           }else{
-            this.setOutputData(0, null);
-            this.setOutputData(1, null);
+            workOuts.forEach(({slotIndex})=> this.setOutputData(slotIndex, null));
           }
           break;
         }
         case 'DOWN':
           if(now >= this._until){
-            this.setOutputData(0, null);
-            this.setOutputData(1, null);
+            this._workOutputs().forEach(({slotIndex})=> this.setOutputData(slotIndex, null));
             this._state = 'IDLE';
             this._setWaitIcon(false);
             again = true;
@@ -184,6 +265,24 @@ class SplitNode extends EquipmentNode{
 }
 
 menuMixin(SplitNode);
+(function(proto){
+  const prev = proto.getExtraMenuOptions;
+  proto.getExtraMenuOptions = function(){
+    let opts = prev ? prev.call(this) : [];
+    if(!Array.isArray(opts)) opts = [];
+    opts.push({
+      content: 'Add workOut',
+      callback: ()=> this._addWorkOutput()
+    });
+    const count = this._workOutputSlots().length;
+    opts.push({
+      content: 'Remove workOut',
+      disabled: count <= 2,
+      callback: ()=> this._removeWorkOutput()
+    });
+    return opts;
+  };
+})(SplitNode.prototype);
 // Ensure palette/menu shows proper name
 SplitNode.title = 'Split';
 window.SplitNode = SplitNode;
