@@ -144,6 +144,56 @@ class LinkAnimator{
   const animator = new LinkAnimator();
   window.WorkLinkAnimator = animator;
 
+  function collectConnectionCullNodes(canvas){
+    const graph = canvas && canvas.graph;
+    if(!graph || !Array.isArray(graph._nodes) || !graph._nodes.length) return null;
+
+    const allNodes = graph._nodes;
+    if(allNodes.length < 200 || typeof canvas.computeVisibleNodes !== 'function') return allNodes;
+
+    const visibleBuf = canvas.__cullVisibleNodesBuf || (canvas.__cullVisibleNodesBuf = []);
+    const visibleNodes = canvas.computeVisibleNodes(allNodes, visibleBuf);
+    if(!visibleNodes || !visibleNodes.length) return [];
+    if(visibleNodes.length >= allNodes.length) return allNodes;
+
+    const includeIds = new Set();
+    for(const node of visibleNodes){
+      if(!node || typeof node.id === 'undefined') continue;
+      includeIds.add(node.id);
+
+      if(Array.isArray(node.inputs)){
+        for(const inp of node.inputs){
+          if(!inp || inp.link == null) continue;
+          const link = graph.links && graph.links[inp.link];
+          if(!link) continue;
+          if(typeof link.origin_id !== 'undefined') includeIds.add(link.origin_id);
+          if(typeof link.target_id !== 'undefined') includeIds.add(link.target_id);
+        }
+      }
+
+      if(Array.isArray(node.outputs)){
+        for(const out of node.outputs){
+          if(!out || !out.links) continue;
+          for(const lid of out.links){
+            const link = graph.links && graph.links[lid];
+            if(!link) continue;
+            if(typeof link.origin_id !== 'undefined') includeIds.add(link.origin_id);
+            if(typeof link.target_id !== 'undefined') includeIds.add(link.target_id);
+          }
+        }
+      }
+    }
+
+    if(includeIds.size >= allNodes.length) return allNodes;
+
+    const subset = canvas.__cullNodeSubsetBuf || (canvas.__cullNodeSubsetBuf = []);
+    subset.length = 0;
+    for(const node of allNodes){
+      if(node && includeIds.has(node.id)) subset.push(node);
+    }
+    return subset;
+  }
+
   const originalSetOutputData = LiteGraph.LGraphNode.prototype.setOutputData;
   LiteGraph.LGraphNode.prototype.setOutputData = function(slot, data){
     // Track output changes to allow same-tick settle passes
@@ -194,7 +244,20 @@ class LinkAnimator{
 
   const originalDrawConnections = LiteGraph.LGraphCanvas.prototype.drawConnections;
   LiteGraph.LGraphCanvas.prototype.drawConnections = function(ctx){
-    originalDrawConnections.call(this, ctx);
+    let originalNodes = null;
+    let replaced = false;
+    try{
+      const graph = this.graph;
+      const subset = collectConnectionCullNodes(this);
+      if(graph && Array.isArray(graph._nodes) && Array.isArray(subset) && subset !== graph._nodes){
+        originalNodes = graph._nodes;
+        graph._nodes = subset;
+        replaced = true;
+      }
+      originalDrawConnections.call(this, ctx);
+    }finally{
+      if(replaced && this.graph) this.graph._nodes = originalNodes;
+    }
     animator.draw(this, ctx);
   };
 })();

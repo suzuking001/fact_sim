@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260215b"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260215b" />
+    <link rel="stylesheet" href="css/app.css?v=20260215d" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -25,27 +25,6 @@
         <label for="speedRange">Speed <span id="speedFactor">1.0x</span></label>
         <input type="range" id="speedRange" value="2" min="0" max="12" step="1">
       </div>
-      <div class="control-group">
-        <label for="renderFpsSelect">Render FPS</label>
-        <select id="renderFpsSelect">
-          <option value="15">15</option>
-          <option value="30">30</option>
-          <option value="60" selected>60</option>
-        </select>
-      </div>
-      <span>Time: <span id="simTime">0.00 s</span></span>
-      <div class="control-group">
-        <label for="simModeSelect">Engine</label>
-        <select id="simModeSelect">
-          <option value="dt">dt</option>
-          <option value="event">event</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label>Engine detail</label>
-        <div id="simDt" class="sim-meta">Engine: dt (0.1 s fixed)</div>
-      </div>
-      <button id="btnBenchmark">Compare Speed</button>
       <select id="exampleSelect" title="Examples">
         <option value="">Load example…</option>
         <option value="simple">Simple</option>
@@ -71,6 +50,29 @@
       </div>
       <div id="addNodeProps" class="propFields"></div>
       <button id="btnAddNode">Add Node</button>
+    </div>
+    <div id="advancedPanel">
+      <div class="panelHeader">Simulation Detail</div>
+      <div class="control-group">
+        <label for="renderFpsSelect">Render FPS</label>
+        <select id="renderFpsSelect">
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="60" selected>60</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="simModeSelect">Engine</label>
+        <select id="simModeSelect">
+          <option value="dt">dt</option>
+          <option value="event">event</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Engine detail</label>
+        <div id="simDt" class="sim-meta">Engine: dt (0.1 s fixed)</div>
+      </div>
+      <button id="btnBenchmark">Compare Speed</button>
     </div>
     <div id="shortcutPanel">
       <div class="panelHeader">Shortcuts</div>
@@ -117,6 +119,7 @@
       <button id="btnAbout">About / Licenses</button>
     </div>
   </div>
+  <div id="simTimeHud">Time: <span id="simTime">0.00 s</span></div>
   <canvas id="graph"></canvas>
   <input id="nodeTitleEditor" type="text" aria-label="Edit node title" />
   <div id="toast" role="status" aria-live="polite"></div>
@@ -235,7 +238,7 @@ SOFTWARE.
     <script src="js/nodes/ioflip.js"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js"></script>
+    <script src="js/link-anim.js?v=20260215b"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js"></script>
   <script src="js/nodes/source.js"></script>
@@ -261,7 +264,7 @@ SOFTWARE.
   <script src="js/app/graph-init.js?v=20260215b"></script>
   <script src="js/app/examples.js"></script>
   <script src="js/app/file-io.js?v=20260213"></script>
-  <script src="js/app/ui.js?v=20260215d"></script>
+  <script src="js/app/ui.js?v=20260215e"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

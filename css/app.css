@@ -51,7 +51,8 @@ html,body{
 #controls button,#controls input,#controls select,
 #fileControls button,
 #scriptEditorControls button,
-#addNodePanel button,#addNodePanel select{
+#addNodePanel button,#addNodePanel select,
+#advancedPanel button,#advancedPanel select{
   margin-right:8px;
   padding:8px 14px;
   border-radius: var(--radius-sm);
@@ -64,7 +65,8 @@ html,body{
 #controls button,
 #fileControls button,
 #scriptEditorControls button,
-#addNodePanel button{
+#addNodePanel button,
+#advancedPanel button{
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
   border: none;
   color: #fff;
@@ -72,14 +74,16 @@ html,body{
 #controls button:hover,
 #fileControls button:hover,
 #scriptEditorControls button:hover,
-#addNodePanel button:hover{
+#addNodePanel button:hover,
+#advancedPanel button:hover{
   filter: brightness(1.06);
   transform: translateY(-1px);
 }
 #controls button:active,
 #fileControls button:active,
 #scriptEditorControls button:active,
-#addNodePanel button:active{
+#addNodePanel button:active,
+#advancedPanel button:active{
   transform: translateY(0);
   filter: brightness(0.98);
 }
@@ -93,7 +97,26 @@ html,body{
   box-shadow: 0 0 0 3px rgba(110,168,254,0.25);
 }
 
-#simTime{margin-left:12px;font-weight:600;color:var(--muted);}
+#simTimeHud{
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  z-index: 1600;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  color: var(--muted);
+  font-weight: 600;
+  pointer-events: none;
+}
+#simTime{
+  margin-left: 6px;
+  color: var(--text);
+  font-weight: 700;
+}
 
 #fileInput{display:none;}
 
@@ -368,6 +391,7 @@ body.timeline-hidden #timelineDock{ display: none; }
 
 /* Add Node + Shortcut panel cards */
 #addNodePanel,
+#advancedPanel,
 #shortcutPanel{
   background: #fff; border: 1px solid var(--panel-border);
   border-radius: var(--radius); box-shadow: var(--shadow);
@@ -375,6 +399,7 @@ body.timeline-hidden #timelineDock{ display: none; }
   display:flex; flex-direction: column; gap: 10px;
 }
 #addNodePanel .panelHeader,
+#advancedPanel .panelHeader,
 #shortcutPanel .panelHeader{ font-weight: 600; color: var(--muted); }
 #addNodePanel .field{ display:flex; flex-direction: column; gap:6px; }
 #addNodePanel select{ width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--input-border); border-radius: var(--radius-sm); background:#fff; color:var(--text); }

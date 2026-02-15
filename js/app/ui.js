@@ -17,16 +17,11 @@ if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
 
 const simModeSelect = document.getElementById('simModeSelect');
 if(simModeSelect){
-  let currentMode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));
-  try{
-    const saved = localStorage.getItem('sim-mode');
-    if(saved) currentMode = (App.setSimMode ? App.setSimMode(saved) : saved);
-  }catch(_e){}
+  let currentMode = (App.setSimMode ? App.setSimMode('dt') : 'dt');
   simModeSelect.value = currentMode;
   simModeSelect.addEventListener('change', ()=>{
     const mode = (App.setSimMode ? App.setSimMode(simModeSelect.value) : simModeSelect.value);
     simModeSelect.value = mode;
-    try{ localStorage.setItem('sim-mode', mode); }catch(_e){}
     if(typeof window.updateSimTime === 'function') window.updateSimTime();
     if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
       stopSimulation();
@@ -38,18 +33,13 @@ if(simModeSelect){
 
 const renderFpsSelect = document.getElementById('renderFpsSelect');
 if(renderFpsSelect){
-  let fps = (typeof App.getRenderFps === 'function') ? App.getRenderFps() : 60;
-  try{
-    const saved = localStorage.getItem('render-fps');
-    if(saved && typeof App.setRenderFps === 'function') fps = App.setRenderFps(saved);
-  }catch(_e){}
+  let fps = (typeof App.setRenderFps === 'function') ? App.setRenderFps(60) : 60;
   renderFpsSelect.value = String(fps);
   renderFpsSelect.addEventListener('change', ()=>{
     const next = (typeof App.setRenderFps === 'function')
       ? App.setRenderFps(renderFpsSelect.value)
       : Number(renderFpsSelect.value) || 60;
     renderFpsSelect.value = String(next);
-    try{ localStorage.setItem('render-fps', String(next)); }catch(_e){}
     try{
       if(App.timelineChart && typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
       if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
