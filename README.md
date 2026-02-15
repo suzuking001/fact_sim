@@ -12,6 +12,18 @@
 
 ![fact_sim UI](./スクリーンショット%202026-02-07%20095035.png)
 
+## 全体像（Mermaid）
+```mermaid
+flowchart LR
+  UI[UI<br/>index.html] --> G[LiteGraph Graph]
+  G --> N[Nodes<br/>Source/Equip/...]
+  G --> E[Engine<br/>dt or event]
+  E -->|simNow/update| N
+  N --> T[Timeline]
+  N --> B[Benchmark]
+  G --> S[Share URL / Share ID]
+```
+
 ## 理論モデルとの関係（重要）
 本実装は、理論上の「2状態最小モデル（P/T）」を実運用向けに拡張した形です。  
 各工程ノード（Equipment系）は `IDLE / PROCESS / WAIT / DOWN` の4状態で動きますが、
@@ -23,6 +35,25 @@
   上下流の受入条件から決まるゲート状態（追加の時間パラメータを基本要求しない）
 
 このため、理論の狙いである「状態・計測・計算の簡素化」は、現実装でも維持されています。
+
+```mermaid
+stateDiagram-v2
+  direction LR
+  [*] --> IDLE
+  IDLE --> PROCESS: work受入
+  PROCESS --> WAIT: processTime経過
+  WAIT --> DOWN: 下流受入可
+  DOWN --> IDLE: downTime経過
+
+  note right of PROCESS
+    実測中心パラメータ
+    processTime
+  end note
+  note right of DOWN
+    実測中心パラメータ
+    downTime
+  end note
+```
 
 ## この実装のメリット（理論意図の継承）
 - **状態空間の抑制**  
@@ -71,6 +102,23 @@
 - 受信Workをカウント
 - サイクル履歴の簡易グラフ表示
 
+## ノード連結イメージ（Mermaid）
+```mermaid
+flowchart LR
+  SRC[Source] --> EQ1[Equipment]
+  EQ1 --> SPL[Split]
+  SPL --> A[Line A]
+  SPL --> B[Line B]
+  A --> MER[Merge]
+  B --> MER
+  MER --> JN[Join]
+  JN --> SNK[Sink]
+
+  BR[Branch] --> P1[workOut A]
+  BR --> P2[workOut B]
+  AGV[AGV Route] --> EQ1
+```
+
 ## シミュレーションエンジン
 ### `dt` エンジン
 - 固定刻み（`0.1s`）で進行
@@ -78,6 +126,16 @@
 ### `event` エンジン
 - ヒープベースのイベント駆動
 - `_until` を持つ状態遷移を時間ジャンプで処理
+
+```mermaid
+flowchart TD
+  START[update(simDelta)] --> M{mode}
+  M -->|dt| DT[固定刻みでrunStep]
+  M -->|event| EV[次イベント時刻へジャンプ]
+  DT --> CAP[状態キャプチャ]
+  EV --> CAP
+  CAP --> TL[Timeline更新]
+```
 
 ## 実行時UI
 ### 速度
@@ -104,6 +162,22 @@
 
 ### Share ID
 - 外部ストレージ（`tmpfiles.org`）へ保存して `#sid=...` を生成
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant A as App
+  participant R as Remote(tmpfiles)
+
+  U->>A: Share URL
+  A->>A: グラフJSON圧縮
+  A-->>U: #g=... をコピー
+
+  U->>A: Share ID
+  A->>R: グラフJSONアップロード
+  R-->>A: sid
+  A-->>U: #sid=... をコピー
+```
 
 ## 制約・既定値
 - ノード数上限: `5000`（`js/nodes-config.js` の `limits.maxNodes`）
