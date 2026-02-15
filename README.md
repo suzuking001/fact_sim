@@ -17,6 +17,28 @@ Quick walkthrough GIF:
 
 ---
 
+## At a Glance
+```mermaid
+flowchart LR
+  A[Build line model] --> B[Run simulation]
+  B --> C[Observe node states]
+  C --> D[Review timing chart]
+  D --> E[Find bottlenecks]
+```
+
+```mermaid
+flowchart LR
+  S[Source] --> E1[Equipment]
+  E1 --> BR[Branch]
+  BR --> A[Equipment A]
+  BR --> B[Equipment B]
+  A --> MG[Merge]
+  B --> MG
+  MG --> K[Sink]
+```
+
+---
+
 ## Features
 - Web browser based (no installation required)
 - Node-based production line modeling
