@@ -5,6 +5,7 @@ const graphElement = document.getElementById('graph');
 
 // Time management (simulation clock)
 const SIM_DT_SEC = 0.1;
+const SPEED_LEVELS = [0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
 let speed = 1;
 let simTimeMs = 0;
 let simRunning = false;
@@ -26,51 +27,81 @@ function setSimTime(ms){
   simTimeMs = (isFinite(t) && t >= 0) ? t : 0;
 }
 
-function setSpeed(v){
-  if(isNaN(v)) return;
-  if(v <= 1){
-    v = Math.round(v * 10) / 10;
-    if(v < 0.1) v = 0.1;
-  }else{
-    v = Math.round(v);
+function clampSpeed(v){
+  const min = SPEED_LEVELS[0];
+  const max = SPEED_LEVELS[SPEED_LEVELS.length - 1];
+  if(!isFinite(v)) return min;
+  if(v < min) return min;
+  if(v > max) return max;
+  return v;
+}
+
+function clampSpeedLevelIndex(i){
+  const max = SPEED_LEVELS.length - 1;
+  if(!isFinite(i)) return 0;
+  const idx = Math.round(i);
+  if(idx < 0) return 0;
+  if(idx > max) return max;
+  return idx;
+}
+
+function speedLevelIndexFromValue(v){
+  const n = Number(v);
+  if(!isFinite(n)) return clampSpeedLevelIndex(SPEED_LEVELS.indexOf(1));
+  let bestIdx = 0;
+  let bestDiff = Math.abs(SPEED_LEVELS[0] - n);
+  for(let i = 1; i < SPEED_LEVELS.length; i++){
+    const diff = Math.abs(SPEED_LEVELS[i] - n);
+    if(diff < bestDiff){
+      bestDiff = diff;
+      bestIdx = i;
+    }
   }
-  // clamp to reasonable range
-  if(v > 100) v = 100;
-  speed = v;
-  updateSimTime();
-  // reflect to UI controls
+  return bestIdx;
+}
+
+function formatSpeedLabel(v){
+  const n = Number(v);
+  if(!isFinite(n)) return '1x';
+  if(Number.isInteger(n)) return `${n}x`;
+  return `${n.toFixed(2).replace(/0+$/,'').replace(/\.$/, '')}x`;
+}
+
+function reflectSpeedUI(v){
   try{
     const range = document.getElementById('speedRange');
     if(range){
-      const max = parseFloat(range.max||'10');
-      const min = parseFloat(range.min||'0.1');
-      if(v >= min && v <= max){
-        range.step = (v <= 1 ? '0.1' : '1');
-        range.value = (v < 1 ? v.toFixed(1) : String(v));
-      }
+      range.min = '0';
+      range.max = String(SPEED_LEVELS.length - 1);
+      range.step = '1';
+      range.value = String(speedLevelIndexFromValue(v));
     }
     const sf = document.getElementById('speedFactor');
-    if(sf) sf.textContent = (v < 1 ? v.toFixed(1) : String(v)) + 'x';
+    if(sf) sf.textContent = formatSpeedLabel(v);
   }catch(e){}
+}
+
+function setSpeed(v){
+  const n = Number(v);
+  if(!isFinite(n)) return;
+  speed = clampSpeed(n);
+  updateSimTime();
+  reflectSpeedUI(speed);
 }
 
 // Bind speed control (range slider preferred; fall back to numeric input if present)
 (function(){
   const range = document.getElementById('speedRange');
   if(range){
-    range.addEventListener('input', e => setSpeed(parseFloat(e.target.value)));
-    // initialize UI label
-    try{
-      const sf=document.getElementById('speedFactor');
-      if(sf){
-        const v = parseFloat(range.value);
-        sf.textContent = (v < 1 ? v.toFixed(1) : String(parseInt(range.value,10))) + 'x';
-      }
-    }catch(e){}
-    try{
-      const v = parseFloat(range.value);
-      range.step = (v <= 1 ? '0.1' : '1');
-    }catch(e){}
+    range.min = '0';
+    range.max = String(SPEED_LEVELS.length - 1);
+    range.step = '1';
+    range.value = String(speedLevelIndexFromValue(speed));
+    range.addEventListener('input', e=>{
+      const idx = clampSpeedLevelIndex(parseInt(e.target.value, 10));
+      setSpeed(SPEED_LEVELS[idx]);
+    });
+    reflectSpeedUI(speed);
   }
 })();
 

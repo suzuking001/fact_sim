@@ -10,6 +10,9 @@ function initGraph(){
   App.graph.onAfterChange = ()=> pushHistory();
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
+  if(typeof App.installCanvasRenderThrottle === 'function'){
+    App.installCanvasRenderThrottle(App.canvas);
+  }
   App.canvas.multi_select = true;
   installBoxSelect(App.canvas);
   installBoxSelectOverlay(App.canvas);

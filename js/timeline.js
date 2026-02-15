@@ -90,7 +90,7 @@
       this.draw();
     }
 
-    onStep(){
+    onStep(shouldDraw = true){
       if(!this.graph) return;
       const now = this._nowSec();
       this._lastNow = now;
@@ -99,7 +99,7 @@
         this._recordNode(n, now);
       }
       this._prune(now);
-      this.draw();
+      if(shouldDraw !== false) this.draw();
     }
 
     _nowSec(){

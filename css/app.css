@@ -408,6 +408,29 @@ body.timeline-hidden #timelineDock{ display: none; }
 .benchmarkHeader h2{
   margin:0; font-size:18px; letter-spacing:0.02em;
 }
+.benchmarkProgressWrap{
+  margin: 10px 0 10px;
+  display: none;
+}
+.benchmarkProgressLabel{
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.benchmarkProgressTrack{
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+.benchmarkProgressBar{
+  width: 0%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0f766e, #0ea5e9);
+  transition: width .12s linear;
+}
 .benchmarkSummary{
   margin:8px 0 6px; color:var(--text); font-size:13px;
 }

@@ -7,9 +7,9 @@
   <!-- LiteGraph -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/css/litegraph.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
-  <script src="js/nodes-config.js"></script>
+  <script src="js/nodes-config.js?v=20260215b"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260215" />
+    <link rel="stylesheet" href="css/app.css?v=20260215b" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -23,15 +23,22 @@
       </div>
       <div class="control-group">
         <label for="speedRange">Speed <span id="speedFactor">1.0x</span></label>
-        <input type="range" id="speedRange" value="1" min="0.1" max="100" step="0.1">
+        <input type="range" id="speedRange" value="2" min="0" max="12" step="1">
+      </div>
+      <div class="control-group">
+        <label for="renderFpsSelect">Render FPS</label>
+        <select id="renderFpsSelect">
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="60" selected>60</option>
+        </select>
       </div>
       <span>Time: <span id="simTime">0.00 s</span></span>
       <div class="control-group">
         <label for="simModeSelect">Engine</label>
         <select id="simModeSelect">
           <option value="dt">dt</option>
-          <option value="event">event-lite</option>
-          <option value="eventq">event-queue</option>
+          <option value="event">event</option>
         </select>
       </div>
       <div class="control-group">
@@ -142,15 +149,23 @@
         <h2>Engine Benchmark</h2>
         <button id="benchmarkClose" aria-label="Close">Close</button>
       </div>
+      <div id="benchmarkProgressWrap" class="benchmarkProgressWrap" aria-live="polite">
+        <div id="benchmarkProgressLabel" class="benchmarkProgressLabel">Benchmark running...</div>
+        <div class="benchmarkProgressTrack">
+          <div id="benchmarkProgressBar" class="benchmarkProgressBar"></div>
+        </div>
+      </div>
       <p id="benchmarkSummary" class="benchmarkSummary"></p>
-      <p class="benchmarkLegend">
+      <p id="benchmarkLegend" class="benchmarkLegend">
         `speed` は実時間に対して進んだシミュレーション時間の倍率です（高いほど高速）。<br>
+        `Case` は描画あり/なしの条件を示します。<br>
         棒グラフは最速エンジンを100%として相対表示しています。
       </p>
       <table id="benchmarkTable" aria-label="Benchmark result table">
         <thead>
           <tr>
             <th>Engine</th>
+            <th>Case</th>
             <th>Speed</th>
             <th>Sim Time</th>
             <th>Wall Time</th>
@@ -213,7 +228,7 @@ SOFTWARE.
     </div>
   </div>
 
-  <script src="js/core.js"></script>
+  <script src="js/core.js?v=20260215b"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js"></script>
@@ -233,19 +248,20 @@ SOFTWARE.
   <script src="js/nodes/sink.js"></script>
   <script src="js/nodes/register.js"></script>
   <script src="sample/sample_line1.js"></script>
-  <script src="js/timeline.js"></script>
-  <script src="js/app/state.js"></script>
+  <script src="js/timeline.js?v=20260215b"></script>
+  <script src="js/app/state.js?v=20260215b"></script>
   <script src="js/app/script-editor.js"></script>
-  <script src="js/app/engine.js"></script>
-  <script src="js/app/sim.js"></script>
+  <script src="js/app/engine.js?v=20260215f"></script>
+  <script src="js/app/sim.js?v=20260215e"></script>
+  <script src="js/app/benchmark.js?v=20260215d"></script>
   <script src="js/app/history.js"></script>
   <script src="js/app/selection.js"></script>
   <script src="js/app/fit.js"></script>
   <script src="js/app/timeline-init.js"></script>
-  <script src="js/app/graph-init.js"></script>
+  <script src="js/app/graph-init.js?v=20260215b"></script>
   <script src="js/app/examples.js"></script>
   <script src="js/app/file-io.js?v=20260213"></script>
-  <script src="js/app/ui.js?v=20260215"></script>
+  <script src="js/app/ui.js?v=20260215d"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

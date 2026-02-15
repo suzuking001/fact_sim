@@ -15,8 +15,7 @@ function configureGraphClock(g){
 
 window.getSimMetaText = function(){
   const mode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));
-  if(mode === 'eventq') return 'Engine: event-queue (heap)';
-  if(mode === 'event') return 'Engine: event-lite (time jump)';
+  if(mode === 'event') return 'Engine: event (heap)';
   const dt = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
   return `Engine: dt (${dt.toFixed(1)} s fixed)`;
 };
@@ -24,6 +23,7 @@ window.getSimMetaText = function(){
 function startSimulation(){
   if(!App.graph) return;
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;
+  if(typeof App.resetRenderBudget === 'function') App.resetRenderBudget();
 
   const mode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));
   App.engine = (typeof App.createSimEngine === 'function')
@@ -57,4 +57,11 @@ function stopSimulation(){
     App.graph.status = LGraph.STATUS_STOPPED;
     App.graph.sendEventToAllNodes('onStop');
   }
+
+  try{
+    if(App.timelineChart && typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
+  }catch(_e){}
+  try{
+    if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+  }catch(_e){}
 }

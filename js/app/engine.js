@@ -1,4 +1,4 @@
-// Simulation engine implementations (dt / event-lite / event-queue)
+// Simulation engine implementations (dt / event)
 
 var App = window.App || (window.App = {});
 
@@ -25,8 +25,20 @@ var App = window.App || (window.App = {});
     }
   }
 
-  function notifyTimeline(){
+  function captureTimeline(){
     if(App._suspendTimeline) return;
+    if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
+      App.timelineChart.onStep(false);
+    }
+  }
+
+  function drawTimeline(){
+    if(App._suspendTimeline) return;
+    if(App.timelineChart && typeof App.timelineChart.draw === 'function'){
+      if(typeof App.shouldRenderFrame === 'function' && !App.shouldRenderFrame('timeline', false)) return;
+      App.timelineChart.draw();
+      return;
+    }
     if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
       App.timelineChart.onStep();
     }
@@ -63,63 +75,122 @@ var App = window.App || (window.App = {});
     return ids;
   }
 
-  function isFlowInputPort(port){
-    if(!port) return false;
-    const name = String(port.name || '').toLowerCase();
-    if(name.startsWith('sig')) return false;
-
-    const rawType = port.type;
-    const type = String(rawType == null ? '' : rawType).toLowerCase();
-    if(type === 'string' || type === 'signal' || type === 'sig') return false;
-    if(type === 'work' || type === 'agv' || type === 'number' || type === '*' || type === 'any' || type === '0') return true;
-    if(name.indexOf('work') >= 0 || name.indexOf('agv') >= 0) return true;
-    return rawType === 0 || rawType == null || type === '';
-  }
-
-  function heapPush(heap, item){
-    heap.push(item);
-    let i = heap.length - 1;
-    while(i > 0){
-      const p = ((i - 1) >> 1);
-      if(heap[p].t < heap[i].t) break;
-      if(heap[p].t === heap[i].t && heap[p].seq < heap[i].seq) break;
-      const tmp = heap[p];
-      heap[p] = heap[i];
-      heap[i] = tmp;
-      i = p;
+  class IndexedEventHeap{
+    constructor(){
+      this.items = [];
+      this.indexByNodeId = new Map();
+      this.seq = 0;
     }
-  }
 
-  function heapPop(heap){
-    if(!heap.length) return null;
-    const top = heap[0];
-    const last = heap.pop();
-    if(heap.length){
-      heap[0] = last;
-      let i = 0;
+    get size(){
+      return this.items.length;
+    }
+
+    clear(){
+      this.items.length = 0;
+      this.indexByNodeId.clear();
+      this.seq = 0;
+    }
+
+    nodeIds(){
+      return this.indexByNodeId.keys();
+    }
+
+    peek(){
+      return this.items.length ? this.items[0] : null;
+    }
+
+    pop(){
+      if(!this.items.length) return null;
+      return this._removeAt(0);
+    }
+
+    remove(nodeId){
+      const idx = this.indexByNodeId.get(nodeId);
+      if(typeof idx === 'undefined') return null;
+      return this._removeAt(idx);
+    }
+
+    upsert(nodeId, t){
+      const time = Number(t);
+      const idx = this.indexByNodeId.get(nodeId);
+
+      if(typeof idx === 'undefined'){
+        const item = { nodeId, t: time, seq: ++this.seq };
+        this.items.push(item);
+        const last = this.items.length - 1;
+        this.indexByNodeId.set(nodeId, last);
+        this._bubbleUp(last);
+        return item;
+      }
+
+      const item = this.items[idx];
+      const prevT = item.t;
+      item.t = time;
+      if(time < prevT) this._bubbleUp(idx);
+      else if(time > prevT) this._bubbleDown(idx);
+      return item;
+    }
+
+    _removeAt(idx){
+      const lastIndex = this.items.length - 1;
+      const removed = this.items[idx];
+      this.indexByNodeId.delete(removed.nodeId);
+
+      if(idx === lastIndex){
+        this.items.pop();
+        return removed;
+      }
+
+      const last = this.items[lastIndex];
+      this.items[idx] = last;
+      this.items.pop();
+      this.indexByNodeId.set(last.nodeId, idx);
+
+      const upIdx = this._bubbleUp(idx);
+      if(upIdx === idx) this._bubbleDown(idx);
+
+      return removed;
+    }
+
+    _isLess(a, b){
+      return a.t < b.t || (a.t === b.t && a.seq < b.seq);
+    }
+
+    _swap(i, j){
+      const a = this.items[i];
+      const b = this.items[j];
+      this.items[i] = b;
+      this.items[j] = a;
+      this.indexByNodeId.set(a.nodeId, j);
+      this.indexByNodeId.set(b.nodeId, i);
+    }
+
+    _bubbleUp(start){
+      let i = start;
+      while(i > 0){
+        const p = ((i - 1) >> 1);
+        if(this._isLess(this.items[p], this.items[i])) break;
+        this._swap(i, p);
+        i = p;
+      }
+      return i;
+    }
+
+    _bubbleDown(start){
+      let i = start;
       while(true){
         const l = i * 2 + 1;
         const r = l + 1;
-        if(l >= heap.length) break;
+        if(l >= this.items.length) break;
         let s = l;
-        if(r < heap.length){
-          const hl = heap[l];
-          const hr = heap[r];
-          if(hr.t < hl.t || (hr.t === hl.t && hr.seq < hl.seq)) s = r;
-        }
-        const hs = heap[s];
-        const hi = heap[i];
-        if(hi.t < hs.t || (hi.t === hs.t && hi.seq <= hs.seq)) break;
-        heap[i] = hs;
-        heap[s] = hi;
+        if(r < this.items.length && this._isLess(this.items[r], this.items[l])) s = r;
+        if(this._isLess(this.items[i], this.items[s])) break;
+        this._swap(i, s);
         i = s;
       }
+      return i;
     }
-    return top;
-  }
-
-  function heapPeek(heap){
-    return heap.length ? heap[0] : null;
   }
 
   class DirtyExecEngineBase{
@@ -169,12 +240,12 @@ var App = window.App || (window.App = {});
           }
         }
       }
-      const flowInputSlots = this._getFlowInputSlots(node);
-      for(const slotIndex of flowInputSlots){
-        const inp = node.inputs && node.inputs[slotIndex];
-        if(!inp || inp.link == null) continue;
-        const link = this.graph.links && this.graph.links[inp.link];
-        if(link && typeof link.origin_id !== 'undefined') this._markNodeDirty(link.origin_id);
+      if(Array.isArray(node.inputs)){
+        for(const inp of node.inputs){
+          if(!inp || inp.link == null) continue;
+          const link = this.graph.links && this.graph.links[inp.link];
+          if(link && typeof link.origin_id !== 'undefined') this._markNodeDirty(link.origin_id);
+        }
       }
     }
 
@@ -238,30 +309,6 @@ var App = window.App || (window.App = {});
 
       node.__simDirtyUntilPatched = patched;
       node.__simDirtyOnUntilChanged = onUntilChanged;
-      this._collectFlowInputSlots(node);
-    }
-
-    _collectFlowInputSlots(node){
-      if(!node || !Array.isArray(node.inputs) || !node.inputs.length){
-        node.__simFlowInputSlots = [];
-        node.__simFlowInputCount = 0;
-        return node.__simFlowInputSlots;
-      }
-      const slots = [];
-      for(let i = 0; i < node.inputs.length; i++){
-        if(isFlowInputPort(node.inputs[i])) slots.push(i);
-      }
-      node.__simFlowInputSlots = slots;
-      node.__simFlowInputCount = node.inputs.length;
-      return slots;
-    }
-
-    _getFlowInputSlots(node){
-      if(!node || !Array.isArray(node.inputs) || !node.inputs.length) return [];
-      if(!Array.isArray(node.__simFlowInputSlots) || node.__simFlowInputCount !== node.inputs.length){
-        return this._collectFlowInputSlots(node);
-      }
-      return node.__simFlowInputSlots;
     }
 
     _safeExecuteNode(node){
@@ -342,251 +389,76 @@ var App = window.App || (window.App = {});
       this.accumMs += delta;
 
       let steps = 0;
+      let timelineCaptured = false;
       while(this.accumMs >= dtMs && steps < DT_STEP_LIMIT){
         graph.__outputDirty = false;
         graph.runStep(1, !graph.catch_errors);
         settleGraph(graph, DT_SETTLE_LIMIT);
 
         if(typeof window.advanceSimTime === 'function') window.advanceSimTime(dtMs);
+        captureTimeline();
+        timelineCaptured = true;
         this.accumMs -= dtMs;
         steps++;
       }
 
       if(steps === DT_STEP_LIMIT) this.accumMs = 0;
-      if(steps > 0) notifyTimeline();
+      if(timelineCaptured) drawTimeline();
     }
   }
 
-  class EventLiteEngine extends DirtyExecEngineBase{
+  class EventHeapEngine extends DirtyExecEngineBase{
     constructor(graph){
       super(graph);
-      this.heap = [];
-      this.seq = 0;
-      this.eventByNodeId = new Map();
+      this.eventHeap = new IndexedEventHeap();
     }
 
     reset(){
-      this.heap.length = 0;
-      this.seq = 0;
-      this.eventByNodeId.clear();
+      this.eventHeap.clear();
       this.resetDirty();
     }
 
     _onTrackedNodeSetChanged(){
       const alive = collectAliveNodeIds(this.graph);
-      for(const nodeId of this.eventByNodeId.keys()){
-        if(!alive.has(nodeId)) this.eventByNodeId.delete(nodeId);
+      const existingIds = Array.from(this.eventHeap.nodeIds());
+      for(const nodeId of existingIds){
+        if(!alive.has(nodeId)) this.eventHeap.remove(nodeId);
       }
     }
 
-    _scheduleNodeEvent(node, nowMs){
+    _upsertNodeEvent(node, nowMs){
       if(!node || typeof node.id === 'undefined') return;
       const until = getTimedUntil(node, nowMs);
       if(!isFinite(until)){
-        this.eventByNodeId.delete(node.id);
+        this.eventHeap.remove(node.id);
         return;
       }
-      this.eventByNodeId.set(node.id, until);
-      heapPush(this.heap, {
-        t: until,
-        nodeId: node.id,
-        seq: ++this.seq
-      });
+      this.eventHeap.upsert(node.id, until);
     }
 
     _onNodeExecuted(node, nowMs){
-      this._scheduleNodeEvent(node, nowMs);
+      this._upsertNodeEvent(node, nowMs);
     }
 
     _peekNextValid(nowMs){
-      while(this.heap.length){
-        const top = heapPeek(this.heap);
+      while(this.eventHeap.size){
+        const top = this.eventHeap.peek();
         if(!top) return null;
-
-        const expected = this.eventByNodeId.get(top.nodeId);
-        if(!isFinite(expected)){
-          heapPop(this.heap);
-          continue;
-        }
-
-        if(Math.abs(expected - top.t) > EPSILON_MS){
-          heapPop(this.heap);
-          continue;
-        }
 
         const node = this.graph && this.graph.getNodeById(top.nodeId);
         if(!node){
-          heapPop(this.heap);
-          this.eventByNodeId.delete(top.nodeId);
+          this.eventHeap.remove(top.nodeId);
           continue;
         }
 
         const until = getTimedUntil(node, nowMs);
         if(!isFinite(until)){
-          heapPop(this.heap);
-          this.eventByNodeId.delete(top.nodeId);
-          continue;
-        }
-
-        if(Math.abs(until - expected) > EPSILON_MS){
-          heapPop(this.heap);
-          this._scheduleNodeEvent(node, nowMs);
-          continue;
-        }
-
-        return top;
-      }
-      return null;
-    }
-
-    _drainDue(nowMs){
-      let count = 0;
-      while(true){
-        const top = this._peekNextValid(nowMs);
-        if(!top) break;
-        if(top.t > nowMs + EPSILON_MS) break;
-        heapPop(this.heap);
-        this.eventByNodeId.delete(top.nodeId);
-        this._markNodeDirty(top.nodeId);
-        count++;
-      }
-      return count;
-    }
-
-    update(simDeltaMs){
-      const graph = this.graph;
-      if(!graph) return;
-      let budgetMs = Number(simDeltaMs);
-      if(!isFinite(budgetMs) || budgetMs <= 0) return;
-
-      this._ensureTrackedNodes();
-
-      let loops = 0;
-      let sameTimeSpins = 0;
-      let nowMs = nowSimMs();
-
-      this._runDirtyQueue(nowMs);
-
-      while(budgetMs > 0 && loops++ < EVENT_LOOP_LIMIT){
-        const next = this._peekNextValid(nowMs);
-
-        if(!next){
-          if(typeof window.advanceSimTime === 'function') window.advanceSimTime(budgetMs);
-          budgetMs = 0;
-          break;
-        }
-
-        let jumpMs = next.t - nowMs;
-        if(jumpMs < EPSILON_MS) jumpMs = 0;
-
-        if(jumpMs > 0){
-          if(jumpMs > budgetMs){
-            if(typeof window.advanceSimTime === 'function') window.advanceSimTime(budgetMs);
-            budgetMs = 0;
-            break;
-          }
-          if(typeof window.advanceSimTime === 'function') window.advanceSimTime(jumpMs);
-          budgetMs -= jumpMs;
-          nowMs += jumpMs;
-          sameTimeSpins = 0;
-          continue;
-        }
-
-        const due = this._drainDue(nowMs);
-        if(due > 0){
-          this._runDirtyQueue(nowMs);
-          nowMs = nowSimMs();
-          sameTimeSpins = 0;
-          continue;
-        }
-
-        sameTimeSpins++;
-        if(sameTimeSpins > EVENT_SAME_TIME_LIMIT){
-          if(budgetMs <= EPSILON_MS) break;
-          if(typeof window.advanceSimTime === 'function') window.advanceSimTime(EPSILON_MS);
-          budgetMs -= EPSILON_MS;
-          nowMs += EPSILON_MS;
-          sameTimeSpins = 0;
-        }
-      }
-
-      this._runDirtyQueue(nowMs);
-      notifyTimeline();
-    }
-  }
-
-  class EventQueueEngine extends DirtyExecEngineBase{
-    constructor(graph){
-      super(graph);
-      this.heap = [];
-      this.seq = 0;
-      this.revisionByNodeId = new Map();
-    }
-
-    reset(){
-      this.heap.length = 0;
-      this.seq = 0;
-      this.revisionByNodeId.clear();
-      this.resetDirty();
-    }
-
-    _onTrackedNodeSetChanged(){
-      const alive = collectAliveNodeIds(this.graph);
-      for(const nodeId of this.revisionByNodeId.keys()){
-        if(!alive.has(nodeId)) this.revisionByNodeId.delete(nodeId);
-      }
-    }
-
-    _bumpRevision(nodeId){
-      const next = (this.revisionByNodeId.get(nodeId) || 0) + 1;
-      this.revisionByNodeId.set(nodeId, next);
-      return next;
-    }
-
-    _pushNodeEvent(node, nowMs){
-      if(!node || typeof node.id === 'undefined') return;
-      const nodeId = node.id;
-      const rev = this._bumpRevision(nodeId);
-      const until = getTimedUntil(node, nowMs);
-      if(!isFinite(until)) return;
-      heapPush(this.heap, {
-        t: until,
-        nodeId,
-        rev,
-        seq: ++this.seq
-      });
-    }
-
-    _onNodeExecuted(node, nowMs){
-      this._pushNodeEvent(node, nowMs);
-    }
-
-    _peekNextValid(nowMs){
-      while(this.heap.length){
-        const top = heapPeek(this.heap);
-        if(!top) return null;
-
-        const rev = this.revisionByNodeId.get(top.nodeId) || 0;
-        if(top.rev !== rev){
-          heapPop(this.heap);
-          continue;
-        }
-
-        const node = this.graph && this.graph.getNodeById(top.nodeId);
-        if(!node){
-          heapPop(this.heap);
-          continue;
-        }
-
-        const until = getTimedUntil(node, nowMs);
-        if(!isFinite(until)){
-          heapPop(this.heap);
+          this.eventHeap.remove(top.nodeId);
           continue;
         }
 
         if(Math.abs(until - top.t) > EPSILON_MS){
-          heapPop(this.heap);
-          this._markNodeDirty(top.nodeId);
+          this.eventHeap.upsert(top.nodeId, until);
           continue;
         }
 
@@ -601,7 +473,7 @@ var App = window.App || (window.App = {});
         const top = this._peekNextValid(nowMs);
         if(!top) break;
         if(top.t > nowMs + EPSILON_MS) break;
-        heapPop(this.heap);
+        this.eventHeap.pop();
         this._markNodeDirty(top.nodeId);
         count++;
       }
@@ -618,14 +490,19 @@ var App = window.App || (window.App = {});
       let loops = 0;
       let sameTimeSpins = 0;
       let nowMs = nowSimMs();
+      let timelineCaptured = false;
 
       this._runDirtyQueue(nowMs);
+      captureTimeline();
+      timelineCaptured = true;
 
       while(budgetMs > 0 && loops++ < EVENT_LOOP_LIMIT){
         const next = this._peekNextValid(nowMs);
 
         if(!next){
           if(typeof window.advanceSimTime === 'function') window.advanceSimTime(budgetMs);
+          captureTimeline();
+          timelineCaptured = true;
           budgetMs = 0;
           break;
         }
@@ -636,12 +513,16 @@ var App = window.App || (window.App = {});
         if(jumpMs > 0){
           if(jumpMs > budgetMs){
             if(typeof window.advanceSimTime === 'function') window.advanceSimTime(budgetMs);
+            captureTimeline();
+            timelineCaptured = true;
             budgetMs = 0;
             break;
           }
           if(typeof window.advanceSimTime === 'function') window.advanceSimTime(jumpMs);
           budgetMs -= jumpMs;
           nowMs += jumpMs;
+          captureTimeline();
+          timelineCaptured = true;
           sameTimeSpins = 0;
           continue;
         }
@@ -650,6 +531,8 @@ var App = window.App || (window.App = {});
         if(due > 0){
           this._runDirtyQueue(nowMs);
           nowMs = nowSimMs();
+          captureTimeline();
+          timelineCaptured = true;
           sameTimeSpins = 0;
           continue;
         }
@@ -660,30 +543,35 @@ var App = window.App || (window.App = {});
           if(typeof window.advanceSimTime === 'function') window.advanceSimTime(EPSILON_MS);
           budgetMs -= EPSILON_MS;
           nowMs += EPSILON_MS;
+          captureTimeline();
+          timelineCaptured = true;
           sameTimeSpins = 0;
         }
       }
 
       this._runDirtyQueue(nowMs);
-      notifyTimeline();
+      captureTimeline();
+      timelineCaptured = true;
+      if(timelineCaptured) drawTimeline();
     }
   }
 
+  class EventEngine extends EventHeapEngine{}
+
   App.getSupportedSimModes = function(){
-    return ['dt', 'event', 'eventq'];
+    return ['dt', 'event'];
   };
 
   App.normalizeSimMode = function(mode){
     const m = String(mode || '').toLowerCase();
-    if(m === 'eventq' || m === 'event-queue' || m === 'queue') return 'eventq';
+    if(m === 'eventq' || m === 'event-queue' || m === 'queue') return 'event';
     if(m === 'event' || m === 'event-lite' || m === 'lite') return 'event';
     return 'dt';
   };
 
   App.getSimModeLabel = function(mode){
     const m = App.normalizeSimMode(mode);
-    if(m === 'event') return 'event-lite';
-    if(m === 'eventq') return 'event-queue';
+    if(m === 'event') return 'event';
     return 'dt';
   };
 
@@ -699,83 +587,7 @@ var App = window.App || (window.App = {});
 
   App.createSimEngine = function(mode, graph){
     const m = App.normalizeSimMode(mode);
-    if(m === 'eventq') return new EventQueueEngine(graph);
-    if(m === 'event') return new EventLiteEngine(graph);
+    if(m === 'event') return new EventEngine(graph);
     return new DtEngine(graph);
-  };
-
-  App.runEngineBenchmark = function(options){
-    if(!App.graph) throw new Error('graph is not initialized');
-
-    const opts = options || {};
-    const wallMs = Math.max(100, Number(opts.wallMs) || 1200);
-    const realStepMs = Math.max(1, Number(opts.realStepMs) || 16);
-    const requestedModes = (Array.isArray(opts.modes) && opts.modes.length)
-      ? opts.modes
-      : ['dt', 'event', 'eventq'];
-    const modes = requestedModes
-      .map(m=> App.normalizeSimMode(m))
-      .filter((m, i, arr)=> arr.indexOf(m) === i);
-
-    const snapshot = App.graph.serialize();
-    const originalTime = nowSimMs();
-    const originalMode = App.getSimMode();
-    const prevSuspendTimeline = !!App._suspendTimeline;
-
-    const cloneData = ()=> JSON.parse(JSON.stringify(snapshot));
-    const results = [];
-
-    try{
-      App._suspendTimeline = true;
-      for(const mode of modes){
-        const graph = new LGraph();
-        graph.configure(cloneData());
-        if(typeof configureGraphClock === 'function') configureGraphClock(graph);
-
-        const engine = App.createSimEngine(mode, graph);
-        if(engine && typeof engine.reset === 'function') engine.reset();
-
-        graph.status = LGraph.STATUS_RUNNING;
-        graph.starttime = LiteGraph.getTime();
-        graph.last_update_time = graph.starttime;
-        try{ graph.sendEventToAllNodes('onStart'); }catch(_e){}
-
-        if(typeof window.setSimTime === 'function') window.setSimTime(0);
-        const started = performance.now();
-        let now = started;
-        let loops = 0;
-
-        while((now - started) < wallMs){
-          if(engine && typeof engine.update === 'function') engine.update(realStepMs);
-          loops++;
-          now = performance.now();
-        }
-
-        const simMs = nowSimMs();
-        const spentMs = Math.max(0, now - started);
-        try{ graph.sendEventToAllNodes('onStop'); }catch(_e){}
-
-        results.push({
-          mode,
-          modeLabel: App.getSimModeLabel(mode),
-          wallMs: spentMs,
-          simMs,
-          loops,
-          simSec: simMs / 1000,
-          speed: simMs / Math.max(1, spentMs)
-        });
-      }
-    }finally{
-      App._suspendTimeline = prevSuspendTimeline;
-      App.setSimMode(originalMode);
-      if(typeof window.setSimTime === 'function') window.setSimTime(originalTime);
-      if(typeof window.updateSimTime === 'function') window.updateSimTime();
-    }
-
-    return {
-      wallMs,
-      realStepMs,
-      results
-    };
   };
 })();

@@ -36,15 +36,45 @@ if(simModeSelect){
   });
 }
 
+const renderFpsSelect = document.getElementById('renderFpsSelect');
+if(renderFpsSelect){
+  let fps = (typeof App.getRenderFps === 'function') ? App.getRenderFps() : 60;
+  try{
+    const saved = localStorage.getItem('render-fps');
+    if(saved && typeof App.setRenderFps === 'function') fps = App.setRenderFps(saved);
+  }catch(_e){}
+  renderFpsSelect.value = String(fps);
+  renderFpsSelect.addEventListener('change', ()=>{
+    const next = (typeof App.setRenderFps === 'function')
+      ? App.setRenderFps(renderFpsSelect.value)
+      : Number(renderFpsSelect.value) || 60;
+    renderFpsSelect.value = String(next);
+    try{ localStorage.setItem('render-fps', String(next)); }catch(_e){}
+    try{
+      if(App.timelineChart && typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
+      if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+    }catch(_e){}
+    App.showToast(`Render FPS: ${next}`);
+  });
+}
+
 // Benchmark result modal
 (function(){
   const modal = document.getElementById('benchmarkModal');
   const closeBtn = document.getElementById('benchmarkClose');
+  const table = document.getElementById('benchmarkTable');
   const body = document.getElementById('benchmarkBody');
   const summary = document.getElementById('benchmarkSummary');
-  if(!modal || !closeBtn || !body || !summary) return;
+  const legend = document.getElementById('benchmarkLegend');
+  const progressWrap = document.getElementById('benchmarkProgressWrap');
+  const progressLabel = document.getElementById('benchmarkProgressLabel');
+  const progressBar = document.getElementById('benchmarkProgressBar');
+  if(!modal || !closeBtn || !table || !body || !summary || !legend || !progressWrap || !progressLabel || !progressBar) return;
+
+  let running = false;
 
   const close = ()=>{
+    if(running) return;
     modal.style.display = 'none';
     modal.setAttribute('aria-hidden', 'true');
   };
@@ -60,9 +90,40 @@ if(simModeSelect){
     if(e.key === 'Escape' && modal.style.display === 'block') close();
   });
 
+  App.showBenchmarkProgress = function(progress, text){
+    const ratio = Math.max(0, Math.min(1, Number(progress) || 0));
+    const percent = Math.round(ratio * 100);
+    running = true;
+
+    closeBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    progressBar.style.width = `${percent}%`;
+    progressLabel.textContent = text || `Benchmark running... ${percent}%`;
+
+    summary.style.display = 'none';
+    legend.style.display = 'none';
+    table.style.display = 'none';
+    body.innerHTML = '';
+
+    open();
+    return true;
+  };
+
+  App.stopBenchmarkProgress = function(){
+    running = false;
+    closeBtn.disabled = false;
+    progressWrap.style.display = 'none';
+    progressBar.style.width = '0%';
+    progressLabel.textContent = 'Benchmark running...';
+    summary.style.display = 'block';
+    legend.style.display = 'block';
+    table.style.display = 'table';
+  };
+
   App.showBenchmarkModal = function(bench){
     const rows = (bench && Array.isArray(bench.results)) ? bench.results.slice() : [];
     if(!rows.length) return false;
+    App.stopBenchmarkProgress();
 
     const sorted = rows.sort((a,b)=> b.speed - a.speed);
     const best = sorted[0];
@@ -70,7 +131,11 @@ if(simModeSelect){
 
     const wallSec = (Number(bench.wallMs) || 0) / 1000;
     const realStep = Number(bench.realStepMs) || 0;
-    summary.textContent = `計測条件: wall=${wallSec.toFixed(2)}s, realStep=${realStep.toFixed(0)}ms | 最速: ${best.modeLabel} (${best.speed.toFixed(2)}x)`;
+    const cases = Array.from(new Set(sorted.map(r=> String(r.renderLabel || 'render:off')))).join(', ');
+    summary.style.display = 'block';
+    legend.style.display = 'block';
+    table.style.display = 'table';
+    summary.textContent = `計測条件: wall=${wallSec.toFixed(2)}s, realStep=${realStep.toFixed(0)}ms, cases=${cases} | 最速: ${best.modeLabel} + ${best.renderLabel || 'render:off'} (${best.speed.toFixed(2)}x)`;
 
     body.innerHTML = '';
     sorted.forEach((r, idx)=>{
@@ -80,6 +145,10 @@ if(simModeSelect){
       const engineTd = document.createElement('td');
       engineTd.textContent = r.modeLabel;
       tr.appendChild(engineTd);
+
+      const caseTd = document.createElement('td');
+      caseTd.textContent = r.renderLabel || 'render:off';
+      tr.appendChild(caseTd);
 
       const speedTd = document.createElement('td');
       speedTd.className = 'benchSpeedCell';
@@ -122,22 +191,51 @@ if(simModeSelect){
 
 const btnBenchmark = document.getElementById('btnBenchmark');
 if(btnBenchmark){
-  btnBenchmark.addEventListener('click', ()=>{
+  btnBenchmark.addEventListener('click', async ()=>{
+    if(btnBenchmark.disabled) return;
     if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
       stopSimulation();
     }
+    const prevText = btnBenchmark.textContent;
+    btnBenchmark.disabled = true;
+    btnBenchmark.textContent = 'Benchmarking...';
+
     try{
       if(typeof App.runEngineBenchmark !== 'function') throw new Error('benchmark API is unavailable');
-      const bench = App.runEngineBenchmark({
-        wallMs: 1200,
+      if(typeof App.showBenchmarkProgress === 'function'){
+        App.showBenchmarkProgress(0, 'Benchmark running... 0%');
+      }
+
+      let bench;
+      const benchOptions = {
+        wallMs: 5000,
         realStepMs: 16,
-        modes: ['dt', 'event', 'eventq']
-      });
+        modes: ['dt', 'event'],
+        renderCases: ['headless', 'render']
+      };
+      if(typeof App.runEngineBenchmarkAsync === 'function'){
+        bench = await App.runEngineBenchmarkAsync({
+          ...benchOptions,
+          onProgress: (ratio, info)=>{
+            if(typeof App.showBenchmarkProgress === 'function'){
+              const pct = Math.round(Math.max(0, Math.min(1, ratio)) * 100);
+              let label = `Benchmark running... ${pct}%`;
+              if(info && info.modeLabel && info.renderLabel){
+                label = `Benchmark running... ${pct}% (${info.modeLabel}, ${info.renderLabel})`;
+              }
+              App.showBenchmarkProgress(ratio, label);
+            }
+          }
+        });
+      }else{
+        bench = App.runEngineBenchmark(benchOptions);
+      }
+
       const rows = (bench && Array.isArray(bench.results)) ? bench.results : [];
       if(!rows.length) throw new Error('no benchmark result');
 
       rows.forEach(r=>{
-        console.log(`[benchmark] ${r.modeLabel}: speed=${r.speed.toFixed(2)}x (sim=${r.simSec.toFixed(2)}s / wall=${(r.wallMs/1000).toFixed(2)}s), loops=${r.loops}`);
+        console.log(`[benchmark] ${r.modeLabel}, ${r.renderLabel || 'render:off'}: speed=${r.speed.toFixed(2)}x (sim=${r.simSec.toFixed(2)}s / wall=${(r.wallMs/1000).toFixed(2)}s), loops=${r.loops}`);
       });
 
       const sorted = rows.slice().sort((a,b)=> b.speed - a.speed);
@@ -145,12 +243,16 @@ if(btnBenchmark){
       if(typeof App.showBenchmarkModal === 'function'){
         App.showBenchmarkModal(bench);
       }else{
-        alert(`Best: ${best.modeLabel} (${best.speed.toFixed(2)}x)`);
+        alert(`Best: ${best.modeLabel} + ${best.renderLabel || 'render:off'} (${best.speed.toFixed(2)}x)`);
       }
-      App.showToast(`Best: ${best.modeLabel} ${best.speed.toFixed(2)}x`);
+      App.showToast(`Best: ${best.modeLabel} + ${best.renderLabel || 'render:off'} ${best.speed.toFixed(2)}x`);
     }catch(err){
       console.error(err);
+      if(typeof App.stopBenchmarkProgress === 'function') App.stopBenchmarkProgress();
       alert('Benchmark failed');
+    }finally{
+      btnBenchmark.disabled = false;
+      btnBenchmark.textContent = prevText;
     }
   });
 }

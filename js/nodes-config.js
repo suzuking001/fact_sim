@@ -21,5 +21,17 @@ window.NODES_CONFIG = {
     processTimeSec: 3,
     downTimeSec: 0.5,
     agvCapacity: 2,
+  },
+  limits: {
+    // LiteGraph default is 1000. Raise it for large models.
+    maxNodes: 5000,
   }
 };
+
+// Apply graph-size limit override as early as possible.
+(function(){
+  if(typeof LiteGraph === 'undefined') return;
+  const cfg = Number(window.NODES_CONFIG?.limits?.maxNodes);
+  if(!isFinite(cfg) || cfg < 1) return;
+  LiteGraph.MAX_NUMBER_OF_NODES = Math.round(cfg);
+})();
