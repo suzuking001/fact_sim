@@ -3,18 +3,27 @@
 // Canvas element
 const graphElement = document.getElementById('graph');
 
-// Time management (fixed dt simulation clock)
+// Time management (simulation clock)
 const SIM_DT_SEC = 0.1;
-const SIM_DT_MS = SIM_DT_SEC * 1000;
 let speed = 1;
 let simTimeMs = 0;
-let simAccumMs = 0;
 let simRunning = false;
 let simRafId = null;
 let lastRealMs = 0;
 
 function simNow(){
   return simTimeMs;
+}
+
+function advanceSimTime(ms){
+  const delta = Number(ms);
+  if(!isFinite(delta) || delta <= 0) return;
+  simTimeMs += delta;
+}
+
+function setSimTime(ms){
+  const t = Number(ms);
+  simTimeMs = (isFinite(t) && t >= 0) ? t : 0;
 }
 
 function setSpeed(v){
@@ -68,12 +77,14 @@ function setSpeed(v){
 function updateSimTime(){
   document.getElementById('simTime').textContent = (simTimeMs/1000).toFixed(1) + ' s';
   const dtEl = document.getElementById('simDt');
-  if(dtEl) dtEl.textContent = `Δt: ${SIM_DT_SEC.toFixed(1)} s (fixed)`;
+  if(dtEl){
+    if(typeof window.getSimMetaText === 'function') dtEl.textContent = window.getSimMetaText();
+    else dtEl.textContent = `dt: ${SIM_DT_SEC.toFixed(1)} s (fixed)`;
+  }
 }
 
 function resetSimClock(){
   simTimeMs = 0;
-  simAccumMs = 0;
   lastRealMs = 0;
   updateSimTime();
 }
@@ -88,16 +99,8 @@ function startSimLoop(stepFn){
     let delta = ts - lastRealMs;
     if(delta < 0) delta = 0;
     lastRealMs = ts;
-    simAccumMs += delta * speed;
-    const maxSteps = 200;
-    let steps = 0;
-    while(simAccumMs >= SIM_DT_MS && steps < maxSteps){
-      if(typeof stepFn === 'function') stepFn();
-      simTimeMs += SIM_DT_MS;
-      simAccumMs -= SIM_DT_MS;
-      steps++;
-    }
-    if(steps === maxSteps) simAccumMs = 0; // avoid spiral of death
+    const simDeltaMs = delta * speed;
+    if(typeof stepFn === 'function') stepFn(simDeltaMs);
     updateSimTime();
     simRafId = window.requestAnimationFrame(tick);
   };
@@ -130,6 +133,8 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
 // Export globals needed elsewhere
 window.updateSimTime = updateSimTime;
 window.simNow = simNow;
+window.advanceSimTime = advanceSimTime;
+window.setSimTime = setSimTime;
 window.resetSimClock = resetSimClock;
 window.startSimLoop = startSimLoop;
 window.stopSimLoop = stopSimLoop;

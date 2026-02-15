@@ -152,7 +152,19 @@ class LinkAnimator{
       const prev = out.__lastSet;
       if(prev !== data){
         out.__lastSet = data;
-        if(this.graph) this.graph.__outputDirty = true;
+        if(this.graph){
+          this.graph.__outputDirty = true;
+          // Track downstream nodes impacted by this output update.
+          if(!this.graph.__dirtyNodeIds) this.graph.__dirtyNodeIds = new Set();
+          if(out.links){
+            out.links.forEach(id=>{
+              const link = this.graph.links[id];
+              if(link && typeof link.target_id !== 'undefined'){
+                this.graph.__dirtyNodeIds.add(link.target_id);
+              }
+            });
+          }
+        }
       }
     }
     if(this.outputs && this.outputs[slot] && !data){

@@ -1,4 +1,4 @@
-﻿// Simulation clock wiring for graph
+// Simulation clock wiring for graph
 
 var App = window.App || (window.App = {});
 
@@ -13,28 +13,33 @@ function configureGraphClock(g){
   g.status = LGraph.STATUS_STOPPED;
 }
 
+window.getSimMetaText = function(){
+  const mode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));
+  if(mode === 'eventq') return 'Engine: event-queue (heap)';
+  if(mode === 'event') return 'Engine: event-lite (time jump)';
+  const dt = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
+  return `Engine: dt (${dt.toFixed(1)} s fixed)`;
+};
+
 function startSimulation(){
   if(!App.graph) return;
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;
+
+  const mode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));
+  App.engine = (typeof App.createSimEngine === 'function')
+    ? App.createSimEngine(mode, App.graph)
+    : null;
+  if(App.engine && typeof App.engine.reset === 'function') App.engine.reset();
+
   App.graph.status = LGraph.STATUS_RUNNING;
   App.graph.starttime = LiteGraph.getTime();
   App.graph.last_update_time = App.graph.starttime;
   App.graph.sendEventToAllNodes('onStart');
-  window.startSimLoop(()=>{
-    // First pass advances simulation time
-    App.graph.__outputDirty = false;
-    App.graph.runStep(1, !App.graph.catch_errors);
-    // Always run one settle pass (dt=0) so downstream can react within the same tick,
-    // even if no output changed (state-only readiness changes).
-    App.graph.__outputDirty = false;
-    App.graph.runStep(0, !App.graph.catch_errors);
-    // Additional settle passes only if outputs keep changing
-    let settle = 0;
-    while(App.graph.__outputDirty && settle++ < 5){
-      App.graph.__outputDirty = false;
-      App.graph.runStep(0, !App.graph.catch_errors);
+
+  window.startSimLoop((simDeltaMs)=>{
+    if(App.engine && typeof App.engine.update === 'function'){
+      App.engine.update(simDeltaMs);
     }
-    if(App.timelineChart) App.timelineChart.onStep();
   });
 }
 
@@ -42,9 +47,14 @@ function stopSimulation(){
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
     window.stopSimLoop();
   }
+
+  if(App.engine && typeof App.engine.stop === 'function'){
+    try{ App.engine.stop(); }catch(_e){}
+  }
+  App.engine = null;
+
   if(App.graph && App.graph.status !== LGraph.STATUS_STOPPED){
     App.graph.status = LGraph.STATUS_STOPPED;
     App.graph.sendEventToAllNodes('onStop');
   }
 }
-

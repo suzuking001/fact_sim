@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js"></script>
 
-    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/app.css?v=20260215" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -27,9 +27,18 @@
       </div>
       <span>Time: <span id="simTime">0.00 s</span></span>
       <div class="control-group">
-        <label>Fixed Δt</label>
-        <div id="simDt" class="sim-meta">Δt: 0.1 s (fixed)</div>
+        <label for="simModeSelect">Engine</label>
+        <select id="simModeSelect">
+          <option value="dt">dt</option>
+          <option value="event">event-lite</option>
+          <option value="eventq">event-queue</option>
+        </select>
       </div>
+      <div class="control-group">
+        <label>Engine detail</label>
+        <div id="simDt" class="sim-meta">Engine: dt (0.1 s fixed)</div>
+      </div>
+      <button id="btnBenchmark">Compare Speed</button>
       <select id="exampleSelect" title="Examples">
         <option value="">Load example…</option>
         <option value="simple">Simple</option>
@@ -95,6 +104,8 @@
     <div id="fileControls">
       <button id="btnSave">Save</button>
       <button id="btnLoad">Load</button>
+      <button id="btnShareUrl">Share URL</button>
+      <button id="btnShareId">Share ID</button>
       <input type="file" id="fileInput" accept=".json">
       <button id="btnAbout">About / Licenses</button>
     </div>
@@ -121,6 +132,33 @@
         <button id="scriptEditorSave">Save</button>
         <button id="scriptEditorCancel">Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Benchmark Result Modal -->
+  <div id="benchmarkModal" aria-hidden="true" role="dialog">
+    <div id="benchmarkContainer" role="document" aria-label="Engine benchmark results">
+      <div class="benchmarkHeader">
+        <h2>Engine Benchmark</h2>
+        <button id="benchmarkClose" aria-label="Close">Close</button>
+      </div>
+      <p id="benchmarkSummary" class="benchmarkSummary"></p>
+      <p class="benchmarkLegend">
+        `speed` は実時間に対して進んだシミュレーション時間の倍率です（高いほど高速）。<br>
+        棒グラフは最速エンジンを100%として相対表示しています。
+      </p>
+      <table id="benchmarkTable" aria-label="Benchmark result table">
+        <thead>
+          <tr>
+            <th>Engine</th>
+            <th>Speed</th>
+            <th>Sim Time</th>
+            <th>Wall Time</th>
+            <th>Loops</th>
+          </tr>
+        </thead>
+        <tbody id="benchmarkBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -183,6 +221,7 @@ SOFTWARE.
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
     <script src="js/link-anim.js"></script>
+    <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js"></script>
   <script src="js/nodes/source.js"></script>
   <script src="js/nodes/split.js"></script>
@@ -197,6 +236,7 @@ SOFTWARE.
   <script src="js/timeline.js"></script>
   <script src="js/app/state.js"></script>
   <script src="js/app/script-editor.js"></script>
+  <script src="js/app/engine.js"></script>
   <script src="js/app/sim.js"></script>
   <script src="js/app/history.js"></script>
   <script src="js/app/selection.js"></script>
@@ -204,9 +244,9 @@ SOFTWARE.
   <script src="js/app/timeline-init.js"></script>
   <script src="js/app/graph-init.js"></script>
   <script src="js/app/examples.js"></script>
-  <script src="js/app/file-io.js"></script>
-  <script src="js/app/ui.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app/file-io.js?v=20260213"></script>
+  <script src="js/app/ui.js?v=20260215"></script>
+  <script src="js/app.js?v=20260213"></script>
 
 </body>
 </html>

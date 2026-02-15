@@ -15,6 +15,146 @@ if(btnReset) btnReset.onclick = ()=>{ stopSimulation(); initGraph(); };
 const btnFit = document.getElementById('btnFit');
 if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
 
+const simModeSelect = document.getElementById('simModeSelect');
+if(simModeSelect){
+  let currentMode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));
+  try{
+    const saved = localStorage.getItem('sim-mode');
+    if(saved) currentMode = (App.setSimMode ? App.setSimMode(saved) : saved);
+  }catch(_e){}
+  simModeSelect.value = currentMode;
+  simModeSelect.addEventListener('change', ()=>{
+    const mode = (App.setSimMode ? App.setSimMode(simModeSelect.value) : simModeSelect.value);
+    simModeSelect.value = mode;
+    try{ localStorage.setItem('sim-mode', mode); }catch(_e){}
+    if(typeof window.updateSimTime === 'function') window.updateSimTime();
+    if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
+      stopSimulation();
+      startSimulation();
+    }
+    App.showToast(`Engine: ${mode}`);
+  });
+}
+
+// Benchmark result modal
+(function(){
+  const modal = document.getElementById('benchmarkModal');
+  const closeBtn = document.getElementById('benchmarkClose');
+  const body = document.getElementById('benchmarkBody');
+  const summary = document.getElementById('benchmarkSummary');
+  if(!modal || !closeBtn || !body || !summary) return;
+
+  const close = ()=>{
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  };
+
+  const open = ()=>{
+    modal.style.display = 'block';
+    modal.setAttribute('aria-hidden', 'false');
+  };
+
+  closeBtn.addEventListener('click', close);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) close(); });
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && modal.style.display === 'block') close();
+  });
+
+  App.showBenchmarkModal = function(bench){
+    const rows = (bench && Array.isArray(bench.results)) ? bench.results.slice() : [];
+    if(!rows.length) return false;
+
+    const sorted = rows.sort((a,b)=> b.speed - a.speed);
+    const best = sorted[0];
+    const bestSpeed = Math.max(best.speed, 0.0001);
+
+    const wallSec = (Number(bench.wallMs) || 0) / 1000;
+    const realStep = Number(bench.realStepMs) || 0;
+    summary.textContent = `計測条件: wall=${wallSec.toFixed(2)}s, realStep=${realStep.toFixed(0)}ms | 最速: ${best.modeLabel} (${best.speed.toFixed(2)}x)`;
+
+    body.innerHTML = '';
+    sorted.forEach((r, idx)=>{
+      const tr = document.createElement('tr');
+      if(idx === 0) tr.classList.add('bench-best');
+
+      const engineTd = document.createElement('td');
+      engineTd.textContent = r.modeLabel;
+      tr.appendChild(engineTd);
+
+      const speedTd = document.createElement('td');
+      speedTd.className = 'benchSpeedCell';
+      const speedText = document.createElement('div');
+      speedText.className = 'benchSpeedText';
+      speedText.textContent = `${r.speed.toFixed(2)}x`;
+      const track = document.createElement('div');
+      track.className = 'benchBarTrack';
+      const fill = document.createElement('div');
+      fill.className = 'benchBarFill';
+      const ratio = (r.speed / bestSpeed) * 100;
+      fill.style.width = `${Math.max(3, Math.min(100, ratio)).toFixed(1)}%`;
+      track.appendChild(fill);
+      speedTd.appendChild(speedText);
+      speedTd.appendChild(track);
+      tr.appendChild(speedTd);
+
+      const simTd = document.createElement('td');
+      simTd.className = 'benchMono';
+      simTd.textContent = `${r.simSec.toFixed(2)}s`;
+      tr.appendChild(simTd);
+
+      const wallTd = document.createElement('td');
+      wallTd.className = 'benchMono';
+      wallTd.textContent = `${(r.wallMs/1000).toFixed(2)}s`;
+      tr.appendChild(wallTd);
+
+      const loopTd = document.createElement('td');
+      loopTd.className = 'benchMono';
+      loopTd.textContent = Number(r.loops || 0).toLocaleString();
+      tr.appendChild(loopTd);
+
+      body.appendChild(tr);
+    });
+
+    open();
+    return true;
+  };
+})();
+
+const btnBenchmark = document.getElementById('btnBenchmark');
+if(btnBenchmark){
+  btnBenchmark.addEventListener('click', ()=>{
+    if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
+      stopSimulation();
+    }
+    try{
+      if(typeof App.runEngineBenchmark !== 'function') throw new Error('benchmark API is unavailable');
+      const bench = App.runEngineBenchmark({
+        wallMs: 1200,
+        realStepMs: 16,
+        modes: ['dt', 'event', 'eventq']
+      });
+      const rows = (bench && Array.isArray(bench.results)) ? bench.results : [];
+      if(!rows.length) throw new Error('no benchmark result');
+
+      rows.forEach(r=>{
+        console.log(`[benchmark] ${r.modeLabel}: speed=${r.speed.toFixed(2)}x (sim=${r.simSec.toFixed(2)}s / wall=${(r.wallMs/1000).toFixed(2)}s), loops=${r.loops}`);
+      });
+
+      const sorted = rows.slice().sort((a,b)=> b.speed - a.speed);
+      const best = sorted[0];
+      if(typeof App.showBenchmarkModal === 'function'){
+        App.showBenchmarkModal(bench);
+      }else{
+        alert(`Best: ${best.modeLabel} (${best.speed.toFixed(2)}x)`);
+      }
+      App.showToast(`Best: ${best.modeLabel} ${best.speed.toFixed(2)}x`);
+    }catch(err){
+      console.error(err);
+      alert('Benchmark failed');
+    }
+  });
+}
+
 // About / Licenses modal wiring
 (function(){
   const m = document.getElementById('aboutModal');

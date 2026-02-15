@@ -1,13 +1,338 @@
-﻿// Save / Load handlers
+// Save / Load handlers + URL share helpers
 
 var App = window.App || (window.App = {});
+
+const SHARE_SCHEMA = 'fact-sim-share-v1';
+const TMPFILES_UPLOAD_API = 'https://tmpfiles.org/api/v1/upload';
+const TMPFILES_DL_BASE = 'https://tmpfiles.org/dl';
+const TMPFILES_FILE_NAME = 'factsim_share.txt';
+const TMPFILES_GLOBAL_KEY = '__FACT_SIM_REMOTE_SHARE__';
+
+const _utf8Encoder = new TextEncoder();
+const _utf8Decoder = new TextDecoder();
+
+function _serializeGraph(){
+  if(!App.graph) throw new Error('graph is not initialized');
+  return _compactGraphData(App.graph.serialize());
+}
+
+function _applyGraphData(data){
+  if(!App.graph) throw new Error('graph is not initialized');
+  if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
+  App.history.lock = true;
+  try{
+    App.graph.clear();
+    App.graph.configure(data);
+  }finally{
+    App.history.lock = false;
+  }
+  configureGraphClock(App.graph);
+  if(typeof window.resetSimClock === 'function') window.resetSimClock();
+  if(typeof updateSimTime === 'function') updateSimTime();
+  resetHistory();
+  attachTimeline();
+  try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
+}
+
+function _toBase64Url(u8){
+  let binary = '';
+  const chunk = 0x8000;
+  for(let i=0;i<u8.length;i+=chunk){
+    const slice = u8.subarray(i, i + chunk);
+    binary += String.fromCharCode.apply(null, slice);
+  }
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function _fromBase64Url(text){
+  const padded = text + '='.repeat((4 - (text.length % 4)) % 4);
+  const b64 = padded.replace(/-/g,'+').replace(/_/g,'/');
+  const binary = atob(b64);
+  const out = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) out[i] = binary.charCodeAt(i);
+  return out;
+}
+
+function _to2Tuple(v){
+  if(Array.isArray(v)) return [Number(v[0]) || 0, Number(v[1]) || 0];
+  if(v && typeof v === 'object') return [Number(v[0]) || 0, Number(v[1]) || 0];
+  return v;
+}
+
+function _compactGraphData(graph){
+  if(!graph || typeof graph !== 'object') return graph;
+  const g = JSON.parse(JSON.stringify(graph));
+  if(g.config && typeof g.config === 'object' && Object.keys(g.config).length === 0) delete g.config;
+  if(g.extra && typeof g.extra === 'object' && Object.keys(g.extra).length === 0) delete g.extra;
+
+  const defaultScriptText = (typeof window.defaultScript === 'function') ? String(window.defaultScript()) : '';
+  const nodes = Array.isArray(g.nodes) ? g.nodes : [];
+  for(const n of nodes){
+    if(!n || typeof n !== 'object') continue;
+    if(typeof n.pos !== 'undefined') n.pos = _to2Tuple(n.pos);
+    if(typeof n.size !== 'undefined') n.size = _to2Tuple(n.size);
+
+    if(n.flags && typeof n.flags === 'object' && Object.keys(n.flags).length === 0) delete n.flags;
+    if(n.mode === 0) delete n.mode;
+    if(n.order === 0) delete n.order;
+
+    delete n.color;
+    delete n.bgcolor;
+    delete n.boxcolor;
+    delete n.shape;
+
+    if(n.properties && typeof n.properties === 'object'){
+      if(n.properties.flipIO === false) delete n.properties.flipIO;
+      if(n.properties.sigExtra === 0) delete n.properties.sigExtra;
+      if(n.properties.sigEnabled === true) delete n.properties.sigEnabled;
+      if(defaultScriptText && n.properties.script === defaultScriptText) delete n.properties.script;
+      if(Object.keys(n.properties).length === 0) delete n.properties;
+    }
+  }
+  return g;
+}
+
+function _hasCompressionStreams(){
+  return (typeof CompressionStream === 'function') && (typeof DecompressionStream === 'function');
+}
+
+function _hasLzString(){
+  return !!(window.LZString &&
+    typeof window.LZString.compressToEncodedURIComponent === 'function' &&
+    typeof window.LZString.decompressFromEncodedURIComponent === 'function');
+}
+
+async function _withTimeout(promise, ms, label){
+  let timer = null;
+  try{
+    return await Promise.race([
+      promise,
+      new Promise((_, reject)=>{
+        timer = setTimeout(()=> reject(new Error(`${label || 'operation'} timeout`)), ms);
+      })
+    ]);
+  }finally{
+    if(timer) clearTimeout(timer);
+  }
+}
+
+async function _gzipBytes(bytes){
+  const cs = new CompressionStream('gzip');
+  const writer = cs.writable.getWriter();
+  await writer.write(bytes);
+  await writer.close();
+  const ab = await new Response(cs.readable).arrayBuffer();
+  return new Uint8Array(ab);
+}
+
+async function _gunzipBytes(bytes){
+  const ds = new DecompressionStream('gzip');
+  const writer = ds.writable.getWriter();
+  await writer.write(bytes);
+  await writer.close();
+  const ab = await new Response(ds.readable).arrayBuffer();
+  return new Uint8Array(ab);
+}
+
+function _shareEnvelope(graph){
+  return {
+    s: SHARE_SCHEMA,
+    v: 1,
+    g: graph
+  };
+}
+
+function _unwrapEnvelope(payload){
+  if(payload && typeof payload === 'object'){
+    if(payload.s === SHARE_SCHEMA && payload.g && typeof payload.g === 'object'){
+      return payload.g;
+    }
+    if(payload.schema === SHARE_SCHEMA && payload.graph && typeof payload.graph === 'object'){
+      return payload.graph;
+    }
+    if(payload.graph && payload.app === 'fact_sim'){
+      return payload.graph;
+    }
+  }
+  return payload;
+}
+
+async function _packEnvelopeForUrl(envelope){
+  const json = JSON.stringify(envelope);
+  const raw = _utf8Encoder.encode(json);
+  const rawToken = `raw.${_toBase64Url(raw)}`;
+
+  if(_hasLzString()){
+    try{
+      const compressed = window.LZString.compressToEncodedURIComponent(json);
+      const lzToken = `lz.${compressed}`;
+      if(lzToken.length < rawToken.length) return lzToken;
+    }catch(_e){}
+  }
+
+  if(!_hasCompressionStreams()) return rawToken;
+
+  try{
+    const compressed = await _withTimeout(_gzipBytes(raw), 1200, 'gzip');
+    const zipToken = `gz.${_toBase64Url(compressed)}`;
+    // Keep the smaller one for safety on tiny payloads.
+    return zipToken.length < rawToken.length ? zipToken : rawToken;
+  }catch(_e){
+    return rawToken;
+  }
+}
+
+async function _unpackEnvelopeFromUrl(token){
+  if(typeof token !== 'string' || !token) throw new Error('share token is empty');
+  const dot = token.indexOf('.');
+  if(dot <= 0) throw new Error('invalid share token');
+  const codec = token.slice(0, dot);
+  const body = token.slice(dot + 1);
+  if(codec === 'lz'){
+    if(!_hasLzString()) throw new Error('compressed share URL is not supported in this browser');
+    const json = window.LZString.decompressFromEncodedURIComponent(body);
+    if(typeof json !== 'string' || !json.length) throw new Error('failed to decode compressed share URL');
+    return JSON.parse(json);
+  }
+
+  let bytes = _fromBase64Url(body);
+  if(codec === 'gz'){
+    if(!_hasCompressionStreams()) throw new Error('compressed share URL is not supported in this browser');
+    bytes = await _withTimeout(_gunzipBytes(bytes), 1200, 'gunzip');
+  }else if(codec !== 'raw'){
+    throw new Error(`unknown codec: ${codec}`);
+  }
+  const json = _utf8Decoder.decode(bytes);
+  return JSON.parse(json);
+}
+
+function _shareParamsFromUrl(){
+  const u = new URL(window.location.href);
+  const qp = u.searchParams;
+  const hp = new URLSearchParams(String(u.hash || '').replace(/^#/, ''));
+  return {
+    g: hp.get('g') || qp.get('g') || '',
+    sid: hp.get('sid') || qp.get('sid') || ''
+  };
+}
+
+function _baseAppUrl(){
+  const u = new URL(window.location.href);
+  u.search = '';
+  u.hash = '';
+  return u;
+}
+
+async function _copyText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', 'readonly');
+  area.style.position = 'fixed';
+  area.style.left = '-9999px';
+  document.body.appendChild(area);
+  area.focus();
+  area.select();
+  document.execCommand('copy');
+  area.remove();
+}
+
+function _extractTmpfilesId(url){
+  const m = String(url || '').match(/tmpfiles\.org\/(\d+)\//);
+  return m ? m[1] : '';
+}
+
+async function _uploadEnvelopeToTmpfiles(envelope){
+  const jsPayload = `window.${TMPFILES_GLOBAL_KEY}=${JSON.stringify(envelope)};`;
+  const form = new FormData();
+  form.append('file', new Blob([jsPayload], { type: 'text/plain' }), TMPFILES_FILE_NAME);
+  const res = await fetch(TMPFILES_UPLOAD_API, { method: 'POST', body: form });
+  const data = await res.json().catch(()=> null);
+  if(!res.ok || !data || data.status !== 'success'){
+    const msg = data && data.message ? data.message : `status=${res.status}`;
+    throw new Error(`tmpfiles upload failed: ${msg}`);
+  }
+  const sid = _extractTmpfilesId(data.data && data.data.url);
+  if(!sid) throw new Error('tmpfiles id parse failed');
+  return sid;
+}
+
+async function _loadEnvelopeFromTmpfilesId(sid){
+  const id = String(sid || '').trim();
+  if(!/^\d+$/.test(id)) throw new Error('invalid share id');
+
+  const url = `${TMPFILES_DL_BASE}/${id}/${TMPFILES_FILE_NAME}`;
+  try{ delete window[TMPFILES_GLOBAL_KEY]; }catch(_e){ window[TMPFILES_GLOBAL_KEY] = undefined; }
+
+  await new Promise((resolve, reject)=>{
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `${url}?t=${Date.now()}`;
+    script.onload = ()=>{
+      if(script.parentNode) script.parentNode.removeChild(script);
+      resolve();
+    };
+    script.onerror = ()=>{
+      if(script.parentNode) script.parentNode.removeChild(script);
+      reject(new Error('failed to load remote share payload'));
+    };
+    document.head.appendChild(script);
+  });
+
+  const payload = window[TMPFILES_GLOBAL_KEY];
+  try{ delete window[TMPFILES_GLOBAL_KEY]; }catch(_e){ window[TMPFILES_GLOBAL_KEY] = undefined; }
+  if(!payload || typeof payload !== 'object'){
+    throw new Error('remote share payload is empty');
+  }
+  return payload;
+}
+
+App.buildEmbeddedShareUrl = async function(){
+  const envelope = _shareEnvelope(_serializeGraph());
+  const token = await _packEnvelopeForUrl(envelope);
+  const u = _baseAppUrl();
+  u.hash = `g=${token}`;
+  return u.toString();
+};
+
+App.buildShortIdShareUrl = async function(){
+  const envelope = _shareEnvelope(_serializeGraph());
+  const sid = await _uploadEnvelopeToTmpfiles(envelope);
+  const u = _baseAppUrl();
+  u.hash = `sid=${sid}`;
+  return u.toString();
+};
+
+App.loadSharedGraphFromUrl = async function(){
+  const p = _shareParamsFromUrl();
+  if(!p.g && !p.sid) return false;
+  let payload = null;
+  if(p.g){
+    payload = await _unpackEnvelopeFromUrl(p.g);
+  }else{
+    if(!/^\d+$/.test(String(p.sid || '').trim())){
+      throw new Error('Unsupported Share ID format. Please regenerate the link.');
+    }
+    payload = await _loadEnvelopeFromTmpfilesId(p.sid);
+  }
+  const graph = _unwrapEnvelope(payload);
+  _applyGraphData(graph);
+  App.showToast('Shared graph loaded');
+  return true;
+};
 
 const btnSave = document.getElementById('btnSave');
 if(btnSave){
   btnSave.onclick = ()=>{
-    const blob = new Blob([JSON.stringify(App.graph.serialize(), null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(_serializeGraph(), null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'graph.json'; a.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'graph.json';
+    a.click();
     URL.revokeObjectURL(url);
   };
 }
@@ -17,27 +342,55 @@ if(btnLoad){
   btnLoad.onclick = ()=> document.getElementById('fileInput').click();
 }
 
+const btnShareUrl = document.getElementById('btnShareUrl');
+if(btnShareUrl){
+  btnShareUrl.onclick = async ()=>{
+    try{
+      const link = await App.buildEmbeddedShareUrl();
+      await _copyText(link);
+      App.showToast('Share URL copied');
+      if(link.length > 8000){
+        alert('The URL is long. Use Share ID when possible.');
+      }
+    }catch(err){
+      alert('Failed to create Share URL');
+      console.error(err);
+    }
+  };
+}
+
+const btnShareId = document.getElementById('btnShareId');
+if(btnShareId){
+  btnShareId.onclick = async ()=>{
+    try{
+      const link = await App.buildShortIdShareUrl();
+      await _copyText(link);
+      App.showToast('Share ID URL copied');
+    }catch(err){
+      alert('Failed to create Share ID');
+      console.error(err);
+      alert('Try Share URL if remote storage is unavailable.');
+    }
+  };
+}
+
 const fileInput = document.getElementById('fileInput');
 if(fileInput){
   fileInput.addEventListener('change', e => {
-    const f = e.target.files[0]; if(!f) return;
+    const f = e.target.files[0];
+    if(!f) return;
     const r = new FileReader();
     r.onload = () => {
       try{
-        App.history.lock = true;
-        App.graph.clear();
-        App.graph.configure(JSON.parse(r.result));
-        App.history.lock = false;
-        configureGraphClock(App.graph);
-        resetHistory();
-        attachTimeline();
+        const parsed = JSON.parse(r.result);
+        _applyGraphData(parsed);
       }catch(err){
-        App.history.lock = false;
-        alert('JSON読込失敗');
+        alert('Failed to load JSON');
         console.error(err);
+      }finally{
+        e.target.value = '';
       }
     };
     r.readAsText(f);
   });
 }
-
