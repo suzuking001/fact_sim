@@ -12,6 +12,9 @@ that runs entirely in the web browser, designed for real manufacturing workflows
 Live demo:  
 https://suzuking001.github.io/fact_sim/
 
+Quick walkthrough GIF:  
+![fact_sim demo](docs/assets/fact_sim_demo.gif)
+
 ---
 
 ## Features
