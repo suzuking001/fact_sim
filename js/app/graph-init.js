@@ -17,6 +17,7 @@ function initGraph(){
   installBoxSelect(App.canvas);
   installBoxSelectOverlay(App.canvas);
   installClipboardHandlers(App.canvas);
+  installTimelineNodeSelection(App.canvas);
   bindHistoryButtons();
   installFitHandlers(App.canvas);
   if(typeof installPlacementHandlers === 'function') installPlacementHandlers(App.canvas);

@@ -9,6 +9,15 @@ function rectsOverlap(a, b){
            a[1] + a[3] < b[1]);
 }
 
+function findNodeAtCanvasPos(c, x, y){
+  if(!c) return null;
+  try{
+    if(typeof c.getNodeOnPos === 'function') return c.getNodeOnPos(x, y);
+    if(c.graph && typeof c.graph.getNodeOnPos === 'function') return c.graph.getNodeOnPos(x, y);
+  }catch(_e){}
+  return null;
+}
+
 function installBoxSelect(c){
   if(!c || c.__boxSelectHooked) return;
   const el = c.canvas;
@@ -31,7 +40,7 @@ function installBoxSelect(c){
     const useCtrl = e.ctrlKey || e.metaKey;
     if(!useCtrl) return;
     const p = getCanvasPos(e);
-    const node = c.getNodeOnPos(p[0], p[1]);
+    const node = findNodeAtCanvasPos(c, p[0], p[1]);
     if(node) return;
     selecting = true;
     c.dragging_rectangle = new Float32Array([p[0], p[1], 1, 1]);
@@ -176,6 +185,36 @@ function installClipboardHandlers(c){
   }, opts);
 
   c.__clipboardHooked = true;
+}
+
+function installTimelineNodeSelection(c){
+  if(!c || c.__timelineNodeSelectHooked) return;
+  const el = c.canvas;
+  if(!el) return;
+  const controller = App.resetListenerController('__timelineNodeSelectController');
+  const opts = App.listenerOptions(true, controller);
+
+  const getCanvasPos = (e)=>{
+    try{
+      if(typeof c.convertEventToCanvasOffset === 'function') return c.convertEventToCanvasOffset(e);
+      if(typeof c.convertEventToCanvas === 'function') return c.convertEventToCanvas(e);
+    }catch(_e){}
+    return [e.offsetX || 0, e.offsetY || 0];
+  };
+
+  el.addEventListener('mousedown', (e)=>{
+    if(e.button !== 0) return;
+    if(e.ctrlKey || e.metaKey) return;
+    if(App.placement && App.placement.active) return;
+    const chart = App.timelineChart;
+    if(!chart || typeof chart.selectNodeFromGraph !== 'function') return;
+    const p = getCanvasPos(e);
+    const node = findNodeAtCanvasPos(c, p[0], p[1]);
+    if(!node) return;
+    chart.selectNodeFromGraph(node, { ensureVisible: true, draw: true });
+  }, opts);
+
+  c.__timelineNodeSelectHooked = true;
 }
 
 function bindHistoryButtons(){

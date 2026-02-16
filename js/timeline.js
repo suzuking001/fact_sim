@@ -305,6 +305,53 @@
       }catch(_e){}
     }
 
+    _findNodeRowIndexById(id){
+      if(id === null || typeof id === 'undefined') return -1;
+      const nodes = this._nodeList();
+      for(let i = 0; i < nodes.length; i++){
+        const node = nodes[i];
+        const nid = (node && typeof node.id !== 'undefined') ? node.id : this._nodeKey(node);
+        if(nid == id) return i;
+      }
+      return -1;
+    }
+
+    _scrollToRowIndex(rowIdx){
+      if(!isFinite(rowIdx) || rowIdx < 0) return;
+      const rowStep = this.rowHeight + this.rowGap;
+      const chartH = Math.max(1, this.height - this.topPadding - this.bottomPadding);
+      const totalRows = this._nodeList().length;
+      const totalHeight = totalRows * rowStep;
+      const maxScroll = Math.max(0, totalHeight - chartH);
+      const rowTop = rowIdx * rowStep;
+      const rowBottom = rowTop + rowStep;
+      if(rowTop < this.scrollY) this.scrollY = rowTop;
+      else if(rowBottom > this.scrollY + chartH) this.scrollY = rowBottom - chartH;
+      if(this.scrollY < 0) this.scrollY = 0;
+      if(this.scrollY > maxScroll) this.scrollY = maxScroll;
+    }
+
+    setSelectedNodeId(id, options){
+      const opts = options || {};
+      this._setSelectedNodeId(id);
+      if(this.selectedNodeId !== null && opts.ensureVisible !== false){
+        const rowIdx = this._findNodeRowIndexById(this.selectedNodeId);
+        if(rowIdx >= 0) this._scrollToRowIndex(rowIdx);
+      }
+      if(opts.draw !== false) this.draw();
+    }
+
+    selectNodeFromGraph(node, options){
+      const opts = options || {};
+      if(!node || !this._isTimelineNode(node)){
+        this.setSelectedNodeId(null, opts);
+        return false;
+      }
+      const nid = (typeof node.id !== 'undefined') ? node.id : this._nodeKey(node);
+      this.setSelectedNodeId(nid, opts);
+      return true;
+    }
+
     _recordNode(node, now){
       const key = this._nodeKey(node);
       let entry = this.entries.get(key);
@@ -541,19 +588,29 @@
       for(let i=0;i<nodes.length;i++){
         const y = this.topPadding + i * rowStep - this.scrollY;
         if(y + this.rowHeight < this.topPadding || y > this.height) continue;
+        const node = nodes[i];
+        const key = this._nodeKey(node);
+        const nid = (node && typeof node.id !== 'undefined') ? node.id : key;
+        const isNodeSelected = (this.selectedNodeId !== null && nid == this.selectedNodeId);
+        const entry = this.entries.get(key);
+        const label = entry ? entry.label : this._nodeLabel(node);
+
         ctx.fillStyle = (i % 2 === 0) ? '#ffffff' : '#fafafa';
         ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
 
+        if(isNodeSelected){
+          ctx.fillStyle = '#f5f3ff';
+          ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
+          ctx.strokeStyle = '#7c3aed';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(this.leftGutter + 0.5, y + 0.5, Math.max(1, chartW - 1), Math.max(1, this.rowHeight - 1));
+        }
+
         // row label
-        const node = nodes[i];
-        const key = this._nodeKey(node);
-        const entry = this.entries.get(key);
-        const label = entry ? entry.label : this._nodeLabel(node);
         ctx.save();
         ctx.beginPath();
         ctx.rect(0, y, this.leftGutter - 6, this.rowHeight);
         ctx.clip();
-        const isNodeSelected = (this.selectedNodeId !== null && ((node && typeof node.id !== 'undefined' ? node.id : key) == this.selectedNodeId));
         if(isNodeSelected){
           ctx.fillStyle = '#ede9fe';
           ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
