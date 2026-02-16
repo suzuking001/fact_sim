@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260215b"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260215d" />
+    <link rel="stylesheet" href="css/app.css?v=20260215e" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -78,34 +78,39 @@
       <div class="panelHeader">Shortcuts</div>
       <div class="shortcuts">
         <div class="shortcut-row">
-          <span class="shortcut-action">矩形選択</span>
-          <span class="shortcut-key">Ctrl + ドラッグ</span>
+          <span class="shortcut-action">Box Select</span>
+          <span class="shortcut-key">Ctrl + Drag</span>
           <span class="shortcut-spacer"></span>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-action">コピー</span>
+          <span class="shortcut-action">Copy</span>
           <span class="shortcut-key">Ctrl + C</span>
           <span class="shortcut-spacer"></span>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-action">ペースト</span>
+          <span class="shortcut-action">Paste</span>
           <span class="shortcut-key">Ctrl + V</span>
           <span class="shortcut-spacer"></span>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-action">元に戻す</span>
+          <span class="shortcut-action">Delete Selected Node</span>
+          <span class="shortcut-key">Delete</span>
+          <span class="shortcut-spacer"></span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">Undo</span>
           <span class="shortcut-key">Ctrl + Z</span>
-          <button id="btnUndo" class="shortcut-btn">実行</button>
+          <button id="btnUndo" class="shortcut-btn">Run</button>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-action">やり直し</span>
+          <span class="shortcut-action">Redo</span>
           <span class="shortcut-key">Ctrl + Y / Ctrl + Shift + Z</span>
-          <button id="btnRedo" class="shortcut-btn">実行</button>
+          <button id="btnRedo" class="shortcut-btn">Run</button>
         </div>
         <div class="shortcut-row">
-          <span class="shortcut-action">画面フィット</span>
-          <span class="shortcut-key">ホイール×2</span>
-          <button id="btnFit" class="shortcut-btn">実行</button>
+          <span class="shortcut-action">Fit to Screen</span>
+          <span class="shortcut-key">Mouse Wheel x2</span>
+          <button id="btnFit" class="shortcut-btn">Run</button>
         </div>
       </div>
     </div>
@@ -258,7 +263,7 @@ SOFTWARE.
   <script src="js/app/sim.js?v=20260215e"></script>
   <script src="js/app/benchmark.js?v=20260215d"></script>
   <script src="js/app/history.js"></script>
-  <script src="js/app/selection.js?v=20260215b"></script>
+  <script src="js/app/selection.js?v=20260215c"></script>
   <script src="js/app/fit.js"></script>
   <script src="js/app/timeline-init.js"></script>
   <script src="js/app/graph-init.js?v=20260215c"></script>

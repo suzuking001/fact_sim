@@ -135,6 +135,45 @@ function doPaste(){
   App.showToast('ペーストしました');
 }
 
+function deleteSelectedNodes(){
+  if(!App.graph || !App.canvas) return 0;
+  const selected = App.canvas.selected_nodes || {};
+  const nodes = Object.values(selected).filter(Boolean);
+  if(!nodes.length) return 0;
+
+  const removedNodeIds = new Set();
+  for(const node of nodes){
+    if(!node) continue;
+    if(typeof node.id !== 'undefined' && node.id !== null) removedNodeIds.add(String(node.id));
+    if(App.placement && App.placement.active && App.placement.node === node){
+      App.placement.active = false;
+      App.placement.node = null;
+    }
+    try{
+      App.graph.remove(node);
+    }catch(_e){}
+  }
+
+  const chart = App.timelineChart;
+  if(chart && removedNodeIds.size){
+    const selectedNodeId = chart.selectedNodeId;
+    if(selectedNodeId !== null && removedNodeIds.has(String(selectedNodeId))){
+      if(typeof chart.setSelectedNodeId === 'function') chart.setSelectedNodeId(null, { draw: true });
+      else{
+        try{
+          if(typeof chart._setSelectedNodeId === 'function') chart._setSelectedNodeId(null);
+          if(typeof chart.draw === 'function') chart.draw();
+        }catch(_e){}
+      }
+    }
+  }
+
+  try{
+    if(typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+  }catch(_e){}
+  return nodes.length;
+}
+
 function installClipboardHandlers(c){
   if(!c || c.__clipboardHooked) return;
   const el = c.canvas;
@@ -158,8 +197,24 @@ function installClipboardHandlers(c){
   };
   el.addEventListener('mousemove', updateMouse, opts);
 
+  const isTextInputTarget = (target)=>{
+    if(!target) return false;
+    const tag = String(target.localName || '').toLowerCase();
+    if(tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+    if(typeof target.isContentEditable === 'boolean' && target.isContentEditable) return true;
+    return false;
+  };
+
   window.addEventListener('keydown', (e)=>{
-    if(e.target && (e.target.localName === 'input' || e.target.localName === 'textarea')) return;
+    if(isTextInputTarget(e.target)) return;
+    if(e.key === 'Delete' || e.code === 'Delete'){
+      const removed = deleteSelectedNodes();
+      if(removed > 0){
+        App.showToast(`${removed}ノードを削除しました`);
+        e.preventDefault();
+      }
+      return;
+    }
     const mod = e.metaKey || e.ctrlKey;
     if(!mod) return;
     if(e.code === 'KeyC'){
