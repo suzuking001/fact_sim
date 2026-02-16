@@ -147,16 +147,80 @@ function stopSimLoop(){
 function isSimRunning(){ return simRunning; }
 function getSimDtSec(){ return SIM_DT_SEC; }
 
+function _signalValueOn(v){
+  if(v === null || typeof v === 'undefined') return false;
+  if(typeof v === 'boolean') return v;
+  if(typeof v === 'number') return isFinite(v) && v !== 0;
+  if(typeof v === 'string'){
+    const s = v.trim().toUpperCase();
+    if(!s) return false;
+    if(s === '0' || s === 'OFF' || s === 'FALSE' || s === 'LOW' || s === 'IDLE' || s === 'NULL' || s === 'NONE') return false;
+    return true;
+  }
+  return true;
+}
+
+function _signalPortStates(node, kind){
+  const isInput = kind === 'in';
+  const ports = isInput ? node?.inputs : node?.outputs;
+  if(!Array.isArray(ports) || !ports.length) return [];
+  const list = [];
+  for(let i = 0; i < ports.length; i++){
+    const p = ports[i];
+    const name = String(p?.name || '');
+    const re = isInput ? /^sigIn(\d+)$/ : /^sigOut(\d+)$/;
+    const m = name.match(re);
+    if(!m) continue;
+    const idx = Number(m[1]);
+    const connected = isInput ? (p && p.link != null) : !!(p && Array.isArray(p.links) && p.links.length);
+    let val = null;
+    try{
+      if(isInput && typeof node.getInputData === 'function') val = node.getInputData(i);
+      else if(!isInput && typeof node.getOutputData === 'function') val = node.getOutputData(i);
+      else if(!isInput && p && Object.prototype.hasOwnProperty.call(p, '_data')) val = p._data;
+    }catch(_e){}
+    const state = connected ? (_signalValueOn(val) ? 'ON' : 'OFF') : 'NC';
+    list.push({ idx, state });
+  }
+  list.sort((a,b)=>a.idx-b.idx);
+  return list;
+}
+
+function _buildSignalSummaryLines(node){
+  const inStates = _signalPortStates(node, 'in');
+  const outStates = _signalPortStates(node, 'out');
+  const lines = [];
+  const perLine = 4;
+  const pushGroup = (label, arr)=>{
+    if(!arr.length) return;
+    for(let i = 0; i < arr.length; i += perLine){
+      const items = arr.slice(i, i + perLine).map(x => `${x.idx}:${x.state}`).join('  ');
+      lines.push(i === 0 ? `${label}: ${items}` : `      ${items}`);
+    }
+  };
+  pushGroup('SIG IN', inStates);
+  pushGroup('SIG OUT', outStates);
+  return lines;
+}
+
 function drawStateBelow(ctx, node, lines, x=8, margin=6){
   try{
+    const baseLines = Array.isArray(lines) ? lines.slice() : [];
+    const sigLines = _buildSignalSummaryLines(node);
+    const allLines = baseLines.concat(sigLines);
+
     ctx.save();
     ctx.font = '12px sans-serif';
-    let w = 0; for(const t of lines){ w = Math.max(w, ctx.measureText(String(t)).width); }
-    const lh = 14; const pad = 6; const h = lines.length * lh + pad*2;
+    let w = 0; for(const t of allLines){ w = Math.max(w, ctx.measureText(String(t)).width); }
+    const lh = 14; const pad = 6; const h = allLines.length * lh + pad*2;
     const yTop = node.size[1] + margin;
     ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(x-4, yTop, w+pad*2, h);
     ctx.fillStyle = '#fff';
-    let yy = yTop + pad + 8; for(const t of lines){ ctx.fillText(String(t), x, yy); yy += lh; }
+    let yy = yTop + pad + 8;
+    for(const t of allLines){
+      ctx.fillText(String(t), x, yy);
+      yy += lh;
+    }
   }catch(e){}
   finally{ try{ ctx.restore(); }catch(_e){} }
 }
