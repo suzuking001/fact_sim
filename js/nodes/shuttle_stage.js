@@ -16,7 +16,6 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
     this.properties = {
       processTime: 2,
       groupId: 'shuttle-1',
-      stageIndex: 1,
       flipIO: false
     };
 
@@ -106,22 +105,12 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
     graph.__outputDirty = true;
   }
 
-  _stageOrderValue(node){
-    const n = Number(node?.properties?.stageIndex);
-    if(isFinite(n)) return n;
-    const id = Number(node?.id);
-    return isFinite(id) ? id : 0;
-  }
-
   _leaderOf(peers){
     if(!Array.isArray(peers) || !peers.length) return this;
     let leader = peers[0];
     for(let i = 1; i < peers.length; i++){
       const a = peers[i];
-      const la = this._stageOrderValue(a);
-      const lb = this._stageOrderValue(leader);
-      if(la < lb) leader = a;
-      else if(la === lb && Number(a.id) < Number(leader.id)) leader = a;
+      if(Number(a.id) < Number(leader.id)) leader = a;
     }
     return leader;
   }
@@ -344,11 +333,6 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
       const n = Number(this.properties.processTime);
       this.properties.processTime = (isFinite(n) && n >= 0) ? n : 0;
     }
-    if(name === 'stageIndex'){
-      const n = Number(this.properties.stageIndex);
-      this.properties.stageIndex = (isFinite(n)) ? n : 1;
-      this._markGroupDirty();
-    }
     if(name === 'groupId'){
       this._markGroupDirty();
     }
@@ -361,7 +345,6 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
     const lines = [
       `State: ${this._state}`,
       `Group: ${this._groupId() || '-'}`,
-      `Stage: ${this.properties.stageIndex}`,
       this._currentWork ? `Work: ID=${this._currentWork.id} Type=${this._currentWork.type}` : 'Work: (none)',
       `Remain(s): ${remSec}`,
       `Proc(s): ${this.properties.processTime}`
@@ -381,11 +364,8 @@ menuMixin(ShuttleStageNode);
       callback: ()=>{
         const gid = prompt('Group ID:', this.properties.groupId ?? 'shuttle-1');
         if(gid != null) this.properties.groupId = String(gid).trim() || 'shuttle-1';
-        const idx = prompt('Stage Index:', this.properties.stageIndex ?? 1);
-        if(idx != null && !isNaN(idx)) this.properties.stageIndex = Number(idx);
         if(typeof this.onPropertyChanged === 'function'){
           this.onPropertyChanged('groupId');
-          this.onPropertyChanged('stageIndex');
         }
         this.setDirtyCanvas(true, true);
       }

@@ -34,7 +34,6 @@ function makeExample(kind){
       st.title = `Shuttle ${i + 1}`;
       st.pos = [360 + i * 300, 240];
       st.properties.groupId = 'shuttle-demo';
-      st.properties.stageIndex = i + 1;
       st.properties.processTime = proc[i];
       stages.push(st);
     }
