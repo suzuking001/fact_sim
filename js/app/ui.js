@@ -439,6 +439,21 @@ function beginNodePlacement(node){
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
+    signal:{
+      type:'factory/signal',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Signal', target:'title' }
+      ]
+    },
+    shuttle:{
+      type:'factory/shuttle_stage',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Shuttle Stage', target:'title' },
+        { key:'groupId', label:'Group ID', type:'text', default:'shuttle-1' },
+        { key:'stageIndex', label:'Stage Index', type:'number', min:1, step:1, default:1 },
+        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 }
+      ]
+    },
     merge:{
       type:'factory/merge',
       props:[

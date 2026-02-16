@@ -29,6 +29,7 @@
         <option value="">Load example…</option>
         <option value="simple">Simple</option>
         <option value="branch">Branch</option>
+        <option value="shuttle_line5">Shuttle Line (5 Stage)</option>
         <option value="sample_line1">Sample Line1</option>
       </select>
     </div>
@@ -39,6 +40,8 @@
         <label for="nodeKindSelect">Type</label>
         <select id="nodeKindSelect">
           <option value="equip">Equipment</option>
+          <option value="signal">Signal</option>
+          <option value="shuttle">Shuttle Stage</option>
           <option value="source">Source</option>
           <option value="sink">Sink</option>
           <option value="split">Split</option>
@@ -246,6 +249,8 @@ SOFTWARE.
     <script src="js/link-anim.js?v=20260215b"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js"></script>
+  <script src="js/nodes/signal.js"></script>
+  <script src="js/nodes/shuttle_stage.js?v=20260216e"></script>
   <script src="js/nodes/source.js"></script>
   <script src="js/nodes/split.js"></script>
   <script src="js/nodes/branch.js"></script>
@@ -254,7 +259,7 @@ SOFTWARE.
   <script src="js/nodes/agv_route.js"></script>
   <script src="js/nodes/agv_route_ui.js"></script>
   <script src="js/nodes/sink.js"></script>
-  <script src="js/nodes/register.js"></script>
+  <script src="js/nodes/register.js?v=20260216a"></script>
   <script src="sample/sample_line1.js"></script>
   <script src="js/timeline.js?v=20260215c"></script>
   <script src="js/app/state.js?v=20260215b"></script>
@@ -267,9 +272,9 @@ SOFTWARE.
   <script src="js/app/fit.js"></script>
   <script src="js/app/timeline-init.js"></script>
   <script src="js/app/graph-init.js?v=20260215c"></script>
-  <script src="js/app/examples.js"></script>
+  <script src="js/app/examples.js?v=20260216a"></script>
   <script src="js/app/file-io.js?v=20260213"></script>
-  <script src="js/app/ui.js?v=20260215e"></script>
+  <script src="js/app/ui.js?v=20260216a"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

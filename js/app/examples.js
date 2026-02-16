@@ -24,6 +24,28 @@ function makeExample(kind){
     const k=LiteGraph.createNode('factory/sink'); k.pos=[960,240];
     App.graph.add(s); App.graph.add(sp); App.graph.add(a); App.graph.add(b); App.graph.add(k);
     s.connect(0,sp,0); sp.connect(0,a,0); sp.connect(1,b,0); a.connect(0,k,0); b.connect(0,k,0);
+  }else if(kind==='shuttle_line5'){
+    const s = LiteGraph.createNode('factory/source'); s.pos = [60, 240]; s.properties.sequence = 'A,B';
+    const sink = LiteGraph.createNode('factory/sink'); sink.pos = [1880, 240];
+    const stages = [];
+    const proc = [1.2, 1.6, 1.0, 1.4, 1.8];
+    for(let i = 0; i < 5; i++){
+      const st = LiteGraph.createNode('factory/shuttle_stage');
+      st.title = `Shuttle ${i + 1}`;
+      st.pos = [360 + i * 300, 240];
+      st.properties.groupId = 'shuttle-demo';
+      st.properties.stageIndex = i + 1;
+      st.properties.processTime = proc[i];
+      stages.push(st);
+    }
+    App.graph.add(s);
+    stages.forEach(n => App.graph.add(n));
+    App.graph.add(sink);
+    s.connect(0, stages[0], 0);
+    for(let i = 0; i < stages.length - 1; i++){
+      stages[i].connect(0, stages[i + 1], 0);
+    }
+    stages[stages.length - 1].connect(0, sink, 0);
   }
   // reset time display (no auto start)
   updateSimTime();
