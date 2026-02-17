@@ -1,7 +1,7 @@
 ﻿# fact_sim
 
 [![Demo](https://img.shields.io/badge/demo-live-2ea44f)](https://suzuking001.github.io/fact_sim/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-Research%20%2F%20Non--Commercial-blue)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/suzuking001/fact_sim?style=social)](https://github.com/suzuking001/fact_sim)
 
 Quick walkthrough GIF:  
@@ -11,7 +11,7 @@ Quick walkthrough GIF:
 
 | English | 日本語 |
 | --- | --- |
-| **Overview**<br>Web-based production line simulation engine for manufacturing engineers.<br>`fact_sim` is an open-source discrete-event simulator that runs entirely in the browser. | **概要**<br>製造エンジニア向けの Web ベース生産ラインシミュレーションエンジンです。<br>`fact_sim` は、ブラウザだけで動作するオープンソースの離散事象シミュレータです。 |
+| **Overview**<br>Web-based production line simulation engine for manufacturing engineers.<br>`fact_sim` is a source-available discrete-event simulator that runs entirely in the browser. | **概要**<br>製造エンジニア向けの Web ベース生産ラインシミュレーションエンジンです。<br>`fact_sim` は、ブラウザだけで動作するソース公開型の離散事象シミュレータです。 |
 | **Live Demo**<br>https://suzuking001.github.io/fact_sim/ | **デモサイト**<br>https://suzuking001.github.io/fact_sim/ |
 | **Why fact_sim**<br>• No install, no license server, no heavy setup.<br>• Build a line quickly with node-based modeling.<br>• Simulate with `dt` and `event` engines.<br>• Inspect behavior with timing charts and CSV export.<br>• Share models instantly with `Share URL` / `Share ID`. | **fact_sim の特長**<br>• インストール不要・ライセンスサーバ不要・軽量。<br>• ノードベースでラインをすばやく構築可能。<br>• `dt` / `event` エンジンを切替可能。<br>• タイミングチャート表示と CSV 出力に対応。<br>• `Share URL` / `Share ID` で即共有。 |
 | **Quick Start**<br>1. Open the demo site.<br>2. Choose `Sample Line1`.<br>3. Click `Start`.<br>4. Change speed as needed.<br>5. Open `Compare Speed` if you want benchmark results.<br><br>You can start running a useful production-line simulation in just a few minutes. | **クイックスタート**<br>1. デモサイトを開く。<br>2. `Sample Line1` を選ぶ。<br>3. `Start` を押す。<br>4. 必要に応じて速度を変更する。<br>5. ベンチ結果を見たい場合は `Compare Speed` を開く。<br><br>数分で実用的な生産ラインシミュレーションを開始できます。 |
@@ -19,7 +19,7 @@ Quick walkthrough GIF:
 | **Typical Use Cases**<br>• Automotive production line planning<br>• Assembly throughput estimation<br>• Conveyor and branch/merge logic validation<br>• Manufacturing education and research | **主な用途**<br>• 自動車生産ライン計画<br>• 組立ラインのスループット見積もり<br>• コンベヤおよび分岐・合流ロジック検証<br>• 製造教育・研究 |
 | **Documentation**<br>• Research document: `docs/research.md`<br>• Third-party notices: `THIRD_PARTY_NOTICES.md` | **ドキュメント**<br>• 研究者向け: `docs/research.md`<br>• サードパーティ通知: `THIRD_PARTY_NOTICES.md` |
 | **Contributing**<br>Issues and pull requests are welcome.<br>https://github.com/suzuking001/fact_sim/issues | **コントリビュート**<br>Issue / Pull Request を歓迎します。<br>https://github.com/suzuking001/fact_sim/issues |
-| **License**<br>Apache License 2.0 (`LICENSE`) | **ライセンス**<br>Apache License 2.0 (`LICENSE`) |
+| **License**<br>Research / Non-Commercial License (`LICENSE`) | **ライセンス**<br>Research / Non-Commercial License（研究・非商用）(`LICENSE`) |
 
 ## Key Capabilities
 

@@ -272,5 +272,6 @@ python -m http.server 8123
 をセットで示すと、主張が通りやすくなります。
 
 ## ライセンス
-本体コードは **Apache License 2.0** です。  
+本体コードは **Research / Non-Commercial License**（研究・非商用）です。  
+商用利用は許可されません。  
 サードパーティライセンスは `THIRD_PARTY_NOTICES.md` を参照してください。
