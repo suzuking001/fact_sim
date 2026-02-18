@@ -26,6 +26,17 @@ function initTimeline(){
       }
     });
   }
+  const autoOrderBtn = document.getElementById('timelineAutoOrderBtn');
+  if(autoOrderBtn){
+    autoOrderBtn.addEventListener('click', ()=>{
+      if(!App.timelineChart || typeof App.timelineChart.resetTimelineOrderToAuto !== 'function') return;
+      const changed = App.timelineChart.resetTimelineOrderToAuto();
+      if(typeof App.showToast === 'function'){
+        if(changed > 0) App.showToast('Timeline order reset to auto');
+        else App.showToast('Timeline already auto order');
+      }
+    });
+  }
 
   const dock = document.getElementById('timelineDock');
   const handle = document.getElementById('timelineResizeHandle');

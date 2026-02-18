@@ -45,6 +45,9 @@
       this.onFollowChange = null;
       this._lastNow = 0;
       this._drag = null;
+      this._rowDrag = null;
+      this._autoOrderCacheKey = '';
+      this._autoOrderCache = new Map();
       this.width = 0;
       this.height = 0;
       this._installEvents();
@@ -78,6 +81,8 @@
     reset(){
       this.entries.clear();
       this.scrollY = 0;
+      this._autoOrderCacheKey = '';
+      this._autoOrderCache = new Map();
     }
 
     capture(){
@@ -110,12 +115,359 @@
     _nodeList(){
       if(!this.graph || !Array.isArray(this.graph._nodes)) return [];
       const nodes = this.graph._nodes.slice().filter(n => this._isTimelineNode(n));
+      let needAuto = false;
+      for(let i = 0; i < nodes.length; i++){
+        if(this._timelineOrderOf(nodes[i]) === null){ needAuto = true; break; }
+      }
+      const autoRanks = needAuto ? this._getAutoOrderRankMap(nodes) : new Map();
       nodes.sort((a,b)=>{
-        const oa = (typeof a.order === 'number') ? a.order : (typeof a.id === 'number' ? a.id : 0);
-        const ob = (typeof b.order === 'number') ? b.order : (typeof b.id === 'number' ? b.id : 0);
-        return oa - ob;
+        const ta = this._timelineOrderOf(a);
+        const tb = this._timelineOrderOf(b);
+        if(ta !== null || tb !== null){
+          if(ta === null) return 1;
+          if(tb === null) return -1;
+          if(ta !== tb) return ta - tb;
+        }
+        const ra = autoRanks.get(this._nodeKey(a));
+        const rb = autoRanks.get(this._nodeKey(b));
+        if(isFinite(ra) && isFinite(rb) && ra !== rb) return ra - rb;
+        const oa = this._fallbackOrderOf(a);
+        const ob = this._fallbackOrderOf(b);
+        if(oa !== ob) return oa - ob;
+        const ia = (typeof a?.id === 'number') ? a.id : 0;
+        const ib = (typeof b?.id === 'number') ? b.id : 0;
+        return ia - ib;
       });
       return nodes;
+    }
+
+    _fallbackOrderOf(node){
+      if(!node) return 0;
+      if(typeof node.order === 'number' && isFinite(node.order)) return node.order;
+      if(typeof node.id === 'number' && isFinite(node.id)) return node.id;
+      return 0;
+    }
+
+    _nodePosX(node){
+      const x = Number(node?.pos?.[0]);
+      return isFinite(x) ? x : 0;
+    }
+
+    _nodePosY(node){
+      const y = Number(node?.pos?.[1]);
+      return isFinite(y) ? y : 0;
+    }
+
+    _nodeVisualCompare(a, b){
+      const ax = this._nodePosX(a);
+      const bx = this._nodePosX(b);
+      if(ax !== bx) return ax - bx;
+      const ay = this._nodePosY(a);
+      const by = this._nodePosY(b);
+      if(ay !== by) return ay - by;
+      const oa = this._fallbackOrderOf(a);
+      const ob = this._fallbackOrderOf(b);
+      if(oa !== ob) return oa - ob;
+      const ia = (typeof a?.id === 'number') ? a.id : 0;
+      const ib = (typeof b?.id === 'number') ? b.id : 0;
+      return ia - ib;
+    }
+
+    _isFlowPortName(name){
+      const s = String(name || '').trim().toLowerCase();
+      if(!s) return false;
+      if(s.startsWith('sig')) return false;
+      if(s.startsWith('work')) return true;
+      if(s.startsWith('agv')) return true;
+      return false;
+    }
+
+    _isFlowLink(originNode, originSlot, link, targetNode){
+      if(!originNode || !targetNode || !link) return false;
+      const outName = String(originNode?.outputs?.[originSlot]?.name || '').trim();
+      const inName = String(targetNode?.inputs?.[link.target_slot]?.name || '').trim();
+      if(/^sig/i.test(outName) || /^sig/i.test(inName)) return false;
+      if(this._isFlowPortName(outName) || this._isFlowPortName(inName)) return true;
+      return false;
+    }
+
+    _autoOrderStamp(nodes){
+      const links = this.graph && this.graph.links ? this.graph.links : {};
+      const nodeSet = new Set();
+      let manual = 0;
+      let sum = 0;
+      let posSig = 0;
+      for(let i = 0; i < nodes.length; i++){
+        const n = nodes[i];
+        const key = this._nodeKey(n);
+        nodeSet.add(key);
+        if(this._timelineOrderOf(n) !== null) manual++;
+        const id = Number(this._nodeKey(n));
+        if(isFinite(id)) sum += id;
+        const x = Math.round(this._nodePosX(n) / 20);
+        const y = Math.round(this._nodePosY(n) / 20);
+        posSig += (x * 131 + y * 17);
+      }
+
+      let flowCount = 0;
+      let flowHash = 2166136261 >>> 0;
+      const linkIds = Object.keys(links);
+      for(let i = 0; i < linkIds.length; i++){
+        const lk = links[linkIds[i]];
+        if(!lk) continue;
+        const origin = this.graph.getNodeById(lk.origin_id);
+        const target = this.graph.getNodeById(lk.target_id);
+        if(!origin || !target) continue;
+        const fromKey = this._nodeKey(origin);
+        const toKey = this._nodeKey(target);
+        if(!nodeSet.has(fromKey) || !nodeSet.has(toKey) || fromKey === toKey) continue;
+        if(!this._isFlowLink(origin, lk.origin_slot, lk, target)) continue;
+
+        const o = (Number(lk.origin_id) | 0) >>> 0;
+        const t = (Number(lk.target_id) | 0) >>> 0;
+        const os = (Number(lk.origin_slot) | 0) >>> 0;
+        const ts = (Number(lk.target_slot) | 0) >>> 0;
+        const token = (o * 73856093) ^ (t * 19349663) ^ ((os + 1) * 83492791) ^ ((ts + 1) * 2654435761);
+        flowHash ^= (token >>> 0);
+        flowHash = Math.imul(flowHash, 16777619) >>> 0;
+        flowCount++;
+      }
+
+      return `${nodes.length}|${manual}|${sum}|${posSig}|${flowCount}|${flowHash}`;
+    }
+
+    _getAutoOrderRankMap(nodes){
+      if(!Array.isArray(nodes) || !nodes.length) return new Map();
+      const stamp = this._autoOrderStamp(nodes);
+      if(this._autoOrderCacheKey === stamp && this._autoOrderCache){
+        return this._autoOrderCache;
+      }
+
+      const keyToNode = new Map();
+      const outMap = new Map();
+      const inMap = new Map();
+      const undMap = new Map();
+      for(const n of nodes){
+        const k = this._nodeKey(n);
+        keyToNode.set(k, n);
+        outMap.set(k, new Set());
+        inMap.set(k, new Set());
+        undMap.set(k, new Set());
+      }
+
+      for(const n of nodes){
+        const fromKey = this._nodeKey(n);
+        const outputs = Array.isArray(n?.outputs) ? n.outputs : [];
+        for(let oi = 0; oi < outputs.length; oi++){
+          const port = outputs[oi];
+          const links = Array.isArray(port?.links) ? port.links : [];
+          for(let li = 0; li < links.length; li++){
+            const linkId = links[li];
+            const link = this.graph?.links ? this.graph.links[linkId] : null;
+            if(!link) continue;
+            const target = this.graph.getNodeById(link.target_id);
+            if(!target) continue;
+            if(!this._isFlowLink(n, oi, link, target)) continue;
+            const toKey = this._nodeKey(target);
+            if(!keyToNode.has(toKey) || toKey === fromKey) continue;
+            outMap.get(fromKey).add(toKey);
+            inMap.get(toKey).add(fromKey);
+            undMap.get(fromKey).add(toKey);
+            undMap.get(toKey).add(fromKey);
+          }
+        }
+      }
+
+      const comps = [];
+      const visited = new Set();
+      for(const n of nodes){
+        const startKey = this._nodeKey(n);
+        if(visited.has(startKey)) continue;
+        const stack = [startKey];
+        visited.add(startKey);
+        const compKeys = [];
+        while(stack.length){
+          const k = stack.pop();
+          compKeys.push(k);
+          const nbr = undMap.get(k);
+          if(!nbr) continue;
+          nbr.forEach((nx)=>{
+            if(visited.has(nx)) return;
+            visited.add(nx);
+            stack.push(nx);
+          });
+        }
+        if(compKeys.length) comps.push(compKeys);
+      }
+
+      comps.sort((ca, cb)=>{
+        const na = ca.map(k => keyToNode.get(k)).filter(Boolean).sort((x,y)=> this._nodeVisualCompare(x,y))[0];
+        const nb = cb.map(k => keyToNode.get(k)).filter(Boolean).sort((x,y)=> this._nodeVisualCompare(x,y))[0];
+        return this._nodeVisualCompare(na, nb);
+      });
+
+      const orderedKeys = [];
+      for(const comp of comps){
+        const compSet = new Set(comp);
+        const indeg = new Map();
+        for(const k of comp){
+          let d = 0;
+          const ins = inMap.get(k);
+          if(ins){
+            ins.forEach((src)=>{ if(compSet.has(src)) d++; });
+          }
+          indeg.set(k, d);
+        }
+
+        const compareKey = (ka, kb)=> this._nodeVisualCompare(keyToNode.get(ka), keyToNode.get(kb));
+        const localOrder = [];
+        const visitedComp = new Set();
+        const walkFrom = (startKey)=>{
+          const stack = [startKey];
+          while(stack.length){
+            const k = stack.pop();
+            if(visitedComp.has(k)) continue;
+            visitedComp.add(k);
+            localOrder.push(k);
+
+            const outs = Array.from(outMap.get(k) || []).filter(nx => compSet.has(nx) && !visitedComp.has(nx));
+            outs.sort(compareKey);
+
+            const others = Array.from(undMap.get(k) || []).filter(nx => compSet.has(nx) && !visitedComp.has(nx) && outs.indexOf(nx) < 0);
+            others.sort(compareKey);
+
+            const next = outs.concat(others);
+            for(let i = next.length - 1; i >= 0; i--){
+              stack.push(next[i]);
+            }
+          }
+        };
+
+        const seeds = comp.filter(k => (indeg.get(k) || 0) === 0);
+        seeds.sort(compareKey);
+        for(const s of seeds){
+          if(!visitedComp.has(s)) walkFrom(s);
+        }
+
+        if(visitedComp.size < comp.length){
+          const remain = comp.filter(k => !visitedComp.has(k));
+          remain.sort(compareKey);
+          for(const r of remain){
+            if(!visitedComp.has(r)) walkFrom(r);
+          }
+        }
+
+        orderedKeys.push(...localOrder);
+      }
+
+      if(orderedKeys.length < nodes.length){
+        const localOrder = [];
+        const exists = new Set(orderedKeys);
+        for(const n of nodes){
+          const k = this._nodeKey(n);
+          if(exists.has(k)) continue;
+          localOrder.push(k);
+        }
+        localOrder.sort((ka, kb)=> this._nodeVisualCompare(keyToNode.get(ka), keyToNode.get(kb)));
+        orderedKeys.push(...localOrder);
+      }
+
+      const rank = new Map();
+      for(let i = 0; i < orderedKeys.length; i++){
+        rank.set(orderedKeys[i], i + 1);
+      }
+      this._autoOrderCacheKey = stamp;
+      this._autoOrderCache = rank;
+      return rank;
+    }
+
+    _timelineOrderOf(node){
+      const v = Number(node?.properties?.timelineOrder);
+      if(!isFinite(v)) return null;
+      return Math.round(v);
+    }
+
+    _setTimelineOrder(node, order){
+      if(!node) return;
+      node.properties = node.properties || {};
+      node.properties.timelineOrder = Math.max(1, Math.round(order));
+    }
+
+    _saveTimelineOrder(nodes){
+      if(!Array.isArray(nodes)) return;
+      for(let i = 0; i < nodes.length; i++){
+        this._setTimelineOrder(nodes[i], i + 1);
+      }
+    }
+
+    _notifyGraphChanged(){
+      try{
+        if(this.graph && typeof this.graph.onAfterChange === 'function'){
+          this.graph.onAfterChange();
+          return;
+        }
+      }catch(_e){}
+      try{
+        if(typeof pushHistory === 'function') pushHistory();
+      }catch(_e){}
+    }
+
+    resetTimelineOrderToAuto(options){
+      const opts = options || {};
+      const nodes = this._nodeList();
+      let changed = 0;
+      for(let i = 0; i < nodes.length; i++){
+        const n = nodes[i];
+        if(!n) continue;
+        if(!n.properties || typeof n.properties !== 'object') continue;
+        if(!Object.prototype.hasOwnProperty.call(n.properties, 'timelineOrder')) continue;
+        delete n.properties.timelineOrder;
+        changed++;
+      }
+      this._autoOrderCacheKey = '';
+      this._autoOrderCache = new Map();
+      if(changed > 0 && opts.notify !== false){
+        this._notifyGraphChanged();
+      }
+      if(opts.draw !== false){
+        this.draw();
+      }
+      return changed;
+    }
+
+    _moveTimelineRow(fromIdx, toIdx){
+      const nodes = this._nodeList();
+      if(!nodes.length) return false;
+      if(!isFinite(fromIdx) || !isFinite(toIdx)) return false;
+      let from = Math.max(0, Math.min(nodes.length - 1, Math.floor(fromIdx)));
+      let to = Math.max(0, Math.min(nodes.length - 1, Math.floor(toIdx)));
+      if(from === to) return false;
+      const moved = nodes.splice(from, 1)[0];
+      nodes.splice(to, 0, moved);
+      this._saveTimelineOrder(nodes);
+      this._notifyGraphChanged();
+      return true;
+    }
+
+    _rowIndexFromY(y, rows){
+      const count = Math.max(0, Number(rows) || 0);
+      if(count <= 0) return -1;
+      if(y < this.topPadding) return -1;
+      const rowStep = this.rowHeight + this.rowGap;
+      const idx = Math.floor((y + this.scrollY - this.topPadding) / rowStep);
+      if(!isFinite(idx) || idx < 0 || idx >= count) return -1;
+      return idx;
+    }
+
+    _clampScrollByRows(rows){
+      const count = Math.max(0, Number(rows) || 0);
+      const rowStep = this.rowHeight + this.rowGap;
+      const chartH = Math.max(1, this.height - this.topPadding - this.bottomPadding);
+      const totalH = count * rowStep;
+      const maxScroll = Math.max(0, totalH - chartH);
+      if(this.scrollY < 0) this.scrollY = 0;
+      if(this.scrollY > maxScroll) this.scrollY = maxScroll;
+      return { rowStep, chartH, maxScroll };
     }
 
     _isTimelineNode(node){
@@ -430,6 +782,23 @@
       el.addEventListener('mousedown', (e)=>{
         if(e.button !== 0) return;
         const rect = el.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const nodes = this._nodeList();
+        const rowIdx = this._rowIndexFromY(y, nodes.length);
+        if(x < this.leftGutter && rowIdx >= 0){
+          this._rowDrag = {
+            x: e.clientX,
+            y: e.clientY,
+            startRow: rowIdx,
+            targetRow: rowIdx,
+            moved: false
+          };
+          this._drag = null;
+          e.preventDefault();
+          this.draw();
+          return;
+        }
         this._drag = {
           x: e.clientX,
           y: e.clientY,
@@ -441,6 +810,29 @@
         e.preventDefault();
       });
       window.addEventListener('mousemove', (e)=>{
+        if(this._rowDrag){
+          const rd = this._rowDrag;
+          if(Math.abs(e.clientY - rd.y) > 3) rd.moved = true;
+          const rect = this.canvas.getBoundingClientRect();
+          const y = e.clientY - rect.top;
+          const nodes = this._nodeList();
+          if(nodes.length){
+            const edge = 20;
+            if(y < this.topPadding + edge){
+              this.scrollY -= Math.max(1, (this.topPadding + edge - y) * 0.5);
+            }else if(y > this.height - edge){
+              this.scrollY += Math.max(1, (y - (this.height - edge)) * 0.5);
+            }
+            this._clampScrollByRows(nodes.length);
+            let rowIdx = this._rowIndexFromY(y, nodes.length);
+            if(rowIdx < 0){
+              rowIdx = (y < this.topPadding) ? 0 : (nodes.length - 1);
+            }
+            rd.targetRow = rowIdx;
+          }
+          this.draw();
+          return;
+        }
         if(!this._drag) return;
         if(Math.abs(e.clientX - this._drag.x) > 3 || Math.abs(e.clientY - this._drag.y) > 3){
           this._drag.moved = true;
@@ -454,6 +846,17 @@
         this.draw();
       });
       window.addEventListener('mouseup', (e)=>{
+        if(this._rowDrag){
+          const rd = this._rowDrag;
+          if(rd.moved){
+            this._moveTimelineRow(rd.startRow, rd.targetRow);
+          }else{
+            this._handleClick(e);
+          }
+          this._rowDrag = null;
+          this.draw();
+          return;
+        }
         if(this._drag && !this._drag.moved){
           this._handleClick(e);
         }
@@ -470,9 +873,8 @@
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       if(y < this.topPadding) return;
-      const rowStep = this.rowHeight + this.rowGap;
-      const rowIdx = Math.floor((y + this.scrollY - this.topPadding) / rowStep);
       const nodes = this._nodeList();
+      const rowIdx = this._rowIndexFromY(y, nodes.length);
       if(rowIdx < 0 || rowIdx >= nodes.length) return;
       const node = nodes[rowIdx];
       if(x < this.leftGutter){
@@ -555,11 +957,7 @@
 
       const nodes = this._nodeList();
       const totalRows = nodes.length;
-      const rowStep = this.rowHeight + this.rowGap;
-      const totalHeight = totalRows * rowStep;
-      const maxScroll = Math.max(0, totalHeight - chartH);
-      if(this.scrollY < 0) this.scrollY = 0;
-      if(this.scrollY > maxScroll) this.scrollY = maxScroll;
+      const { rowStep } = this._clampScrollByRows(totalRows);
 
       // background
       ctx.fillStyle = '#ffffff';
@@ -595,11 +993,17 @@
         const key = this._nodeKey(node);
         const nid = (node && typeof node.id !== 'undefined') ? node.id : key;
         const isNodeSelected = (this.selectedNodeId !== null && nid == this.selectedNodeId);
+        const isDragSource = !!(this._rowDrag && this._rowDrag.startRow === i);
+        const isDragTarget = !!(this._rowDrag && this._rowDrag.targetRow === i);
         const entry = this.entries.get(key);
         const label = entry ? entry.label : this._nodeLabel(node);
 
         ctx.fillStyle = (i % 2 === 0) ? '#ffffff' : '#fafafa';
         ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
+        if(isDragSource){
+          ctx.fillStyle = 'rgba(37,99,235,0.08)';
+          ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
+        }
 
         if(isNodeSelected){
           ctx.fillStyle = '#f5f3ff';
@@ -614,6 +1018,13 @@
         ctx.beginPath();
         ctx.rect(0, y, this.leftGutter - 6, this.rowHeight);
         ctx.clip();
+        if(isDragSource){
+          ctx.fillStyle = '#dbeafe';
+          ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
+        }else if(isDragTarget){
+          ctx.fillStyle = '#eff6ff';
+          ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
+        }
         if(isNodeSelected){
           ctx.fillStyle = '#ede9fe';
           ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
@@ -653,6 +1064,19 @@
             }
             ctx.globalAlpha = 1;
           }
+        }
+      }
+
+      if(this._rowDrag && nodes.length){
+        const idx = Math.max(0, Math.min(nodes.length - 1, this._rowDrag.targetRow));
+        const lineY = this.topPadding + idx * rowStep - this.scrollY + this.rowHeight + this.rowGap * 0.5;
+        if(lineY >= this.topPadding - rowStep && lineY <= this.height + rowStep){
+          ctx.strokeStyle = '#2563eb';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, lineY);
+          ctx.lineTo(this.width, lineY);
+          ctx.stroke();
         }
       }
 
