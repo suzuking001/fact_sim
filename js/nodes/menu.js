@@ -25,8 +25,12 @@ function menuMixin(cls){
     const opts = [];
     if(this.properties.script !== undefined){
       opts.push({
-        content: 'Edit Script…',
+        content: 'Edit Script...',
         callback: ()=>{
+          if(typeof window.openPropertyEditor === 'function'){
+            window.openPropertyEditor(this, 'script');
+            return;
+          }
           window.editingNode = this;
           scriptEditorTextarea.value = this.properties.script;
           document.getElementById('scriptEditorModal').style.display = 'block';
@@ -35,40 +39,53 @@ function menuMixin(cls){
     }
     if(this.properties.processTime !== undefined || this.properties.downTime !== undefined){
       opts.push({
-        content: 'Edit Properties…',
+        content: 'Edit Properties...',
         callback: ()=>{
           const p = this.properties;
           if(p.processTime !== undefined){
             const v = prompt('ProcessTime (s):', p.processTime);
-            if(v!=null && !isNaN(v)) p.processTime = +v;
+            if(v != null && !isNaN(v)) p.processTime = +v;
           }
           if(p.downTime !== undefined){
             const v = prompt('DownTime (s):', p.downTime);
-            if(v!=null && !isNaN(v)) p.downTime = +v;
+            if(v != null && !isNaN(v)) p.downTime = +v;
           }
-          this.setDirtyCanvas(true,true);
+          this.setDirtyCanvas(true, true);
         }
       });
     }
     if(this.properties.sigEnabled !== undefined){
       opts.push({
         content: this.properties.sigEnabled ? 'Disable Signals' : 'Enable Signals',
-        callback: ()=>{ this.properties.sigEnabled = !this.properties.sigEnabled; this.setDirtyCanvas(true,true); }
+        callback: ()=>{
+          this.properties.sigEnabled = !this.properties.sigEnabled;
+          this.setDirtyCanvas(true, true);
+        }
       });
     }
     const extra = this.properties.sigExtra || 0;
     const applySigChange = ()=>{
       if(typeof this._syncSignalPorts === 'function') this._syncSignalPorts();
-      else { syncSigPorts(this, 0); if(this.setDirtyCanvas) this.setDirtyCanvas(true,true); }
+      else{
+        syncSigPorts(this, 0);
+        if(this.setDirtyCanvas) this.setDirtyCanvas(true, true);
+      }
     };
     opts.push({
       content: 'Add SIG IN/OUT',
-      callback: ()=>{ this.properties.sigExtra++; applySigChange(); }
+      callback: ()=>{
+        this.properties.sigExtra++;
+        applySigChange();
+      }
     });
     opts.push({
       content: 'Remove SIG IN/OUT',
-      disabled: extra===0,
-      callback: ()=>{ if(extra===0) return; this.properties.sigExtra--; applySigChange(); }
+      disabled: extra === 0,
+      callback: ()=>{
+        if(extra === 0) return;
+        this.properties.sigExtra--;
+        applySigChange();
+      }
     });
     return opts;
   };

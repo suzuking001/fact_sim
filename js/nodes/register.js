@@ -2,6 +2,7 @@
 
 function afterRegister(){
   LiteGraph.registerNodeType('factory/source', SourceNode);
+  LiteGraph.registerNodeType('factory/note',   NoteNode);
   LiteGraph.registerNodeType('factory/equip',  EquipmentNode);
   LiteGraph.registerNodeType('factory/signal', SignalNode);
   LiteGraph.registerNodeType('factory/shuttle_stage', ShuttleStageNode);

@@ -439,6 +439,16 @@ function beginNodePlacement(node){
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
+    note:{
+      type:'factory/note',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Memo', target:'title' },
+        { key:'text', label:'Text', type:'textarea', rows:6, default:'Equipment memo...' },
+        { key:'fontSize', label:'Font Size (px)', type:'number', min:10, max:64, step:1, default:13 },
+        { key:'backgroundColor', label:'Background Color', type:'color', default:'#f8fafc' },
+        { key:'textColor', label:'Text Color', type:'color', default:'#0f172a' }
+      ]
+    },
     signal:{
       type:'factory/signal',
       props:[
@@ -534,6 +544,10 @@ function beginNodePlacement(node){
       input = document.createElement('input');
       input.type = 'checkbox';
       input.checked = !!def.default;
+    }else if(def.type === 'color'){
+      input = document.createElement('input');
+      input.type = 'color';
+      input.value = def.default ?? '#ffffff';
     }else{
       input = document.createElement('input');
       input.type = 'text';

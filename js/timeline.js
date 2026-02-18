@@ -124,12 +124,15 @@
       try{
         const srcCtor = (typeof window !== 'undefined') ? window.SourceNode : null;
         const sinkCtor = (typeof window !== 'undefined') ? window.SinkNode : null;
+        const noteCtor = (typeof window !== 'undefined') ? window.NoteNode : null;
         if(srcCtor && node instanceof srcCtor) return false;
         if(sinkCtor && node instanceof sinkCtor) return false;
+        if(noteCtor && node instanceof noteCtor) return false;
       }catch(_e){}
       const type = String(node.type || '').toLowerCase();
       if(type === 'source' || type.endsWith('/source')) return false;
       if(type === 'sink' || type.endsWith('/sink')) return false;
+      if(type === 'note' || type.endsWith('/note')) return false;
       const title = String(node.title || '').toLowerCase();
       if(title === 'source' || title === 'sink') return false;
       return true;
