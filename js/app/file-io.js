@@ -3,10 +3,6 @@
 var App = window.App || (window.App = {});
 
 const SHARE_SCHEMA = 'fact-sim-share-v1';
-const TMPFILES_UPLOAD_API = 'https://tmpfiles.org/api/v1/upload';
-const TMPFILES_DL_BASE = 'https://tmpfiles.org/dl';
-const TMPFILES_FILE_NAME = 'factsim_share.txt';
-const TMPFILES_GLOBAL_KEY = '__FACT_SIM_REMOTE_SHARE__';
 
 const _utf8Encoder = new TextEncoder();
 const _utf8Decoder = new TextDecoder();
@@ -211,8 +207,7 @@ function _shareParamsFromUrl(){
   const qp = u.searchParams;
   const hp = new URLSearchParams(String(u.hash || '').replace(/^#/, ''));
   return {
-    g: hp.get('g') || qp.get('g') || '',
-    sid: hp.get('sid') || qp.get('sid') || ''
+    g: hp.get('g') || qp.get('g') || ''
   };
 }
 
@@ -240,56 +235,6 @@ async function _copyText(text){
   area.remove();
 }
 
-function _extractTmpfilesId(url){
-  const m = String(url || '').match(/tmpfiles\.org\/(\d+)\//);
-  return m ? m[1] : '';
-}
-
-async function _uploadEnvelopeToTmpfiles(envelope){
-  const jsPayload = `window.${TMPFILES_GLOBAL_KEY}=${JSON.stringify(envelope)};`;
-  const form = new FormData();
-  form.append('file', new Blob([jsPayload], { type: 'text/plain' }), TMPFILES_FILE_NAME);
-  const res = await fetch(TMPFILES_UPLOAD_API, { method: 'POST', body: form });
-  const data = await res.json().catch(()=> null);
-  if(!res.ok || !data || data.status !== 'success'){
-    const msg = data && data.message ? data.message : `status=${res.status}`;
-    throw new Error(`tmpfiles upload failed: ${msg}`);
-  }
-  const sid = _extractTmpfilesId(data.data && data.data.url);
-  if(!sid) throw new Error('tmpfiles id parse failed');
-  return sid;
-}
-
-async function _loadEnvelopeFromTmpfilesId(sid){
-  const id = String(sid || '').trim();
-  if(!/^\d+$/.test(id)) throw new Error('invalid share id');
-
-  const url = `${TMPFILES_DL_BASE}/${id}/${TMPFILES_FILE_NAME}`;
-  try{ delete window[TMPFILES_GLOBAL_KEY]; }catch(_e){ window[TMPFILES_GLOBAL_KEY] = undefined; }
-
-  await new Promise((resolve, reject)=>{
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `${url}?t=${Date.now()}`;
-    script.onload = ()=>{
-      if(script.parentNode) script.parentNode.removeChild(script);
-      resolve();
-    };
-    script.onerror = ()=>{
-      if(script.parentNode) script.parentNode.removeChild(script);
-      reject(new Error('failed to load remote share payload'));
-    };
-    document.head.appendChild(script);
-  });
-
-  const payload = window[TMPFILES_GLOBAL_KEY];
-  try{ delete window[TMPFILES_GLOBAL_KEY]; }catch(_e){ window[TMPFILES_GLOBAL_KEY] = undefined; }
-  if(!payload || typeof payload !== 'object'){
-    throw new Error('remote share payload is empty');
-  }
-  return payload;
-}
-
 App.buildEmbeddedShareUrl = async function(){
   const envelope = _shareEnvelope(_serializeGraph());
   const token = await _packEnvelopeForUrl(envelope);
@@ -298,31 +243,72 @@ App.buildEmbeddedShareUrl = async function(){
   return u.toString();
 };
 
-App.buildShortIdShareUrl = async function(){
-  const envelope = _shareEnvelope(_serializeGraph());
-  const sid = await _uploadEnvelopeToTmpfiles(envelope);
-  const u = _baseAppUrl();
-  u.hash = `sid=${sid}`;
-  return u.toString();
-};
-
 App.loadSharedGraphFromUrl = async function(){
   const p = _shareParamsFromUrl();
-  if(!p.g && !p.sid) return false;
-  let payload = null;
-  if(p.g){
-    payload = await _unpackEnvelopeFromUrl(p.g);
-  }else{
-    if(!/^\d+$/.test(String(p.sid || '').trim())){
-      throw new Error('Unsupported Share ID format. Please regenerate the link.');
-    }
-    payload = await _loadEnvelopeFromTmpfilesId(p.sid);
+  if(!p.g){
+    const u = new URL(window.location.href);
+    const qp = u.searchParams;
+    const hp = new URLSearchParams(String(u.hash || '').replace(/^#/, ''));
+    const legacySid = hp.get('sid') || qp.get('sid') || '';
+    if(legacySid) throw new Error('Share ID is no longer supported. Please use Share URL (#g=...).');
+    return false;
   }
+  const payload = await _unpackEnvelopeFromUrl(p.g);
   const graph = _unwrapEnvelope(payload);
   _applyGraphData(graph);
   App.showToast('Shared graph loaded');
   return true;
 };
+
+(function initShareUrlModal(){
+  const modal = document.getElementById('shareUrlModal');
+  const closeBtn = document.getElementById('shareUrlClose');
+  const valueEl = document.getElementById('shareUrlValue');
+  const lenEl = document.getElementById('shareUrlLength');
+  const warnEl = document.getElementById('shareUrlWarning');
+  const copyBtn = document.getElementById('shareUrlCopyBtn');
+  if(!modal || !closeBtn || !valueEl || !lenEl || !warnEl || !copyBtn) return;
+
+  const close = ()=>{
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  };
+  const open = ()=>{
+    modal.style.display = 'block';
+    modal.setAttribute('aria-hidden', 'false');
+  };
+
+  closeBtn.addEventListener('click', close);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) close(); });
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && modal.style.display === 'block') close();
+  });
+
+  copyBtn.addEventListener('click', async ()=>{
+    try{
+      await _copyText(valueEl.value || '');
+      if(typeof App.showToast === 'function') App.showToast('Share URL copied');
+    }catch(err){
+      console.error(err);
+      alert('Failed to copy Share URL');
+    }
+  });
+
+  App.showShareUrlModal = function(link){
+    const text = String(link || '');
+    valueEl.value = text;
+    lenEl.textContent = `URL length: ${text.length.toLocaleString()} 文字`;
+    if(text.length > 8000){
+      warnEl.textContent = '注意: 環境によってはURL長の上限を超える可能性があります。';
+    }else if(text.length > 4000){
+      warnEl.textContent = '注意: 一部ブラウザ/ツールでは扱いにくい長さです。';
+    }else{
+      warnEl.textContent = '';
+    }
+    open();
+    return true;
+  };
+})();
 
 const btnSave = document.getElementById('btnSave');
 if(btnSave){
@@ -349,27 +335,12 @@ if(btnShareUrl){
       const link = await App.buildEmbeddedShareUrl();
       await _copyText(link);
       App.showToast('Share URL copied');
-      if(link.length > 8000){
-        alert('The URL is long. Use Share ID when possible.');
+      if(typeof App.showShareUrlModal === 'function'){
+        App.showShareUrlModal(link);
       }
     }catch(err){
       alert('Failed to create Share URL');
       console.error(err);
-    }
-  };
-}
-
-const btnShareId = document.getElementById('btnShareId');
-if(btnShareId){
-  btnShareId.onclick = async ()=>{
-    try{
-      const link = await App.buildShortIdShareUrl();
-      await _copyText(link);
-      App.showToast('Share ID URL copied');
-    }catch(err){
-      alert('Failed to create Share ID');
-      console.error(err);
-      alert('Try Share URL if remote storage is unavailable.');
     }
   };
 }

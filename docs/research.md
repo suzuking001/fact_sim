@@ -8,7 +8,7 @@
 
 - 対応エンジン: `dt`（固定刻み） / `event`（イベント駆動）
 - 対応ノード: Source / Equipment / Split / Branch / Merge / Join / AGV Route / Sink
-- タイムライン表示、CSVエクスポート、Share URL / Share ID 共有に対応
+- タイムライン表示、CSVエクスポート、Share URL 共有に対応
 
 ![fact_sim UI](../スクリーンショット%202026-02-07%20095035.png)
 
@@ -37,7 +37,7 @@ flowchart LR
   E -->|simNow/update| N
   N --> T[Timeline]
   N --> B[Benchmark]
-  G --> S[Share URL / Share ID]
+  G --> S[Share URL]
 ```
 
 ## 理論モデルとの関係（重要）
@@ -183,25 +183,16 @@ flowchart TD
 ### Share URL
 - グラフJSONを圧縮して `#g=...` に埋め込み
 
-### Share ID
-- 外部ストレージ（`tmpfiles.org`）へ保存して `#sid=...` を生成
-
-Figure 5. Share URL / Share ID の生成シーケンス
+Figure 5. Share URL の生成シーケンス
 
 ```mermaid
 sequenceDiagram
   participant U as User
   participant A as App
-  participant R as Remote(tmpfiles)
 
   U->>A: Share URL
   A->>A: グラフJSON圧縮
   A-->>U: #g=... をコピー
-
-  U->>A: Share ID
-  A->>R: グラフJSONアップロード
-  R-->>A: sid
-  A-->>U: #sid=... をコピー
 ```
 
 ## 制約・既定値

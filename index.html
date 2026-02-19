@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260215b"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260218f" />
+    <link rel="stylesheet" href="css/app.css?v=20260218g" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -123,7 +123,6 @@
       <button id="btnSave">Save</button>
       <button id="btnLoad">Load</button>
       <button id="btnShareUrl">Share URL</button>
-      <button id="btnShareId">Share ID</button>
       <input type="file" id="fileInput" accept=".json">
       <button id="btnAbout">About / Licenses</button>
     </div>
@@ -187,6 +186,36 @@
         </thead>
         <tbody id="benchmarkBody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Share URL Modal -->
+  <div id="shareUrlModal" aria-hidden="true" role="dialog">
+    <div id="shareUrlContainer" role="document" aria-label="Share URL details">
+      <div class="shareUrlHeader">
+        <h2>Share URL</h2>
+        <button id="shareUrlClose" aria-label="Close">Close</button>
+      </div>
+      <div class="shareUrlBody">
+        <p>
+          Share URL は、グラフJSONを圧縮して URL ハッシュ（<code>#g=...</code>）に埋め込む方式です。
+        </p>
+        <p>
+          外部サーバーへグラフデータを送信しません。共有データはこの URL 文字列に含まれます。
+        </p>
+        <p>
+          ブラウザや利用環境により URL 文字数上限が異なるため、非常に大きなグラフでは開けない可能性があります。
+        </p>
+        <label for="shareUrlValue">Generated URL</label>
+        <textarea id="shareUrlValue" readonly aria-label="Generated share URL"></textarea>
+        <div class="shareUrlMeta">
+          <span id="shareUrlLength">Length: 0</span>
+          <span id="shareUrlWarning"></span>
+        </div>
+        <div class="shareUrlActions">
+          <button id="shareUrlCopyBtn">Copy Again</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -276,7 +305,7 @@ SOFTWARE.
   <script src="js/app/timeline-init.js?v=20260218a"></script>
   <script src="js/app/graph-init.js?v=20260215c"></script>
   <script src="js/app/examples.js?v=20260216b"></script>
-  <script src="js/app/file-io.js?v=20260213"></script>
+  <script src="js/app/file-io.js?v=20260218b"></script>
   <script src="js/app/ui.js?v=20260218b"></script>
   <script src="js/app.js?v=20260213"></script>
 

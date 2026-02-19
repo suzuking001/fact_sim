@@ -517,6 +517,78 @@ body.timeline-hidden #timelineDock{ display: none; }
   font-variant-numeric: tabular-nums;
 }
 
+/* === Share URL modal === */
+#shareUrlModal{
+  display:none; position:fixed; inset:0; z-index:2200;
+  background: rgba(0,0,0,0.28); backdrop-filter: blur(3px);
+}
+#shareUrlContainer{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:min(900px, 94%); max-height: 82vh; overflow:auto;
+  background:#fff; border:1px solid var(--panel-border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding:14px; box-sizing:border-box;
+}
+.shareUrlHeader{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.shareUrlHeader h2{
+  margin:0; font-size:18px; letter-spacing:0.02em;
+}
+#shareUrlContainer button{
+  border: 1px solid var(--input-border);
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+#shareUrlContainer button:hover{ filter: brightness(1.06); }
+.shareUrlBody{
+  font-size:13px; color:var(--text); line-height:1.55;
+}
+.shareUrlBody p{
+  margin: 10px 0;
+}
+.shareUrlBody label{
+  display:block;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+#shareUrlValue{
+  width:100%;
+  min-height:110px;
+  max-height:260px;
+  box-sizing:border-box;
+  resize:vertical;
+  padding:10px;
+  border:1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background:#f8fafc;
+  color:#0f172a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size:12px;
+  line-height:1.45;
+}
+.shareUrlMeta{
+  margin-top:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  font-size:12px;
+  color:var(--muted);
+}
+#shareUrlWarning{
+  color:#b45309;
+  font-weight:600;
+}
+.shareUrlActions{
+  margin-top:10px;
+  text-align:right;
+}
+
 /* === About / Licenses modal === */
 #aboutModal{
   display:none; position:fixed; inset:0; z-index:2000;
