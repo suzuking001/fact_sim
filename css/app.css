@@ -102,18 +102,27 @@ html,body{
   top: 10px;
   left: 12px;
   z-index: 1600;
-  padding: 8px 12px;
+  width: 168px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
   border-radius: 10px;
-  border: 1px solid var(--panel-border);
-  background: var(--panel-bg);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(148,163,184,0.28);
+  background: rgba(255,255,255,0.56);
+  box-shadow: 0 4px 14px rgba(15,23,42,0.12);
   backdrop-filter: blur(8px);
   color: var(--muted);
   font-weight: 600;
   pointer-events: none;
 }
 #simTime{
-  margin-left: 6px;
+  min-width: 86px;
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
   color: var(--text);
   font-weight: 700;
 }
