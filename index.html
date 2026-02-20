@@ -11,7 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260215b"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260220e" />
+    <link rel="stylesheet" href="css/app.css?v=20260220h" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -130,6 +130,8 @@
     </div>
   </div>
   <div id="simTimeHud">Time: <span id="simTime">0.00 s</span></div>
+  <div id="fastestModeOverlay" aria-hidden="true"></div>
+  <div id="fastestModeNotice" aria-live="polite" role="status">FASTEST mode: Rendering disabled for maximum simulation speed.</div>
   <canvas id="graph"></canvas>
   <input id="nodeTitleEditor" type="text" aria-label="Edit node title" />
   <div id="toast" role="status" aria-live="polite"></div>
@@ -306,7 +308,7 @@ SOFTWARE.
     </div>
   </div>
 
-  <script src="js/core.js?v=20260215c"></script>
+  <script src="js/core.js?v=20260220c"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js?v=20260218a"></script>
@@ -330,9 +332,9 @@ SOFTWARE.
   <script src="js/nodes/register.js?v=20260218a"></script>
   <script src="sample/sample_line1.js"></script>
   <script src="js/timeline.js?v=20260218e"></script>
-  <script src="js/app/state.js?v=20260215b"></script>
+  <script src="js/app/state.js?v=20260220a"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
-  <script src="js/app/engine.js?v=20260215f"></script>
+  <script src="js/app/engine.js?v=20260220a"></script>
   <script src="js/app/sim.js?v=20260215e"></script>
   <script src="js/app/benchmark.js?v=20260215d"></script>
   <script src="js/app/history.js"></script>

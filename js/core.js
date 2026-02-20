@@ -6,11 +6,20 @@ const graphElement = document.getElementById('graph');
 // Time management (simulation clock)
 const SIM_DT_SEC = 0.1;
 const SPEED_LEVELS = [0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
+const FASTEST_MODE_LABEL = 'FASTEST';
+const FASTEST_MODE_INDEX = SPEED_LEVELS.length;
+const FASTEST_BASE_SPEED = SPEED_LEVELS[SPEED_LEVELS.length - 1];
+const FASTEST_STEP_REAL_MS = 16;
+const FASTEST_FRAME_BUDGET_MS = 14;
+const FASTEST_LOOP_LIMIT = 1200;
+const FASTEST_UI_INTERVAL_MS = 120;
 let speed = 1;
+let fastMode = false;
 let simTimeMs = 0;
 let simRunning = false;
 let simRafId = null;
 let lastRealMs = 0;
+let lastUiUpdateMs = 0;
 
 function simNow(){
   return simTimeMs;
@@ -36,8 +45,8 @@ function clampSpeed(v){
   return v;
 }
 
-function clampSpeedLevelIndex(i){
-  const max = SPEED_LEVELS.length - 1;
+function clampSpeedLevelIndex(i, includeFast){
+  const max = includeFast ? SPEED_LEVELS.length : (SPEED_LEVELS.length - 1);
   if(!isFinite(i)) return 0;
   const idx = Math.round(i);
   if(idx < 0) return 0;
@@ -61,10 +70,30 @@ function speedLevelIndexFromValue(v){
 }
 
 function formatSpeedLabel(v){
+  if(fastMode) return FASTEST_MODE_LABEL;
   const n = Number(v);
   if(!isFinite(n)) return '1x';
   if(Number.isInteger(n)) return `${n}x`;
   return `${n.toFixed(2).replace(/0+$/,'').replace(/\.$/, '')}x`;
+}
+
+function updateFastestModeNotice(){
+  try{
+    const show = !!(fastMode && simRunning);
+    const notice = document.getElementById('fastestModeNotice');
+    if(notice) notice.classList.toggle('show', show);
+    const overlay = document.getElementById('fastestModeOverlay');
+    if(overlay){
+      overlay.classList.toggle('show', show);
+      overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+    }
+  }catch(_e){}
+}
+
+function applyRenderSuppression(enabled){
+  const app = window.App;
+  if(!app || typeof app.setRenderSuppressed !== 'function') return;
+  app.setRenderSuppressed(!!enabled);
 }
 
 function reflectSpeedUI(v){
@@ -72,9 +101,10 @@ function reflectSpeedUI(v){
     const range = document.getElementById('speedRange');
     if(range){
       range.min = '0';
-      range.max = String(SPEED_LEVELS.length - 1);
+      range.max = String(FASTEST_MODE_INDEX);
       range.step = '1';
-      range.value = String(speedLevelIndexFromValue(v));
+      const idx = fastMode ? FASTEST_MODE_INDEX : speedLevelIndexFromValue(v);
+      range.value = String(idx);
     }
     const sf = document.getElementById('speedFactor');
     if(sf) sf.textContent = formatSpeedLabel(v);
@@ -85,8 +115,19 @@ function setSpeed(v){
   const n = Number(v);
   if(!isFinite(n)) return;
   speed = clampSpeed(n);
+  fastMode = false;
+  applyRenderSuppression(simRunning && fastMode);
   updateSimTime();
   reflectSpeedUI(speed);
+  updateFastestModeNotice();
+}
+
+function setFastestMode(enabled){
+  fastMode = !!enabled;
+  applyRenderSuppression(simRunning && fastMode);
+  updateSimTime();
+  reflectSpeedUI(speed);
+  updateFastestModeNotice();
 }
 
 // Bind speed control (range slider preferred; fall back to numeric input if present)
@@ -94,12 +135,16 @@ function setSpeed(v){
   const range = document.getElementById('speedRange');
   if(range){
     range.min = '0';
-    range.max = String(SPEED_LEVELS.length - 1);
+    range.max = String(FASTEST_MODE_INDEX);
     range.step = '1';
     range.value = String(speedLevelIndexFromValue(speed));
     range.addEventListener('input', e=>{
-      const idx = clampSpeedLevelIndex(parseInt(e.target.value, 10));
-      setSpeed(SPEED_LEVELS[idx]);
+      const idx = clampSpeedLevelIndex(parseInt(e.target.value, 10), true);
+      if(idx >= SPEED_LEVELS.length){
+        setFastestMode(true);
+      }else{
+        setSpeed(SPEED_LEVELS[idx]);
+      }
     });
     reflectSpeedUI(speed);
   }
@@ -124,8 +169,26 @@ function startSimLoop(stepFn){
   if(simRunning) return;
   simRunning = true;
   lastRealMs = 0;
+  lastUiUpdateMs = 0;
+  applyRenderSuppression(fastMode);
+  updateFastestModeNotice();
   const tick = (ts)=>{
     if(!simRunning) return;
+    if(fastMode){
+      const simDeltaMs = FASTEST_STEP_REAL_MS * FASTEST_BASE_SPEED;
+      const begin = performance.now();
+      let loops = 0;
+      while(simRunning && loops < FASTEST_LOOP_LIMIT && (performance.now() - begin) < FASTEST_FRAME_BUDGET_MS){
+        if(typeof stepFn === 'function') stepFn(simDeltaMs);
+        loops++;
+      }
+      if(!lastUiUpdateMs || (ts - lastUiUpdateMs) >= FASTEST_UI_INTERVAL_MS){
+        updateSimTime();
+        lastUiUpdateMs = ts;
+      }
+      simRafId = window.requestAnimationFrame(tick);
+      return;
+    }
     if(!lastRealMs) lastRealMs = ts;
     let delta = ts - lastRealMs;
     if(delta < 0) delta = 0;
@@ -141,11 +204,14 @@ function startSimLoop(stepFn){
 function stopSimLoop(){
   simRunning = false;
   if(simRafId){ window.cancelAnimationFrame(simRafId); simRafId = null; }
+  applyRenderSuppression(false);
+  updateFastestModeNotice();
   updateSimTime();
 }
 
 function isSimRunning(){ return simRunning; }
 function getSimDtSec(){ return SIM_DT_SEC; }
+function isFastestMode(){ return fastMode; }
 
 function _signalValueOn(v){
   if(v === null || typeof v === 'undefined') return false;
@@ -235,4 +301,5 @@ window.startSimLoop = startSimLoop;
 window.stopSimLoop = stopSimLoop;
 window.isSimRunning = isSimRunning;
 window.getSimDtSec = getSimDtSec;
+window.isFastestMode = isFastestMode;
 window.drawStateBelow = drawStateBelow;

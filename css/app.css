@@ -110,7 +110,7 @@ html,body{
   position: fixed;
   top: 10px;
   left: 12px;
-  z-index: 1600;
+  z-index: 1760;
   width: 168px;
   box-sizing: border-box;
   display: flex;
@@ -134,6 +134,43 @@ html,body{
   font-feature-settings: "tnum";
   color: var(--text);
   font-weight: 700;
+}
+#fastestModeOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 1650;
+  background: rgba(2,6,23,0.52);
+  backdrop-filter: blur(1px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .16s ease;
+}
+#fastestModeOverlay.show{
+  opacity: 1;
+}
+#fastestModeNotice{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1750;
+  width: min(720px, calc(100vw - 52px));
+  box-sizing: border-box;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(251,146,60,0.72);
+  background: linear-gradient(180deg, rgba(255,251,235,0.96) 0%, rgba(255,237,213,0.96) 100%);
+  color: #7c2d12;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.02em;
+  box-shadow: 0 22px 55px rgba(2,6,23,0.34);
+  backdrop-filter: blur(10px);
+  display: none;
+}
+#fastestModeNotice.show{
+  display: block;
 }
 
 #fileInput{display:none;}
@@ -176,7 +213,7 @@ html,body{
   box-shadow: -8px 0 24px rgba(15,23,42,0.12);
   display: flex; flex-direction: column; gap: 16px;
   padding: 64px 12px 12px; box-sizing: border-box; position: fixed;
-  z-index: 1000; backdrop-filter: blur(12px);
+  z-index: 1700; backdrop-filter: blur(12px);
   transform: translateX(0);
   transition: transform .24s ease;
   overflow-y: auto;
