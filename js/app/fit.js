@@ -56,7 +56,7 @@ function fitToScreen(){
     App.canvas.ds.offset[1] = (ch / 2) / scale - cy;
   }
   App.canvas.setDirty(true,true);
-  App.showToast('画面フィット');
+  App.showToast('Fit to screen');
 }
 
 function installFitHandlers(c){

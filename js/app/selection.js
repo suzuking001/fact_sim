@@ -119,7 +119,7 @@ function doCopy(){
   if(!App.canvas) return;
   if(App.canvas.selected_nodes && Object.keys(App.canvas.selected_nodes).length){
     App.canvas.copyToClipboard();
-    App.showToast('コピーしました');
+    App.showToast('Copied');
   }
 }
 
@@ -132,7 +132,7 @@ function doPaste(){
     App.canvas.graph_mouse[0] = cx; App.canvas.graph_mouse[1] = cy;
   }
   App.canvas.pasteFromClipboard(false);
-  App.showToast('ペーストしました');
+  App.showToast('Pasted');
 }
 
 function deleteSelectedNodes(){
@@ -210,7 +210,7 @@ function installClipboardHandlers(c){
     if(e.key === 'Delete' || e.code === 'Delete'){
       const removed = deleteSelectedNodes();
       if(removed > 0){
-        App.showToast(`${removed}ノードを削除しました`);
+        App.showToast(`${removed} node(s) deleted`);
         e.preventDefault();
       }
       return;
@@ -223,15 +223,15 @@ function installClipboardHandlers(c){
     }else if(e.code === 'KeyZ'){
       if(e.shiftKey){
         redo();
-        App.showToast('やり直しました');
+        App.showToast('Redo');
       }else{
         undo();
-        App.showToast('元に戻しました');
+        App.showToast('Undo');
       }
       e.preventDefault();
     }else if(e.code === 'KeyY'){
       redo();
-      App.showToast('やり直しました');
+      App.showToast('Redo');
       e.preventDefault();
     }else if(e.code === 'KeyV'){
       doPaste();
@@ -278,14 +278,14 @@ function bindHistoryButtons(){
   if(btnUndo && !btnUndo.__historyHooked){
     btnUndo.addEventListener('click', ()=>{
       undo();
-      App.showToast('元に戻しました');
+      App.showToast('Undo');
     });
     btnUndo.__historyHooked = true;
   }
   if(btnRedo && !btnRedo.__historyHooked){
     btnRedo.addEventListener('click', ()=>{
       redo();
-      App.showToast('やり直しました');
+      App.showToast('Redo');
     });
     btnRedo.__historyHooked = true;
   }

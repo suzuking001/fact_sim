@@ -73,7 +73,7 @@ function loadExampleFromFile(path){
   fetch(path)
     .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
     .then(data=>{ applyExampleData(data); })
-    .catch(err=>{ alert('JSON読込失敗'); console.error(err); });
+    .catch(err=>{ alert('Failed to load JSON'); console.error(err); });
 }
 
 function initExamples(){

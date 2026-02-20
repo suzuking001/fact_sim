@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>LiteGraph Simulator (ver 3.0 - Persistent Script Editor)</title>
@@ -171,9 +171,9 @@
       </div>
       <p id="benchmarkSummary" class="benchmarkSummary"></p>
       <p id="benchmarkLegend" class="benchmarkLegend">
-        `speed` は実時間に対して進んだシミュレーション時間の倍率です（高いほど高速）。<br>
-        `Case` は描画あり/なしの条件を示します。<br>
-        棒グラフは最速エンジンを100%として相対表示しています。
+        `speed` is the ratio of simulated time progressed per real time (higher is faster).<br>
+        `Case` indicates whether rendering is on or off.<br>
+        Bars are shown relative to the fastest result as 100%.
       </p>
       <table id="benchmarkTable" aria-label="Benchmark result table">
         <thead>
@@ -200,13 +200,13 @@
       </div>
       <div class="shareUrlBody">
         <p>
-          Share URL は、グラフJSONを圧縮して URL ハッシュ（<code>#g=...</code>）に埋め込む方式です。
+          Share URL compresses graph JSON and embeds it in the URL hash (<code>#g=...</code>).
         </p>
         <p>
-          外部サーバーへグラフデータを送信しません。共有データはこの URL 文字列に含まれます。
+          Graph data is not sent to external servers. Shared data stays in this URL string.
         </p>
         <p>
-          ブラウザや利用環境により URL 文字数上限が異なるため、非常に大きなグラフでは開けない可能性があります。
+          URL length limits vary by browser/environment, so very large graphs may not open via URL.
         </p>
         <label for="shareUrlValue">Generated URL</label>
         <textarea id="shareUrlValue" readonly aria-label="Generated share URL"></textarea>
@@ -302,13 +302,13 @@ SOFTWARE.
   <script src="js/app/sim.js?v=20260215e"></script>
   <script src="js/app/benchmark.js?v=20260215d"></script>
   <script src="js/app/history.js"></script>
-  <script src="js/app/selection.js?v=20260215c"></script>
-  <script src="js/app/fit.js"></script>
+  <script src="js/app/selection.js?v=20260218a"></script>
+  <script src="js/app/fit.js?v=20260218a"></script>
   <script src="js/app/timeline-init.js?v=20260218a"></script>
   <script src="js/app/graph-init.js?v=20260215c"></script>
-  <script src="js/app/examples.js?v=20260216b"></script>
+  <script src="js/app/examples.js?v=20260218a"></script>
   <script src="js/app/file-io.js?v=20260218b"></script>
-  <script src="js/app/ui.js?v=20260218b"></script>
+  <script src="js/app/ui.js?v=20260218c"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

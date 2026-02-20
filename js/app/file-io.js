@@ -297,11 +297,11 @@ App.loadSharedGraphFromUrl = async function(){
   App.showShareUrlModal = function(link){
     const text = String(link || '');
     valueEl.value = text;
-    lenEl.textContent = `URL length: ${text.length.toLocaleString()} 文字`;
+    lenEl.textContent = `URL length: ${text.length.toLocaleString()} characters`;
     if(text.length > 8000){
-      warnEl.textContent = '注意: 環境によってはURL長の上限を超える可能性があります。';
+      warnEl.textContent = 'Warning: URL may exceed limits in some environments.';
     }else if(text.length > 4000){
-      warnEl.textContent = '注意: 一部ブラウザ/ツールでは扱いにくい長さです。';
+      warnEl.textContent = 'Caution: URL is relatively long for some browsers/tools.';
     }else{
       warnEl.textContent = '';
     }

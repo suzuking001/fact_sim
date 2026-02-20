@@ -125,7 +125,7 @@ if(renderFpsSelect){
     summary.style.display = 'block';
     legend.style.display = 'block';
     table.style.display = 'table';
-    summary.textContent = `計測条件: wall=${wallSec.toFixed(2)}s, realStep=${realStep.toFixed(0)}ms, cases=${cases} | 最速: ${best.modeLabel} + ${best.renderLabel || 'render:off'} (${best.speed.toFixed(2)}x)`;
+    summary.textContent = `Conditions: wall=${wallSec.toFixed(2)}s, realStep=${realStep.toFixed(0)}ms, cases=${cases} | Fastest: ${best.modeLabel} + ${best.renderLabel || 'render:off'} (${best.speed.toFixed(2)}x)`;
 
     body.innerHTML = '';
     sorted.forEach((r, idx)=>{
@@ -421,7 +421,7 @@ function beginNodePlacement(node){
   if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
   App.canvas.selectNode(node);
   App.canvas.setDirty(true,true);
-  App.showToast('左クリックで配置 / 右クリック or Escでキャンセル');
+  App.showToast('Left click to place / Right click or Esc to cancel');
 }
 
 // Add Node (from sidebar select + button)
