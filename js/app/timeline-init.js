@@ -4,9 +4,45 @@ var App = window.App || (window.App = {});
 
 function initTimeline(){
   const tCanvas = document.getElementById('timelineCanvas');
-  if(!tCanvas || typeof TimelineChart === 'undefined') return;
+  const dock = document.getElementById('timelineDock');
+  const body = document.getElementById('timelineBody');
+  if(!tCanvas || !dock || !body || typeof TimelineChart === 'undefined') return;
   App.timelineChart = new TimelineChart(tCanvas);
   window.timelineChart = App.timelineChart;
+  if(typeof App.NodePropsPanel === 'function'){
+    const root = document.getElementById('nodePropsPanel');
+    if(root) App.nodePropsPanel = new App.NodePropsPanel(root);
+  }
+
+  const tabChart = document.getElementById('timelineTabChart');
+  const tabProps = document.getElementById('timelineTabProps');
+  const propsMeta = document.getElementById('timelinePropsMeta');
+  if(propsMeta) propsMeta.textContent = 'Edit node properties in a spreadsheet-style table.';
+  const setView = (mode)=>{
+    const view = (mode === 'props') ? 'props' : 'chart';
+    dock.dataset.view = view;
+    body.classList.toggle('view-chart', view === 'chart');
+    body.classList.toggle('view-props', view === 'props');
+    if(tabChart){
+      const active = view === 'chart';
+      tabChart.classList.toggle('is-active', active);
+      tabChart.setAttribute('aria-selected', active ? 'true' : 'false');
+    }
+    if(tabProps){
+      const active = view === 'props';
+      tabProps.classList.toggle('is-active', active);
+      tabProps.setAttribute('aria-selected', active ? 'true' : 'false');
+    }
+    if(view === 'chart'){
+      if(App.timelineChart && typeof App.timelineChart.resize === 'function') App.timelineChart.resize();
+    }else{
+      if(App.nodePropsPanel && typeof App.nodePropsPanel.refresh === 'function') App.nodePropsPanel.refresh();
+    }
+  };
+  App.setTimelineDockView = setView;
+  if(tabChart) tabChart.addEventListener('click', ()=> setView('chart'));
+  if(tabProps) tabProps.addEventListener('click', ()=> setView('props'));
+  setView('chart');
 
   const followBtn = document.getElementById('timelineFollowBtn');
   if(followBtn){
@@ -37,8 +73,16 @@ function initTimeline(){
       }
     });
   }
+  const propsRefreshBtn = document.getElementById('nodePropsRefreshBtn');
+  if(propsRefreshBtn){
+    propsRefreshBtn.addEventListener('click', ()=>{
+      if(App.nodePropsPanel && typeof App.nodePropsPanel.refresh === 'function'){
+        App.nodePropsPanel.refresh();
+        if(typeof App.showToast === 'function') App.showToast('Properties refreshed');
+      }
+    });
+  }
 
-  const dock = document.getElementById('timelineDock');
   const handle = document.getElementById('timelineResizeHandle');
   if(dock && handle){
     let resizing = false;
@@ -50,7 +94,7 @@ function initTimeline(){
       const maxH = Math.max(minH, window.innerHeight - 120);
       const next = clamp(h, minH, maxH);
       document.documentElement.style.setProperty('--timeline-height', `${Math.round(next)}px`);
-      if(App.timelineChart) App.timelineChart.resize();
+      if(App.timelineChart && dock.dataset.view !== 'props') App.timelineChart.resize();
       window.dispatchEvent(new Event('resize'));
     };
     handle.addEventListener('mousedown', (e)=>{
@@ -72,10 +116,13 @@ function initTimeline(){
     });
   }
 
-  window.addEventListener('resize', ()=> App.timelineChart && App.timelineChart.resize());
+  window.addEventListener('resize', ()=>{
+    if(App.timelineChart && dock.dataset.view !== 'props') App.timelineChart.resize();
+  });
 }
 
 function attachTimeline(){
   if(App.timelineChart && App.graph) App.timelineChart.attachGraph(App.graph);
+  if(App.nodePropsPanel && App.graph) App.nodePropsPanel.attachGraph(App.graph);
 }
 

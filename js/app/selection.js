@@ -262,11 +262,19 @@ function installTimelineNodeSelection(c){
     if(e.ctrlKey || e.metaKey) return;
     if(App.placement && App.placement.active) return;
     const chart = App.timelineChart;
-    if(!chart || typeof chart.selectNodeFromGraph !== 'function') return;
+    const props = App.nodePropsPanel;
+    const canTimeline = !!(chart && typeof chart.selectNodeFromGraph === 'function');
+    const canProps = !!(props && typeof props.selectNodeFromGraph === 'function');
+    if(!canTimeline && !canProps) return;
     const p = getCanvasPos(e);
     const node = findNodeAtCanvasPos(c, p[0], p[1]);
     if(!node) return;
-    chart.selectNodeFromGraph(node, { ensureVisible: true, draw: true });
+    if(canTimeline){
+      chart.selectNodeFromGraph(node, { ensureVisible: true, draw: true });
+    }
+    if(canProps){
+      props.selectNodeFromGraph(node, { ensureVisible: true, syncTimeline: false });
+    }
   }, opts);
 
   c.__timelineNodeSelectHooked = true;

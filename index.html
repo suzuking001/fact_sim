@@ -11,7 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260215b"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260218g" />
+    <link rel="stylesheet" href="css/app.css?v=20260218k" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -134,16 +134,50 @@
   <input id="nodeTitleEditor" type="text" aria-label="Edit node title" />
   <div id="toast" role="status" aria-live="polite"></div>
   <!-- Timing Chart Dock -->
-  <div id="timelineDock">
+  <div id="timelineDock" data-view="chart">
     <div id="timelineResizeHandle" aria-label="Resize timing chart"></div>
     <div id="timelineHeader">
-      <span class="timelineTitle">Timing Chart</span>
+      <div class="timelineHeaderLeft">
+        <span class="timelineTitle">Analysis</span>
+        <div class="timelineTabs" role="tablist" aria-label="Timeline dock tabs">
+          <button id="timelineTabChart" class="timelineTab is-active" role="tab" aria-selected="true">Timing Chart</button>
+          <button id="timelineTabProps" class="timelineTab" role="tab" aria-selected="false">Node Properties</button>
+        </div>
+      </div>
       <span id="timelineSelection" class="timelineSelection">Work: -</span>
-      <button id="timelineAutoOrderBtn" class="timelineBtn">Auto Order</button>
-      <button id="timelineExportBtn" class="timelineBtn">Export CSV</button>
-      <button id="timelineFollowBtn" class="timelineBtn">Follow: ON</button>
+      <span id="timelinePropsMeta" class="timelinePropsMeta" aria-live="polite"></span>
+      <div id="timelineChartActions" class="timelineActions">
+        <button id="timelineAutoOrderBtn" class="timelineBtn">Auto Order</button>
+        <button id="timelineExportBtn" class="timelineBtn">Export CSV</button>
+        <button id="timelineFollowBtn" class="timelineBtn">Follow: ON</button>
+      </div>
+      <div id="timelinePropsActions" class="timelineActions">
+        <button id="nodePropsRefreshBtn" class="timelineBtn">Refresh</button>
+      </div>
     </div>
-    <canvas id="timelineCanvas"></canvas>
+    <div id="timelineBody" class="view-chart">
+      <canvas id="timelineCanvas"></canvas>
+      <div id="nodePropsPanel" aria-label="Node properties editor">
+        <div class="nodePropsToolbar">
+          <input id="nodePropsFilter" type="text" placeholder="Filter node, connection, or JSON..." aria-label="Filter node properties" />
+          <span id="nodePropsSummary">0 rows</span>
+        </div>
+        <div class="nodePropsTableWrap">
+          <table id="nodePropsTable" aria-label="Node properties table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Node</th>
+                <th>Type</th>
+                <th>Connected To</th>
+                <th>Properties (JSON)</th>
+              </tr>
+            </thead>
+            <tbody id="nodePropsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
   <!-- Script Editor Modal -->
   <div id="scriptEditorModal">
@@ -302,9 +336,10 @@ SOFTWARE.
   <script src="js/app/sim.js?v=20260215e"></script>
   <script src="js/app/benchmark.js?v=20260215d"></script>
   <script src="js/app/history.js"></script>
-  <script src="js/app/selection.js?v=20260218a"></script>
+  <script src="js/app/selection.js?v=20260218b"></script>
   <script src="js/app/fit.js?v=20260218a"></script>
-  <script src="js/app/timeline-init.js?v=20260218a"></script>
+  <script src="js/app/node-props-panel.js?v=20260218d"></script>
+  <script src="js/app/timeline-init.js?v=20260218b"></script>
   <script src="js/app/graph-init.js?v=20260215c"></script>
   <script src="js/app/examples.js?v=20260218a"></script>
   <script src="js/app/file-io.js?v=20260218b"></script>
