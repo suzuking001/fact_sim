@@ -26,6 +26,7 @@ var App = window.App || (window.App = {});
   }
 
   function captureTimeline(){
+    if(typeof App.isRenderSuppressed === 'function' && App.isRenderSuppressed()) return;
     if(App._suspendTimeline) return;
     if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
       App.timelineChart.onStep(false);
@@ -33,6 +34,7 @@ var App = window.App || (window.App = {});
   }
 
   function drawTimeline(){
+    if(typeof App.isRenderSuppressed === 'function' && App.isRenderSuppressed()) return;
     if(App._suspendTimeline) return;
     if(App.timelineChart && typeof App.timelineChart.draw === 'function'){
       if(typeof App.shouldRenderFrame === 'function' && !App.shouldRenderFrame('timeline', false)) return;

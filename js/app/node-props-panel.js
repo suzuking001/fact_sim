@@ -258,7 +258,12 @@ var App = window.App || (window.App = {});
           tr.classList.add('is-node-selected');
         }
         tr.addEventListener('click', ()=>{
-          this.setSelectedNodeId(row.nodeId, { ensureVisible: false, syncTimeline: false });
+          this.setSelectedNodeId(row.nodeId, {
+            ensureVisible: false,
+            highlightGraph: true,
+            syncTimeline: true,
+            forceRefresh: true
+          });
         });
 
         const tdId = document.createElement('td');

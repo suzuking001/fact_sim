@@ -9,7 +9,21 @@
 class LinkAnimator{
   constructor(){
     this.animations = [];
-    this._max = 200;
+    this._max = Math.max(200, Number(cfg.maxTransient) || 1500);
+  }
+  _trimTransient(){
+    if(this.animations.length <= this._max) return;
+    let over = this.animations.length - this._max;
+    if(over <= 0) return;
+    for(let i = 0; i < this.animations.length && over > 0;){
+      const anim = this.animations[i];
+      if(anim && anim.tail){
+        i++;
+        continue;
+      }
+      this.animations.splice(i, 1);
+      over--;
+    }
   }
   _getSlotDir(node, slotIndex, isInput){
     const slot = isInput ? (node.inputs && node.inputs[slotIndex]) : (node.outputs && node.outputs[slotIndex]);
@@ -57,11 +71,23 @@ class LinkAnimator{
       duration: durationMs || defaultDuration,
       tail: false
     });
-    if(this.animations.length > this._max) this.animations.shift();
+    this._trimTransient();
   }
   showPortIcon(graph, linkId, type, info){
     if(!graph || !linkId) return;
-    this.animations = this.animations.filter(anim=>!(anim.tail && anim.graph===graph && anim.linkId===linkId));
+    const existing = this.animations.find(anim=>(
+      anim.tail &&
+      anim.graph === graph &&
+      anim.linkId === linkId &&
+      anim.type === type
+    ));
+    if(existing){
+      existing.info = info || existing.info || null;
+      existing.start = getNow();
+      existing._tailMiss = 0;
+      return;
+    }
+    this.animations = this.animations.filter(anim=>!(anim.tail && anim.graph===graph && anim.linkId===linkId && anim.type===type));
     this.animations.push({
       graph,
       linkId,
@@ -69,7 +95,8 @@ class LinkAnimator{
       info: info || null,
       start: getNow(),
       duration: null,
-      tail: true
+      tail: true,
+      _tailMiss: 0
     });
   }
   hidePortIcon(graph, linkId){
@@ -100,7 +127,12 @@ class LinkAnimator{
              originNode._stateName.startsWith('workOut_wait') ||
              originNode._stateName.startsWith('workOut_down') ||
              originNode._stateName === 'agvOut_wait');
-          if(originNode._state !== 'WAIT' && !allowAgvWait) return false;
+          if(originNode._state !== 'WAIT' && !allowAgvWait){
+            anim._tailMiss = (anim._tailMiss || 0) + 1;
+            if(anim._tailMiss <= 2) return true;
+            return false;
+          }
+          anim._tailMiss = 0;
           x = start[0];
           y = start[1];
       }else{

@@ -13,7 +13,8 @@ App.placement = App.placement || { active: false, node: null };
 App.render = App.render || {
   fps: 60,
   lastGraphDrawMs: 0,
-  lastTimelineDrawMs: 0
+  lastTimelineDrawMs: 0,
+  suppressAll: false
 };
 
 App.showToast = function(msg){
@@ -87,6 +88,19 @@ App.resetRenderBudget = function(){
   App.render.lastTimelineDrawMs = 0;
 };
 
+App.isRenderSuppressed = function(){
+  return !!(App.render && App.render.suppressAll);
+};
+
+App.setRenderSuppressed = function(enabled){
+  if(!App.render) return false;
+  const next = !!enabled;
+  if(App.render.suppressAll === next) return next;
+  App.render.suppressAll = next;
+  App.resetRenderBudget();
+  return next;
+};
+
 App.setRenderFps = function(value){
   const fps = App.normalizeRenderFps(value);
   App.render.fps = fps;
@@ -95,6 +109,7 @@ App.setRenderFps = function(value){
 };
 
 App.shouldRenderFrame = function(kind, force){
+  if(!force && App.isRenderSuppressed()) return false;
   if(force) return true;
   if(typeof window.isSimRunning === 'function' && !window.isSimRunning()) return true;
 

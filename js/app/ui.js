@@ -264,6 +264,7 @@ if(btnBenchmark){
 // Sidebar toggle (hamburger)
 (function(){
   const btn = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
   const body = document.body;
   if(!btn) return;
   // initial state from localStorage
@@ -283,6 +284,23 @@ if(btnBenchmark){
     updateAria();
     try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
   });
+
+  // Sidebar should always be wheel-scrollable even if graph handlers consume wheel events.
+  if(sidebar && !sidebar.__wheelScrollHooked){
+    sidebar.addEventListener('wheel', (e)=>{
+      if(body.classList.contains('sidebar-hidden')) return;
+      const max = Math.max(0, sidebar.scrollHeight - sidebar.clientHeight);
+      if(max <= 0) return;
+      const delta = Number(e.deltaY) || 0;
+      if(delta === 0) return;
+      const next = Math.max(0, Math.min(max, sidebar.scrollTop + delta));
+      if(next === sidebar.scrollTop) return;
+      sidebar.scrollTop = next;
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false });
+    sidebar.__wheelScrollHooked = true;
+  }
 })();
 
 // Inline node title editor (double-click node to rename)
