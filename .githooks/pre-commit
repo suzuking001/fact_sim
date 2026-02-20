@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+set -eu
+
+GITLEAKS_BIN=""
+
+if command -v gitleaks >/dev/null 2>&1; then
+  GITLEAKS_BIN="gitleaks"
+elif command -v powershell.exe >/dev/null 2>&1; then
+  GITLEAKS_BIN="$(powershell.exe -NoProfile -Command "\$cmd = Get-Command gitleaks -ErrorAction SilentlyContinue; if (\$cmd) { \$cmd.Source; exit 0 }; \$base = Join-Path \$env:LOCALAPPDATA 'Microsoft\\WinGet\\Packages'; \$hit = Get-ChildItem -Path \$base -Filter 'Gitleaks.Gitleaks*' -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path \$_.FullName 'gitleaks.exe' } | Where-Object { Test-Path \$_ } | Select-Object -First 1; if (\$hit) { \$hit; exit 0 }; exit 1" | tr -d '\r')"
+fi
+
+if [ -z "${GITLEAKS_BIN}" ]; then
+  echo "[pre-commit] gitleaks not found in PATH."
+  echo "[pre-commit] Install gitleaks first: https://github.com/gitleaks/gitleaks"
+  exit 1
+fi
+
+echo "[pre-commit] Running secret scan on staged changes..."
+"${GITLEAKS_BIN}" git --staged --no-banner --redact .

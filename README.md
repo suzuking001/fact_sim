@@ -30,3 +30,11 @@ Quick walkthrough GIF:
 | Analysis | Inspect timing chart, follow work progress, export timeline CSV |
 | Benchmark | Compare engine speed with render on/off cases in app |
 | Collaboration | Save/Load JSON, share via URL hash |
+
+## Secret Scan / シークレット検査
+
+| English | 日本語 |
+| --- | --- |
+| **CI scan**<br>GitHub Actions runs gitleaks on every push / PR.<br>Workflow: `.github/workflows/secret-scan.yml` | **CI スキャン**<br>GitHub Actions で push / PR ごとに gitleaks を実行します。<br>ワークフロー: `.github/workflows/secret-scan.yml` |
+| **Local pre-commit**<br>1. Install gitleaks<br>2. Run `powershell -File scripts/setup-git-hooks.ps1`<br>3. Commit normally (`.githooks/pre-commit` scans staged changes). | **ローカル pre-commit**<br>1. gitleaks をインストール<br>2. `powershell -File scripts/setup-git-hooks.ps1` を実行<br>3. 通常どおりコミット（`.githooks/pre-commit` が staged 変更を検査）。 |
+| **Manual scan**<br>`powershell -File scripts/secret-scan.ps1` | **手動スキャン**<br>`powershell -File scripts/secret-scan.ps1` |
