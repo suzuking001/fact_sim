@@ -2,103 +2,35 @@
 
 var App = window.App || (window.App = {});
 
+const EXAMPLE_ALIASES = {
+  agv_config: 'carrier',
+  carrier_config: 'carrier'
+};
+
+const EXAMPLE_FILES = {
+  simple: 'sample/simple.json',
+  branch: 'sample/branch.json',
+  shuttle_line5: 'sample/shuttle_line5.json',
+  carrier: 'sample/carrier.json',
+  sample_line1: 'sample/sample_line1.json'
+};
+
+function resolveExampleKey(kind){
+  const key = String(kind || '').trim();
+  if(!key) return '';
+  return EXAMPLE_ALIASES[key] || key;
+}
+
 function makeExample(kind){
-  if(!App.graph) return;
-  stopSimulation();
-  App.history.lock = true;
-  App.graph.clear();
-  App.history.lock = false;
-  if(typeof window.resetSimClock === 'function') window.resetSimClock();
-  if(kind==='simple'){
-    const s=LiteGraph.createNode('factory/source'); s.pos=[60,200];
-    const e1=LiteGraph.createNode('factory/equip'); e1.pos=[360,200]; e1.properties.processTime=1;
-    const e2=LiteGraph.createNode('factory/equip'); e2.pos=[660,200]; e2.properties.processTime=1;
-    const k=LiteGraph.createNode('factory/sink'); k.pos=[960,200];
-    App.graph.add(s); App.graph.add(e1); App.graph.add(e2); App.graph.add(k);
-    s.connect(0,e1,0); e1.connect(0,e2,0); e2.connect(0,k,0);
-  }else if(kind==='branch'){
-    const s=LiteGraph.createNode('factory/source'); s.pos=[60,240];
-    const sp=LiteGraph.createNode('factory/split'); sp.pos=[360,240];
-    const a=LiteGraph.createNode('factory/equip'); a.title='Line A'; a.pos=[660,160]; a.properties.processTime=1;
-    const b=LiteGraph.createNode('factory/equip'); b.title='Line B'; b.pos=[660,320]; b.properties.processTime=2;
-    const k=LiteGraph.createNode('factory/sink'); k.pos=[960,240];
-    App.graph.add(s); App.graph.add(sp); App.graph.add(a); App.graph.add(b); App.graph.add(k);
-    s.connect(0,sp,0); sp.connect(0,a,0); sp.connect(1,b,0); a.connect(0,k,0); b.connect(0,k,0);
-  }else if(kind==='shuttle_line5'){
-    const s = LiteGraph.createNode('factory/source'); s.pos = [60, 240]; s.properties.sequence = 'A,B';
-    const sink = LiteGraph.createNode('factory/sink'); sink.pos = [1880, 240];
-    const stages = [];
-    const proc = [1.2, 1.6, 1.0, 1.4, 1.8];
-    for(let i = 0; i < 5; i++){
-      const st = LiteGraph.createNode('factory/shuttle_stage');
-      st.title = `Shuttle ${i + 1}`;
-      st.pos = [360 + i * 300, 240];
-      st.properties.groupId = 'shuttle-demo';
-      st.properties.processTime = proc[i];
-      stages.push(st);
-    }
-    App.graph.add(s);
-    stages.forEach(n => App.graph.add(n));
-    App.graph.add(sink);
-    s.connect(0, stages[0], 0);
-    for(let i = 0; i < stages.length - 1; i++){
-      stages[i].connect(0, stages[i + 1], 0);
-    }
-    stages[stages.length - 1].connect(0, sink, 0);
-  }else if(kind==='carrier_config'){
-    const src = LiteGraph.createNode('factory/source'); src.pos = [60, 220]; src.properties.sequence = 'A,B';
-    const r1 = LiteGraph.createNode('factory/carrierroute'); r1.pos = [320, 220];
-    const sink = LiteGraph.createNode('factory/sink'); sink.pos = [620, 220];
-    const r2 = LiteGraph.createNode('factory/carrierroute'); r2.pos = [620, 430];
-    const cfg = LiteGraph.createNode('factory/carrierconfig'); cfg.pos = [320, 430];
-
-    r1.title = 'Route R1';
-    r2.title = 'Route R2';
-    cfg.title = 'Carrier Config #1';
-    r1.properties.routeKey = 'R1';
-    r2.properties.routeKey = 'R2';
-    r1.properties.processTime = 1;
-    r1.properties.downTime = 0.3;
-    r2.properties.processTime = 1;
-    r2.properties.downTime = 0.3;
-    cfg.properties.carrierId = 'Carrier-1';
-    cfg.properties.capacity = 2;
-    cfg.properties.sequence = 'R1,R2';
-    cfg.properties.autoSpawn = true;
-
-    if(typeof r1.onPropertyChanged === 'function'){
-      r1.onPropertyChanged('routeKey');
-      r1.onPropertyChanged('processTime');
-      r1.onPropertyChanged('downTime');
-    }
-    if(typeof r2.onPropertyChanged === 'function'){
-      r2.onPropertyChanged('routeKey');
-      r2.onPropertyChanged('processTime');
-      r2.onPropertyChanged('downTime');
-    }
-    if(typeof cfg.onPropertyChanged === 'function'){
-      cfg.onPropertyChanged('carrierId');
-      cfg.onPropertyChanged('capacity');
-      cfg.onPropertyChanged('sequence');
-      cfg.onPropertyChanged('autoSpawn');
-    }
-
-    App.graph.add(src); App.graph.add(r1); App.graph.add(sink); App.graph.add(r2); App.graph.add(cfg);
-
-    // Work path
-    src.connect(0, r1, 0);
-    r1.connect(0, sink, 0);
-
-    // AGV circulation (AGVConfig-driven)
-    cfg.connect(0, r1, 1);
-    r1.connect(1, r2, 1);
-    r2.connect(1, cfg, 0);
+  const key = resolveExampleKey(kind);
+  if(!key) return;
+  const data = window.EXAMPLES && window.EXAMPLES[key];
+  if(data){
+    applyExampleData(data);
+    return;
   }
-  // reset time display (no auto start)
-  updateSimTime();
-  try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
-  resetHistory();
-  attachTimeline();
+  const file = EXAMPLE_FILES[key] || `sample/${key}.json`;
+  loadExampleFromFile(file);
 }
 
 function applyExampleData(data){
@@ -129,26 +61,12 @@ function initExamples(){
   if(sel){
     sel.addEventListener('change', e=>{
       const v = e.target.value; if(!v) return;
-      if(v === 'agv_config' || v === 'carrier_config'){
-        const data = window.EXAMPLES && window.EXAMPLES.carrier;
-        if(data) applyExampleData(data);
-        else loadExampleFromFile('sample/carrier.json');
-        return;
-      }
-      if(v === 'sample_line1'){
-        const data = window.EXAMPLES && window.EXAMPLES.sample_line1;
-        if(data) applyExampleData(data);
-        else loadExampleFromFile('sample/sample_line1.json');
-        return;
-      }
       makeExample(v);
     });
   }
 
   // Default example: sample_line1
   if(sel) sel.value = 'sample_line1';
-  const data = window.EXAMPLES && window.EXAMPLES.sample_line1;
-  if(data) applyExampleData(data);
-  else loadExampleFromFile('sample/sample_line1.json');
+  makeExample('sample_line1');
 }
 

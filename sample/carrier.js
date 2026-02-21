@@ -1,4 +1,5 @@
-{
+window.EXAMPLES = window.EXAMPLES || {};
+window.EXAMPLES.carrier = {
   "last_node_id": 13,
   "last_link_id": 16,
   "nodes": [
@@ -551,4 +552,4 @@
   ],
   "groups": [],
   "version": 0.4
-}
+};

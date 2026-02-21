@@ -1,0 +1,51 @@
+window.EXAMPLES = window.EXAMPLES || {};
+window.EXAMPLES.branch = {
+  "last_node_id": 5,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "factory/source",
+      "pos": [60, 240],
+      "title": "Source",
+      "properties": { "sequence": "A,B" }
+    },
+    {
+      "id": 2,
+      "type": "factory/split",
+      "pos": [360, 240],
+      "title": "Split",
+      "properties": {}
+    },
+    {
+      "id": 3,
+      "type": "factory/equip",
+      "pos": [660, 160],
+      "title": "Line A",
+      "properties": { "processTime": 1, "downTime": 3 }
+    },
+    {
+      "id": 4,
+      "type": "factory/equip",
+      "pos": [660, 320],
+      "title": "Line B",
+      "properties": { "processTime": 2, "downTime": 3 }
+    },
+    {
+      "id": 5,
+      "type": "factory/sink",
+      "pos": [960, 240],
+      "title": "Sink",
+      "properties": {}
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, 0],
+    [2, 2, 0, 3, 0, 0],
+    [3, 2, 1, 4, 0, 0],
+    [4, 3, 0, 5, 0, 0],
+    [5, 4, 0, 5, 0, 0]
+  ],
+  "groups": [],
+  "version": 0.4
+};
