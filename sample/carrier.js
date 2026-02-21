@@ -379,7 +379,7 @@ window.EXAMPLES.carrier = {
     },
     {
       "id": 5,
-      "type": "factory/carrierconfig",
+      "type": "factory/carrierhome",
       "pos": [
         38,
         666
@@ -421,7 +421,7 @@ window.EXAMPLES.carrier = {
           "__animToken": null
         }
       ],
-      "title": "Carrier Config #1",
+      "title": "Carrier Home #1",
       "properties": {
         "carrierId": "Carrier-1",
         "capacity": 2,

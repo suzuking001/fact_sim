@@ -21,3 +21,21 @@
 })(CarrierRouteNode.prototype);
 
 menuMixin(CarrierRouteNode);
+(function(proto){
+  const prev = proto.getExtraMenuOptions;
+  proto.getExtraMenuOptions = function(){
+    let opts = prev ? prev.call(this) : [];
+    if(!Array.isArray(opts)) opts = [];
+    const laneCount = typeof this._carrierLaneCount === 'function' ? this._carrierLaneCount() : 1;
+    opts.push({
+      content: 'Add carrier IN/OUT',
+      callback: ()=> this._addCarrierLane && this._addCarrierLane()
+    });
+    opts.push({
+      content: 'Remove carrier IN/OUT',
+      disabled: laneCount <= 1,
+      callback: ()=> this._removeCarrierLane && this._removeCarrierLane()
+    });
+    return opts;
+  };
+})(CarrierRouteNode.prototype);

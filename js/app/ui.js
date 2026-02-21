@@ -528,10 +528,10 @@ function beginNodePlacement(node){
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
-    carrierconfig:{
-      type:'factory/carrierconfig',
+    carrierhome:{
+      type:'factory/carrierhome',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Carrier Config', target:'title' },
+        { key:'title', label:'Title', type:'text', default:'Carrier Home', target:'title' },
         { key:'carrierId', label:'Carrier ID', type:'text', default:'Carrier-1' },
         { key:'capacity', label:'Carrier Capacity (work)', type:'number', min:1, step:1, default:2 },
         { key:'sequence', label:'Route Sequence (comma or ->)', type:'textarea', default:'' },

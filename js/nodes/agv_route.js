@@ -378,6 +378,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(t._currentAgv === agv) return true;
+      if(t._pendingAgv === agv) return true;
     }
     return false;
   }
@@ -399,7 +400,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
 
   _captureWorkInput(){
     if(!this._currentAgv) return;
-    if(!this._stateName.startsWith('workIn_idle')){ this._lastWorkInRef = null; return; }
+    // Keep last input reference while busy so a held upstream output is not re-accepted.
+    if(!this._stateName.startsWith('workIn_idle')) return;
     if(!this._hasWorkInLink()){
       this._beginUnloadPhase();
       return;

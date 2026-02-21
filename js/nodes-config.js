@@ -31,6 +31,11 @@ window.NODES_CONFIG = {
     capacity: 2,
     autoSpawn: true,
   },
+  // Preferred key (kept alongside carrierConfig for backward compatibility)
+  carrierHome: {
+    capacity: 2,
+    autoSpawn: true,
+  },
   limits: {
     // LiteGraph default is 1000. Raise it for large models.
     maxNodes: 5000,
