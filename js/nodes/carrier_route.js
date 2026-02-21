@@ -1,36 +1,34 @@
-﻿// AGV Route node (generalised max_load = n)
-// Follows work_node_memo spec: agv_process -> workIn_idle_k/process_k (repeat) -> workOut_wait_k/down_k (repeat) -> agvOut_wait/down -> agvIn_idle
+﻿// Carrier Route node: infrastructure-focused transport segment.
+// Holds only transport timing and route-key matching (no carrier pool/settings).
 
-const AGV_ROUTE_DEFAULTS = {
+const CARRIER_ROUTE_DEFAULTS = {
   processTime: 3,
   downTime: 0.5,
-  agvCapacity: 2,
-  agvIds: 'AGV-1,AGV-2'
+  routeKey: ''
 };
 
-class AGVRouteNode extends LiteGraph.LGraphNode{
+class CarrierRouteNode extends LiteGraph.LGraphNode{
   constructor(){
     super();
-    this.title = 'AGV Route';
+    this.title = 'Carrier Route';
     this.resizable = true;
     this.size = [280, 150];
-    // ports: workIn, agvIn -> workOut, agvOut
+
     this._workInIndex = this.inputs.length;  this.addInput('workIn', 'work');
-    this._agvInIndex  = this.inputs.length;  this.addInput('agvIn', 'AGV');
+    this._agvInIndex  = this.inputs.length;  this.addInput('carrierIn', 'AGV');
     this._workOutIndex= this.outputs.length; this.addOutput('workOut', 'work');
-    this._agvOutIndex = this.outputs.length; this.addOutput('agvOut', 'AGV');
+    this._agvOutIndex = this.outputs.length; this.addOutput('carrierOut', 'AGV');
 
     this.properties = {
-      processTime: window.NODES_CONFIG?.agvRoute?.processTimeSec ?? AGV_ROUTE_DEFAULTS.processTime,
-      downTime: window.NODES_CONFIG?.agvRoute?.downTimeSec ?? AGV_ROUTE_DEFAULTS.downTime,
-      agvCapacity: window.NODES_CONFIG?.agvRoute?.agvCapacity ?? AGV_ROUTE_DEFAULTS.agvCapacity,
-      agvIds: AGV_ROUTE_DEFAULTS.agvIds,
+      processTime: window.NODES_CONFIG?.carrierRoute?.processTimeSec ?? CARRIER_ROUTE_DEFAULTS.processTime,
+      downTime: window.NODES_CONFIG?.carrierRoute?.downTimeSec ?? CARRIER_ROUTE_DEFAULTS.downTime,
+      routeKey: window.NODES_CONFIG?.carrierRoute?.routeKey ?? CARRIER_ROUTE_DEFAULTS.routeKey,
       sigExtra: 0,
       sigEnabled: true
     };
     if(window.enableFlipIO) window.enableFlipIO(this);
-    this._lastSig = [];
 
+    this._lastSig = [];
     this._currentAgv = null;
     this._departingAgv = null;
     this._departingAccepted = false;
@@ -48,22 +46,142 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._state = 'IDLE';
     this._lastWorkInRef = null;
     this._lastAgvInRef = null;
-    this._agvSpawnQueue = [];
-    this._rebuildAgvPool();
+
     this._setState('agvIn_idle','IDLE');
     this._syncSignalOutputs();
-  }
-
-  _rebuildAgvPool(){
-    const ids = (this.properties.agvIds || '').split(/[,\n]+/).map(t=>t.trim()).filter(Boolean);
-    this._agvSpawnQueue = ids.map(id=> new AGV(id, this.properties.agvCapacity || 1));
   }
 
   _hasWorkInLink(){ const port = this.inputs[this._workInIndex]; return !!(port && port.link!=null); }
   _hasWorkOutLink(){ const port = this.outputs[this._workOutIndex]; return !!(port && port.links && port.links.length); }
   _hasAgvOutLink(){ const port = this.outputs[this._agvOutIndex]; return !!(port && port.links && port.links.length); }
 
-  canAcceptAgv(){ return !this._currentAgv && !this._departingAgv; }
+  _tokenizeSequence(raw){
+    if(Array.isArray(raw)) return raw.map(v=>String(v ?? '').trim()).filter(Boolean);
+    if(typeof raw !== 'string') return [];
+    return raw
+      .replace(/\r/g, '\n')
+      .split(/(?:,|\n|->)+/)
+      .map(v=>v.trim())
+      .filter(Boolean);
+  }
+
+  _routeTokens(agv){
+    const m = agv?.meta;
+    if(!m || typeof m !== 'object') return [];
+    if(Array.isArray(m.routeSequence)) return this._tokenizeSequence(m.routeSequence);
+    if(typeof m.routeSequence === 'string') return this._tokenizeSequence(m.routeSequence);
+    return [];
+  }
+
+  _currentRouteKeyCandidates(){
+    const seen = new Set();
+    const push = (raw)=>{
+      const text = String(raw ?? '').trim();
+      if(!text) return;
+      seen.add(text);
+      // Also accept title-like labels such as "Route R1" by indexing simple tokens.
+      const tokens = text.split(/[\s,:;>\/\\|._-]+/).map((t)=>t.trim()).filter(Boolean);
+      for(const t of tokens) seen.add(t);
+    };
+    push(this.properties?.routeKey ?? '');
+    if(this.id !== undefined && this.id !== null) push(String(this.id));
+    push(this.title ?? '');
+    return Array.from(seen);
+  }
+
+  _agvMatchesRoute(agv){
+    if(!agv || typeof agv !== 'object') return true;
+    const seq = this._routeTokens(agv);
+    if(!seq.length) return true;
+    const norm = (v)=> String(v ?? '').trim().toLowerCase();
+    if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
+    let cursor = Number(agv.meta.routeCursor);
+    if(!isFinite(cursor) || cursor < 0) cursor = 0;
+    const expected = seq[cursor % seq.length];
+    if(!expected) return true;
+    const expectedNorm = norm(expected);
+    if(!expectedNorm) return true;
+    return this._currentRouteKeyCandidates().some((c)=> norm(c) === expectedNorm);
+  }
+
+  _advanceAgvSequence(agv){
+    if(!agv || typeof agv !== 'object') return;
+    const seq = this._routeTokens(agv);
+    if(!seq.length) return;
+    if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
+    let cursor = Number(agv.meta.routeCursor);
+    if(!isFinite(cursor) || cursor < 0) cursor = 0;
+    const norm = (v)=> String(v ?? '').trim().toLowerCase();
+    const expected = seq[cursor % seq.length];
+    const expectedNorm = norm(expected);
+    if(!expectedNorm) return;
+    const matched = this._currentRouteKeyCandidates().some((c)=> norm(c) === expectedNorm);
+    if(!matched) return;
+    agv.meta.routeCursor = (cursor + 1) % seq.length;
+  }
+
+  _agvForDispatchProbe(agv){
+    if(!agv || typeof agv !== 'object') return agv;
+    const seq = this._routeTokens(agv);
+    if(!seq.length) return agv;
+    const norm = (v)=> String(v ?? '').trim().toLowerCase();
+    const keys = this._currentRouteKeyCandidates().map(norm);
+    if(!keys.length) return agv;
+    const current = Number(agv.meta?.routeCursor);
+    const cursor = (!isFinite(current) || current < 0) ? 0 : current;
+    const expected = norm(seq[cursor % seq.length]);
+    if(!expected || !keys.includes(expected)) return agv;
+
+    // Probe downstream acceptance with the next sequence step without mutating the real carrier.
+    const probeMeta = Object.assign({}, agv.meta, { routeCursor: (cursor + 1) % seq.length });
+    return Object.assign({}, agv, { meta: probeMeta });
+  }
+
+  _normalizeAgv(agv){
+    let a = agv;
+    if(!(a instanceof AGV)){
+      const id = String(a?.id ?? a ?? `Carrier-${this.id}`);
+      const cap = Math.max(1, Math.round(Number(a?.capacity ?? a?.meta?.capacity ?? 1) || 1));
+      a = new AGV(id, cap);
+      if(agv && typeof agv === 'object'){
+        if(Array.isArray(agv.cargo)) a.cargo = agv.cargo;
+        if(agv.meta && typeof agv.meta === 'object') a.meta = agv.meta;
+      }
+    }
+    if(!Array.isArray(a.cargo)) a.cargo = [];
+    if(!a.meta || typeof a.meta !== 'object') a.meta = {};
+    const cap = Math.max(1, Math.round(Number(a.capacity || a.meta.capacity || 1) || 1));
+    a.capacity = cap;
+    a.meta.capacity = cap;
+    let cursor = Number(a.meta.routeCursor);
+    if(!isFinite(cursor) || cursor < 0) cursor = 0;
+    a.meta.routeCursor = cursor;
+    return a;
+  }
+
+  _adoptIncomingAgv(agv, withInputAnim){
+    const a = this._normalizeAgv(agv);
+    if(!this.canAcceptAgv(a)) return false;
+    this._currentAgv = a;
+    this._departingAgv = null;
+    this._departingAccepted = false;
+    this._loadIndex = Array.isArray(a.cargo) ? a.cargo.length : 0;
+    this._unloadIndex = 0;
+    this._pendingUnload = [];
+    this._workOffer = null;
+    this._setState('agv_process','PROCESS');
+    const now = simNow();
+    this._until = now + Math.max(0,(this.properties.processTime||0)*1000);
+    if(withInputAnim) this._triggerAnim(this._agvInIndex, 'agv', this._until - now, { id:a.id, t:'AGV' });
+    if(this._until === now) this._handleAgvProcess(now);
+    return true;
+  }
+
+  canAcceptAgv(agv){
+    if(this._currentAgv || this._departingAgv) return false;
+    return this._agvMatchesRoute(agv);
+  }
+
   canAcceptWorkInput(slotIndex){
     if(slotIndex !== this._workInIndex) return false;
     if(!this._currentAgv) return false;
@@ -87,7 +205,6 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   }
 
   _emit(i,state){
-    // signal outputs start after workOut/agvOut
     const base = 2;
     const idx = base + i;
     if(!this.properties.sigEnabled) { if(this.outputs[idx]) this.setOutputData(idx, null); return; }
@@ -112,51 +229,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const agv = this.getInputData(this._agvInIndex);
     if(!agv){ this._lastAgvInRef = null; return; }
     if(this._lastAgvInRef === agv) return;
-    if(this.canAcceptAgv(agv)){
-      const a = agv instanceof AGV ? agv : new AGV(String(agv.id ?? agv), this.properties.agvCapacity);
-      if(!Array.isArray(a.cargo)) a.cargo = [];
-      a.capacity = Math.max(1, a.capacity || this.properties.agvCapacity || 1);
-      this._currentAgv = a;
-      this._departingAgv = null;
-      this._departingAccepted = false;
-      this._loadIndex = Array.isArray(a.cargo) ? a.cargo.length : 0;
-      this._unloadIndex = 0;
-      this._pendingUnload = [];
-      this._workOffer = null;
-      this._lastAgvInRef = agv;
-      this._setState('agv_process','PROCESS');
-      const now = simNow();
-      this._until = now + Math.max(0,(this.properties.processTime||0)*1000);
-      this._triggerAnim(this._agvInIndex, 'agv', this._until - now, { id:a.id, t:'AGV' });
-      if(this._until === now) this._handleAgvProcess(now);
-    }
-  }
-
-  _maybeSpawnAgv(){
-    if(this._currentAgv || this._departingAgv) return;
-    if(!this._agvSpawnQueue.length) return;
-    const agv = this._agvSpawnQueue.shift();
-    this._lastAgvInRef = null;
-    this._captureAgvInputHelper(agv);
-  }
-
-  _captureAgvInputHelper(agv){
-    if(!agv) return;
-    if(!(agv instanceof AGV)) agv = new AGV(String(agv.id ?? agv), this.properties.agvCapacity);
-    if(!Array.isArray(agv.cargo)) agv.cargo = [];
-    agv.capacity = Math.max(1, agv.capacity || this.properties.agvCapacity || 1);
-    this._currentAgv = agv;
-    this._departingAgv = null;
-    this._departingAccepted = false;
-    this._loadIndex = Array.isArray(agv.cargo) ? agv.cargo.length : 0;
-    this._unloadIndex = 0;
-    this._pendingUnload = [];
-    this._workOffer = null;
-    this._setState('agv_process','PROCESS');
-    const now = simNow();
-    this._until = now + Math.max(0,(this.properties.processTime||0)*1000);
-    this._triggerAnim(this._agvInIndex, 'agv', this._until-now, { id: agv.id, t:'AGV' });
-    if(this._until === now) this._handleAgvProcess(now);
+    if(this._adoptIncomingAgv(agv, true)) this._lastAgvInRef = agv;
   }
 
   _triggerAnim(slot, type, duration, info){
@@ -273,9 +346,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   _completeWorkOutOffer(){
     if(!this._workOffer) return;
     this._pendingUnload.shift();
-    if(this._currentAgv && Array.isArray(this._currentAgv.cargo)){
-      this._currentAgv.cargo.shift();
-    }
+    if(this._currentAgv && Array.isArray(this._currentAgv.cargo)) this._currentAgv.cargo.shift();
     this._workOffer = null;
     this._workOfferArmed = false;
     this._workOfferAccepted = false;
@@ -317,6 +388,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._setState('agvOut_down','DOWN');
     const now = simNow();
     this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    this._advanceAgvSequence(this._currentAgv);
     this._departingAgv = this._currentAgv;
     this._departingAccepted = false;
     this._currentAgv = null;
@@ -355,11 +427,12 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   _downstreamAgvReady(agv){
     const out = this.outputs[this._agvOutIndex];
     if(!out || !out.links) return false;
+    const probeAgv = this._agvForDispatchProbe(agv);
     for(const id of out.links){
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
-      if(typeof t.canAcceptAgv === 'function' && !t.canAcceptAgv(agv)) return false;
+      if(typeof t.canAcceptAgv === 'function' && !t.canAcceptAgv(probeAgv)) return false;
     }
     return true;
   }
@@ -378,6 +451,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(t._currentAgv === agv) return true;
+      if(Array.isArray(t._queue) && t._queue.includes(agv)) return true;
+      if(t._offerAgv === agv) return true;
     }
     return false;
   }
@@ -430,18 +505,13 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       this._enterAgvOutWait();
       return;
     }
-    if(this._downstreamWorkReady()){
-      this._startWorkOutDown();
-    }
+    if(this._downstreamWorkReady()) this._startWorkOutDown();
   }
 
   _handleWorkOutDown(now){
     if(!this._workOffer){
-      if(this._pendingUnload.length){
-        this._setState(`workOut_wait_${this._unloadIndex+1}`,'WAIT');
-      }else{
-        this._enterAgvOutWait();
-      }
+      if(this._pendingUnload.length) this._setState(`workOut_wait_${this._unloadIndex+1}`,'WAIT');
+      else this._enterAgvOutWait();
       return;
     }
     if(!this._workOfferAccepted){
@@ -451,9 +521,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
         try{ this.setOutputData(this._workOutIndex, null); }catch(_e){}
       }
     }
-    if(this._workOfferAccepted && now >= this._until){
-      this._completeWorkOutOffer();
-    }
+    if(this._workOfferAccepted && now >= this._until) this._completeWorkOutOffer();
   }
 
   _handleAgvOutWait(){
@@ -461,9 +529,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       this._setState('agvIn_idle','IDLE');
       return;
     }
-    if(this._downstreamAgvReady(this._currentAgv)){
-      this._startAgvOutDown();
-    }
+    if(this._downstreamAgvReady(this._currentAgv)) this._startAgvOutDown();
   }
 
   _handleAgvOutDown(now){
@@ -492,7 +558,6 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const now = simNow();
     this._captureAgvInput();
     this._captureWorkInput();
-    this._maybeSpawnAgv();
 
     if(this._stateName === 'agv_process') this._handleAgvProcess(now);
     else if(this._stateName.startsWith('workIn_process')) this._handleWorkInProcess(now);
@@ -521,16 +586,11 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
 
   onPropertyChanged(name){
     const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
-    if(name === 'agvIds') this._rebuildAgvPool();
-    if(name === 'agvCapacity'){
-      const n = Math.max(1, Math.round(parseFloat(this.properties.agvCapacity)||1));
-      this.properties.agvCapacity = n;
-      if(this._currentAgv) this._currentAgv.capacity = n;
-    }
+    if(name === 'routeKey') this.properties.routeKey = String(this.properties.routeKey ?? '').trim();
     if(name === 'sigExtra') this._syncSignalOutputs();
     if(name === 'processTime') this.properties.processTime = clamp(this.properties.processTime);
     if(name === 'downTime') this.properties.downTime = clamp(this.properties.downTime);
   }
 }
 
-window.AGVRouteNode = AGVRouteNode;
+window.CarrierRouteNode = CarrierRouteNode;

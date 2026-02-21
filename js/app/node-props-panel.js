@@ -7,6 +7,11 @@ var App = window.App || (window.App = {});
     return v && typeof v === 'object' && !Array.isArray(v);
   }
 
+  function isInteractiveElement(target){
+    if(!target || typeof target.closest !== 'function') return false;
+    return !!target.closest('input, textarea, select, button, a, [contenteditable="true"], [contenteditable=""]');
+  }
+
   function stringifyValue(v){
     try{
       return JSON.stringify(v, null, 2);
@@ -257,12 +262,13 @@ var App = window.App || (window.App = {});
         if(this.selectedNodeId !== null && String(row.nodeId) === this.selectedNodeId){
           tr.classList.add('is-node-selected');
         }
-        tr.addEventListener('click', ()=>{
+        tr.addEventListener('click', (e)=>{
+          if(isInteractiveElement(e.target)) return;
           this.setSelectedNodeId(row.nodeId, {
             ensureVisible: false,
             highlightGraph: true,
             syncTimeline: true,
-            forceRefresh: true
+            forceRefresh: false
           });
         });
 
@@ -291,6 +297,7 @@ var App = window.App || (window.App = {});
         const titleInput = document.createElement('input');
         titleInput.type = 'text';
         titleInput.value = row.nodeTitle;
+        titleInput.addEventListener('click', (e)=> e.stopPropagation());
         titleInput.addEventListener('change', ()=> this._commitTitle(row, titleInput.value));
         tdNode.appendChild(titleInput);
         tr.appendChild(tdNode);
@@ -309,6 +316,7 @@ var App = window.App || (window.App = {});
         tdProps.className = 'col-props';
         const propsArea = document.createElement('textarea');
         propsArea.value = row.propsText;
+        propsArea.addEventListener('click', (e)=> e.stopPropagation());
         propsArea.addEventListener('change', ()=> this._commitPropertiesJson(row, propsArea.value, propsArea));
         tdProps.appendChild(propsArea);
         tr.appendChild(tdProps);

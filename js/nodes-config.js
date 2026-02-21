@@ -22,6 +22,15 @@ window.NODES_CONFIG = {
     downTimeSec: 0.5,
     agvCapacity: 2,
   },
+  carrierRoute: {
+    processTimeSec: 3,
+    downTimeSec: 0.5,
+    routeKey: '',
+  },
+  carrierConfig: {
+    capacity: 2,
+    autoSpawn: true,
+  },
   limits: {
     // LiteGraph default is 1000. Raise it for large models.
     maxNodes: 5000,

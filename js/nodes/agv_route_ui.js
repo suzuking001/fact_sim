@@ -1,4 +1,4 @@
-(function(proto){
+﻿(function(proto){
   // Status overlay
   proto.onDrawForeground = function(ctx){
     const now = simNow();

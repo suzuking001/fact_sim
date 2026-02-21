@@ -741,7 +741,8 @@ body.timeline-hidden #timelineDock{ display: none; }
   color: #1e293b;
   font-size: 11px;
   line-height: 1.4;
-  max-width: 360px;
+  width: 120px;
+  max-width: 120px;
   white-space: normal;
   word-break: break-word;
 }

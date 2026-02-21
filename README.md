@@ -25,7 +25,7 @@ Quick walkthrough GIF:
 
 | Area | What you can do |
 | --- | --- |
-| Modeling | Build lines with Source / Equipment / Split / Branch / Merge / Join / AGV Route / Sink |
+| Modeling | Build lines with Source / Equipment / Split / Branch / Merge / Join / AGV Route / Carrier Config / Carrier Route / Sink |
 | Simulation | Switch engine mode (`dt` or `event`), adjust speed, run large scenarios |
 | Analysis | Inspect timing chart, follow work progress, export timeline CSV |
 | Benchmark | Compare engine speed with render on/off cases in app |

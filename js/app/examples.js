@@ -45,6 +45,54 @@ function makeExample(kind){
       stages[i].connect(0, stages[i + 1], 0);
     }
     stages[stages.length - 1].connect(0, sink, 0);
+  }else if(kind==='carrier_config'){
+    const src = LiteGraph.createNode('factory/source'); src.pos = [60, 220]; src.properties.sequence = 'A,B';
+    const r1 = LiteGraph.createNode('factory/carrierroute'); r1.pos = [320, 220];
+    const sink = LiteGraph.createNode('factory/sink'); sink.pos = [620, 220];
+    const r2 = LiteGraph.createNode('factory/carrierroute'); r2.pos = [620, 430];
+    const cfg = LiteGraph.createNode('factory/carrierconfig'); cfg.pos = [320, 430];
+
+    r1.title = 'Route R1';
+    r2.title = 'Route R2';
+    cfg.title = 'Carrier Config #1';
+    r1.properties.routeKey = 'R1';
+    r2.properties.routeKey = 'R2';
+    r1.properties.processTime = 1;
+    r1.properties.downTime = 0.3;
+    r2.properties.processTime = 1;
+    r2.properties.downTime = 0.3;
+    cfg.properties.carrierId = 'Carrier-1';
+    cfg.properties.capacity = 2;
+    cfg.properties.sequence = 'R1,R2';
+    cfg.properties.autoSpawn = true;
+
+    if(typeof r1.onPropertyChanged === 'function'){
+      r1.onPropertyChanged('routeKey');
+      r1.onPropertyChanged('processTime');
+      r1.onPropertyChanged('downTime');
+    }
+    if(typeof r2.onPropertyChanged === 'function'){
+      r2.onPropertyChanged('routeKey');
+      r2.onPropertyChanged('processTime');
+      r2.onPropertyChanged('downTime');
+    }
+    if(typeof cfg.onPropertyChanged === 'function'){
+      cfg.onPropertyChanged('carrierId');
+      cfg.onPropertyChanged('capacity');
+      cfg.onPropertyChanged('sequence');
+      cfg.onPropertyChanged('autoSpawn');
+    }
+
+    App.graph.add(src); App.graph.add(r1); App.graph.add(sink); App.graph.add(r2); App.graph.add(cfg);
+
+    // Work path
+    src.connect(0, r1, 0);
+    r1.connect(0, sink, 0);
+
+    // AGV circulation (AGVConfig-driven)
+    cfg.connect(0, r1, 1);
+    r1.connect(1, r2, 1);
+    r2.connect(1, cfg, 0);
   }
   // reset time display (no auto start)
   updateSimTime();
@@ -81,6 +129,12 @@ function initExamples(){
   if(sel){
     sel.addEventListener('change', e=>{
       const v = e.target.value; if(!v) return;
+      if(v === 'agv_config' || v === 'carrier_config'){
+        const data = window.EXAMPLES && window.EXAMPLES.carrier;
+        if(data) applyExampleData(data);
+        else loadExampleFromFile('sample/carrier.json');
+        return;
+      }
       if(v === 'sample_line1'){
         const data = window.EXAMPLES && window.EXAMPLES.sample_line1;
         if(data) applyExampleData(data);

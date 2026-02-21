@@ -528,6 +528,16 @@ function beginNodePlacement(node){
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
+    carrierconfig:{
+      type:'factory/carrierconfig',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Carrier Config', target:'title' },
+        { key:'carrierId', label:'Carrier ID', type:'text', default:'Carrier-1' },
+        { key:'capacity', label:'Carrier Capacity (work)', type:'number', min:1, step:1, default:2 },
+        { key:'sequence', label:'Route Sequence (comma or ->)', type:'textarea', default:'' },
+        { key:'autoSpawn', label:'Auto Spawn', type:'checkbox', default:true }
+      ]
+    },
     agvroute:{
       type:'factory/agvroute',
       props:[
@@ -536,6 +546,15 @@ function beginNodePlacement(node){
         { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
         { key:'agvCapacity', label:'AGV Capacity', type:'number', min:1, step:1, default:2 },
         { key:'agvIds', label:'Initial AGV IDs', type:'textarea', default:'AGV-1,AGV-2' }
+      ]
+    },
+    carrierroute:{
+      type:'factory/carrierroute',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Carrier Route', target:'title' },
+        { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
+        { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
+        { key:'routeKey', label:'Route Key (for sequence)', type:'text', default:'' }
       ]
     }
   };

@@ -9,9 +9,9 @@
   <!-- LiteGraph -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/css/litegraph.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
-  <script src="js/nodes-config.js?v=20260215b"></script>
+  <script src="js/nodes-config.js?v=20260220a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260220h" />
+    <link rel="stylesheet" href="css/app.css?v=20260220i" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -32,6 +32,7 @@
         <option value="simple">Simple</option>
         <option value="branch">Branch</option>
         <option value="shuttle_line5">Shuttle Line (5 Stage)</option>
+        <option value="carrier_config">Carrier Config Example</option>
         <option value="sample_line1">Sample Line1</option>
       </select>
     </div>
@@ -50,6 +51,8 @@
           <option value="split">Split</option>
           <option value="branch">Branch</option>
           <option value="agvroute">AGV Route</option>
+          <option value="carrierconfig">Carrier Config</option>
+          <option value="carrierroute">Carrier Route</option>
           <option value="merge">Merge</option>
           <option value="join">Join</option>
         </select>
@@ -326,10 +329,13 @@ SOFTWARE.
   <script src="js/nodes/branch.js"></script>
   <script src="js/nodes/merge2.js"></script>
   <script src="js/nodes/join.js"></script>
-  <script src="js/nodes/agv_route.js"></script>
-  <script src="js/nodes/agv_route_ui.js"></script>
+  <script src="js/nodes/agv_route.js?v=20260220d"></script>
+  <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
+  <script src="js/nodes/carrier_config.js?v=20260220a"></script>
+  <script src="js/nodes/carrier_route.js?v=20260220c"></script>
+  <script src="js/nodes/carrier_route_ui.js?v=20260220a"></script>
   <script src="js/nodes/sink.js"></script>
-  <script src="js/nodes/register.js?v=20260218a"></script>
+  <script src="js/nodes/register.js?v=20260220b"></script>
   <script src="sample/sample_line1.js"></script>
   <script src="js/timeline.js?v=20260218e"></script>
   <script src="js/app/state.js?v=20260220a"></script>
@@ -340,12 +346,12 @@ SOFTWARE.
   <script src="js/app/history.js"></script>
   <script src="js/app/selection.js?v=20260218b"></script>
   <script src="js/app/fit.js?v=20260218a"></script>
-  <script src="js/app/node-props-panel.js?v=20260220a"></script>
+  <script src="js/app/node-props-panel.js?v=20260220b"></script>
   <script src="js/app/timeline-init.js?v=20260218b"></script>
   <script src="js/app/graph-init.js?v=20260215c"></script>
-  <script src="js/app/examples.js?v=20260218a"></script>
+  <script src="js/app/examples.js?v=20260221a"></script>
   <script src="js/app/file-io.js?v=20260218b"></script>
-  <script src="js/app/ui.js?v=20260220b"></script>
+  <script src="js/app/ui.js?v=20260220d"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>
