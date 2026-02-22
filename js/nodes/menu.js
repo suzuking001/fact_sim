@@ -37,23 +37,6 @@ function menuMixin(cls){
         }
       });
     }
-    if(this.properties.processTime !== undefined || this.properties.downTime !== undefined){
-      opts.push({
-        content: 'Edit Properties...',
-        callback: ()=>{
-          const p = this.properties;
-          if(p.processTime !== undefined){
-            const v = prompt('ProcessTime (s):', p.processTime);
-            if(v != null && !isNaN(v)) p.processTime = +v;
-          }
-          if(p.downTime !== undefined){
-            const v = prompt('DownTime (s):', p.downTime);
-            if(v != null && !isNaN(v)) p.downTime = +v;
-          }
-          this.setDirtyCanvas(true, true);
-        }
-      });
-    }
     if(this.properties.sigEnabled !== undefined){
       opts.push({
         content: this.properties.sigEnabled ? 'Disable Signals' : 'Enable Signals',
@@ -93,3 +76,117 @@ function menuMixin(cls){
 
 window.defaultScript = defaultScript;
 window.menuMixin = menuMixin;
+
+// Prune rarely-used LiteGraph default node menu items.
+(function(){
+  if(typeof LiteGraph === 'undefined' || !LiteGraph.LGraphCanvas) return;
+  const proto = LiteGraph.LGraphCanvas.prototype;
+  if(proto.__factMenuPruned) return;
+
+  const HIDE = new Set(['Mode', 'Collapse', 'Pin', 'Shapes']);
+  const rawGetNodeMenuOptions = proto.getNodeMenuOptions;
+  if(typeof rawGetNodeMenuOptions !== 'function') return;
+
+  function compactMenuSeparators(items){
+    const out = [];
+    let lastWasSep = true;
+    for(const item of items){
+      const isSep = item == null;
+      if(isSep){
+        if(lastWasSep) continue;
+        out.push(null);
+        lastWasSep = true;
+        continue;
+      }
+      out.push(item);
+      lastWasSep = false;
+    }
+    while(out.length && out[out.length - 1] == null) out.pop();
+    return out;
+  }
+
+  proto.getNodeMenuOptions = function(){
+    const menu = rawGetNodeMenuOptions.apply(this, arguments);
+    if(!Array.isArray(menu)) return menu;
+    const filtered = menu.filter((item)=>{
+      if(!item || typeof item.content !== 'string') return true;
+      return !HIDE.has(item.content.trim());
+    });
+    return compactMenuSeparators(filtered);
+  };
+
+  proto.__factMenuPruned = true;
+})();
+
+// Flatten "Add Node" menu to factory nodes only:
+// current: Add Node > factory > node
+// target : Add Node > node
+(function(){
+  if(typeof LiteGraph === 'undefined' || !LiteGraph.LGraphCanvas) return;
+  if(LiteGraph.LGraphCanvas.__factAddNodeFactoryOnly) return;
+
+  const SKIP_TYPES = new Set([
+    'factory/carrierhome', // legacy alias (keep load compatibility only)
+    'factory/merge2'       // legacy alias (keep load compatibility only)
+  ]);
+
+  const rawOnMenuAdd = LiteGraph.LGraphCanvas.onMenuAdd;
+  LiteGraph.LGraphCanvas.onMenuAdd = function(value, options, event, parentMenu, onCreate){
+    const canvas = LiteGraph.LGraphCanvas.active_canvas;
+    const graph = canvas && canvas.graph;
+    if(!canvas || !graph){
+      if(typeof rawOnMenuAdd === 'function') return rawOnMenuAdd.apply(this, arguments);
+      return false;
+    }
+
+    const filter = canvas.filter || graph.filter;
+    let list = LiteGraph.getNodeTypesInCategory('factory', filter) || [];
+    list = list.filter((nt)=>
+      nt &&
+      !nt.skip_list &&
+      typeof nt.type === 'string' &&
+      nt.type.startsWith('factory/') &&
+      !SKIP_TYPES.has(nt.type)
+    );
+
+    if(!list.length){
+      if(typeof rawOnMenuAdd === 'function') return rawOnMenuAdd.apply(this, arguments);
+      return false;
+    }
+
+    const byType = new Map();
+    for(const nt of list){
+      if(!byType.has(nt.type)) byType.set(nt.type, nt);
+    }
+    const nodes = Array.from(byType.values()).sort((a,b)=>{
+      const at = String(a.title || a.type || '');
+      const bt = String(b.title || b.type || '');
+      return at.localeCompare(bt);
+    });
+
+    const menuItems = nodes.map((nt)=>({
+      value: nt.type,
+      content: nt.title || nt.type,
+      has_submenu: false,
+      callback: (item, _opt, _ctx, menuRef)=>{
+        const ev =
+          (menuRef && typeof menuRef.getFirstEvent === 'function' && menuRef.getFirstEvent()) ||
+          event;
+        graph.beforeChange();
+        const node = LiteGraph.createNode(item.value);
+        if(node){
+          node.pos = canvas.convertEventToCanvasOffset(ev || event);
+          graph.add(node);
+          if(typeof onCreate === 'function') onCreate(node);
+        }
+        graph.afterChange();
+      }
+    }));
+
+    const win = canvas.getCanvasWindow ? canvas.getCanvasWindow() : window;
+    new LiteGraph.ContextMenu(menuItems, { event, parentMenu }, win);
+    return false;
+  };
+
+  LiteGraph.LGraphCanvas.__factAddNodeFactoryOnly = true;
+})();
