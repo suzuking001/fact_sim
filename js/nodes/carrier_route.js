@@ -4,7 +4,7 @@
 const CARRIER_ROUTE_DEFAULTS = {
   processTime: 3,
   downTime: 0.5,
-  routeKey: ''
+  initialCarrier: ''
 };
 
 class CarrierRouteNode extends LiteGraph.LGraphNode{
@@ -20,7 +20,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this.properties = {
       processTime: window.NODES_CONFIG?.carrierRoute?.processTimeSec ?? CARRIER_ROUTE_DEFAULTS.processTime,
       downTime: window.NODES_CONFIG?.carrierRoute?.downTimeSec ?? CARRIER_ROUTE_DEFAULTS.downTime,
-      routeKey: window.NODES_CONFIG?.carrierRoute?.routeKey ?? CARRIER_ROUTE_DEFAULTS.routeKey,
+      initialCarrier: window.NODES_CONFIG?.carrierRoute?.initialCarrierId ?? CARRIER_ROUTE_DEFAULTS.initialCarrier,
       sigExtra: 0,
       sigEnabled: true
     };
@@ -46,6 +46,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._lastAgvInRefBySlot = Object.create(null);
     this._currentCarrierLane = 0;
     this._departingCarrierLane = 0;
+    this._initialCarrierSpawned = false;
 
     this._setState('agvIn_idle','IDLE');
     this._ensureMinCarrierPorts(1);
@@ -323,86 +324,82 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this.setDirtyCanvas(true, true);
   }
 
-  _tokenizeSequence(raw){
-    if(Array.isArray(raw)) return raw.map(v=>String(v ?? '').trim()).filter(Boolean);
-    if(typeof raw !== 'string') return [];
-    return raw
-      .replace(/\r/g, '\n')
-      .split(/(?:,|\n|->)+/)
-      .map(v=>v.trim())
-      .filter(Boolean);
+  _normalizeInitialCarrierId(){
+    return String(this.properties?.initialCarrier ?? '').trim();
   }
 
-  _routeTokens(agv){
-    const m = agv?.meta;
-    if(!m || typeof m !== 'object') return [];
-    if(Array.isArray(m.routeSequence)) return this._tokenizeSequence(m.routeSequence);
-    if(typeof m.routeSequence === 'string') return this._tokenizeSequence(m.routeSequence);
-    return [];
+  _carrierConfigNodes(){
+    const nodes = this.graph && Array.isArray(this.graph._nodes) ? this.graph._nodes : [];
+    return nodes.filter((node)=>
+      node &&
+      (typeof node.isForCarrierId === 'function' ||
+       node.type === 'factory/carrierconfig' ||
+       node.type === 'factory/carrierhome'));
   }
 
-  _currentRouteKeyCandidates(){
-    const seen = new Set();
-    const push = (raw)=>{
-      const text = String(raw ?? '').trim();
-      if(!text) return;
-      seen.add(text);
-      // Also accept title-like labels such as "Route R1" by indexing simple tokens.
-      const tokens = text.split(/[\s,:;>\/\\|._-]+/).map((t)=>t.trim()).filter(Boolean);
-      for(const t of tokens) seen.add(t);
-    };
-    push(this.properties?.routeKey ?? '');
-    if(this.id !== undefined && this.id !== null) push(String(this.id));
-    push(this.title ?? '');
-    return Array.from(seen);
+  _carrierConfigByNodeId(nodeId){
+    if(!isFinite(Number(nodeId))) return null;
+    const id = Number(nodeId);
+    const list = this._carrierConfigNodes();
+    for(const node of list){
+      if(Number(node.id) === id) return node;
+    }
+    return null;
   }
 
-  _agvMatchesRoute(agv){
-    if(!agv || typeof agv !== 'object') return true;
-    const seq = this._routeTokens(agv);
-    if(!seq.length) return true;
-    const norm = (v)=> String(v ?? '').trim().toLowerCase();
-    if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
-    let cursor = Number(agv.meta.routeCursor);
-    if(!isFinite(cursor) || cursor < 0) cursor = 0;
-    const expected = seq[cursor % seq.length];
-    if(!expected) return true;
-    const expectedNorm = norm(expected);
-    if(!expectedNorm) return true;
-    return this._currentRouteKeyCandidates().some((c)=> norm(c) === expectedNorm);
+  _findCarrierConfigById(carrierId){
+    const idText = String(carrierId ?? '').trim();
+    if(!idText) return null;
+    const list = this._carrierConfigNodes();
+    for(const node of list){
+      if(typeof node.isForCarrierId === 'function'){
+        if(node.isForCarrierId(idText)) return node;
+        continue;
+      }
+      const cfgId = String(node.properties?.carrierId ?? '').trim();
+      if(cfgId && cfgId === idText) return node;
+    }
+    return null;
   }
 
-  _advanceAgvSequence(agv){
-    if(!agv || typeof agv !== 'object') return;
-    const seq = this._routeTokens(agv);
-    if(!seq.length) return;
-    if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
-    let cursor = Number(agv.meta.routeCursor);
-    if(!isFinite(cursor) || cursor < 0) cursor = 0;
-    const norm = (v)=> String(v ?? '').trim().toLowerCase();
-    const expected = seq[cursor % seq.length];
-    const expectedNorm = norm(expected);
-    if(!expectedNorm) return;
-    const matched = this._currentRouteKeyCandidates().some((c)=> norm(c) === expectedNorm);
-    if(!matched) return;
-    agv.meta.routeCursor = (cursor + 1) % seq.length;
+  _findCarrierConfigForAgv(agv){
+    if(!agv || typeof agv !== 'object') return null;
+    const owner = Number(agv.meta?.configNodeId);
+    const ownerCfg = this._carrierConfigByNodeId(owner);
+    if(ownerCfg) return ownerCfg;
+    const carrierId = String(agv.id ?? agv.meta?.carrierId ?? '').trim();
+    if(!carrierId) return null;
+    return this._findCarrierConfigById(carrierId);
   }
 
-  _agvForDispatchProbe(agv){
-    if(!agv || typeof agv !== 'object') return agv;
-    const seq = this._routeTokens(agv);
-    if(!seq.length) return agv;
-    const norm = (v)=> String(v ?? '').trim().toLowerCase();
-    const keys = this._currentRouteKeyCandidates().map(norm);
-    if(!keys.length) return agv;
-    const current = Number(agv.meta?.routeCursor);
-    const cursor = (!isFinite(current) || current < 0) ? 0 : current;
-    const expected = norm(seq[cursor % seq.length]);
-    if(!expected || !keys.includes(expected)) return agv;
+  _applyCarrierConfig(agv){
+    const cfg = this._findCarrierConfigForAgv(agv);
+    if(cfg && typeof cfg.applyToCarrier === 'function') cfg.applyToCarrier(agv);
+    return cfg;
+  }
 
-    // Probe downstream acceptance with the next sequence step without mutating the real carrier.
-    const probeMeta = Object.assign({}, agv.meta, { routeCursor: (cursor + 1) % seq.length });
-    return Object.assign({}, agv, { meta: probeMeta });
+  _selectDepartureLane(agv, fallbackLane){
+    const outs = this._carrierOutputSlots();
+    const laneCount = Math.max(1, outs.length);
+    const fallback = Math.max(0, Math.min(laneCount - 1, Math.floor(Number(fallbackLane) || 0)));
+    const cfg = this._findCarrierConfigForAgv(agv);
+    if(!cfg || typeof cfg.isHomeRoute !== 'function' || !cfg.isHomeRoute(this)) return fallback;
+    if(typeof cfg.nextDispatchLane !== 'function') return fallback;
+    return cfg.nextDispatchLane(agv, laneCount, fallback);
+  }
+
+  _trySpawnInitialCarrier(){
+    if(this._initialCarrierSpawned) return;
+    if(this._currentAgv || this._departingAgv) return;
+    const id = this._normalizeInitialCarrierId();
+    if(!id) return;
+    const agv = new AGV(id, 1);
+    const cfg = this._findCarrierConfigById(id);
+    if(cfg && typeof cfg.applyToCarrier === 'function') cfg.applyToCarrier(agv);
+    const inSlot = this._carrierInputSlots()[0] ?? 0;
+    if(this._adoptIncomingAgv(agv, false, 0, inSlot)){
+      this._initialCarrierSpawned = true;
+    }
   }
 
   _normalizeAgv(agv){
@@ -421,21 +418,24 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const cap = Math.max(1, Math.round(Number(a.capacity || a.meta.capacity || 1) || 1));
     a.capacity = cap;
     a.meta.capacity = cap;
-    let cursor = Number(a.meta.routeCursor);
-    if(!isFinite(cursor) || cursor < 0) cursor = 0;
-    a.meta.routeCursor = cursor;
+    let lane = Number(a.meta.carrierLane);
+    if(!isFinite(lane) || lane < 0) lane = 0;
+    a.meta.carrierLane = lane;
     return a;
   }
 
-  _adoptIncomingAgv(agv, withInputAnim, lane = 0, inputSlot = this._carrierOutSlotForLane(0)){
+  _adoptIncomingAgv(agv, withInputAnim, lane = 0, inputSlot = this._carrierInputSlots()[0] ?? 0){
     const a = this._normalizeAgv(agv);
     if(!this.canAcceptAgv(inputSlot, a)) return false;
+    this._applyCarrierConfig(a);
     this._currentAgv = a;
     this._departingAgv = null;
     this._departingAccepted = false;
     this._currentCarrierLane = Math.max(0, Number(lane) || 0);
     if(!a.meta || typeof a.meta !== 'object') a.meta = {};
     a.meta.carrierLane = this._currentCarrierLane;
+    const initialId = this._normalizeInitialCarrierId();
+    if(initialId && String(a.id ?? '').trim() === initialId) this._initialCarrierSpawned = true;
     this._loadIndex = Array.isArray(a.cargo) ? a.cargo.length : 0;
     this._unloadIndex = 0;
     this._pendingUnload = [];
@@ -450,14 +450,12 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   canAcceptAgv(slotIndex, agv){
     let slot = slotIndex;
-    let incoming = agv;
     if(typeof slotIndex !== 'number'){
       slot = null;
-      incoming = slotIndex;
     }
     if(slot != null && this._carrierInputOrdinal(slot) < 0) return false;
     if(this._currentAgv || this._departingAgv) return false;
-    return this._agvMatchesRoute(incoming);
+    return true;
   }
 
   canAcceptWorkInput(slotIndex){
@@ -712,8 +710,8 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._setState('agvOut_down','DOWN');
     const now = simNow();
     this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
-    this._advanceAgvSequence(this._currentAgv);
-    this._departingCarrierLane = this._currentCarrierLane;
+    this._applyCarrierConfig(this._currentAgv);
+    this._departingCarrierLane = this._selectDepartureLane(this._currentAgv, this._currentCarrierLane);
     if(this._currentAgv && this._currentAgv.meta && typeof this._currentAgv.meta === 'object'){
       this._currentAgv.meta.carrierLane = this._departingCarrierLane;
     }
@@ -758,12 +756,11 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const outSlot = this._carrierOutSlotForLane(lane);
     const out = this.outputs[outSlot];
     if(!out || !out.links) return false;
-    const probeAgv = this._agvForDispatchProbe(agv);
     for(const id of out.links){
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
-      if(typeof t.canAcceptAgv === 'function' && !t.canAcceptAgv(link.target_slot, probeAgv)) return false;
+      if(typeof t.canAcceptAgv === 'function' && !t.canAcceptAgv(link.target_slot, agv)) return false;
     }
     return true;
   }
@@ -896,7 +893,10 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   onExecute(){
     const now = simNow();
+    this._trySpawnInitialCarrier();
     this._captureAgvInput();
+    if(this._currentAgv) this._applyCarrierConfig(this._currentAgv);
+    if(this._departingAgv) this._applyCarrierConfig(this._departingAgv);
     this._captureWorkInput();
 
     if(this._stateName === 'agv_process') this._handleAgvProcess(now);
@@ -926,14 +926,20 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   onPropertyChanged(name){
     const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
-    if(name === 'routeKey') this.properties.routeKey = String(this.properties.routeKey ?? '').trim();
+    if(name === 'initialCarrier'){
+      this.properties.initialCarrier = this._normalizeInitialCarrierId();
+      this._initialCarrierSpawned = false;
+    }
     if(name === 'sigExtra') this._syncSignalOutputs();
     if(name === 'processTime') this.properties.processTime = clamp(this.properties.processTime);
     if(name === 'downTime') this.properties.downTime = clamp(this.properties.downTime);
   }
 
   onConfigure(){
+    this.properties.initialCarrier = this._normalizeInitialCarrierId();
+    this._initialCarrierSpawned = !!(this._currentAgv || this._departingAgv);
     this._ensureMinCarrierPorts(1);
+    this._ensureWorkLanePairs(0);
     this._syncSignalOutputs();
     window.refreshFlipIO(this);
   }

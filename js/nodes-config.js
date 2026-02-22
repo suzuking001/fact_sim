@@ -25,16 +25,18 @@ window.NODES_CONFIG = {
   carrierRoute: {
     processTimeSec: 3,
     downTimeSec: 0.5,
-    routeKey: '',
+    initialCarrierId: '',
   },
   carrierConfig: {
     capacity: 2,
-    autoSpawn: true,
+    homeRoute: '',
+    sequence: '',
   },
-  // Preferred key (kept alongside carrierConfig for backward compatibility)
+  // Backward compatibility key (old name).
   carrierHome: {
     capacity: 2,
-    autoSpawn: true,
+    homeRoute: '',
+    sequence: '',
   },
   limits: {
     // LiteGraph default is 1000. Raise it for large models.

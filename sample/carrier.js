@@ -1,7 +1,7 @@
 window.EXAMPLES = window.EXAMPLES || {};
 window.EXAMPLES.carrier = {
   "last_node_id": 13,
-  "last_link_id": 16,
+  "last_link_id": 17,
   "nodes": [
     {
       "id": 1,
@@ -52,7 +52,7 @@ window.EXAMPLES.carrier = {
         {
           "name": "carrierIn",
           "type": "AGV",
-          "link": 9
+          "link": 17
         }
       ],
       "outputs": [
@@ -74,7 +74,7 @@ window.EXAMPLES.carrier = {
       "properties": {
         "processTime": 1,
         "downTime": 0.3,
-        "routeKey": "R10"
+        "initialCarrier": "Carrier-1"
       }
     },
     {
@@ -132,7 +132,7 @@ window.EXAMPLES.carrier = {
           "name": "carrierOut",
           "type": "AGV",
           "links": [
-            5
+            17
           ],
           "pos": [
             10,
@@ -147,8 +147,8 @@ window.EXAMPLES.carrier = {
       "properties": {
         "processTime": 1,
         "downTime": 0.3,
-        "routeKey": "R2",
-        "flipIO": true
+        "flipIO": true,
+        "initialCarrier": ""
       }
     },
     {
@@ -222,8 +222,8 @@ window.EXAMPLES.carrier = {
       "properties": {
         "processTime": 1,
         "downTime": 0.3,
-        "routeKey": "R11",
-        "flipIO": true
+        "flipIO": true,
+        "initialCarrier": ""
       }
     },
     {
@@ -271,7 +271,7 @@ window.EXAMPLES.carrier = {
       "properties": {
         "processTime": 1,
         "downTime": 0.3,
-        "routeKey": "R1"
+        "initialCarrier": ""
       }
     },
     {
@@ -317,7 +317,7 @@ window.EXAMPLES.carrier = {
       "properties": {
         "processTime": 1,
         "downTime": 0.3,
-        "routeKey": "R13"
+        "initialCarrier": ""
       }
     },
     {
@@ -379,55 +379,24 @@ window.EXAMPLES.carrier = {
     },
     {
       "id": 5,
-      "type": "factory/carrierhome",
+      "type": "factory/carrierconfig",
       "pos": [
         38,
         666
       ],
       "size": [
-        169.60000610351562,
-        26
+        300,
+        130
       ],
       "order": 5,
-      "inputs": [
-        {
-          "name": "carrierIn",
-          "type": "AGV",
-          "link": 5,
-          "pos": [
-            159.60000610351562,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true
-        }
-      ],
-      "outputs": [
-        {
-          "name": "carrierOut",
-          "type": "AGV",
-          "links": [
-            9
-          ],
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
-          "__lastSet": null,
-          "__animToken": null
-        }
-      ],
-      "title": "Carrier Home #1",
+      "inputs": [],
+      "outputs": [],
+      "title": "Carrier Config #1",
       "properties": {
         "carrierId": "Carrier-1",
         "capacity": 2,
-        "sequence": "R10,R13,R1,R11,R2",
-        "autoSpawn": true,
-        "flipIO": true
+        "homeRoute": "10",
+        "sequence": "1"
       }
     },
     {
@@ -470,14 +439,6 @@ window.EXAMPLES.carrier = {
   ],
   "links": [
     [
-      5,
-      4,
-      1,
-      5,
-      0,
-      "AGV"
-    ],
-    [
       6,
       1,
       0,
@@ -492,14 +453,6 @@ window.EXAMPLES.carrier = {
       10,
       0,
       "work"
-    ],
-    [
-      9,
-      5,
-      0,
-      10,
-      1,
-      "AGV"
     ],
     [
       11,
@@ -546,6 +499,14 @@ window.EXAMPLES.carrier = {
       13,
       1,
       2,
+      1,
+      "AGV"
+    ],
+    [
+      17,
+      4,
+      1,
+      10,
       1,
       "AGV"
     ]

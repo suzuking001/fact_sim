@@ -9,8 +9,8 @@ function afterRegister(){
   LiteGraph.registerNodeType('factory/split',  SplitNode);
   LiteGraph.registerNodeType('factory/branch', BranchNode);
   LiteGraph.registerNodeType('factory/agvroute', AGVRouteNode);
-  LiteGraph.registerNodeType('factory/carrierhome', CarrierHomeNode);
-  LiteGraph.registerNodeType('factory/carrierconfig', CarrierHomeNode);
+  LiteGraph.registerNodeType('factory/carrierconfig', CarrierConfigNode);
+  LiteGraph.registerNodeType('factory/carrierhome', CarrierConfigNode);
   LiteGraph.registerNodeType('factory/carrierroute', CarrierRouteNode);
   LiteGraph.registerNodeType('factory/sink',   SinkNode);
   LiteGraph.registerNodeType('factory/merge',  MergeNode);
