@@ -179,6 +179,132 @@ if(renderFpsSelect){
   };
 })();
 
+// Add Group (stop groups)
+(function(){
+  const typeSel = document.getElementById('groupKindSelect');
+  const propsWrap = document.getElementById('addGroupProps');
+  const rateEl = document.getElementById('groupStopRate');
+  const btn = document.getElementById('btnAddGroup');
+  if(!typeSel || !propsWrap || !rateEl || !btn) return;
+  if(!App.stopGroups || typeof App.stopGroups.getTypeDefinitions !== 'function') return;
+
+  const defs = App.stopGroups.getTypeDefinitions()
+    .filter((d)=> d && d.key && Array.isArray(d.uiFields))
+    .sort((a, b)=> String(a.label || a.key).localeCompare(String(b.label || b.key)));
+
+  if(!defs.length) return;
+
+  typeSel.innerHTML = '';
+  defs.forEach((def)=>{
+    const opt = document.createElement('option');
+    opt.value = def.key;
+    opt.textContent = def.label || def.key;
+    typeSel.appendChild(opt);
+  });
+
+  const makeField = (def)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    const label = document.createElement('label');
+    label.textContent = def.label || def.key;
+    wrap.appendChild(label);
+
+    let input = null;
+    if(def.type === 'textarea'){
+      input = document.createElement('textarea');
+      if(def.rows) input.rows = def.rows;
+      input.value = def.default ?? '';
+    }else if(def.type === 'number'){
+      input = document.createElement('input');
+      input.type = 'number';
+      if(typeof def.step !== 'undefined') input.step = String(def.step);
+      if(typeof def.min !== 'undefined') input.min = String(def.min);
+      if(typeof def.max !== 'undefined') input.max = String(def.max);
+      input.value = def.default ?? 0;
+    }else if(def.type === 'color'){
+      input = document.createElement('input');
+      input.type = 'color';
+      input.value = def.default ?? '#ffffff';
+    }else{
+      input = document.createElement('input');
+      input.type = 'text';
+      input.value = def.default ?? '';
+    }
+    input.dataset.field = def.key;
+    wrap.appendChild(input);
+    return wrap;
+  };
+
+  const getDef = ()=>{
+    const key = typeSel.value || defs[0].key;
+    return defs.find((d)=> d.key === key) || defs[0];
+  };
+
+  const readMeta = ()=>{
+    const def = getDef();
+    const meta = {
+      type: def.key,
+      title: def.defaultTitle || 'Stop Group',
+      props: {}
+    };
+    for(const field of def.uiFields){
+      const el = propsWrap.querySelector(`[data-field="${field.key}"]`);
+      if(!el) continue;
+      let value = null;
+      if(field.type === 'number'){
+        const parsed = parseFloat(el.value);
+        value = isNaN(parsed) ? (field.default ?? 0) : parsed;
+      }else{
+        value = el.value;
+      }
+      if(field.target === 'title'){
+        const t = String(value == null ? '' : value).trim();
+        if(t) meta.title = t;
+      }else{
+        meta.props[field.key] = value;
+      }
+    }
+    return App.stopGroups.normalizeMeta(meta);
+  };
+
+  const updateStopRate = ()=>{
+    try{
+      const meta = readMeta();
+      const pct = App.stopGroups.estimateStopRatePercent(meta.type, meta.props);
+      rateEl.textContent = `Reference stop rate: ${pct.toFixed(1)}%`;
+    }catch(_e){
+      rateEl.textContent = 'Reference stop rate: -';
+    }
+  };
+
+  const renderFields = ()=>{
+    const def = getDef();
+    propsWrap.innerHTML = '';
+    for(const field of def.uiFields){
+      propsWrap.appendChild(makeField(field));
+    }
+    propsWrap.querySelectorAll('input,textarea,select').forEach((el)=>{
+      el.addEventListener('input', updateStopRate);
+      el.addEventListener('change', updateStopRate);
+    });
+    updateStopRate();
+  };
+
+  typeSel.addEventListener('change', renderFields);
+  renderFields();
+
+  btn.addEventListener('click', ()=>{
+    if(!App.graph || !App.canvas) return;
+    try{
+      const meta = readMeta();
+      const group = App.stopGroups.createGroup(meta);
+      beginGroupPlacement(group);
+    }catch(err){
+      console.error(err);
+    }
+  });
+})();
+
 const btnBenchmark = document.getElementById('btnBenchmark');
 if(btnBenchmark){
   btnBenchmark.addEventListener('click', async ()=>{
@@ -345,7 +471,46 @@ if(btnBenchmark){
   if(App.canvas) install(App.canvas);
 })();
 
-// Node placement mode (follow cursor, click to place)
+// Placement mode (node/group follows cursor, left click to place)
+function _clearPlacementState(){
+  if(!App.placement) return;
+  App.placement.active = false;
+  App.placement.kind = '';
+  App.placement.item = null;
+}
+
+function _removePlacementItem(item){
+  if(!App.graph || !item) return;
+  try{ App.graph.remove(item); }catch(_e){}
+}
+
+function _isNodePlacementItem(kind, item){
+  if(kind === 'node') return true;
+  if(item && typeof item.onExecute === 'function') return true;
+  return false;
+}
+
+function _setPlacementItemPos(item, kind, p){
+  if(!item || !p) return;
+  if(_isNodePlacementItem(kind, item)){
+    const w = item.size ? item.size[0] : 0;
+    const h = item.size ? item.size[1] : 0;
+    item.pos = [p[0] - w / 2, p[1] - h / 2];
+    if(typeof item.setDirtyCanvas === 'function') item.setDirtyCanvas(true, true);
+    return;
+  }
+
+  if(item._bounding && item._bounding.length >= 4){
+    const w = Number(item._bounding[2]) || 0;
+    const h = Number(item._bounding[3]) || 0;
+    item._bounding[0] = p[0] - w / 2;
+    item._bounding[1] = p[1] - h / 2;
+  }else{
+    const size = Array.isArray(item.size) ? item.size : [300, 180];
+    item.pos = [p[0] - size[0] / 2, p[1] - size[1] / 2];
+  }
+}
+
 function installPlacementHandlers(c){
   if(!c || c.__placementHooked) return;
   const controller = App.resetListenerController('__placementController');
@@ -369,45 +534,41 @@ function installPlacementHandlers(c){
     if(!App.placement || !App.placement.active) return;
     const p = getCanvasPos(e);
     if(!p) return;
-    const n = App.placement.node;
-    if(!n) return;
-    const w = n.size ? n.size[0] : 0;
-    const h = n.size ? n.size[1] : 0;
-    n.pos = [p[0] - w/2, p[1] - h/2];
-    if(typeof n.setDirtyCanvas === 'function') n.setDirtyCanvas(true,true);
-    c.setDirty(true,true);
+    const item = App.placement.item;
+    if(!item) return;
+    _setPlacementItemPos(item, App.placement.kind, p);
+    c.setDirty(true, true);
   }, opts);
 
   el.addEventListener('mousedown', (e)=>{
     if(!App.placement || !App.placement.active) return;
     if(e.button === 0){
-      App.placement.active = false;
-      App.placement.node = null;
-      c.setDirty(true,true);
+      _clearPlacementState();
+      c.setDirty(true, true);
       e.preventDefault();
       e.stopPropagation();
-    }else if(e.button === 2){
-      const n = App.placement.node;
-      App.placement.active = false;
-      App.placement.node = null;
-      if(App.graph && n) App.graph.remove(n);
-      c.setDirty(true,true);
-      e.preventDefault();
-      e.stopPropagation();
-    }else{
-      e.preventDefault();
-      e.stopPropagation();
+      return;
     }
+    if(e.button === 2){
+      const item = App.placement.item;
+      _clearPlacementState();
+      _removePlacementItem(item);
+      c.setDirty(true, true);
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
   }, opts);
 
   window.addEventListener('keydown', (e)=>{
     if(!App.placement || !App.placement.active) return;
     if(e.key === 'Escape'){
-      const n = App.placement.node;
-      App.placement.active = false;
-      App.placement.node = null;
-      if(App.graph && n) App.graph.remove(n);
-      c.setDirty(true,true);
+      const item = App.placement.item;
+      _clearPlacementState();
+      _removePlacementItem(item);
+      c.setDirty(true, true);
       e.preventDefault();
     }
   }, opts);
@@ -426,20 +587,35 @@ function _defaultGraphPos(){
 function beginNodePlacement(node){
   if(!App.graph || !App.canvas || !node) return;
   if(App.placement && App.placement.active){
-    const prev = App.placement.node;
+    const prev = App.placement.item;
     if(App.graph && prev) App.graph.remove(prev);
   }
   App.placement.active = true;
-  App.placement.node = node;
+  App.placement.kind = 'node';
+  App.placement.item = node;
   App.graph.add(node);
   const p = App.canvas.__last_mouse || _defaultGraphPos();
-  const w = node.size ? node.size[0] : 0;
-  const h = node.size ? node.size[1] : 0;
-  node.pos = [p[0] - w/2, p[1] - h/2];
-  if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
+  _setPlacementItemPos(node, 'node', p);
+  if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
   App.canvas.selectNode(node);
-  App.canvas.setDirty(true,true);
+  App.canvas.setDirty(true, true);
   App.showToast('Left click to place / Right click or Esc to cancel');
+}
+
+function beginGroupPlacement(group){
+  if(!App.graph || !App.canvas || !group) return;
+  if(App.placement && App.placement.active){
+    const prev = App.placement.item;
+    if(App.graph && prev) App.graph.remove(prev);
+  }
+  App.placement.active = true;
+  App.placement.kind = 'group';
+  App.placement.item = group;
+  App.graph.add(group);
+  const p = App.canvas.__last_mouse || _defaultGraphPos();
+  _setPlacementItemPos(group, 'group', p);
+  App.canvas.setDirty(true, true);
+  App.showToast('Left click to place group / Right click or Esc to cancel');
 }
 
 // Add Node (from sidebar select + button)

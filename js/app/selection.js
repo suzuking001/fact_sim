@@ -145,9 +145,10 @@ function deleteSelectedNodes(){
   for(const node of nodes){
     if(!node) continue;
     if(typeof node.id !== 'undefined' && node.id !== null) removedNodeIds.add(String(node.id));
-    if(App.placement && App.placement.active && App.placement.node === node){
+    if(App.placement && App.placement.active && App.placement.item === node){
       App.placement.active = false;
-      App.placement.node = null;
+      App.placement.kind = '';
+      App.placement.item = null;
     }
     try{
       App.graph.remove(node);

@@ -14,6 +14,16 @@ var App = window.App || (window.App = {});
     return (typeof window.simNow === 'function') ? window.simNow() : 0;
   }
 
+  function createStopGroupRuntime(graph){
+    if(!App.stopGroups || typeof App.stopGroups.createRuntime !== 'function') return null;
+    try{
+      return App.stopGroups.createRuntime(graph);
+    }catch(err){
+      console.error(err);
+      return null;
+    }
+  }
+
   function settleGraph(graph, limit){
     if(!graph) return;
     graph.__outputDirty = false;
@@ -375,10 +385,20 @@ var App = window.App || (window.App = {});
     constructor(graph){
       this.graph = graph;
       this.accumMs = 0;
+      this.stopGroupRuntime = createStopGroupRuntime(graph);
     }
 
     reset(){
       this.accumMs = 0;
+      if(this.stopGroupRuntime && typeof this.stopGroupRuntime.reset === 'function'){
+        this.stopGroupRuntime.reset(nowSimMs());
+      }
+    }
+
+    stop(){
+      if(this.stopGroupRuntime && typeof this.stopGroupRuntime.stop === 'function'){
+        this.stopGroupRuntime.stop();
+      }
     }
 
     update(simDeltaMs){
@@ -393,11 +413,18 @@ var App = window.App || (window.App = {});
       let steps = 0;
       let timelineCaptured = false;
       while(this.accumMs >= dtMs && steps < DT_STEP_LIMIT){
+        const nowMs = nowSimMs();
+        if(this.stopGroupRuntime && typeof this.stopGroupRuntime.beforeAdvance === 'function'){
+          this.stopGroupRuntime.beforeAdvance(nowMs, dtMs);
+        }
         graph.__outputDirty = false;
         graph.runStep(1, !graph.catch_errors);
         settleGraph(graph, DT_SETTLE_LIMIT);
 
         if(typeof window.advanceSimTime === 'function') window.advanceSimTime(dtMs);
+        if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+          this.stopGroupRuntime.update(nowMs + dtMs);
+        }
         captureTimeline();
         timelineCaptured = true;
         this.accumMs -= dtMs;
@@ -413,11 +440,21 @@ var App = window.App || (window.App = {});
     constructor(graph){
       super(graph);
       this.eventHeap = new IndexedEventHeap();
+      this.stopGroupRuntime = createStopGroupRuntime(graph);
     }
 
     reset(){
       this.eventHeap.clear();
       this.resetDirty();
+      if(this.stopGroupRuntime && typeof this.stopGroupRuntime.reset === 'function'){
+        this.stopGroupRuntime.reset(nowSimMs());
+      }
+    }
+
+    stop(){
+      if(this.stopGroupRuntime && typeof this.stopGroupRuntime.stop === 'function'){
+        this.stopGroupRuntime.stop();
+      }
     }
 
     _onTrackedNodeSetChanged(){
@@ -494,45 +531,80 @@ var App = window.App || (window.App = {});
       let nowMs = nowSimMs();
       let timelineCaptured = false;
 
+      if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+        this.stopGroupRuntime.update(nowMs);
+      }
+
       this._runDirtyQueue(nowMs);
       captureTimeline();
       timelineCaptured = true;
 
       while(budgetMs > 0 && loops++ < EVENT_LOOP_LIMIT){
         const next = this._peekNextValid(nowMs);
+        const boundaryMs = (this.stopGroupRuntime && typeof this.stopGroupRuntime.getNextTransitionMs === 'function')
+          ? this.stopGroupRuntime.getNextTransitionMs(nowMs)
+          : Infinity;
+        const hasBoundary = isFinite(boundaryMs);
+        const hasNext = !!next;
 
-        if(!next){
+        let targetMs = Infinity;
+        if(hasNext) targetMs = next.t;
+        if(hasBoundary && boundaryMs < targetMs) targetMs = boundaryMs;
+
+        if(!isFinite(targetMs)){
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.beforeAdvance === 'function'){
+            this.stopGroupRuntime.beforeAdvance(nowMs, budgetMs);
+          }
           if(typeof window.advanceSimTime === 'function') window.advanceSimTime(budgetMs);
+          nowMs += budgetMs;
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+            this.stopGroupRuntime.update(nowMs);
+          }
           captureTimeline();
           timelineCaptured = true;
           budgetMs = 0;
           break;
         }
 
-        let jumpMs = next.t - nowMs;
+        let jumpMs = targetMs - nowMs;
         if(jumpMs < EPSILON_MS) jumpMs = 0;
 
         if(jumpMs > 0){
-          if(jumpMs > budgetMs){
-            if(typeof window.advanceSimTime === 'function') window.advanceSimTime(budgetMs);
-            captureTimeline();
-            timelineCaptured = true;
-            budgetMs = 0;
-            break;
+          const stepMs = Math.min(jumpMs, budgetMs);
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.beforeAdvance === 'function'){
+            this.stopGroupRuntime.beforeAdvance(nowMs, stepMs);
           }
-          if(typeof window.advanceSimTime === 'function') window.advanceSimTime(jumpMs);
-          budgetMs -= jumpMs;
-          nowMs += jumpMs;
+          if(typeof window.advanceSimTime === 'function') window.advanceSimTime(stepMs);
+          budgetMs -= stepMs;
+          nowMs += stepMs;
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+            this.stopGroupRuntime.update(nowMs);
+          }
           captureTimeline();
           timelineCaptured = true;
           sameTimeSpins = 0;
           continue;
         }
 
-        const due = this._drainDue(nowMs);
-        if(due > 0){
-          this._runDirtyQueue(nowMs);
-          nowMs = nowSimMs();
+        if(hasNext && Math.abs(next.t - nowMs) <= EPSILON_MS){
+          const due = this._drainDue(nowMs);
+          if(due > 0){
+            this._runDirtyQueue(nowMs);
+            nowMs = nowSimMs();
+            if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+              this.stopGroupRuntime.update(nowMs);
+            }
+            captureTimeline();
+            timelineCaptured = true;
+            sameTimeSpins = 0;
+            continue;
+          }
+        }
+
+        if(hasBoundary && Math.abs(boundaryMs - nowMs) <= EPSILON_MS){
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+            this.stopGroupRuntime.update(nowMs);
+          }
           captureTimeline();
           timelineCaptured = true;
           sameTimeSpins = 0;
@@ -542,9 +614,15 @@ var App = window.App || (window.App = {});
         sameTimeSpins++;
         if(sameTimeSpins > EVENT_SAME_TIME_LIMIT){
           if(budgetMs <= EPSILON_MS) break;
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.beforeAdvance === 'function'){
+            this.stopGroupRuntime.beforeAdvance(nowMs, EPSILON_MS);
+          }
           if(typeof window.advanceSimTime === 'function') window.advanceSimTime(EPSILON_MS);
           budgetMs -= EPSILON_MS;
           nowMs += EPSILON_MS;
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+            this.stopGroupRuntime.update(nowMs);
+          }
           captureTimeline();
           timelineCaptured = true;
           sameTimeSpins = 0;

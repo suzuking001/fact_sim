@@ -39,6 +39,9 @@ function applyExampleData(data){
   App.history.lock = true;
   App.graph.clear();
   App.graph.configure(data);
+  if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+    App.stopGroups.restoreSerializedData(App.graph, data, false);
+  }
   App.history.lock = false;
   configureGraphClock(App.graph);
   if(typeof window.resetSimClock === 'function') window.resetSimClock();

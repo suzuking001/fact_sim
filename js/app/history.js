@@ -5,7 +5,13 @@ var App = window.App || (window.App = {});
 function _captureHistory(){
   if(App.history.lock || !App.graph) return;
   let snap;
-  try{ snap = JSON.stringify(App.graph.serialize()); }catch(_e){ return; }
+  try{
+    const data = App.graph.serialize();
+    if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
+      App.stopGroups.injectSerializedData(data, App.graph);
+    }
+    snap = JSON.stringify(data);
+  }catch(_e){ return; }
   if(App.history.last === snap) return;
   App.history.undo.push(snap);
   if(App.history.undo.length > App.history.max) App.history.undo.shift();
@@ -43,7 +49,11 @@ function resetHistory(){
       clearTimeout(App.history._timer);
       App.history._timer = null;
     }
-    const snap = JSON.stringify(App.graph.serialize());
+    const data = App.graph.serialize();
+    if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
+      App.stopGroups.injectSerializedData(data, App.graph);
+    }
+    const snap = JSON.stringify(data);
     App.history.undo = [snap];
     App.history.redo = [];
     App.history.last = snap;
@@ -56,8 +66,12 @@ function applySnapshot(snap){
   if(!App.graph || !snap) return;
   App.history.lock = true;
   try{
+    const data = JSON.parse(snap);
     App.graph.clear();
-    App.graph.configure(JSON.parse(snap));
+    App.graph.configure(data);
+    if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+      App.stopGroups.restoreSerializedData(App.graph, data, false);
+    }
     configureGraphClock(App.graph);
     try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
   }finally{

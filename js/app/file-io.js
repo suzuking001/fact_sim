@@ -9,7 +9,11 @@ const _utf8Decoder = new TextDecoder();
 
 function _serializeGraph(){
   if(!App.graph) throw new Error('graph is not initialized');
-  return _compactGraphData(App.graph.serialize());
+  const serialized = App.graph.serialize();
+  if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
+    App.stopGroups.injectSerializedData(serialized, App.graph);
+  }
+  return _compactGraphData(serialized);
 }
 
 function _applyGraphData(data){
@@ -19,6 +23,9 @@ function _applyGraphData(data){
   try{
     App.graph.clear();
     App.graph.configure(data);
+    if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+      App.stopGroups.restoreSerializedData(App.graph, data, false);
+    }
   }finally{
     App.history.lock = false;
   }

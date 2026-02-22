@@ -9,7 +9,7 @@ App.toastTimer = null;
 App.engine = null;
 App.simMode = App.simMode || 'dt';
 App._controllers = App._controllers || {};
-App.placement = App.placement || { active: false, node: null };
+App.placement = App.placement || { active: false, kind: '', item: null };
 App.render = App.render || {
   fps: 60,
   lastGraphDrawMs: 0,

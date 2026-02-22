@@ -11,7 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260222a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260220i" />
+    <link rel="stylesheet" href="css/app.css?v=20260222a" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -59,6 +59,16 @@
       </div>
       <div id="addNodeProps" class="propFields"></div>
       <button id="btnAddNode">Add Node</button>
+    </div>
+    <div id="addGroupPanel">
+      <div class="panelHeader">Add Group</div>
+      <div class="field">
+        <label for="groupKindSelect">Type</label>
+        <select id="groupKindSelect"></select>
+      </div>
+      <div id="groupStopRate" class="group-stop-rate">Reference stop rate: -</div>
+      <div id="addGroupProps" class="propFields"></div>
+      <button id="btnAddGroup">Add Group</button>
     </div>
     <div id="advancedPanel">
       <div class="panelHeader">Simulation Detail</div>
@@ -342,20 +352,21 @@ SOFTWARE.
   <script src="sample/carrier.js?v=20260222a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
   <script src="js/timeline.js?v=20260218e"></script>
-  <script src="js/app/state.js?v=20260220a"></script>
+  <script src="js/app/state.js?v=20260222a"></script>
+  <script src="js/app/stop-groups.js?v=20260222c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
-  <script src="js/app/engine.js?v=20260220a"></script>
+  <script src="js/app/engine.js?v=20260222a"></script>
   <script src="js/app/sim.js?v=20260215e"></script>
-  <script src="js/app/benchmark.js?v=20260215d"></script>
-  <script src="js/app/history.js"></script>
+  <script src="js/app/benchmark.js?v=20260222a"></script>
+  <script src="js/app/history.js?v=20260222a"></script>
   <script src="js/app/selection.js?v=20260218b"></script>
   <script src="js/app/fit.js?v=20260218a"></script>
   <script src="js/app/node-props-panel.js?v=20260220b"></script>
   <script src="js/app/timeline-init.js?v=20260218b"></script>
-  <script src="js/app/graph-init.js?v=20260215c"></script>
-  <script src="js/app/examples.js?v=20260221b"></script>
-  <script src="js/app/file-io.js?v=20260218b"></script>
-  <script src="js/app/ui.js?v=20260222a"></script>
+  <script src="js/app/graph-init.js?v=20260222a"></script>
+  <script src="js/app/examples.js?v=20260222a"></script>
+  <script src="js/app/file-io.js?v=20260222a"></script>
+  <script src="js/app/ui.js?v=20260222b"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

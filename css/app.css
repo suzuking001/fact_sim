@@ -61,6 +61,7 @@ html,body{
 #fileControls button,
 #scriptEditorControls button,
 #addNodePanel button,#addNodePanel select,
+#addGroupPanel button,#addGroupPanel select,
 #advancedPanel button,#advancedPanel select{
   margin-right:8px;
   padding:8px 14px;
@@ -75,6 +76,7 @@ html,body{
 #fileControls button,
 #scriptEditorControls button,
 #addNodePanel button,
+#addGroupPanel button,
 #advancedPanel button{
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
   border: none;
@@ -84,6 +86,7 @@ html,body{
 #fileControls button:hover,
 #scriptEditorControls button:hover,
 #addNodePanel button:hover,
+#addGroupPanel button:hover,
 #advancedPanel button:hover{
   filter: brightness(1.06);
   transform: translateY(-1px);
@@ -92,6 +95,7 @@ html,body{
 #fileControls button:active,
 #scriptEditorControls button:active,
 #addNodePanel button:active,
+#addGroupPanel button:active,
 #advancedPanel button:active{
   transform: translateY(0);
   filter: brightness(0.98);
@@ -263,6 +267,7 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 #sidebarHeader,
 #sidebar #controls,
 #addNodePanel,
+#addGroupPanel,
 #advancedPanel,
 #shortcutPanel,
 #sidebar #fileControls{
@@ -781,6 +786,7 @@ body.timeline-hidden #timelineDock{ display: none; }
 
 /* Add Node + Shortcut panel cards */
 #addNodePanel,
+#addGroupPanel,
 #advancedPanel,
 #shortcutPanel{
   background: var(--menu-card-bg);
@@ -794,6 +800,7 @@ body.timeline-hidden #timelineDock{ display: none; }
 #sidebar #controls::before,
 #sidebar #fileControls::before,
 #addNodePanel::before,
+#addGroupPanel::before,
 #advancedPanel::before,
 #shortcutPanel::before{
   content: "";
@@ -804,6 +811,7 @@ body.timeline-hidden #timelineDock{ display: none; }
   opacity: 0.85;
 }
 #addNodePanel .panelHeader,
+#addGroupPanel .panelHeader,
 #advancedPanel .panelHeader,
 #shortcutPanel .panelHeader{
   font-weight: 700;
@@ -813,10 +821,15 @@ body.timeline-hidden #timelineDock{ display: none; }
   font-size: 11px;
 }
 #addNodePanel .field{ display:flex; flex-direction: column; gap:6px; }
+#addGroupPanel .field{ display:flex; flex-direction: column; gap:6px; }
 #addNodePanel select{ width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--menu-input-border); border-radius: var(--radius-sm); background:var(--menu-input-bg); color:var(--menu-text); }
+#addGroupPanel select{ width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--menu-input-border); border-radius: var(--radius-sm); background:var(--menu-input-bg); color:var(--menu-text); }
 #addNodePanel .propFields{ display:flex; flex-direction: column; gap:10px; }
+#addGroupPanel .propFields{ display:flex; flex-direction: column; gap:10px; }
 #addNodePanel .propFields .placeholder{ color: var(--menu-muted); font-size:13px; }
+#addGroupPanel .propFields .placeholder{ color: var(--menu-muted); font-size:13px; }
 #addNodePanel .propFields .field label{ font-size: 12px; color: var(--menu-muted); }
+#addGroupPanel .propFields .field label{ font-size: 12px; color: var(--menu-muted); }
 #addNodePanel .propFields input,
 #addNodePanel .propFields textarea,
 #addNodePanel .propFields select{
@@ -824,7 +837,23 @@ body.timeline-hidden #timelineDock{ display: none; }
   border:1px solid var(--menu-input-border); border-radius: var(--radius-sm);
   background:var(--menu-input-bg); color:var(--menu-text);
 }
+#addGroupPanel .propFields input,
+#addGroupPanel .propFields textarea,
+#addGroupPanel .propFields select{
+  width:100%; box-sizing:border-box; padding:8px 10px;
+  border:1px solid var(--menu-input-border); border-radius: var(--radius-sm);
+  background:var(--menu-input-bg); color:var(--menu-text);
+}
 #addNodePanel .propFields textarea{ resize: vertical; min-height:60px; }
+#addGroupPanel .propFields textarea{ resize: vertical; min-height:60px; }
+#addGroupPanel .group-stop-rate{
+  font-size: 12px;
+  color: var(--menu-muted);
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
 
 /* === Benchmark modal === */
 #benchmarkModal{

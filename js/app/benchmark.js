@@ -114,6 +114,9 @@ var App = window.App || (window.App = {});
   function createBenchmarkRunContext(){
     if(!App.graph) throw new Error('graph is not initialized');
     const snapshot = App.graph.serialize();
+    if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
+      App.stopGroups.injectSerializedData(snapshot, App.graph);
+    }
     const originalTime = nowSimMs();
     const originalMode = App.getSimMode();
     const prevSuspendTimeline = !!App._suspendTimeline;
@@ -173,7 +176,11 @@ var App = window.App || (window.App = {});
         };
 
         const graph = new LGraph();
-        graph.configure(ctx.cloneData());
+        const data = ctx.cloneData();
+        graph.configure(data);
+        if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+          App.stopGroups.restoreSerializedData(graph, data, false);
+        }
         if(typeof configureGraphClock === 'function') configureGraphClock(graph);
 
         const engine = App.createSimEngine(mode, graph);
@@ -256,7 +263,11 @@ var App = window.App || (window.App = {});
         const renderCase = run.renderCase;
         const renderLabel = getRenderCaseLabel(renderCase);
         const graph = new LGraph();
-        graph.configure(ctx.cloneData());
+        const data = ctx.cloneData();
+        graph.configure(data);
+        if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+          App.stopGroups.restoreSerializedData(graph, data, false);
+        }
         if(typeof configureGraphClock === 'function') configureGraphClock(graph);
 
         const engine = App.createSimEngine(mode, graph);

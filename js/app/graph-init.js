@@ -6,8 +6,16 @@ function initGraph(){
   if(App.graph) stopSimulation();
   workCounter = 0;
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
+  if(App.stopGroups && typeof App.stopGroups.clearRuntimeState === 'function'){
+    App.stopGroups.clearRuntimeState();
+  }
   App.graph = new LGraph();
-  App.graph.onAfterChange = ()=> pushHistory();
+  App.graph.onAfterChange = ()=>{
+    if(App.stopGroups && typeof App.stopGroups.onGraphChanged === 'function'){
+      App.stopGroups.onGraphChanged();
+    }
+    pushHistory();
+  };
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
   if(typeof App.installCanvasRenderThrottle === 'function'){
