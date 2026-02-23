@@ -115,8 +115,10 @@ class SplitNode extends EquipmentNode{
     const entries = this._workOutputs();
     if(entries.length < 2) return false;
     const payload = this._payload;
+    let connectedCount = 0;
     const readyFor = (out)=>{
-      if(!out || !out.links || out.links.length === 0) return false;
+      if(!out || !out.links || out.links.length === 0) return null; // ignore unconnected ports
+      connectedCount++;
       for(const id of out.links){
         const link = this.graph.links[id];
         if(!link) continue;
@@ -131,9 +133,11 @@ class SplitNode extends EquipmentNode{
       return true;
     };
     for(const {out} of entries){
-      if(!readyFor(out)) return false;
+      const ready = readyFor(out);
+      if(ready === false) return false;
     }
-    return true;
+    // Need at least one connected downstream port to emit.
+    return connectedCount > 0;
   }
 
   onExecute(){

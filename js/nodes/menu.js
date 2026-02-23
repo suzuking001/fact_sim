@@ -118,6 +118,37 @@ window.menuMixin = menuMixin;
   proto.__factMenuPruned = true;
 })();
 
+// Add stop-group property editor to group context menu.
+(function(){
+  if(typeof LiteGraph === 'undefined' || !LiteGraph.LGraphCanvas) return;
+  const proto = LiteGraph.LGraphCanvas.prototype;
+  if(proto.__factStopGroupMenuPatched) return;
+
+  const rawGetGroupMenuOptions = proto.getGroupMenuOptions;
+  if(typeof rawGetGroupMenuOptions !== 'function') return;
+
+  proto.getGroupMenuOptions = function(group){
+    const menu = rawGetGroupMenuOptions.apply(this, arguments);
+    if(!group || !window.App || !window.App.stopGroups) return menu;
+    if(typeof window.App.stopGroups.getGroupMeta !== 'function') return menu;
+    const meta = window.App.stopGroups.getGroupMeta(group);
+    if(!meta) return menu;
+
+    const out = Array.isArray(menu) ? menu.slice() : [];
+    out.unshift({
+      content: 'Edit Stop Group...',
+      callback: ()=>{
+        if(typeof window.App.stopGroups.openGroupEditor === 'function'){
+          window.App.stopGroups.openGroupEditor(group);
+        }
+      }
+    });
+    return out;
+  };
+
+  proto.__factStopGroupMenuPatched = true;
+})();
+
 // Flatten "Add Node" menu to factory nodes only:
 // current: Add Node > factory > node
 // target : Add Node > node

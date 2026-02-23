@@ -548,6 +548,51 @@ var App = window.App || (window.App = {});
     return new StopGroupRuntime(graph);
   }
 
+  function parseUiFieldValue(field, raw, fallback){
+    if(!field) return raw;
+    if(field.type === 'number'){
+      const n = Number(raw);
+      if(!isFinite(n)) return fallback;
+      return n;
+    }
+    if(field.type === 'checkbox'){
+      return !!raw;
+    }
+    return raw;
+  }
+
+  function buildEditableMetaFromPrompt(group){
+    const current = getGroupMeta(group);
+    if(!current) return null;
+    const def = getTypeDef(current.type);
+    const fields = Array.isArray(def?.uiFields) ? def.uiFields : [];
+    const next = {
+      uid: current.uid,
+      type: current.type,
+      title: current.title,
+      props: { ...(current.props || {}) }
+    };
+
+    for(const field of fields){
+      if(!field || !field.key) continue;
+      const isTitle = field.target === 'title';
+      const currentValue = isTitle
+        ? (next.title ?? '')
+        : (Object.prototype.hasOwnProperty.call(next.props, field.key) ? next.props[field.key] : field.default);
+      const promptLabel = `${field.label || field.key}`;
+      const raw = window.prompt(promptLabel, String(currentValue ?? ''));
+      if(raw == null) return null; // canceled
+      const parsed = parseUiFieldValue(field, raw, currentValue);
+      if(isTitle){
+        next.title = String(parsed == null ? '' : parsed).trim() || String(current.title || def.defaultTitle || 'Stop Group');
+      }else{
+        next.props[field.key] = parsed;
+      }
+    }
+
+    return normalizeMeta(next);
+  }
+
   App.stopGroups = App.stopGroups || {};
   App.stopGroups.EXTRA_KEY = EXTRA_KEY;
 
@@ -582,6 +627,21 @@ var App = window.App || (window.App = {});
   App.stopGroups.injectSerializedData = injectSerializedData;
   App.stopGroups.restoreSerializedData = restoreSerializedData;
   App.stopGroups.createRuntime = createRuntime;
+  App.stopGroups.openGroupEditor = function(group){
+    const targetGroup = group || null;
+    if(!targetGroup) return false;
+    const meta = getGroupMeta(targetGroup);
+    if(!meta) return false;
+
+    const next = buildEditableMetaFromPrompt(targetGroup);
+    if(!next) return false;
+
+    const graph = App.graph;
+    if(graph && typeof graph.beforeChange === 'function') graph.beforeChange();
+    setGroupMeta(targetGroup, next, true);
+    if(graph && typeof graph.afterChange === 'function') graph.afterChange();
+    return true;
+  };
   App.stopGroups.getRevision = function(){ return groupRevision; };
   App.stopGroups.isNodePaused = function(node){
     return !!(node && pausedNodeIds && pausedNodeIds.has(node.id));

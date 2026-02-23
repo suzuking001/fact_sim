@@ -331,6 +331,26 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const p = this.inputs[slot];
     return !!(p && p.link != null);
   }
+  _linkedWorkInputSlots(){
+    const slots = this._workInputSlots();
+    const linked = [];
+    for(const slot of slots){
+      const p = this.inputs && this.inputs[slot];
+      if(p && p.link != null) linked.push(slot);
+    }
+    return linked;
+  }
+  _resolveActiveWorkInSlot(){
+    const laneSlot = this._workInSlotForLane(this._currentCarrierLane);
+    if(laneSlot >= 0){
+      const p = this.inputs && this.inputs[laneSlot];
+      if(p && p.link != null) return laneSlot;
+    }
+    // Legacy/layout-fallback: if exactly one work input is wired, accept that one.
+    const linked = this._linkedWorkInputSlots();
+    if(linked.length === 1) return linked[0];
+    return laneSlot;
+  }
   _hasWorkOutLinkForLane(lane){
     const slot = this._workOutSlotForLane(lane);
     if(slot < 0) return false;
@@ -545,7 +565,10 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const idText = String(carrierId ?? '').trim();
     if(!idText) return null;
     const list = this._carrierConfigNodes();
-    for(const node of list){
+    // Prefer the latest config when duplicated IDs exist.
+    // This makes "newly added/edited config overrides old one" behavior explicit.
+    for(let i = list.length - 1; i >= 0; i--){
+      const node = list[i];
       if(typeof node.isForCarrierId === 'function'){
         if(node.isForCarrierId(idText)) return node;
         continue;
@@ -558,12 +581,16 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   _findCarrierConfigForAgv(agv){
     if(!agv || typeof agv !== 'object') return null;
+    const carrierId = String(agv.id ?? agv.meta?.carrierId ?? '').trim();
+    if(carrierId){
+      const byId = this._findCarrierConfigById(carrierId);
+      if(byId) return byId;
+    }
+    // Fallback only when ID-based lookup is unavailable.
     const owner = Number(agv.meta?.configNodeId);
     const ownerCfg = this._carrierConfigByNodeId(owner);
     if(ownerCfg) return ownerCfg;
-    const carrierId = String(agv.id ?? agv.meta?.carrierId ?? '').trim();
-    if(!carrierId) return null;
-    return this._findCarrierConfigById(carrierId);
+    return null;
   }
 
   _applyCarrierConfig(agv){
@@ -651,11 +678,18 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     return true;
   }
 
+  _canAcceptWorkInState(){
+    if(!this._stateName) return false;
+    return this._stateName.startsWith('workIn_idle') || this._stateName === 'agvOut_wait';
+  }
+
   canAcceptWorkInput(slotIndex){
-    const activeIn = this._workInSlotForLane(this._currentCarrierLane);
-    if(activeIn < 0 || slotIndex !== activeIn) return false;
-    if(!this._currentAgv) return false;
-    if(!this._stateName || !this._stateName.startsWith('workIn_idle')) return false;
+    const activeIn = this._resolveActiveWorkInSlot();
+    const slotNum = Number(slotIndex);
+    const targetSlot = isFinite(slotNum) ? slotNum : slotIndex;
+    if(activeIn < 0 || targetSlot !== activeIn) return false;
+    if(!this._currentAgv || this._departingAgv) return false;
+    if(!this._canAcceptWorkInState()) return false;
     const cap = this._currentAgv.capacity || 0;
     const load = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
     if(cap <= 0 || load >= cap) return false;
@@ -823,7 +857,11 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       return;
     }
     const cap = this._currentAgv.capacity || 1;
-    if(!this._hasWorkInLinkForLane(this._currentCarrierLane) || this._loadIndex >= cap){
+    const currentLoad = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
+    this._loadIndex = currentLoad;
+    const activeIn = this._resolveActiveWorkInSlot();
+    const hasActiveWorkIn = activeIn >= 0 && this.inputs && this.inputs[activeIn] && this.inputs[activeIn].link != null;
+    if(!hasActiveWorkIn || currentLoad >= cap){
       this._beginUnloadPhase();
       return;
     }
@@ -838,7 +876,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const duration = Math.max(0,(this.properties.processTime||0)*1000);
     this._until = now + duration;
     const w = this._currentAgv && this._currentAgv.cargo[this._currentAgv.cargo.length-1];
-    const inSlot = this._workInSlotForLane(this._currentCarrierLane);
+    const inSlot = this._resolveActiveWorkInSlot();
     if(w && inSlot >= 0) this._triggerAnim(inSlot,'work',duration,{id:w.id, t:w.type});
     if(duration===0) this._handleWorkInProcess(now);
   }
@@ -957,7 +995,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _downstreamWorkReady(){
     const outSlot = this._workOutSlotForLane(this._currentCarrierLane);
     const out = this.outputs[outSlot];
-    if(!out || !out.links) return false;
+    if(!out || !out.links || out.links.length === 0) return false;
     for(const id of out.links){
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
@@ -988,7 +1026,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _downstreamAgvReady(agv, lane){
     const outSlot = this._carrierOutSlotForLane(lane);
     const out = this.outputs[outSlot];
-    if(!out || !out.links) return false;
+    if(!out || !out.links || out.links.length === 0) return false;
     for(const id of out.links){
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
@@ -1043,11 +1081,15 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   _captureWorkInput(){
     if(!this._currentAgv) return;
+    if(this._departingAgv) return;
     // Keep last input reference while busy so a held upstream output is not re-accepted.
-    if(!this._stateName.startsWith('workIn_idle')) return;
-    const inSlot = this._workInSlotForLane(this._currentCarrierLane);
-    if(inSlot < 0 || !this._hasWorkInLinkForLane(this._currentCarrierLane)){
-      this._beginUnloadPhase();
+    const inWorkIdle = this._stateName.startsWith('workIn_idle');
+    const inAgvOutWait = this._stateName === 'agvOut_wait';
+    if(!inWorkIdle && !inAgvOutWait) return;
+    const inSlot = this._resolveActiveWorkInSlot();
+    const hasActiveWorkIn = inSlot >= 0 && this.inputs && this.inputs[inSlot] && this.inputs[inSlot].link != null;
+    if(inSlot < 0 || !hasActiveWorkIn){
+      if(inWorkIdle) this._beginUnloadPhase();
       return;
     }
     const w = this.getInputData(inSlot);
@@ -1055,6 +1097,9 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(this._lastWorkInRefBySlot[inSlot] === w) return;
     this._lastWorkInRefBySlot[inSlot] = w;
     if(this._currentAgv.cargo.length < this._currentAgv.capacity){
+      if(inAgvOutWait){
+        this._setAgvOutWaitIcon(false);
+      }
       this._currentWork = w;
       this._payload = w;
       this._currentAgv.cargo.push(w);
