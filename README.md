@@ -59,5 +59,13 @@ Open `http://127.0.0.1:8123`
 Issues and pull requests are welcome:
 https://github.com/suzuking001/fact_sim/issues
 
+## Commercial Use
+Commercial use is not permitted under the default Research / Non-Commercial License.
+
+If you want to use `fact_sim` for commercial purposes, please contact us for a separate commercial license:
+- Email: suzukiuser01@gmail.com
+- GitHub Issues: https://github.com/suzuking001/fact_sim/issues
+- Recommended issue title: `Commercial License Inquiry`
+
 ## License
 Research / Non-Commercial License (`LICENSE`)
