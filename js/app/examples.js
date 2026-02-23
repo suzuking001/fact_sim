@@ -11,7 +11,7 @@ const EXAMPLE_FILES = {
   simple: 'sample/simple.json',
   branch: 'sample/branch.json',
   shuttle_line5: 'sample/shuttle_line5.json',
-  carrier: 'sample/carrier.json',
+  carrier: 'sample/graph (3).json',
   sample_line1: 'sample/sample_line1.json'
 };
 
@@ -25,22 +25,37 @@ function makeExample(kind){
   const key = resolveExampleKey(kind);
   if(!key) return;
   const data = window.EXAMPLES && window.EXAMPLES[key];
-  if(data){
+  const isFileProtocol = String(window.location?.protocol || '').toLowerCase() === 'file:';
+  if(isFileProtocol && data){
+    // file:// cannot fetch local JSON in many browsers; use bundled JS examples.
     applyExampleData(data);
     return;
   }
   const file = EXAMPLE_FILES[key] || `sample/${key}.json`;
-  loadExampleFromFile(file);
+  if(file){
+    loadExampleFromFile(file, key, data);
+    return;
+  }
+  if(data){
+    applyExampleData(data);
+    return;
+  }
 }
 
 function applyExampleData(data){
   if(!App.graph) return;
   stopSimulation();
+  let payload = data;
+  try{
+    payload = JSON.parse(JSON.stringify(data));
+  }catch(_e){
+    payload = data;
+  }
   App.history.lock = true;
   App.graph.clear();
-  App.graph.configure(data);
+  App.graph.configure(payload);
   if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
-    App.stopGroups.restoreSerializedData(App.graph, data, false);
+    App.stopGroups.restoreSerializedData(App.graph, payload, false);
   }
   App.history.lock = false;
   configureGraphClock(App.graph);
@@ -51,12 +66,22 @@ function applyExampleData(data){
   attachTimeline();
 }
 
-function loadExampleFromFile(path){
+function loadExampleFromFile(path, key, fallbackData){
   if(!App.graph) return;
-  fetch(path)
+  const requestPath = encodeURI(path);
+  fetch(requestPath)
     .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
     .then(data=>{ applyExampleData(data); })
-    .catch(err=>{ alert('Failed to load JSON'); console.error(err); });
+    .catch(err=>{
+      const fallback = fallbackData || (window.EXAMPLES && window.EXAMPLES[resolveExampleKey(key)]);
+      if(fallback){
+        console.warn(`[examples] fallback to embedded data for "${key}"`, err);
+        applyExampleData(fallback);
+        return;
+      }
+      alert('Failed to load JSON');
+      console.error(err);
+    });
 }
 
 function initExamples(){

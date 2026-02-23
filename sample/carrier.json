@@ -393,9 +393,7 @@
       "title": "Carrier Config #1",
       "properties": {
         "carrierId": "Carrier-1",
-        "capacity": 2,
-        "homeRoute": "10",
-        "sequence": "1"
+        "capacity": 2
       }
     },
     {

@@ -620,7 +620,7 @@ var App = window.App || (window.App = {});
   };
 
   TYPE_DEFS.random_stop = {
-    label: 'Random Stop (ランダム停止)',
+    label: 'Random Stop',
     defaultTitle: 'Random Stop Group',
     groupColor: '#f59e0b',
     groupActiveColor: ACTIVE_STOP_COLOR,
@@ -670,7 +670,7 @@ var App = window.App || (window.App = {});
   };
 
   TYPE_DEFS.scheduled_stop = {
-    label: 'Scheduled Stop (定時停止)',
+    label: 'Scheduled Stop',
     defaultTitle: 'Scheduled Stop Group',
     groupColor: '#0ea5e9',
     groupActiveColor: ACTIVE_STOP_COLOR,

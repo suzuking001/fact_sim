@@ -152,11 +152,6 @@ function setFastestMode(enabled){
 
 function updateSimTime(){
   document.getElementById('simTime').textContent = (simTimeMs/1000).toFixed(1) + ' s';
-  const dtEl = document.getElementById('simDt');
-  if(dtEl){
-    if(typeof window.getSimMetaText === 'function') dtEl.textContent = window.getSimMetaText();
-    else dtEl.textContent = `dt: ${SIM_DT_SEC.toFixed(1)} s (fixed)`;
-  }
 }
 
 function resetSimClock(){

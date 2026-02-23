@@ -13,13 +13,6 @@ function configureGraphClock(g){
   g.status = LGraph.STATUS_STOPPED;
 }
 
-window.getSimMetaText = function(){
-  const mode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));
-  if(mode === 'event') return 'Engine: event (heap)';
-  const dt = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
-  return `Engine: dt (${dt.toFixed(1)} s fixed)`;
-};
-
 function startSimulation(){
   if(!App.graph) return;
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;

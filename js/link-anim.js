@@ -152,7 +152,25 @@ class LinkAnimator{
       const info = anim.info || {};
       let label = '';
       if(anim.type === 'agv'){
-        label = info.label || (info.id ? `AGV:${info.id}` : 'AGV');
+        const kind = String(info.kind || '').toLowerCase();
+        const isCarrier = kind === 'carrier';
+        const countRaw = Number(info.workCount);
+        const hasCount = Number.isFinite(countRaw);
+        const count = hasCount ? Math.max(0, Math.floor(countRaw)) : null;
+
+        if(info.label){
+          if(isCarrier && hasCount){
+            label = `${info.label} (${count})`;
+          }else{
+            label = info.label;
+          }
+        }else if(isCarrier){
+          const id = info.id ? String(info.id) : 'carrier';
+          if(hasCount) label = `${id} (${count})`;
+          else label = id;
+        }else{
+          label = info.id ? `AGV:${info.id}` : 'AGV';
+        }
       }else if(anim.type === 'work'){
         const id = info.id ?? '';
         const t = info.t ?? info.type ?? '';

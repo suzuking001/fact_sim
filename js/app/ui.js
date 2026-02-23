@@ -709,9 +709,7 @@ function beginGroupPlacement(group){
       props:[
         { key:'title', label:'Title', type:'text', default:'Carrier Config', target:'title' },
         { key:'carrierId', label:'Carrier ID', type:'text', default:'Carrier-1' },
-        { key:'capacity', label:'Carrier Capacity (work)', type:'number', min:1, step:1, default:2 },
-        { key:'homeRoute', label:'Home Route (ID or title)', type:'text', default:'' },
-        { key:'sequence', label:'Carrier OUT Sequence (1-based, comma)', type:'textarea', default:'' }
+        { key:'capacity', label:'Carrier Capacity (work)', type:'number', min:1, step:1, default:2 }
       ]
     },
     agvroute:{
@@ -730,7 +728,8 @@ function beginGroupPlacement(group){
         { key:'title', label:'Title', type:'text', default:'Carrier Route', target:'title' },
         { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
-        { key:'initialCarrier', label:'Initial Carrier ID', type:'text', default:'' }
+        { key:'initialCarrier', label:'Initial Carrier ID', type:'text', default:'' },
+        { key:'outSequence', label:'Carrier OUT Sequence (1-based, comma)', type:'textarea', default:'' }
       ]
     }
   };

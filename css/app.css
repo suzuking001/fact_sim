@@ -263,6 +263,7 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
   position: relative;
 }
 #sidebar #controls > *, #sidebar #fileControls > *{ margin-bottom: 8px; }
+#sidebar #controls > *:last-child, #sidebar #fileControls > *:last-child{ margin-bottom: 0; }
 #sidebar .sidebar-spacer{ flex: 1 1 auto; }
 #sidebarHeader,
 #sidebar #controls,
@@ -341,6 +342,30 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
   color: #1d4ed8;
   font-weight: 700;
 }
+#sidebar .accessCounter{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  color: #334155;
+  font-size: 12px;
+}
+#sidebar .accessCounter .accessCounterLabel{
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+#accessCounterValue{
+  color: #1e3a8a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 700;
+}
 
 /* Hamburger toggle button (outside sidebar) */
 #menuToggle{
@@ -401,16 +426,6 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
   border: 2px solid rgba(59,130,246,0.72);
   background: #e0f2fe;
 }
-/* Fixed dt display */
-.sim-meta{
-  font-size: 12px;
-  color: var(--menu-muted);
-  background: #f8fafc;
-  border: 1px solid #dbe3ef;
-  border-radius: 8px;
-  padding: 6px 8px;
-}
-
 /* Shortcut list */
 .shortcuts{
   display: flex;
