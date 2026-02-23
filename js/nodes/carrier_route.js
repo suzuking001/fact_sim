@@ -345,11 +345,17 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(laneSlot >= 0){
       const p = this.inputs && this.inputs[laneSlot];
       if(p && p.link != null) return laneSlot;
+      // Lane exists but is unconnected: treat as "no input" for this lane.
+      // Caller can decide to pass-through/unload instead of waiting.
+      return laneSlot;
     }
-    // Legacy/layout-fallback: if exactly one work input is wired, accept that one.
-    const linked = this._linkedWorkInputSlots();
-    if(linked.length === 1) return linked[0];
-    return laneSlot;
+    // Compatibility fallback is only safe for single-lane carrier routes.
+    // In multi-lane routes this would break lane-to-work pairing and can deadlock.
+    if(this._carrierLaneCount() <= 1){
+      const linked = this._linkedWorkInputSlots();
+      if(linked.length === 1) return linked[0];
+    }
+    return -1;
   }
   _hasWorkOutLinkForLane(lane){
     const slot = this._workOutSlotForLane(lane);
@@ -1093,7 +1099,19 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       return;
     }
     const w = this.getInputData(inSlot);
-    if(!w){ this._lastWorkInRefBySlot[inSlot] = null; return; }
+    if(!w){
+      this._lastWorkInRefBySlot[inSlot] = null;
+      // Do not wait forever for "full load". If partially loaded and no input is
+      // currently available, proceed with unload/depart to avoid route deadlocks.
+      if(inWorkIdle && this._currentAgv){
+        const load = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
+        const cap = Math.max(0, Number(this._currentAgv.capacity) || 0);
+        if(load > 0 && load < cap){
+          this._beginUnloadPhase();
+        }
+      }
+      return;
+    }
     if(this._lastWorkInRefBySlot[inSlot] === w) return;
     this._lastWorkInRefBySlot[inSlot] = w;
     if(this._currentAgv.cargo.length < this._currentAgv.capacity){

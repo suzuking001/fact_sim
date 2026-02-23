@@ -36,7 +36,6 @@ var App = window.App || (window.App = {});
   }
 
   function captureTimeline(){
-    if(typeof App.isRenderSuppressed === 'function' && App.isRenderSuppressed()) return;
     if(App._suspendTimeline) return;
     if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
       App.timelineChart.onStep(false);
