@@ -477,14 +477,18 @@
         const srcCtor = (typeof window !== 'undefined') ? window.SourceNode : null;
         const sinkCtor = (typeof window !== 'undefined') ? window.SinkNode : null;
         const noteCtor = (typeof window !== 'undefined') ? window.NoteNode : null;
+        const carrierCfgCtor = (typeof window !== 'undefined') ? window.CarrierConfigNode : null;
         if(srcCtor && node instanceof srcCtor) return false;
         if(sinkCtor && node instanceof sinkCtor) return false;
         if(noteCtor && node instanceof noteCtor) return false;
+        if(carrierCfgCtor && node instanceof carrierCfgCtor) return false;
       }catch(_e){}
       const type = String(node.type || '').toLowerCase();
       if(type === 'source' || type.endsWith('/source')) return false;
       if(type === 'sink' || type.endsWith('/sink')) return false;
       if(type === 'note' || type.endsWith('/note')) return false;
+      if(type === 'carrierconfig' || type.endsWith('/carrierconfig')) return false;
+      if(type === 'carrierhome' || type.endsWith('/carrierhome')) return false;
       const title = String(node.title || '').toLowerCase();
       if(title === 'source' || title === 'sink') return false;
       return true;
