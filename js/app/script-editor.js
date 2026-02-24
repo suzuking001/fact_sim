@@ -22,11 +22,21 @@ if(scriptEditorSave){
     const n = window.editingNode;
     if(n){
       const key = String(window.editingPropertyKey || 'script');
-      n.properties = n.properties || {};
-      n.properties[key] = scriptEditorTextarea.value;
-      if(key === 'script') n._compiled = null;
-      if(typeof n.onPropertyChanged === 'function') n.onPropertyChanged(key);
-      n.setDirtyCanvas(true,true);
+      const graph = (window.App && window.App.graph) ? window.App.graph : (n.graph || null);
+      try{
+        if(graph && typeof graph.beforeChange === 'function'){
+          try{ graph.beforeChange(); }catch(_e){}
+        }
+        n.properties = n.properties || {};
+        n.properties[key] = scriptEditorTextarea.value;
+        if(key === 'script') n._compiled = null;
+        if(typeof n.onPropertyChanged === 'function') n.onPropertyChanged(key);
+        n.setDirtyCanvas(true,true);
+      }finally{
+        if(graph && typeof graph.afterChange === 'function'){
+          try{ graph.afterChange(); }catch(_e){}
+        }
+      }
     }
     if(scriptEditorModal) scriptEditorModal.style.display = 'none';
     window.editingNode = null;

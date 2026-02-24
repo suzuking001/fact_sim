@@ -477,11 +477,25 @@ function _clearPlacementState(){
   App.placement.active = false;
   App.placement.kind = '';
   App.placement.item = null;
+  App.placement.pendingChange = false;
 }
 
 function _removePlacementItem(item){
   if(!App.graph || !item) return;
   try{ App.graph.remove(item); }catch(_e){}
+}
+
+function _finishPlacement(commit){
+  if(!App.placement || !App.placement.active) return;
+  const item = App.placement.item;
+  const pending = !!App.placement.pendingChange;
+  if(!commit && item){
+    _removePlacementItem(item);
+  }
+  if(pending && App.graph && typeof App.graph.afterChange === 'function'){
+    try{ App.graph.afterChange(); }catch(_e){}
+  }
+  _clearPlacementState();
 }
 
 function _isNodePlacementItem(kind, item){
@@ -543,16 +557,14 @@ function installPlacementHandlers(c){
   el.addEventListener('mousedown', (e)=>{
     if(!App.placement || !App.placement.active) return;
     if(e.button === 0){
-      _clearPlacementState();
+      _finishPlacement(true);
       c.setDirty(true, true);
       e.preventDefault();
       e.stopPropagation();
       return;
     }
     if(e.button === 2){
-      const item = App.placement.item;
-      _clearPlacementState();
-      _removePlacementItem(item);
+      _finishPlacement(false);
       c.setDirty(true, true);
       e.preventDefault();
       e.stopPropagation();
@@ -565,9 +577,7 @@ function installPlacementHandlers(c){
   window.addEventListener('keydown', (e)=>{
     if(!App.placement || !App.placement.active) return;
     if(e.key === 'Escape'){
-      const item = App.placement.item;
-      _clearPlacementState();
-      _removePlacementItem(item);
+      _finishPlacement(false);
       c.setDirty(true, true);
       e.preventDefault();
     }
@@ -587,12 +597,15 @@ function _defaultGraphPos(){
 function beginNodePlacement(node){
   if(!App.graph || !App.canvas || !node) return;
   if(App.placement && App.placement.active){
-    const prev = App.placement.item;
-    if(App.graph && prev) App.graph.remove(prev);
+    _finishPlacement(false);
+  }
+  if(typeof App.graph.beforeChange === 'function'){
+    try{ App.graph.beforeChange(); }catch(_e){}
   }
   App.placement.active = true;
   App.placement.kind = 'node';
   App.placement.item = node;
+  App.placement.pendingChange = true;
   App.graph.add(node);
   const p = App.canvas.__last_mouse || _defaultGraphPos();
   _setPlacementItemPos(node, 'node', p);
@@ -605,12 +618,15 @@ function beginNodePlacement(node){
 function beginGroupPlacement(group){
   if(!App.graph || !App.canvas || !group) return;
   if(App.placement && App.placement.active){
-    const prev = App.placement.item;
-    if(App.graph && prev) App.graph.remove(prev);
+    _finishPlacement(false);
+  }
+  if(typeof App.graph.beforeChange === 'function'){
+    try{ App.graph.beforeChange(); }catch(_e){}
   }
   App.placement.active = true;
   App.placement.kind = 'group';
   App.placement.item = group;
+  App.placement.pendingChange = true;
   App.graph.add(group);
   const p = App.canvas.__last_mouse || _defaultGraphPos();
   _setPlacementItemPos(group, 'group', p);

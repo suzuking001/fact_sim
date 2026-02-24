@@ -270,9 +270,29 @@ var App = window.App || (window.App = {});
     _ensureTrackedNodes(){
       if(!this.graph || !Array.isArray(this.graph._nodes)) return;
       const nodeCount = this.graph._nodes.length;
-      if(this.lastNodeCount === nodeCount) return;
-      if(this.lastNodeCount > nodeCount){
-        this.trackedNodeIds.clear();
+      const alive = collectAliveNodeIds(this.graph);
+      const sizeUnchanged = (this.lastNodeCount === nodeCount) && (this.trackedNodeIds.size === alive.size);
+      if(sizeUnchanged){
+        let sameIds = true;
+        for(const id of alive){
+          if(!this.trackedNodeIds.has(id)){
+            sameIds = false;
+            break;
+          }
+        }
+        if(sameIds){
+          this.lastNodeCount = nodeCount;
+          return;
+        }
+      }
+
+      let removed = false;
+      for(const id of Array.from(this.trackedNodeIds)){
+        if(alive.has(id)) continue;
+        this.trackedNodeIds.delete(id);
+        removed = true;
+      }
+      if(removed){
         this._onTrackedNodeSetChanged();
       }
       for(const node of this.graph._nodes){

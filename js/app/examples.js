@@ -52,12 +52,15 @@ function applyExampleData(data){
     payload = data;
   }
   App.history.lock = true;
-  App.graph.clear();
-  App.graph.configure(payload);
-  if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
-    App.stopGroups.restoreSerializedData(App.graph, payload, false);
+  try{
+    App.graph.clear();
+    App.graph.configure(payload);
+    if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+      App.stopGroups.restoreSerializedData(App.graph, payload, false);
+    }
+  }finally{
+    App.history.lock = false;
   }
-  App.history.lock = false;
   configureGraphClock(App.graph);
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
   updateSimTime();
