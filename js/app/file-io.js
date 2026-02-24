@@ -16,9 +16,53 @@ function _serializeGraph(){
   return _compactGraphData(serialized);
 }
 
-function _applyGraphData(data){
+function _findScriptedNodes(data){
+  const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
+  const scripted = [];
+  for(const node of nodes){
+    const script = node?.properties?.script;
+    if(typeof script !== 'string') continue;
+    if(!script.trim()) continue;
+    scripted.push(node);
+  }
+  return scripted;
+}
+
+function _stripNodeScripts(data){
+  const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
+  for(const node of nodes){
+    if(!node || !node.properties || typeof node.properties !== 'object') continue;
+    if(!Object.prototype.hasOwnProperty.call(node.properties, 'script')) continue;
+    delete node.properties.script;
+  }
+}
+
+function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
+  const opts = options || {};
+  const source = String(opts.source || '').toLowerCase();
+  if(source === 'share'){
+    const scriptedNodes = _findScriptedNodes(data);
+    if(scriptedNodes.length){
+      let trusted = false;
+      try{
+        trusted = !!window.confirm(
+          `This shared URL contains executable scripts in ${scriptedNodes.length} node(s).\n\n` +
+          'OK: trust and load scripts\n' +
+          'Cancel: load with scripts disabled'
+        );
+      }catch(_e){
+        trusted = false;
+      }
+      if(!trusted){
+        _stripNodeScripts(data);
+        if(typeof App.showToast === 'function'){
+          App.showToast('Loaded shared graph with scripts disabled');
+        }
+      }
+    }
+  }
   App.history.lock = true;
   try{
     App.graph.clear();
@@ -262,7 +306,7 @@ App.loadSharedGraphFromUrl = async function(){
   }
   const payload = await _unpackEnvelopeFromUrl(p.g);
   const graph = _unwrapEnvelope(payload);
-  _applyGraphData(graph);
+  _applyGraphData(graph, { source: 'share' });
   App.showToast('Shared graph loaded');
   return true;
 };
@@ -361,7 +405,7 @@ if(fileInput){
     r.onload = () => {
       try{
         const parsed = JSON.parse(r.result);
-        _applyGraphData(parsed);
+        _applyGraphData(parsed, { source: 'file' });
       }catch(err){
         alert('Failed to load JSON');
         console.error(err);

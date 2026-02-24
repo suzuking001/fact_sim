@@ -160,8 +160,12 @@ class MergeNode extends EquipmentNode{
         try{
           alert(`Merge ID mismatch: expected=${firstWork ? firstWork.id : '-'} actual=${w.id}`);
         }catch(_e){}
-        try{ this.graph && this.graph.stop && this.graph.stop(); }catch(_e){}
         this._state = 'ERROR';
+        // Stop the whole simulation loop (strict mode), not only graph status.
+        try{
+          if(typeof window.stopSimulation === 'function') window.stopSimulation();
+          else if(this.graph && typeof this.graph.stop === 'function') this.graph.stop();
+        }catch(_e){}
         return false;
       }
     }

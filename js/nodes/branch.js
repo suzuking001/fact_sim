@@ -103,6 +103,28 @@ class BranchNode extends EquipmentNode{
     return -1;
   }
 
+  _firstConnectedRouteSlot(){
+    const rows = this._workOutputs();
+    for(const { slotIndex, out } of rows){
+      if(out && out.links && out.links.length) return slotIndex;
+    }
+    return -1;
+  }
+
+  _routeSlotForPayload(payload, allowWarn = true){
+    const exact = this._findRouteSlot(payload);
+    if(exact >= 0) return exact;
+    const fallback = this._firstConnectedRouteSlot();
+    if(fallback >= 0 && allowWarn){
+      const t = String(payload && payload.type != null ? payload.type : '').trim() || '(empty)';
+      if(this._lastUnmatchedTypeWarn !== t){
+        this._lastUnmatchedTypeWarn = t;
+        console.warn(`[branch] unmatched work.type="${t}" on node #${this.id}; fallback to ${this.outputs[fallback]?.name || 'workOut'}`);
+      }
+    }
+    return fallback;
+  }
+
   _clearWorkOutputs(){
     this._workOutputs().forEach(({slotIndex})=> this.setOutputData(slotIndex, null));
   }
@@ -113,7 +135,7 @@ class BranchNode extends EquipmentNode{
       if(active){
         if(this._waitIconLinksBranch) return;
         const payload = this._payload;
-        const slot = this._findRouteSlot(payload);
+        const slot = this._routeSlotForPayload(payload, false);
         if(slot < 0) return;
         const out = this.outputs && this.outputs[slot];
         if(!out || !out.links || out.links.length === 0) return;
@@ -236,7 +258,7 @@ class BranchNode extends EquipmentNode{
           break;
         case 'WAIT': {
           const payload = this._payload;
-          const slot = this._findRouteSlot(payload);
+          const slot = this._routeSlotForPayload(payload, true);
           if(slot >= 0 && this._downReadyForSlot(slot, payload)){
             this._setWaitIcon(false);
             this._state = 'DOWN';
@@ -344,4 +366,3 @@ menuMixin(BranchNode);
 
 BranchNode.title = 'Branch';
 window.BranchNode = BranchNode;
-

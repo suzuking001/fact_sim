@@ -57,7 +57,20 @@ var App = window.App || (window.App = {});
       });
   };
 
-  let retried = false;
+  let retryTimer = null;
+  let retryCount = 0;
+  const scheduleRetry = ()=>{
+    if(retryTimer) return;
+    const baseMs = 5000;
+    const maxMs = 120000;
+    const delay = Math.min(maxMs, baseMs * Math.pow(2, Math.min(retryCount, 6)));
+    retryCount += 1;
+    retryTimer = setTimeout(()=>{
+      retryTimer = null;
+      loadCounter();
+    }, delay);
+  };
+
   const loadCounter = ()=>{
     fetchFromCounterApi()
       .catch((err1)=>{
@@ -70,15 +83,13 @@ var App = window.App || (window.App = {});
       .then((result)=>{
         valueEl.textContent = result.count.toLocaleString();
         wrap.title = `Public access counter (${result.provider}): ${namespace}/${key}`;
+        retryCount = 0;
       })
       .catch((err)=>{
         console.warn('[counter] failed to fetch', err);
         valueEl.textContent = 'N/A';
         wrap.title = `Counter unavailable (${err && err.message ? err.message : 'network/CORS/ad-block'})`;
-        if(!retried){
-          retried = true;
-          setTimeout(loadCounter, 8000);
-        }
+        scheduleRetry();
       });
   };
 

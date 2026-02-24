@@ -348,18 +348,26 @@ var App = window.App || (window.App = {});
   }
 
   function patchNodeExecution(node){
-    if(!node || node.__stopGroupPatched) return;
+    if(!node) return;
     if(typeof node.onExecute !== 'function'){
       node.__stopGroupPatched = true;
       return;
     }
-    const raw = node.onExecute;
-    node.onExecute = function(){
+
+    const current = node.onExecute;
+    if(current && current.__stopGroupPauseWrapped) return;
+
+    const raw = current;
+    const wrapped = function(){
       if(App.stopGroups && typeof App.stopGroups.isNodePaused === 'function'){
         if(App.stopGroups.isNodePaused(this)) return;
       }
       return raw.apply(this, arguments);
     };
+    wrapped.__stopGroupPauseWrapped = true;
+    wrapped.__stopGroupRawOnExecute = raw;
+
+    node.onExecute = wrapped;
     node.__stopGroupPatched = true;
     node.__stopGroupRawOnExecute = raw;
   }
@@ -442,7 +450,14 @@ var App = window.App || (window.App = {});
 
     _ensureNodePatch(force){
       const nodes = Array.isArray(this.graph?._nodes) ? this.graph._nodes : [];
-      if(!force && this.lastNodeCount === nodes.length) return;
+      if(!force && this.lastNodeCount === nodes.length){
+        for(const node of nodes){
+          if(!node || typeof node.onExecute !== 'function') continue;
+          if(node.onExecute && node.onExecute.__stopGroupPauseWrapped) continue;
+          patchNodeExecution(node);
+        }
+        return;
+      }
       for(const node of nodes) patchNodeExecution(node);
       this.lastNodeCount = nodes.length;
     }

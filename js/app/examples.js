@@ -1,6 +1,7 @@
 ﻿// Example graphs and loaders
 
 var App = window.App || (window.App = {});
+let activeExampleLoadToken = 0;
 
 const EXAMPLE_ALIASES = {
   agv_config: 'carrier',
@@ -21,25 +22,35 @@ function resolveExampleKey(kind){
   return EXAMPLE_ALIASES[key] || key;
 }
 
+function _nextExampleLoadToken(){
+  activeExampleLoadToken += 1;
+  return activeExampleLoadToken;
+}
+
+function _isLatestExampleLoadToken(token){
+  return token === activeExampleLoadToken;
+}
+
 function makeExample(kind){
+  const token = _nextExampleLoadToken();
   const key = resolveExampleKey(kind);
   if(!key) return;
   const data = window.EXAMPLES && window.EXAMPLES[key];
   const isFileProtocol = String(window.location?.protocol || '').toLowerCase() === 'file:';
   if(isFileProtocol && data){
     // file:// cannot fetch local JSON in many browsers; use bundled JS examples.
-    applyExampleData(data);
-    return;
+    if(_isLatestExampleLoadToken(token)) applyExampleData(data);
+    return Promise.resolve(true);
   }
   const file = EXAMPLE_FILES[key] || `sample/${key}.json`;
   if(file){
-    loadExampleFromFile(file, key, data);
-    return;
+    return loadExampleFromFile(file, key, data, token);
   }
   if(data){
-    applyExampleData(data);
-    return;
+    if(_isLatestExampleLoadToken(token)) applyExampleData(data);
+    return Promise.resolve(true);
   }
+  return Promise.resolve(false);
 }
 
 function applyExampleData(data){
@@ -69,21 +80,27 @@ function applyExampleData(data){
   attachTimeline();
 }
 
-function loadExampleFromFile(path, key, fallbackData){
-  if(!App.graph) return;
+function loadExampleFromFile(path, key, fallbackData, token){
+  if(!App.graph) return Promise.resolve(false);
   const requestPath = encodeURI(path);
-  fetch(requestPath)
+  return fetch(requestPath)
     .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
-    .then(data=>{ applyExampleData(data); })
+    .then(data=>{
+      if(!_isLatestExampleLoadToken(token)) return false;
+      applyExampleData(data);
+      return true;
+    })
     .catch(err=>{
+      if(!_isLatestExampleLoadToken(token)) return false;
       const fallback = fallbackData || (window.EXAMPLES && window.EXAMPLES[resolveExampleKey(key)]);
       if(fallback){
         console.warn(`[examples] fallback to embedded data for "${key}"`, err);
         applyExampleData(fallback);
-        return;
+        return true;
       }
       alert('Failed to load JSON');
       console.error(err);
+      return false;
     });
 }
 

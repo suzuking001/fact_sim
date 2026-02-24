@@ -48,17 +48,23 @@ function menuMixin(cls){
     }
     const extra = this.properties.sigExtra || 0;
     const applySigChange = ()=>{
-      let handled = false;
-      if(typeof this._syncSignalPorts === 'function'){
-        this._syncSignalPorts();
-        handled = true;
+      const graph = this.graph;
+      try{
+        if(graph && typeof graph.beforeChange === 'function') graph.beforeChange();
+        let handled = false;
+        if(typeof this._syncSignalPorts === 'function'){
+          this._syncSignalPorts();
+          handled = true;
+        }
+        if(typeof this._syncSignalOutputs === 'function'){
+          this._syncSignalOutputs();
+          handled = true;
+        }
+        if(!handled) syncSigPorts(this, 0);
+        if(this.setDirtyCanvas) this.setDirtyCanvas(true, true);
+      }finally{
+        if(graph && typeof graph.afterChange === 'function') graph.afterChange();
       }
-      if(typeof this._syncSignalOutputs === 'function'){
-        this._syncSignalOutputs();
-        handled = true;
-      }
-      if(!handled) syncSigPorts(this, 0);
-      if(this.setDirtyCanvas) this.setDirtyCanvas(true, true);
     };
     opts.push({
       content: 'Add SIG IN/OUT',
