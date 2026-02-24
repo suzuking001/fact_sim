@@ -48,11 +48,17 @@ function menuMixin(cls){
     }
     const extra = this.properties.sigExtra || 0;
     const applySigChange = ()=>{
-      if(typeof this._syncSignalPorts === 'function') this._syncSignalPorts();
-      else{
-        syncSigPorts(this, 0);
-        if(this.setDirtyCanvas) this.setDirtyCanvas(true, true);
+      let handled = false;
+      if(typeof this._syncSignalPorts === 'function'){
+        this._syncSignalPorts();
+        handled = true;
       }
+      if(typeof this._syncSignalOutputs === 'function'){
+        this._syncSignalOutputs();
+        handled = true;
+      }
+      if(!handled) syncSigPorts(this, 0);
+      if(this.setDirtyCanvas) this.setDirtyCanvas(true, true);
     };
     opts.push({
       content: 'Add SIG IN/OUT',
@@ -203,14 +209,17 @@ window.menuMixin = menuMixin;
         const ev =
           (menuRef && typeof menuRef.getFirstEvent === 'function' && menuRef.getFirstEvent()) ||
           event;
-        graph.beforeChange();
-        const node = LiteGraph.createNode(item.value);
-        if(node){
-          node.pos = canvas.convertEventToCanvasOffset(ev || event);
-          graph.add(node);
-          if(typeof onCreate === 'function') onCreate(node);
+        try{
+          if(typeof graph.beforeChange === 'function') graph.beforeChange();
+          const node = LiteGraph.createNode(item.value);
+          if(node){
+            node.pos = canvas.convertEventToCanvasOffset(ev || event);
+            graph.add(node);
+            if(typeof onCreate === 'function') onCreate(node);
+          }
+        }finally{
+          if(typeof graph.afterChange === 'function') graph.afterChange();
         }
-        graph.afterChange();
       }
     }));
 

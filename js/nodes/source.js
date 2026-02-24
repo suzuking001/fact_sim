@@ -42,23 +42,44 @@ class SourceNode extends LiteGraph.LGraphNode{
     if(n==='sequence') this._parseSeq();
     if(n==='sigExtra') syncSigPorts(this);
   }
+  _downstreamStatus(){
+    const out = this.outputs && this.outputs[0];
+    if(!out || !Array.isArray(out.links) || out.links.length === 0){
+      return { ready: false, status: 'DISCONNECTED' };
+    }
+
+    let hasValidLink = false;
+    for(const lid of out.links){
+      const link = this.graph && this.graph.links ? this.graph.links[lid] : null;
+      if(!link) continue;
+      const t = this.graph && typeof this.graph.getNodeById === 'function'
+        ? this.graph.getNodeById(link.target_id)
+        : null;
+      if(!t) continue;
+      hasValidLink = true;
+
+      if(typeof t.canAcceptWorkInput === 'function'){
+        if(!t.canAcceptWorkInput(link.target_slot, null)){
+          return { ready: false, status: 'BUSY' };
+        }
+        continue;
+      }
+
+      if(typeof t._state !== 'undefined' && t._state !== 'IDLE'){
+        return { ready: false, status: 'BUSY' };
+      }
+    }
+
+    if(!hasValidLink){
+      return { ready: false, status: 'DISCONNECTED' };
+    }
+    return { ready: true, status: 'READY' };
+  }
   onExecute(){
     const extra = this.properties.sigExtra || 0;
     const sigCount = Math.max(0, extra);
-
-    let ready = false;
-    const out = this.outputs && this.outputs[0];
-    if(out && out.links){
-      for(const lid of out.links){
-        const link = this.graph.links[lid]; if(!link) continue;
-        const t = this.graph.getNodeById(link.target_id); if(!t) continue;
-        if(typeof t.canAcceptWorkInput === 'function'){
-          if(t.canAcceptWorkInput(link.target_slot, null)){ ready = true; break; }
-          continue;
-        }
-        if(typeof t._state === 'undefined' || t._state === 'IDLE'){ ready = true; break; }
-      }
-    }
+    const downstream = this._downstreamStatus();
+    const ready = !!downstream.ready;
 
     if(ready){
       if(!this._seq || !this._seq.length) this._parseSeq();
@@ -82,17 +103,9 @@ window.SourceNode = SourceNode;
 
 SourceNode.prototype.onDrawForeground = function(ctx){
   const next = (this._seq && this._seq.length) ? this._seq[this._cursor] : {type:'A'};
-  let downstream = 'DISCONNECTED';
-  const out = this.outputs && this.outputs[0];
-  if(out && out.links){
-    let ready = false;
-    for(const lid of out.links){
-      const link = this.graph.links[lid]; if(!link) continue;
-      const t = this.graph.getNodeById(link.target_id); if(!t) continue;
-      if(typeof t._state === 'undefined' || t._state === 'IDLE'){ ready = true; break; }
-    }
-    downstream = ready ? 'READY' : 'BUSY';
-  }
+  const downstream = (typeof this._downstreamStatus === 'function')
+    ? this._downstreamStatus().status
+    : 'DISCONNECTED';
   const lines = [
     `Next: ID=${(this._counter||0)+1} Type=${next?next.type:'A'}`,
     `Downstream: ${downstream}`,

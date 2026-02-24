@@ -637,9 +637,12 @@ var App = window.App || (window.App = {});
     if(!next) return false;
 
     const graph = App.graph;
-    if(graph && typeof graph.beforeChange === 'function') graph.beforeChange();
-    setGroupMeta(targetGroup, next, true);
-    if(graph && typeof graph.afterChange === 'function') graph.afterChange();
+    try{
+      if(graph && typeof graph.beforeChange === 'function') graph.beforeChange();
+      setGroupMeta(targetGroup, next, true);
+    }finally{
+      if(graph && typeof graph.afterChange === 'function') graph.afterChange();
+    }
     return true;
   };
   App.stopGroups.getRevision = function(){ return groupRevision; };

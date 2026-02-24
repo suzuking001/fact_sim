@@ -497,6 +497,7 @@ function _finishPlacement(commit){
   }
   _clearPlacementState();
 }
+App.finishPlacement = _finishPlacement;
 
 function _isNodePlacementItem(kind, item){
   if(kind === 'node') return true;

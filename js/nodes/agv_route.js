@@ -100,9 +100,30 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const extra = Math.max(0, this.properties.sigExtra || 0);
     const needed = 2 + extra;
     this.outputs = this.outputs || [];
+    while(this.outputs.length > needed){
+      const idx = this.outputs.length - 1;
+      if(idx < 2) break;
+      const out = this.outputs[idx];
+      if(out && out.links){
+        [...out.links].forEach((id)=>{
+          try{ this.graph && this.graph.removeLink(id); }catch(_e){}
+        });
+      }
+      this.removeOutput(idx);
+    }
     while(this.outputs.length < needed){
       const idx = this.outputs.length - 2;
       this.addOutput(`sigOut${idx}`, 0);
+    }
+    for(let i = 0; i < extra; i++){
+      const out = this.outputs[2 + i];
+      if(out) out.name = `sigOut${i}`;
+    }
+    if(Array.isArray(this._lastSig)){
+      if(this._lastSig.length > extra) this._lastSig.length = extra;
+      while(this._lastSig.length < extra) this._lastSig.push(null);
+    }else{
+      this._lastSig = Array(extra).fill(null);
     }
   }
 
@@ -519,6 +540,10 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     for(let i=0;i<sigCount;i++) this._emit(i, this._state);
 
     if(this._state !== 'IDLE' || this._currentAgv) this.setDirtyCanvas(true,true);
+  }
+
+  onConfigure(){
+    this._syncSignalOutputs();
   }
 
   onPropertyChanged(name){

@@ -142,14 +142,26 @@ function deleteSelectedNodes(){
   if(!nodes.length) return 0;
 
   const removedNodeIds = new Set();
+  let placementRemovedNode = null;
+  if(App.placement && App.placement.active && App.placement.item){
+    const placementNode = App.placement.item;
+    if(nodes.includes(placementNode)){
+      placementRemovedNode = placementNode;
+      if(typeof App.finishPlacement === 'function'){
+        App.finishPlacement(false);
+      }else{
+        App.placement.active = false;
+        App.placement.kind = '';
+        App.placement.item = null;
+        App.placement.pendingChange = false;
+        try{ App.graph.remove(placementNode); }catch(_e){}
+      }
+    }
+  }
   for(const node of nodes){
     if(!node) continue;
     if(typeof node.id !== 'undefined' && node.id !== null) removedNodeIds.add(String(node.id));
-    if(App.placement && App.placement.active && App.placement.item === node){
-      App.placement.active = false;
-      App.placement.kind = '';
-      App.placement.item = null;
-    }
+    if(node === placementRemovedNode) continue;
     try{
       App.graph.remove(node);
     }catch(_e){}

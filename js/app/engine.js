@@ -8,6 +8,7 @@ var App = window.App || (window.App = {});
   const EVENT_LOOP_LIMIT = 500;
   const EVENT_SAME_TIME_LIMIT = 64;
   const DIRTY_EXEC_LIMIT = 2500;
+  const DIRTY_OVERFLOW_WARN_THROTTLE_MS = 1500;
   const EPSILON_MS = 0.001;
 
   function nowSimMs(){
@@ -68,6 +69,26 @@ var App = window.App || (window.App = {});
   function getTimedUntil(node, nowMs){
     if(!hasTimedState(node)) return NaN;
     const until = Number(node && node._until);
+    if(!isFinite(until)) return NaN;
+    if(until <= nowMs + EPSILON_MS){
+      if(until >= nowMs - EPSILON_MS) return nowMs;
+      return NaN;
+    }
+    return until;
+  }
+
+  function getNodeEventUntil(node, nowMs){
+    const timed = getTimedUntil(node, nowMs);
+    if(isFinite(timed)) return timed;
+    if(!node || typeof node.getEventUntil !== 'function') return NaN;
+
+    let until = NaN;
+    try{
+      until = Number(node.getEventUntil(nowMs));
+    }catch(err){
+      console.error(err);
+      return NaN;
+    }
     if(!isFinite(until)) return NaN;
     if(until <= nowMs + EPSILON_MS){
       if(until >= nowMs - EPSILON_MS) return nowMs;
@@ -212,6 +233,7 @@ var App = window.App || (window.App = {});
       this.dirtyReadIndex = 0;
       this.trackedNodeIds = new Set();
       this.lastNodeCount = -1;
+      this._lastDirtyOverflowWarnMs = 0;
     }
 
     resetDirty(){
@@ -389,13 +411,27 @@ var App = window.App || (window.App = {});
         this._pullGraphDirtyIds();
       }
 
-      if(this.dirtyReadIndex >= this.dirtyQueue.length){
-        this._clearDirtyQueue();
+      if(loops >= DIRTY_EXEC_LIMIT && this.dirtyReadIndex < this.dirtyQueue.length){
+        const remaining = this.dirtyQueue.slice(this.dirtyReadIndex);
+        this.dirtyQueue = remaining;
+        this.dirtyReadIndex = 0;
+        this.dirtyQueued = Object.create(null);
+        for(const id of remaining){
+          this.dirtyQueued[String(id)] = 1;
+        }
+
+        const nowWarn = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+          ? performance.now()
+          : Date.now();
+        if((nowWarn - this._lastDirtyOverflowWarnMs) >= DIRTY_OVERFLOW_WARN_THROTTLE_MS){
+          this._lastDirtyOverflowWarnMs = nowWarn;
+          console.warn(`[engine] dirty queue overflow: deferred ${remaining.length} node(s) to next update`);
+        }
+        return;
       }
 
-      if(loops >= DIRTY_EXEC_LIMIT){
+      if(this.dirtyReadIndex >= this.dirtyQueue.length){
         this._clearDirtyQueue();
-        if(this.graph.__dirtyNodeIds) this.graph.__dirtyNodeIds.clear();
       }
     }
   }
@@ -486,7 +522,7 @@ var App = window.App || (window.App = {});
 
     _upsertNodeEvent(node, nowMs){
       if(!node || typeof node.id === 'undefined') return;
-      const until = getTimedUntil(node, nowMs);
+      const until = getNodeEventUntil(node, nowMs);
       if(!isFinite(until)){
         this.eventHeap.remove(node.id);
         return;
@@ -509,7 +545,7 @@ var App = window.App || (window.App = {});
           continue;
         }
 
-        const until = getTimedUntil(node, nowMs);
+        const until = getNodeEventUntil(node, nowMs);
         if(!isFinite(until)){
           this.eventHeap.remove(top.nodeId);
           continue;

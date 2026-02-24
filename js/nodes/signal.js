@@ -38,6 +38,7 @@ class SignalNode extends LiteGraph.LGraphNode{
     this._outState = [];
     this._tickCount = 0;
     this._lastError = '';
+    this._eventUntil = NaN;
 
     this._syncSignalPorts();
     if(window.enableFlipIO) window.enableFlipIO(this);
@@ -182,6 +183,8 @@ class SignalNode extends LiteGraph.LGraphNode{
   onExecute(){
     this._tickCount++;
     const nowSec = simNow() / 1000;
+    const dtSec = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
+    const stepMs = Math.max(0.001, (Number(dtSec) || 0.1) * 1000);
 
     const sig = [];
     for(let i = 0;; i++){
@@ -201,7 +204,27 @@ class SignalNode extends LiteGraph.LGraphNode{
       this.setOutputData(slotIndex, (typeof v === 'undefined') ? null : v);
     }
 
+    this._eventUntil = (nowSec * 1000) + stepMs;
     this.setDirtyCanvas(true, true);
+  }
+
+  onStart(){
+    this._eventUntil = NaN;
+  }
+
+  onStop(){
+    this._eventUntil = NaN;
+  }
+
+  getEventUntil(nowMs){
+    const now = Number(nowMs);
+    const base = isFinite(now) ? now : ((typeof simNow === 'function') ? simNow() : 0);
+    const dtSec = (typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1;
+    const stepMs = Math.max(0.001, (Number(dtSec) || 0.1) * 1000);
+    if(!isFinite(this._eventUntil)){
+      this._eventUntil = base + stepMs;
+    }
+    return this._eventUntil;
   }
 
   onDrawForeground(ctx){
