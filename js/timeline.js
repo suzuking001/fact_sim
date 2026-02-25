@@ -26,7 +26,8 @@
       this.ctx = canvas.getContext('2d');
       this.graph = null;
       this.entries = new Map();
-      this.leftGutter = 180;
+      this.leftGutter = 250;
+      this.utilColWidth = 74;
       this.topPadding = 18;
       this.bottomPadding = 6;
       this.rowHeight = 18;
@@ -711,6 +712,34 @@
       return true;
     }
 
+    _utilizationStats(entry, now, cutoff){
+      if(!entry || !Array.isArray(entry.segments) || !entry.segments.length){
+        return { activeSec: 0, loadSec: 0, pct: null, text: '--' };
+      }
+      let activeSec = 0;
+      let loadSec = 0;
+      for(let i = 0; i < entry.segments.length; i++){
+        const seg = entry.segments[i];
+        if(!seg) continue;
+        const s = Math.max(cutoff, Number(seg.start) || 0);
+        const e = Math.min(now, Number(seg.end) || 0);
+        if(e <= s) continue;
+        const dur = e - s;
+        const state = String(seg.state || 'other').toLowerCase();
+        if(state === 'process' || state === 'down'){
+          activeSec += dur;
+        }
+        if(state === 'process' || state === 'down' || state === 'wait' || state === 'idle'){
+          loadSec += dur;
+        }
+      }
+      if(loadSec <= 0){
+        return { activeSec, loadSec, pct: null, text: '--' };
+      }
+      const pct = (activeSec / loadSec) * 100;
+      return { activeSec, loadSec, pct, text: `${pct.toFixed(1)}%` };
+    }
+
     _recordNode(node, now){
       const key = this._nodeKey(node);
       let entry = this.entries.get(key);
@@ -962,6 +991,9 @@
       const nodes = this._nodeList();
       const totalRows = nodes.length;
       const { rowStep } = this._clampScrollByRows(totalRows);
+      const cutoff = now - this.historySec;
+      const utilColX = Math.max(64, this.leftGutter - this.utilColWidth);
+      const labelColW = Math.max(60, utilColX - 6);
 
       // background
       ctx.fillStyle = '#ffffff';
@@ -978,6 +1010,12 @@
       ctx.lineWidth = 1;
       ctx.font = '10px sans-serif';
       ctx.fillStyle = '#6b7280';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillText('Node', 8, 10);
+      ctx.textAlign = 'right';
+      ctx.fillText('Utilization', this.leftGutter - 8, 10);
+      ctx.textAlign = 'left';
       for(let t = startSec; t <= this.offsetSec + this.windowSec + gridSec; t += gridSec){
         const x = this.leftGutter + (t - this.offsetSec) * scale;
         if(x < this.leftGutter || x > this.leftGutter + chartW) continue;
@@ -1001,6 +1039,7 @@
         const isDragTarget = !!(this._rowDrag && this._rowDrag.targetRow === i);
         const entry = this.entries.get(key);
         const label = entry ? entry.label : this._nodeLabel(node);
+        const util = this._utilizationStats(entry, now, cutoff);
 
         ctx.fillStyle = (i % 2 === 0) ? '#ffffff' : '#fafafa';
         ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
@@ -1020,26 +1059,50 @@
         // row label
         ctx.save();
         ctx.beginPath();
-        ctx.rect(0, y, this.leftGutter - 6, this.rowHeight);
+        ctx.rect(0, y, labelColW, this.rowHeight);
         ctx.clip();
         if(isDragSource){
           ctx.fillStyle = '#dbeafe';
-          ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
+          ctx.fillRect(0, y, labelColW, this.rowHeight);
         }else if(isDragTarget){
           ctx.fillStyle = '#eff6ff';
-          ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
+          ctx.fillRect(0, y, labelColW, this.rowHeight);
         }
         if(isNodeSelected){
           ctx.fillStyle = '#ede9fe';
-          ctx.fillRect(0, y, this.leftGutter - 6, this.rowHeight);
+          ctx.fillRect(0, y, labelColW, this.rowHeight);
           ctx.strokeStyle = '#7c3aed';
           ctx.lineWidth = 2;
-          ctx.strokeRect(1, y + 1, this.leftGutter - 8, this.rowHeight - 2);
+          ctx.strokeRect(1, y + 1, Math.max(1, labelColW - 2), this.rowHeight - 2);
         }
         ctx.fillStyle = isNodeSelected ? '#5b21b6' : '#111827';
         ctx.font = '12px sans-serif';
         ctx.textBaseline = 'middle';
         ctx.fillText(label, 8, y + this.rowHeight / 2);
+        ctx.restore();
+
+        // utilization column (2nd column)
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
+        ctx.clip();
+        if(isDragSource){
+          ctx.fillStyle = '#dbeafe';
+          ctx.fillRect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
+        }else if(isDragTarget){
+          ctx.fillStyle = '#eff6ff';
+          ctx.fillRect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
+        }
+        if(isNodeSelected){
+          ctx.fillStyle = '#ede9fe';
+          ctx.fillRect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
+        }
+        ctx.font = '12px sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'right';
+        ctx.fillStyle = (util.pct === null) ? '#9ca3af' : (isNodeSelected ? '#5b21b6' : '#1f2937');
+        ctx.fillText(util.text, this.leftGutter - 8, y + this.rowHeight / 2);
+        ctx.textAlign = 'left';
         ctx.restore();
 
         // segments
@@ -1098,6 +1161,10 @@
       // borders
       ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(utilColX, 0);
+      ctx.lineTo(utilColX, this.height);
+      ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(this.leftGutter, 0);
       ctx.lineTo(this.leftGutter, this.height);
