@@ -20,7 +20,10 @@ var App = window.App || (window.App = {});
   const namespace = sanitizeToken(`fact_sim_${host}`, 'fact_sim');
   const key = sanitizeToken(`visits_${path}`, 'visits');
   const counterApiEndpoint = `https://api.counterapi.dev/v1/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}/up`;
+  const counterApiReadEndpoint = `https://api.counterapi.dev/v1/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
   const countApiEndpoint = `https://api.countapi.xyz/hit/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
+  const countApiReadEndpoint = `https://api.countapi.xyz/get/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
+  const incrementFlagKey = `fact_sim_counter_incremented_${namespace}_${key}`;
 
   wrap.title = `Public access counter (CounterAPI): ${namespace}/${key}`;
 
@@ -44,6 +47,19 @@ var App = window.App || (window.App = {});
       });
   };
 
+  const fetchFromCounterApiRead = ()=>{
+    return fetch(counterApiReadEndpoint, { method: 'GET', mode: 'cors', cache: 'no-store' })
+      .then((res)=>{
+        if(!res.ok) throw new Error(`CounterAPI(read) HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data)=>{
+        const count = Number(data && data.count);
+        if(!Number.isFinite(count)) throw new Error('CounterAPI(read) response has no numeric count');
+        return { count, provider: 'CounterAPI' };
+      });
+  };
+
   const fetchFromCountApi = ()=>{
     return fetch(countApiEndpoint, { method: 'GET', mode: 'cors', cache: 'no-store' })
       .then((res)=>{
@@ -57,41 +73,85 @@ var App = window.App || (window.App = {});
       });
   };
 
+  const fetchFromCountApiRead = ()=>{
+    return fetch(countApiReadEndpoint, { method: 'GET', mode: 'cors', cache: 'no-store' })
+      .then((res)=>{
+        if(!res.ok) throw new Error(`CountAPI(read) HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data)=>{
+        const count = Number(data && data.value);
+        if(!Number.isFinite(count)) throw new Error('CountAPI(read) response has no numeric value');
+        return { count, provider: 'CountAPI' };
+      });
+  };
+
+  const fetchIncrement = ()=>{
+    return fetchFromCounterApi()
+      .catch((err1)=>{
+        console.warn('[counter] CounterAPI increment failed, trying CountAPI', err1);
+        return fetchFromCountApi().catch((err2)=>{
+          const combined = new Error(`${err1 && err1.message ? err1.message : err1} | ${err2 && err2.message ? err2.message : err2}`);
+          throw combined;
+        });
+      });
+  };
+
+  const fetchReadOnly = ()=>{
+    return fetchFromCounterApiRead()
+      .catch((err1)=>{
+        console.warn('[counter] CounterAPI read failed, trying CountAPI read', err1);
+        return fetchFromCountApiRead().catch((err2)=>{
+          const combined = new Error(`${err1 && err1.message ? err1.message : err1} | ${err2 && err2.message ? err2.message : err2}`);
+          throw combined;
+        });
+      });
+  };
+
   let retryTimer = null;
   let retryCount = 0;
-  const scheduleRetry = ()=>{
+  let retryMode = 'read';
+  const scheduleRetry = (mode)=>{
     if(retryTimer) return;
+    retryMode = mode || 'read';
     const baseMs = 5000;
     const maxMs = 120000;
     const delay = Math.min(maxMs, baseMs * Math.pow(2, Math.min(retryCount, 6)));
     retryCount += 1;
     retryTimer = setTimeout(()=>{
       retryTimer = null;
-      loadCounter();
+      loadCounter(retryMode);
     }, delay);
   };
 
-  const loadCounter = ()=>{
-    fetchFromCounterApi()
-      .catch((err1)=>{
-        console.warn('[counter] CounterAPI failed, trying CountAPI', err1);
-        return fetchFromCountApi().catch((err2)=>{
-          const combined = new Error(`${err1 && err1.message ? err1.message : err1} | ${err2 && err2.message ? err2.message : err2}`);
-          throw combined;
-        });
-      })
+  let incrementDone = false;
+  try{
+    incrementDone = window.sessionStorage && window.sessionStorage.getItem(incrementFlagKey) === '1';
+  }catch(_e){}
+
+  const loadCounter = (mode)=>{
+    const shouldIncrement = (mode !== 'read') && !incrementDone;
+    const request = shouldIncrement ? fetchIncrement() : fetchReadOnly();
+
+    request
       .then((result)=>{
         valueEl.textContent = result.count.toLocaleString();
         wrap.title = `Public access counter (${result.provider}): ${namespace}/${key}`;
         retryCount = 0;
+        if(shouldIncrement){
+          incrementDone = true;
+          try{
+            if(window.sessionStorage) window.sessionStorage.setItem(incrementFlagKey, '1');
+          }catch(_e){}
+        }
       })
       .catch((err)=>{
         console.warn('[counter] failed to fetch', err);
         valueEl.textContent = 'N/A';
         wrap.title = `Counter unavailable (${err && err.message ? err.message : 'network/CORS/ad-block'})`;
-        scheduleRetry();
+        scheduleRetry('read');
       });
   };
 
-  loadCounter();
+  loadCounter(incrementDone ? 'read' : 'increment');
 })();

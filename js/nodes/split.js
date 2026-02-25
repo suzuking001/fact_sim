@@ -276,13 +276,17 @@ menuMixin(SplitNode);
     if(!Array.isArray(opts)) opts = [];
     opts.push({
       content: 'Add workOut',
-      callback: ()=> this._addWorkOutput()
+      callback: ()=> (window.runNodeMutation
+        ? window.runNodeMutation(this, ()=> this._addWorkOutput())
+        : this._addWorkOutput())
     });
     const count = this._workOutputSlots().length;
     opts.push({
       content: 'Remove workOut',
       disabled: count <= 2,
-      callback: ()=> this._removeWorkOutput()
+      callback: ()=> (window.runNodeMutation
+        ? window.runNodeMutation(this, ()=> this._removeWorkOutput())
+        : this._removeWorkOutput())
     });
     return opts;
   };

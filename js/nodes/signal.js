@@ -31,7 +31,8 @@ class SignalNode extends LiteGraph.LGraphNode{
     this.properties = {
       script: SIGNAL_DEFAULT_SCRIPT,
       sigExtra: 1,
-      sigEnabled: true
+      sigEnabled: true,
+      scriptDisabled: false
     };
 
     this._compiled = null;
@@ -176,6 +177,7 @@ class SignalNode extends LiteGraph.LGraphNode{
     if(name === 'script'){
       this._compiled = null;
       this._lastError = '';
+      this.properties.scriptDisabled = false;
       return;
     }
   }
@@ -193,8 +195,14 @@ class SignalNode extends LiteGraph.LGraphNode{
       sig.push(this.getInputData(idx));
     }
 
-    const result = this._evalScript(sig, nowSec, this._tickCount);
-    this._applyResult(result);
+    if(this.properties.scriptDisabled){
+      // Safe mode for imported/shared graphs: do not execute custom scripts.
+      this._lastError = 'script disabled';
+      for(let i = 0; i < this._outState.length; i++) this._outState[i] = null;
+    }else{
+      const result = this._evalScript(sig, nowSec, this._tickCount);
+      this._applyResult(result);
+    }
     this._normalizeStateSize();
 
     const outRows = this._sigOutputSlots();

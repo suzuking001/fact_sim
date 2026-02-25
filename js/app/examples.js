@@ -1,7 +1,6 @@
 ﻿// Example graphs and loaders
 
 var App = window.App || (window.App = {});
-let activeExampleLoadToken = 0;
 
 const EXAMPLE_ALIASES = {
   agv_config: 'carrier',
@@ -22,24 +21,30 @@ function resolveExampleKey(kind){
   return EXAMPLE_ALIASES[key] || key;
 }
 
-function _nextExampleLoadToken(){
-  activeExampleLoadToken += 1;
-  return activeExampleLoadToken;
+function _nextGraphLoadToken(){
+  if(typeof App.bumpGraphLoadRevision === 'function'){
+    return App.bumpGraphLoadRevision();
+  }
+  App._graphLoadRevision = (Number(App._graphLoadRevision) || 0) + 1;
+  return App._graphLoadRevision;
 }
 
-function _isLatestExampleLoadToken(token){
-  return token === activeExampleLoadToken;
+function _isLatestGraphLoadToken(token){
+  const current = (typeof App.getGraphLoadRevision === 'function')
+    ? App.getGraphLoadRevision()
+    : (Number(App._graphLoadRevision) || 0);
+  return token === current;
 }
 
 function makeExample(kind){
-  const token = _nextExampleLoadToken();
+  const token = _nextGraphLoadToken();
   const key = resolveExampleKey(kind);
   if(!key) return;
   const data = window.EXAMPLES && window.EXAMPLES[key];
   const isFileProtocol = String(window.location?.protocol || '').toLowerCase() === 'file:';
   if(isFileProtocol && data){
     // file:// cannot fetch local JSON in many browsers; use bundled JS examples.
-    if(_isLatestExampleLoadToken(token)) applyExampleData(data);
+    if(_isLatestGraphLoadToken(token)) applyExampleData(data);
     return Promise.resolve(true);
   }
   const file = EXAMPLE_FILES[key] || `sample/${key}.json`;
@@ -47,7 +52,7 @@ function makeExample(kind){
     return loadExampleFromFile(file, key, data, token);
   }
   if(data){
-    if(_isLatestExampleLoadToken(token)) applyExampleData(data);
+    if(_isLatestGraphLoadToken(token)) applyExampleData(data);
     return Promise.resolve(true);
   }
   return Promise.resolve(false);
@@ -86,12 +91,12 @@ function loadExampleFromFile(path, key, fallbackData, token){
   return fetch(requestPath)
     .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
     .then(data=>{
-      if(!_isLatestExampleLoadToken(token)) return false;
+      if(!_isLatestGraphLoadToken(token)) return false;
       applyExampleData(data);
       return true;
     })
     .catch(err=>{
-      if(!_isLatestExampleLoadToken(token)) return false;
+      if(!_isLatestGraphLoadToken(token)) return false;
       const fallback = fallbackData || (window.EXAMPLES && window.EXAMPLES[resolveExampleKey(key)]);
       if(fallback){
         console.warn(`[examples] fallback to embedded data for "${key}"`, err);

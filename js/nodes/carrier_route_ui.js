@@ -44,21 +44,37 @@ menuMixin(CarrierRouteNode);
     const workLaneCount = typeof this._workLaneCount === 'function' ? this._workLaneCount() : 0;
     opts.push({
       content: 'Add carrier IN/OUT',
-      callback: ()=> this._addCarrierLane && this._addCarrierLane()
+      callback: ()=> {
+        if(!this._addCarrierLane) return;
+        if(window.runNodeMutation) window.runNodeMutation(this, ()=> this._addCarrierLane());
+        else this._addCarrierLane();
+      }
     });
     opts.push({
       content: 'Remove carrier IN/OUT',
       disabled: laneCount <= 1,
-      callback: ()=> this._removeCarrierLane && this._removeCarrierLane()
+      callback: ()=> {
+        if(!this._removeCarrierLane) return;
+        if(window.runNodeMutation) window.runNodeMutation(this, ()=> this._removeCarrierLane());
+        else this._removeCarrierLane();
+      }
     });
     opts.push({
       content: 'Add work IN/OUT',
-      callback: ()=> this._addWorkLane && this._addWorkLane()
+      callback: ()=> {
+        if(!this._addWorkLane) return;
+        if(window.runNodeMutation) window.runNodeMutation(this, ()=> this._addWorkLane());
+        else this._addWorkLane();
+      }
     });
     opts.push({
       content: 'Remove work IN/OUT',
       disabled: workLaneCount <= 0,
-      callback: ()=> this._removeWorkLane && this._removeWorkLane()
+      callback: ()=> {
+        if(!this._removeWorkLane) return;
+        if(window.runNodeMutation) window.runNodeMutation(this, ()=> this._removeWorkLane());
+        else this._removeWorkLane();
+      }
     });
     return opts;
   };

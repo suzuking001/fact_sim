@@ -36,6 +36,16 @@ App.history = {
   _timer: null
 };
 
+// Monotonic token for any async graph load/apply path.
+App._graphLoadRevision = Number(App._graphLoadRevision) || 0;
+App.bumpGraphLoadRevision = function(){
+  App._graphLoadRevision = (Number(App._graphLoadRevision) || 0) + 1;
+  return App._graphLoadRevision;
+};
+App.getGraphLoadRevision = function(){
+  return Number(App._graphLoadRevision) || 0;
+};
+
 App.resetListenerController = function(key){
   try{
     const prev = App._controllers[key];

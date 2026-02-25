@@ -20,6 +20,23 @@ if(work.type === 'A'){
 return true;`;
 }
 
+function runNodeMutation(node, mutator){
+  if(typeof mutator !== 'function') return;
+  const graph = node && node.graph;
+  let opened = false;
+  try{
+    if(graph && typeof graph.beforeChange === 'function'){
+      graph.beforeChange();
+      opened = true;
+    }
+    mutator();
+  }finally{
+    if(opened && graph && typeof graph.afterChange === 'function'){
+      graph.afterChange();
+    }
+  }
+}
+
 function menuMixin(cls){
   cls.prototype.getExtraMenuOptions = function(){
     const opts = [];
@@ -47,10 +64,11 @@ function menuMixin(cls){
       });
     }
     const extra = this.properties.sigExtra || 0;
-    const applySigChange = ()=>{
-      const graph = this.graph;
-      try{
-        if(graph && typeof graph.beforeChange === 'function') graph.beforeChange();
+    const applySigChange = (delta)=>{
+      runNodeMutation(this, ()=>{
+        if(Number(delta)){
+          this.properties.sigExtra = Math.max(0, Number(this.properties.sigExtra || 0) + Number(delta));
+        }
         let handled = false;
         if(typeof this._syncSignalPorts === 'function'){
           this._syncSignalPorts();
@@ -62,15 +80,12 @@ function menuMixin(cls){
         }
         if(!handled) syncSigPorts(this, 0);
         if(this.setDirtyCanvas) this.setDirtyCanvas(true, true);
-      }finally{
-        if(graph && typeof graph.afterChange === 'function') graph.afterChange();
-      }
+      });
     };
     opts.push({
       content: 'Add SIG IN/OUT',
       callback: ()=>{
-        this.properties.sigExtra++;
-        applySigChange();
+        applySigChange(1);
       }
     });
     opts.push({
@@ -78,8 +93,7 @@ function menuMixin(cls){
       disabled: extra === 0,
       callback: ()=>{
         if(extra === 0) return;
-        this.properties.sigExtra--;
-        applySigChange();
+        applySigChange(-1);
       }
     });
     return opts;
@@ -88,6 +102,7 @@ function menuMixin(cls){
 
 window.defaultScript = defaultScript;
 window.menuMixin = menuMixin;
+window.runNodeMutation = runNodeMutation;
 
 // Prune rarely-used LiteGraph default node menu items.
 (function(){

@@ -1113,17 +1113,16 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       return;
     }
     if(this._lastWorkInRefBySlot[inSlot] === w) return;
+    if(this._currentAgv.cargo.length >= this._currentAgv.capacity) return;
     this._lastWorkInRefBySlot[inSlot] = w;
-    if(this._currentAgv.cargo.length < this._currentAgv.capacity){
-      if(inAgvOutWait){
-        this._setAgvOutWaitIcon(false);
-      }
-      this._currentWork = w;
-      this._payload = w;
-      this._currentAgv.cargo.push(w);
-      this._loadIndex = this._currentAgv.cargo.length;
-      this._startWorkInProcess();
+    if(inAgvOutWait){
+      this._setAgvOutWaitIcon(false);
     }
+    this._currentWork = w;
+    this._payload = w;
+    this._currentAgv.cargo.push(w);
+    this._loadIndex = this._currentAgv.cargo.length;
+    this._startWorkInProcess();
   }
 
   _handleAgvProcess(now){

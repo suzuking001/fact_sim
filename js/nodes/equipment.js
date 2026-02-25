@@ -103,6 +103,10 @@ class EquipmentNode extends LiteGraph.LGraphNode{
   }
   // スクリプトを（必要なら）コンパイルして実行。true で受け入れ、false で素通し
   _evalScript(w, s){
+    if(this.properties && this.properties.scriptDisabled){
+      // Safe mode for imported/shared graphs: skip user script execution.
+      return true;
+    }
     if(!this._compiled){
       try{ this._compiled = new Function('work','signalArr', this.properties.script); }
       catch(e){ console.error(e); }
@@ -249,6 +253,10 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       if(n==='downTime') this.properties.downTime = r01(this.properties.downTime);
       if(n==='sigExtra'){
         this._syncSignalPorts();
+      }
+      if(n==='script'){
+        this._compiled = null;
+        if(this.properties) this.properties.scriptDisabled = false;
       }
     }catch(e){}
   }

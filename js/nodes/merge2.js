@@ -337,9 +337,20 @@ menuMixin(MergeNode);
     let opts = prev ? prev.call(this) : [];
     if(!Array.isArray(opts)) opts = [];
 
-    opts.push({ content: 'Add workIn', callback: ()=> this._addWorkInput() });
+    opts.push({
+      content: 'Add workIn',
+      callback: ()=> (window.runNodeMutation
+        ? window.runNodeMutation(this, ()=> this._addWorkInput())
+        : this._addWorkInput())
+    });
     const count = this._workInputSlots().length;
-    opts.push({ content: 'Remove workIn', disabled: count <= 2, callback: ()=> this._removeWorkInput() });
+    opts.push({
+      content: 'Remove workIn',
+      disabled: count <= 2,
+      callback: ()=> (window.runNodeMutation
+        ? window.runNodeMutation(this, ()=> this._removeWorkInput())
+        : this._removeWorkInput())
+    });
 
     if(this.properties && Object.prototype.hasOwnProperty.call(this.properties,'flipIO')){
       const label = this.properties.flipIO ? 'Ports: reset alignment' : 'Ports: flip horizontally';

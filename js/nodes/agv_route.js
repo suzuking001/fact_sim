@@ -430,14 +430,13 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const w = this.getInputData(this._workInIndex);
     if(!w){ this._lastWorkInRef = null; return; }
     if(this._lastWorkInRef === w) return;
+    if(this._currentAgv.cargo.length >= this._currentAgv.capacity) return;
     this._lastWorkInRef = w;
-    if(this._currentAgv.cargo.length < this._currentAgv.capacity){
-      this._currentWork = w;
-      this._payload = w;
-      this._currentAgv.cargo.push(w);
-      this._loadIndex = this._currentAgv.cargo.length;
-      this._startWorkInProcess();
-    }
+    this._currentWork = w;
+    this._payload = w;
+    this._currentAgv.cargo.push(w);
+    this._loadIndex = this._currentAgv.cargo.length;
+    this._startWorkInProcess();
   }
 
   _handleAgvProcess(now){

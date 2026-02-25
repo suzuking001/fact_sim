@@ -32,8 +32,11 @@ function _stripNodeScripts(data){
   const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
   for(const node of nodes){
     if(!node || !node.properties || typeof node.properties !== 'object') continue;
-    if(!Object.prototype.hasOwnProperty.call(node.properties, 'script')) continue;
-    delete node.properties.script;
+    const hasScript = Object.prototype.hasOwnProperty.call(node.properties, 'script');
+    if(!hasScript) continue;
+    node.properties.script = '';
+    // Keep explicit runtime flag so node-side evaluators can hard-disable scripts.
+    node.properties.scriptDisabled = true;
   }
 }
 
@@ -41,6 +44,15 @@ function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
   const opts = options || {};
+  const expectedRevision = Number(opts.expectedRevision);
+  if(isFinite(expectedRevision)){
+    const currentRevision = (typeof App.getGraphLoadRevision === 'function')
+      ? App.getGraphLoadRevision()
+      : (Number(App._graphLoadRevision) || 0);
+    if(currentRevision !== expectedRevision){
+      return false;
+    }
+  }
   const source = String(opts.source || '').toLowerCase();
   if(source === 'share'){
     const scriptedNodes = _findScriptedNodes(data);
@@ -58,7 +70,7 @@ function _applyGraphData(data, options){
       if(!trusted){
         _stripNodeScripts(data);
         if(typeof App.showToast === 'function'){
-          App.showToast('Loaded shared graph with scripts disabled');
+          App.showToast('Loaded shared graph with custom scripts stripped');
         }
       }
     }
@@ -79,6 +91,7 @@ function _applyGraphData(data, options){
   resetHistory();
   attachTimeline();
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
+  return true;
 }
 
 function _toBase64Url(u8){
@@ -295,6 +308,9 @@ App.buildEmbeddedShareUrl = async function(){
 };
 
 App.loadSharedGraphFromUrl = async function(){
+  const loadRevision = (typeof App.bumpGraphLoadRevision === 'function')
+    ? App.bumpGraphLoadRevision()
+    : ((App._graphLoadRevision = (Number(App._graphLoadRevision) || 0) + 1));
   const p = _shareParamsFromUrl();
   if(!p.g){
     const u = new URL(window.location.href);
@@ -306,7 +322,8 @@ App.loadSharedGraphFromUrl = async function(){
   }
   const payload = await _unpackEnvelopeFromUrl(p.g);
   const graph = _unwrapEnvelope(payload);
-  _applyGraphData(graph, { source: 'share' });
+  const applied = _applyGraphData(graph, { source: 'share', expectedRevision: loadRevision });
+  if(!applied) return false;
   App.showToast('Shared graph loaded');
   return true;
 };
@@ -405,7 +422,10 @@ if(fileInput){
     r.onload = () => {
       try{
         const parsed = JSON.parse(r.result);
-        _applyGraphData(parsed, { source: 'file' });
+        const loadRevision = (typeof App.bumpGraphLoadRevision === 'function')
+          ? App.bumpGraphLoadRevision()
+          : ((App._graphLoadRevision = (Number(App._graphLoadRevision) || 0) + 1));
+        _applyGraphData(parsed, { source: 'file', expectedRevision: loadRevision });
       }catch(err){
         alert('Failed to load JSON');
         console.error(err);

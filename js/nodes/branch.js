@@ -357,9 +357,20 @@ menuMixin(BranchNode);
   proto.getExtraMenuOptions = function(){
     let opts = prev ? prev.call(this) : [];
     if(!Array.isArray(opts)) opts = [];
-    opts.push({ content: 'Add workOut', callback: ()=> this._addWorkOutput() });
+    opts.push({
+      content: 'Add workOut',
+      callback: ()=> (window.runNodeMutation
+        ? window.runNodeMutation(this, ()=> this._addWorkOutput())
+        : this._addWorkOutput())
+    });
     const cnt = this._workOutputs().length;
-    opts.push({ content: 'Remove workOut', disabled: cnt <= 2, callback: ()=> this._removeWorkOutput() });
+    opts.push({
+      content: 'Remove workOut',
+      disabled: cnt <= 2,
+      callback: ()=> (window.runNodeMutation
+        ? window.runNodeMutation(this, ()=> this._removeWorkOutput())
+        : this._removeWorkOutput())
+    });
     return opts;
   };
 })(BranchNode.prototype);
