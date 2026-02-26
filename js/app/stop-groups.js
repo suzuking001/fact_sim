@@ -379,7 +379,11 @@ var App = window.App || (window.App = {});
       this.signature = '';
       this.lastRevision = -1;
       this.lastNodeCount = -1;
+      this._hasPatchedNodes = false;
       this.pausedNodeIds = new Set();
+      this._pausedDirty = true;
+      this._activeStateSignature = '';
+      this._pauseNodeCount = -1;
     }
 
     reset(nowMs){
@@ -387,7 +391,11 @@ var App = window.App || (window.App = {});
       this.signature = '';
       this.lastRevision = -1;
       this.lastNodeCount = -1;
+      this._hasPatchedNodes = false;
       this.pausedNodeIds = new Set();
+      this._pausedDirty = true;
+      this._activeStateSignature = '';
+      this._pauseNodeCount = -1;
       pausedNodeIds = this.pausedNodeIds;
       this._sync(nowMs);
       this.update(nowMs);
@@ -397,6 +405,10 @@ var App = window.App || (window.App = {});
       this.pausedNodeIds.clear();
       if(activeRuntime === this) activeRuntime = null;
       pausedNodeIds = new Set();
+      this._hasPatchedNodes = false;
+      this._pausedDirty = true;
+      this._activeStateSignature = '';
+      this._pauseNodeCount = -1;
     }
 
     _makeSignature(){
@@ -416,7 +428,9 @@ var App = window.App || (window.App = {});
       const sig = this._makeSignature();
       const needsResync = (sig !== this.signature) || (rev !== this.lastRevision);
       if(!needsResync){
-        this._ensureNodePatch();
+        if(this._hasPatchedNodes && this.states.length){
+          this._ensureNodePatch();
+        }
         return;
       }
 
@@ -445,7 +459,11 @@ var App = window.App || (window.App = {});
       this.states = nextStates;
       this.signature = sig;
       this.lastRevision = rev;
-      this._ensureNodePatch(true);
+      this._hasPatchedNodes = false;
+      this._pausedDirty = true;
+      if(this.states.length){
+        this._ensureNodePatch(true);
+      }
     }
 
     _ensureNodePatch(force){
@@ -456,10 +474,12 @@ var App = window.App || (window.App = {});
           if(node.onExecute && node.onExecute.__stopGroupPauseWrapped) continue;
           patchNodeExecution(node);
         }
+        this._hasPatchedNodes = true;
         return;
       }
       for(const node of nodes) patchNodeExecution(node);
       this.lastNodeCount = nodes.length;
+      this._hasPatchedNodes = true;
     }
 
     _createState(group, meta, nowMs){
@@ -493,14 +513,28 @@ var App = window.App || (window.App = {});
     }
 
     _updateStates(nowMs){
+      let changed = false;
       for(const st of this.states){
         if(!st || !isFinite(st.nextTransitionMs)) continue;
         let guard = 0;
         while(nowMs + EPS_MS >= st.nextTransitionMs && guard++ < 1024){
-          this._advanceState(st);
+          const stepChanged = this._advanceState(st);
+          changed = changed || stepChanged;
           if(!isFinite(st.nextTransitionMs)) break;
         }
       }
+      return changed;
+    }
+
+    _computeActiveSignature(){
+      if(!this.states.length) return '';
+      const keys = [];
+      for(let i = 0; i < this.states.length; i++){
+        const st = this.states[i];
+        if(!st || !st.active || !st.meta) continue;
+        keys.push(`${i}:${st.meta.uid}`);
+      }
+      return keys.join('|');
     }
 
     _rebuildPausedNodes(){
@@ -525,8 +559,31 @@ var App = window.App || (window.App = {});
       const now = Number(nowMs);
       if(!isFinite(now)) return;
       this._sync(now);
-      this._updateStates(now);
-      this._rebuildPausedNodes();
+      if(!this.states.length){
+        if(this.pausedNodeIds.size){
+          this.pausedNodeIds = new Set();
+          pausedNodeIds = this.pausedNodeIds;
+        }
+        this._pausedDirty = false;
+        this._activeStateSignature = '';
+        this._pauseNodeCount = Array.isArray(this.graph?._nodes) ? this.graph._nodes.length : 0;
+        activeRuntime = this;
+        return;
+      }
+      const stateChanged = this._updateStates(now);
+      if(stateChanged) this._pausedDirty = true;
+
+      const activeSignature = this._computeActiveSignature();
+      const nodeCount = Array.isArray(this.graph?._nodes) ? this.graph._nodes.length : 0;
+      if(activeSignature !== this._activeStateSignature) this._pausedDirty = true;
+      if(nodeCount !== this._pauseNodeCount) this._pausedDirty = true;
+
+      if(this._pausedDirty){
+        this._rebuildPausedNodes();
+        this._pausedDirty = false;
+        this._activeStateSignature = activeSignature;
+        this._pauseNodeCount = nodeCount;
+      }
       activeRuntime = this;
     }
 
@@ -666,6 +723,12 @@ var App = window.App || (window.App = {});
   };
   App.stopGroups.getPausedNodeIds = function(){
     return new Set(pausedNodeIds);
+  };
+  App.stopGroups.getNextTransitionMs = function(nowMs){
+    const now = Number(nowMs);
+    if(!activeRuntime || typeof activeRuntime.getNextTransitionMs !== 'function') return Infinity;
+    if(!isFinite(now)) return Infinity;
+    return activeRuntime.getNextTransitionMs(now);
   };
 
   App.stopGroups.createGroup = function(metaLike){

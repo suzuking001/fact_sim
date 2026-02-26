@@ -289,6 +289,36 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 #sidebar .control-group label{
   color: var(--menu-muted);
 }
+#sidebar .realtimeFpsGroup{
+  gap: 6px;
+}
+#sidebar .realtimeFactorGroup{
+  gap: 6px;
+}
+#sidebar .realtimeFpsValue{
+  border: 1px solid var(--menu-input-border);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  color: #1d4ed8;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+#sidebar .realtimeFactorValue{
+  border: 1px solid var(--menu-input-border);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  color: #0f766e;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
 #sidebar input,
 #sidebar select,
 #sidebar textarea{

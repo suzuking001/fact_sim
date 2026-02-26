@@ -1152,6 +1152,9 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       if(this._workAccepted()){
         this._workOfferAccepted = true;
         this._clearWorkOutputs();
+      }else if(now >= this._until){
+        // Event engine safety: keep scheduling while waiting for downstream accept.
+        this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
       }
     }
     if(this._workOfferAccepted && now >= this._until) this._completeWorkOutOffer();

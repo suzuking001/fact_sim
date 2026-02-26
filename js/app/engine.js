@@ -11,6 +11,16 @@ var App = window.App || (window.App = {});
   const DIRTY_OVERFLOW_WARN_THROTTLE_MS = 1500;
   const EPSILON_MS = 0.001;
 
+  function getPausedNodeResumeMs(node, nowMs){
+    if(!node || !App.stopGroups || typeof App.stopGroups.isNodePaused !== 'function') return NaN;
+    if(!App.stopGroups.isNodePaused(node)) return NaN;
+    if(typeof App.stopGroups.getNextTransitionMs === 'function'){
+      const nextMs = Number(App.stopGroups.getNextTransitionMs(nowMs));
+      if(isFinite(nextMs) && nextMs > nowMs + EPSILON_MS) return nextMs;
+    }
+    return nowMs + 1;
+  }
+
   function nowSimMs(){
     return (typeof window.simNow === 'function') ? window.simNow() : 0;
   }
@@ -70,10 +80,10 @@ var App = window.App || (window.App = {});
     if(!hasTimedState(node)) return NaN;
     const until = Number(node && node._until);
     if(!isFinite(until)) return NaN;
-    if(until <= nowMs + EPSILON_MS){
-      if(until >= nowMs - EPSILON_MS) return nowMs;
-      return NaN;
-    }
+    const pausedResumeMs = getPausedNodeResumeMs(node, nowMs);
+    if(isFinite(pausedResumeMs)) return pausedResumeMs;
+    // Keep timed nodes schedulable even when their deadline is already overdue.
+    if(until <= nowMs + EPSILON_MS) return nowMs;
     return until;
   }
 
@@ -90,10 +100,7 @@ var App = window.App || (window.App = {});
       return NaN;
     }
     if(!isFinite(until)) return NaN;
-    if(until <= nowMs + EPSILON_MS){
-      if(until >= nowMs - EPSILON_MS) return nowMs;
-      return NaN;
-    }
+    if(until <= nowMs + EPSILON_MS) return nowMs;
     return until;
   }
 
@@ -662,7 +669,30 @@ var App = window.App || (window.App = {});
           }
           captureTimeline();
           timelineCaptured = true;
-          sameTimeSpins = 0;
+          let nextBoundaryMs = Infinity;
+          if(this.stopGroupRuntime && typeof this.stopGroupRuntime.getNextTransitionMs === 'function'){
+            nextBoundaryMs = this.stopGroupRuntime.getNextTransitionMs(nowMs);
+          }
+          if(isFinite(nextBoundaryMs) && nextBoundaryMs <= nowMs + EPSILON_MS){
+            sameTimeSpins++;
+            if(sameTimeSpins > EVENT_SAME_TIME_LIMIT){
+              if(budgetMs <= EPSILON_MS) break;
+              if(this.stopGroupRuntime && typeof this.stopGroupRuntime.beforeAdvance === 'function'){
+                this.stopGroupRuntime.beforeAdvance(nowMs, EPSILON_MS);
+              }
+              if(typeof window.advanceSimTime === 'function') window.advanceSimTime(EPSILON_MS);
+              budgetMs -= EPSILON_MS;
+              nowMs += EPSILON_MS;
+              if(this.stopGroupRuntime && typeof this.stopGroupRuntime.update === 'function'){
+                this.stopGroupRuntime.update(nowMs);
+              }
+              captureTimeline();
+              timelineCaptured = true;
+              sameTimeSpins = 0;
+            }
+          }else{
+            sameTimeSpins = 0;
+          }
           continue;
         }
 

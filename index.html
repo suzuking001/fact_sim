@@ -11,7 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260223a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260223a" />
+    <link rel="stylesheet" href="css/app.css?v=20260225c" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -83,6 +83,14 @@
           <option value="30">30</option>
           <option value="60" selected>60</option>
         </select>
+      </div>
+      <div class="control-group realtimeFpsGroup">
+        <label for="realtimeFpsValue">Realtime FPS</label>
+        <div id="realtimeFpsValue" class="realtimeFpsValue">--</div>
+      </div>
+      <div class="control-group realtimeFactorGroup">
+        <label for="realtimeFactorValue">Realtime x (1s Sim/Wall)</label>
+        <div id="realtimeFactorValue" class="realtimeFactorValue">--</div>
       </div>
       <div class="control-group">
         <label for="simModeSelect">Engine</label>
@@ -321,14 +329,14 @@ SOFTWARE.
     </div>
   </div>
 
-  <script src="js/core.js?v=20260222d"></script>
+  <script src="js/core.js?v=20260225d"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js?v=20260224b"></script>
     <script src="js/nodes/ioflip.js"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js?v=20260223a"></script>
+    <script src="js/link-anim.js?v=20260225b"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js?v=20260224b"></script>
   <script src="js/nodes/note.js?v=20260218c"></script>
@@ -339,12 +347,12 @@ SOFTWARE.
   <script src="js/nodes/branch.js?v=20260224b"></script>
   <script src="js/nodes/merge2.js?v=20260224b"></script>
   <script src="js/nodes/join.js?v=20260224b"></script>
-  <script src="js/nodes/agv_route.js?v=20260224b"></script>
+  <script src="js/nodes/agv_route.js?v=20260225c"></script>
   <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
   <script src="js/nodes/carrier_config.js?v=20260223a"></script>
-  <script src="js/nodes/carrier_route.js?v=20260224b"></script>
+  <script src="js/nodes/carrier_route.js?v=20260225c"></script>
   <script src="js/nodes/carrier_route_ui.js?v=20260224b"></script>
-  <script src="js/nodes/sink.js"></script>
+  <script src="js/nodes/sink.js?v=20260226a"></script>
   <script src="js/nodes/register.js?v=20260222a"></script>
   <script src="sample/simple.js?v=20260221b"></script>
   <script src="sample/branch.js?v=20260221b"></script>
@@ -352,10 +360,10 @@ SOFTWARE.
   <script src="sample/carrier.js?v=20260223a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
   <script src="js/timeline.js?v=20260225a"></script>
-  <script src="js/app/state.js?v=20260224b"></script>
-  <script src="js/app/stop-groups.js?v=20260224a"></script>
+  <script src="js/app/state.js?v=20260225b"></script>
+  <script src="js/app/stop-groups.js?v=20260225c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
-  <script src="js/app/engine.js?v=20260224a"></script>
+  <script src="js/app/engine.js?v=20260225d"></script>
   <script src="js/app/sim.js?v=20260222a"></script>
   <script src="js/app/benchmark.js?v=20260222a"></script>
   <script src="js/app/history.js?v=20260222a"></script>

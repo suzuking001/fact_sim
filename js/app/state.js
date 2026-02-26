@@ -14,7 +14,10 @@ App.render = App.render || {
   fps: 60,
   lastGraphDrawMs: 0,
   lastTimelineDrawMs: 0,
-  suppressAll: false
+  suppressAll: false,
+  lastFrameAtMs: 0,
+  frameFps: 0,
+  frameFpsSmooth: 0
 };
 
 App.showToast = function(msg){
@@ -98,6 +101,46 @@ App.resetRenderBudget = function(){
   App.render.lastTimelineDrawMs = 0;
 };
 
+App.resetRenderFpsStats = function(){
+  if(!App.render) return;
+  App.render.lastFrameAtMs = 0;
+  App.render.frameFps = 0;
+  App.render.frameFpsSmooth = 0;
+};
+
+App.recordRenderedFrame = function(nowMs){
+  if(!App.render) return;
+  const now = Number(nowMs);
+  if(!isFinite(now)) return;
+  const prev = Number(App.render.lastFrameAtMs) || 0;
+  App.render.lastFrameAtMs = now;
+  if(prev <= 0) return;
+  const dt = now - prev;
+  if(!isFinite(dt) || dt <= 0) return;
+  const instant = 1000 / dt;
+  App.render.frameFps = instant;
+  const prevSmooth = Number(App.render.frameFpsSmooth) || 0;
+  if(prevSmooth <= 0){
+    App.render.frameFpsSmooth = instant;
+  }else{
+    const alpha = 0.18;
+    App.render.frameFpsSmooth = prevSmooth + (instant - prevSmooth) * alpha;
+  }
+};
+
+App.getRealtimeRenderFps = function(){
+  if(!App.render) return 0;
+  const smooth = Number(App.render.frameFpsSmooth) || 0;
+  if(!isFinite(smooth) || smooth <= 0) return 0;
+  const lastAt = Number(App.render.lastFrameAtMs) || 0;
+  if(lastAt <= 0) return 0;
+  const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+    ? performance.now()
+    : Date.now();
+  if((now - lastAt) > 1200) return 0;
+  return smooth;
+};
+
 App.isRenderSuppressed = function(){
   return !!(App.render && App.render.suppressAll);
 };
@@ -108,6 +151,7 @@ App.setRenderSuppressed = function(enabled){
   if(App.render.suppressAll === next) return next;
   App.render.suppressAll = next;
   App.resetRenderBudget();
+  if(next) App.resetRenderFpsStats();
   return next;
 };
 
@@ -115,6 +159,7 @@ App.setRenderFps = function(value){
   const fps = App.normalizeRenderFps(value);
   App.render.fps = fps;
   App.resetRenderBudget();
+  App.resetRenderFpsStats();
   return fps;
 };
 
@@ -146,7 +191,14 @@ App.installCanvasRenderThrottle = function(canvas){
   canvas.draw = function(forceForeground, forceBackground){
     const forced = !!forceForeground || !!forceBackground;
     if(!App.shouldRenderFrame('graph', forced)) return;
-    return rawDraw(forceForeground, forceBackground);
+    const out = rawDraw(forceForeground, forceBackground);
+    if(typeof App.recordRenderedFrame === 'function'){
+      const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+        ? performance.now()
+        : Date.now();
+      App.recordRenderedFrame(now);
+    }
+    return out;
   };
   canvas.__fpsThrottlePatched = true;
   return canvas;

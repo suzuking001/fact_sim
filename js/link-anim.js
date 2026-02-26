@@ -10,6 +10,7 @@ class LinkAnimator{
   constructor(){
     this.animations = [];
     this._max = Math.max(200, Number(cfg.maxTransient) || 1500);
+    this._sampleOffset = 0;
   }
   _trimTransient(){
     if(this.animations.length <= this._max) return;
@@ -102,9 +103,52 @@ class LinkAnimator{
   hidePortIcon(graph, linkId){
     this.animations = this.animations.filter(anim=>!(anim.tail && anim.graph===graph && anim.linkId===linkId));
   }
+  _adaptiveRenderPolicy(canvas){
+    const graph = canvas && canvas.graph;
+    const nodeCount = Array.isArray(graph && graph._nodes) ? graph._nodes.length : 0;
+    const app = window.App || null;
+    const fps = (app && typeof app.getRealtimeRenderFps === 'function') ? Number(app.getRealtimeRenderFps()) : 60;
+    const running = (typeof isSimRunning === 'function') ? !!isSimRunning() : false;
+    if(!running){
+      return { step: 1, labelEvery: 1 };
+    }
+
+    let targetTransient = 800;
+    let labelEvery = 1;
+    if(nodeCount >= 300 || fps < 34){
+      targetTransient = 600;
+      labelEvery = 2;
+    }
+    if(nodeCount >= 700 || fps < 24){
+      targetTransient = 360;
+      labelEvery = 3;
+    }
+    if(nodeCount >= 1100 || fps < 16){
+      targetTransient = 220;
+      labelEvery = 5;
+    }
+
+    let transientCount = 0;
+    for(let i = 0; i < this.animations.length; i++){
+      const anim = this.animations[i];
+      if(anim && !anim.tail) transientCount++;
+    }
+    const step = (transientCount > targetTransient)
+      ? Math.max(1, Math.ceil(transientCount / targetTransient))
+      : 1;
+    return { step, labelEvery };
+  }
   draw(canvas, ctx){
     if(!this.animations.length || !canvas || !ctx) return;
     const now = getNow();
+    const policy = this._adaptiveRenderPolicy(canvas);
+    const step = Math.max(1, Number(policy.step) || 1);
+    const labelEvery = Math.max(1, Number(policy.labelEvery) || 1);
+    const drawTransientRemainder = (step > 1)
+      ? (this._sampleOffset = (this._sampleOffset + 1) % step)
+      : 0;
+    let transientIdx = 0;
+    let labelCounter = 0;
     ctx.save();
     this.animations = this.animations.filter(anim=>{
       const graph = anim.graph;
@@ -114,10 +158,9 @@ class LinkAnimator{
       const originNode = graph.getNodeById(link.origin_id);
       const targetNode = graph.getNodeById(link.target_id);
       if(!originNode || !targetNode) return false;
-      const start = originNode.getConnectionPos(false, link.origin_slot);
-      const startDir = this._getSlotDir(originNode, link.origin_slot, false);
       let x, y;
         if(anim.tail){
+          const start = originNode.getConnectionPos(false, link.origin_slot);
           const allowAgvWait =
             anim.type === 'agv' &&
             originNode &&
@@ -139,6 +182,13 @@ class LinkAnimator{
         const duration = anim.duration || defaultDuration;
         const t = Math.min((now - anim.start) / duration, 1);
         if(t >= 1) return false;
+        const shouldDrawTransient = (step <= 1) || ((transientIdx % step) === drawTransientRemainder);
+        transientIdx++;
+        if(!shouldDrawTransient){
+          return true;
+        }
+        const start = originNode.getConnectionPos(false, link.origin_slot);
+        const startDir = this._getSlotDir(originNode, link.origin_slot, false);
         const eased = t * t * (3 - 2 * t);
         const end = targetNode.getConnectionPos(true, link.target_slot);
         const endDir = this._getSlotDir(targetNode, link.target_slot, true);
@@ -179,11 +229,14 @@ class LinkAnimator{
         else if(t) label = String(t);
       }
       if(label){
-        ctx.fillStyle = '#fff';
-        ctx.font = '12px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(label, x, y - iconRadius - 4);
+        const shouldDrawLabel = anim.tail || (labelEvery <= 1) || ((labelCounter++ % labelEvery) === 0);
+        if(shouldDrawLabel){
+          ctx.fillStyle = '#fff';
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(label, x, y - iconRadius - 4);
+        }
       }
       return anim.tail ? true : true;
     });

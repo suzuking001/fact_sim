@@ -13,6 +13,9 @@ const FASTEST_STEP_REAL_MS = 16;
 const FASTEST_FRAME_BUDGET_MS = 14;
 const FASTEST_LOOP_LIMIT = 1200;
 const FASTEST_UI_INTERVAL_MS = 120;
+const REALTIME_FACTOR_WINDOW_MS = 1000;
+const REALTIME_FACTOR_KEEP_MS = 2500;
+const REALTIME_FACTOR_MAX_SAMPLES = 360;
 let speed = 1;
 let fastMode = false;
 let simTimeMs = 0;
@@ -20,6 +23,14 @@ let simRunning = false;
 let simRafId = null;
 let lastRealMs = 0;
 let lastUiUpdateMs = 0;
+let realtimeFactorSamples = [];
+
+function wallNowMs(){
+  if(typeof performance !== 'undefined' && typeof performance.now === 'function'){
+    return performance.now();
+  }
+  return Date.now();
+}
 
 function simNow(){
   return simTimeMs;
@@ -152,11 +163,105 @@ function setFastestMode(enabled){
 
 function updateSimTime(){
   document.getElementById('simTime').textContent = (simTimeMs/1000).toFixed(1) + ' s';
+  updateRealtimeFps();
+  updateRealtimeFactor();
+}
+
+function updateRealtimeFps(){
+  const el = document.getElementById('realtimeFpsValue');
+  if(!el) return;
+  if(!simRunning){
+    el.textContent = '--';
+    return;
+  }
+  if(fastMode){
+    el.textContent = 'N/A (FASTEST)';
+    return;
+  }
+  const app = window.App;
+  const fps = (app && typeof app.getRealtimeRenderFps === 'function') ? app.getRealtimeRenderFps() : 0;
+  if(!isFinite(fps) || fps <= 0){
+    el.textContent = 'measuring...';
+    return;
+  }
+  el.textContent = `${fps.toFixed(1)} fps`;
+}
+
+function resetRealtimeFactorSamples(){
+  realtimeFactorSamples.length = 0;
+}
+
+function pushRealtimeFactorSample(){
+  const nowWall = wallNowMs();
+  realtimeFactorSamples.push({ wall: nowWall, sim: simTimeMs });
+  const keepFrom = nowWall - REALTIME_FACTOR_KEEP_MS;
+  while(realtimeFactorSamples.length > 1 && realtimeFactorSamples[0].wall < keepFrom){
+    realtimeFactorSamples.shift();
+  }
+  if(realtimeFactorSamples.length > REALTIME_FACTOR_MAX_SAMPLES){
+    realtimeFactorSamples.splice(0, realtimeFactorSamples.length - REALTIME_FACTOR_MAX_SAMPLES);
+  }
+}
+
+function computeRealtimeFactor1s(){
+  const len = realtimeFactorSamples.length;
+  if(len < 2) return NaN;
+
+  const newest = realtimeFactorSamples[len - 1];
+  const targetWall = newest.wall - REALTIME_FACTOR_WINDOW_MS;
+  let base = realtimeFactorSamples[0];
+
+  for(let i = len - 2; i >= 0; i--){
+    const s = realtimeFactorSamples[i];
+    if(s.wall <= targetWall){
+      const next = realtimeFactorSamples[i + 1];
+      if(next && next.wall > s.wall && targetWall > s.wall){
+        const t = (targetWall - s.wall) / (next.wall - s.wall);
+        base = {
+          wall: targetWall,
+          sim: s.sim + (next.sim - s.sim) * t
+        };
+      }else{
+        base = s;
+      }
+      break;
+    }
+  }
+
+  const wallDelta = newest.wall - base.wall;
+  const simDelta = newest.sim - base.sim;
+  if(!isFinite(wallDelta) || wallDelta <= 1) return NaN;
+  if(!isFinite(simDelta) || simDelta < 0) return NaN;
+  return simDelta / wallDelta;
+}
+
+function formatRealtimeFactor(v){
+  if(!isFinite(v) || v < 0) return '--';
+  if(v >= 1000) return `${v.toFixed(0)}x`;
+  if(v >= 100) return `${v.toFixed(1)}x`;
+  return `${v.toFixed(2)}x`;
+}
+
+function updateRealtimeFactor(){
+  const el = document.getElementById('realtimeFactorValue');
+  if(!el) return;
+  if(!simRunning){
+    el.textContent = '--';
+    return;
+  }
+  pushRealtimeFactorSample();
+  const ratio = computeRealtimeFactor1s();
+  if(!isFinite(ratio)){
+    el.textContent = 'measuring...';
+    return;
+  }
+  el.textContent = formatRealtimeFactor(ratio);
 }
 
 function resetSimClock(){
   simTimeMs = 0;
   lastRealMs = 0;
+  resetRealtimeFactorSamples();
   updateSimTime();
 }
 
@@ -165,8 +270,15 @@ function startSimLoop(stepFn){
   simRunning = true;
   lastRealMs = 0;
   lastUiUpdateMs = 0;
+  resetRealtimeFactorSamples();
+  pushRealtimeFactorSample();
+  try{
+    const app = window.App;
+    if(app && typeof app.resetRenderFpsStats === 'function') app.resetRenderFpsStats();
+  }catch(_e){}
   applyRenderSuppression(fastMode);
   updateFastestModeNotice();
+  updateRealtimeFps();
   const tick = (ts)=>{
     if(!simRunning) return;
     if(fastMode){
@@ -201,6 +313,7 @@ function stopSimLoop(){
   if(simRafId){ window.cancelAnimationFrame(simRafId); simRafId = null; }
   applyRenderSuppression(false);
   updateFastestModeNotice();
+  updateRealtimeFps();
   updateSimTime();
 }
 
