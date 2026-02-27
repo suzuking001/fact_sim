@@ -14,17 +14,17 @@ It helps manufacturing teams validate takt feasibility, throughput, bottlenecks,
 ## Live Demo
 https://suzuking001.github.io/fact_sim/
 
-## Core Message (Japanese)
-fact_sim は「ロボットの動く絵」を作るツールではありません。
-企画段階で本当に必要な問いを、秒単位で説明可能な形で検証するための生産ラインシミュレータです。
+## Core Message
+fact_sim is not a tool for making flashy robot animations.
+It is a production-line simulator designed to answer the questions that matter at planning stage, with second-level explainability:
 
-- タクトに間に合うか
-- スループットはいくつか
-- どこがボトルネックか
-- 設備・バッファ・AGV・キャリアの台数は妥当か
+- Will the line meet takt?
+- What throughput can we achieve?
+- Where is the bottleneck?
+- Are equipment, buffers, AGVs, and carriers sized correctly?
 
-ブラウザだけで動き、タイミングチャートとCSVで「間に合う理由／間に合わない理由」を可視化。
-高額投資の前に、現場で使える判断材料を最短で作れます。
+It runs fully in the browser and visualizes *why* a line meets or misses target via timing charts and CSV.
+Before major CAPEX, it helps teams build decision-grade evidence fast.
 
 ## Why fact_sim
 - Browser-native workflow for fast iteration
@@ -56,19 +56,18 @@ A browser-based discrete-event simulator for manufacturing engineers. Validate t
 **Launch post**
 fact_sim was built for one purpose: make production decisions explainable before CAPEX. Not flashy robot animation, but second-level operational truth. Model quickly, run in-browser, inspect timing charts, export CSV, and share scenarios by URL. If your team asks “Will this line really meet takt?”, fact_sim gives a defensible answer.
 
-## note Article Intro (Japanese)
-「動く絵」は会議を通しやすくします。
-でも、投資判断に必要なのは“見栄え”ではなく“説明責任”です。
+## note Article Intro
+“Moving visuals” make meetings easier.
+But investment decisions need accountability, not aesthetics.
 
-私は15年以上、現場の生産技術として
+For over 15 years in production engineering, the key questions have remained:
 
-- どこで詰まるか
-- 何台あれば間に合うか
-- なぜ間に合わないか
+- Where will it choke?
+- How many units are actually needed?
+- Why exactly does it miss target?
 
-を問い続けてきました。
-fact_sim は、その問いに秒単位で答えるために作ったツールです。
-この記事では、机上のDXではなく、現場で本当に使えるシミュレーション設計を公開します。
+fact_sim was built to answer those questions at second-level resolution.
+This article shares practical simulation design for real factories, not presentation-only DX.
 
 ## Run Locally
 ```bash
