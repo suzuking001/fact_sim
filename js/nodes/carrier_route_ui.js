@@ -10,6 +10,15 @@
     const cfgText = cfg
       ? `${String(cfg.properties?.carrierId ?? agv?.id ?? '').trim() || '-'} @${cfg.id ?? '-'}`
       : '(none)';
+    const carrierInfo = (agv && typeof this._carrierAnimInfo === 'function')
+      ? this._carrierAnimInfo(agv)
+      : null;
+    const loadText = carrierInfo
+      ? `work=${Number(carrierInfo.workCount) || 0}/${Number(carrierInfo.capacity) || 0}`
+      : (agv ? `load=${agv.cargo.length}/${agv.capacity}` : 'load=-');
+    const palletText = carrierInfo && Number(carrierInfo.palletCapacity) > 0
+      ? ` pallets=${Number(carrierInfo.palletCount) || 0}/${Number(carrierInfo.palletCapacity) || 0}`
+      : '';
     const inLane = Number(this._currentCarrierLane) + 1;
     const outLane = this._departingAgv
       ? (Number(this._departingCarrierLane) + 1)
@@ -22,12 +31,13 @@
     const lines = [
       `State: ${this._stateName}`,
       `Initial carrier: ${initialCarrier}`,
-      agv ? `Carrier: ${agv.id} load=${agv.cargo.length}/${agv.capacity}` : 'Carrier: (none)',
+      agv ? `Carrier: ${agv.id} ${loadText}${palletText}` : 'Carrier: (none)',
       `Carrier Config: ${cfgText}`,
       `Out sequence: ${outSeq}`,
       `Sequence step: ${seqStep}`,
       `Lane(in/out): ${inLane} / ${outLane}`,
       `Pending unload: ${this._pendingUnload.length}`,
+      `Pending pallet unload: ${this._pendingPalletUnload.length}`,
       `Remain(s): ${(rem/1000).toFixed(1)}`
     ];
     drawStateBelow(ctx, this, lines, 8, 6);
@@ -42,6 +52,7 @@ menuMixin(CarrierRouteNode);
     if(!Array.isArray(opts)) opts = [];
     const laneCount = typeof this._carrierLaneCount === 'function' ? this._carrierLaneCount() : 1;
     const workLaneCount = typeof this._workLaneCount === 'function' ? this._workLaneCount() : 0;
+    const palletLaneCount = typeof this._palletLaneCount === 'function' ? this._palletLaneCount() : 1;
     opts.push({
       content: 'Add carrier IN/OUT',
       callback: ()=> {
@@ -74,6 +85,23 @@ menuMixin(CarrierRouteNode);
         if(!this._removeWorkLane) return;
         if(window.runNodeMutation) window.runNodeMutation(this, ()=> this._removeWorkLane());
         else this._removeWorkLane();
+      }
+    });
+    opts.push({
+      content: 'Add pallet IN/OUT',
+      callback: ()=> {
+        if(!this._addPalletLane) return;
+        if(window.runNodeMutation) window.runNodeMutation(this, ()=> this._addPalletLane());
+        else this._addPalletLane();
+      }
+    });
+    opts.push({
+      content: 'Remove pallet IN/OUT',
+      disabled: palletLaneCount <= 1,
+      callback: ()=> {
+        if(!this._removePalletLane) return;
+        if(window.runNodeMutation) window.runNodeMutation(this, ()=> this._removePalletLane());
+        else this._removePalletLane();
       }
     });
     return opts;

@@ -33,6 +33,10 @@ class CarrierConfigNode extends LiteGraph.LGraphNode{
     return n;
   }
 
+  getCarrierMode(){
+    return 'carrier';
+  }
+
   isForCarrierId(id){
     const mine = this._normalizeCarrierId();
     const other = String(id ?? '').trim();
@@ -43,9 +47,11 @@ class CarrierConfigNode extends LiteGraph.LGraphNode{
     if(!agv || typeof agv !== 'object') return agv;
     if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
     if(!Array.isArray(agv.cargo)) agv.cargo = [];
+    if(Array.isArray(agv.pallets)) delete agv.pallets;
     const cap = this._normalizeCapacity();
     agv.capacity = cap;
     agv.meta.capacity = cap;
+    agv.meta.carrierMode = 'carrier';
     agv.meta.carrierId = this._normalizeCarrierId();
     agv.meta.configNodeId = this.id;
     return agv;

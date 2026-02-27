@@ -17,6 +17,8 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
     this._agvInIndex  = this.inputs.length;  this.addInput('carrierIn', 'AGV');
     this._agvOutIndex = this.outputs.length; this.addOutput('carrierOut', 'AGV');
+    this._palletInIndex = this.inputs.length; this.addInput('palletIn', 'PALLET');
+    this._palletOutIndex = this.outputs.length; this.addOutput('palletOut', 'PALLET');
 
     this.properties = {
       processTime: window.NODES_CONFIG?.carrierRoute?.processTimeSec ?? CARRIER_ROUTE_DEFAULTS.processTime,
@@ -36,6 +38,11 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._workOffer = null;
     this._workOfferArmed = false;
     this._workOfferAccepted = false;
+    this._pendingPalletUnload = [];
+    this._palletOffer = null;
+    this._palletOfferArmed = false;
+    this._palletOfferAccepted = false;
+    this._palletUnloadIndex = 0;
     this._agvWaitIconLinks = null;
     this._agvWaitIconInfoKey = '';
     this._agvWaitIconSlot = -1;
@@ -48,6 +55,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._state = 'IDLE';
     this._lastWorkInRefBySlot = Object.create(null);
     this._lastAgvInRefBySlot = Object.create(null);
+    this._lastPalletInRefBySlot = Object.create(null);
     this._currentCarrierLane = 0;
     this._departingCarrierLane = 0;
     this._plannedDepartureLane = 0;
@@ -94,6 +102,14 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const n = String(p?.name || '');
     return n === 'carrierOut' || /^carrierOut\d+$/.test(n);
   }
+  _isPalletInputPort(p){
+    const n = String(p?.name || '');
+    return n === 'palletIn' || /^palletIn\d+$/.test(n);
+  }
+  _isPalletOutputPort(p){
+    const n = String(p?.name || '');
+    return n === 'palletOut' || /^palletOut\d+$/.test(n);
+  }
   _carrierInputSlots(){
     const slots = [];
     if(!this.inputs) return slots;
@@ -110,11 +126,29 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     }
     return slots;
   }
+  _palletInputSlots(){
+    const slots = [];
+    if(!this.inputs) return slots;
+    for(let i = 0; i < this.inputs.length; i++){
+      if(this._isPalletInputPort(this.inputs[i])) slots.push(i);
+    }
+    return slots;
+  }
+  _palletOutputSlots(){
+    const slots = [];
+    if(!this.outputs) return slots;
+    for(let i = 0; i < this.outputs.length; i++){
+      if(this._isPalletOutputPort(this.outputs[i])) slots.push(i);
+    }
+    return slots;
+  }
   _normalizeCarrierPortNames(){
     const wIns = this._workInputSlots();
     const wOuts = this._workOutputSlots();
     const ins = this._carrierInputSlots();
     const outs = this._carrierOutputSlots();
+    const pIns = this._palletInputSlots();
+    const pOuts = this._palletOutputSlots();
     for(let i = 0; i < wIns.length; i++){
       const p = this.inputs[wIns[i]];
       if(p) p.name = `workIn${i + 1}`;
@@ -130,6 +164,14 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     for(let i = 0; i < outs.length; i++){
       const p = this.outputs[outs[i]];
       if(p) p.name = `carrierOut${i + 1}`;
+    }
+    for(let i = 0; i < pIns.length; i++){
+      const p = this.inputs[pIns[i]];
+      if(p) p.name = `palletIn${i + 1}`;
+    }
+    for(let i = 0; i < pOuts.length; i++){
+      const p = this.outputs[pOuts[i]];
+      if(p) p.name = `palletOut${i + 1}`;
     }
     this._reorderLanePorts();
   }
@@ -169,37 +211,43 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
     const workIns = [];
     const carrierIns = [];
+    const palletIns = [];
     const otherIns = [];
     for(let i = 0; i < oldInputs.length; i++){
       const port = oldInputs[i];
       if(this._isWorkInputPort(port)) workIns.push({ oldIdx: i, port });
       else if(this._isCarrierInputPort(port)) carrierIns.push({ oldIdx: i, port });
+      else if(this._isPalletInputPort(port)) palletIns.push({ oldIdx: i, port });
       else otherIns.push({ oldIdx: i, port });
     }
 
     const workOuts = [];
     const carrierOuts = [];
+    const palletOuts = [];
     const otherOuts = [];
     for(let i = 0; i < oldOutputs.length; i++){
       const port = oldOutputs[i];
       if(this._isWorkOutputPort(port)) workOuts.push({ oldIdx: i, port });
       else if(this._isCarrierOutputPort(port)) carrierOuts.push({ oldIdx: i, port });
+      else if(this._isPalletOutputPort(port)) palletOuts.push({ oldIdx: i, port });
       else otherOuts.push({ oldIdx: i, port });
     }
 
     const newInputsMeta = [];
-    const inputLaneCount = Math.max(workIns.length, carrierIns.length);
+    const inputLaneCount = Math.max(workIns.length, carrierIns.length, palletIns.length);
     for(let i = 0; i < inputLaneCount; i++){
       if(workIns[i]) newInputsMeta.push(workIns[i]);      // workInN first
       if(carrierIns[i]) newInputsMeta.push(carrierIns[i]); // carrierInN next
+      if(palletIns[i]) newInputsMeta.push(palletIns[i]);   // palletInN next
     }
     for(const item of otherIns) newInputsMeta.push(item);
 
     const newOutputsMeta = [];
-    const outputLaneCount = Math.max(workOuts.length, carrierOuts.length);
+    const outputLaneCount = Math.max(workOuts.length, carrierOuts.length, palletOuts.length);
     for(let i = 0; i < outputLaneCount; i++){
       if(workOuts[i]) newOutputsMeta.push(workOuts[i]);      // workOutN first
       if(carrierOuts[i]) newOutputsMeta.push(carrierOuts[i]); // carrierOutN next
+      if(palletOuts[i]) newOutputsMeta.push(palletOuts[i]);   // palletOutN next
     }
     for(const item of otherOuts) newOutputsMeta.push(item);
 
@@ -226,6 +274,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
     this._lastWorkInRefBySlot = this._remapSlotCacheByMap(this._lastWorkInRefBySlot, inMap);
     this._lastAgvInRefBySlot = this._remapSlotCacheByMap(this._lastAgvInRefBySlot, inMap);
+    this._lastPalletInRefBySlot = this._remapSlotCacheByMap(this._lastPalletInRefBySlot, inMap);
   }
   _ensureMinCarrierPorts(minCount = 1){
     let ins = this._carrierInputSlots();
@@ -325,6 +374,20 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(!isFinite(n) || n < 0 || n >= slots.length) return -1;
     return slots[Math.floor(n)];
   }
+  _palletInSlotForLane(lane){
+    const slots = this._palletInputSlots();
+    if(!slots.length) return -1;
+    const n = Number(lane);
+    if(!isFinite(n) || n < 0 || n >= slots.length) return -1;
+    return slots[Math.floor(n)];
+  }
+  _palletOutSlotForLane(lane){
+    const slots = this._palletOutputSlots();
+    if(!slots.length) return -1;
+    const n = Number(lane);
+    if(!isFinite(n) || n < 0 || n >= slots.length) return -1;
+    return slots[Math.floor(n)];
+  }
   _hasWorkInLinkForLane(lane){
     const slot = this._workInSlotForLane(lane);
     if(slot < 0) return false;
@@ -363,8 +426,25 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const p = this.outputs[slot];
     return !!(p && p.links && p.links.length);
   }
+  _hasPalletInLinkForLane(lane){
+    const slot = this._palletInSlotForLane(lane);
+    if(slot < 0) return false;
+    const p = this.inputs[slot];
+    return !!(p && p.link != null);
+  }
+  _hasPalletOutLinkForLane(lane){
+    const slot = this._palletOutSlotForLane(lane);
+    if(slot < 0) return false;
+    const p = this.outputs[slot];
+    return !!(p && p.links && p.links.length);
+  }
   _clearWorkOutputs(){
     for(const slot of this._workOutputSlots()){
+      try{ this.setOutputData(slot, null); }catch(_e){}
+    }
+  }
+  _clearPalletOutputs(){
+    for(const slot of this._palletOutputSlots()){
       try{ this.setOutputData(slot, null); }catch(_e){}
     }
   }
@@ -389,8 +469,32 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     }
     this._normalizeCarrierPortNames();
   }
+  _ensurePalletLanePairs(minCount = 1){
+    let ins = this._palletInputSlots();
+    while(ins.length < minCount){
+      this.addInput('palletIn', 'PALLET');
+      ins = this._palletInputSlots();
+    }
+    let outs = this._palletOutputSlots();
+    while(outs.length < minCount){
+      this.addOutput('palletOut', 'PALLET');
+      outs = this._palletOutputSlots();
+    }
+    while(ins.length < outs.length){
+      this.addInput('palletIn', 'PALLET');
+      ins = this._palletInputSlots();
+    }
+    while(outs.length < ins.length){
+      this.addOutput('palletOut', 'PALLET');
+      outs = this._palletOutputSlots();
+    }
+    this._normalizeCarrierPortNames();
+  }
   _workLaneCount(){
     return Math.min(this._workInputSlots().length, this._workOutputSlots().length);
+  }
+  _palletLaneCount(){
+    return Math.min(this._palletInputSlots().length, this._palletOutputSlots().length);
   }
   _addWorkLane(){
     this.addInput('workIn', 'work');
@@ -424,6 +528,41 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     }
     this._lastWorkInRefBySlot = Object.create(null);
     this._ensureWorkLanePairs(0);
+    window.refreshFlipIO(this);
+    this.setDirtyCanvas(true, true);
+  }
+  _addPalletLane(){
+    this.addInput('palletIn', 'PALLET');
+    this.addOutput('palletOut', 'PALLET');
+    this._ensurePalletLanePairs(1);
+    window.refreshFlipIO(this);
+    this.setDirtyCanvas(true, true);
+  }
+  _removePalletLane(){
+    const count = this._palletLaneCount();
+    if(count <= 1) return;
+    const inSlots = this._palletInputSlots();
+    const outSlots = this._palletOutputSlots();
+    const inIdx = inSlots[inSlots.length - 1];
+    const outIdx = outSlots[outSlots.length - 1];
+    if(inIdx >= 0){
+      const p = this.inputs && this.inputs[inIdx];
+      if(p && p.link != null){
+        try{ this.graph && this.graph.removeLink(p.link); }catch(_e){}
+      }
+      this.removeInput(inIdx);
+    }
+    if(outIdx >= 0){
+      const p = this.outputs && this.outputs[outIdx];
+      if(p && p.links){
+        [...p.links].forEach((id)=>{
+          try{ this.graph && this.graph.removeLink(id); }catch(_e){}
+        });
+      }
+      this.removeOutput(outIdx);
+    }
+    this._lastPalletInRefBySlot = Object.create(null);
+    this._ensurePalletLanePairs(1);
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true, true);
   }
@@ -554,7 +693,9 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       node &&
       (typeof node.isForCarrierId === 'function' ||
        node.type === 'factory/carrierconfig' ||
-       node.type === 'factory/carrierhome'));
+       node.type === 'factory/carrierhome' ||
+       node.type === 'factory/palletcarrierconfig' ||
+       node.type === 'factory/palletcarrier'));
   }
 
   _carrierConfigByNodeId(nodeId){
@@ -567,14 +708,19 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     return null;
   }
 
-  _findCarrierConfigById(carrierId){
+  _findCarrierConfigById(carrierId, mode){
     const idText = String(carrierId ?? '').trim();
     if(!idText) return null;
+    const modeText = String(mode || '').trim().toLowerCase();
     const list = this._carrierConfigNodes();
     // Prefer the latest config when duplicated IDs exist.
     // This makes "newly added/edited config overrides old one" behavior explicit.
     for(let i = list.length - 1; i >= 0; i--){
       const node = list[i];
+      if(modeText && typeof node.getCarrierMode === 'function'){
+        const nodeMode = String(node.getCarrierMode() || '').trim().toLowerCase();
+        if(nodeMode && nodeMode !== modeText) continue;
+      }
       if(typeof node.isForCarrierId === 'function'){
         if(node.isForCarrierId(idText)) return node;
         continue;
@@ -588,9 +734,23 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _findCarrierConfigForAgv(agv){
     if(!agv || typeof agv !== 'object') return null;
     const carrierId = String(agv.id ?? agv.meta?.carrierId ?? '').trim();
+    const mode = this._isPalletCarrier(agv) ? 'pallet' : 'carrier';
     if(carrierId){
-      const byId = this._findCarrierConfigById(carrierId);
+      const list = this._carrierConfigNodes();
+      for(let i = list.length - 1; i >= 0; i--){
+        const node = list[i];
+        if(!node || typeof node.isForCarrierId !== 'function') continue;
+        if(!node.isForCarrierId(carrierId)) continue;
+        const nodeMode = (typeof node.getCarrierMode === 'function') ? String(node.getCarrierMode() || '').toLowerCase() : '';
+        if(nodeMode && nodeMode !== mode) continue;
+        return node;
+      }
+      const byId = this._findCarrierConfigById(carrierId, mode);
       if(byId) return byId;
+      if(mode !== 'pallet'){
+        const relaxed = this._findCarrierConfigById(carrierId);
+        if(relaxed) return relaxed;
+      }
     }
     // Fallback only when ID-based lookup is unavailable.
     const owner = Number(agv.meta?.configNodeId);
@@ -603,6 +763,148 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const cfg = this._findCarrierConfigForAgv(agv);
     if(cfg && typeof cfg.applyToCarrier === 'function') cfg.applyToCarrier(agv);
     return cfg;
+  }
+
+  _isPalletCarrier(agv){
+    if(!agv || typeof agv !== 'object') return false;
+    if(Array.isArray(agv.pallets)) return true;
+    return String(agv.meta?.carrierMode || '').toLowerCase() === 'pallet';
+  }
+
+  _normalizePallet(pallet){
+    const src = (pallet && typeof pallet === 'object') ? pallet : {};
+    const idText = String(src.palletId ?? src.id ?? '').trim();
+    const capRaw = Number(src.capacity);
+    const cap = isFinite(capRaw) && capRaw > 0 ? Math.max(1, Math.floor(capRaw)) : 10;
+    const works = Array.isArray(src.works) ? src.works.slice() : [];
+    return {
+      palletId: idText || `P-${Math.random().toString(36).slice(2, 8)}`,
+      capacity: cap,
+      works
+    };
+  }
+
+  _ensurePalletCarrier(agv){
+    if(!agv || typeof agv !== 'object') return;
+    if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
+    if(!this._isPalletCarrier(agv)) return;
+    agv.meta.carrierMode = 'pallet';
+    const capRaw = Number(agv.meta.palletCapacity);
+    const palletCapacity = isFinite(capRaw) && capRaw > 0 ? Math.max(1, Math.floor(capRaw)) : 1;
+    agv.meta.palletCapacity = palletCapacity;
+    if(!Array.isArray(agv.pallets)) agv.pallets = [];
+    agv.pallets = agv.pallets.map((p)=> this._normalizePallet(p)).slice(0, palletCapacity);
+  }
+
+  _carrierWorkCount(agv){
+    if(!agv || typeof agv !== 'object') return 0;
+    if(!this._isPalletCarrier(agv)){
+      return Array.isArray(agv.cargo) ? agv.cargo.length : 0;
+    }
+    this._ensurePalletCarrier(agv);
+    let total = 0;
+    for(const pallet of agv.pallets){
+      total += Array.isArray(pallet?.works) ? pallet.works.length : 0;
+    }
+    return total;
+  }
+
+  _carrierHasWorkCapacity(agv){
+    if(!agv || typeof agv !== 'object') return false;
+    if(!this._isPalletCarrier(agv)){
+      const cap = Number(agv.capacity) || 0;
+      const load = Array.isArray(agv.cargo) ? agv.cargo.length : 0;
+      return cap > 0 && load < cap;
+    }
+    this._ensurePalletCarrier(agv);
+    for(const pallet of agv.pallets){
+      const works = Array.isArray(pallet?.works) ? pallet.works : null;
+      const cap = Number(pallet?.capacity) || 0;
+      if(works && cap > 0 && works.length < cap) return true;
+    }
+    return false;
+  }
+
+  _carrierPushWork(agv, work){
+    if(!agv || typeof agv !== 'object') return false;
+    if(!this._isPalletCarrier(agv)){
+      if(!Array.isArray(agv.cargo)) agv.cargo = [];
+      if(!this._carrierHasWorkCapacity(agv)) return false;
+      agv.cargo.push(work);
+      return true;
+    }
+    this._ensurePalletCarrier(agv);
+    for(const pallet of agv.pallets){
+      if(!Array.isArray(pallet?.works)) continue;
+      const cap = Number(pallet?.capacity) || 0;
+      if(cap <= 0 || pallet.works.length >= cap) continue;
+      pallet.works.push(work);
+      return true;
+    }
+    return false;
+  }
+
+  _carrierBuildWorkUnloadQueue(agv){
+    if(!agv || typeof agv !== 'object') return [];
+    if(!this._isPalletCarrier(agv)){
+      return Array.isArray(agv.cargo) ? agv.cargo.slice() : [];
+    }
+    this._ensurePalletCarrier(agv);
+    const out = [];
+    for(const pallet of agv.pallets){
+      if(!Array.isArray(pallet?.works)) continue;
+      for(const w of pallet.works) out.push(w);
+    }
+    return out;
+  }
+
+  _carrierRemoveWork(agv, work){
+    if(!agv || typeof agv !== 'object') return false;
+    if(!this._isPalletCarrier(agv)){
+      if(!Array.isArray(agv.cargo)) return false;
+      const idx = agv.cargo.indexOf(work);
+      if(idx < 0) return false;
+      agv.cargo.splice(idx, 1);
+      return true;
+    }
+    this._ensurePalletCarrier(agv);
+    for(const pallet of agv.pallets){
+      if(!Array.isArray(pallet?.works)) continue;
+      const idx = pallet.works.indexOf(work);
+      if(idx < 0) continue;
+      pallet.works.splice(idx, 1);
+      return true;
+    }
+    return false;
+  }
+
+  _carrierHasPalletCapacity(agv){
+    if(!this._isPalletCarrier(agv)) return false;
+    this._ensurePalletCarrier(agv);
+    const cap = Number(agv.meta?.palletCapacity) || 0;
+    return cap > 0 && agv.pallets.length < cap;
+  }
+
+  _carrierPushPallet(agv, pallet){
+    if(!this._carrierHasPalletCapacity(agv)) return false;
+    this._ensurePalletCarrier(agv);
+    agv.pallets.push(this._normalizePallet(pallet));
+    return true;
+  }
+
+  _carrierBuildPalletUnloadQueue(agv){
+    if(!this._isPalletCarrier(agv)) return [];
+    this._ensurePalletCarrier(agv);
+    return agv.pallets.slice();
+  }
+
+  _carrierRemovePallet(agv, pallet){
+    if(!this._isPalletCarrier(agv)) return false;
+    this._ensurePalletCarrier(agv);
+    const idx = agv.pallets.indexOf(pallet);
+    if(idx < 0) return false;
+    agv.pallets.splice(idx, 1);
+    return true;
   }
 
   _selectDepartureLane(agv, fallbackLane, consume = false){
@@ -635,6 +937,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       a = new AGV(id, cap);
       if(agv && typeof agv === 'object'){
         if(Array.isArray(agv.cargo)) a.cargo = agv.cargo;
+        if(Array.isArray(agv.pallets)) a.pallets = agv.pallets;
         if(agv.meta && typeof agv.meta === 'object') a.meta = agv.meta;
       }
     }
@@ -643,6 +946,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const cap = Math.max(1, Math.round(Number(a.capacity || a.meta.capacity || 1) || 1));
     a.capacity = cap;
     a.meta.capacity = cap;
+    this._ensurePalletCarrier(a);
     let lane = Number(a.meta.carrierLane);
     if(!isFinite(lane) || lane < 0) lane = 0;
     a.meta.carrierLane = lane;
@@ -696,10 +1000,17 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(activeIn < 0 || targetSlot !== activeIn) return false;
     if(!this._currentAgv || this._departingAgv) return false;
     if(!this._canAcceptWorkInState()) return false;
-    const cap = this._currentAgv.capacity || 0;
-    const load = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
-    if(cap <= 0 || load >= cap) return false;
-    return true;
+    return this._carrierHasWorkCapacity(this._currentAgv);
+  }
+
+  canAcceptPalletInput(slotIndex){
+    const activeIn = this._palletInSlotForLane(this._currentCarrierLane);
+    const slotNum = Number(slotIndex);
+    const targetSlot = isFinite(slotNum) ? slotNum : slotIndex;
+    if(activeIn < 0 || targetSlot !== activeIn) return false;
+    if(!this._currentAgv || this._departingAgv) return false;
+    if(!this._canAcceptWorkInState()) return false;
+    return this._carrierHasPalletCapacity(this._currentAgv);
   }
 
   _setState(name, kind){
@@ -791,21 +1102,37 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _carrierAnimInfo(agv){
     const carrier = agv || this._currentAgv || this._departingAgv || null;
     if(!carrier){
-      return { kind: 'carrier', id: '', workCount: 0, capacity: 0 };
+      return { kind: 'carrier', id: '', workCount: 0, capacity: 0, palletCount: 0, palletCapacity: 0 };
     }
-    const workCount = Array.isArray(carrier.cargo) ? carrier.cargo.length : 0;
-    const capacity = Math.max(0, Math.round(Number(carrier.capacity || carrier.meta?.capacity || 0) || 0));
+    const isPallet = this._isPalletCarrier(carrier);
+    const workCount = this._carrierWorkCount(carrier);
+    let capacity = Math.max(0, Math.round(Number(carrier.capacity || carrier.meta?.capacity || 0) || 0));
+    let palletCount = 0;
+    let palletCapacity = 0;
+    if(isPallet){
+      this._ensurePalletCarrier(carrier);
+      palletCount = Array.isArray(carrier.pallets) ? carrier.pallets.length : 0;
+      palletCapacity = Math.max(0, Math.round(Number(carrier.meta?.palletCapacity || 0) || 0));
+      capacity = 0;
+      if(Array.isArray(carrier.pallets)){
+        for(const pallet of carrier.pallets){
+          capacity += Math.max(0, Math.round(Number(pallet?.capacity || 0) || 0));
+        }
+      }
+    }
     return {
       kind: 'carrier',
       id: String(carrier.id ?? ''),
       workCount,
-      capacity
+      capacity,
+      palletCount,
+      palletCapacity
     };
   }
 
   _carrierAnimInfoKey(info){
     if(!info || typeof info !== 'object') return '';
-    return `${String(info.id || '')}|${Number(info.workCount) || 0}|${Number(info.capacity) || 0}`;
+    return `${String(info.id || '')}|${Number(info.workCount) || 0}|${Number(info.capacity) || 0}|${Number(info.palletCount) || 0}|${Number(info.palletCapacity) || 0}`;
   }
 
   _setAgvOutWaitIcon(active){
@@ -853,6 +1180,8 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
        this._stateName.startsWith('workIn_process') ||
        this._stateName.startsWith('workOut_wait') ||
        this._stateName.startsWith('workOut_down') ||
+       this._stateName.startsWith('palletOut_wait') ||
+       this._stateName.startsWith('palletOut_down') ||
        this._stateName === 'agvOut_wait');
     this._setAgvOutWaitIcon(shouldShow);
   }
@@ -862,8 +1191,10 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       this._enterAgvOutWait();
       return;
     }
-    const cap = this._currentAgv.capacity || 1;
-    const currentLoad = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
+    const cap = this._isPalletCarrier(this._currentAgv)
+      ? Number.MAX_SAFE_INTEGER
+      : (this._currentAgv.capacity || 1);
+    const currentLoad = this._carrierWorkCount(this._currentAgv);
     this._loadIndex = currentLoad;
     const activeIn = this._resolveActiveWorkInSlot();
     const hasActiveWorkIn = activeIn >= 0 && this.inputs && this.inputs[activeIn] && this.inputs[activeIn].link != null;
@@ -881,7 +1212,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const now = simNow();
     const duration = Math.max(0,(this.properties.processTime||0)*1000);
     this._until = now + duration;
-    const w = this._currentAgv && this._currentAgv.cargo[this._currentAgv.cargo.length-1];
+    const w = this._currentWork;
     const inSlot = this._resolveActiveWorkInSlot();
     if(w && inSlot >= 0) this._triggerAnim(inSlot,'work',duration,{id:w.id, t:w.type});
     if(duration===0) this._handleWorkInProcess(now);
@@ -889,7 +1220,9 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   _handleWorkInProcess(now){
     if(now < this._until) return;
-    const cap = this._currentAgv ? this._currentAgv.capacity : 0;
+    const cap = this._currentAgv
+      ? (this._isPalletCarrier(this._currentAgv) ? Number.MAX_SAFE_INTEGER : (this._currentAgv.capacity || 0))
+      : 0;
     this._currentWork = null;
     this._payload = null;
     if(this._hasWorkInLinkForLane(this._currentCarrierLane) && this._currentAgv && this._loadIndex < cap){
@@ -904,17 +1237,32 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       this._enterAgvOutWait();
       return;
     }
-    this._pendingUnload = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.slice() : [];
+    this._pendingUnload = this._carrierBuildWorkUnloadQueue(this._currentAgv);
     this._unloadIndex = 0;
     this._workOffer = null;
     this._workOfferArmed = false;
     this._until = simNow();
-    if(!this._pendingUnload.length || !this._hasWorkOutLinkForLane(this._currentCarrierLane)){
+    const hasWorkOffer = this._pendingUnload.length > 0 && this._hasWorkOutLinkForLane(this._currentCarrierLane);
+    if(hasWorkOffer){
+      this._setState('workOut_wait_1','WAIT');
+      return;
+    }
+    if(this._isPalletCarrier(this._currentAgv)){
+      this._pendingPalletUnload = this._carrierBuildPalletUnloadQueue(this._currentAgv);
+      if(this._pendingPalletUnload.length > 0 && this._hasPalletOutLinkForLane(this._currentCarrierLane)){
+        this._palletUnloadIndex = 0;
+        this._palletOffer = null;
+        this._palletOfferArmed = false;
+        this._palletOfferAccepted = false;
+        this._setState('palletOut_wait_1','WAIT');
+        return;
+      }
+    }
+    if(!hasWorkOffer){
       this._pendingUnload.length = 0;
       this._enterAgvOutWait();
       return;
     }
-    this._setState('workOut_wait_1','WAIT');
   }
 
   _startWorkOutDown(){
@@ -942,7 +1290,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _completeWorkOutOffer(){
     if(!this._workOffer) return;
     this._pendingUnload.shift();
-    if(this._currentAgv && Array.isArray(this._currentAgv.cargo)) this._currentAgv.cargo.shift();
+    if(this._currentAgv) this._carrierRemoveWork(this._currentAgv, this._workOffer);
     this._workOffer = null;
     this._workOfferArmed = false;
     this._workOfferAccepted = false;
@@ -956,11 +1304,73 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     }
   }
 
+  _beginPalletUnloadPhase(){
+    if(!this._currentAgv || !this._isPalletCarrier(this._currentAgv)){
+      this._enterAgvOutWait();
+      return;
+    }
+    this._pendingPalletUnload = this._carrierBuildPalletUnloadQueue(this._currentAgv);
+    this._palletUnloadIndex = 0;
+    this._palletOffer = null;
+    this._palletOfferArmed = false;
+    this._palletOfferAccepted = false;
+    if(!this._pendingPalletUnload.length || !this._hasPalletOutLinkForLane(this._currentCarrierLane)){
+      this._pendingPalletUnload.length = 0;
+      this._enterAgvOutWait();
+      return;
+    }
+    this._setState('palletOut_wait_1','WAIT');
+  }
+
+  _startPalletOutDown(){
+    if(!this._pendingPalletUnload.length){
+      this._enterAgvOutWait();
+      return;
+    }
+    const ord = this._palletUnloadIndex + 1;
+    this._setState(`palletOut_down_${ord}`,'DOWN');
+    this._palletOffer = this._pendingPalletUnload[0];
+    this._palletOfferArmed = true;
+    this._palletOfferAccepted = false;
+    const now = simNow();
+    this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    this._emitPalletOffer();
+  }
+
+  _emitPalletOffer(){
+    const outSlot = this._palletOutSlotForLane(this._currentCarrierLane);
+    if(outSlot < 0) return;
+    this._clearPalletOutputs();
+    try{ this.setOutputData(outSlot, this._palletOffer); }catch(_e){}
+  }
+
+  _completePalletOutOffer(){
+    if(!this._palletOffer) return;
+    this._pendingPalletUnload.shift();
+    if(this._currentAgv) this._carrierRemovePallet(this._currentAgv, this._palletOffer);
+    this._palletOffer = null;
+    this._palletOfferArmed = false;
+    this._palletOfferAccepted = false;
+    this._palletUnloadIndex++;
+    this._clearPalletOutputs();
+    if(this._pendingPalletUnload.length){
+      const nextOrd = this._palletUnloadIndex + 1;
+      this._setState(`palletOut_wait_${nextOrd}`,'WAIT');
+    }else{
+      this._enterAgvOutWait();
+    }
+  }
+
   _enterAgvOutWait(){
     this._pendingUnload.length = 0;
     this._workOffer = null;
     this._workOfferArmed = false;
+    this._pendingPalletUnload.length = 0;
+    this._palletOffer = null;
+    this._palletOfferArmed = false;
+    this._palletOfferAccepted = false;
     this._clearWorkOutputs();
+    this._clearPalletOutputs();
     this._clearCarrierOutputs();
     this._setAgvOutWaitIcon(false);
     if(!this._currentAgv){
@@ -1014,6 +1424,22 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     return true;
   }
 
+  _downstreamPalletReady(){
+    const outSlot = this._palletOutSlotForLane(this._currentCarrierLane);
+    const out = this.outputs[outSlot];
+    if(!out || !out.links || out.links.length === 0) return false;
+    for(const id of out.links){
+      const link = this.graph.links[id]; if(!link) continue;
+      const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+      if(typeof t.canAcceptPalletInput === 'function'){
+        if(!t.canAcceptPalletInput(link.target_slot, this._palletOffer)) return false;
+        continue;
+      }
+      if(typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
+    }
+    return true;
+  }
+
   _workAccepted(){
     if(!this._workOffer) return false;
     const outSlot = this._workOutSlotForLane(this._currentCarrierLane);
@@ -1024,7 +1450,24 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(typeof t._state === 'undefined') return true;
       if(t._currentWork === this._workOffer || t._payload === this._workOffer) return true;
+      if(t._lastWorkInRef === this._workOffer) return true;
       if(Array.isArray(t._workQueue) && t._workQueue.includes(this._workOffer)) return true;
+    }
+    return false;
+  }
+
+  _palletAccepted(){
+    if(!this._palletOffer) return false;
+    const outSlot = this._palletOutSlotForLane(this._currentCarrierLane);
+    const out = this.outputs[outSlot];
+    if(!out || !out.links) return false;
+    for(const id of out.links){
+      const link = this.graph.links[id]; if(!link) continue;
+      const t = this.graph.getNodeById(link.target_id); if(!t) continue;
+      if(typeof t._state === 'undefined') return true;
+      if(t._pallet === this._palletOffer || t._payload === this._palletOffer) return true;
+      if(t._lastPalletInRef === this._palletOffer) return true;
+      if(Array.isArray(t._palletQueue) && t._palletQueue.includes(this._palletOffer)) return true;
     }
     return false;
   }
@@ -1076,7 +1519,12 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._pendingUnload.length = 0;
     this._workOffer = null;
     this._workOfferArmed = false;
+    this._pendingPalletUnload.length = 0;
+    this._palletOffer = null;
+    this._palletOfferArmed = false;
+    this._palletOfferAccepted = false;
     this._clearCarrierOutputs();
+    this._clearPalletOutputs();
     this._setAgvOutWaitIcon(false);
     this._currentWork = null;
     this._payload = null;
@@ -1104,8 +1552,10 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       // Do not wait forever for "full load". If partially loaded and no input is
       // currently available, proceed with unload/depart to avoid route deadlocks.
       if(inWorkIdle && this._currentAgv){
-        const load = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
-        const cap = Math.max(0, Number(this._currentAgv.capacity) || 0);
+        const load = this._carrierWorkCount(this._currentAgv);
+        const cap = this._isPalletCarrier(this._currentAgv)
+          ? Number.MAX_SAFE_INTEGER
+          : Math.max(0, Number(this._currentAgv.capacity) || 0);
         if(load > 0 && load < cap){
           this._beginUnloadPhase();
         }
@@ -1113,16 +1563,45 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       return;
     }
     if(this._lastWorkInRefBySlot[inSlot] === w) return;
-    if(this._currentAgv.cargo.length >= this._currentAgv.capacity) return;
+    if(!this._carrierHasWorkCapacity(this._currentAgv)){
+      if(inWorkIdle) this._beginUnloadPhase();
+      return;
+    }
     this._lastWorkInRefBySlot[inSlot] = w;
     if(inAgvOutWait){
       this._setAgvOutWaitIcon(false);
     }
     this._currentWork = w;
     this._payload = w;
-    this._currentAgv.cargo.push(w);
-    this._loadIndex = this._currentAgv.cargo.length;
+    if(!this._carrierPushWork(this._currentAgv, w)) return;
+    this._loadIndex = this._carrierWorkCount(this._currentAgv);
     this._startWorkInProcess();
+  }
+
+  _capturePalletInput(){
+    if(!this._currentAgv) return;
+    if(this._departingAgv) return;
+    if(!this._isPalletCarrier(this._currentAgv)) return;
+    const inWorkIdle = this._stateName.startsWith('workIn_idle');
+    const inAgvOutWait = this._stateName === 'agvOut_wait';
+    if(!inWorkIdle && !inAgvOutWait) return;
+    const inSlot = this._palletInSlotForLane(this._currentCarrierLane);
+    const hasActivePalletIn = inSlot >= 0 && this.inputs && this.inputs[inSlot] && this.inputs[inSlot].link != null;
+    if(inSlot < 0 || !hasActivePalletIn){
+      if(inSlot >= 0) this._lastPalletInRefBySlot[inSlot] = null;
+      return;
+    }
+    const pallet = this.getInputData(inSlot);
+    if(!pallet){
+      this._lastPalletInRefBySlot[inSlot] = null;
+      return;
+    }
+    if(this._lastPalletInRefBySlot[inSlot] === pallet) return;
+    if(!this._carrierPushPallet(this._currentAgv, pallet)) return;
+    this._lastPalletInRefBySlot[inSlot] = pallet;
+    if(inAgvOutWait){
+      this._setAgvOutWaitIcon(false);
+    }
   }
 
   _handleAgvProcess(now){
@@ -1135,7 +1614,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       this._setState('workOut_wait_1','WAIT');
     }
     if(!this._pendingUnload.length){
-      this._enterAgvOutWait();
+      this._beginPalletUnloadPhase();
       return;
     }
     if(this._downstreamWorkReady()) this._startWorkOutDown();
@@ -1158,6 +1637,35 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       }
     }
     if(this._workOfferAccepted && now >= this._until) this._completeWorkOutOffer();
+  }
+
+  _handlePalletOutWait(){
+    if(this._pendingPalletUnload.length && this._palletUnloadIndex === 0 && !this._palletOffer && this._stateName !== 'palletOut_wait_1'){
+      this._setState('palletOut_wait_1','WAIT');
+    }
+    if(!this._pendingPalletUnload.length){
+      this._enterAgvOutWait();
+      return;
+    }
+    if(this._downstreamPalletReady()) this._startPalletOutDown();
+  }
+
+  _handlePalletOutDown(now){
+    if(!this._palletOffer){
+      if(this._pendingPalletUnload.length) this._setState(`palletOut_wait_${this._palletUnloadIndex+1}`,'WAIT');
+      else this._enterAgvOutWait();
+      return;
+    }
+    if(!this._palletOfferAccepted){
+      if(this._palletOfferArmed) this._emitPalletOffer();
+      if(this._palletAccepted()){
+        this._palletOfferAccepted = true;
+        this._clearPalletOutputs();
+      }else if(now >= this._until){
+        this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+      }
+    }
+    if(this._palletOfferAccepted && now >= this._until) this._completePalletOutOffer();
   }
 
   _handleAgvOutWait(){
@@ -1197,12 +1705,15 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._captureAgvInput();
     if(this._currentAgv) this._applyCarrierConfig(this._currentAgv);
     if(this._departingAgv) this._applyCarrierConfig(this._departingAgv);
+    this._capturePalletInput();
     this._captureWorkInput();
 
     if(this._stateName === 'agv_process') this._handleAgvProcess(now);
     else if(this._stateName.startsWith('workIn_process')) this._handleWorkInProcess(now);
     else if(this._stateName.startsWith('workOut_wait')) this._handleWorkOutWait();
     else if(this._stateName.startsWith('workOut_down')) this._handleWorkOutDown(now);
+    else if(this._stateName.startsWith('palletOut_wait')) this._handlePalletOutWait();
+    else if(this._stateName.startsWith('palletOut_down')) this._handlePalletOutDown(now);
     else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait();
     else if(this._stateName === 'agvOut_down') this._handleAgvOutDown(now);
 
@@ -1211,9 +1722,10 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       const prev = this._stateName;
       if(this._stateName.startsWith('workIn_idle')) this._captureWorkInput();
       if(this._stateName.startsWith('workOut_wait')) this._handleWorkOutWait();
+      else if(this._stateName.startsWith('palletOut_wait')) this._handlePalletOutWait();
       else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait();
       if(this._stateName === prev) break;
-      if(this._stateName.startsWith('workOut_down') || this._stateName === 'agvOut_down') break;
+      if(this._stateName.startsWith('workOut_down') || this._stateName.startsWith('palletOut_down') || this._stateName === 'agvOut_down') break;
     }
 
     this._refreshAgvWaitIcon();
@@ -1244,6 +1756,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._initialCarrierSpawned = !!(this._currentAgv || this._departingAgv);
     this._ensureMinCarrierPorts(1);
     this._ensureWorkLanePairs(0);
+    this._ensurePalletLanePairs(1);
     this._syncSignalOutputs();
     window.refreshFlipIO(this);
   }

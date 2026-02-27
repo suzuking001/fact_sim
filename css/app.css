@@ -490,6 +490,17 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
   white-space: nowrap;
   box-shadow: 0 2px 6px rgba(59,130,246,0.15);
 }
+.shortcut-select{
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 12px;
+}
 .shortcut-spacer{
   display: inline-block;
   width: 56px;

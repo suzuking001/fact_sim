@@ -489,6 +489,8 @@
       if(type === 'sink' || type.endsWith('/sink')) return false;
       if(type === 'note' || type.endsWith('/note')) return false;
       if(type === 'carrierconfig' || type.endsWith('/carrierconfig')) return false;
+      if(type === 'palletcarrierconfig' || type.endsWith('/palletcarrierconfig')) return false;
+      if(type === 'palletcarrier' || type.endsWith('/palletcarrier')) return false;
       if(type === 'carrierhome' || type.endsWith('/carrierhome')) return false;
       const title = String(node.title || '').toLowerCase();
       if(title === 'source' || title === 'sink') return false;

@@ -14,97 +14,75 @@ var App = window.App || (window.App = {});
     return token || fallback;
   };
 
-  const protocol = String(window.location?.protocol || '').toLowerCase();
   const host = sanitizeToken(window.location?.hostname, 'local');
   const path = sanitizeToken(window.location?.pathname, 'root');
   const namespace = sanitizeToken(`fact_sim_${host}`, 'fact_sim');
   const key = sanitizeToken(`visits_${path}`, 'visits');
-  const counterApiEndpoint = `https://api.counterapi.dev/v1/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}/up`;
-  const counterApiReadEndpoint = `https://api.counterapi.dev/v1/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
-  const countApiEndpoint = `https://api.countapi.xyz/hit/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
-  const countApiReadEndpoint = `https://api.countapi.xyz/get/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
+  const counterUpEndpoint = `https://api.counterapi.dev/v1/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}/up`;
+  const counterReadEndpoint = `https://api.counterapi.dev/v1/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
   const incrementFlagKey = `fact_sim_counter_incremented_${namespace}_${key}`;
+  const localFallbackKey = `fact_sim_counter_local_${namespace}_${key}`;
 
   wrap.title = `Public access counter (CounterAPI): ${namespace}/${key}`;
-
-  if(protocol === 'file:'){
-    valueEl.textContent = 'N/A';
-    wrap.title = `Visits disabled on file://. Use http(s) to enable counter.`;
-    return;
-  }
-
   valueEl.textContent = '...';
-  const fetchFromCounterApi = ()=>{
-    return fetch(counterApiEndpoint, { method: 'GET', mode: 'cors', cache: 'no-store' })
-      .then((res)=>{
-        if(!res.ok) throw new Error(`CounterAPI HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data)=>{
-        const count = Number(data && data.count);
-        if(!Number.isFinite(count)) throw new Error('CounterAPI response has no numeric count');
-        return { count, provider: 'CounterAPI' };
-      });
+
+  const readLocalFallback = ()=>{
+    try{
+      const raw = window.localStorage ? window.localStorage.getItem(localFallbackKey) : null;
+      const n = Number(raw);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+    }catch(_e){
+      return 0;
+    }
   };
 
-  const fetchFromCounterApiRead = ()=>{
-    return fetch(counterApiReadEndpoint, { method: 'GET', mode: 'cors', cache: 'no-store' })
-      .then((res)=>{
-        if(!res.ok) throw new Error(`CounterAPI(read) HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data)=>{
-        const count = Number(data && data.count);
-        if(!Number.isFinite(count)) throw new Error('CounterAPI(read) response has no numeric count');
-        return { count, provider: 'CounterAPI' };
-      });
+  const writeLocalFallback = (n)=>{
+    const safe = Math.max(0, Math.floor(Number(n) || 0));
+    try{
+      if(window.localStorage) window.localStorage.setItem(localFallbackKey, String(safe));
+    }catch(_e){}
+    return safe;
   };
 
-  const fetchFromCountApi = ()=>{
-    return fetch(countApiEndpoint, { method: 'GET', mode: 'cors', cache: 'no-store' })
-      .then((res)=>{
-        if(!res.ok) throw new Error(`CountAPI HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data)=>{
-        const count = Number(data && data.value);
-        if(!Number.isFinite(count)) throw new Error('CountAPI response has no numeric value');
-        return { count, provider: 'CountAPI' };
-      });
+  const bumpLocalFallback = ()=>{
+    const next = readLocalFallback() + 1;
+    return writeLocalFallback(next);
   };
 
-  const fetchFromCountApiRead = ()=>{
-    return fetch(countApiReadEndpoint, { method: 'GET', mode: 'cors', cache: 'no-store' })
+  const fetchJson = (url, label)=>{
+    return fetch(url, { method: 'GET', mode: 'cors', cache: 'no-store' })
       .then((res)=>{
-        if(!res.ok) throw new Error(`CountAPI(read) HTTP ${res.status}`);
+        if(!res.ok){
+          const err = new Error(`${label} HTTP ${res.status}`);
+          err.status = res.status;
+          throw err;
+        }
         return res.json();
-      })
-      .then((data)=>{
-        const count = Number(data && data.value);
-        if(!Number.isFinite(count)) throw new Error('CountAPI(read) response has no numeric value');
-        return { count, provider: 'CountAPI' };
       });
   };
 
   const fetchIncrement = ()=>{
-    return fetchFromCounterApi()
-      .catch((err1)=>{
-        console.warn('[counter] CounterAPI increment failed, trying CountAPI', err1);
-        return fetchFromCountApi().catch((err2)=>{
-          const combined = new Error(`${err1 && err1.message ? err1.message : err1} | ${err2 && err2.message ? err2.message : err2}`);
-          throw combined;
-        });
+    return fetchJson(counterUpEndpoint, 'CounterAPI(up)')
+      .then((data)=>{
+        const count = Number(data && data.count);
+        if(!Number.isFinite(count)) throw new Error('CounterAPI(up) response has no numeric count');
+        return { count, provider: 'CounterAPI' };
       });
   };
 
   const fetchReadOnly = ()=>{
-    return fetchFromCounterApiRead()
-      .catch((err1)=>{
-        console.warn('[counter] CounterAPI read failed, trying CountAPI read', err1);
-        return fetchFromCountApiRead().catch((err2)=>{
-          const combined = new Error(`${err1 && err1.message ? err1.message : err1} | ${err2 && err2.message ? err2.message : err2}`);
-          throw combined;
-        });
+    return fetchJson(counterReadEndpoint, 'CounterAPI(read)')
+      .then((data)=>{
+        const count = Number(data && data.count);
+        if(!Number.isFinite(count)) throw new Error('CounterAPI(read) response has no numeric count');
+        return { count, provider: 'CounterAPI' };
+      })
+      .catch((err)=>{
+        // Auto-heal when record does not exist yet.
+        if(err && (err.status === 400 || err.status === 404)){
+          return fetchIncrement();
+        }
+        throw err;
       });
   };
 
@@ -129,14 +107,20 @@ var App = window.App || (window.App = {});
     incrementDone = window.sessionStorage && window.sessionStorage.getItem(incrementFlagKey) === '1';
   }catch(_e){}
 
+  const renderCount = (count, provider)=>{
+    const safe = Math.max(0, Math.floor(Number(count) || 0));
+    valueEl.textContent = safe.toLocaleString();
+    wrap.title = `Public access counter (${provider}): ${namespace}/${key}`;
+  };
+
   const loadCounter = (mode)=>{
     const shouldIncrement = (mode !== 'read') && !incrementDone;
     const request = shouldIncrement ? fetchIncrement() : fetchReadOnly();
 
     request
       .then((result)=>{
-        valueEl.textContent = result.count.toLocaleString();
-        wrap.title = `Public access counter (${result.provider}): ${namespace}/${key}`;
+        const safe = writeLocalFallback(result.count);
+        renderCount(safe, result.provider);
         retryCount = 0;
         if(shouldIncrement){
           incrementDone = true;
@@ -146,9 +130,9 @@ var App = window.App || (window.App = {});
         }
       })
       .catch((err)=>{
-        console.warn('[counter] failed to fetch', err);
-        valueEl.textContent = 'N/A';
-        wrap.title = `Counter unavailable (${err && err.message ? err.message : 'network/CORS/ad-block'})`;
+        console.warn('[counter] failed to fetch, using local fallback', err);
+        const localCount = shouldIncrement ? bumpLocalFallback() : readLocalFallback();
+        renderCount(localCount, 'local');
         scheduleRetry('read');
       });
   };

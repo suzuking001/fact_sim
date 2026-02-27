@@ -1,0 +1,125 @@
+{
+  "last_node_id": 7,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "factory/source",
+      "pos": [80, 120],
+      "title": "Source",
+      "inputs": [],
+      "outputs": [
+        { "name": "workOut", "type": 0, "links": [1] }
+      ],
+      "properties": {
+        "sequence": "A,B,C"
+      }
+    },
+    {
+      "id": 2,
+      "type": "factory/carrierroute",
+      "pos": [420, 220],
+      "title": "Carrier Route IN",
+      "inputs": [
+        { "name": "carrierIn1", "type": "AGV", "link": null },
+        { "name": "palletIn1", "type": "PALLET", "link": null }
+      ],
+      "outputs": [
+        { "name": "carrierOut1", "type": "AGV", "links": null },
+        { "name": "palletOut1", "type": "PALLET", "links": [2] }
+      ],
+      "properties": {
+        "processTime": 1,
+        "downTime": 0.3,
+        "initialCarrier": "Carrier-IN",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 3,
+      "type": "factory/carrierroute",
+      "pos": [820, 220],
+      "title": "Carrier Route OUT",
+      "inputs": [
+        { "name": "carrierIn1", "type": "AGV", "link": null },
+        { "name": "palletIn1", "type": "PALLET", "link": 3 }
+      ],
+      "outputs": [
+        { "name": "carrierOut1", "type": "AGV", "links": null },
+        { "name": "palletOut1", "type": "PALLET", "links": null }
+      ],
+      "properties": {
+        "processTime": 1,
+        "downTime": 0.3,
+        "initialCarrier": "Carrier-OUT",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 4,
+      "type": "factory/palletcarrierconfig",
+      "pos": [420, 40],
+      "title": "Pallet Carrier Config IN",
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "carrierId": "Carrier-IN",
+        "palletCapacity": 1,
+        "palletWorkCapacity": 4,
+        "initialPalletIds": "P-1"
+      }
+    },
+    {
+      "id": 5,
+      "type": "factory/palletcarrierconfig",
+      "pos": [820, 40],
+      "title": "Pallet Carrier Config OUT",
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "carrierId": "Carrier-OUT",
+        "palletCapacity": 2,
+        "palletWorkCapacity": 4,
+        "initialPalletIds": ""
+      }
+    },
+    {
+      "id": 6,
+      "type": "factory/station",
+      "pos": [620, 40],
+      "title": "Station",
+      "inputs": [
+        { "name": "workIn", "type": 0, "link": 1 },
+        { "name": "palletIn", "type": "PALLET", "link": 2 }
+      ],
+      "outputs": [
+        { "name": "workOut", "type": 0, "links": [4] },
+        { "name": "palletOut", "type": "PALLET", "links": [3] }
+      ],
+      "properties": {
+        "processTime": 1,
+        "downTime": 1,
+        "palletWorkCapacity": 4
+      }
+    },
+    {
+      "id": 7,
+      "type": "factory/sink",
+      "pos": [980, 40],
+      "title": "Sink",
+      "inputs": [
+        { "name": "workIn", "type": 0, "link": 4 }
+      ],
+      "outputs": [],
+      "properties": {}
+    }
+  ],
+  "links": [
+    [1, 1, 0, 6, 0, 0],
+    [2, 2, 1, 6, 1, "PALLET"],
+    [3, 6, 1, 3, 1, "PALLET"],
+    [4, 6, 0, 7, 0, 0]
+  ],
+  "groups": [],
+  "version": 0.4
+}

@@ -31,6 +31,16 @@ window.NODES_CONFIG = {
   carrierConfig: {
     capacity: 2,
   },
+  palletCarrierConfig: {
+    palletCapacity: 2,
+    palletWorkCapacity: 6,
+    initialPalletIds: 'P-1'
+  },
+  station: {
+    processTimeSec: 2,
+    downTimeSec: 3,
+    palletWorkCapacity: 6
+  },
   // Backward compatibility key (old name).
   carrierHome: {
     capacity: 2,

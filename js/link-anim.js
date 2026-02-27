@@ -169,6 +169,8 @@ class LinkAnimator{
              originNode._stateName.startsWith('workIn_process') ||
              originNode._stateName.startsWith('workOut_wait') ||
              originNode._stateName.startsWith('workOut_down') ||
+             originNode._stateName.startsWith('palletOut_wait') ||
+             originNode._stateName.startsWith('palletOut_down') ||
              originNode._stateName === 'agvOut_wait');
           if(originNode._state !== 'WAIT' && !allowAgvWait){
             anim._tailMiss = (anim._tailMiss || 0) + 1;
@@ -195,7 +197,10 @@ class LinkAnimator{
         [x,y] = this._bezierPoint(start, startDir, end, endDir, eased);
       }
       ctx.beginPath();
-      ctx.fillStyle = anim.type === 'agv' ? '#5dade2' : '#d5d8dc';
+      ctx.fillStyle =
+        anim.type === 'agv' ? '#5dade2' :
+        anim.type === 'pallet' ? '#2ecc71' :
+        '#d5d8dc';
       ctx.arc(x, y, iconRadius, 0, Math.PI * 2);
       ctx.fill();
       // label
@@ -221,6 +226,12 @@ class LinkAnimator{
         }else{
           label = info.id ? `AGV:${info.id}` : 'AGV';
         }
+      }else if(anim.type === 'pallet'){
+        const id = info.id ? String(info.id) : 'Pallet';
+        const countRaw = Number(info.workCount);
+        const hasCount = Number.isFinite(countRaw);
+        if(hasCount) label = `${id} (${Math.max(0, Math.floor(countRaw))})`;
+        else label = id;
       }else if(anim.type === 'work'){
         const id = info.id ?? '';
         const t = info.t ?? info.type ?? '';

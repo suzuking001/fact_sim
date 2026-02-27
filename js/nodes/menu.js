@@ -185,7 +185,8 @@ window.runNodeMutation = runNodeMutation;
 
   const SKIP_TYPES = new Set([
     'factory/carrierhome', // legacy alias (keep load compatibility only)
-    'factory/merge2'       // legacy alias (keep load compatibility only)
+    'factory/merge2',      // legacy alias (keep load compatibility only)
+    'factory/palletcarrier' // legacy alias (keep load compatibility only)
   ]);
 
   const rawOnMenuAdd = LiteGraph.LGraphCanvas.onMenuAdd;

@@ -9,9 +9,9 @@
   <!-- LiteGraph -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/css/litegraph.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
-  <script src="js/nodes-config.js?v=20260223a"></script>
+  <script src="js/nodes-config.js?v=20260226a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260225c" />
+    <link rel="stylesheet" href="css/app.css?v=20260226a" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -33,6 +33,7 @@
         <option value="branch">Branch</option>
         <option value="shuttle_line5">Shuttle Line (5 Stage)</option>
         <option value="carrier_config">Carrier Config Example</option>
+        <option value="pallet_station_demo">Pallet Station Demo</option>
         <option value="sample_line1">Sample Line1</option>
       </select>
       <div id="accessCounter" class="accessCounter" title="Public access counter (CounterAPI)">
@@ -56,7 +57,9 @@
           <option value="branch">Branch</option>
           <option value="agvroute">AGV Route</option>
           <option value="carrierconfig">Carrier Config</option>
+          <option value="palletcarrierconfig">Pallet Carrier Config</option>
           <option value="carrierroute">Carrier Route</option>
+          <option value="station">Station</option>
           <option value="merge">Merge</option>
           <option value="join">Join</option>
         </select>
@@ -138,6 +141,29 @@
           <span class="shortcut-action">Fit to Screen</span>
           <span class="shortcut-key">Mouse Wheel x2</span>
           <button id="btnFit" class="shortcut-btn">Run</button>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">Auto Layout</span>
+          <select id="autoLayoutMode" class="shortcut-select" title="Auto layout mode">
+            <option value="simple">Simple</option>
+            <option value="flow" selected>Flow</option>
+            <option value="flow-group">Flow + Group</option>
+          </select>
+          <button id="btnAutoLayout" class="shortcut-btn">Run</button>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">Selection Layout</span>
+          <select id="selectionLayoutMode" class="shortcut-select" title="Selection layout action">
+            <option value="align-left">Align Left</option>
+            <option value="align-right">Align Right</option>
+            <option value="align-top">Align Top</option>
+            <option value="align-bottom">Align Bottom</option>
+            <option value="align-center-x">Align Center X</option>
+            <option value="align-center-y">Align Center Y</option>
+            <option value="distribute-h">Distribute Horizontal</option>
+            <option value="distribute-v">Distribute Vertical</option>
+          </select>
+          <button id="btnSelectionLayout" class="shortcut-btn">Run</button>
         </div>
       </div>
     </div>
@@ -332,11 +358,11 @@ SOFTWARE.
   <script src="js/core.js?v=20260225d"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
-    <script src="js/nodes/menu.js?v=20260224b"></script>
+    <script src="js/nodes/menu.js?v=20260226a"></script>
     <script src="js/nodes/ioflip.js"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js?v=20260225b"></script>
+    <script src="js/link-anim.js?v=20260226b"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js?v=20260224b"></script>
   <script src="js/nodes/note.js?v=20260218c"></script>
@@ -349,17 +375,20 @@ SOFTWARE.
   <script src="js/nodes/join.js?v=20260224b"></script>
   <script src="js/nodes/agv_route.js?v=20260225c"></script>
   <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
-  <script src="js/nodes/carrier_config.js?v=20260223a"></script>
-  <script src="js/nodes/carrier_route.js?v=20260225c"></script>
-  <script src="js/nodes/carrier_route_ui.js?v=20260224b"></script>
+  <script src="js/nodes/carrier_config.js?v=20260226a"></script>
+  <script src="js/nodes/pallet_carrier_config.js?v=20260226a"></script>
+  <script src="js/nodes/carrier_route.js?v=20260226a"></script>
+  <script src="js/nodes/carrier_route_ui.js?v=20260226a"></script>
+  <script src="js/nodes/station.js?v=20260226c"></script>
   <script src="js/nodes/sink.js?v=20260226a"></script>
-  <script src="js/nodes/register.js?v=20260222a"></script>
+  <script src="js/nodes/register.js?v=20260226a"></script>
   <script src="sample/simple.js?v=20260221b"></script>
   <script src="sample/branch.js?v=20260221b"></script>
   <script src="sample/shuttle_line5.js?v=20260221b"></script>
   <script src="sample/carrier.js?v=20260223a"></script>
+  <script src="sample/pallet_station_demo.js?v=20260226a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
-  <script src="js/timeline.js?v=20260225a"></script>
+  <script src="js/timeline.js?v=20260226a"></script>
   <script src="js/app/state.js?v=20260225b"></script>
   <script src="js/app/stop-groups.js?v=20260225c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
@@ -368,14 +397,14 @@ SOFTWARE.
   <script src="js/app/benchmark.js?v=20260222a"></script>
   <script src="js/app/history.js?v=20260222a"></script>
   <script src="js/app/selection.js?v=20260224a"></script>
-  <script src="js/app/fit.js?v=20260218a"></script>
+  <script src="js/app/fit.js?v=20260226c"></script>
   <script src="js/app/node-props-panel.js?v=20260220b"></script>
   <script src="js/app/timeline-init.js?v=20260218b"></script>
   <script src="js/app/graph-init.js?v=20260222a"></script>
-  <script src="js/app/examples.js?v=20260224b"></script>
+  <script src="js/app/examples.js?v=20260226a"></script>
   <script src="js/app/file-io.js?v=20260224b"></script>
-  <script src="js/app/access-counter.js?v=20260224b"></script>
-  <script src="js/app/ui.js?v=20260224a"></script>
+  <script src="js/app/access-counter.js?v=20260226a"></script>
+  <script src="js/app/ui.js?v=20260226c"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

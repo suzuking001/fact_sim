@@ -15,6 +15,39 @@ if(btnReset) btnReset.onclick = ()=>{ stopSimulation(); initGraph(); };
 const btnFit = document.getElementById('btnFit');
 if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());
 
+const btnAutoLayout = document.getElementById('btnAutoLayout');
+if(btnAutoLayout){
+  const layoutModeSelect = document.getElementById('autoLayoutMode');
+  btnAutoLayout.addEventListener('click', ()=>{
+    if(typeof autoLayoutGraph === 'function'){
+      const mode = String(layoutModeSelect?.value || 'flow');
+      if(!autoLayoutGraph({ mode, spacing:80, fit:true })){
+        App.showToast('Auto layout unavailable');
+      }
+    }
+  });
+}
+
+const btnSelectionLayout = document.getElementById('btnSelectionLayout');
+if(btnSelectionLayout){
+  const selectionLayoutMode = document.getElementById('selectionLayoutMode');
+  btnSelectionLayout.addEventListener('click', ()=>{
+    if(typeof applySelectionLayout !== 'function'){
+      App.showToast('Selection layout unavailable');
+      return;
+    }
+    const action = String(selectionLayoutMode?.value || 'align-left');
+    const ok = applySelectionLayout(action);
+    if(!ok){
+      if(action === 'distribute-h' || action === 'distribute-v'){
+        App.showToast('Select 3+ nodes for distribute');
+      }else{
+        App.showToast('Select 2+ nodes first');
+      }
+    }
+  });
+}
+
 const simModeSelect = document.getElementById('simModeSelect');
 if(simModeSelect){
   let currentMode = (App.setSimMode ? App.setSimMode('dt') : 'dt');
@@ -729,6 +762,16 @@ function beginGroupPlacement(group){
         { key:'capacity', label:'Carrier Capacity (work)', type:'number', min:1, step:1, default:2 }
       ]
     },
+    palletcarrierconfig:{
+      type:'factory/palletcarrierconfig',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Pallet Carrier Config', target:'title' },
+        { key:'carrierId', label:'Carrier ID', type:'text', default:'Carrier-1' },
+        { key:'palletCapacity', label:'Pallet Capacity (count)', type:'number', min:1, step:1, default:2 },
+        { key:'palletWorkCapacity', label:'Work Capacity / Pallet', type:'number', min:1, step:1, default:6 },
+        { key:'initialPalletIds', label:'Initial Pallet IDs (comma)', type:'textarea', default:'P-1' }
+      ]
+    },
     agvroute:{
       type:'factory/agvroute',
       props:[
@@ -747,6 +790,15 @@ function beginGroupPlacement(group){
         { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
         { key:'initialCarrier', label:'Initial Carrier ID', type:'text', default:'' },
         { key:'outSequence', label:'Carrier OUT Sequence (1-based, comma)', type:'textarea', default:'' }
+      ]
+    },
+    station:{
+      type:'factory/station',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Station', target:'title' },
+        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
+        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
+        { key:'palletWorkCapacity', label:'Pallet Work Capacity', type:'number', min:1, step:1, default:6 }
       ]
     }
   };

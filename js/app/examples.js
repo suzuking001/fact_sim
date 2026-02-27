@@ -12,6 +12,7 @@ const EXAMPLE_FILES = {
   branch: 'sample/branch.json',
   shuttle_line5: 'sample/shuttle_line5.json',
   carrier: 'sample/graph (3).json',
+  pallet_station_demo: 'sample/pallet_station_demo.json',
   sample_line1: 'sample/sample_line1.json'
 };
 
