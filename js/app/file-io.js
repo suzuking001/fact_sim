@@ -7,11 +7,113 @@ const SHARE_SCHEMA = 'fact-sim-share-v1';
 const _utf8Encoder = new TextEncoder();
 const _utf8Decoder = new TextDecoder();
 
+function _captureViewState(){
+  const out = { version: 1 };
+
+  try{
+    const ds = App.canvas && App.canvas.ds;
+    if(ds){
+      const scale = Number(ds.scale);
+      const ox = Number(ds.offset && ds.offset[0]);
+      const oy = Number(ds.offset && ds.offset[1]);
+      if(isFinite(scale) && isFinite(ox) && isFinite(oy)){
+        out.graph = { scale, offset: [ox, oy] };
+      }
+    }
+  }catch(_e){}
+
+  try{
+    const body = document.body;
+    const root = document.documentElement;
+    const dock = document.getElementById('timelineDock');
+    const cssHeight = parseFloat(getComputedStyle(root).getPropertyValue('--timeline-height'));
+    out.ui = {
+      sidebarHidden: !!body && body.classList.contains('sidebar-hidden'),
+      timelineHidden: !!body && body.classList.contains('timeline-hidden'),
+      timelineView: String((dock && dock.dataset && dock.dataset.view) || 'chart')
+    };
+    if(isFinite(cssHeight) && cssHeight > 0){
+      out.ui.timelineHeight = cssHeight;
+    }
+  }catch(_e){}
+
+  if(!out.graph && !out.ui) return null;
+  return out;
+}
+
+function _applyViewState(view){
+  if(!view || typeof view !== 'object') return false;
+  let applied = false;
+
+  try{
+    const graphView = view.graph;
+    const ds = App.canvas && App.canvas.ds;
+    if(graphView && ds){
+      const scale = Number(graphView.scale);
+      const rawOffset = graphView.offset;
+      const ox = Array.isArray(rawOffset) ? Number(rawOffset[0]) : Number(graphView.offsetX);
+      const oy = Array.isArray(rawOffset) ? Number(rawOffset[1]) : Number(graphView.offsetY);
+      if(isFinite(scale) && isFinite(ox) && isFinite(oy)){
+        let clampedScale = scale;
+        if(isFinite(Number(ds.min_scale))) clampedScale = Math.max(Number(ds.min_scale), clampedScale);
+        if(isFinite(Number(ds.max_scale))) clampedScale = Math.min(Number(ds.max_scale), clampedScale);
+        ds.scale = clampedScale;
+        if(!Array.isArray(ds.offset)) ds.offset = [0, 0];
+        ds.offset[0] = ox;
+        ds.offset[1] = oy;
+        applied = true;
+      }
+    }
+  }catch(_e){}
+
+  try{
+    const ui = view.ui;
+    if(ui && typeof ui === 'object'){
+      const body = document.body;
+      if(body){
+        if(typeof ui.sidebarHidden === 'boolean'){
+          body.classList.toggle('sidebar-hidden', ui.sidebarHidden);
+          try{ localStorage.setItem('sidebar-hidden', ui.sidebarHidden ? '1' : '0'); }catch(_e){}
+        }
+        if(typeof ui.timelineHidden === 'boolean'){
+          if(typeof App.setTimelineHidden === 'function'){
+            App.setTimelineHidden(ui.timelineHidden, { toast:false });
+          }else{
+            body.classList.toggle('timeline-hidden', ui.timelineHidden);
+          }
+        }
+      }
+
+      const h = Number(ui.timelineHeight);
+      if(isFinite(h) && h > 0){
+        document.documentElement.style.setProperty('--timeline-height', `${Math.round(h)}px`);
+      }
+
+      const timelineView = String(ui.timelineView || '').toLowerCase();
+      if((timelineView === 'chart' || timelineView === 'props') && typeof App.setTimelineDockView === 'function'){
+        App.setTimelineDockView(timelineView);
+      }
+    }
+  }catch(_e){}
+
+  try{
+    if(App.canvas && typeof App.canvas.setDirty === 'function'){
+      App.canvas.setDirty(true, true);
+    }
+  }catch(_e){}
+
+  return applied;
+}
+
 function _serializeGraph(){
   if(!App.graph) throw new Error('graph is not initialized');
   const serialized = App.graph.serialize();
   if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
     App.stopGroups.injectSerializedData(serialized, App.graph);
+  }
+  const viewState = _captureViewState();
+  if(viewState){
+    serialized.__factSimView = viewState;
   }
   return _compactGraphData(serialized);
 }
@@ -43,6 +145,7 @@ function _stripNodeScripts(data){
 function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
+  const viewState = data.__factSimView || null;
   const opts = options || {};
   const expectedRevision = Number(opts.expectedRevision);
   if(isFinite(expectedRevision)){
@@ -90,6 +193,9 @@ function _applyGraphData(data, options){
   if(typeof updateSimTime === 'function') updateSimTime();
   resetHistory();
   attachTimeline();
+  if(viewState){
+    _applyViewState(viewState);
+  }
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
   return true;
 }
