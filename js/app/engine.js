@@ -82,8 +82,9 @@ var App = window.App || (window.App = {});
     if(!isFinite(until)) return NaN;
     const pausedResumeMs = getPausedNodeResumeMs(node, nowMs);
     if(isFinite(pausedResumeMs)) return pausedResumeMs;
-    // Keep timed nodes schedulable even when their deadline is already overdue.
-    if(until <= nowMs + EPSILON_MS) return nowMs;
+    // Clamp only when overdue. If deadline is still in the future, keep original
+    // timestamp so strict node-side checks like `now < _until` remain consistent.
+    if(until <= nowMs) return nowMs;
     return until;
   }
 
@@ -100,7 +101,7 @@ var App = window.App || (window.App = {});
       return NaN;
     }
     if(!isFinite(until)) return NaN;
-    if(until <= nowMs + EPSILON_MS) return nowMs;
+    if(until <= nowMs) return nowMs;
     return until;
   }
 
@@ -573,7 +574,7 @@ var App = window.App || (window.App = {});
       while(true){
         const top = this._peekNextValid(nowMs);
         if(!top) break;
-        if(top.t > nowMs + EPSILON_MS) break;
+        if(top.t > nowMs) break;
         this.eventHeap.pop();
         this._markNodeDirty(top.nodeId);
         count++;
@@ -629,7 +630,7 @@ var App = window.App || (window.App = {});
         }
 
         let jumpMs = targetMs - nowMs;
-        if(jumpMs < EPSILON_MS) jumpMs = 0;
+        if(jumpMs < 0) jumpMs = 0;
 
         if(jumpMs > 0){
           const stepMs = Math.min(jumpMs, budgetMs);
