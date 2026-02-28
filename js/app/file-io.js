@@ -282,6 +282,76 @@ function _baseAppUrl(){
   return u;
 }
 
+function _appRootUrl(){
+  const u = _baseAppUrl();
+  const path = String(u.pathname || '/');
+  // When opened as "/project" (without trailing slash), treat it as a directory.
+  if(/\/[^\/]+\.[a-z0-9]+$/i.test(path)){
+    u.pathname = path.replace(/\/[^\/]*$/, '/');
+  }else if(!path.endsWith('/')){
+    u.pathname = `${path}/`;
+  }
+  return u;
+}
+
+function _embeddedShareTokenFromHtml(){
+  const globalToken = window.__FACT_SIM_EMBEDDED_TOKEN;
+  if(typeof globalToken === 'string' && globalToken.trim()){
+    return globalToken.trim();
+  }
+  const el = document.getElementById('factSimEmbeddedToken');
+  if(!el) return '';
+  const token = String(el.textContent || '').trim();
+  return token || '';
+}
+
+async function _loadExportHtmlTemplate(){
+  const root = _appRootUrl();
+  const url = new URL('index.html', root).toString();
+  try{
+    const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+    if(!res.ok) throw new Error(`template fetch HTTP ${res.status}`);
+    return await res.text();
+  }catch(_e){
+    return '<!DOCTYPE html>\n' + String(document.documentElement?.outerHTML || '');
+  }
+}
+
+function _injectEmbeddedTokenIntoHtml(htmlText, token){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(String(htmlText || ''), 'text/html');
+  if(!doc || !doc.documentElement) throw new Error('failed to parse export template');
+
+  const appBase = _appRootUrl().toString();
+  const head = doc.head || doc.getElementsByTagName('head')[0] || doc.documentElement;
+  let baseEl = head.querySelector('base[data-factsim-export]');
+  if(!baseEl){
+    baseEl = doc.createElement('base');
+    baseEl.setAttribute('data-factsim-export', '1');
+    if(head.firstChild) head.insertBefore(baseEl, head.firstChild);
+    else head.appendChild(baseEl);
+  }
+  baseEl.setAttribute('href', appBase);
+
+  const old = doc.getElementById('factSimEmbeddedToken');
+  if(old && old.parentNode) old.parentNode.removeChild(old);
+  const body = doc.body || doc.documentElement;
+  const tokenScript = doc.createElement('script');
+  tokenScript.id = 'factSimEmbeddedToken';
+  tokenScript.type = 'application/json';
+  tokenScript.textContent = token;
+  body.appendChild(tokenScript);
+
+  const marker = doc.createElement('meta');
+  marker.setAttribute('name', 'fact-sim-export');
+  marker.setAttribute('content', 'embedded-v1');
+  const oldMarker = head.querySelector('meta[name="fact-sim-export"]');
+  if(oldMarker && oldMarker.parentNode) oldMarker.parentNode.removeChild(oldMarker);
+  head.appendChild(marker);
+
+  return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+}
+
 async function _copyText(text){
   if(navigator.clipboard && navigator.clipboard.writeText){
     await navigator.clipboard.writeText(text);
@@ -307,10 +377,32 @@ App.buildEmbeddedShareUrl = async function(){
   return u.toString();
 };
 
+App.buildEmbeddedExportHtml = async function(){
+  const envelope = _shareEnvelope(_serializeGraph());
+  const token = await _packEnvelopeForUrl(envelope);
+  const template = await _loadExportHtmlTemplate();
+  return _injectEmbeddedTokenIntoHtml(template, token);
+};
+
 App.loadSharedGraphFromUrl = async function(){
   const loadRevision = (typeof App.bumpGraphLoadRevision === 'function')
     ? App.bumpGraphLoadRevision()
     : ((App._graphLoadRevision = (Number(App._graphLoadRevision) || 0) + 1));
+  const embeddedToken = _embeddedShareTokenFromHtml();
+  if(embeddedToken){
+    try{
+      const payload = await _unpackEnvelopeFromUrl(embeddedToken);
+      const graph = _unwrapEnvelope(payload);
+      const applied = _applyGraphData(graph, { source: 'embedded', expectedRevision: loadRevision });
+      if(applied){
+        App.showToast('Embedded graph loaded');
+        return true;
+      }
+    }catch(err){
+      console.warn('[share] embedded token load failed, fallback to #g', err);
+    }
+  }
+
   const p = _shareParamsFromUrl();
   if(!p.g){
     const u = new URL(window.location.href);
@@ -409,6 +501,26 @@ if(btnShareUrl){
     }catch(err){
       alert('Failed to create Share URL');
       console.error(err);
+    }
+  };
+}
+
+const btnExportHtml = document.getElementById('btnExportHtml');
+if(btnExportHtml){
+  btnExportHtml.onclick = async ()=>{
+    try{
+      const html = await App.buildEmbeddedExportHtml();
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'fact_sim_embedded.html';
+      a.click();
+      URL.revokeObjectURL(url);
+      if(typeof App.showToast === 'function') App.showToast('Embedded HTML exported');
+    }catch(err){
+      console.error(err);
+      alert('Failed to export embedded HTML');
     }
   };
 }

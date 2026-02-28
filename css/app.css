@@ -594,6 +594,32 @@ body.timeline-hidden #timelineDock{ display: none; }
   z-index: 2;
 }
 
+#timelineRevealHandle{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 16px;
+  display: none;
+  cursor: ns-resize;
+  z-index: 1455;
+}
+body.timeline-hidden #timelineRevealHandle{
+  display: block;
+}
+#timelineRevealHandle::before{
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 88px;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(148,163,184,0.9);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+}
+
 #timelineHeader{
   height: var(--timeline-header);
   display: flex;
