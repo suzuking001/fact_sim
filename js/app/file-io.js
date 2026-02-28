@@ -242,6 +242,20 @@ async function _packEnvelopeForUrl(envelope){
   }
 }
 
+function _packEnvelopeForEmbeddedHtml(envelope){
+  const json = JSON.stringify(envelope);
+  const raw = _utf8Encoder.encode(json);
+  const rawToken = `raw.${_toBase64Url(raw)}`;
+  if(_hasLzString()){
+    try{
+      const compressed = window.LZString.compressToEncodedURIComponent(json);
+      const lzToken = `lz.${compressed}`;
+      return lzToken.length < rawToken.length ? lzToken : rawToken;
+    }catch(_e){}
+  }
+  return rawToken;
+}
+
 async function _unpackEnvelopeFromUrl(token){
   if(typeof token !== 'string' || !token) throw new Error('share token is empty');
   const dot = token.indexOf('.');
@@ -282,16 +296,46 @@ function _baseAppUrl(){
   return u;
 }
 
-function _appRootUrl(){
-  const u = _baseAppUrl();
+function _asDirectoryUrl(urlLike){
+  const u = new URL(String(urlLike || ''), _baseAppUrl().toString());
   const path = String(u.pathname || '/');
-  // When opened as "/project" (without trailing slash), treat it as a directory.
   if(/\/[^\/]+\.[a-z0-9]+$/i.test(path)){
     u.pathname = path.replace(/\/[^\/]*$/, '/');
   }else if(!path.endsWith('/')){
     u.pathname = `${path}/`;
   }
+  u.search = '';
+  u.hash = '';
   return u;
+}
+
+function _appRootUrl(){
+  return _asDirectoryUrl(_baseAppUrl());
+}
+
+function _documentExportBaseFrom(doc){
+  const d = doc || document;
+  if(!d || !d.querySelector) return '';
+  const metaBase = d.querySelector('meta[name="fact-sim-export-base"]');
+  const metaValue = String(metaBase?.getAttribute('content') || '').trim();
+  if(metaValue) return metaValue;
+  const baseEl = d.querySelector('base[data-factsim-export]');
+  const href = String(baseEl?.getAttribute('href') || '').trim();
+  if(href) return href;
+  return '';
+}
+
+function _resolveExportAppBase(templateDoc){
+  const fallback = _appRootUrl().toString();
+  const fromTemplate = _documentExportBaseFrom(templateDoc);
+  if(fromTemplate){
+    try{ return _asDirectoryUrl(fromTemplate).toString(); }catch(_e){}
+  }
+  const fromCurrent = _documentExportBaseFrom(document);
+  if(fromCurrent){
+    try{ return _asDirectoryUrl(fromCurrent).toString(); }catch(_e){}
+  }
+  return fallback;
 }
 
 function _embeddedShareTokenFromHtml(){
@@ -306,8 +350,12 @@ function _embeddedShareTokenFromHtml(){
 }
 
 async function _loadExportHtmlTemplate(){
-  const root = _appRootUrl();
-  const url = new URL('index.html', root).toString();
+  let root = _appRootUrl();
+  const docBase = _documentExportBaseFrom(document);
+  if(docBase){
+    try{ root = _asDirectoryUrl(docBase); }catch(_e){}
+  }
+  const url = new URL('index.html', root.toString()).toString();
   try{
     const res = await fetch(url, { method: 'GET', cache: 'no-store' });
     if(!res.ok) throw new Error(`template fetch HTTP ${res.status}`);
@@ -322,7 +370,7 @@ function _injectEmbeddedTokenIntoHtml(htmlText, token){
   const doc = parser.parseFromString(String(htmlText || ''), 'text/html');
   if(!doc || !doc.documentElement) throw new Error('failed to parse export template');
 
-  const appBase = _appRootUrl().toString();
+  const appBase = _resolveExportAppBase(doc);
   const head = doc.head || doc.getElementsByTagName('head')[0] || doc.documentElement;
   let baseEl = head.querySelector('base[data-factsim-export]');
   if(!baseEl){
@@ -333,6 +381,31 @@ function _injectEmbeddedTokenIntoHtml(htmlText, token){
   }
   baseEl.setAttribute('href', appBase);
 
+  let baseMeta = head.querySelector('meta[name="fact-sim-export-base"]');
+  if(!baseMeta){
+    baseMeta = doc.createElement('meta');
+    baseMeta.setAttribute('name', 'fact-sim-export-base');
+    head.appendChild(baseMeta);
+  }
+  baseMeta.setAttribute('content', appBase);
+
+  const oldBoot = doc.getElementById('factSimEmbeddedTokenBootstrap');
+  if(oldBoot && oldBoot.parentNode) oldBoot.parentNode.removeChild(oldBoot);
+  const boot = doc.createElement('script');
+  boot.id = 'factSimEmbeddedTokenBootstrap';
+  const tokenJson = JSON.stringify(String(token || ''));
+  boot.textContent =
+    `(function(){` +
+    `var t=${tokenJson};` +
+    `window.__FACT_SIM_EMBEDDED_TOKEN=t;` +
+    `try{` +
+    `if(!(location.hash && /(^|[&#?])g=/.test(location.hash))){location.hash='g='+t;}` +
+    `}catch(_e){}` +
+    `})();`;
+  const firstHeadScript = head.querySelector('script');
+  if(firstHeadScript) head.insertBefore(boot, firstHeadScript);
+  else head.appendChild(boot);
+
   const old = doc.getElementById('factSimEmbeddedToken');
   if(old && old.parentNode) old.parentNode.removeChild(old);
   const body = doc.body || doc.documentElement;
@@ -340,7 +413,9 @@ function _injectEmbeddedTokenIntoHtml(htmlText, token){
   tokenScript.id = 'factSimEmbeddedToken';
   tokenScript.type = 'application/json';
   tokenScript.textContent = token;
-  body.appendChild(tokenScript);
+  const firstBodyScript = body.querySelector('script');
+  if(firstBodyScript) body.insertBefore(tokenScript, firstBodyScript);
+  else body.appendChild(tokenScript);
 
   const marker = doc.createElement('meta');
   marker.setAttribute('name', 'fact-sim-export');
@@ -379,7 +454,7 @@ App.buildEmbeddedShareUrl = async function(){
 
 App.buildEmbeddedExportHtml = async function(){
   const envelope = _shareEnvelope(_serializeGraph());
-  const token = await _packEnvelopeForUrl(envelope);
+  const token = _packEnvelopeForEmbeddedHtml(envelope);
   const template = await _loadExportHtmlTemplate();
   return _injectEmbeddedTokenIntoHtml(template, token);
 };
@@ -400,6 +475,9 @@ App.loadSharedGraphFromUrl = async function(){
       }
     }catch(err){
       console.warn('[share] embedded token load failed, fallback to #g', err);
+      if(typeof App.showToast === 'function'){
+        App.showToast('Embedded load failed, fallback to URL/default');
+      }
     }
   }
 
