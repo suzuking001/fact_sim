@@ -1,4 +1,4 @@
-// Benchmark helpers for simulation engines
+﻿// Benchmark helpers for simulation engines
 
 var App = window.App || (window.App = {});
 
@@ -178,6 +178,9 @@ var App = window.App || (window.App = {});
         const graph = new LGraph();
         const data = ctx.cloneData();
         graph.configure(data);
+        if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
+          App.repairGraphLinks(graph);
+        }
         if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
           App.stopGroups.restoreSerializedData(graph, data, false);
         }
@@ -265,6 +268,9 @@ var App = window.App || (window.App = {});
         const graph = new LGraph();
         const data = ctx.cloneData();
         graph.configure(data);
+        if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
+          App.repairGraphLinks(graph);
+        }
         if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
           App.stopGroups.restoreSerializedData(graph, data, false);
         }
@@ -322,3 +328,5 @@ var App = window.App || (window.App = {});
     };
   };
 })();
+
+

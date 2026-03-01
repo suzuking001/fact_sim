@@ -1,4 +1,4 @@
-// Save / Load handlers + URL share helpers
+﻿// Save / Load handlers + URL share helpers
 
 var App = window.App || (window.App = {});
 
@@ -111,6 +111,11 @@ function _serializeGraph(){
   if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
     App.stopGroups.injectSerializedData(serialized, App.graph);
   }
+  if(App.backgroundLayout && typeof App.backgroundLayout.serialize === 'function'){
+    const bg = App.backgroundLayout.serialize();
+    if(bg) serialized.__factSimBackground = bg;
+    else delete serialized.__factSimBackground;
+  }
   const viewState = _captureViewState();
   if(viewState){
     serialized.__factSimView = viewState;
@@ -182,6 +187,9 @@ function _applyGraphData(data, options){
   try{
     App.graph.clear();
     App.graph.configure(data);
+    if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
+      App.repairGraphLinks(App.graph);
+    }
     if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
       App.stopGroups.restoreSerializedData(App.graph, data, false);
     }
@@ -193,6 +201,9 @@ function _applyGraphData(data, options){
   if(typeof updateSimTime === 'function') updateSimTime();
   resetHistory();
   attachTimeline();
+  if(App.backgroundLayout && typeof App.backgroundLayout.restore === 'function'){
+    App.backgroundLayout.restore(data.__factSimBackground || null);
+  }
   if(viewState){
     _applyViewState(viewState);
   }
@@ -732,3 +743,5 @@ if(fileInput){
     r.readAsText(f);
   });
 }
+
+

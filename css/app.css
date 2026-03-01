@@ -870,7 +870,8 @@ body.timeline-hidden #timelineRevealHandle{
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
-#shortcutPanel{
+#shortcutPanel,
+#backgroundPanel{
   background: var(--menu-card-bg);
   border: 1px solid var(--menu-card-border);
   border-radius: var(--radius);
@@ -884,7 +885,8 @@ body.timeline-hidden #timelineRevealHandle{
 #addNodePanel::before,
 #addGroupPanel::before,
 #advancedPanel::before,
-#shortcutPanel::before{
+#shortcutPanel::before,
+#backgroundPanel::before{
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -895,7 +897,8 @@ body.timeline-hidden #timelineRevealHandle{
 #addNodePanel .panelHeader,
 #addGroupPanel .panelHeader,
 #advancedPanel .panelHeader,
-#shortcutPanel .panelHeader{
+#shortcutPanel .panelHeader,
+#backgroundPanel .panelHeader{
   font-weight: 700;
   color: #1e3a8a;
   letter-spacing: 0.07em;
@@ -904,6 +907,7 @@ body.timeline-hidden #timelineRevealHandle{
 }
 #addNodePanel .field{ display:flex; flex-direction: column; gap:6px; }
 #addGroupPanel .field{ display:flex; flex-direction: column; gap:6px; }
+#backgroundPanel .field{ display:flex; flex-direction: column; gap:6px; }
 #addNodePanel select{ width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--menu-input-border); border-radius: var(--radius-sm); background:var(--menu-input-bg); color:var(--menu-text); }
 #addGroupPanel select{ width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--menu-input-border); border-radius: var(--radius-sm); background:var(--menu-input-bg); color:var(--menu-text); }
 #addNodePanel .propFields{ display:flex; flex-direction: column; gap:10px; }
@@ -935,6 +939,13 @@ body.timeline-hidden #timelineRevealHandle{
   border: 1px solid #dbe3ef;
   border-radius: 8px;
   padding: 6px 8px;
+}
+#backgroundPanel input[type="checkbox"]{
+  width: auto;
+  justify-self: flex-start;
+}
+#backgroundPanel .btn-row > button{
+  min-width: 96px;
 }
 
 /* === Benchmark modal === */

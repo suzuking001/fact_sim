@@ -19,7 +19,8 @@ class StationNode extends LiteGraph.LGraphNode{
     this.properties = {
       processTime: STATION_DEFAULTS.processTime,
       downTime: STATION_DEFAULTS.downTime,
-      palletWorkCapacity: STATION_DEFAULTS.palletWorkCapacity
+      palletWorkCapacity: STATION_DEFAULTS.palletWorkCapacity,
+      flipIO: false
     };
 
     this._state = 'IDLE';
@@ -33,6 +34,8 @@ class StationNode extends LiteGraph.LGraphNode{
     this._palletWaitIconLinks = null;
     this._palletWaitIconKey = '';
     this._setState('IDLE', 'idle');
+
+    if(window.enableFlipIO) window.enableFlipIO(this);
   }
 
   _setState(kind, detail){

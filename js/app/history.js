@@ -69,6 +69,9 @@ function applySnapshot(snap){
     const data = JSON.parse(snap);
     App.graph.clear();
     App.graph.configure(data);
+    if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
+      App.repairGraphLinks(App.graph);
+    }
     if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
       App.stopGroups.restoreSerializedData(App.graph, data, false);
     }
@@ -97,3 +100,5 @@ function redo(){
   App.history.last = snap;
   applySnapshot(snap);
 }
+
+

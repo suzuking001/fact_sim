@@ -7,6 +7,7 @@ const CARRIER_ROUTE_DEFAULTS = {
   initialCarrier: '',
   outSequence: window.NODES_CONFIG?.carrierRoute?.outSequence ?? ''
 };
+const CARRIER_ROUTE_PALLET_PICKUP_HOLD_MS = 1;
 
 class CarrierRouteNode extends LiteGraph.LGraphNode{
   constructor(){
@@ -59,6 +60,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._currentCarrierLane = 0;
     this._departingCarrierLane = 0;
     this._plannedDepartureLane = 0;
+    this._agvOutWaitSince = 0;
     this._initialCarrierSpawned = false;
     this._parsedOutSequence = [];
     this._outSequenceRaw = null;
@@ -902,9 +904,27 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(!this._isPalletCarrier(agv)) return false;
     this._ensurePalletCarrier(agv);
     const idx = agv.pallets.indexOf(pallet);
-    if(idx < 0) return false;
-    agv.pallets.splice(idx, 1);
+    if(idx >= 0){
+      agv.pallets.splice(idx, 1);
+      return true;
+    }
+    const targetId = String(pallet?.palletId ?? pallet?.id ?? '').trim();
+    if(!targetId) return false;
+    const byId = agv.pallets.findIndex((p)=> String(p?.palletId ?? p?.id ?? '').trim() === targetId);
+    if(byId < 0) return false;
+    agv.pallets.splice(byId, 1);
     return true;
+  }
+
+  _shouldHoldDepartureForPalletPickup(){
+    if(!this._currentAgv) return false;
+    if(this._departingAgv) return false;
+    if(!this._isPalletCarrier(this._currentAgv)) return false;
+    if(!this._carrierHasPalletCapacity(this._currentAgv)) return false;
+    const inSlot = this._palletInSlotForLane(this._currentCarrierLane);
+    if(inSlot < 0) return false;
+    const port = this.inputs && this.inputs[inSlot];
+    return !!(port && port.link != null);
   }
 
   _selectDepartureLane(agv, fallbackLane, consume = false){
@@ -1380,10 +1400,12 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._plannedDepartureLane = this._selectDepartureLane(this._currentAgv, this._currentCarrierLane, false);
     if(!this._hasAgvOutLinkForLane(this._plannedDepartureLane)){
       this._setState('agvOut_wait','WAIT');
+      this._agvOutWaitSince = simNow();
       this._setAgvOutWaitIcon(false);
       return;
     }
     this._setState('agvOut_wait','WAIT');
+    this._agvOutWaitSince = simNow();
     this._setAgvOutWaitIcon(true);
   }
 
@@ -1668,10 +1690,15 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(this._palletOfferAccepted && now >= this._until) this._completePalletOutOffer();
   }
 
-  _handleAgvOutWait(){
+  _handleAgvOutWait(now){
     if(!this._currentAgv){
       this._setState('agvIn_idle','IDLE');
       return;
+    }
+    if(this._shouldHoldDepartureForPalletPickup()){
+      const holdSince = Number(this._agvOutWaitSince);
+      const base = isFinite(holdSince) ? holdSince : now;
+      if(now < base + CARRIER_ROUTE_PALLET_PICKUP_HOLD_MS) return;
     }
     this._plannedDepartureLane = this._selectDepartureLane(this._currentAgv, this._currentCarrierLane, false);
     if(this._downstreamAgvReady(this._currentAgv, this._plannedDepartureLane)) this._startAgvOutDown();
@@ -1714,7 +1741,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     else if(this._stateName.startsWith('workOut_down')) this._handleWorkOutDown(now);
     else if(this._stateName.startsWith('palletOut_wait')) this._handlePalletOutWait();
     else if(this._stateName.startsWith('palletOut_down')) this._handlePalletOutDown(now);
-    else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait();
+    else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait(now);
     else if(this._stateName === 'agvOut_down') this._handleAgvOutDown(now);
 
     let settle = 0;
@@ -1723,7 +1750,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       if(this._stateName.startsWith('workIn_idle')) this._captureWorkInput();
       if(this._stateName.startsWith('workOut_wait')) this._handleWorkOutWait();
       else if(this._stateName.startsWith('palletOut_wait')) this._handlePalletOutWait();
-      else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait();
+      else if(this._stateName === 'agvOut_wait') this._handleAgvOutWait(now);
       if(this._stateName === prev) break;
       if(this._stateName.startsWith('workOut_down') || this._stateName.startsWith('palletOut_down') || this._stateName === 'agvOut_down') break;
     }

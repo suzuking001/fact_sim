@@ -18,6 +18,9 @@ function initGraph(){
   };
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
+  if(App.backgroundLayout && typeof App.backgroundLayout.attachCanvas === 'function'){
+    App.backgroundLayout.attachCanvas(App.canvas);
+  }
   if(typeof App.installCanvasRenderThrottle === 'function'){
     App.installCanvasRenderThrottle(App.canvas);
   }
@@ -47,6 +50,9 @@ function initGraph(){
   const src = LiteGraph.createNode('factory/source'); src.pos=[60,180];
   const eq  = LiteGraph.createNode('factory/equip');  eq.pos=[360,180];
   App.graph.add(src); App.graph.add(eq); src.connect(0,eq,0);
+  if(App.backgroundLayout && typeof App.backgroundLayout.restore === 'function'){
+    App.backgroundLayout.restore(null);
+  }
   resetHistory();
   attachTimeline();
 }

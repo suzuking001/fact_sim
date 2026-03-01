@@ -72,6 +72,9 @@ function applyExampleData(data){
   try{
     App.graph.clear();
     App.graph.configure(payload);
+    if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
+      App.repairGraphLinks(App.graph);
+    }
     if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
       App.stopGroups.restoreSerializedData(App.graph, payload, false);
     }
@@ -81,6 +84,9 @@ function applyExampleData(data){
   configureGraphClock(App.graph);
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
   updateSimTime();
+  if(App.backgroundLayout && typeof App.backgroundLayout.restore === 'function'){
+    App.backgroundLayout.restore(payload.__factSimBackground || null);
+  }
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
   resetHistory();
   attachTimeline();
@@ -123,4 +129,6 @@ function initExamples(){
   if(sel) sel.value = 'sample_line1';
   makeExample('sample_line1');
 }
+
+
 

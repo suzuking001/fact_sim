@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -11,7 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260226b" />
+    <link rel="stylesheet" href="css/app.css?v=20260301c" />
 </head>
 <body>
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -39,6 +39,38 @@
       <div id="accessCounter" class="accessCounter" title="Public access counter (CounterAPI)">
         <span class="accessCounterLabel">Visits</span>
         <span id="accessCounterValue">...</span>
+      </div>
+    </div>
+    <div id="backgroundPanel">
+      <div class="panelHeader">Layout Background</div>
+      <div class="btn-row">
+        <button id="bgLayoutLoadBtn">Import Image</button>
+        <button id="bgLayoutClearBtn">Clear</button>
+      </div>
+      <input type="file" id="bgLayoutFileInput" accept="image/*" hidden>
+      <div class="field">
+        <label for="bgLayoutEnabled">Show</label>
+        <input type="checkbox" id="bgLayoutEnabled" checked>
+      </div>
+      <div class="field">
+        <label for="bgLayoutX">X</label>
+        <input type="number" id="bgLayoutX" step="1" value="0">
+      </div>
+      <div class="field">
+        <label for="bgLayoutY">Y</label>
+        <input type="number" id="bgLayoutY" step="1" value="0">
+      </div>
+      <div class="field">
+        <label for="bgLayoutW">Width</label>
+        <input type="number" id="bgLayoutW" step="1" min="1" value="0">
+      </div>
+      <div class="field">
+        <label for="bgLayoutH">Height</label>
+        <input type="number" id="bgLayoutH" step="1" min="1" value="0">
+      </div>
+      <div class="field">
+        <label for="bgLayoutOpacity">Opacity <span id="bgLayoutOpacityValue">0.35</span></label>
+        <input type="range" id="bgLayoutOpacity" min="0.05" max="1" step="0.05" value="0.35">
       </div>
     </div>
     <!-- Add Node panel -->
@@ -381,7 +413,7 @@ SOFTWARE.
   <script src="js/nodes/pallet_carrier_config.js?v=20260226a"></script>
   <script src="js/nodes/carrier_route.js?v=20260226a"></script>
   <script src="js/nodes/carrier_route_ui.js?v=20260226a"></script>
-  <script src="js/nodes/station.js?v=20260226c"></script>
+  <script src="js/nodes/station.js?v=20260301a"></script>
   <script src="js/nodes/sink.js?v=20260226a"></script>
   <script src="js/nodes/register.js?v=20260226a"></script>
   <script src="sample/simple.js?v=20260221b"></script>
@@ -392,6 +424,8 @@ SOFTWARE.
   <script src="sample/sample_line1.js?v=20260221b"></script>
   <script src="js/timeline.js?v=20260226a"></script>
   <script src="js/app/state.js?v=20260225b"></script>
+  <script src="js/app/background-layout.js?v=20260301a"></script>
+  <script src="js/app/graph-links.js?v=20260301a"></script>
   <script src="js/app/stop-groups.js?v=20260225c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
   <script src="js/app/engine.js?v=20260225d"></script>
@@ -402,15 +436,17 @@ SOFTWARE.
   <script src="js/app/fit.js?v=20260226c"></script>
   <script src="js/app/node-props-panel.js?v=20260220b"></script>
   <script src="js/app/timeline-init.js?v=20260226b"></script>
-  <script src="js/app/graph-init.js?v=20260222a"></script>
-  <script src="js/app/examples.js?v=20260226a"></script>
-  <script src="js/app/file-io.js?v=20260226g"></script>
+  <script src="js/app/graph-init.js?v=20260301b"></script>
+  <script src="js/app/examples.js?v=20260301b"></script>
+  <script src="js/app/file-io.js?v=20260301h"></script>
   <script src="js/app/access-counter.js?v=20260226a"></script>
   <script src="js/app/ui.js?v=20260226c"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>
 </html>
+
+
 
 
 
