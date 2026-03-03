@@ -18,9 +18,6 @@ function initGraph(){
   };
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
-  if(App.backgroundLayout && typeof App.backgroundLayout.attachCanvas === 'function'){
-    App.backgroundLayout.attachCanvas(App.canvas);
-  }
   if(typeof App.installCanvasRenderThrottle === 'function'){
     App.installCanvasRenderThrottle(App.canvas);
   }
@@ -32,6 +29,9 @@ function initGraph(){
   bindHistoryButtons();
   installFitHandlers(App.canvas);
   if(typeof installPlacementHandlers === 'function') installPlacementHandlers(App.canvas);
+  if(App.backgroundLayout && typeof App.backgroundLayout.attachCanvas === 'function'){
+    App.backgroundLayout.attachCanvas(App.canvas);
+  }
   // expose for other helpers that hook into canvas
   window.canvas = App.canvas;
   if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(App.canvas);

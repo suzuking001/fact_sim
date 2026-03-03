@@ -3,20 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <title>LiteGraph Simulator (ver 3.0 - Persistent Script Editor)</title>
-  <link rel="icon" type="image/png" href="img/f54d6a2d-4c68-435b-9ef6-3bea34daf347.png" />
-  <link rel="apple-touch-icon" href="img/f54d6a2d-4c68-435b-9ef6-3bea34daf347.png" />
+  <script>
+    (function(){
+      try{
+        var qs = new URLSearchParams(window.location.search || '');
+        if(qs.get('skipLanding') === '1'){
+          document.documentElement.classList.add('skip-landing');
+        }
+      }catch(_e){}
+    })();
+  </script>
+  <link rel="icon" type="image/png" href="img/fact_sim_logo.png" />
+  <link rel="apple-touch-icon" href="img/fact_sim_logo.png" />
 
   <!-- LiteGraph -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/css/litegraph.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260301c" />
+    <link rel="stylesheet" href="css/app.css?v=20260304f" />
 </head>
 <body>
+<main id="landing" aria-labelledby="landingTitle">
+  <section class="landingCard">
+    <p class="landingEyebrow">Factory Simulation Platform</p>
+    <h1 id="landingTitle">FactSim</h1>
+    <p class="landingSubtitle">Discrete-event simulation for factories.</p>
+    <p class="landingBody">
+      fact_sim is an open-source discrete-event simulator that runs entirely in the browser.
+      No install, no license server, no heavy setup.
+    </p>
+    <div id="landingProgressBar" class="landingProgressBar" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="landingProgressFill" class="landingProgressFill"></div>
+    </div>
+    <div class="landingProgressMeta">
+      <span id="landingProgressValue">0%</span>
+      <span id="landingProgressLabel">Loading simulator assets...</span>
+    </div>
+    <button id="landingOpenBtn" type="button" disabled aria-disabled="true">Open Simulator</button>
+    <p class="landingLegal">Open-source software provided as-is. For production usage, validate outputs against your process data.</p>
+  </section>
+</main>
+<div id="appRoot" aria-hidden="true">
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
 <div id="sidebar">
-    <div id="sidebarHeader"><span class="brand">fact sim <span class="accent">mini</span></span></div>
+    <div id="sidebarHeader">
+      <div class="appBrandRow">
+        <img class="appLogo" src="img/fact_sim_logo.png" alt="fact sim logo">
+        <span class="appBrandText">FACT_SIM</span>
+      </div>
+    </div>
     <div id="controls">
       <div class="btn-row">
         <button id="btnStart">Start</button>
@@ -51,6 +87,10 @@
       <div class="field">
         <label for="bgLayoutEnabled">Show</label>
         <input type="checkbox" id="bgLayoutEnabled" checked>
+      </div>
+      <div class="field">
+        <label for="bgLayoutMouseEdit">Mouse Edit</label>
+        <input type="checkbox" id="bgLayoutMouseEdit">
       </div>
       <div class="field">
         <label for="bgLayoutX">X</label>
@@ -196,6 +236,14 @@
             <option value="distribute-v">Distribute Vertical</option>
           </select>
           <button id="btnSelectionLayout" class="shortcut-btn">Run</button>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">Resize</span>
+          <select id="resizeMode" class="shortcut-select" title="Resize selected nodes">
+            <option value="set-size">Set Size...</option>
+            <option value="min-size">Minimum Size</option>
+          </select>
+          <button id="btnResizeNodes" class="shortcut-btn">Run</button>
         </div>
       </div>
     </div>
@@ -388,7 +436,9 @@ SOFTWARE.
       </div>
     </div>
   </div>
+  </div>
 
+  <script src="js/app/landing.js?v=20260304b"></script>
   <script src="js/core.js?v=20260225d"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
@@ -424,7 +474,7 @@ SOFTWARE.
   <script src="sample/sample_line1.js?v=20260221b"></script>
   <script src="js/timeline.js?v=20260226a"></script>
   <script src="js/app/state.js?v=20260225b"></script>
-  <script src="js/app/background-layout.js?v=20260301a"></script>
+  <script src="js/app/background-layout.js?v=20260303b"></script>
   <script src="js/app/graph-links.js?v=20260301a"></script>
   <script src="js/app/stop-groups.js?v=20260225c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
@@ -433,14 +483,14 @@ SOFTWARE.
   <script src="js/app/benchmark.js?v=20260222a"></script>
   <script src="js/app/history.js?v=20260222a"></script>
   <script src="js/app/selection.js?v=20260224a"></script>
-  <script src="js/app/fit.js?v=20260226c"></script>
+  <script src="js/app/fit.js?v=20260304a"></script>
   <script src="js/app/node-props-panel.js?v=20260220b"></script>
   <script src="js/app/timeline-init.js?v=20260226b"></script>
-  <script src="js/app/graph-init.js?v=20260301b"></script>
+  <script src="js/app/graph-init.js?v=20260303a"></script>
   <script src="js/app/examples.js?v=20260301b"></script>
   <script src="js/app/file-io.js?v=20260301h"></script>
   <script src="js/app/access-counter.js?v=20260226a"></script>
-  <script src="js/app/ui.js?v=20260226c"></script>
+  <script src="js/app/ui.js?v=20260304a"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

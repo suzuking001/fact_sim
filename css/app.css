@@ -36,6 +36,132 @@ html,body{
   -moz-osx-font-smoothing: grayscale;
 }
 
+#appRoot{
+  display: block;
+}
+body:not(.landing-hidden) #appRoot{
+  visibility: hidden;
+  pointer-events: none;
+}
+body.landing-hidden #appRoot,
+html.skip-landing #appRoot{
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#landing{
+  position: fixed;
+  inset: 0;
+  z-index: 2800;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: #f8fafc;
+}
+body.landing-hidden #landing,
+html.skip-landing #landing{
+  display: none;
+}
+
+.landingCard{
+  width: min(780px, 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
+  padding: clamp(24px, 4vw, 40px);
+}
+.landingEyebrow{
+  margin: 0 0 8px;
+  color: #6b7280;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#landingTitle{
+  margin: 0;
+  font-size: clamp(34px, 7vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #111827;
+}
+.landingSubtitle{
+  margin: 12px 0 0;
+  font-size: clamp(17px, 2.4vw, 24px);
+  color: #111827;
+}
+.landingBody{
+  margin: 16px 0 24px;
+  max-width: 62ch;
+  color: #4b5563;
+  line-height: 1.72;
+}
+.landingProgressBar{
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+.landingProgressFill{
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #111827 0%, #4b5563 100%);
+  border-radius: inherit;
+  transition: width .18s ease;
+}
+.landingProgressMeta{
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #6b7280;
+  font-size: 12px;
+}
+#landingProgressValue{
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+#landingOpenBtn{
+  margin-top: 20px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid #111827;
+  background: #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background-color .16s ease, color .16s ease, border-color .16s ease, opacity .16s ease;
+}
+#landingOpenBtn:hover:not(:disabled){
+  background: #000000;
+}
+#landingOpenBtn:disabled{
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+#landingOpenBtn:focus-visible{
+  outline: 3px solid #111827;
+  outline-offset: 2px;
+}
+.landingLegal{
+  margin: 16px 0 0;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .landingProgressFill,
+  #landingOpenBtn{
+    transition: none;
+  }
+}
+
 /* Canvas with subtle grid */
 #graph{
   width:100%;height:100%;
@@ -509,7 +635,8 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 /* Sidebar header branding */
 #sidebarHeader{
   display:flex; align-items:center; justify-content:center;
-  padding: 14px 16px; margin-bottom: 6px;
+  padding: 12px 16px; margin-bottom: 6px;
+  min-height: 74px;
   background: linear-gradient(120deg, #0f172a 0%, #1f2937 100%);
   border: 1px solid rgba(148,163,184,0.24);
   border-radius: 14px;
@@ -517,6 +644,25 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
   color:#e2e8f0;
   text-transform: uppercase;
   letter-spacing: .35rem;
+}
+#sidebarHeader .appBrandRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#sidebarHeader .appLogo{
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+#sidebarHeader .appBrandText{
+  font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: .14rem;
+  color: #e2e8f0;
 }
 #sidebarHeader .brand{
   font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;

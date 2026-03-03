@@ -132,6 +132,46 @@ function _hasMovement(nodes, beforeMap){
   return false;
 }
 
+function _captureNodeSizes(nodes){
+  const out = new Map();
+  for(const node of nodes){
+    if(!node) continue;
+    const [w, h] = _nodeSize(node);
+    out.set(node.id, [w, h]);
+  }
+  return out;
+}
+
+function _hasSizeChange(nodes, beforeMap){
+  for(const node of nodes){
+    if(!node) continue;
+    const before = beforeMap.get(node.id);
+    if(!before) continue;
+    const [w, h] = _nodeSize(node);
+    const dw = Math.abs(w - before[0]);
+    const dh = Math.abs(h - before[1]);
+    if(dw > 0.01 || dh > 0.01) return true;
+  }
+  return false;
+}
+
+function _nodeMinimumSize(node){
+  let w = 80;
+  let h = 40;
+  if(node && typeof node.computeSize === 'function'){
+    try{
+      const s = node.computeSize();
+      if(Array.isArray(s) || (s && typeof s[0] !== 'undefined' && typeof s[1] !== 'undefined')){
+        const cw = Number(s[0]);
+        const ch = Number(s[1]);
+        if(isFinite(cw) && cw > 0) w = Math.max(w, cw);
+        if(isFinite(ch) && ch > 0) h = Math.max(h, ch);
+      }
+    }catch(_e){}
+  }
+  return [w, h];
+}
+
 function _runGraphMutation(fn){
   if(!App.graph || typeof fn !== 'function') return false;
   try{
@@ -528,9 +568,11 @@ function autoLayoutGraph(opts){
 
 function applySelectionLayout(action){
   const nodes = _collectSelectedLayoutNodes();
-  if(nodes.length < 2) return false;
   const act = String(action || '').toLowerCase();
   if(!act) return false;
+  if(nodes.length < 2){
+    return false;
+  }
   if((act === 'distribute-h' || act === 'distribute-v') && nodes.length < 3) return false;
 
   const beforeById = _captureNodePositions(nodes);
@@ -608,6 +650,44 @@ function applySelectionLayout(action){
     'distribute-v': 'Distribute Vertical'
   };
   App.showToast(`Selection layout: ${labels[act] || act}`);
+  return true;
+}
+
+function applySelectionResize(mode, opts){
+  const nodes = _collectSelectedLayoutNodes();
+  if(!nodes.length) return false;
+  const m = String(mode || 'set-size').toLowerCase();
+  let targetW = 0;
+  let targetH = 0;
+  if(m === 'set-size'){
+    targetW = Math.max(80, Number(opts && opts.width) || 0);
+    targetH = Math.max(40, Number(opts && opts.height) || 0);
+    if(!isFinite(targetW) || !isFinite(targetH) || targetW <= 0 || targetH <= 0){
+      return false;
+    }
+  }
+
+  const beforeSizeById = _captureNodeSizes(nodes);
+  const ok = _runGraphMutation(()=>{
+    nodes.forEach((node)=>{
+      let w = targetW;
+      let h = targetH;
+      if(m === 'min-size'){
+        const s = _nodeMinimumSize(node);
+        w = s[0];
+        h = s[1];
+      }
+      node.size = [w, h];
+      if(typeof node.onResize === 'function'){
+        try{ node.onResize(node.size); }catch(_e){}
+      }
+    });
+  });
+  if(!ok) return false;
+  if(App.canvas) App.canvas.setDirty(true, true);
+  const changed = _hasSizeChange(nodes, beforeSizeById);
+  if(!changed) return false;
+  App.showToast(m === 'min-size' ? 'Resize: Minimum Size' : 'Resize: Set Size');
   return true;
 }
 

@@ -48,6 +48,37 @@ if(btnSelectionLayout){
   });
 }
 
+const btnResizeNodes = document.getElementById('btnResizeNodes');
+if(btnResizeNodes){
+  const resizeMode = document.getElementById('resizeMode');
+  btnResizeNodes.addEventListener('click', ()=>{
+    if(typeof applySelectionResize !== 'function'){
+      App.showToast('Resize unavailable');
+      return;
+    }
+    const mode = String(resizeMode?.value || 'set-size');
+    let ok = false;
+    if(mode === 'min-size'){
+      ok = applySelectionResize('min-size');
+    }else{
+      const wIn = window.prompt('Width (px)', '180');
+      if(wIn == null) return;
+      const hIn = window.prompt('Height (px)', '90');
+      if(hIn == null) return;
+      const w = Number(wIn);
+      const h = Number(hIn);
+      if(!isFinite(w) || !isFinite(h) || w <= 0 || h <= 0){
+        App.showToast('Invalid width/height');
+        return;
+      }
+      ok = applySelectionResize('set-size', { width: w, height: h });
+    }
+    if(!ok){
+      App.showToast('Select 1+ nodes first');
+    }
+  });
+}
+
 const simModeSelect = document.getElementById('simModeSelect');
 if(simModeSelect){
   let currentMode = (App.setSimMode ? App.setSimMode('dt') : 'dt');
