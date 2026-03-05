@@ -2,7 +2,35 @@
 
 var App = window.App || (window.App = {});
 
+function applyGraphVisualTheme(){
+  if(!window.LiteGraph || !window.LGraphCanvas) return;
+  if(App.__graphVisualThemeApplied) return;
+  App.__graphVisualThemeApplied = true;
+
+  LiteGraph.NODE_TEXT_SIZE = 13;
+  LiteGraph.NODE_TITLE_HEIGHT = 28;
+  LiteGraph.NODE_SLOT_HEIGHT = 18;
+  LiteGraph.NODE_TITLE_COLOR = '#111111';
+  LiteGraph.NODE_SELECTED_TITLE_COLOR = '#111111';
+  LiteGraph.NODE_DEFAULT_COLOR = '#f8f8f8';
+  LiteGraph.NODE_DEFAULT_BGCOLOR = '#ffffff';
+  LiteGraph.NODE_DEFAULT_BOXCOLOR = '#7c3aed';
+  LiteGraph.NODE_BOX_OUTLINE_COLOR = '#111111';
+  LiteGraph.LINK_COLOR = '#a3a3a3';
+  LiteGraph.EVENT_LINK_COLOR = '#7c3aed';
+
+  LGraphCanvas.link_type_colors = Object.assign({}, LGraphCanvas.link_type_colors || {}, {
+    '-1': '#a3a3a3',
+    number: '#a3a3a3',
+    string: '#a3a3a3',
+    boolean: '#7c3aed',
+    event: '#7c3aed',
+    action: '#7c3aed'
+  });
+}
+
 function initGraph(){
+  applyGraphVisualTheme();
   if(App.graph) stopSimulation();
   workCounter = 0;
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
@@ -35,8 +63,8 @@ function initGraph(){
   // expose for other helpers that hook into canvas
   window.canvas = App.canvas;
   if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(App.canvas);
-  // Make the canvas background white (node area backdrop)
-  App.canvas.bgcolor = '#ffffff';
+  // Keep canvas slightly translucent so the CSS grid stays visible.
+  App.canvas.bgcolor = 'rgba(255,255,255,0.82)';
   function resize(){
     const r = App.canvas.canvas.getBoundingClientRect(), d = window.devicePixelRatio||1;
     App.canvas.canvas.width = r.width*d; App.canvas.canvas.height = r.height*d;
