@@ -255,6 +255,11 @@ class NoteNode extends LiteGraph.LGraphNode{
     }finally{
       ctx.restore();
     }
+    const lines = [
+      `Type: Memo`,
+      `Chars: ${text.length}`
+    ];
+    drawStateBelow(ctx, this, lines, 8, 6);
   }
 }
 

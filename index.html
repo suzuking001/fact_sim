@@ -21,28 +21,84 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260305d" />
+    <link rel="stylesheet" href="css/app.css?v=20260305k" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
-  <section class="landingCard">
-    <p class="landingEyebrow">Factory Simulation Platform</p>
-    <h1 id="landingTitle">FactSim</h1>
-    <p class="landingSubtitle">Discrete-event simulation for factories.</p>
-    <p class="landingBody">
-      fact_sim is an open-source discrete-event simulator that runs entirely in the browser.
-      No install, no license server, no heavy setup.
-    </p>
-    <div id="landingProgressBar" class="landingProgressBar" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-      <div id="landingProgressFill" class="landingProgressFill"></div>
-    </div>
-    <div class="landingProgressMeta">
-      <span id="landingProgressValue">0%</span>
-      <span id="landingProgressLabel">Loading simulator assets...</span>
-    </div>
-    <button id="landingOpenBtn" type="button" disabled aria-disabled="true">Open Simulator</button>
-    <p class="landingLegal">Open-source software provided as-is. For production usage, validate outputs against your process data.</p>
-  </section>
+  <div class="landingShell">
+    <section class="landingHero">
+      <p class="landingEyebrow">Browser-Based Industrial Simulation</p>
+      <h1 id="landingTitle">FACT SIM</h1>
+      <p class="landingSubtitle">Real World Discrete Event Simulation</p>
+      <p class="landingBody">
+        Model factories, production lines, AGVs, logistics, and other real-world systems
+        as discrete events with second-level precision.
+      </p>
+      <div class="landingActions">
+        <button id="landingOpenBtn" class="landingBtn landingBtnPrimary" type="button" disabled aria-disabled="true">Open Simulator</button>
+        <a class="landingBtn landingBtnGhost" href="https://github.com/suzuking001/fact_sim" target="_blank" rel="noopener">View GitHub</a>
+        <a class="landingBtn landingBtnGhost" href="https://suzuking001.github.io/fact_sim/" target="_blank" rel="noopener">View Demo</a>
+      </div>
+      <div class="landingProgressWrap">
+        <div id="landingProgressBar" class="landingProgressBar" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="landingProgressFill" class="landingProgressFill"></div>
+        </div>
+        <div class="landingProgressMeta">
+          <span id="landingProgressLabel">Loading simulator assets...</span>
+          <span id="landingProgressValue">0%</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="landingSection">
+      <h2 class="landingSectionTitle">Concept</h2>
+      <p class="landingSectionLead">“The world can be represented by state transitions and events.”</p>
+      <p class="landingSectionText">
+        Factories, robots, cars, AGVs, and people are all systems of connected events.
+        FACT SIM lets you model this structure directly and validate behavior before implementation.
+      </p>
+      <div class="landingPills">
+        <span>Factories</span>
+        <span>Robots</span>
+        <span>Cars</span>
+        <span>AGVs</span>
+        <span>People</span>
+      </div>
+    </section>
+
+    <section class="landingSection">
+      <h2 class="landingSectionTitle">Core Features</h2>
+      <div class="landingGrid landingGrid3">
+        <article class="landingCardMini"><h3>Node-Based Modeling</h3><p>Build systems visually using a graph model.</p></article>
+        <article class="landingCardMini"><h3>Discrete-Event Engine</h3><p>Simulate state transitions and event timing accurately.</p></article>
+        <article class="landingCardMini"><h3>Second-Level Precision</h3><p>Analyze process flow with practical temporal resolution.</p></article>
+        <article class="landingCardMini"><h3>Browser Native</h3><p>Run instantly with no installation or license server.</p></article>
+        <article class="landingCardMini"><h3>Lightweight</h3><p>Fast iteration on everyday laptops and workstations.</p></article>
+        <article class="landingCardMini"><h3>Open Source</h3><p>Transparent architecture for extension and audit.</p></article>
+      </div>
+    </section>
+
+    <section class="landingSection">
+      <h2 class="landingSectionTitle">Use Cases</h2>
+      <div class="landingGrid landingGrid2">
+        <article class="landingCardMini"><h3>Factory Production Lines</h3><p>Validate takt, throughput, and bottleneck risk early.</p></article>
+        <article class="landingCardMini"><h3>AGV Logistics</h3><p>Evaluate route, carrier, and handoff synchronization.</p></article>
+        <article class="landingCardMini"><h3>Traffic Simulation</h3><p>Explore event-based flow behavior under constraints.</p></article>
+        <article class="landingCardMini"><h3>Hospital Patient Flow</h3><p>Model arrivals, queues, and resource allocation.</p></article>
+      </div>
+    </section>
+
+    <section class="landingSection landingSectionGithub">
+      <h2 class="landingSectionTitle">Open Source on GitHub</h2>
+      <p class="landingSectionText">
+        FACT SIM is built as an open platform for industrial and operational simulation.
+        Fork it, inspect it, and extend it for your domain.
+      </p>
+      <a class="landingBtn landingBtnPrimary" href="https://github.com/suzuking001/fact_sim" target="_blank" rel="noopener">Explore Repository</a>
+    </section>
+
+    <p class="landingLegal">Open-source software provided as-is. Validate outputs with your domain data before production decisions.</p>
+  </div>
 </main>
 <div id="appRoot" aria-hidden="true">
 <button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
@@ -439,7 +495,7 @@ SOFTWARE.
   </div>
 
   <script src="js/app/landing.js?v=20260304b"></script>
-  <script src="js/core.js?v=20260225d"></script>
+  <script src="js/core.js?v=20260305b"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js?v=20260226a"></script>
@@ -449,7 +505,7 @@ SOFTWARE.
     <script src="js/link-anim.js?v=20260226b"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js?v=20260224b"></script>
-  <script src="js/nodes/note.js?v=20260218c"></script>
+  <script src="js/nodes/note.js?v=20260305a"></script>
   <script src="js/nodes/signal.js?v=20260224b"></script>
   <script src="js/nodes/shuttle_stage.js?v=20260216f"></script>
   <script src="js/nodes/source.js?v=20260224a"></script>
@@ -464,7 +520,7 @@ SOFTWARE.
   <script src="js/nodes/carrier_route.js?v=20260226a"></script>
   <script src="js/nodes/carrier_route_ui.js?v=20260226a"></script>
   <script src="js/nodes/station.js?v=20260301a"></script>
-  <script src="js/nodes/sink.js?v=20260226a"></script>
+  <script src="js/nodes/sink.js?v=20260305a"></script>
   <script src="js/nodes/register.js?v=20260226a"></script>
   <script src="sample/simple.js?v=20260221b"></script>
   <script src="sample/branch.js?v=20260221b"></script>

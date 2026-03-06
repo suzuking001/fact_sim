@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&family=Poppins:wght@500;700&display=swap');
 
 :root{
   /* Monochrome minimal theme */
@@ -53,62 +53,150 @@ html.skip-landing #appRoot{
   position: fixed;
   inset: 0;
   z-index: 2800;
-  display: grid;
-  place-items: center;
-  padding: 28px;
-  background: #f8fafc;
+  overflow: auto;
+  background:
+    radial-gradient(1000px 440px at 88% -6%, rgba(124,58,237,0.08), transparent 70%),
+    radial-gradient(760px 360px at 12% -8%, rgba(17,17,17,0.06), transparent 72%),
+    #ffffff;
+}
+#landing::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("../img/landing_editor_bg.png?v=20260305a") center top / cover no-repeat;
+  opacity: 0.4;
+  filter: grayscale(1) contrast(1.06);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  transform: scale(1.02);
+}
+#landing::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.18) 0%,
+    rgba(255,255,255,0.82) 42%,
+    rgba(255,255,255,0.96) 100%
+  );
+  pointer-events: none;
 }
 body.landing-hidden #landing,
 html.skip-landing #landing{
   display: none;
 }
 
-.landingCard{
-  width: min(780px, 100%);
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
-  padding: clamp(24px, 4vw, 40px);
+.landingShell{
+  width: min(1120px, calc(100% - 40px));
+  margin: 26px auto 40px;
+  padding-bottom: 18px;
+  color: #111111;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  position: relative;
+  z-index: 1;
+}
+.landingHero{
+  border: 1px solid rgba(17,17,17,0.1);
+  border-radius: 22px;
+  background: rgba(255,255,255,0.96);
+  box-shadow: 0 18px 40px rgba(17,17,17,0.08);
+  padding: clamp(24px, 4vw, 44px);
 }
 .landingEyebrow{
-  margin: 0 0 8px;
-  color: #6b7280;
+  margin: 0 0 10px;
+  color: #5a5a5a;
   font-size: 12px;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 #landingTitle{
   margin: 0;
-  font-size: clamp(34px, 7vw, 56px);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: #111827;
+  font-size: clamp(40px, 7.8vw, 78px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: #111111;
 }
 .landingSubtitle{
   margin: 12px 0 0;
-  font-size: clamp(17px, 2.4vw, 24px);
-  color: #111827;
+  font-size: clamp(20px, 2.8vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #191919;
 }
 .landingBody{
-  margin: 16px 0 24px;
-  max-width: 62ch;
-  color: #4b5563;
+  margin: 16px 0 0;
+  max-width: 70ch;
+  color: #444444;
   line-height: 1.72;
+  font-size: 15px;
+}
+.landingActions{
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.landingBtn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 11px;
+  border: 1px solid rgba(17,17,17,0.14);
+  background: #ffffff;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background-color .14s ease, color .14s ease;
+}
+.landingBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(124,58,237,0.42);
+  box-shadow: 0 8px 20px rgba(124,58,237,0.16);
+}
+.landingBtnPrimary{
+  border-color: #111111;
+  background: #111111;
+  color: #ffffff;
+}
+.landingBtnPrimary:hover{
+  background: #1f1f1f;
+  color: #ffffff;
+}
+.landingBtnGhost{
+  background: #ffffff;
+}
+.landingBtn:focus-visible{
+  outline: none;
+  border-color: rgba(124,58,237,0.8);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.18);
+}
+#landingOpenBtn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.landingProgressWrap{
+  margin-top: 22px;
 }
 .landingProgressBar{
   width: 100%;
   height: 6px;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: #ebebeb;
   overflow: hidden;
 }
 .landingProgressFill{
   width: 0%;
   height: 100%;
-  background: linear-gradient(90deg, #111827 0%, #4b5563 100%);
+  background: linear-gradient(90deg, #111111 0%, #7c3aed 100%);
   border-radius: inherit;
-  transition: width .18s ease;
+  transition: width .2s ease;
 }
 .landingProgressMeta{
   margin-top: 8px;
@@ -116,48 +204,131 @@ html.skip-landing #landing{
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  color: #6b7280;
+  color: #5e5e5e;
   font-size: 12px;
 }
 #landingProgressValue{
-  color: #111827;
+  color: #111111;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
-#landingOpenBtn{
-  margin-top: 20px;
-  min-height: 44px;
-  padding: 0 20px;
-  border-radius: 999px;
-  border: 1px solid #111827;
-  background: #111827;
-  color: #ffffff;
-  font-size: 14px;
+.landingSection{
+  margin-top: 16px;
+  border: 1px solid rgba(17,17,17,0.08);
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 20px 22px;
+}
+.landingSectionTitle{
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  color: #111111;
+}
+.landingSectionLead{
+  margin: 10px 0 0;
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition: background-color .16s ease, color .16s ease, border-color .16s ease, opacity .16s ease;
+  color: #1e1e1e;
 }
-#landingOpenBtn:hover:not(:disabled){
-  background: #000000;
+.landingSectionText{
+  margin: 8px 0 0;
+  color: #4d4d4d;
+  line-height: 1.68;
+  font-size: 14px;
 }
-#landingOpenBtn:disabled{
-  opacity: 0.45;
-  cursor: not-allowed;
+.landingPills{
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
-#landingOpenBtn:focus-visible{
-  outline: 3px solid #111827;
-  outline-offset: 2px;
+.landingPills span{
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(124,58,237,0.28);
+  background: rgba(124,58,237,0.05);
+  color: #4b2aa8;
+  font-size: 12px;
+  font-weight: 600;
+}
+.landingGrid{
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+.landingGrid3{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.landingGrid2{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.landingCardMini{
+  border: 1px solid rgba(17,17,17,0.08);
+  border-radius: 12px;
+  padding: 13px 14px;
+  background: #fff;
+}
+.landingCardMini h3{
+  margin: 0;
+  font-size: 14px;
+  color: #111111;
+}
+.landingCardMini p{
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #4d4d4d;
+  line-height: 1.56;
+}
+.landingSectionGithub{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.landingSectionGithub .landingBtn{
+  width: fit-content;
 }
 .landingLegal{
-  margin: 16px 0 0;
+  margin: 18px 2px 6px;
+  color: #7a7a7a;
   font-size: 11px;
-  color: #9ca3af;
 }
 
+@media (max-width: 980px){
+  .landingGrid3{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px){
+  #landing::before{
+    opacity: 0.4;
+    background-position: center 16px;
+    background-size: 160%;
+  }
+  .landingShell{
+    width: calc(100% - 22px);
+    margin: 10px auto 20px;
+  }
+  .landingHero{
+    border-radius: 16px;
+    padding: 18px;
+  }
+  .landingSection{
+    margin-top: 12px;
+    border-radius: 13px;
+    padding: 16px;
+  }
+  .landingGrid2,
+  .landingGrid3{
+    grid-template-columns: 1fr;
+  }
+}
 @media (prefers-reduced-motion: reduce){
   .landingProgressFill,
-  #landingOpenBtn{
+  .landingBtn{
     transition: none;
   }
 }

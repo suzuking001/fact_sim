@@ -95,6 +95,12 @@ class SinkNode extends LiteGraph.LGraphNode{
 
   onDrawForeground(ctx){
     this._drawHistory(ctx);
+    const tph = this._formatThroughputPerHour(this._calcThroughputPerHour(simNow()));
+    const lines = [
+      `Received: ${this._recv.length}`,
+      `TPH(1h): ${tph}`
+    ];
+    drawStateBelow(ctx, this, lines, 8, 6);
   }
 
   _drawHistory(ctx){

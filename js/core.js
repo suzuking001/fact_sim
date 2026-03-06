@@ -377,11 +377,70 @@ function _buildSignalSummaryLines(node){
   return lines;
 }
 
+function _normalizeStateLabel(node){
+  const s = (node && typeof node._state !== 'undefined' && node._state !== null) ? String(node._state) : '';
+  const n = (node && typeof node._stateName !== 'undefined' && node._stateName !== null) ? String(node._stateName) : '';
+  if(s && n) return `State: ${s} (${n})`;
+  if(s) return `State: ${s}`;
+  if(n) return `State: ${n}`;
+  return 'State: N/A';
+}
+
+function _stringifyPropValue(v){
+  if(v === null) return 'null';
+  const t = typeof v;
+  if(t === 'string') return `"${v.replace(/\r?\n/g, '\\n')}"`;
+  if(t === 'number' || t === 'boolean' || t === 'bigint') return String(v);
+  if(t === 'undefined') return 'undefined';
+  if(t === 'function') return '[Function]';
+  try{
+    const s = JSON.stringify(v);
+    if(typeof s === 'string') return s;
+  }catch(_e){}
+  return String(v);
+}
+
+function _pushWrappedLine(dst, text, maxLen, contPrefix){
+  const limit = Math.max(16, maxLen | 0);
+  let src = String(text == null ? '' : text);
+  if(src.length <= limit){
+    dst.push(src);
+    return;
+  }
+  dst.push(src.slice(0, limit));
+  src = src.slice(limit);
+  while(src.length){
+    dst.push(`${contPrefix}${src.slice(0, limit)}`);
+    src = src.slice(limit);
+  }
+}
+
+function _buildPropertySummaryLines(node){
+  const props = (node && node.properties && typeof node.properties === 'object') ? node.properties : null;
+  if(!props) return ['Props: (none)'];
+  const keys = Object.keys(props);
+  if(!keys.length) return ['Props: (none)'];
+  keys.sort((a,b)=>a.localeCompare(b));
+
+  const lines = ['Props:'];
+  const maxPerLine = 72;
+  for(const k of keys){
+    const v = _stringifyPropValue(props[k]);
+    _pushWrappedLine(lines, `- ${k}: ${v}`, maxPerLine, '  ');
+  }
+  return lines;
+}
+
 function drawStateBelow(ctx, node, lines, x=8, margin=6){
   try{
     const baseLines = Array.isArray(lines) ? lines.slice() : [];
+    const hasState = baseLines.some(l => /^state\s*:/i.test(String(l || '')));
+    if(!hasState){
+      baseLines.unshift(_normalizeStateLabel(node));
+    }
+    const propLines = _buildPropertySummaryLines(node);
     const sigLines = _buildSignalSummaryLines(node);
-    const allLines = baseLines.concat(sigLines);
+    const allLines = baseLines.concat(propLines, sigLines);
 
     ctx.save();
     ctx.font = '12px sans-serif';
