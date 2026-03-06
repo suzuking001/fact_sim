@@ -396,13 +396,21 @@ function _nodeOverlayCanvas(){
   return null;
 }
 
+function _asVec2Like(value){
+  if(!value) return null;
+  if(Array.isArray(value)) return value;
+  if(typeof value.length === 'number' && value.length >= 2) return value;
+  if(typeof value === 'object' && typeof value[0] !== 'undefined' && typeof value[1] !== 'undefined') return value;
+  return null;
+}
+
 function _isNodeHovered(node){
   try{
     const canvas = _nodeOverlayCanvas();
     if(!canvas) return false;
     const mouse = Array.isArray(canvas.graph_mouse) ? canvas.graph_mouse : null;
-    const pos = Array.isArray(node && node.pos) ? node.pos : null;
-    const size = Array.isArray(node && node.size) ? node.size : null;
+    const pos = _asVec2Like(node && node.pos);
+    const size = _asVec2Like(node && node.size);
     if(mouse && pos && size){
       const mx = Number(mouse[0]);
       const my = Number(mouse[1]);
@@ -796,13 +804,17 @@ function getNodeOverlayMinimumSize(node, lines){
 }
 
 function enforceNodeOverlayMinSize(node, lines){
-  if(!node || !Array.isArray(node.size)) return false;
+  const size = _asVec2Like(node && node.size);
+  if(!node || !size) return false;
   const minSize = getNodeOverlayMinimumSize(node, lines || []);
   if(!minSize) return false;
-  const nextW = Math.max(Number(node.size[0]) || 0, minSize[0]);
-  const nextH = Math.max(Number(node.size[1]) || 0, minSize[1]);
-  if(nextW !== node.size[0] || nextH !== node.size[1]){
-    node.size = [nextW, nextH];
+  const currentW = Number(size[0]) || 0;
+  const currentH = Number(size[1]) || 0;
+  const nextW = Math.max(currentW, minSize[0]);
+  const nextH = Math.max(currentH, minSize[1]);
+  if(nextW !== currentW || nextH !== currentH){
+    size[0] = nextW;
+    size[1] = nextH;
     if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
     return true;
   }
