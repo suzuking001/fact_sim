@@ -187,6 +187,9 @@ function _applyGraphData(data, options){
   try{
     App.graph.clear();
     App.graph.configure(data);
+    if(typeof window.normalizeGraphOverlaySizes === 'function'){
+      window.normalizeGraphOverlaySizes(App.graph);
+    }
     if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
       App.repairGraphLinks(App.graph);
     }

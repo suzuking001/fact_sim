@@ -158,6 +158,17 @@ function _hasSizeChange(nodes, beforeMap){
 function _nodeMinimumSize(node){
   let w = 80;
   let h = 40;
+  if(node && typeof window.getNodeOverlayMinimumSize === 'function'){
+    try{
+      const overlaySize = window.getNodeOverlayMinimumSize(node, []);
+      if(Array.isArray(overlaySize)){
+        const ow = Number(overlaySize[0]);
+        const oh = Number(overlaySize[1]);
+        if(isFinite(ow) && ow > 0) w = Math.max(w, ow);
+        if(isFinite(oh) && oh > 0) h = Math.max(h, oh);
+      }
+    }catch(_e){}
+  }
   if(node && typeof node.computeSize === 'function'){
     try{
       const s = node.computeSize();

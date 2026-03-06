@@ -88,6 +88,7 @@
       const origResize = node.onResize;
       node.onResize = function(size){
         if(origResize) origResize.call(this, size);
+        if(window.enforceNodeOverlayMinSize) window.enforceNodeOverlayMinSize(this);
         if(window.refreshFlipIO) window.refreshFlipIO(this);
       };
       node.__flipResizePatched = true;

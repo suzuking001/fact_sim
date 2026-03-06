@@ -77,6 +77,10 @@ function initGraph(){
   // Place initial nodes lower so they don't hide under menus
   const src = LiteGraph.createNode('factory/source'); src.pos=[60,180];
   const eq  = LiteGraph.createNode('factory/equip');  eq.pos=[360,180];
+  if(typeof window.enforceNodeOverlayMinSize === 'function'){
+    try{ window.enforceNodeOverlayMinSize(src); }catch(_e){}
+    try{ window.enforceNodeOverlayMinSize(eq); }catch(_e){}
+  }
   App.graph.add(src); App.graph.add(eq); src.connect(0,eq,0);
   if(App.backgroundLayout && typeof App.backgroundLayout.restore === 'function'){
     App.backgroundLayout.restore(null);

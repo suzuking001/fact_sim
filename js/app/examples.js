@@ -72,6 +72,9 @@ function applyExampleData(data){
   try{
     App.graph.clear();
     App.graph.configure(payload);
+    if(typeof window.normalizeGraphOverlaySizes === 'function'){
+      window.normalizeGraphOverlaySizes(App.graph);
+    }
     if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
       App.repairGraphLinks(App.graph);
     }

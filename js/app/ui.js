@@ -664,6 +664,9 @@ function beginNodePlacement(node){
   if(App.placement && App.placement.active){
     _finishPlacement(false);
   }
+  if(typeof window.enforceNodeOverlayMinSize === 'function'){
+    try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}
+  }
   if(typeof App.graph.beforeChange === 'function'){
     try{ App.graph.beforeChange(); }catch(_e){}
   }
@@ -917,6 +920,9 @@ function beginGroupPlacement(group){
           }
         });
         if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
+      }
+      if(typeof window.enforceNodeOverlayMinSize === 'function'){
+        try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}
       }
       beginNodePlacement(node);
     }catch(e){ console.error(e); }

@@ -69,6 +69,9 @@ function applySnapshot(snap){
     const data = JSON.parse(snap);
     App.graph.clear();
     App.graph.configure(data);
+    if(typeof window.normalizeGraphOverlaySizes === 'function'){
+      window.normalizeGraphOverlaySizes(App.graph);
+    }
     if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
       App.repairGraphLinks(App.graph);
     }

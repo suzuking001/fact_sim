@@ -235,6 +235,9 @@ window.runNodeMutation = runNodeMutation;
           if(typeof graph.beforeChange === 'function') graph.beforeChange();
           const node = LiteGraph.createNode(item.value);
           if(node){
+            if(typeof window.enforceNodeOverlayMinSize === 'function'){
+              try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}
+            }
             node.pos = canvas.convertEventToCanvasOffset(ev || event);
             graph.add(node);
             if(typeof onCreate === 'function') onCreate(node);
