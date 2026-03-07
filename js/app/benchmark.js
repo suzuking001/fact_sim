@@ -65,9 +65,18 @@ var App = window.App || (window.App = {});
     if(typeof canvas.resize === 'function') canvas.resize(width, height);
     if(typeof canvas.stopRendering === 'function') canvas.stopRendering();
 
+    let lastDrawAt = 0;
     return {
       draw: ()=>{
-        try{ canvas.draw(true, true); }catch(_e){}
+        const fps = (typeof App.getRenderFps === 'function') ? Math.max(1, App.getRenderFps()) : 60;
+        const intervalMs = 1000 / fps;
+        const now = performance.now();
+        if(lastDrawAt > 0 && (now - lastDrawAt) < intervalMs){
+          return false;
+        }
+        lastDrawAt = now;
+        try{ canvas.draw(false, false); }catch(_e){}
+        return true;
       },
       dispose: ()=>{
         try{
