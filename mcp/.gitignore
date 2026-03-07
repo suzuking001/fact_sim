@@ -1,0 +1,6 @@
+node_modules/
+dist/
+artifacts/
+.vscode/mcp.json
+.env
+.env.*

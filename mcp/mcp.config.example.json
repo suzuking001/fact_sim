@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "fact-sim-ai": {
+      "command": "node",
+      "args": [
+        "G:/マイドライブ/プログラミング/github/fact_sim/mcp/dist/index.js"
+      ]
+    }
+  }
+}

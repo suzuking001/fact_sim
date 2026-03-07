@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "fact-sim-ai": {
+      "command": "node",
+      "args": [
+        "mcp/dist/index.js"
+      ]
+    }
+  }
+}
