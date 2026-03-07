@@ -16,6 +16,39 @@ const EXAMPLE_FILES = {
   sample_line1: 'sample/sample_line1.json'
 };
 
+function shouldAutoStartFromUrl(){
+  try{
+    const qs = new URLSearchParams(window.location.search || '');
+    return qs.get('autoStart') === '1';
+  }catch(_e){
+    return false;
+  }
+}
+
+function queueAutoStart(){
+  let attempts = 0;
+  const maxAttempts = 80;
+  const tryStart = ()=>{
+    if(typeof window.startSimulation !== 'function') return false;
+    if(window.App && window.App.graph && typeof window.App.graph.status === 'number' && window.App.graph.status === window.LGraph.STATUS_RUNNING){
+      return true;
+    }
+    try{
+      window.startSimulation();
+      return true;
+    }catch(_e){
+      return false;
+    }
+  };
+  if(tryStart()) return;
+  const timer = window.setInterval(()=>{
+    attempts += 1;
+    if(tryStart() || attempts >= maxAttempts){
+      window.clearInterval(timer);
+    }
+  }, 250);
+}
+
 function resolveExampleKey(kind){
   const key = String(kind || '').trim();
   if(!key) return '';
@@ -130,7 +163,12 @@ function initExamples(){
 
   // Default example: sample_line1
   if(sel) sel.value = 'sample_line1';
-  makeExample('sample_line1');
+  const loadPromise = makeExample('sample_line1');
+  if(shouldAutoStartFromUrl()){
+    Promise.resolve(loadPromise).then(()=>{
+      queueAutoStart();
+    });
+  }
 }
 
 

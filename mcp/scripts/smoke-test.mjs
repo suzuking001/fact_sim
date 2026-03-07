@@ -34,14 +34,25 @@ async function main() {
     const toolList = await client.listTools();
     const toolNames = toolList.tools.map((tool) => tool.name).sort();
     const expected = [
+      "add_node",
       "build_blueprint_report",
+      "build_graph_from_blueprint",
+      "connect_nodes",
+      "connect_nodes_by_port_kind",
       "edit_graph",
       "examples",
       "graph",
+      "get_graph_overview",
+      "get_kpi_summary",
+      "get_simulation_status",
+      "load_example",
       "metrics",
       "optimize",
       "prepare_session",
+      "remove_node",
+      "run_benchmark",
       "run_report",
+      "run_simulation_for",
       "simulate"
     ];
     for (const name of expected) {
@@ -92,10 +103,60 @@ async function main() {
 
     const report = parseTextResult(await client.callTool({
       name: "run_report",
-      arguments: { wallMs: 200, mode: "dt", topN: 3, maxNodes: 3 }
+      arguments: { mode: "dt", topN: 3, maxNodes: 3 }
     }));
     if (typeof report?.run?.simTimeMs !== "number") {
       throw new Error("run_report missing simTimeMs");
+    }
+    if (report?.run?.wallMs !== 1000) {
+      throw new Error("run_report default wallMs was not applied");
+    }
+
+    const aliasStatus = parseTextResult(await client.callTool({
+      name: "get_simulation_status",
+      arguments: {}
+    }));
+    if (typeof aliasStatus?.nodeCount !== "number") {
+      throw new Error("legacy alias get_simulation_status failed");
+    }
+
+    const batch = parseTextResult(await client.callTool({
+      name: "edit_graph",
+      arguments: {
+        action: "batch",
+        operations: [
+          {
+            action: "add",
+            ref: "batchEquip",
+            nodeType: "factory/equip",
+            title: "MCP Batch Equip",
+            x: 80,
+            y: 80,
+            properties: { processTime: 5, downTime: 6 }
+          },
+          {
+            action: "add",
+            ref: "batchSource",
+            nodeType: "factory/source",
+            title: "MCP Batch Source",
+            x: 20,
+            y: 80,
+            properties: { spawnInterval: 10 }
+          },
+          {
+            action: "connect",
+            fromNodeId: "$batchSource",
+            toNodeId: "$batchEquip",
+            portKind: "work"
+          }
+        ]
+      }
+    }));
+    if (typeof batch?.operationCount !== "number" || batch.operationCount !== 3) {
+      throw new Error("edit_graph batch did not return operationCount=3");
+    }
+    if (!batch?.refs?.batchEquip || !batch?.refs?.batchSource) {
+      throw new Error("edit_graph batch refs were not returned");
     }
 
     console.log(JSON.stringify({
@@ -105,7 +166,9 @@ async function main() {
       run,
       kpi,
       overview,
-      report
+      report,
+      aliasStatus,
+      batch
     }));
   } finally {
     await client.close();

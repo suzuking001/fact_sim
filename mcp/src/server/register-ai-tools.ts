@@ -8,6 +8,7 @@ const nodeIdSchema = z.union([z.string().min(1), z.number()]);
 const portKindSchema = z.enum(["work", "signal", "carrier", "pallet"]);
 const jsonRecordSchema = z.record(z.string(), z.unknown());
 const unknownArraySchema = z.array(z.record(z.string(), z.unknown()));
+type BatchRefs = Map<string, string | number>;
 
 function summarizeStatus(result: Awaited<ReturnType<FactSimRuntime["getSimulationStatus"]>>) {
   return {
@@ -139,7 +140,7 @@ async function collectRunReport(
   runtime: FactSimRuntime,
   options: {
     example?: string;
-    wallMs: number;
+    wallMs?: number;
     mode?: "dt" | "event";
     speed?: number;
     fastest?: boolean;
@@ -164,12 +165,17 @@ async function collectRunReport(
     includeNodes,
     maxNodes
   } = options;
+  const effectiveWallMs = typeof wallMs === "number" ? wallMs : 1000;
+  const effectiveTopN = typeof topN === "number" ? topN : 5;
+  const effectiveReset = typeof reset === "boolean" ? reset : !!example;
+  const effectiveIncludeNodes = !!includeNodes;
+  const effectiveMaxNodes = effectiveIncludeNodes ? (typeof maxNodes === "number" ? maxNodes : 12) : 0;
 
   let loadedExample: { example: string; nodeCount: number } | null = null;
   if (example) {
     loadedExample = await runtime.loadExample(example);
   }
-  if (reset) {
+  if (effectiveReset) {
     await runtime.resetSimulationClock();
   }
   if (typeof seed === "number") {
@@ -182,9 +188,9 @@ async function collectRunReport(
     await runtime.setPlaybackSpeed(speed, fastest);
   }
 
-  const run = await runtime.runSimulationFor(wallMs, mode, fastest, false, undefined);
-  const bottlenecks = await runtime.getBottleneckReport(topN, minSampleSec);
-  const overview = await runtime.getGraphOverview(includeNodes, maxNodes);
+  const run = await runtime.runSimulationFor(effectiveWallMs, mode, fastest, false, undefined);
+  const bottlenecks = await runtime.getBottleneckReport(effectiveTopN, minSampleSec);
+  const overview = await runtime.getGraphOverview(effectiveIncludeNodes, effectiveMaxNodes);
 
   return {
     example: loadedExample?.example ?? null,
@@ -194,6 +200,177 @@ async function collectRunReport(
     bottlenecks: summarizeBottlenecks(bottlenecks),
     overview: summarizeOverview(overview)
   };
+}
+
+function resolveBatchNodeId(value: unknown, refs: BatchRefs): string | number | undefined {
+  if (typeof value === "number") {
+    return value;
+  }
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  if (!value.startsWith("$")) {
+    return value;
+  }
+  const refName = value.slice(1).trim();
+  if (!refName) {
+    throw new Error("Invalid empty batch node reference");
+  }
+  if (!refs.has(refName)) {
+    throw new Error(`Unknown batch node reference: ${value}`);
+  }
+  return refs.get(refName);
+}
+
+function storeBatchRef(refs: BatchRefs, refName: string | undefined, result: unknown): void {
+  if (!refName) {
+    return;
+  }
+  if (!result || typeof result !== "object") {
+    return;
+  }
+  const raw = result as Record<string, unknown>;
+  const nodeId = raw.nodeId ?? raw.removedNodeId ?? null;
+  if (typeof nodeId === "string" || typeof nodeId === "number") {
+    refs.set(refName, nodeId);
+    return;
+  }
+  if (Array.isArray(raw.createdNodes)) {
+    for (const entry of raw.createdNodes) {
+      if (!entry || typeof entry !== "object") {
+        continue;
+      }
+      const node = entry as Record<string, unknown>;
+      const key = typeof node.key === "string" ? node.key.trim() : "";
+      const createdId = node.nodeId;
+      if (!key || (typeof createdId !== "string" && typeof createdId !== "number")) {
+        continue;
+      }
+      refs.set(key, createdId);
+    }
+  }
+}
+
+async function applyEditOperation(
+  runtime: FactSimRuntime,
+  refs: BatchRefs,
+  operation: {
+    action: string;
+    ref?: string;
+    nodeType?: string;
+    title?: string;
+    x?: number;
+    y?: number;
+    properties?: Record<string, unknown>;
+    mergeProperties?: boolean;
+    nodeId?: string | number;
+    fromNodeId?: string | number;
+    toNodeId?: string | number;
+    fromSlot?: number;
+    toSlot?: number;
+    portKind?: "work" | "signal" | "carrier" | "pallet";
+    allowDuplicate?: boolean;
+    linkId?: number;
+    removeAllMatches?: boolean;
+    nodes?: Array<Record<string, unknown>>;
+    edges?: Array<Record<string, unknown>>;
+    clearExisting?: boolean;
+    originX?: number;
+    originY?: number;
+    xPitch?: number;
+    yPitch?: number;
+  }
+) {
+  const {
+    action,
+    nodeType,
+    title,
+    x,
+    y,
+    properties,
+    mergeProperties,
+    nodeId,
+    fromNodeId,
+    toNodeId,
+    fromSlot,
+    toSlot,
+    portKind,
+    allowDuplicate,
+    linkId,
+    removeAllMatches,
+    nodes,
+    edges,
+    clearExisting,
+    originX,
+    originY,
+    xPitch,
+    yPitch
+  } = operation;
+
+  switch (action) {
+    case "add":
+      if (!nodeType) {
+        throw new Error("nodeType is required when action=add");
+      }
+      return runtime.addNode(nodeType, title, x, y, properties);
+    case "update":
+      if (typeof nodeId === "undefined") {
+        throw new Error("nodeId is required when action=update");
+      }
+      return runtime.updateNode(resolveBatchNodeId(nodeId, refs) as string | number, title, properties, mergeProperties);
+    case "remove":
+      if (typeof nodeId === "undefined") {
+        throw new Error("nodeId is required when action=remove");
+      }
+      return runtime.removeNode(resolveBatchNodeId(nodeId, refs) as string | number);
+    case "connect":
+      if (typeof fromNodeId === "undefined" || typeof toNodeId === "undefined") {
+        throw new Error("fromNodeId and toNodeId are required when action=connect");
+      }
+      if (portKind) {
+        return runtime.connectNodesByPortKind(
+          resolveBatchNodeId(fromNodeId, refs) as string | number,
+          resolveBatchNodeId(toNodeId, refs) as string | number,
+          portKind,
+          fromSlot,
+          toSlot,
+          allowDuplicate
+        );
+      }
+      return runtime.connectNodes(
+        resolveBatchNodeId(fromNodeId, refs) as string | number,
+        resolveBatchNodeId(toNodeId, refs) as string | number,
+        fromSlot,
+        toSlot,
+        allowDuplicate
+      );
+    case "disconnect":
+      return runtime.disconnectNodes({
+        linkId,
+        fromNodeId: typeof fromNodeId === "undefined" ? undefined : resolveBatchNodeId(fromNodeId, refs),
+        toNodeId: typeof toNodeId === "undefined" ? undefined : resolveBatchNodeId(toNodeId, refs),
+        fromSlot,
+        toSlot,
+        removeAllMatches
+      });
+    case "build":
+      if (!nodes || nodes.length === 0) {
+        throw new Error("nodes is required when action=build");
+      }
+      return runtime.buildGraphFromBlueprint(
+        nodes as any,
+        (edges ?? []) as any,
+        {
+          clearExisting,
+          originX,
+          originY,
+          xPitch,
+          yPitch
+        }
+      );
+    default:
+      throw new Error(`Unsupported action: ${String(action)}`);
+  }
 }
 
 async function invokeTool<T>(
@@ -398,7 +575,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
       description: "Load optional example, run simulation for a fixed wall time, and return compact KPI + bottleneck + overview summary.",
       inputSchema: {
         example: z.string().min(1).optional(),
-        wallMs: z.number().int().positive(),
+        wallMs: z.number().int().positive().optional(),
         mode: z.enum(["dt", "event"]).optional(),
         speed: z.number().positive().optional(),
         fastest: z.boolean().optional(),
@@ -412,18 +589,19 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
     },
     async ({ example, wallMs, mode, speed, fastest, seed, reset, topN, minSampleSec, includeNodes, maxNodes }, extra) => {
       const requestId = String(extra.requestId);
+      const effectiveWallMs = typeof wallMs === "number" ? wallMs : 1000;
       return invokeTool(
         requestId,
         "run_report",
         {
           example: example ?? null,
-          wallMs,
+          wallMs: effectiveWallMs,
           mode: mode ?? null
         },
         async () =>
           collectRunReport(runtime, {
             example,
-            wallMs,
+            wallMs: effectiveWallMs,
             mode,
             speed,
             fastest,
@@ -450,7 +628,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         originY: z.number().optional(),
         xPitch: z.number().positive().optional(),
         yPitch: z.number().positive().optional(),
-        wallMs: z.number().int().positive(),
+        wallMs: z.number().int().positive().optional(),
         mode: z.enum(["dt", "event"]).optional(),
         speed: z.number().positive().optional(),
         fastest: z.boolean().optional(),
@@ -464,13 +642,14 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
     },
     async ({ nodes, edges, clearExisting, originX, originY, xPitch, yPitch, wallMs, mode, speed, fastest, seed, reset, topN, minSampleSec, includeNodes, maxNodes }, extra) => {
       const requestId = String(extra.requestId);
+      const effectiveWallMs = typeof wallMs === "number" ? wallMs : 1000;
       return invokeTool(
         requestId,
         "build_blueprint_report",
         {
           nodeCount: nodes.length,
           edgeCount: Array.isArray(edges) ? edges.length : 0,
-          wallMs,
+          wallMs: effectiveWallMs,
           mode: mode ?? null
         },
         async () => {
@@ -486,7 +665,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
             }
           );
           const report = await collectRunReport(runtime, {
-            wallMs,
+            wallMs: effectiveWallMs,
             mode,
             speed,
             fastest,
@@ -621,7 +800,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
     {
       description: "Add, update, remove, connect, disconnect, or build nodes and links.",
       inputSchema: {
-        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build"]),
+        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch"]),
         nodeType: z.string().min(1).optional(),
         title: z.string().optional(),
         x: z.number().optional(),
@@ -643,63 +822,104 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         originX: z.number().optional(),
         originY: z.number().optional(),
         xPitch: z.number().positive().optional(),
-        yPitch: z.number().positive().optional()
+        yPitch: z.number().positive().optional(),
+        operations: unknownArraySchema.optional(),
+        ref: z.string().min(1).optional()
       }
     },
-    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch }, extra) => {
+    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "edit_graph", { action }, async () => {
-        switch (action) {
-          case "add":
-            if (!nodeType) {
-              throw new Error("nodeType is required when action=add");
-            }
-            return runtime.addNode(nodeType, title, x, y, properties);
-          case "update":
-            if (typeof nodeId === "undefined") {
-              throw new Error("nodeId is required when action=update");
-            }
-            return runtime.updateNode(nodeId, title, properties, mergeProperties);
-          case "remove":
-            if (typeof nodeId === "undefined") {
-              throw new Error("nodeId is required when action=remove");
-            }
-            return runtime.removeNode(nodeId);
-          case "connect":
-            if (typeof fromNodeId === "undefined" || typeof toNodeId === "undefined") {
-              throw new Error("fromNodeId and toNodeId are required when action=connect");
-            }
-            if (portKind) {
-              return runtime.connectNodesByPortKind(fromNodeId, toNodeId, portKind, fromSlot, toSlot, allowDuplicate);
-            }
-            return runtime.connectNodes(fromNodeId, toNodeId, fromSlot, toSlot, allowDuplicate);
-          case "disconnect":
-            return runtime.disconnectNodes({
-              linkId,
-              fromNodeId,
-              toNodeId,
-              fromSlot,
-              toSlot,
-              removeAllMatches
+        if (action === "batch") {
+          if (!operations || operations.length === 0) {
+            throw new Error("operations is required when action=batch");
+          }
+          const refs = new Map<string, string | number>();
+          const results = [];
+          for (let index = 0; index < operations.length; index += 1) {
+            const current = operations[index] as Record<string, unknown>;
+            const currentRef = typeof current.ref === "string" ? current.ref.trim() : "";
+            const result = await applyEditOperation(runtime, refs, {
+              action: String(current.action ?? ""),
+              ref: currentRef || undefined,
+              nodeType: typeof current.nodeType === "string" ? current.nodeType : undefined,
+              title: typeof current.title === "string" ? current.title : undefined,
+              x: typeof current.x === "number" ? current.x : undefined,
+              y: typeof current.y === "number" ? current.y : undefined,
+              properties:
+                current.properties && typeof current.properties === "object"
+                  ? (current.properties as Record<string, unknown>)
+                  : undefined,
+              mergeProperties: typeof current.mergeProperties === "boolean" ? current.mergeProperties : undefined,
+              nodeId:
+                typeof current.nodeId === "string" || typeof current.nodeId === "number"
+                  ? (current.nodeId as string | number)
+                  : undefined,
+              fromNodeId:
+                typeof current.fromNodeId === "string" || typeof current.fromNodeId === "number"
+                  ? (current.fromNodeId as string | number)
+                  : undefined,
+              toNodeId:
+                typeof current.toNodeId === "string" || typeof current.toNodeId === "number"
+                  ? (current.toNodeId as string | number)
+                  : undefined,
+              fromSlot: typeof current.fromSlot === "number" ? current.fromSlot : undefined,
+              toSlot: typeof current.toSlot === "number" ? current.toSlot : undefined,
+              portKind:
+                current.portKind === "work" ||
+                current.portKind === "signal" ||
+                current.portKind === "carrier" ||
+                current.portKind === "pallet"
+                  ? current.portKind
+                  : undefined,
+              allowDuplicate: typeof current.allowDuplicate === "boolean" ? current.allowDuplicate : undefined,
+              linkId: typeof current.linkId === "number" ? current.linkId : undefined,
+              removeAllMatches: typeof current.removeAllMatches === "boolean" ? current.removeAllMatches : undefined,
+              nodes: Array.isArray(current.nodes) ? (current.nodes as Array<Record<string, unknown>>) : undefined,
+              edges: Array.isArray(current.edges) ? (current.edges as Array<Record<string, unknown>>) : undefined,
+              clearExisting: typeof current.clearExisting === "boolean" ? current.clearExisting : undefined,
+              originX: typeof current.originX === "number" ? current.originX : undefined,
+              originY: typeof current.originY === "number" ? current.originY : undefined,
+              xPitch: typeof current.xPitch === "number" ? current.xPitch : undefined,
+              yPitch: typeof current.yPitch === "number" ? current.yPitch : undefined
             });
-          case "build":
-            if (!nodes || nodes.length === 0) {
-              throw new Error("nodes is required when action=build");
-            }
-            return runtime.buildGraphFromBlueprint(
-              nodes as any,
-              (edges ?? []) as any,
-              {
-                clearExisting,
-                originX,
-                originY,
-                xPitch,
-                yPitch
-              }
-            );
-          default:
-            throw new Error(`Unsupported action: ${String(action)}`);
+            storeBatchRef(refs, currentRef || undefined, result);
+            results.push({ index, action: String(current.action ?? ""), ref: currentRef || null, result });
+          }
+          return {
+            operationCount: results.length,
+            refs: Object.fromEntries(refs),
+            results
+          };
         }
+
+        const result = await applyEditOperation(runtime, new Map<string, string | number>(), {
+          action,
+          ref,
+          nodeType,
+          title,
+          x,
+          y,
+          properties,
+          mergeProperties,
+          nodeId,
+          fromNodeId,
+          toNodeId,
+          fromSlot,
+          toSlot,
+          portKind,
+          allowDuplicate,
+          linkId,
+          removeAllMatches,
+          nodes: nodes as Array<Record<string, unknown>> | undefined,
+          edges: edges as Array<Record<string, unknown>> | undefined,
+          clearExisting,
+          originX,
+          originY,
+          xPitch,
+          yPitch
+        });
+        return result;
       });
     }
   );
@@ -818,6 +1038,251 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
             throw new Error(`Unsupported action: ${String(action)}`);
         }
       });
+    }
+  );
+
+  server.registerTool(
+    "load_example",
+    {
+      description: "Legacy alias of examples(load).",
+      inputSchema: {
+        example: z.string().min(1)
+      }
+    },
+    async ({ example }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "load_example", { example }, async () => {
+        const loaded = await runtime.loadExample(example);
+        const overview = await runtime.getGraphOverview(false, 0);
+        return {
+          example: loaded.example,
+          nodeCount: loaded.nodeCount,
+          linkCount: overview.linkCount
+        };
+      });
+    }
+  );
+
+  server.registerTool(
+    "start_simulation",
+    {
+      description: "Legacy alias of simulate(start)."
+    },
+    async (extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "start_simulation", {}, async () => runtime.startSimulation());
+    }
+  );
+
+  server.registerTool(
+    "stop_simulation",
+    {
+      description: "Legacy alias of simulate(stop)."
+    },
+    async (extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "stop_simulation", {}, async () => runtime.stopSimulation());
+    }
+  );
+
+  server.registerTool(
+    "run_simulation_for",
+    {
+      description: "Legacy alias of simulate(run_for).",
+      inputSchema: {
+        wallMs: z.number().int().positive(),
+        mode: z.enum(["dt", "event"]).optional(),
+        fastest: z.boolean().optional(),
+        includeBenchmark: z.boolean().optional(),
+        benchmarkWallMs: z.number().int().positive().optional()
+      }
+    },
+    async ({ wallMs, mode, fastest, includeBenchmark, benchmarkWallMs }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "run_simulation_for", { wallMs, mode: mode ?? null }, async () =>
+        summarizeRun(await runtime.runSimulationFor(wallMs, mode, fastest, includeBenchmark, benchmarkWallMs))
+      );
+    }
+  );
+
+  server.registerTool(
+    "get_simulation_status",
+    {
+      description: "Legacy alias of simulate(status)."
+    },
+    async (extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "get_simulation_status", {}, async () =>
+        summarizeStatus(await runtime.getSimulationStatus())
+      );
+    }
+  );
+
+  server.registerTool(
+    "get_kpi_summary",
+    {
+      description: "Legacy alias of metrics(kpi)."
+    },
+    async (extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "get_kpi_summary", {}, async () =>
+        summarizeKpi(await runtime.getKpiSummary())
+      );
+    }
+  );
+
+  server.registerTool(
+    "run_benchmark",
+    {
+      description: "Legacy alias of metrics(benchmark).",
+      inputSchema: {
+        wallMs: z.number().int().positive().optional()
+      }
+    },
+    async ({ wallMs }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "run_benchmark", { wallMs: wallMs ?? null }, async () =>
+        summarizeBenchmark(await runtime.runBenchmark(wallMs))
+      );
+    }
+  );
+
+  server.registerTool(
+    "get_graph_overview",
+    {
+      description: "Legacy alias of graph(overview).",
+      inputSchema: {
+        includeNodes: z.boolean().optional(),
+        maxNodes: z.number().int().nonnegative().optional()
+      }
+    },
+    async ({ includeNodes, maxNodes }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "get_graph_overview", { includeNodes: !!includeNodes }, async () =>
+        summarizeOverview(await runtime.getGraphOverview(includeNodes, maxNodes))
+      );
+    }
+  );
+
+  server.registerTool(
+    "add_node",
+    {
+      description: "Legacy alias of edit_graph(add).",
+      inputSchema: {
+        nodeType: z.string().min(1),
+        title: z.string().optional(),
+        x: z.number().optional(),
+        y: z.number().optional(),
+        properties: jsonRecordSchema.optional()
+      }
+    },
+    async ({ nodeType, title, x, y, properties }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "add_node", { nodeType }, async () =>
+        runtime.addNode(nodeType, title, x, y, properties)
+      );
+    }
+  );
+
+  server.registerTool(
+    "update_node",
+    {
+      description: "Legacy alias of edit_graph(update).",
+      inputSchema: {
+        nodeId: nodeIdSchema,
+        title: z.string().optional(),
+        properties: jsonRecordSchema.optional(),
+        mergeProperties: z.boolean().optional()
+      }
+    },
+    async ({ nodeId, title, properties, mergeProperties }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "update_node", { nodeId }, async () =>
+        runtime.updateNode(nodeId, title, properties, mergeProperties)
+      );
+    }
+  );
+
+  server.registerTool(
+    "connect_nodes",
+    {
+      description: "Legacy alias of edit_graph(connect).",
+      inputSchema: {
+        fromNodeId: nodeIdSchema,
+        toNodeId: nodeIdSchema,
+        fromSlot: z.number().int().nonnegative().optional(),
+        toSlot: z.number().int().nonnegative().optional(),
+        allowDuplicate: z.boolean().optional()
+      }
+    },
+    async ({ fromNodeId, toNodeId, fromSlot, toSlot, allowDuplicate }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "connect_nodes", { fromNodeId, toNodeId }, async () =>
+        runtime.connectNodes(fromNodeId, toNodeId, fromSlot, toSlot, allowDuplicate)
+      );
+    }
+  );
+
+  server.registerTool(
+    "connect_nodes_by_port_kind",
+    {
+      description: "Legacy alias of edit_graph(connect with portKind).",
+      inputSchema: {
+        fromNodeId: nodeIdSchema,
+        toNodeId: nodeIdSchema,
+        portKind: portKindSchema,
+        fromSlot: z.number().int().nonnegative().optional(),
+        toSlot: z.number().int().nonnegative().optional(),
+        allowDuplicate: z.boolean().optional()
+      }
+    },
+    async ({ fromNodeId, toNodeId, portKind, fromSlot, toSlot, allowDuplicate }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "connect_nodes_by_port_kind", { fromNodeId, toNodeId, portKind }, async () =>
+        runtime.connectNodesByPortKind(fromNodeId, toNodeId, portKind, fromSlot, toSlot, allowDuplicate)
+      );
+    }
+  );
+
+  server.registerTool(
+    "remove_node",
+    {
+      description: "Legacy alias of edit_graph(remove).",
+      inputSchema: {
+        nodeId: nodeIdSchema
+      }
+    },
+    async ({ nodeId }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "remove_node", { nodeId }, async () => runtime.removeNode(nodeId));
+    }
+  );
+
+  server.registerTool(
+    "build_graph_from_blueprint",
+    {
+      description: "Legacy alias of edit_graph(build).",
+      inputSchema: {
+        nodes: unknownArraySchema,
+        edges: unknownArraySchema.optional(),
+        clearExisting: z.boolean().optional(),
+        originX: z.number().optional(),
+        originY: z.number().optional(),
+        xPitch: z.number().positive().optional(),
+        yPitch: z.number().positive().optional()
+      }
+    },
+    async ({ nodes, edges, clearExisting, originX, originY, xPitch, yPitch }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "build_graph_from_blueprint", { nodeCount: nodes.length }, async () =>
+        runtime.buildGraphFromBlueprint(nodes as any, (edges ?? []) as any, {
+          clearExisting,
+          originX,
+          originY,
+          xPitch,
+          yPitch
+        })
+      );
     }
   );
 }

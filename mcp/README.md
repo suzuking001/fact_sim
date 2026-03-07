@@ -16,6 +16,14 @@ High-frequency tools for AI agents:
 1. `prepare_session`
 2. `run_report`
 3. `build_blueprint_report`
+4. `edit_graph` with `action="batch"`
+
+Defaults tuned for short prompts:
+
+- `run_report.wallMs`: `1000`
+- `run_report.topN`: `5`
+- `build_blueprint_report.wallMs`: `1000`
+- `includeNodes`: `false`
 
 Core tools:
 
@@ -50,7 +58,34 @@ Core tools:
 - graph export / import / ports: `graph`
 - KPI / benchmark / bottlenecks: `metrics`
 - candidate scoring / DOE / layout rules: `optimize`
-   - objective / candidate scoring / topology suggestions / DOE / layout checks
+
+## Compatibility aliases
+
+High-frequency aliases from the older `fact_sim_mcp` naming are available:
+
+- `load_example`
+- `start_simulation`
+- `stop_simulation`
+- `run_simulation_for`
+- `get_simulation_status`
+- `get_kpi_summary`
+- `run_benchmark`
+- `get_graph_overview`
+- `add_node`
+- `update_node`
+- `connect_nodes`
+- `connect_nodes_by_port_kind`
+- `remove_node`
+- `build_graph_from_blueprint`
+
+## Batch references
+
+`edit_graph` batch supports:
+
+- per-operation `ref`
+- `$name` references in later `nodeId` / `fromNodeId` / `toNodeId`
+
+This lets AI build and connect graphs in one tool call.
 
 ## Setup
 
