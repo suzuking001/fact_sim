@@ -83,6 +83,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       case 'IDLE':    this.color='#f1c40f'; this.bgcolor='#fff9db'; this._state='IDLE'; break;
       default:        this.color='#bdc3c7'; this.bgcolor='#f7f7f7'; this._state='IDLE';
     }
+    if(typeof window.applyNodeStateTheme === 'function') window.applyNodeStateTheme(this, this._state);
     this.setDirtyCanvas(true,true);
   }
 

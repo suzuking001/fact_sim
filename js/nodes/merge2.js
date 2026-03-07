@@ -295,6 +295,7 @@ class MergeNode extends EquipmentNode{
       case 'IDLE':    this.color = '#f1c40f'; this.bgcolor = '#fff9db'; break;
       case 'ERROR':   this.color = '#e74c3c'; this.bgcolor = '#fdecea'; break;
     }
+    if(typeof window.applyNodeStateTheme === 'function') window.applyNodeStateTheme(this, this._state);
 
     if(this._state !== 'IDLE' || this._payload) this.setDirtyCanvas(true,true);
   }

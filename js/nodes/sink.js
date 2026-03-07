@@ -8,8 +8,9 @@ class SinkNode extends LiteGraph.LGraphNode{
     this.title = 'Sink';
     this.addInput('workIn', 0);
     this.size = [220,170];
-    this.color = '#f1c40f';
-    this.bgcolor = '#fff9db';
+    this.color = '#fbefbe';
+    this.bgcolor = '#fffdf3';
+    this.boxcolor = '#f1c40f';
     this._recv = [];
     this._history = [];
     this._maxSamples = 60;

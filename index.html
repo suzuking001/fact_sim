@@ -1,8 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>LiteGraph Simulator (ver 3.0 - Persistent Script Editor)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="FACT SIM is a browser-based discrete-event simulator for factories, AGVs, logistics, traffic, and other real-world systems." />
+  <meta name="theme-color" content="#ffffff" />
+  <title>FACT SIM - Browser-Based Discrete Event Simulation</title>
   <script>
     (function(){
       try{
@@ -21,53 +24,105 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-    <link rel="stylesheet" href="css/app.css?v=20260305k" />
+  <link rel="stylesheet" href="css/app.css?v=20260307j" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
+  <a class="landingSkip" href="#landingOpenBtn">Skip to simulator</a>
   <div class="landingShell">
+    <header class="landingTopbar">
+      <a class="landingWordmark" href="#landingTitle" aria-label="FACT SIM landing top">
+        <img class="landingWordmarkLogo" src="img/fact_sim_logo.png" alt="" aria-hidden="true">
+        <span>FACT SIM</span>
+      </a>
+      <nav class="landingNav" aria-label="Landing sections">
+        <a href="#landingConcept">Concept</a>
+        <a href="#landingFeatures">Features</a>
+        <a href="#landingGithub">GitHub</a>
+      </nav>
+    </header>
+
     <section class="landingHero">
-      <p class="landingEyebrow">Browser-Based Industrial Simulation</p>
-      <h1 id="landingTitle">FACT SIM</h1>
-      <p class="landingSubtitle">Real World Discrete Event Simulation</p>
-      <p class="landingBody">
-        Model factories, production lines, AGVs, logistics, and other real-world systems
-        as discrete events with second-level precision.
-      </p>
-      <div class="landingActions">
-        <button id="landingOpenBtn" class="landingBtn landingBtnPrimary" type="button" disabled aria-disabled="true">Open Simulator</button>
-        <a class="landingBtn landingBtnGhost" href="https://github.com/suzuking001/fact_sim" target="_blank" rel="noopener">View GitHub</a>
-        <a class="landingBtn landingBtnGhost" href="https://suzuking001.github.io/fact_sim/" target="_blank" rel="noopener">View Demo</a>
-      </div>
-      <div class="landingProgressWrap">
-        <div id="landingProgressBar" class="landingProgressBar" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div id="landingProgressFill" class="landingProgressFill"></div>
+      <div class="landingHeroGrid">
+        <div class="landingHeroMain">
+          <p class="landingEyebrow">Browser-Based Industrial Simulation</p>
+          <h1 id="landingTitle">FACT SIM</h1>
+          <p class="landingSubtitle">Real World Discrete Event Simulation</p>
+          <p class="landingBody">
+            Model factories, production lines, AGVs, logistics, hospitals, and other real-world
+            systems as discrete events with second-level precision.
+          </p>
+          <div class="landingActions">
+            <button id="landingOpenBtn" class="landingBtn landingBtnPrimary" type="button" data-landing-open disabled aria-disabled="true">Open Simulator</button>
+          </div>
+          <div class="landingProgressWrap">
+            <div class="landingProgressHead">
+              <span id="landingProgressLabel" class="landingProgressStatus">Loading simulator assets...</span>
+              <span id="landingProgressValue">0%</span>
+            </div>
+            <div id="landingProgressBar" class="landingProgressBar" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="landingProgressFill" class="landingProgressFill"></div>
+            </div>
+            <div class="landingProgressMeta">
+              <span id="landingProgressHint">Preparing the browser runtime, UI, and simulation modules.</span>
+              <span id="landingProgressState" class="landingProgressState">Booting</span>
+            </div>
+          </div>
         </div>
-        <div class="landingProgressMeta">
-          <span id="landingProgressLabel">Loading simulator assets...</span>
-          <span id="landingProgressValue">0%</span>
+        <aside class="landingHeroAside" aria-label="What FACT SIM helps answer">
+          <div class="landingMetricCard">
+            <p class="landingMetricEyebrow">What you can validate</p>
+            <ul class="landingMetricList">
+              <li><strong>Takt feasibility</strong><span>Will the line actually meet target cycle time?</span></li>
+              <li><strong>Throughput</strong><span>How much output can the system sustain per hour?</span></li>
+              <li><strong>Bottlenecks</strong><span>Which station, carrier, or buffer is constraining flow?</span></li>
+              <li><strong>Resource sizing</strong><span>How many machines, AGVs, carriers, or pallets are enough?</span></li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="landingConcept" class="landingSection landingSectionConcept">
+      <div class="landingSectionHead">
+        <h2 class="landingSectionTitle">The world moves through events and state transitions.</h2>
+      </div>
+      <div class="landingConceptGrid">
+        <div class="landingConceptMain">
+          <p class="landingSectionLead">“The world can be represented by state transitions and events.”</p>
+          <p class="landingSectionText">
+            Factories, robots, cars, AGVs, and people are all systems of connected events.
+            FACT SIM models this structure directly so you can validate decisions before deployment.
+          </p>
+          <div class="landingPills">
+            <span>Factories</span>
+            <span>Robots</span>
+            <span>Cars</span>
+            <span>AGVs</span>
+            <span>People</span>
+          </div>
+        </div>
+        <div class="landingConceptStack">
+          <article class="landingCardMini">
+            <h3>States</h3>
+            <p>Idle, process, wait, down, blocked, reserved, occupied.</p>
+          </article>
+          <article class="landingCardMini">
+            <h3>Events</h3>
+            <p>Arrivals, handoffs, releases, merges, splits, routing, downtime.</p>
+          </article>
+          <article class="landingCardMini">
+            <h3>Decisions</h3>
+            <p>Validate the reason a line meets takt or fails before equipment is purchased.</p>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="landingSection">
-      <h2 class="landingSectionTitle">Concept</h2>
-      <p class="landingSectionLead">“The world can be represented by state transitions and events.”</p>
-      <p class="landingSectionText">
-        Factories, robots, cars, AGVs, and people are all systems of connected events.
-        FACT SIM lets you model this structure directly and validate behavior before implementation.
-      </p>
-      <div class="landingPills">
-        <span>Factories</span>
-        <span>Robots</span>
-        <span>Cars</span>
-        <span>AGVs</span>
-        <span>People</span>
+    <section id="landingFeatures" class="landingSection">
+      <div class="landingSectionHead">
+        <h2 class="landingSectionTitle">Built for analysis, not presentation-only animation.</h2>
       </div>
-    </section>
-
-    <section class="landingSection">
-      <h2 class="landingSectionTitle">Core Features</h2>
       <div class="landingGrid landingGrid3">
         <article class="landingCardMini"><h3>Node-Based Modeling</h3><p>Build systems visually using a graph model.</p></article>
         <article class="landingCardMini"><h3>Discrete-Event Engine</h3><p>Simulate state transitions and event timing accurately.</p></article>
@@ -78,8 +133,10 @@
       </div>
     </section>
 
-    <section class="landingSection">
-      <h2 class="landingSectionTitle">Use Cases</h2>
+    <section id="landingUseCases" class="landingSection">
+      <div class="landingSectionHead">
+        <h2 class="landingSectionTitle">Model real systems with discrete-event logic.</h2>
+      </div>
       <div class="landingGrid landingGrid2">
         <article class="landingCardMini"><h3>Factory Production Lines</h3><p>Validate takt, throughput, and bottleneck risk early.</p></article>
         <article class="landingCardMini"><h3>AGV Logistics</h3><p>Evaluate route, carrier, and handoff synchronization.</p></article>
@@ -88,16 +145,24 @@
       </div>
     </section>
 
-    <section class="landingSection landingSectionGithub">
-      <h2 class="landingSectionTitle">Open Source on GitHub</h2>
+    <section id="landingGithub" class="landingSection landingSectionGithub">
+      <div class="landingSectionHead">
+        <h2 class="landingSectionTitle">Open source, inspectable, and easy to extend.</h2>
+      </div>
       <p class="landingSectionText">
         FACT SIM is built as an open platform for industrial and operational simulation.
-        Fork it, inspect it, and extend it for your domain.
+        Explore the code, open issues, fork the modeler, and adapt it for your own domain.
       </p>
-      <a class="landingBtn landingBtnPrimary" href="https://github.com/suzuking001/fact_sim" target="_blank" rel="noopener">Explore Repository</a>
+      <a class="landingInlineLink" href="https://github.com/suzuking001/fact_sim" target="_blank" rel="noopener">Explore Repository</a>
     </section>
 
-    <p class="landingLegal">Open-source software provided as-is. Validate outputs with your domain data before production decisions.</p>
+    <footer class="landingFooter">
+      <p class="landingLegal">Open-source software provided as-is. Validate outputs with your domain data before production decisions.</p>
+      <div class="landingFooterLinks">
+        <a href="docs/research.md" target="_blank" rel="noopener">Research Notes</a>
+        <a href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener">Third-Party Notices</a>
+      </div>
+    </footer>
   </div>
 </main>
 <div id="appRoot" aria-hidden="true">
@@ -110,6 +175,7 @@
       </div>
     </div>
     <div id="controls">
+      <div class="panelHeader">Overview</div>
       <div class="btn-row">
         <button id="btnStart">Start</button>
         <button id="btnStop">Stop</button>
@@ -119,18 +185,45 @@
         <label for="speedRange">Speed <span id="speedFactor">1.0x</span></label>
         <input type="range" id="speedRange" value="2" min="0" max="12" step="1">
       </div>
-      <select id="exampleSelect" title="Examples">
-        <option value="">Load example…</option>
-        <option value="simple">Simple</option>
-        <option value="branch">Branch</option>
-        <option value="shuttle_line5">Shuttle Line (5 Stage)</option>
-        <option value="carrier_config">Carrier Config Example</option>
-        <option value="pallet_station_demo">Pallet Station Demo</option>
-        <option value="sample_line1">Sample Line1</option>
-      </select>
+      <div class="control-group">
+        <label for="exampleSelect">Example Graph</label>
+        <select id="exampleSelect" title="Examples">
+          <option value="">Load example…</option>
+          <option value="simple">Simple</option>
+          <option value="branch">Branch</option>
+          <option value="shuttle_line5">Shuttle Line (5 Stage)</option>
+          <option value="carrier_config">Carrier Config Example</option>
+          <option value="pallet_station_demo">Pallet Station Demo</option>
+          <option value="sample_line1">Sample Line1</option>
+        </select>
+      </div>
       <div id="accessCounter" class="accessCounter" title="Public access counter (CounterAPI)">
         <span class="accessCounterLabel">Visits</span>
         <span id="accessCounterValue">...</span>
+      </div>
+      <div id="simStatusCard" class="simStatusCard" aria-live="polite">
+        <div class="simStatusHead">
+          <span id="simStatusBadge" class="simStatusBadge">Stopped</span>
+          <span id="simStatusEngine" class="simStatusEngine">dt (0.1s fixed)</span>
+        </div>
+        <div class="simStatusGrid">
+          <div class="simStatusItem">
+            <span class="simStatusLabel">Render</span>
+            <strong id="simStatusRender">60 FPS</strong>
+          </div>
+          <div class="simStatusItem">
+            <span class="simStatusLabel">Realtime</span>
+            <strong id="simStatusRealtime">--</strong>
+          </div>
+          <div class="simStatusItem">
+            <span class="simStatusLabel">Speed</span>
+            <strong id="simStatusSpeed">1x</strong>
+          </div>
+          <div class="simStatusItem">
+            <span class="simStatusLabel">Selection</span>
+            <strong id="simStatusSelection">0 nodes</strong>
+          </div>
+        </div>
       </div>
     </div>
     <div id="backgroundPanel">
@@ -172,6 +265,12 @@
     <!-- Add Node panel -->
     <div id="addNodePanel">
       <div class="panelHeader">Add Node</div>
+      <div id="nodeCategoryTabs" class="category-tabs" role="tablist" aria-label="Node categories"></div>
+      <div class="field">
+        <label for="nodeTypeSearch">Search</label>
+        <input id="nodeTypeSearch" type="search" placeholder="Filter node types">
+      </div>
+      <div id="nodeQuickPicks" class="quick-pick-row" aria-label="Quick node picks"></div>
       <div class="field">
         <label for="nodeKindSelect">Type</label>
         <select id="nodeKindSelect">
@@ -230,11 +329,12 @@
           <option value="event">event (heap)</option>
         </select>
       </div>
-      <button id="btnBenchmark">Compare Speed</button>
-    </div>
-    <div id="shortcutPanel">
-      <div class="panelHeader">Shortcuts</div>
-      <div class="shortcuts">
+        <button id="btnBenchmark">Compare Speed</button>
+      </div>
+      <div id="shortcutPanel">
+        <div class="panelHeader">Shortcuts</div>
+        <div class="shortcuts">
+        <div class="shortcut-group-label">Most Used</div>
         <div class="shortcut-row">
           <span class="shortcut-action">Box Select</span>
           <span class="shortcut-key">Ctrl + Drag</span>
@@ -258,17 +358,18 @@
         <div class="shortcut-row">
           <span class="shortcut-action">Undo</span>
           <span class="shortcut-key">Ctrl + Z</span>
-          <button id="btnUndo" class="shortcut-btn">Run</button>
+          <button id="btnUndo" class="shortcut-btn">Undo</button>
         </div>
         <div class="shortcut-row">
           <span class="shortcut-action">Redo</span>
           <span class="shortcut-key">Ctrl + Y / Ctrl + Shift + Z</span>
-          <button id="btnRedo" class="shortcut-btn">Run</button>
+          <button id="btnRedo" class="shortcut-btn">Redo</button>
         </div>
+        <div class="shortcut-group-label">Layout</div>
         <div class="shortcut-row">
           <span class="shortcut-action">Fit to Screen</span>
           <span class="shortcut-key">Mouse Wheel x2</span>
-          <button id="btnFit" class="shortcut-btn">Run</button>
+          <button id="btnFit" class="shortcut-btn">Fit</button>
         </div>
         <div class="shortcut-row">
           <span class="shortcut-action">Auto Layout</span>
@@ -277,7 +378,7 @@
             <option value="flow" selected>Flow</option>
             <option value="flow-group">Flow + Group</option>
           </select>
-          <button id="btnAutoLayout" class="shortcut-btn">Run</button>
+          <button id="btnAutoLayout" class="shortcut-btn">Layout</button>
         </div>
         <div class="shortcut-row">
           <span class="shortcut-action">Selection Layout</span>
@@ -291,7 +392,7 @@
             <option value="distribute-h">Distribute Horizontal</option>
             <option value="distribute-v">Distribute Vertical</option>
           </select>
-          <button id="btnSelectionLayout" class="shortcut-btn">Run</button>
+          <button id="btnSelectionLayout" class="shortcut-btn">Align</button>
         </div>
         <div class="shortcut-row">
           <span class="shortcut-action">Resize</span>
@@ -299,12 +400,24 @@
             <option value="set-size">Set Size...</option>
             <option value="min-size">Minimum Size</option>
           </select>
-          <button id="btnResizeNodes" class="shortcut-btn">Run</button>
+          <button id="btnResizeNodes" class="shortcut-btn">Resize</button>
+        </div>
+        <div class="shortcut-group-label">Simulation</div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">Start / Stop</span>
+          <span class="shortcut-key">Sidebar buttons</span>
+          <span class="shortcut-spacer"></span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-action">Add Node / Group</span>
+          <span class="shortcut-key">Enter / Ctrl + Enter</span>
+          <span class="shortcut-spacer"></span>
         </div>
       </div>
     </div>
     <div class="sidebar-spacer"></div>
     <div id="fileControls">
+      <div class="panelHeader">Project</div>
       <button id="btnSave">Save</button>
       <button id="btnLoad">Load</button>
       <button id="btnShareUrl">Share URL</button>
@@ -494,8 +607,8 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260304b"></script>
-  <script src="js/core.js?v=20260307d"></script>
+  <script src="js/app/landing.js?v=20260307b"></script>
+  <script src="js/core.js?v=20260307h"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js?v=20260307a"></script>
@@ -504,23 +617,23 @@ SOFTWARE.
     <script src="js/work-highlight.js"></script>
     <script src="js/link-anim.js?v=20260226b"></script>
     <script src="js/vendor/lz-string.min.js"></script>
-  <script src="js/nodes/equipment.js?v=20260224b"></script>
+  <script src="js/nodes/equipment.js?v=20260307c"></script>
   <script src="js/nodes/note.js?v=20260305a"></script>
-  <script src="js/nodes/signal.js?v=20260224b"></script>
-  <script src="js/nodes/shuttle_stage.js?v=20260216f"></script>
-  <script src="js/nodes/source.js?v=20260224a"></script>
-  <script src="js/nodes/split.js?v=20260224b"></script>
-  <script src="js/nodes/branch.js?v=20260224b"></script>
-  <script src="js/nodes/merge2.js?v=20260224b"></script>
-  <script src="js/nodes/join.js?v=20260224b"></script>
-  <script src="js/nodes/agv_route.js?v=20260225c"></script>
+  <script src="js/nodes/signal.js?v=20260307c"></script>
+  <script src="js/nodes/shuttle_stage.js?v=20260307a"></script>
+  <script src="js/nodes/source.js?v=20260307c"></script>
+  <script src="js/nodes/split.js?v=20260307b"></script>
+  <script src="js/nodes/branch.js?v=20260307b"></script>
+  <script src="js/nodes/merge2.js?v=20260307b"></script>
+  <script src="js/nodes/join.js?v=20260307b"></script>
+  <script src="js/nodes/agv_route.js?v=20260307b"></script>
   <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
-  <script src="js/nodes/carrier_config.js?v=20260226a"></script>
-  <script src="js/nodes/pallet_carrier_config.js?v=20260226a"></script>
-  <script src="js/nodes/carrier_route.js?v=20260226a"></script>
+  <script src="js/nodes/carrier_config.js?v=20260307b"></script>
+  <script src="js/nodes/pallet_carrier_config.js?v=20260307b"></script>
+  <script src="js/nodes/carrier_route.js?v=20260307b"></script>
   <script src="js/nodes/carrier_route_ui.js?v=20260226a"></script>
-  <script src="js/nodes/station.js?v=20260301a"></script>
-  <script src="js/nodes/sink.js?v=20260305a"></script>
+  <script src="js/nodes/station.js?v=20260307b"></script>
+  <script src="js/nodes/sink.js?v=20260307c"></script>
   <script src="js/nodes/register.js?v=20260226a"></script>
   <script src="sample/simple.js?v=20260221b"></script>
   <script src="sample/branch.js?v=20260221b"></script>
@@ -542,11 +655,11 @@ SOFTWARE.
   <script src="js/app/fit.js?v=20260306a"></script>
   <script src="js/app/node-props-panel.js?v=20260220b"></script>
   <script src="js/app/timeline-init.js?v=20260226b"></script>
-  <script src="js/app/graph-init.js?v=20260307a"></script>
+  <script src="js/app/graph-init.js?v=20260307d"></script>
   <script src="js/app/examples.js?v=20260307a"></script>
   <script src="js/app/file-io.js?v=20260307a"></script>
-  <script src="js/app/access-counter.js?v=20260226a"></script>
-  <script src="js/app/ui.js?v=20260307a"></script>
+  <script src="js/app/access-counter.js?v=20260307a"></script>
+  <script src="js/app/ui.js?v=20260307h"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

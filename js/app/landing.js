@@ -10,7 +10,10 @@
   const progressFill = document.getElementById('landingProgressFill');
   const progressValue = document.getElementById('landingProgressValue');
   const progressLabel = document.getElementById('landingProgressLabel');
+  const progressHint = document.getElementById('landingProgressHint');
+  const progressState = document.getElementById('landingProgressState');
   const openBtn = document.getElementById('landingOpenBtn');
+  const openButtons = Array.from(document.querySelectorAll('[data-landing-open]'));
 
   if(!body || !landing || !appRoot || !progressBar || !progressFill || !progressValue || !openBtn){
     return;
@@ -66,8 +69,13 @@
     if(ready) return;
     ready = true;
     if(progressLabel) progressLabel.textContent = 'Ready';
-    openBtn.disabled = false;
-    openBtn.setAttribute('aria-disabled', 'false');
+    if(progressHint) progressHint.textContent = 'Simulator modules are ready. Open the editor when you want to start.';
+    if(progressState) progressState.textContent = 'Ready';
+    openButtons.forEach((btn)=>{
+      btn.disabled = false;
+      btn.setAttribute('aria-disabled', 'false');
+      if(btn.tagName === 'BUTTON') btn.textContent = 'Open Simulator';
+    });
   }
 
   function onOpen(){
@@ -79,20 +87,26 @@
     }
   }
 
-  openBtn.addEventListener('click', onOpen);
-  openBtn.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' || e.key === ' '){
-      e.preventDefault();
-      onOpen();
-    }
+  openButtons.forEach((btn)=>{
+    btn.addEventListener('click', onOpen);
+    btn.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        onOpen();
+      }
+    });
   });
 
   function updateFromReadyState(){
     const rs = document.readyState;
     if(rs === 'interactive'){
       realTarget = Math.max(realTarget, 62);
+      if(progressState) progressState.textContent = 'Initializing';
+      if(progressHint) progressHint.textContent = 'Bootstrapping the UI shell and preparing interaction handlers.';
     }else if(rs === 'complete'){
       realTarget = Math.max(realTarget, 84);
+      if(progressState) progressState.textContent = 'Loading';
+      if(progressHint) progressHint.textContent = 'Loading graph, rendering, and simulation modules.';
     }
   }
   updateFromReadyState();
@@ -106,6 +120,10 @@
         if(!entries || !entries.length) return;
         seenResources += entries.length;
         realTarget = Math.max(realTarget, Math.min(88, 10 + seenResources * 1.5));
+        if(progressState) progressState.textContent = seenResources > 8 ? 'Linking' : 'Loading';
+        if(progressHint && seenResources > 8){
+          progressHint.textContent = 'Resolving editor modules, examples, and simulation nodes.';
+        }
       });
       po.observe({ type:'resource', buffered:true });
     }catch(_e){}
@@ -114,6 +132,8 @@
   window.addEventListener('load', ()=>{
     realTarget = 100;
     if(progressLabel) progressLabel.textContent = 'Finalizing...';
+    if(progressHint) progressHint.textContent = 'Running final layout checks before the simulator is ready.';
+    if(progressState) progressState.textContent = 'Finalizing';
   });
 
   // Fallback to avoid being stuck due edge-case load event behavior.
@@ -143,5 +163,6 @@
   }
 
   setProgress(0);
+  if(progressState) progressState.textContent = 'Booting';
   animationHandle = window.requestAnimationFrame(tick);
 })();

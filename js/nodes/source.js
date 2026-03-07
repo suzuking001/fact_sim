@@ -11,8 +11,9 @@ class SourceNode extends LiteGraph.LGraphNode{
     this.title = 'Source';
     this.size = [200,150];
     this.addOutput('workOut', 0);
-    this.color = '#f39c12';
-    this.bgcolor = '#fff6e6';
+    this.color = '#fee8c7';
+    this.bgcolor = '#fff8ee';
+    this.boxcolor = '#f39c12';
     this.properties = {
       sequence: 'A,B',
       sigExtra: 0,

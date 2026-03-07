@@ -14,8 +14,9 @@ class PalletCarrierConfigNode extends LiteGraph.LGraphNode{
     this.title = 'Pallet Carrier Config';
     this.size = [320, 150];
     this.resizable = true;
-    this.color = '#f1c40f';
-    this.bgcolor = '#fff9db';
+    this.color = '#ececf2';
+    this.bgcolor = '#ffffff';
+    this.boxcolor = '#7c3aed';
     this.properties = {
       carrierId: PALLET_CARRIER_CONFIG_DEFAULTS.carrierId,
       palletCapacity: PALLET_CARRIER_CONFIG_DEFAULTS.palletCapacity,

@@ -48,6 +48,7 @@ class StationNode extends LiteGraph.LGraphNode{
       case 'IDLE':
       default:        this.color = '#f1c40f'; this.bgcolor = '#fff9db'; break;
     }
+    if(typeof window.applyNodeStateTheme === 'function') window.applyNodeStateTheme(this, this._state);
   }
 
   _normalizeTime(v, fallback){

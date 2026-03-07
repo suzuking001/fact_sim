@@ -26,8 +26,9 @@ class SignalNode extends LiteGraph.LGraphNode{
     this.title = title;
     this.size = SIGNAL_UI.baseSize.slice();
     this.resizable = true;
-    this.color = '#3b82f6';
-    this.bgcolor = '#eff6ff';
+    this.color = '#d8ecfb';
+    this.bgcolor = '#f4fafe';
+    this.boxcolor = '#3498db';
     this.properties = {
       script: SIGNAL_DEFAULT_SCRIPT,
       sigExtra: 1,

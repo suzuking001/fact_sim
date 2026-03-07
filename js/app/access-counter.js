@@ -16,6 +16,8 @@ var App = window.App || (window.App = {});
 
   const host = sanitizeToken(window.location?.hostname, 'local');
   const path = sanitizeToken(window.location?.pathname, 'root');
+  const rawHost = String(window.location?.hostname || '').toLowerCase();
+  const isLocalRuntime = !rawHost || rawHost === 'localhost' || rawHost === '127.0.0.1';
   const namespace = sanitizeToken(`fact_sim_${host}`, 'fact_sim');
   const key = sanitizeToken(`visits_${path}`, 'visits');
   const counterUpEndpoint = `https://api.counterapi.dev/v1/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}/up`;
@@ -114,6 +116,11 @@ var App = window.App || (window.App = {});
   };
 
   const loadCounter = (mode)=>{
+    if(isLocalRuntime){
+      const localCount = mode === 'read' ? readLocalFallback() : bumpLocalFallback();
+      renderCount(localCount, 'local');
+      return;
+    }
     const shouldIncrement = (mode !== 'read') && !incrementDone;
     const request = shouldIncrement ? fetchIncrement() : fetchReadOnly();
 

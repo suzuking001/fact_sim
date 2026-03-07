@@ -2,6 +2,74 @@
 
 var App = window.App || (window.App = {});
 
+function initLiteContextMenuStyler(){
+  if(App.__liteContextMenuStylerReady) return;
+  App.__liteContextMenuStylerReady = true;
+
+  const applyEntryStyles = (entry)=>{
+    if(!(entry instanceof HTMLElement) || entry.__factStyledEntry) return;
+    entry.__factStyledEntry = true;
+    entry.style.setProperty('background', 'transparent', 'important');
+    entry.style.setProperty('background-color', 'transparent', 'important');
+    entry.style.setProperty('background-image', 'none', 'important');
+    entry.style.setProperty('color', '#111111', 'important');
+    entry.style.setProperty('border-radius', '11px', 'important');
+    entry.style.setProperty('border', '1px solid transparent', 'important');
+
+    if(entry.classList.contains('separator')){
+      entry.style.setProperty('min-height', '0', 'important');
+      entry.style.setProperty('padding', '0', 'important');
+      entry.style.setProperty('margin', '6px 2px', 'important');
+      entry.style.setProperty('border-radius', '0', 'important');
+      entry.style.setProperty('border', '0', 'important');
+      entry.style.setProperty('border-bottom', '1px solid rgba(17,17,17,0.08)', 'important');
+      return;
+    }
+
+    entry.addEventListener('mouseenter', ()=>{
+      entry.style.setProperty('background', 'rgba(112,87,255,0.08)', 'important');
+      entry.style.setProperty('background-color', 'rgba(112,87,255,0.08)', 'important');
+      entry.style.setProperty('border-color', 'rgba(112,87,255,0.18)', 'important');
+      entry.style.setProperty('color', '#4c1d95', 'important');
+    });
+    entry.addEventListener('mouseleave', ()=>{
+      entry.style.setProperty('background', 'transparent', 'important');
+      entry.style.setProperty('background-color', 'transparent', 'important');
+      entry.style.setProperty('border-color', 'transparent', 'important');
+      entry.style.setProperty('color', entry.classList.contains('disabled') ? 'rgba(17,17,17,0.42)' : '#111111', 'important');
+    });
+  };
+
+  const applyMenuStyles = (menu)=>{
+    if(!(menu instanceof HTMLElement)) return;
+    if(!menu.__factStyledMenu){
+      menu.__factStyledMenu = true;
+      Object.assign(menu.style, {
+        border: '1px solid rgba(17,17,17,0.08)',
+        borderRadius: '16px',
+        background: 'rgba(255,255,255,0.96)',
+        boxShadow: '0 18px 44px rgba(15,23,42,0.12)',
+        backdropFilter: 'blur(14px)',
+        padding: '6px',
+        minWidth: '220px',
+        color: '#111111',
+        fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+      });
+    }
+    menu.querySelectorAll('.litemenu-entry').forEach(applyEntryStyles);
+  };
+
+  const scan = ()=>{
+    document.querySelectorAll('.litegraph.litecontextmenu').forEach(applyMenuStyles);
+  };
+
+  const observer = new MutationObserver(scan);
+  observer.observe(document.body, { childList: true, subtree: true });
+  scan();
+}
+
+initLiteContextMenuStyler();
+
 // Controls
 const btnStart = document.getElementById('btnStart');
 if(btnStart) btnStart.onclick = ()=>{ startSimulation(); };
@@ -249,6 +317,7 @@ if(renderFpsSelect){
   const propsWrap = document.getElementById('addGroupProps');
   const rateEl = document.getElementById('groupStopRate');
   const btn = document.getElementById('btnAddGroup');
+  const descriptionEl = document.getElementById('groupKindDescription');
   if(!typeSel || !propsWrap || !rateEl || !btn) return;
   if(!App.stopGroups || typeof App.stopGroups.getTypeDefinitions !== 'function') return;
 
@@ -257,6 +326,11 @@ if(renderFpsSelect){
     .sort((a, b)=> String(a.label || a.key).localeCompare(String(b.label || b.key)));
 
   if(!defs.length) return;
+
+  const GROUP_DESCRIPTIONS = {
+    random: 'Stop all nodes inside the group using randomized interval and duration distributions.',
+    scheduled: 'Stop all nodes inside the group at fixed intervals for planned pauses and breaks.'
+  };
 
   typeSel.innerHTML = '';
   defs.forEach((def)=>{
@@ -344,6 +418,9 @@ if(renderFpsSelect){
   const renderFields = ()=>{
     const def = getDef();
     propsWrap.innerHTML = '';
+    if(descriptionEl){
+      descriptionEl.textContent = GROUP_DESCRIPTIONS[def.key] || 'Configure a shared stop pattern for grouped nodes.';
+    }
     for(const field of def.uiFields){
       propsWrap.appendChild(makeField(field));
     }
@@ -704,9 +781,14 @@ function beginGroupPlacement(group){
 
 // Add Node (from sidebar select + button)
 (function(){
+  const addNodePanel = document.getElementById('addNodePanel');
   const sel = document.getElementById('nodeKindSelect');
   const btn = document.getElementById('btnAddNode');
   const propsWrap = document.getElementById('addNodeProps');
+  const searchInput = document.getElementById('nodeTypeSearch');
+  const categoryTabsWrap = document.getElementById('nodeCategoryTabs');
+  const quickPicksWrap = document.getElementById('nodeQuickPicks');
+  const descriptionEl = document.getElementById('nodeKindDescription');
   if(!sel || !btn || !propsWrap) return;
   const NODE_SCHEMAS = {
     equip:{
@@ -837,6 +919,50 @@ function beginGroupPlacement(group){
     }
   };
 
+  const NODE_META = {
+    equip:{ label:'Equipment', description:'Process work with standard process / wait / down behavior.' },
+    note:{ label:'Memo', description:'Place text notes on the graph for layout comments and instructions.' },
+    signal:{ label:'Signal', description:'Run signal-only scripts and combine logic without work transport.' },
+    shuttle:{ label:'Shuttle Stage', description:'Synchronize grouped shuttle stages and move one work per stage together.' },
+    merge:{ label:'Merge', description:'Merge matching work IDs from multiple inputs into one output.' },
+    join:{ label:'Join', description:'Pass through the first-arriving work from multiple upstream nodes.' },
+    source:{ label:'Source', description:'Generate work items from a configured sequence.' },
+    sink:{ label:'Sink', description:'Collect completed work and monitor throughput.' },
+    split:{ label:'Split', description:'Duplicate one work ID into multiple synchronized downstream branches.' },
+    branch:{ label:'Branch', description:'Route work by work type to different output ports.' },
+    carrierconfig:{ label:'Carrier Config', description:'Define carrier IDs and work capacity for route initialization.' },
+    palletcarrierconfig:{ label:'Pallet Carrier Config', description:'Define pallet carrier IDs, pallet capacity, and initial pallets.' },
+    agvroute:{ label:'AGV Route', description:'Legacy AGV route node with travel time and dispatch behavior.' },
+    carrierroute:{ label:'Carrier Route', description:'Transport carriers, work, and pallets along a timed route.' },
+    station:{ label:'Station', description:'Store one pallet, feed work in/out, and hand pallets to carriers.' }
+  };
+  const QUICK_PICK_KINDS = ['equip', 'source', 'sink', 'signal', 'carrierroute', 'station'];
+  const CATEGORY_TABS = [
+    { key: 'all', label: 'All' },
+    { key: 'core', label: 'Core' },
+    { key: 'flow', label: 'Flow' },
+    { key: 'carrier', label: 'Carrier' },
+    { key: 'utility', label: 'Utility' }
+  ];
+  const NODE_CATEGORY = {
+    equip: 'core',
+    source: 'core',
+    sink: 'core',
+    split: 'flow',
+    branch: 'flow',
+    merge: 'flow',
+    join: 'flow',
+    shuttle: 'flow',
+    carrierconfig: 'carrier',
+    palletcarrierconfig: 'carrier',
+    carrierroute: 'carrier',
+    station: 'carrier',
+    agvroute: 'carrier',
+    signal: 'utility',
+    note: 'utility'
+  };
+  let activeCategory = 'all';
+
   function makeField(def){
     const wrap = document.createElement('div');
     wrap.className = 'field';
@@ -873,17 +999,142 @@ function beginGroupPlacement(group){
     return wrap;
   }
 
-  function renderFields(kind){
-    const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
-    propsWrap.innerHTML = '';
-    if(!schema.props || !schema.props.length){
-      const div = document.createElement('div'); div.className='placeholder'; div.textContent='No configurable properties.'; propsWrap.appendChild(div); return;
-    }
-    schema.props.forEach(def=>{ propsWrap.appendChild(makeField(def)); });
+  function getNodeMeta(kind){
+    return NODE_META[kind] || { label: kind, description: '' };
   }
 
+  function getNodeCategory(kind){
+    return NODE_CATEGORY[kind] || 'utility';
+  }
+
+  function listNodeKinds(filterText){
+    const filter = String(filterText || '').trim().toLowerCase();
+    return Object.keys(NODE_SCHEMAS).filter((kind)=>{
+      if(activeCategory !== 'all' && getNodeCategory(kind) !== activeCategory) return false;
+      if(!filter) return true;
+      const meta = getNodeMeta(kind);
+      const schema = NODE_SCHEMAS[kind];
+      const haystack = [
+        kind,
+        meta.label,
+        meta.description,
+        schema && schema.type
+      ].join(' ').toLowerCase();
+      return haystack.includes(filter);
+    });
+  }
+
+  function renderCategoryTabs(){
+    if(!categoryTabsWrap) return;
+    categoryTabsWrap.innerHTML = '';
+    CATEGORY_TABS.forEach((tab)=>{
+      const btnEl = document.createElement('button');
+      btnEl.type = 'button';
+      btnEl.className = 'categoryTabBtn' + (tab.key === activeCategory ? ' is-active' : '');
+      btnEl.textContent = tab.label;
+      btnEl.setAttribute('role', 'tab');
+      btnEl.setAttribute('aria-selected', tab.key === activeCategory ? 'true' : 'false');
+      btnEl.addEventListener('click', ()=>{
+        activeCategory = tab.key;
+        renderCategoryTabs();
+        if(!rebuildNodeSelect(searchInput?.value || '')) return;
+        renderFields(sel.value || 'equip');
+      });
+      categoryTabsWrap.appendChild(btnEl);
+    });
+  }
+
+  function renderQuickPicks(activeKind){
+    if(!quickPicksWrap) return;
+    quickPicksWrap.innerHTML = '';
+    QUICK_PICK_KINDS.forEach((kind)=>{
+      const meta = getNodeMeta(kind);
+      if(!meta) return;
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'quickPickBtn' + (kind === activeKind ? ' is-active' : '');
+      chip.textContent = meta.label;
+      chip.title = meta.description || meta.label;
+      chip.addEventListener('click', ()=>{
+        if(searchInput) searchInput.value = '';
+        activeCategory = 'all';
+        renderCategoryTabs();
+        rebuildNodeSelect('');
+        sel.value = kind;
+        renderFields(kind);
+      });
+      quickPicksWrap.appendChild(chip);
+    });
+  }
+
+  function rebuildNodeSelect(filterText){
+    const current = sel.value || 'equip';
+    const kinds = listNodeKinds(filterText);
+    sel.innerHTML = '';
+    if(!kinds.length){
+      btn.disabled = true;
+      propsWrap.innerHTML = '<div class="placeholder">No node types match this filter.</div>';
+      if(descriptionEl) descriptionEl.textContent = 'Try a different search term.';
+      renderQuickPicks('');
+      return false;
+    }
+    kinds.forEach((kind)=>{
+      const opt = document.createElement('option');
+      opt.value = kind;
+      opt.textContent = getNodeMeta(kind).label;
+      sel.appendChild(opt);
+    });
+    btn.disabled = false;
+    sel.value = kinds.includes(current) ? current : kinds[0];
+    return true;
+  }
+
+  function renderFields(kind){
+    const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
+    const meta = getNodeMeta(kind);
+    propsWrap.innerHTML = '';
+    if(descriptionEl) descriptionEl.textContent = meta.description || 'Configure the node before placement.';
+    if(!schema.props || !schema.props.length){
+      const div = document.createElement('div'); div.className='placeholder'; div.textContent='No configurable properties.'; propsWrap.appendChild(div);
+      renderQuickPicks(kind);
+      return;
+    }
+    schema.props.forEach(def=>{ propsWrap.appendChild(makeField(def)); });
+    renderQuickPicks(kind);
+  }
+
+  rebuildNodeSelect('');
+  renderCategoryTabs();
   renderFields(sel.value || 'equip');
   sel.addEventListener('change', ()=> renderFields(sel.value || 'equip'));
+  if(searchInput){
+    searchInput.addEventListener('input', ()=>{
+      if(!rebuildNodeSelect(searchInput.value)) return;
+      renderFields(sel.value || 'equip');
+    });
+    if(!searchInput.__globalShortcutHooked){
+      window.addEventListener('keydown', (e)=>{
+        const target = e.target;
+        const tag = String(target?.tagName || '').toUpperCase();
+        const isTypingTarget = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable;
+        if(e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTypingTarget){
+          e.preventDefault();
+          if(addNodePanel && addNodePanel.classList.contains('is-collapsed')){
+            const header = addNodePanel.querySelector('.panelHeader');
+            if(header) header.click();
+          }
+          searchInput.focus();
+          searchInput.select();
+          return;
+        }
+        if(e.key === 'Escape' && document.activeElement === searchInput && searchInput.value){
+          searchInput.value = '';
+          if(rebuildNodeSelect('')) renderFields(sel.value || 'equip');
+        }
+      });
+      searchInput.__globalShortcutHooked = true;
+    }
+  }
 
   btn.addEventListener('click', ()=>{
     try{
@@ -927,5 +1178,149 @@ function beginGroupPlacement(group){
       beginNodePlacement(node);
     }catch(e){ console.error(e); }
   });
+})();
+
+(function(){
+  const sidebar = document.getElementById('sidebar');
+  const exampleSelect = document.getElementById('exampleSelect');
+  const renderFpsSelect = document.getElementById('renderFpsSelect');
+  const speedFactor = document.getElementById('speedFactor');
+  const realtimeFactor = document.getElementById('realtimeFactorValue');
+  const simStatusBadge = document.getElementById('simStatusBadge');
+  const simStatusEngine = document.getElementById('simStatusEngine');
+  const simStatusSpeed = document.getElementById('simStatusSpeed');
+  const simStatusRender = document.getElementById('simStatusRender');
+  const simStatusRealtime = document.getElementById('simStatusRealtime');
+  const simStatusSelection = document.getElementById('simStatusSelection');
+  const addNodePanel = document.getElementById('addNodePanel');
+  const addGroupPanel = document.getElementById('addGroupPanel');
+  const btnAddNode = document.getElementById('btnAddNode');
+  const btnAddGroup = document.getElementById('btnAddGroup');
+  if(!sidebar) return;
+  const defaultCollapseState = {
+    controls: false,
+    backgroundPanel: true,
+    addNodePanel: false,
+    addGroupPanel: true,
+    advancedPanel: false,
+    shortcutPanel: true,
+    fileControls: true
+  };
+  const collapsibleIds = ['controls', 'backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
+  const collapseKey = 'fact_sim_sidebar_panels_v1';
+
+  function readCollapseState(){
+    try{
+      const raw = localStorage.getItem(collapseKey);
+      if(raw) return JSON.parse(raw);
+    }catch(_e){
+      /* ignore */
+    }
+    return { ...defaultCollapseState };
+  }
+
+  function writeCollapseState(next){
+    try{ localStorage.setItem(collapseKey, JSON.stringify(next || {})); }catch(_e){}
+  }
+
+  const collapseState = readCollapseState();
+
+  function setPanelCollapsed(panel, collapsed){
+    if(!panel) return;
+    panel.classList.toggle('sidebar-panel-collapsible', true);
+    panel.classList.toggle('is-collapsed', !!collapsed);
+    const header = panel.querySelector('.panelHeader');
+    if(header){
+      header.setAttribute('role', 'button');
+      header.setAttribute('tabindex', '0');
+      header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      header.dataset.collapsible = 'true';
+    }
+    collapseState[panel.id] = !!collapsed;
+    writeCollapseState(collapseState);
+  }
+
+  collapsibleIds.forEach((id)=>{
+    const panel = document.getElementById(id);
+    if(!panel) return;
+    const header = panel.querySelector('.panelHeader');
+    if(!header) return;
+    setPanelCollapsed(panel, !!collapseState[id]);
+    if(header.__collapseHooked) return;
+    const toggle = ()=>{
+      setPanelCollapsed(panel, !panel.classList.contains('is-collapsed'));
+    };
+    header.addEventListener('click', toggle);
+    header.addEventListener('keydown', (e)=>{
+      if(e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      toggle();
+    });
+    header.__collapseHooked = true;
+  });
+
+  function updateSimulationSummary(){
+    const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
+    if(btnStart){
+      btnStart.disabled = running;
+      btnStart.setAttribute('aria-pressed', running ? 'true' : 'false');
+    }
+    if(btnStop){
+      btnStop.disabled = !running;
+      btnStop.setAttribute('aria-pressed', running ? 'true' : 'false');
+    }
+    if(simStatusBadge){
+      simStatusBadge.textContent = running ? 'Running' : 'Stopped';
+      simStatusBadge.classList.toggle('is-running', running);
+    }
+    if(simStatusEngine && simModeSelect){
+      const label = simModeSelect.options[simModeSelect.selectedIndex]?.textContent || simModeSelect.value || '--';
+      simStatusEngine.textContent = label;
+    }
+    if(simStatusSpeed) simStatusSpeed.textContent = (speedFactor?.textContent || '--').replace(/^0?\.?/, (m)=> m);
+    if(simStatusRender) simStatusRender.textContent = renderFpsSelect ? `${renderFpsSelect.value} FPS` : '--';
+    if(simStatusRealtime) simStatusRealtime.textContent = realtimeFactor?.textContent || '--';
+    if(simStatusSelection){
+      const selectedMap = App.canvas && App.canvas.selected_nodes ? App.canvas.selected_nodes : null;
+      const count = selectedMap ? Object.keys(selectedMap).length : 0;
+      simStatusSelection.textContent = `${count} node${count === 1 ? '' : 's'}`;
+    }
+  }
+
+  function installSubmitShortcut(panel, actionButton){
+    if(!panel || !actionButton || panel.__submitShortcutHooked) return;
+    panel.addEventListener('keydown', (e)=>{
+      const target = e.target;
+      if(!target || target.tagName === 'BUTTON') return;
+      if(target.tagName === 'TEXTAREA'){
+        if(!(e.ctrlKey || e.metaKey) || e.key !== 'Enter') return;
+      }else if(e.key !== 'Enter'){
+        return;
+      }
+      if(actionButton.disabled) return;
+      e.preventDefault();
+      actionButton.click();
+    });
+    panel.__submitShortcutHooked = true;
+  }
+
+  installSubmitShortcut(addNodePanel, btnAddNode);
+  installSubmitShortcut(addGroupPanel, btnAddGroup);
+
+  if(exampleSelect && !exampleSelect.__summaryHooked){
+    exampleSelect.addEventListener('change', updateSimulationSummary);
+    exampleSelect.__summaryHooked = true;
+  }
+  if(renderFpsSelect && !renderFpsSelect.__summaryHooked){
+    renderFpsSelect.addEventListener('change', updateSimulationSummary);
+    renderFpsSelect.__summaryHooked = true;
+  }
+  if(simModeSelect && !simModeSelect.__summaryHooked){
+    simModeSelect.addEventListener('change', updateSimulationSummary);
+    simModeSelect.__summaryHooked = true;
+  }
+
+  updateSimulationSummary();
+  window.setInterval(updateSimulationSummary, 250);
 })();
 

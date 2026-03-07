@@ -221,6 +221,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       case 'DOWN':    this.color = '#3498db'; this.bgcolor = '#e8f1fb'; break;
       case 'IDLE':    this.color = '#f1c40f'; this.bgcolor = '#fff9db'; break;
     }
+    if(typeof window.applyNodeStateTheme === 'function') window.applyNodeStateTheme(this, this._state);
 
     // 状態が動いている間は描画を更新
     if(this._state !== 'IDLE' || this._payload) this.setDirtyCanvas(true,true);

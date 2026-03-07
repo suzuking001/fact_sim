@@ -330,6 +330,7 @@ class BranchNode extends EquipmentNode{
       case 'DOWN':    this.color = '#3498db'; this.bgcolor = '#e8f1fb'; break;
       case 'IDLE':    this.color = '#f1c40f'; this.bgcolor = '#fff9db'; break;
     }
+    if(typeof window.applyNodeStateTheme === 'function') window.applyNodeStateTheme(this, this._state);
 
     if(this._state !== 'IDLE' || this._payload) this.setDirtyCanvas(true,true);
   }

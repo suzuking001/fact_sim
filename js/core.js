@@ -534,6 +534,53 @@ function _wrapOverlayText(ctx, text, maxWidth){
   return out.length ? out : [''];
 }
 
+const NODE_STATE_THEME = Object.freeze({
+  IDLE:    { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f' },
+  PROCESS: { title: '#d6f5e3', body: '#f4fcf8', accent: '#2ecc71' },
+  WAIT:    { title: '#fee8c7', body: '#fff8ee', accent: '#f39c12' },
+  DOWN:    { title: '#d8ecfb', body: '#f4fafe', accent: '#3498db' },
+  ERROR:   { title: '#ffd9df', body: '#fff4f6', accent: '#dc4c64' }
+});
+
+function _getNodeStateTheme(state){
+  const key = String(state || 'IDLE').toUpperCase();
+  return NODE_STATE_THEME[key] || NODE_STATE_THEME.IDLE;
+}
+
+function _drawCanvasCard(ctx, x, y, width, height, radius){
+  const r = Math.max(0, Math.min(Number(radius) || 0, width * 0.5, height * 0.5));
+  if(typeof ctx.roundRect === 'function'){
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, r);
+    return;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+}
+
+function _getCurrentCanvasScale(){
+  try{
+    const scale = Number(window.App && App.canvas && App.canvas.ds && App.canvas.ds.scale);
+    return (isFinite(scale) && scale > 0) ? scale : 1;
+  }catch(_e){
+    return 1;
+  }
+}
+
+function applyNodeStateTheme(node, state){
+  if(!node) return;
+  const theme = _getNodeStateTheme(state);
+  node.boxcolor = theme.accent;
+}
+
 function _scoreCompactOverlayLine(text){
   const s = String(text || '').trim().toLowerCase();
   if(/^state\s*:/.test(s)) return 0;
@@ -696,15 +743,27 @@ function _getCompactOverlayLayout(ctx, node, lines){
 function _drawCompactLinesInsideNode(ctx, node, lines){
   const layout = _getCompactOverlayLayout(ctx, node, lines);
   if(!layout) return;
+  const theme = _getNodeStateTheme(node && node._state);
+  const scale = _getCurrentCanvasScale();
+  const lowScale = scale < 0.78;
   ctx.save();
   try{
-    ctx.font = '10.5px sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.82)';
-    ctx.fillRect(layout.boxX, layout.boxY, layout.boxWidth, layout.boxHeight);
-    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(layout.boxX + 0.5, layout.boxY + 0.5, layout.boxWidth - 1, layout.boxHeight - 1);
-    ctx.fillStyle = 'rgba(0,0,0,0.76)';
+    ctx.font = '10.5px Inter, ui-sans-serif, system-ui, sans-serif';
+    ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.06)';
+    ctx.shadowBlur = lowScale ? 0 : 8;
+    ctx.shadowOffsetY = lowScale ? 0 : 2;
+    ctx.fillStyle = lowScale ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.88)';
+    _drawCanvasCard(ctx, layout.boxX, layout.boxY, layout.boxWidth, layout.boxHeight, 8);
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = lowScale ? 'rgba(17,17,17,0.16)' : 'rgba(17,17,17,0.08)';
+    ctx.lineWidth = lowScale ? Math.min(2.2, 1 / Math.max(scale, 0.45)) : 1;
+    _drawCanvasCard(ctx, layout.boxX + 0.5, layout.boxY + 0.5, layout.boxWidth - 1, layout.boxHeight - 1, 8);
+    ctx.stroke();
+    ctx.fillStyle = theme.accent;
+    _drawCanvasCard(ctx, layout.boxX + 1.5, layout.boxY + 1.5, 3, Math.max(10, layout.boxHeight - 3), 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(17,17,17,0.74)';
     ctx.textBaseline = 'top';
     let yy = layout.boxY + layout.padY;
     for(const raw of layout.lines){
@@ -721,9 +780,12 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
   const pad = 8;
   const lineHeight = 14;
   const maxBoxWidth = Math.min(460, Math.max(240, node.size[0] * 2.4));
+  const theme = _getNodeStateTheme(node && node._state);
+  const scale = _getCurrentCanvasScale();
+  const lowScale = scale < 0.78;
   ctx.save();
   try{
-    ctx.font = '12px sans-serif';
+    ctx.font = '12px Inter, ui-sans-serif, system-ui, sans-serif';
     const contentWidth = maxBoxWidth - pad * 2;
     const wrapped = [];
     for(const raw of lines){
@@ -740,12 +802,21 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     const boxHeight = wrapped.length * lineHeight + pad * 2;
     const yTop = node.size[1] + margin;
     const boxX = x - 4;
-    ctx.fillStyle = 'rgba(10,10,12,0.88)';
-    ctx.fillRect(boxX, yTop, boxWidth + 8, boxHeight);
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(boxX + 0.5, yTop + 0.5, boxWidth + 7, boxHeight - 1);
-    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.12)';
+    ctx.shadowBlur = lowScale ? 0 : 22;
+    ctx.shadowOffsetY = lowScale ? 0 : 8;
+    ctx.fillStyle = 'rgba(255,255,255,0.97)';
+    _drawCanvasCard(ctx, boxX, yTop, boxWidth + 8, boxHeight, 12);
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = lowScale ? 'rgba(17,17,17,0.16)' : 'rgba(17,17,17,0.08)';
+    ctx.lineWidth = lowScale ? Math.min(2.2, 1 / Math.max(scale, 0.45)) : 1;
+    _drawCanvasCard(ctx, boxX + 0.5, yTop + 0.5, boxWidth + 7, boxHeight - 1, 12);
+    ctx.stroke();
+    ctx.fillStyle = theme.accent;
+    _drawCanvasCard(ctx, boxX + 2, yTop + 2, 4, Math.max(14, boxHeight - 4), 3);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(17,17,17,0.82)';
     ctx.textBaseline = 'top';
     let yy = yTop + pad;
     for(const row of wrapped){
@@ -854,3 +925,4 @@ window.drawStateBelow = drawStateBelow;
 window.getNodeOverlayMinimumSize = getNodeOverlayMinimumSize;
 window.enforceNodeOverlayMinSize = enforceNodeOverlayMinSize;
 window.normalizeGraphOverlaySizes = normalizeGraphOverlaySizes;
+window.applyNodeStateTheme = applyNodeStateTheme;

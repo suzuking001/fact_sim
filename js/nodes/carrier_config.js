@@ -13,8 +13,9 @@ class CarrierConfigNode extends LiteGraph.LGraphNode{
     this.size = [300, 130];
     this.resizable = true;
     // Match Carrier Route idle palette for visual consistency.
-    this.color = '#f1c40f';
-    this.bgcolor = '#fff9db';
+    this.color = '#ececf2';
+    this.bgcolor = '#ffffff';
+    this.boxcolor = '#7c3aed';
 
     this.properties = {
       carrierId: CARRIER_CONFIG_DEFAULTS.carrierId,
