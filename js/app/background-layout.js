@@ -1,4 +1,4 @@
-// Layout background image (import / show / move / resize / opacity)
+// Layout background image (import / show / move / resize / rotate / opacity)
 
 var App = window.App || (window.App = {});
 
@@ -12,6 +12,7 @@ var App = window.App || (window.App = {});
     y: 0,
     width: 0,
     height: 0,
+    rotation: 0,
     opacity: DEFAULT_OPACITY
   };
   const image = new Image();
@@ -32,6 +33,56 @@ var App = window.App || (window.App = {});
     return n;
   }
 
+  function _normalizeAngle(v){
+    let n = _num(v, 0);
+    if(!isFinite(n)) n = 0;
+    while(n > 180) n -= 360;
+    while(n <= -180) n += 360;
+    return n;
+  }
+
+  function _degToRad(v){
+    return _normalizeAngle(v) * Math.PI / 180;
+  }
+
+  function _center(){
+    const w = Math.max(1, Number(state.width) || 1);
+    const h = Math.max(1, Number(state.height) || 1);
+    return {
+      x: (Number(state.x) || 0) + w * 0.5,
+      y: (Number(state.y) || 0) + h * 0.5,
+      w,
+      h
+    };
+  }
+
+  function _axes(rotationDeg){
+    const rad = _degToRad(rotationDeg);
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    return {
+      cos,
+      sin,
+      ux: cos,
+      uy: sin,
+      vx: -sin,
+      vy: cos
+    };
+  }
+
+  function _worldToLocal(gx, gy, rotationDeg){
+    const center = _center();
+    const axes = _axes(rotationDeg);
+    const dx = (Number(gx) || 0) - center.x;
+    const dy = (Number(gy) || 0) - center.y;
+    return {
+      x: dx * axes.cos + dy * axes.sin,
+      y: -dx * axes.sin + dy * axes.cos,
+      center,
+      axes
+    };
+  }
+
   function _drawNow(){
     try{
       const c = App.canvas;
@@ -50,16 +101,30 @@ var App = window.App || (window.App = {});
     controls.y.value = String(Math.round(state.y));
     controls.w.value = String(Math.max(0, Math.round(state.width)));
     controls.h.value = String(Math.max(0, Math.round(state.height)));
+    controls.rotation.value = String(Math.round(_normalizeAngle(state.rotation)));
     controls.opacity.value = String(state.opacity);
     controls.opacityValue.textContent = Number(state.opacity).toFixed(2);
     const hasImage = !!state.src;
-    controls.clearBtn.disabled = !hasImage;
+    if(controls.panel){
+      controls.panel.classList.toggle('has-image', hasImage);
+      controls.panel.classList.toggle('is-empty', !hasImage);
+    }
+    if(controls.emptyState) controls.emptyState.hidden = hasImage;
+    if(controls.adjustDetails && !hasImage) controls.adjustDetails.open = false;
+    if(controls.enabledField) controls.enabledField.hidden = !hasImage;
+    if(controls.mouseEditField) controls.mouseEditField.hidden = !hasImage;
+    if(controls.clearBtn){
+      controls.clearBtn.hidden = !hasImage;
+      controls.clearBtn.disabled = !hasImage;
+    }
+    if(controls.loadBtn) controls.loadBtn.style.gridColumn = hasImage ? '' : '1 / -1';
     controls.enabled.disabled = !hasImage;
     controls.mouseEdit.disabled = !hasImage || !state.enabled;
     controls.x.disabled = !hasImage;
     controls.y.disabled = !hasImage;
     controls.w.disabled = !hasImage;
     controls.h.disabled = !hasImage;
+    controls.rotation.disabled = !hasImage;
     controls.opacity.disabled = !hasImage;
   }
 
@@ -71,6 +136,7 @@ var App = window.App || (window.App = {});
     state.y = _num(next.y, 0);
     state.width = Math.max(0, _num(next.width, 0));
     state.height = Math.max(0, _num(next.height, 0));
+    state.rotation = _normalizeAngle(next.rotation);
     state.opacity = _clamp(_num(next.opacity, DEFAULT_OPACITY), 0.05, 1);
     _updateUi();
     _drawNow();
@@ -107,9 +173,11 @@ var App = window.App || (window.App = {});
         y: state.y,
         width: 0,
         height: 0,
+        rotation: state.rotation,
         opacity: state.opacity
       });
       _loadImage(src, true);
+      if(controls?.adjustDetails) controls.adjustDetails.open = true;
       if(typeof App.showToast === 'function') App.showToast('Layout image imported');
     };
     reader.readAsDataURL(file);
@@ -121,12 +189,17 @@ var App = window.App || (window.App = {});
       loadBtn: document.getElementById('bgLayoutLoadBtn'),
       clearBtn: document.getElementById('bgLayoutClearBtn'),
       fileInput: document.getElementById('bgLayoutFileInput'),
+      emptyState: document.getElementById('bgLayoutEmptyState'),
       enabled: document.getElementById('bgLayoutEnabled'),
+      enabledField: document.getElementById('bgLayoutEnabled')?.closest('.field'),
       mouseEdit: document.getElementById('bgLayoutMouseEdit'),
+      mouseEditField: document.getElementById('bgLayoutMouseEdit')?.closest('.field'),
+      adjustDetails: document.getElementById('bgLayoutAdjustDetails'),
       x: document.getElementById('bgLayoutX'),
       y: document.getElementById('bgLayoutY'),
       w: document.getElementById('bgLayoutW'),
       h: document.getElementById('bgLayoutH'),
+      rotation: document.getElementById('bgLayoutRotation'),
       opacity: document.getElementById('bgLayoutOpacity'),
       opacityValue: document.getElementById('bgLayoutOpacityValue')
     };
@@ -152,6 +225,7 @@ var App = window.App || (window.App = {});
     });
     controls.mouseEdit.addEventListener('change', ()=>{
       state.mouseEdit = !!controls.mouseEdit.checked;
+      if(state.mouseEdit && controls.adjustDetails) controls.adjustDetails.open = true;
       _updateUi();
       _drawNow();
     });
@@ -167,6 +241,11 @@ var App = window.App || (window.App = {});
     bindNumber(controls.y, 'y');
     bindNumber(controls.w, 'width', 1);
     bindNumber(controls.h, 'height', 1);
+    controls.rotation.addEventListener('input', ()=>{
+      state.rotation = _normalizeAngle(controls.rotation.value);
+      _updateUi();
+      _drawNow();
+    });
     controls.opacity.addEventListener('input', ()=>{
       state.opacity = _clamp(_num(controls.opacity.value, state.opacity), 0.05, 1);
       controls.opacityValue.textContent = Number(state.opacity).toFixed(2);
@@ -200,20 +279,26 @@ var App = window.App || (window.App = {});
 
   function _hitTest(gx, gy){
     if(!state.src || !state.enabled) return '';
-    const x = Number(state.x) || 0;
-    const y = Number(state.y) || 0;
     const w = Math.max(1, Number(state.width) || 1);
     const h = Math.max(1, Number(state.height) || 1);
-    const inside = gx >= x && gx <= (x + w) && gy >= y && gy <= (y + h);
-    if(!inside) return '';
     const hs = 14 / _getScale();
-    const inResize = gx >= (x + w - hs) && gy >= (y + h - hs);
-    return inResize ? 'resize' : 'move';
+    const rotateOffset = 24 / _getScale();
+    const local = _worldToLocal(gx, gy, state.rotation);
+    const lx = local.x;
+    const ly = local.y;
+    const rotateDx = lx;
+    const rotateDy = ly + h * 0.5 + rotateOffset;
+    if((rotateDx * rotateDx + rotateDy * rotateDy) <= Math.pow(hs * 0.85, 2)) return 'rotate';
+    const inResize = lx >= (w * 0.5 - hs) && lx <= (w * 0.5 + hs) && ly >= (h * 0.5 - hs) && ly <= (h * 0.5 + hs);
+    if(inResize) return 'resize';
+    const inside = lx >= (-w * 0.5) && lx <= (w * 0.5) && ly >= (-h * 0.5) && ly <= (h * 0.5);
+    return inside ? 'move' : '';
   }
 
   function _applyCursor(canvas, mode){
     if(!canvas || !canvas.canvas) return;
     if(mode === 'resize') canvas.canvas.style.cursor = 'nwse-resize';
+    else if(mode === 'rotate') canvas.canvas.style.cursor = 'crosshair';
     else if(mode === 'move') canvas.canvas.style.cursor = 'move';
     else canvas.canvas.style.cursor = '';
   }
@@ -231,7 +316,13 @@ var App = window.App || (window.App = {});
       baseX: 0,
       baseY: 0,
       baseW: 0,
-      baseH: 0
+      baseH: 0,
+      baseRotation: 0,
+      anchorX: 0,
+      anchorY: 0,
+      centerX: 0,
+      centerY: 0,
+      startAngle: 0
     };
 
     el.addEventListener('mousedown', (e)=>{
@@ -248,6 +339,17 @@ var App = window.App || (window.App = {});
       mouseState.baseY = Number(state.y) || 0;
       mouseState.baseW = Math.max(1, Number(state.width) || 1);
       mouseState.baseH = Math.max(1, Number(state.height) || 1);
+      mouseState.baseRotation = _normalizeAngle(state.rotation);
+      const center = _center();
+      mouseState.centerX = center.x;
+      mouseState.centerY = center.y;
+      if(mode === 'resize'){
+        const axes = _axes(state.rotation);
+        mouseState.anchorX = center.x - axes.ux * mouseState.baseW * 0.5 - axes.vx * mouseState.baseH * 0.5;
+        mouseState.anchorY = center.y - axes.uy * mouseState.baseW * 0.5 - axes.vy * mouseState.baseH * 0.5;
+      }else if(mode === 'rotate'){
+        mouseState.startAngle = Math.atan2(p[1] - center.y, p[0] - center.x);
+      }
       _applyCursor(canvas, mode);
       e.preventDefault();
       e.stopPropagation();
@@ -268,8 +370,21 @@ var App = window.App || (window.App = {});
         state.x = mouseState.baseX + dx;
         state.y = mouseState.baseY + dy;
       }else if(mouseState.mode === 'resize'){
-        state.width = Math.max(16, mouseState.baseW + dx);
-        state.height = Math.max(16, mouseState.baseH + dy);
+        const axes = _axes(mouseState.baseRotation);
+        const vx = p[0] - mouseState.anchorX;
+        const vy = p[1] - mouseState.anchorY;
+        const nextW = Math.max(16, vx * axes.ux + vy * axes.uy);
+        const nextH = Math.max(16, vx * axes.vx + vy * axes.vy);
+        const cx = mouseState.anchorX + axes.ux * nextW * 0.5 + axes.vx * nextH * 0.5;
+        const cy = mouseState.anchorY + axes.uy * nextW * 0.5 + axes.vy * nextH * 0.5;
+        state.width = nextW;
+        state.height = nextH;
+        state.x = cx - nextW * 0.5;
+        state.y = cy - nextH * 0.5;
+      }else if(mouseState.mode === 'rotate'){
+        const nextAngle = Math.atan2(p[1] - mouseState.centerY, p[0] - mouseState.centerX);
+        const delta = (nextAngle - mouseState.startAngle) * 180 / Math.PI;
+        state.rotation = _normalizeAngle(mouseState.baseRotation + delta);
       }
       _updateUi();
       _drawNow();
@@ -304,21 +419,36 @@ var App = window.App || (window.App = {});
 
   function _drawMouseEditOverlay(ctx, canvas){
     if(!state.mouseEdit || !state.src || !state.enabled) return;
-    const x = Number(state.x) || 0;
-    const y = Number(state.y) || 0;
     const w = Math.max(1, Number(state.width) || 1);
     const h = Math.max(1, Number(state.height) || 1);
     const scale = _getScale();
     const hs = 14 / scale;
+    const rotateOffset = 24 / scale;
+    const center = _center();
+    const rotateLabel = `${Math.round(_normalizeAngle(state.rotation))} deg`;
 
     ctx.save();
+    ctx.translate(center.x, center.y);
+    ctx.rotate(_degToRad(state.rotation));
     ctx.lineWidth = 1.5 / scale;
     ctx.strokeStyle = 'rgba(37,99,235,0.95)';
     ctx.setLineDash([6 / scale, 4 / scale]);
-    ctx.strokeRect(x, y, w, h);
+    ctx.strokeRect(-w * 0.5, -h * 0.5, w, h);
     ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(37,99,235,0.95)';
-    ctx.fillRect(x + w - hs, y + h - hs, hs, hs);
+    ctx.fillRect(w * 0.5 - hs, h * 0.5 - hs, hs, hs);
+    ctx.beginPath();
+    ctx.moveTo(0, -h * 0.5);
+    ctx.lineTo(0, -h * 0.5 - rotateOffset);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, -h * 0.5 - rotateOffset, hs * 0.55, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(15,23,42,0.88)';
+    ctx.font = `${Math.max(10, 11 / scale)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(rotateLabel, 0, -h * 0.5 - rotateOffset - hs * 0.8);
     ctx.restore();
   }
 
@@ -334,9 +464,12 @@ var App = window.App || (window.App = {});
         if(!state.enabled || !state.src || !image.src || !image.complete) return;
         const w = Math.max(1, _num(state.width, image.naturalWidth || 1));
         const h = Math.max(1, _num(state.height, image.naturalHeight || 1));
+        const center = _center();
         ctx.save();
         ctx.globalAlpha = _clamp(state.opacity, 0.05, 1);
-        ctx.drawImage(image, _num(state.x, 0), _num(state.y, 0), w, h);
+        ctx.translate(center.x, center.y);
+        ctx.rotate(_degToRad(state.rotation));
+        ctx.drawImage(image, -w * 0.5, -h * 0.5, w, h);
         ctx.restore();
       };
       const prevFg = canvas.onDrawForeground;
@@ -354,7 +487,7 @@ var App = window.App || (window.App = {});
     serialize(){
       if(!state.src) return null;
       return {
-        v: 1,
+        v: 2,
         enabled: !!state.enabled,
         mouseEdit: !!state.mouseEdit,
         src: state.src,
@@ -362,6 +495,17 @@ var App = window.App || (window.App = {});
         y: _num(state.y, 0),
         width: Math.max(1, _num(state.width, 1)),
         height: Math.max(1, _num(state.height, 1)),
+        rotation: _normalizeAngle(state.rotation),
+        opacity: _clamp(state.opacity, 0.05, 1)
+      };
+    },
+
+    getMeta(){
+      return {
+        hasImage: !!state.src,
+        enabled: !!state.enabled,
+        mouseEdit: !!state.mouseEdit,
+        rotation: _normalizeAngle(state.rotation),
         opacity: _clamp(state.opacity, 0.05, 1)
       };
     },
@@ -377,6 +521,7 @@ var App = window.App || (window.App = {});
           y: 0,
           width: 0,
           height: 0,
+          rotation: 0,
           opacity: DEFAULT_OPACITY
         });
         return;
@@ -389,6 +534,7 @@ var App = window.App || (window.App = {});
         y: _num(data.y, 0),
         width: Math.max(1, _num(data.width, 1)),
         height: Math.max(1, _num(data.height, 1)),
+        rotation: _normalizeAngle(data.rotation),
         opacity: _clamp(_num(data.opacity, DEFAULT_OPACITY), 0.05, 1)
       });
       _loadImage(state.src, false);

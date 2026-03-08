@@ -16,6 +16,7 @@ var App = window.App || (window.App = {});
   let uidCounter = 0;
   let activeRuntime = null;
   let pausedNodeIds = new Set();
+  let hasPausedNodes = false;
 
   function bumpRevision(draw){
     groupRevision++;
@@ -268,17 +269,6 @@ var App = window.App || (window.App = {});
     return { x: Number(p[0]) || 0, y: Number(p[1]) || 0, w: Math.max(0, Number(s[0]) || 0), h: Math.max(0, Number(s[1]) || 0) };
   }
 
-  function isNodeInsideGroup(node, group){
-    if(!node || !group) return false;
-    const b = groupBounds(group);
-    if(b.w <= 0 || b.h <= 0) return false;
-    const pos = Array.isArray(node.pos) ? node.pos : [0, 0];
-    const size = Array.isArray(node.size) ? node.size : [140, 80];
-    const cx = (Number(pos[0]) || 0) + (Number(size[0]) || 0) * 0.5;
-    const cy = (Number(pos[1]) || 0) + (Number(size[1]) || 0) * 0.5;
-    return cx >= b.x && cx <= (b.x + b.w) && cy >= b.y && cy <= (b.y + b.h);
-  }
-
   function collectGroupNodeIds(graph, group, outSet){
     if(!graph || !group || !outSet) return;
 
@@ -359,9 +349,7 @@ var App = window.App || (window.App = {});
 
     const raw = current;
     const wrapped = function(){
-      if(App.stopGroups && typeof App.stopGroups.isNodePaused === 'function'){
-        if(App.stopGroups.isNodePaused(this)) return;
-      }
+      if(hasPausedNodes && pausedNodeIds && pausedNodeIds.has(this.id)) return;
       return raw.apply(this, arguments);
     };
     wrapped.__stopGroupPauseWrapped = true;
@@ -381,9 +369,12 @@ var App = window.App || (window.App = {});
       this.lastNodeCount = -1;
       this._hasPatchedNodes = false;
       this.pausedNodeIds = new Set();
+      this.pausedNodes = [];
       this._pausedDirty = true;
       this._activeStateSignature = '';
       this._pauseNodeCount = -1;
+      this._lastUpdateNowMs = NaN;
+      this._lastUpdateRevision = -1;
     }
 
     reset(nowMs){
@@ -393,22 +384,30 @@ var App = window.App || (window.App = {});
       this.lastNodeCount = -1;
       this._hasPatchedNodes = false;
       this.pausedNodeIds = new Set();
+      this.pausedNodes = [];
       this._pausedDirty = true;
       this._activeStateSignature = '';
       this._pauseNodeCount = -1;
+      this._lastUpdateNowMs = NaN;
+      this._lastUpdateRevision = -1;
       pausedNodeIds = this.pausedNodeIds;
+      hasPausedNodes = false;
       this._sync(nowMs);
       this.update(nowMs);
     }
 
     stop(){
       this.pausedNodeIds.clear();
+      this.pausedNodes = [];
       if(activeRuntime === this) activeRuntime = null;
       pausedNodeIds = new Set();
+      hasPausedNodes = false;
       this._hasPatchedNodes = false;
       this._pausedDirty = true;
       this._activeStateSignature = '';
       this._pauseNodeCount = -1;
+      this._lastUpdateNowMs = NaN;
+      this._lastUpdateRevision = -1;
     }
 
     _makeSignature(){
@@ -425,14 +424,8 @@ var App = window.App || (window.App = {});
     _sync(nowMs){
       if(!this.graph) return;
       const rev = groupRevision;
+      if(rev === this.lastRevision) return;
       const sig = this._makeSignature();
-      const needsResync = (sig !== this.signature) || (rev !== this.lastRevision);
-      if(!needsResync){
-        if(this._hasPatchedNodes && this.states.length){
-          this._ensureNodePatch();
-        }
-        return;
-      }
 
       const prevMap = new Map();
       for(const st of this.states){
@@ -468,12 +461,7 @@ var App = window.App || (window.App = {});
 
     _ensureNodePatch(force){
       const nodes = Array.isArray(this.graph?._nodes) ? this.graph._nodes : [];
-      if(!force && this.lastNodeCount === nodes.length){
-        for(const node of nodes){
-          if(!node || typeof node.onExecute !== 'function') continue;
-          if(node.onExecute && node.onExecute.__stopGroupPauseWrapped) continue;
-          patchNodeExecution(node);
-        }
+      if(!force && this._hasPatchedNodes && this.lastNodeCount === nodes.length){
         this._hasPatchedNodes = true;
         return;
       }
@@ -540,9 +528,11 @@ var App = window.App || (window.App = {});
     _rebuildPausedNodes(){
       const activeStates = this.states.filter((st)=> st && st.active && st.group);
       if(!activeStates.length){
-        if(this.pausedNodeIds.size){
+        if(this.pausedNodeIds.size || this.pausedNodes.length){
           this.pausedNodeIds = new Set();
+          this.pausedNodes = [];
           pausedNodeIds = this.pausedNodeIds;
+          hasPausedNodes = false;
         }
         return;
       }
@@ -551,22 +541,41 @@ var App = window.App || (window.App = {});
       for(const st of activeStates){
         collectGroupNodeIds(this.graph, st.group, next);
       }
+      const pausedNodes = [];
+      if(this.graph && typeof this.graph.getNodeById === 'function'){
+        for(const nodeId of next){
+          const node = this.graph.getNodeById(nodeId);
+          if(!node) continue;
+          pausedNodes.push(node);
+        }
+      }
       this.pausedNodeIds = next;
+      this.pausedNodes = pausedNodes;
       pausedNodeIds = this.pausedNodeIds;
+      hasPausedNodes = this.pausedNodeIds.size > 0;
     }
 
     update(nowMs){
       const now = Number(nowMs);
       if(!isFinite(now)) return;
+      const currentRevision = groupRevision;
+      if(Math.abs(now - this._lastUpdateNowMs) <= EPS_MS && currentRevision === this._lastUpdateRevision){
+        activeRuntime = this;
+        return;
+      }
       this._sync(now);
       if(!this.states.length){
-        if(this.pausedNodeIds.size){
+        if(this.pausedNodeIds.size || this.pausedNodes.length){
           this.pausedNodeIds = new Set();
+          this.pausedNodes = [];
           pausedNodeIds = this.pausedNodeIds;
+          hasPausedNodes = false;
         }
         this._pausedDirty = false;
         this._activeStateSignature = '';
         this._pauseNodeCount = Array.isArray(this.graph?._nodes) ? this.graph._nodes.length : 0;
+        this._lastUpdateNowMs = now;
+        this._lastUpdateRevision = groupRevision;
         activeRuntime = this;
         return;
       }
@@ -584,6 +593,8 @@ var App = window.App || (window.App = {});
         this._activeStateSignature = activeSignature;
         this._pauseNodeCount = nodeCount;
       }
+      this._lastUpdateNowMs = now;
+      this._lastUpdateRevision = groupRevision;
       activeRuntime = this;
     }
 
@@ -604,10 +615,8 @@ var App = window.App || (window.App = {});
       const delta = Number(deltaMs);
       if(!isFinite(now) || !isFinite(delta) || delta <= 0) return;
       this.update(now);
-      if(!this.pausedNodeIds.size) return;
-      if(!this.graph || typeof this.graph.getNodeById !== 'function') return;
-      for(const nodeId of this.pausedNodeIds){
-        const node = this.graph.getNodeById(nodeId);
+      if(!this.pausedNodes.length) return;
+      for(const node of this.pausedNodes){
         if(!node || !hasTimedState(node)) continue;
         const until = Number(node._until);
         if(!isFinite(until)) continue;
@@ -1046,7 +1055,10 @@ var App = window.App || (window.App = {});
   App.stopGroups.createRuntime = createRuntime;
   App.stopGroups.getRevision = function(){ return groupRevision; };
   App.stopGroups.isNodePaused = function(node){
-    return !!(node && pausedNodeIds && pausedNodeIds.has(node.id));
+    return !!(hasPausedNodes && node && pausedNodeIds && pausedNodeIds.has(node.id));
+  };
+  App.stopGroups.hasPausedNodes = function(){
+    return hasPausedNodes;
   };
   App.stopGroups.getPausedNodeIds = function(){
     return new Set(pausedNodeIds);
@@ -1110,6 +1122,7 @@ var App = window.App || (window.App = {});
   App.stopGroups.clearRuntimeState = function(){
     activeRuntime = null;
     pausedNodeIds = new Set();
+    hasPausedNodes = false;
   };
 
   TYPE_DEFS.random_stop = {

@@ -132,15 +132,16 @@ class BranchNode extends EquipmentNode{
   _setWaitIcon(active, type='work'){
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
+      const payload = this._payload || this._currentWork || null;
+      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type } : null;
       if(active){
         if(this._waitIconLinksBranch) return;
-        const payload = this._payload;
         const slot = this._routeSlotForPayload(payload, false);
         if(slot < 0) return;
         const out = this.outputs && this.outputs[slot];
         if(!out || !out.links || out.links.length === 0) return;
         this._waitIconLinksBranch = out.links.slice();
-        this._waitIconLinksBranch.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type));
+        this._waitIconLinksBranch.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type, info));
       }else{
         if(!this._waitIconLinksBranch) return;
         this._waitIconLinksBranch.forEach(id=> window.WorkLinkAnimator.hidePortIcon(this.graph, id));

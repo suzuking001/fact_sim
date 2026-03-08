@@ -74,10 +74,12 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       if(!window.WorkLinkAnimator || !this.graph) return;
       const out = this.outputs && this.outputs[0];
       if(!out || !out.links) return;
+      const payload = this._payload || this._currentWork || null;
+      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type } : null;
       if(active){
         if(this._waitIconLinks) return;
         this._waitIconLinks = out.links.slice();
-        this._waitIconLinks.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type));
+        this._waitIconLinks.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type, info));
       }else{
         if(!this._waitIconLinks) return;
         this._waitIconLinks.forEach(id=> window.WorkLinkAnimator.hidePortIcon(this.graph, id));

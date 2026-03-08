@@ -24,7 +24,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260308d" />
+  <link rel="stylesheet" href="css/app.css?v=20260308f" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -197,10 +197,6 @@
           <option value="sample_line1">Sample Line1</option>
         </select>
       </div>
-      <div id="accessCounter" class="accessCounter" title="Public access counter (CounterAPI)">
-        <span class="accessCounterLabel">Visits</span>
-        <span id="accessCounterValue">...</span>
-      </div>
       <div id="simStatusCard" class="simStatusCard" aria-live="polite">
         <div class="simStatusHead">
           <span id="simStatusBadge" class="simStatusBadge">Stopped</span>
@@ -225,92 +221,115 @@
           </div>
         </div>
       </div>
-      <div id="overviewQuickTip" class="panel-help panel-help-compact">Load an example, then press Start. Use Inspector for focused edits.</div>
+      <div class="sidebarMetaFooter">
+        <div id="overviewQuickTip" class="panel-help panel-help-compact">Load an example, then press Start.</div>
+        <div id="accessCounter" class="accessCounter" title="Public access counter (CounterAPI)">
+          <span class="accessCounterLabel">Visits</span>
+          <span id="accessCounterValue">...</span>
+        </div>
+      </div>
     </div>
     <div id="backgroundPanel">
-      <div class="panelHeader">Background</div>
+      <div class="panelHeader">Layout Image</div>
       <div class="btn-row">
-        <button id="bgLayoutLoadBtn">Import Image</button>
-        <button id="bgLayoutClearBtn">Clear</button>
+        <button id="bgLayoutLoadBtn">Add Image</button>
+        <button id="bgLayoutClearBtn">Remove</button>
       </div>
       <input type="file" id="bgLayoutFileInput" accept="image/*" hidden>
+      <div id="bgLayoutEmptyState" class="panel-help panel-help-compact">Import a floor plan or layout image, then align nodes over it.</div>
       <div class="field">
-        <label for="bgLayoutEnabled">Show</label>
+        <label for="bgLayoutEnabled">Show Image</label>
         <input type="checkbox" id="bgLayoutEnabled" checked>
       </div>
       <div class="field">
         <label for="bgLayoutMouseEdit">Mouse Edit</label>
         <input type="checkbox" id="bgLayoutMouseEdit">
       </div>
-      <div class="field">
-        <label for="bgLayoutX">X</label>
-        <input type="number" id="bgLayoutX" step="1" value="0">
-      </div>
-      <div class="field">
-        <label for="bgLayoutY">Y</label>
-        <input type="number" id="bgLayoutY" step="1" value="0">
-      </div>
-      <div class="field">
-        <label for="bgLayoutW">Width</label>
-        <input type="number" id="bgLayoutW" step="1" min="1" value="0">
-      </div>
-      <div class="field">
-        <label for="bgLayoutH">Height</label>
-        <input type="number" id="bgLayoutH" step="1" min="1" value="0">
-      </div>
-      <div class="field">
-        <label for="bgLayoutOpacity">Opacity <span id="bgLayoutOpacityValue">0.35</span></label>
-        <input type="range" id="bgLayoutOpacity" min="0.05" max="1" step="0.05" value="0.35">
-      </div>
+      <details id="bgLayoutAdjustDetails" class="panelDetails">
+        <summary>Adjust Image</summary>
+        <div class="field">
+          <label for="bgLayoutX">X</label>
+          <input type="number" id="bgLayoutX" step="1" value="0">
+        </div>
+        <div class="field">
+          <label for="bgLayoutY">Y</label>
+          <input type="number" id="bgLayoutY" step="1" value="0">
+        </div>
+        <div class="field">
+          <label for="bgLayoutW">Width</label>
+          <input type="number" id="bgLayoutW" step="1" min="1" value="0">
+        </div>
+        <div class="field">
+          <label for="bgLayoutH">Height</label>
+          <input type="number" id="bgLayoutH" step="1" min="1" value="0">
+        </div>
+        <div class="field">
+          <label for="bgLayoutRotation">Rotation (deg)</label>
+          <input type="number" id="bgLayoutRotation" step="1" min="-180" max="180" value="0">
+        </div>
+        <div class="field">
+          <label for="bgLayoutOpacity">Opacity <span id="bgLayoutOpacityValue">0.35</span></label>
+          <input type="range" id="bgLayoutOpacity" min="0.05" max="1" step="0.05" value="0.35">
+        </div>
+      </details>
     </div>
     <!-- Add Node panel -->
     <div id="addNodePanel">
-      <div class="panelHeader">Node Builder</div>
-      <div id="nodeCategoryTabs" class="category-tabs" role="tablist" aria-label="Node categories"></div>
+      <div class="panelHeader">Add Node</div>
       <div class="field">
         <label for="nodeTypeSearch">Search</label>
         <input id="nodeTypeSearch" type="search" placeholder="Search node types">
       </div>
       <div id="nodeQuickPicks" class="quick-pick-row" aria-label="Quick node picks"></div>
-      <div id="nodeKindDescription" class="panel-help panel-help-compact">Pick a common preset or search all node types. Press / to focus search.</div>
-      <div class="field">
-        <label for="nodeKindSelect">All node types</label>
-        <select id="nodeKindSelect">
-          <option value="equip">Equipment</option>
-          <option value="note">Memo</option>
-          <option value="signal">Signal</option>
-          <option value="shuttle">Shuttle Stage</option>
-          <option value="source">Source</option>
-          <option value="sink">Sink</option>
-          <option value="split">Split</option>
-          <option value="branch">Branch</option>
-          <option value="agvroute">AGV Route</option>
-          <option value="carrierconfig">Carrier Config</option>
-          <option value="palletcarrierconfig">Pallet Carrier Config</option>
-          <option value="carrierroute">Carrier Route</option>
-          <option value="station">Station</option>
-          <option value="merge">Merge</option>
-          <option value="join">Join</option>
-        </select>
-      </div>
-      <div id="addNodeProps" class="propFields"></div>
+      <div id="nodeKindDescription" class="panel-help panel-help-compact">Choose a preset. Open settings only when you need custom defaults.</div>
+      <details id="nodeTypeBrowseDetails" class="panelDetails">
+        <summary>Browse All Types</summary>
+        <div id="nodeCategoryTabs" class="category-tabs" role="tablist" aria-label="Node categories"></div>
+        <div class="field">
+          <label for="nodeKindSelect">Node type</label>
+          <select id="nodeKindSelect">
+            <option value="equip">Equipment</option>
+            <option value="note">Memo</option>
+            <option value="signal">Signal</option>
+            <option value="shuttle">Shuttle Stage</option>
+            <option value="source">Source</option>
+            <option value="sink">Sink</option>
+            <option value="split">Split</option>
+            <option value="branch">Branch</option>
+            <option value="agvroute">AGV Route</option>
+            <option value="carrierconfig">Carrier Config</option>
+            <option value="palletcarrierconfig">Pallet Carrier Config</option>
+            <option value="carrierroute">Carrier Route</option>
+            <option value="station">Station</option>
+            <option value="merge">Merge</option>
+            <option value="join">Join</option>
+          </select>
+        </div>
+      </details>
+      <details id="nodeSettingsDetails" class="panelDetails">
+        <summary>Node Settings</summary>
+        <div id="addNodeProps" class="propFields"></div>
+      </details>
       <button id="btnAddNode">Place Node</button>
     </div>
     <div id="addGroupPanel">
-      <div class="panelHeader">Stop Group</div>
+      <div class="panelHeader">Add Stop Group</div>
       <div class="field">
         <label for="groupKindSelect">Pattern</label>
         <select id="groupKindSelect"></select>
       </div>
-      <div id="groupStopRate" class="group-stop-rate">Estimated downtime: -</div>
-      <div id="groupKindDescription" class="panel-help panel-help-compact">Choose a shared stop pattern, then click on the canvas to place the region.</div>
-      <div id="addGroupProps" class="propFields"></div>
+      <div id="groupStopRate" class="group-stop-rate">Downtime: -</div>
+      <div id="groupKindDescription" class="panel-help panel-help-compact">Choose a pattern. Open settings only when timing needs tuning.</div>
+      <details id="groupSettingsDetails" class="panelDetails">
+        <summary>Pattern Settings</summary>
+        <div id="addGroupProps" class="propFields"></div>
+      </details>
       <button id="btnAddGroup">Place Group</button>
     </div>
     <div id="advancedPanel">
-      <div class="panelHeader">Engine &amp; Benchmark</div>
+      <div class="panelHeader">Performance</div>
       <div class="control-group">
-        <label for="renderFpsSelect">View FPS</label>
+        <label for="renderFpsSelect">Render FPS</label>
         <select id="renderFpsSelect">
           <option value="15">15</option>
           <option value="30">30</option>
@@ -326,16 +345,16 @@
         <div id="realtimeFactorValue" class="realtimeFactorValue">--</div>
       </div>
       <div class="control-group">
-        <label for="simModeSelect">Simulation Engine</label>
+        <label for="simModeSelect">Engine</label>
         <select id="simModeSelect">
           <option value="dt">dt (0.1s fixed)</option>
           <option value="event">event (heap)</option>
         </select>
       </div>
-        <button id="btnBenchmark">Run Benchmark</button>
+        <button id="btnBenchmark">Benchmark</button>
       </div>
       <div id="shortcutPanel">
-        <div class="panelHeader">Shortcuts</div>
+        <div class="panelHeader">Canvas Tools</div>
         <div class="shortcuts">
         <div class="shortcut-group-label">Most Used</div>
         <div class="shortcut-row">
@@ -420,13 +439,15 @@
     </div>
     <div class="sidebar-spacer"></div>
     <div id="fileControls">
-      <div class="panelHeader">Save &amp; Share</div>
-      <button id="btnSave">Save</button>
-      <button id="btnLoad">Load</button>
-      <button id="btnShareUrl">Share URL</button>
-      <button id="btnExportHtml">Export HTML (embedded)</button>
+      <div class="panelHeader">Project</div>
+      <div class="projectActionsGrid">
+        <button id="btnSave">Save JSON</button>
+        <button id="btnLoad">Open JSON</button>
+        <button id="btnShareUrl">Copy Share Link</button>
+        <button id="btnExportHtml">Export HTML</button>
+      </div>
       <input type="file" id="fileInput" accept=".json">
-      <button id="btnAbout">About / Licenses</button>
+      <button id="btnAbout" class="button-secondary">About</button>
     </div>
   </div>
   <div id="simTimeHud">Time: <span id="simTime">0.00 s</span></div>
@@ -653,7 +674,7 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260307b"></script>
+  <script src="js/app/landing.js?v=20260308a"></script>
   <script src="js/core.js?v=20260308b"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
@@ -691,7 +712,7 @@ SOFTWARE.
   <script src="js/app/state.js?v=20260225b"></script>
   <script src="js/app/background-layout.js?v=20260303b"></script>
   <script src="js/app/graph-links.js?v=20260301a"></script>
-  <script src="js/app/stop-groups.js?v=20260308b"></script>
+  <script src="js/app/stop-groups.js?v=20260308c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
   <script src="js/app/engine.js?v=20260225d"></script>
   <script src="js/app/sim.js?v=20260222a"></script>
@@ -700,11 +721,11 @@ SOFTWARE.
   <script src="js/app/selection.js?v=20260308a"></script>
   <script src="js/app/fit.js?v=20260306a"></script>
   <script src="js/app/node-props-panel.js?v=20260308c"></script>
-  <script src="js/app/selection-inspector.js?v=20260308d"></script>
+  <script src="js/app/selection-inspector.js?v=20260308e"></script>
   <script src="js/app/timeline-init.js?v=20260308b"></script>
   <script src="js/app/graph-init.js?v=20260308b"></script>
-  <script src="js/app/examples.js?v=20260308a"></script>
-  <script src="js/app/file-io.js?v=20260307a"></script>
+  <script src="js/app/examples.js?v=20260308b"></script>
+  <script src="js/app/file-io.js?v=20260308a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
   <script src="js/app/ui.js?v=20260308k"></script>
   <script src="js/app.js?v=20260213"></script>

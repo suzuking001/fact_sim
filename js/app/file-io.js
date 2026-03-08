@@ -152,6 +152,9 @@ function _applyGraphData(data, options){
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
   const viewState = data.__factSimView || null;
   const opts = options || {};
+  if(typeof window.stopSimulation === 'function'){
+    try{ window.stopSimulation(); }catch(_e){}
+  }
   const expectedRevision = Number(opts.expectedRevision);
   if(isFinite(expectedRevision)){
     const currentRevision = (typeof App.getGraphLoadRevision === 'function')
@@ -211,6 +214,13 @@ function _applyGraphData(data, options){
     _applyViewState(viewState);
   }
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
+  try{
+    window.dispatchEvent(new CustomEvent('factsim:graph-applied', {
+      detail: {
+        source: String(opts.source || 'unknown').toLowerCase()
+      }
+    }));
+  }catch(_e){}
   return true;
 }
 
@@ -271,6 +281,14 @@ function _compactGraphData(graph){
   }
   return g;
 }
+
+App.serializeGraphData = function(){
+  return _serializeGraph();
+};
+
+App.applyGraphData = function(data, options){
+  return _applyGraphData(data, options);
+};
 
 function _hasCompressionStreams(){
   return (typeof CompressionStream === 'function') && (typeof DecompressionStream === 'function');

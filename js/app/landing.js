@@ -19,8 +19,23 @@
     return;
   }
 
+  function clonePayload(data){
+    try{
+      return JSON.parse(JSON.stringify(data));
+    }catch(_e){
+      return null;
+    }
+  }
+
+  function setStatus(label, hint, state){
+    if(progressLabel && label) progressLabel.textContent = label;
+    if(progressHint && hint) progressHint.textContent = hint;
+    if(progressState && state) progressState.textContent = state;
+  }
+
   function revealApp(){
     body.classList.add('landing-hidden');
+    body.classList.remove('landing-preview-pending', 'landing-preview-live');
     appRoot.setAttribute('aria-hidden', 'false');
     // App initializes while landing is visible, so force a post-reveal relayout.
     window.requestAnimationFrame(()=>{
@@ -48,12 +63,20 @@
   }
 
   appRoot.setAttribute('aria-hidden', 'true');
+  body.classList.add('landing-preview-pending');
 
   const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const previewBootDeadlineMs = 18000;
   let progress = 0;
   let realTarget = 6;
   let ready = false;
+  let bootstrapReady = false;
+  let previewReady = false;
+  let previewStarted = false;
+  let opening = false;
   let animationHandle = 0;
+  let previewRetryHandle = 0;
+  let previewSnapshot = null;
   const startTime = performance.now();
 
   function setProgress(next){
@@ -65,12 +88,7 @@
     progressBar.setAttribute('aria-valuenow', String(shown));
   }
 
-  function allowOpen(){
-    if(ready) return;
-    ready = true;
-    if(progressLabel) progressLabel.textContent = 'Ready';
-    if(progressHint) progressHint.textContent = 'Simulator modules are ready. Open the editor when you want to start.';
-    if(progressState) progressState.textContent = 'Ready';
+  function enableOpen(){
     openButtons.forEach((btn)=>{
       btn.disabled = false;
       btn.setAttribute('aria-disabled', 'false');
@@ -78,13 +96,167 @@
     });
   }
 
-  function onOpen(){
-    if(!ready) return;
-    revealApp();
+  function disableOpen(label){
+    openButtons.forEach((btn)=>{
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+      if(btn.tagName === 'BUTTON' && label) btn.textContent = label;
+    });
+  }
+
+  function maybeAllowOpen(){
+    if(ready || !bootstrapReady || !previewReady) return;
+    ready = true;
+    body.classList.add('landing-preview-live');
+    body.classList.remove('landing-preview-pending');
+    setStatus(
+      'Live preview ready',
+      'The simulation is already running behind this glass surface. Opening the editor resets the model to its initial state.',
+      'Preview'
+    );
+    enableOpen();
+  }
+
+  function markBootstrapReady(){
+    if(bootstrapReady) return;
+    bootstrapReady = true;
+    maybeAllowOpen();
+  }
+
+  function markPreviewReady(){
+    if(previewReady) return;
+    previewReady = true;
+    body.classList.add('landing-preview-live');
+    body.classList.remove('landing-preview-pending');
+    maybeAllowOpen();
+  }
+
+  function focusEditorChrome(){
     const firstFocus = document.getElementById('menuToggle') || document.getElementById('btnStart');
     if(firstFocus && typeof firstFocus.focus === 'function'){
       try{ firstFocus.focus({ preventScroll:true }); }catch(_e){ firstFocus.focus(); }
     }
+  }
+
+  function canStartPreview(){
+    if(opening || body.classList.contains('landing-hidden')) return false;
+    if(!window.App || !App.graph || !App.canvas) return false;
+    if(typeof App.serializeGraphData !== 'function' || typeof App.applyGraphData !== 'function') return false;
+    if(typeof window.startSimulation !== 'function' || typeof window.stopSimulation !== 'function') return false;
+    const revision = (typeof App.getGraphLoadRevision === 'function')
+      ? App.getGraphLoadRevision()
+      : (Number(App._graphLoadRevision) || 0);
+    if(revision <= 0) return false;
+    if(!Array.isArray(App.graph._nodes) || !App.graph._nodes.length) return false;
+    return true;
+  }
+
+  function fitPreviewViewport(){
+    try{
+      window.dispatchEvent(new Event('resize'));
+    }catch(_e){}
+    try{
+      if(typeof window.fitToScreen === 'function'){
+        window.fitToScreen({ silent:true });
+      }else if(window.App && App.canvas && typeof App.canvas.draw === 'function'){
+        App.canvas.draw(true, true);
+      }
+    }catch(_e){}
+  }
+
+  function startPreview(){
+    if(previewStarted || previewReady) return true;
+    if(!canStartPreview()) return false;
+    const snapshot = clonePayload(App.serializeGraphData());
+    if(!snapshot) return false;
+    previewSnapshot = snapshot;
+    previewStarted = true;
+    setStatus(
+      'Starting live preview...',
+      'Loading the actual simulation canvas behind the landing glass.',
+      'Preview'
+    );
+    window.requestAnimationFrame(()=>{
+      window.requestAnimationFrame(()=>{
+        if(opening || body.classList.contains('landing-hidden')) return;
+        fitPreviewViewport();
+        try{
+          window.startSimulation();
+          markPreviewReady();
+          if(!bootstrapReady){
+            setStatus(
+              'Preview is running...',
+              'The live simulation is moving in the background while the editor finishes loading.',
+              'Preview'
+            );
+          }
+        }catch(err){
+          previewStarted = false;
+          console.error(err);
+          queuePreviewBoot(280);
+        }
+      });
+    });
+    return true;
+  }
+
+  function queuePreviewBoot(delayMs){
+    if(previewReady || previewStarted || opening || body.classList.contains('landing-hidden')) return;
+    if(previewRetryHandle){
+      window.clearTimeout(previewRetryHandle);
+      previewRetryHandle = 0;
+    }
+    previewRetryHandle = window.setTimeout(()=>{
+      previewRetryHandle = 0;
+      if(startPreview()) return;
+      if((performance.now() - startTime) >= previewBootDeadlineMs){
+        console.warn('[landing] live preview did not boot before timeout; allowing entry');
+        markPreviewReady();
+        return;
+      }
+      queuePreviewBoot(260);
+    }, Math.max(40, Number(delayMs) || 0));
+  }
+
+  function resetToInitialState(){
+    try{
+      if(typeof window.stopSimulation === 'function') window.stopSimulation();
+    }catch(_e){}
+
+    const snapshot = clonePayload(previewSnapshot);
+    if(snapshot && typeof App.applyGraphData === 'function'){
+      App.applyGraphData(snapshot, { source: 'landing-reset' });
+      return true;
+    }
+
+    const sel = document.getElementById('exampleSelect');
+    const exampleKey = String((sel && sel.value) || 'sample_line1').trim() || 'sample_line1';
+    if(typeof window.makeExample === 'function'){
+      return Promise.resolve(window.makeExample(exampleKey)).then(()=> true);
+    }
+    return false;
+  }
+
+  async function onOpen(){
+    if(!ready || opening) return;
+    opening = true;
+    disableOpen('Preparing Workspace...');
+    setStatus(
+      'Resetting workspace...',
+      'Stopping the landing preview and restoring the editor to its initial state.',
+      'Reset'
+    );
+    if(previewRetryHandle){
+      window.clearTimeout(previewRetryHandle);
+      previewRetryHandle = 0;
+    }
+    try{
+      await Promise.resolve(resetToInitialState());
+    }catch(err){
+      console.error(err);
+    }
+    revealApp();
+    focusEditorChrome();
   }
 
   openButtons.forEach((btn)=>{
@@ -101,12 +273,22 @@
     const rs = document.readyState;
     if(rs === 'interactive'){
       realTarget = Math.max(realTarget, 62);
-      if(progressState) progressState.textContent = 'Initializing';
-      if(progressHint) progressHint.textContent = 'Bootstrapping the UI shell and preparing interaction handlers.';
+      if(!previewReady){
+        setStatus(
+          'Initializing editor...',
+          'Bootstrapping the UI shell and preparing interaction handlers.',
+          'Initializing'
+        );
+      }
     }else if(rs === 'complete'){
       realTarget = Math.max(realTarget, 84);
-      if(progressState) progressState.textContent = 'Loading';
-      if(progressHint) progressHint.textContent = 'Loading graph, rendering, and simulation modules.';
+      if(!previewReady){
+        setStatus(
+          'Loading simulator...',
+          'Loading graph, rendering, and simulation modules.',
+          'Loading'
+        );
+      }
     }
   }
   updateFromReadyState();
@@ -120,25 +302,46 @@
         if(!entries || !entries.length) return;
         seenResources += entries.length;
         realTarget = Math.max(realTarget, Math.min(88, 10 + seenResources * 1.5));
-        if(progressState) progressState.textContent = seenResources > 8 ? 'Linking' : 'Loading';
-        if(progressHint && seenResources > 8){
-          progressHint.textContent = 'Resolving editor modules, examples, and simulation nodes.';
+        if(!previewReady){
+          if(seenResources > 8){
+            setStatus(
+              'Linking modules...',
+              'Resolving editor modules, examples, and simulation nodes.',
+              'Linking'
+            );
+          }else{
+            setStatus(
+              'Loading simulator...',
+              'Loading graph, rendering, and simulation modules.',
+              'Loading'
+            );
+          }
         }
       });
       po.observe({ type:'resource', buffered:true });
     }catch(_e){}
   }
 
+  window.addEventListener('factsim:graph-applied', ()=>{
+    queuePreviewBoot(80);
+  });
+
   window.addEventListener('load', ()=>{
     realTarget = 100;
-    if(progressLabel) progressLabel.textContent = 'Finalizing...';
-    if(progressHint) progressHint.textContent = 'Running final layout checks before the simulator is ready.';
-    if(progressState) progressState.textContent = 'Finalizing';
+    if(!previewReady){
+      setStatus(
+        'Finalizing...',
+        'Running final layout checks before the simulator is ready.',
+        'Finalizing'
+      );
+    }
+    queuePreviewBoot(120);
   });
 
   // Fallback to avoid being stuck due edge-case load event behavior.
   window.setTimeout(()=>{
     realTarget = 100;
+    queuePreviewBoot(120);
   }, 30000);
 
   function tick(){
@@ -150,7 +353,7 @@
       setProgress(progress + (100 - progress) * speed);
       if(progress >= 99.7){
         setProgress(100);
-        allowOpen();
+        markBootstrapReady();
         return;
       }
     }else{
@@ -163,6 +366,10 @@
   }
 
   setProgress(0);
-  if(progressState) progressState.textContent = 'Booting';
+  setStatus(
+    'Loading simulator assets...',
+    'Preparing the browser runtime, UI, and simulation modules.',
+    'Booting'
+  );
   animationHandle = window.requestAnimationFrame(tick);
 })();

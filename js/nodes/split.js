@@ -74,6 +74,8 @@ class SplitNode extends EquipmentNode{
   _setWaitIcon(active, type='work'){
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
+      const payload = this._payload || this._currentWork || null;
+      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type } : null;
       if(active){
         if(this._waitIconLinksSplit) return;
         const links = [];
@@ -85,7 +87,7 @@ class SplitNode extends EquipmentNode{
         };
         this._workOutputs().forEach(({out})=> addLinks(out));
         this._waitIconLinksSplit = links;
-        this._waitIconLinksSplit.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type));
+        this._waitIconLinksSplit.forEach(id=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type, info));
       }else{
         if(!this._waitIconLinksSplit) return;
         this._waitIconLinksSplit.forEach(id=> window.WorkLinkAnimator.hidePortIcon(this.graph, id));

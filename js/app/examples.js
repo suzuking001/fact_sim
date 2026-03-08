@@ -94,38 +94,42 @@ function makeExample(kind){
 
 function applyExampleData(data){
   if(!App.graph) return;
-  stopSimulation();
   let payload = data;
   try{
     payload = JSON.parse(JSON.stringify(data));
   }catch(_e){
     payload = data;
   }
-  App.history.lock = true;
-  try{
-    App.graph.clear();
-    App.graph.configure(payload);
-    if(typeof window.normalizeGraphOverlaySizes === 'function'){
-      window.normalizeGraphOverlaySizes(App.graph);
+  if(typeof App.applyGraphData === 'function'){
+    App.applyGraphData(payload, { source: 'example' });
+  }else{
+    stopSimulation();
+    App.history.lock = true;
+    try{
+      App.graph.clear();
+      App.graph.configure(payload);
+      if(typeof window.normalizeGraphOverlaySizes === 'function'){
+        window.normalizeGraphOverlaySizes(App.graph);
+      }
+      if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
+        App.repairGraphLinks(App.graph);
+      }
+      if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+        App.stopGroups.restoreSerializedData(App.graph, payload, false);
+      }
+    }finally{
+      App.history.lock = false;
     }
-    if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
-      App.repairGraphLinks(App.graph);
+    configureGraphClock(App.graph);
+    if(typeof window.resetSimClock === 'function') window.resetSimClock();
+    updateSimTime();
+    if(App.backgroundLayout && typeof App.backgroundLayout.restore === 'function'){
+      App.backgroundLayout.restore(payload.__factSimBackground || null);
     }
-    if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
-      App.stopGroups.restoreSerializedData(App.graph, payload, false);
-    }
-  }finally{
-    App.history.lock = false;
+    try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
+    resetHistory();
+    attachTimeline();
   }
-  configureGraphClock(App.graph);
-  if(typeof window.resetSimClock === 'function') window.resetSimClock();
-  updateSimTime();
-  if(App.backgroundLayout && typeof App.backgroundLayout.restore === 'function'){
-    App.backgroundLayout.restore(payload.__factSimBackground || null);
-  }
-  try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
-  resetHistory();
-  attachTimeline();
   try{
     if(typeof App.refreshSidebarChrome === 'function') App.refreshSidebarChrome();
   }catch(_e){}

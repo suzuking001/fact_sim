@@ -5,6 +5,143 @@
   const cfg = window.NODES_CONFIG?.animations || {};
   const defaultDuration = (cfg.linkMs || 800);
   const iconRadius = cfg.radius || 22.5;
+  const WORK_TYPE_ACCENTS = {
+    A: '#0a84ff',
+    B: '#ff9f0a',
+    C: '#34c759',
+    D: '#bf5af2',
+    E: '#ff375f',
+    F: '#64d2ff'
+  };
+
+  function hashText(text){
+    const raw = String(text || '');
+    let hash = 0;
+    for(let i = 0; i < raw.length; i++){
+      hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash);
+  }
+
+  function normalizeWorkType(value){
+    return String(value == null ? '' : value).trim().toUpperCase();
+  }
+
+  function getWorkTypeAccent(typeValue){
+    const key = normalizeWorkType(typeValue);
+    if(!key) return '#8e8e93';
+    if(WORK_TYPE_ACCENTS[key]) return WORK_TYPE_ACCENTS[key];
+    const hue = hashText(key) % 360;
+    return `hsl(${hue}, 74%, 46%)`;
+  }
+
+  function getAnimatedIconTheme(type, info){
+    switch(String(type || '').toLowerCase()){
+      case 'agv':
+        return {
+          fill: '#5dade2',
+          stroke: 'rgba(255,255,255,0.82)',
+          lineWidth: 2
+        };
+      case 'pallet':
+        return {
+          fill: '#2ecc71',
+          stroke: 'rgba(255,255,255,0.82)',
+          lineWidth: 2
+        };
+      case 'work':{
+        const accent = getWorkTypeAccent(info?.t ?? info?.type ?? '');
+        return {
+          fill: 'rgba(255,255,255,0.96)',
+          stroke: accent,
+          lineWidth: 3.5
+        };
+      }
+      default:
+        return {
+          fill: '#d5d8dc',
+          stroke: 'rgba(15,23,42,0.22)',
+          lineWidth: 1.5
+        };
+    }
+  }
+
+  function drawRoundRect(ctx, x, y, w, h, r){
+    const radius = Math.max(0, Math.min(r || 0, w * 0.5, h * 0.5));
+    ctx.beginPath();
+    if(typeof ctx.roundRect === 'function'){
+      ctx.roundRect(x, y, w, h, radius);
+      return;
+    }
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
+  }
+
+  function trimAnimatedLabel(ctx, text, maxWidth){
+    const raw = String(text || '');
+    if(!raw) return '';
+    if(ctx.measureText(raw).width <= maxWidth) return raw;
+    let out = raw;
+    while(out.length > 1 && ctx.measureText(`${out}…`).width > maxWidth){
+      out = out.slice(0, -1);
+    }
+    return `${out}…`;
+  }
+
+  function getAnimatedLabelTheme(type){
+    switch(String(type || '').toLowerCase()){
+      case 'agv':
+        return {
+          fill: 'rgba(0,113,227,0.92)',
+          stroke: 'rgba(255,255,255,0.28)',
+          text: '#f8fbff'
+        };
+      case 'pallet':
+        return {
+          fill: 'rgba(22,163,74,0.92)',
+          stroke: 'rgba(255,255,255,0.28)',
+          text: '#f7fff9'
+        };
+      default:
+        return {
+          fill: 'rgba(15,23,42,0.88)',
+          stroke: 'rgba(255,255,255,0.22)',
+          text: '#f8fafc'
+        };
+    }
+  }
+
+  function drawAnimatedLabel(ctx, x, y, text, type){
+    const theme = getAnimatedLabelTheme(type);
+    ctx.save();
+    ctx.font = '600 11px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    const label = trimAnimatedLabel(ctx, text, 180);
+    const padX = 9;
+    const height = 19;
+    const width = Math.ceil(ctx.measureText(label).width) + padX * 2;
+    const left = Math.round(x - width * 0.5);
+    const top = Math.round(y - height);
+    ctx.shadowColor = 'rgba(15,23,42,0.16)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = theme.fill;
+    drawRoundRect(ctx, left, top, width, height, 999);
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = theme.stroke;
+    ctx.lineWidth = 1;
+    drawRoundRect(ctx, left + 0.5, top + 0.5, width - 1, height - 1, 999);
+    ctx.stroke();
+    ctx.fillStyle = theme.text;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x, top + height * 0.5 + 0.5);
+    ctx.restore();
+  }
 
 class LinkAnimator{
   constructor(){
@@ -196,15 +333,20 @@ class LinkAnimator{
         const endDir = this._getSlotDir(targetNode, link.target_slot, true);
         [x,y] = this._bezierPoint(start, startDir, end, endDir, eased);
       }
+      const info = anim.info || {};
+      const iconTheme = getAnimatedIconTheme(anim.type, info);
       ctx.beginPath();
-      ctx.fillStyle =
-        anim.type === 'agv' ? '#5dade2' :
-        anim.type === 'pallet' ? '#2ecc71' :
-        '#d5d8dc';
+      ctx.fillStyle = iconTheme.fill;
       ctx.arc(x, y, iconRadius, 0, Math.PI * 2);
       ctx.fill();
+      if(iconTheme.stroke){
+        ctx.beginPath();
+        ctx.lineWidth = iconTheme.lineWidth || 2;
+        ctx.strokeStyle = iconTheme.stroke;
+        ctx.arc(x, y, Math.max(0, iconRadius - (iconTheme.lineWidth || 2) * 0.5), 0, Math.PI * 2);
+        ctx.stroke();
+      }
       // label
-      const info = anim.info || {};
       let label = '';
       if(anim.type === 'agv'){
         const kind = String(info.kind || '').toLowerCase();
@@ -242,11 +384,7 @@ class LinkAnimator{
       if(label){
         const shouldDrawLabel = anim.tail || (labelEvery <= 1) || ((labelCounter++ % labelEvery) === 0);
         if(shouldDrawLabel){
-          ctx.fillStyle = '#fff';
-          ctx.font = '12px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(label, x, y - iconRadius - 4);
+          drawAnimatedLabel(ctx, x, y - iconRadius - 5, label, anim.type);
         }
       }
       return anim.tail ? true : true;

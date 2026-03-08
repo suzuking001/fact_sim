@@ -40,7 +40,8 @@ html,body{
   display: block;
 }
 body:not(.landing-hidden) #appRoot{
-  visibility: hidden;
+  visibility: visible;
+  opacity: 1;
   pointer-events: none;
 }
 body.landing-hidden #appRoot,
@@ -63,7 +64,9 @@ html.skip-landing #appRoot{
   content: "";
   position: fixed;
   inset: 0;
-  background: url("../img/landing_editor_bg.png?v=20260305a") center top / cover no-repeat;
+  background:
+    radial-gradient(780px 340px at 18% 6%, rgba(255,255,255,0.52), transparent 72%),
+    radial-gradient(680px 320px at 88% 10%, rgba(10,132,255,0.14), transparent 70%);
   opacity: 0.28;
   filter: grayscale(1) contrast(1.08);
   pointer-events: none;
@@ -3802,6 +3805,238 @@ body:not(.sidebar-hidden) #graph{
   line-height: 1.5;
   white-space: normal;
   word-break: break-word;
+}
+
+/* Landing live preview layer */
+body:not(.landing-hidden) #graph{
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+body:not(.landing-hidden) #graph canvas{
+  filter: saturate(0.92) contrast(1.04) brightness(0.96);
+  transition: filter .32s ease, transform .32s ease;
+}
+
+body:not(.landing-hidden) #sidebar,
+body:not(.landing-hidden) #timelineDock,
+body:not(.landing-hidden) #menuToggle,
+body:not(.landing-hidden) #simTimeHud,
+body:not(.landing-hidden) #toast{
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body:not(.landing-hidden) #sidebar{
+  transform: translateX(28px);
+}
+
+body:not(.landing-hidden) #timelineDock{
+  transform: translateY(18px);
+}
+
+body:not(.landing-hidden) #landing{
+  background:
+    radial-gradient(940px 480px at 12% -8%, rgba(10,132,255,0.12), transparent 72%),
+    radial-gradient(720px 360px at 86% 2%, rgba(255,255,255,0.22), transparent 72%),
+    linear-gradient(180deg, rgba(244,247,252,0.18) 0%, rgba(244,247,252,0.42) 100%);
+}
+
+body:not(.landing-hidden) #landing::before{
+  background:
+    radial-gradient(780px 340px at 18% 6%, rgba(255,255,255,0.52), transparent 72%),
+    radial-gradient(680px 320px at 88% 10%, rgba(10,132,255,0.14), transparent 70%);
+  opacity: 1;
+  filter: none;
+  mix-blend-mode: screen;
+  transform: none;
+}
+
+body:not(.landing-hidden) #landing::after{
+  background:
+    linear-gradient(180deg, rgba(248,250,253,0.20) 0%, rgba(248,250,253,0.46) 46%, rgba(248,250,253,0.60) 100%);
+  backdrop-filter: blur(20px) saturate(1.18);
+}
+
+body:not(.landing-hidden) .landingTopbar,
+body:not(.landing-hidden) .landingHero,
+body:not(.landing-hidden) .landingMetricCard,
+body:not(.landing-hidden) .landingCardMini,
+body:not(.landing-hidden) .landingSection{
+  background: linear-gradient(180deg, rgba(255,255,255,0.58), rgba(248,250,252,0.34));
+  border-color: rgba(255,255,255,0.72);
+  box-shadow: 0 24px 54px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.52);
+  backdrop-filter: blur(28px) saturate(1.36);
+}
+
+body:not(.landing-hidden) .landingTopbar{
+  background: linear-gradient(180deg, rgba(255,255,255,0.52), rgba(248,250,252,0.28));
+}
+
+body:not(.landing-hidden) .landingHero{
+  position: relative;
+  overflow: hidden;
+}
+
+body:not(.landing-hidden) .landingHero::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(520px 160px at 50% 0%, rgba(255,255,255,0.20), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+body:not(.landing-hidden) .landingProgressWrap{
+  background: linear-gradient(180deg, rgba(255,255,255,0.52), rgba(249,250,252,0.28));
+  border-color: rgba(255,255,255,0.72);
+  box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+  backdrop-filter: blur(24px) saturate(1.28);
+}
+
+body.landing-preview-live #landingOpenBtn{
+  box-shadow: 0 20px 40px rgba(0,113,227,0.24), inset 0 1px 0 rgba(255,255,255,0.24) !important;
+}
+
+body.landing-preview-live .landingProgressState{
+  background: rgba(52,199,89,0.12);
+  border-color: rgba(52,199,89,0.22);
+  color: #118045;
+}
+
+body.landing-preview-live #graph canvas{
+  filter: saturate(0.98) contrast(1.06) brightness(1);
+}
+
+/* Sidebar declutter refinement */
+#sidebar #controls,
+#backgroundPanel,
+#addNodePanel,
+#addGroupPanel,
+#advancedPanel,
+#shortcutPanel,
+#sidebar #fileControls{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#sidebar #controls > *,
+#sidebar #fileControls > *{
+  margin-bottom: 0 !important;
+}
+
+.sidebarMetaFooter{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#overviewQuickTip{
+  padding: 10px 12px;
+  border-radius: 16px;
+  border-color: rgba(10,132,255,0.10);
+  background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(246,249,253,0.72));
+}
+
+#sidebar .accessCounter{
+  align-self: flex-start;
+  min-height: 0;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.58);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42);
+}
+
+#sidebar .accessCounter .accessCounterLabel,
+#accessCounterValue{
+  font-size: 11px;
+}
+
+.panelDetails{
+  border: 1px solid rgba(255,255,255,0.78);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(247,249,252,0.66));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.44);
+  padding: 8px 12px 12px;
+}
+
+.panelDetails[hidden]{
+  display: none !important;
+}
+
+.panelDetails > summary{
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  color: rgba(29,29,31,0.72);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.panelDetails > summary::-webkit-details-marker{
+  display: none;
+}
+
+.panelDetails > summary::after{
+  content: "▾";
+  color: rgba(60,60,67,0.62);
+  font-size: 12px;
+  transition: transform .16s ease;
+}
+
+.panelDetails:not([open]) > summary::after{
+  transform: rotate(-90deg);
+}
+
+.panelDetails > .field,
+.panelDetails > .propFields,
+.panelDetails > .category-tabs{
+  margin-top: 10px;
+}
+
+.panelDetails .propFields{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#backgroundPanel.is-empty #bgLayoutAdjustDetails{
+  display: none;
+}
+
+#bgLayoutEmptyState[hidden]{
+  display: none;
+}
+
+.projectActionsGrid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+#fileControls .button-secondary{
+  background: rgba(255,255,255,0.6) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42) !important;
+}
+
+.sidebar-panel-collapsible .panelHeader::after{
+  content: "▾" !important;
+  margin-left: 8px;
+  color: rgba(60,60,67,0.7);
+  font-size: 12px;
+  transition: transform .16s ease, color .16s ease;
+}
+
+.sidebar-panel-collapsible.is-collapsed .panelHeader::after{
+  transform: rotate(-90deg);
 }
 
 

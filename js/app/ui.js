@@ -396,6 +396,7 @@ if(renderFpsSelect){
   const propsWrap = document.getElementById('addGroupProps');
   const rateEl = document.getElementById('groupStopRate');
   const btn = document.getElementById('btnAddGroup');
+  const settingsDetails = document.getElementById('groupSettingsDetails');
   const descriptionEl = document.getElementById('groupKindDescription');
   if(!typeSel || !propsWrap || !rateEl || !btn) return;
   if(!App.stopGroups || typeof App.stopGroups.getTypeDefinitions !== 'function') return;
@@ -496,9 +497,12 @@ if(renderFpsSelect){
   const updateStopRate = ()=>{
     try{
       const meta = readMeta();
-      rateEl.textContent = `Estimated downtime: ${formatDowntimeEstimate(meta)}`;
+      const rateText = formatDowntimeEstimate(meta);
+      rateEl.dataset.rateText = rateText;
+      rateEl.textContent = `Downtime: ${rateText}`;
     }catch(_e){
-      rateEl.textContent = 'Estimated downtime: -';
+      rateEl.dataset.rateText = '-';
+      rateEl.textContent = 'Downtime: -';
     }
   };
 
@@ -512,9 +516,10 @@ if(renderFpsSelect){
     btn.textContent = active ? 'Cancel Placement' : `Place ${label}`;
     if(descriptionEl){
       descriptionEl.textContent = active
-        ? `Click on the canvas to place ${label}. Right-click or press Esc to cancel.`
-        : (GROUP_DESCRIPTIONS[def.key] || 'Configure a shared stop pattern for grouped nodes.');
+        ? `Place ${label} on the canvas. Right-click or Esc cancels.`
+        : (GROUP_DESCRIPTIONS[def.key] || 'Choose a pattern. Open settings only when timing needs tuning.');
     }
+    if(active && settingsDetails) settingsDetails.open = true;
   };
   App.refreshGroupBuilderUI = updateGroupBuilderUi;
 
@@ -528,6 +533,11 @@ if(renderFpsSelect){
       el.addEventListener('input', updateStopRate);
       el.addEventListener('change', updateStopRate);
     });
+    if(settingsDetails){
+      settingsDetails.hidden = !def.uiFields.length;
+      const summary = settingsDetails.querySelector('summary');
+      if(summary) summary.textContent = `Pattern Settings (${def.uiFields.length})`;
+    }
     updateStopRate();
     updateGroupBuilderUi();
   };
@@ -881,6 +891,7 @@ function beginNodePlacement(node){
   if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
   App.canvas.selectNode(node);
   App.canvas.setDirty(true, true);
+  if(typeof App.focusSidebarPanel === 'function') App.focusSidebarPanel('addNodePanel');
   _notifyPlacementUi();
   App.showToast(`Placing ${_getPlacementItemLabel('node', node)}. Click on the canvas to place it. Right-click or press Esc to cancel.`);
 }
@@ -902,6 +913,7 @@ function beginGroupPlacement(group){
   const p = App.canvas.__last_mouse || _defaultGraphPos();
   _setPlacementItemPos(group, 'group', p);
   App.canvas.setDirty(true, true);
+  if(typeof App.focusSidebarPanel === 'function') App.focusSidebarPanel('addGroupPanel');
   _notifyPlacementUi();
   App.showToast(`Placing ${_getPlacementItemLabel('group', group)}. Click on the canvas to place it. Right-click or press Esc to cancel.`);
 }
@@ -916,6 +928,8 @@ window.beginGroupPlacement = beginGroupPlacement;
   const searchInput = document.getElementById('nodeTypeSearch');
   const categoryTabsWrap = document.getElementById('nodeCategoryTabs');
   const quickPicksWrap = document.getElementById('nodeQuickPicks');
+  const browseDetails = document.getElementById('nodeTypeBrowseDetails');
+  const settingsDetails = document.getElementById('nodeSettingsDetails');
   const descriptionEl = document.getElementById('nodeKindDescription');
   if(!sel || !btn || !propsWrap) return;
   const NODE_SCHEMAS = {
@@ -1230,10 +1244,26 @@ window.beginGroupPlacement = beginGroupPlacement;
     btn.classList.toggle('is-cancel', active);
     btn.textContent = active ? 'Cancel Placement' : `Place ${label}`;
     if(descriptionEl && !active){
-      descriptionEl.textContent = meta.description || 'Configure the node before placement.';
+      descriptionEl.textContent = meta.description || 'Choose a preset. Open settings only when you need custom defaults.';
     }
+    if(active && settingsDetails) settingsDetails.open = true;
   }
   App.refreshNodeBuilderUI = updateNodeBuilderUi;
+
+  function syncNodeBuilderDetails(kind){
+    const selectedKind = kind || sel.value || 'equip';
+    const filterText = String(searchInput?.value || '').trim();
+    if(browseDetails){
+      browseDetails.open = !!filterText || !QUICK_PICK_KINDS.includes(selectedKind);
+    }
+    if(settingsDetails){
+      const schema = NODE_SCHEMAS[selectedKind] || NODE_SCHEMAS.equip;
+      const count = Array.isArray(schema?.props) ? schema.props.length : 0;
+      settingsDetails.hidden = count <= 0;
+      const summary = settingsDetails.querySelector('summary');
+      if(summary) summary.textContent = count > 0 ? `Node Settings (${count})` : 'Node Settings';
+    }
+  }
 
   function renderFields(kind){
     const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
@@ -1242,17 +1272,19 @@ window.beginGroupPlacement = beginGroupPlacement;
     const active = !!(App.placement && App.placement.active && App.placement.kind === 'node');
     if(descriptionEl){
       descriptionEl.textContent = active
-        ? `Click on the canvas to place ${_getPlacementItemLabel('node', App.placement.item)}. Right-click or press Esc to cancel.`
-        : (meta.description || 'Configure the node before placement.');
+        ? `Place ${_getPlacementItemLabel('node', App.placement.item)} on the canvas. Right-click or Esc cancels.`
+        : (meta.description || 'Choose a preset. Open settings only when you need custom defaults.');
     }
     if(!schema.props || !schema.props.length){
       const div = document.createElement('div'); div.className='placeholder'; div.textContent='No configurable properties.'; propsWrap.appendChild(div);
       renderQuickPicks(kind);
+      syncNodeBuilderDetails(kind);
       updateNodeBuilderUi();
       return;
     }
     schema.props.forEach(def=>{ propsWrap.appendChild(makeField(def)); });
     renderQuickPicks(kind);
+    syncNodeBuilderDetails(kind);
     updateNodeBuilderUi();
   }
 
@@ -1272,10 +1304,7 @@ window.beginGroupPlacement = beginGroupPlacement;
         const isTypingTarget = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable;
         if(e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTypingTarget){
           e.preventDefault();
-          if(addNodePanel && addNodePanel.classList.contains('is-collapsed')){
-            const header = addNodePanel.querySelector('.panelHeader');
-            if(header) header.click();
-          }
+          if(typeof App.focusSidebarPanel === 'function') App.focusSidebarPanel('addNodePanel');
           searchInput.focus();
           searchInput.select();
           return;
@@ -1363,14 +1392,15 @@ window.beginGroupPlacement = beginGroupPlacement;
   const defaultCollapseState = {
     controls: false,
     backgroundPanel: true,
-    addNodePanel: false,
+    addNodePanel: true,
     addGroupPanel: true,
     advancedPanel: true,
     shortcutPanel: true,
     fileControls: true
   };
   const collapsibleIds = ['controls', 'backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
-  const collapseKey = 'fact_sim_sidebar_panels_v2';
+  const accordionIds = ['backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
+  const collapseKey = 'fact_sim_sidebar_panels_v4';
 
   function readCollapseState(){
     try{
@@ -1431,6 +1461,14 @@ window.beginGroupPlacement = beginGroupPlacement;
     writeCollapseState(collapseState);
   }
 
+  function expandPanelExclusive(panelId){
+    accordionIds.forEach((id)=>{
+      const target = document.getElementById(id);
+      if(!target) return;
+      setPanelCollapsed(target, id !== panelId);
+    });
+  }
+
   collapsibleIds.forEach((id)=>{
     const panel = document.getElementById(id);
     if(!panel) return;
@@ -1439,7 +1477,12 @@ window.beginGroupPlacement = beginGroupPlacement;
     setPanelCollapsed(panel, !!collapseState[id]);
     if(header.__collapseHooked) return;
     const toggle = ()=>{
-      setPanelCollapsed(panel, !panel.classList.contains('is-collapsed'));
+      if(panel.classList.contains('is-collapsed')){
+        if(accordionIds.includes(panel.id)) expandPanelExclusive(panel.id);
+        else setPanelCollapsed(panel, false);
+        return;
+      }
+      setPanelCollapsed(panel, true);
     };
     header.addEventListener('click', toggle);
     header.addEventListener('keydown', (e)=>{
@@ -1453,7 +1496,19 @@ window.beginGroupPlacement = beginGroupPlacement;
   App.setSidebarPanelCollapsed = function(panelId, collapsed){
     const panel = document.getElementById(panelId);
     if(!panel) return false;
+    if(!collapsed && accordionIds.includes(panelId)){
+      expandPanelExclusive(panelId);
+      return true;
+    }
     setPanelCollapsed(panel, collapsed);
+    return true;
+  };
+
+  App.focusSidebarPanel = function(panelId){
+    const panel = document.getElementById(panelId);
+    if(!panel) return false;
+    if(accordionIds.includes(panelId)) expandPanelExclusive(panelId);
+    else setPanelCollapsed(panel, false);
     return true;
   };
 
@@ -1468,44 +1523,53 @@ window.beginGroupPlacement = beginGroupPlacement;
     const count = selectedMap ? Object.keys(selectedMap).length : 0;
     if(App.placement?.active){
       const label = _getPlacementItemLabel(App.placement.kind, App.placement.item);
-      overviewQuickTip.textContent = `Click on the canvas to place ${label}. Right-click or press Esc to cancel.`;
+      overviewQuickTip.textContent = `Place ${label}. Right-click or Esc cancels.`;
       return;
     }
     if(count > 0){
-      overviewQuickTip.textContent = `Selected ${count} node${count === 1 ? '' : 's'}. Open Inspector to edit the current node with one consistent flow.`;
+      overviewQuickTip.textContent = `${count} node${count === 1 ? '' : 's'} selected. Edit in Inspector.`;
       return;
     }
     if(exampleSelect?.value){
-      overviewQuickTip.textContent = `${getSelectedOptionLabel(exampleSelect, 'Example')} is ready. Press Start to simulate, or open a node and edit it in Inspector.`;
+      overviewQuickTip.textContent = `${getSelectedOptionLabel(exampleSelect, 'Example')} is ready. Press Start to run.`;
       return;
     }
-    overviewQuickTip.textContent = 'Load an example, then press Start. Use Inspector to edit the model.';
+    overviewQuickTip.textContent = 'Load an example or open Add Node to begin.';
   }
 
   function updateSidebarSummaries(){
     const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
-    setPanelMeta('controls', `${getSelectedOptionLabel(exampleSelect, 'Manual')} · ${running ? 'Running' : 'Stopped'}`);
-    setPanelMeta('backgroundPanel', bgLayoutEnabled?.checked ? 'Visible' : 'Hidden');
+    const readyLabel = running ? 'Running' : (exampleSelect?.value ? 'Ready' : 'Idle');
+    setPanelMeta('controls', `${getSelectedOptionLabel(exampleSelect, 'Manual')} · ${readyLabel}`);
+
+    const bgMeta = (App.backgroundLayout && typeof App.backgroundLayout.getMeta === 'function')
+      ? App.backgroundLayout.getMeta()
+      : null;
+    let bgSummary = 'No image';
+    if(bgMeta?.hasImage){
+      bgSummary = bgMeta.enabled ? 'Visible' : 'Hidden';
+      if(bgMeta.mouseEdit) bgSummary += ' · Edit';
+    }
+    setPanelMeta('backgroundPanel', bgSummary);
 
     if(App.placement?.active && App.placement.kind === 'node'){
       setPanelMeta('addNodePanel', `Placing ${_getPlacementItemLabel('node', App.placement.item)}`);
     }else{
-      setPanelMeta('addNodePanel', getSelectedOptionLabel(nodeKindSelect, 'Node'));
+      setPanelMeta('addNodePanel', getSelectedOptionLabel(nodeKindSelect, 'Quick Add'));
     }
 
     if(App.placement?.active && App.placement.kind === 'group'){
       setPanelMeta('addGroupPanel', `Placing ${_getPlacementItemLabel('group', App.placement.item)}`);
     }else{
       const groupLabel = getSelectedOptionLabel(groupKindSelect, 'Stop Group');
-      const rateText = String(groupStopRate?.textContent || '')
-        .replace(/^Estimated downtime:\s*/i, '')
-        .trim();
+      const rateText = String(groupStopRate?.dataset?.rateText || '')
+        || String(groupStopRate?.textContent || '').replace(/^Downtime:\s*/i, '').trim();
       setPanelMeta('addGroupPanel', rateText && rateText !== '-' ? `${groupLabel} · ${rateText} down` : groupLabel);
     }
 
-    setPanelMeta('advancedPanel', `${getSelectedOptionLabel(simModeSelect, 'dt')} · ${renderFpsSelect?.value || '60'} FPS`);
-    setPanelMeta('shortcutPanel', 'Layout · Edit');
-    setPanelMeta('fileControls', 'JSON · URL · HTML');
+    setPanelMeta('advancedPanel', `${getSelectedOptionLabel(simModeSelect, 'dt')} · ${renderFpsSelect?.value || '60'} fps`);
+    setPanelMeta('shortcutPanel', 'Undo · Layout');
+    setPanelMeta('fileControls', 'Save · Load · Share');
   }
 
   App.onPlacementStateChange = ()=>{

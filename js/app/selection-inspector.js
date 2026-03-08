@@ -148,6 +148,101 @@ var App = window.App || (window.App = {});
       point[1] >= rect.y && point[1] <= (rect.y + rect.h);
   }
 
+  function clamp(value, min, max){
+    const n = Number(value);
+    const lo = Number(min);
+    const hi = Number(max);
+    if(!isFinite(n)) return isFinite(lo) ? lo : 0;
+    if(isFinite(lo) && n < lo) return lo;
+    if(isFinite(hi) && n > hi) return hi;
+    return n;
+  }
+
+  function visibleDomRect(el){
+    if(!el || typeof el.getBoundingClientRect !== 'function') return null;
+    const rect = el.getBoundingClientRect();
+    if(!rect || rect.width <= 1 || rect.height <= 1) return null;
+    try{
+      const style = window.getComputedStyle ? window.getComputedStyle(el) : null;
+      if(style && (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0')) return null;
+    }catch(_e){}
+    return rect;
+  }
+
+  function graphViewportSafeRect(canvas){
+    const el = canvas?.canvas;
+    const rect = visibleDomRect(el);
+    if(!rect) return null;
+
+    let safeLeft = rect.left + 14;
+    let safeTop = rect.top + 14;
+    let safeRight = rect.right - 14;
+    let safeBottom = rect.bottom - 14;
+
+    const sidebarRect = visibleDomRect(document.getElementById('sidebar'));
+    if(sidebarRect && sidebarRect.left < safeRight && sidebarRect.right > safeLeft){
+      safeRight = Math.min(safeRight, sidebarRect.left - 14);
+    }
+
+    const dockRect = visibleDomRect(document.getElementById('timelineDock'));
+    if(dockRect && dockRect.top < safeBottom && dockRect.bottom > safeTop){
+      safeBottom = Math.min(safeBottom, dockRect.top - 14);
+    }
+
+    if(safeRight <= safeLeft){
+      safeLeft = rect.left + 14;
+      safeRight = rect.right - 14;
+    }
+    if(safeBottom <= safeTop){
+      safeTop = rect.top + 14;
+      safeBottom = rect.bottom - 14;
+    }
+
+    const scale = Math.max(0.0001, Number(canvas?.ds?.scale) || 1);
+    const ox = Number(canvas?.ds?.offset?.[0]) || 0;
+    const oy = Number(canvas?.ds?.offset?.[1]) || 0;
+    const toGraphX = (clientX)=> (clientX - rect.left - ox) / scale;
+    const toGraphY = (clientY)=> (clientY - rect.top - oy) / scale;
+
+    return {
+      left: toGraphX(safeLeft),
+      top: toGraphY(safeTop),
+      right: toGraphX(safeRight),
+      bottom: toGraphY(safeBottom)
+    };
+  }
+
+  function resolveGroupCardPosition(canvas, bounds, width, height){
+    const safe = graphViewportSafeRect(canvas);
+    const pad = 12;
+    const preferredX = bounds.x + pad;
+    const belowY = bounds.y + bounds.h + 10;
+    const aboveY = bounds.y - height - 10;
+    const insideY = bounds.y + 10;
+
+    if(!safe){
+      return { x: preferredX, y: aboveY >= 0 ? aboveY : belowY };
+    }
+
+    const minX = safe.left;
+    const maxX = Math.max(minX, safe.right - width);
+    const x = clamp(preferredX, minX, maxX);
+
+    if((belowY + height) <= safe.bottom){
+      return { x, y: Math.max(safe.top, belowY) };
+    }
+    if(aboveY >= safe.top){
+      return { x, y: aboveY };
+    }
+    if((insideY + height) <= safe.bottom){
+      return { x, y: insideY };
+    }
+    return {
+      x,
+      y: clamp(insideY, safe.top, Math.max(safe.top, safe.bottom - height))
+    };
+  }
+
   function findGroupAt(graph, x, y){
     const groups = Array.isArray(graph?._groups) ? graph._groups : [];
     for(let i = groups.length - 1; i >= 0; i--){
@@ -162,7 +257,7 @@ var App = window.App || (window.App = {});
     const nodes = Array.isArray(canvas?.graph?._nodes) ? canvas.graph._nodes : [];
     for(let i = nodes.length - 1; i >= 0; i--){
       const node = nodes[i];
-      if(pointInRect(point, node?.__factInspectorActionRect)) return node;
+      if(pointInRect(point, node?.__factInspectorDetailActionRect)) return node;
     }
     return null;
   }
@@ -251,10 +346,11 @@ var App = window.App || (window.App = {});
       `Bounds: ${Math.round(b.x)}, ${Math.round(b.y)} | ${Math.round(b.w)} x ${Math.round(b.h)}`
     ];
     if(rate !== null) lines.push(`Reference stop rate: ${rate.toFixed(1)}%`);
-    const x = b.x + 12;
-    const y = b.y + b.h + 10;
     const w = Math.min(340, Math.max(220, b.w * 0.72));
     const h = 84 + lines.length * 14;
+    const pos = resolveGroupCardPosition(canvas, b, w, h);
+    const x = pos.x;
+    const y = pos.y;
     ctx.save();
     try{
       ctx.shadowColor = 'rgba(15,23,42,0.10)';
@@ -263,6 +359,7 @@ var App = window.App || (window.App = {});
       ctx.fillStyle = 'rgba(255,255,255,0.94)';
       roundedRect(ctx, x, y, w, h, 14);
       ctx.fill();
+      canvas.__factGroupInspectorCard = { group, rect: { x, y, w, h } };
       ctx.shadowColor = 'transparent';
       ctx.strokeStyle = 'rgba(255,255,255,0.82)';
       ctx.lineWidth = 1;
@@ -296,26 +393,6 @@ var App = window.App || (window.App = {});
         ctx.fillText(line, x + 12, yy, w - 24);
         yy += 14;
       }
-    }finally{
-      ctx.restore();
-    }
-  }
-
-  function drawNodeActionChip(ctx, node){
-    const x = Number(node?.pos?.[0]) + Math.max(12, Number(node?.size?.[0]) - 88);
-    const y = Number(node?.pos?.[1]) - 24;
-    const w = 76;
-    const h = 18;
-    ctx.save();
-    try{
-      ctx.fillStyle = '#0a84ff';
-      roundedRect(ctx, x, y, w, h, 999);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '600 11px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Edit Node', x + 11, y + 9);
-      node.__factInspectorActionRect = { x, y, w, h };
     }finally{
       ctx.restore();
     }
@@ -404,18 +481,17 @@ var App = window.App || (window.App = {});
       if(!canvas || canvas.__factInspectorHooked) return;
       const prevDrawOverlay = canvas.onDrawOverlay;
       canvas.onDrawOverlay = function(ctx){
+        const prevGroupCard = this.__factGroupInspectorCard || null;
         try{
           if(typeof prevDrawOverlay === 'function') prevDrawOverlay.call(this, ctx);
         }catch(_e){}
         this.__factGroupInspectorAction = null;
-        const nodes = Array.isArray(this.graph?._nodes) ? this.graph._nodes : [];
-        nodes.forEach((node)=>{ if(node && node.__factInspectorActionRect) node.__factInspectorActionRect = null; });
+        this.__factGroupInspectorCard = null;
         try{
-          const selectedMap = this.selected_nodes || {};
-          const selectedIds = Object.keys(selectedMap);
-          const activeNode = this.node_over || (selectedIds.length === 1 ? selectedMap[selectedIds[0]] : null);
-          if(activeNode) drawNodeActionChip(ctx, activeNode);
-          const hover = findGroupAt(this.graph, this.graph_mouse?.[0], this.graph_mouse?.[1]);
+          let hover = findGroupAt(this.graph, this.graph_mouse?.[0], this.graph_mouse?.[1]);
+          if(!hover && prevGroupCard && pointInRect(this.graph_mouse, prevGroupCard.rect)){
+            hover = prevGroupCard.group;
+          }
           const group = this.selected_group || hover;
           if(group) drawGroupCard(this, ctx, group);
         }catch(_e){}

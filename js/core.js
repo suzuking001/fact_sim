@@ -439,8 +439,28 @@ function _isNodeSelected(node){
   }
 }
 
+function _isNodeInspectorDetailHovered(node){
+  try{
+    const canvas = _nodeOverlayCanvas();
+    if(!canvas) return false;
+    const mouse = Array.isArray(canvas.graph_mouse) ? canvas.graph_mouse : null;
+    const rect = node && (node.__factInspectorDetailCardRect || node.__factInspectorDetailActionRect);
+    if(!mouse || !rect) return false;
+    const mx = Number(mouse[0]);
+    const my = Number(mouse[1]);
+    const x = Number(rect.x);
+    const y = Number(rect.y);
+    const w = Number(rect.w);
+    const h = Number(rect.h);
+    if(!isFinite(mx) || !isFinite(my) || !isFinite(x) || !isFinite(y) || !isFinite(w) || !isFinite(h)) return false;
+    return mx >= x && mx <= (x + w) && my >= y && my <= (y + h);
+  }catch(_e){
+    return false;
+  }
+}
+
 function _shouldShowNodeDetails(node){
-  return _isNodeHovered(node) || _isNodeSelected(node);
+  return _isNodeHovered(node) || _isNodeSelected(node) || _isNodeInspectorDetailHovered(node);
 }
 
 function _stringifyPropValue(v){
@@ -490,6 +510,102 @@ function _trimOverlayText(ctx, text, maxWidth){
     else hi = mid - 1;
   }
   return src.slice(0, Math.max(0, lo)) + ellipsis;
+}
+
+function _overlayClamp(value, min, max){
+  const n = Number(value);
+  const lo = Number(min);
+  const hi = Number(max);
+  if(!isFinite(n)) return isFinite(lo) ? lo : 0;
+  if(isFinite(lo) && n < lo) return lo;
+  if(isFinite(hi) && n > hi) return hi;
+  return n;
+}
+
+function _overlayVisibleDomRect(el){
+  if(!el || typeof el.getBoundingClientRect !== 'function') return null;
+  const rect = el.getBoundingClientRect();
+  if(!rect || rect.width <= 1 || rect.height <= 1) return null;
+  try{
+    const style = window.getComputedStyle ? window.getComputedStyle(el) : null;
+    if(style && (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0')) return null;
+  }catch(_e){}
+  return rect;
+}
+
+function _overlayGraphViewportSafeRect(){
+  const canvas = _nodeOverlayCanvas();
+  const rect = _overlayVisibleDomRect(canvas?.canvas);
+  if(!canvas || !rect) return null;
+
+  let safeLeft = rect.left + 14;
+  let safeTop = rect.top + 14;
+  let safeRight = rect.right - 14;
+  let safeBottom = rect.bottom - 14;
+
+  const sidebarRect = _overlayVisibleDomRect(document.getElementById('sidebar'));
+  if(sidebarRect && sidebarRect.left < safeRight && sidebarRect.right > safeLeft){
+    safeRight = Math.min(safeRight, sidebarRect.left - 14);
+  }
+
+  const dockRect = _overlayVisibleDomRect(document.getElementById('timelineDock'));
+  if(dockRect && dockRect.top < safeBottom && dockRect.bottom > safeTop){
+    safeBottom = Math.min(safeBottom, dockRect.top - 14);
+  }
+
+  if(safeRight <= safeLeft){
+    safeLeft = rect.left + 14;
+    safeRight = rect.right - 14;
+  }
+  if(safeBottom <= safeTop){
+    safeTop = rect.top + 14;
+    safeBottom = rect.bottom - 14;
+  }
+
+  const scale = Math.max(0.0001, Number(canvas?.ds?.scale) || 1);
+  const ox = Number(canvas?.ds?.offset?.[0]) || 0;
+  const oy = Number(canvas?.ds?.offset?.[1]) || 0;
+  const toGraphX = (clientX)=> (clientX - rect.left - ox) / scale;
+  const toGraphY = (clientY)=> (clientY - rect.top - oy) / scale;
+
+  return {
+    left: toGraphX(safeLeft),
+    top: toGraphY(safeTop),
+    right: toGraphX(safeRight),
+    bottom: toGraphY(safeBottom)
+  };
+}
+
+function _resolveNodeDetailCardPosition(node, preferredBoxX, preferredBoxY, boxWidth, boxHeight){
+  const safe = _overlayGraphViewportSafeRect();
+  if(!safe || !node) return { x: preferredBoxX, y: preferredBoxY };
+
+  const totalWidth = boxWidth + 8;
+  const minX = safe.left;
+  const maxX = Math.max(minX, safe.right - totalWidth);
+  const x = _overlayClamp(preferredBoxX, minX, maxX);
+
+  const nodeX = Number(node.pos?.[0]) || 0;
+  const nodeY = Number(node.pos?.[1]) || 0;
+  const nodeH = Math.max(1, Number(node.size?.[1]) || 1);
+  const belowY = preferredBoxY;
+  const aboveY = nodeY - boxHeight - 10;
+  const insideY = nodeY + 10;
+
+  if((belowY + boxHeight) <= safe.bottom){
+    return { x, y: Math.max(safe.top, belowY) };
+  }
+  if(aboveY >= safe.top){
+    return { x, y: aboveY };
+  }
+  if((insideY + boxHeight) <= safe.bottom){
+    return { x, y: insideY };
+  }
+  const fallbackY = nodeY + Math.min(nodeH + 6, Math.max(10, safe.bottom - safe.top - boxHeight));
+  return {
+    x,
+    y: _overlayClamp(fallbackY, safe.top, Math.max(safe.top, safe.bottom - boxHeight))
+  };
 }
 
 function _wrapOverlayText(ctx, text, maxWidth){
@@ -777,7 +893,10 @@ function _drawCompactLinesInsideNode(ctx, node, lines){
 
 function _drawHoverDetailBox(ctx, node, lines, x, margin){
   if(!Array.isArray(lines) || !lines.length){
-    if(node) node.__factInspectorActionRect = null;
+    if(node){
+      node.__factInspectorDetailActionRect = null;
+      node.__factInspectorDetailCardRect = null;
+    }
     return;
   }
   const pad = 8;
@@ -804,14 +923,26 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     for(const row of wrapped) textWidth = Math.max(textWidth, ctx.measureText(row).width);
     const boxWidth = Math.min(maxBoxWidth, Math.max(180, Math.ceil(textWidth + pad * 2)));
     const boxHeight = wrapped.length * lineHeight + pad * 2 + headerPad;
-    const yTop = node.size[1] + margin;
-    const boxX = x - 4;
+    const preferredBoxX = (Number(node.pos?.[0]) || 0) + x - 4;
+    const preferredBoxY = (Number(node.pos?.[1]) || 0) + (Number(node.size?.[1]) || 0) + margin;
+    const resolved = _resolveNodeDetailCardPosition(node, preferredBoxX, preferredBoxY, boxWidth, boxHeight);
+    const boxX = resolved.x - (Number(node.pos?.[0]) || 0);
+    const yTop = resolved.y - (Number(node.pos?.[1]) || 0);
+    const textX = boxX + 4;
     ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.12)';
     ctx.shadowBlur = lowScale ? 0 : 22;
     ctx.shadowOffsetY = lowScale ? 0 : 8;
     ctx.fillStyle = 'rgba(255,255,255,0.94)';
     _drawCanvasCard(ctx, boxX, yTop, boxWidth + 8, boxHeight, 12);
     ctx.fill();
+    if(node){
+      node.__factInspectorDetailCardRect = {
+        x: resolved.x,
+        y: resolved.y,
+        w: boxWidth + 8,
+        h: boxHeight
+      };
+    }
     ctx.shadowColor = 'transparent';
     ctx.strokeStyle = lowScale ? 'rgba(17,17,17,0.16)' : 'rgba(17,17,17,0.08)';
     ctx.lineWidth = lowScale ? Math.min(2.2, 1 / Math.max(scale, 0.45)) : 1;
@@ -833,7 +964,7 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     ctx.textBaseline = 'middle';
     ctx.fillText(chipLabel, chipX + 10, chipY + chipHeight * 0.5);
     if(node){
-      node.__factInspectorActionRect = {
+      node.__factInspectorDetailActionRect = {
         x: (Number(node.pos?.[0]) || 0) + chipX,
         y: (Number(node.pos?.[1]) || 0) + chipY,
         w: chipWidth,
@@ -845,7 +976,7 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     ctx.textBaseline = 'top';
     let yy = yTop + pad + headerPad - 4;
     for(const row of wrapped){
-      ctx.fillText(row, x, yy, boxWidth - pad * 2);
+      ctx.fillText(row, textX, yy, boxWidth - pad * 2);
       yy += lineHeight;
     }
   }finally{
@@ -866,7 +997,10 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
     _drawCompactLinesInsideNode(ctx, node, compactLines);
 
     if(!_shouldShowNodeDetails(node)){
-      if(node) node.__factInspectorActionRect = null;
+      if(node){
+        node.__factInspectorDetailActionRect = null;
+        node.__factInspectorDetailCardRect = null;
+      }
       return;
     }
 

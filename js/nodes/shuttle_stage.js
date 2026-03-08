@@ -66,10 +66,12 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
         if(!active) this._waitIconLinks = null;
         return;
       }
+      const payload = this._payload || this._currentWork || this._pendingTransfer || null;
+      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type } : null;
       if(active){
         if(this._waitIconLinks) return;
         this._waitIconLinks = out.links.slice();
-        this._waitIconLinks.forEach((id)=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type));
+        this._waitIconLinks.forEach((id)=> window.WorkLinkAnimator.showPortIcon(this.graph, id, type, info));
       }else{
         if(!this._waitIconLinks) return;
         this._waitIconLinks.forEach((id)=> window.WorkLinkAnimator.hidePortIcon(this.graph, id));
