@@ -140,6 +140,14 @@ class NoteNode extends LiteGraph.LGraphNode{
     this.setDirtyCanvas(true, true);
   }
 
+  _openInInspector(){
+    if(window.App?.selectionInspector?.openNode){
+      window.App.selectionInspector.openNode(this, true, true);
+      return true;
+    }
+    return false;
+  }
+
   _editFontSize(){
     const p = this.properties || {};
     const fontInput = window.prompt('Font size (px)', String(p.fontSize ?? 13));
@@ -188,16 +196,12 @@ class NoteNode extends LiteGraph.LGraphNode{
   }
 
   onDblClick(){
-    this._openMemoEditor();
+    if(!this._openInInspector()) this._openMemoEditor();
     return true;
   }
 
   getExtraMenuOptions(){
     return [
-      {
-        content: 'Edit Memo...',
-        callback: ()=> this._openMemoEditor()
-      },
       {
         content: 'Clear Memo',
         callback: ()=>{

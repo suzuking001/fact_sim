@@ -15,11 +15,16 @@ function initTimeline(){
     const root = document.getElementById('nodePropsPanel');
     if(root) App.nodePropsPanel = new App.NodePropsPanel(root);
   }
+  if(typeof App.SelectionInspector === 'function'){
+    const root = document.getElementById('selectionInspectorPanel');
+    if(root) App.selectionInspector = new App.SelectionInspector(root);
+  }
 
   const tabChart = document.getElementById('timelineTabChart');
   const tabProps = document.getElementById('timelineTabProps');
+  const tabInspector = document.getElementById('timelineTabInspector');
   const propsMeta = document.getElementById('timelinePropsMeta');
-  if(propsMeta) propsMeta.textContent = 'Edit node properties in a spreadsheet-style table.';
+  if(propsMeta) propsMeta.textContent = 'Browse nodes and open Inspector.';
   const minH = 120;
   const hideSnapH = 72;
   const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
@@ -27,7 +32,7 @@ function initTimeline(){
   const applyHeight = (h)=>{
     const next = clamp(h, minH, maxH());
     document.documentElement.style.setProperty('--timeline-height', `${Math.round(next)}px`);
-    if(App.timelineChart && dock.dataset.view !== 'props' && typeof App.timelineChart.resize === 'function'){
+    if(App.timelineChart && dock.dataset.view === 'chart' && typeof App.timelineChart.resize === 'function'){
       App.timelineChart.resize();
     }
     window.dispatchEvent(new Event('resize'));
@@ -40,7 +45,7 @@ function initTimeline(){
     rootBody.classList.toggle('timeline-hidden', next);
     try{
       if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
-      if(App.timelineChart && !next && dock.dataset.view !== 'props' && typeof App.timelineChart.resize === 'function'){
+      if(App.timelineChart && !next && dock.dataset.view === 'chart' && typeof App.timelineChart.resize === 'function'){
         App.timelineChart.resize();
       }
       window.dispatchEvent(new Event('resize'));
@@ -54,10 +59,11 @@ function initTimeline(){
   App.isTimelineHidden = ()=> rootBody.classList.contains('timeline-hidden');
   App.toggleTimelineHidden = ()=> setTimelineHidden(!rootBody.classList.contains('timeline-hidden'));
   const setView = (mode)=>{
-    const view = (mode === 'props') ? 'props' : 'chart';
+    const view = (mode === 'props' || mode === 'inspector') ? mode : 'chart';
     dock.dataset.view = view;
     body.classList.toggle('view-chart', view === 'chart');
     body.classList.toggle('view-props', view === 'props');
+    body.classList.toggle('view-inspector', view === 'inspector');
     if(tabChart){
       const active = view === 'chart';
       tabChart.classList.toggle('is-active', active);
@@ -68,15 +74,27 @@ function initTimeline(){
       tabProps.classList.toggle('is-active', active);
       tabProps.setAttribute('aria-selected', active ? 'true' : 'false');
     }
+    if(tabInspector){
+      const active = view === 'inspector';
+      tabInspector.classList.toggle('is-active', active);
+      tabInspector.setAttribute('aria-selected', active ? 'true' : 'false');
+    }
+    if(propsMeta){
+      if(view === 'props') propsMeta.textContent = 'Browse nodes and open Inspector.';
+      else if(view === 'inspector') propsMeta.textContent = 'Edit the selected node or group with focused controls.';
+    }
     if(view === 'chart'){
       if(App.timelineChart && typeof App.timelineChart.resize === 'function') App.timelineChart.resize();
-    }else{
+    }else if(view === 'props'){
       if(App.nodePropsPanel && typeof App.nodePropsPanel.refresh === 'function') App.nodePropsPanel.refresh();
+    }else if(App.selectionInspector && typeof App.selectionInspector.refresh === 'function'){
+      App.selectionInspector.refresh();
     }
   };
   App.setTimelineDockView = setView;
   if(tabChart) tabChart.addEventListener('click', ()=> setView('chart'));
   if(tabProps) tabProps.addEventListener('click', ()=> setView('props'));
+  if(tabInspector) tabInspector.addEventListener('click', ()=> setView('inspector'));
   setView('chart');
   // Always show timeline by default on load.
   rootBody.classList.remove('timeline-hidden');
@@ -84,7 +102,7 @@ function initTimeline(){
   const followBtn = document.getElementById('timelineFollowBtn');
   if(followBtn){
     App.timelineChart.onFollowChange = (v)=>{
-      followBtn.textContent = v ? 'Follow: ON' : 'Follow: OFF';
+      followBtn.textContent = v ? 'Auto Follow: ON' : 'Auto Follow: OFF';
     };
     followBtn.addEventListener('click', ()=>{
       App.timelineChart.setFollow(!App.timelineChart.follow);
@@ -116,6 +134,24 @@ function initTimeline(){
       if(App.nodePropsPanel && typeof App.nodePropsPanel.refresh === 'function'){
         App.nodePropsPanel.refresh();
         if(typeof App.showToast === 'function') App.showToast('Properties refreshed');
+      }
+    });
+  }
+  const inspectorRefreshBtn = document.getElementById('selectionInspectorRefreshBtn');
+  if(inspectorRefreshBtn){
+    inspectorRefreshBtn.addEventListener('click', ()=>{
+      if(App.selectionInspector && typeof App.selectionInspector.refresh === 'function'){
+        App.selectionInspector.refresh();
+        if(typeof App.showToast === 'function') App.showToast('Inspector refreshed');
+      }
+    });
+  }
+  const inspectorClearBtn = document.getElementById('selectionInspectorClearBtn');
+  if(inspectorClearBtn){
+    inspectorClearBtn.addEventListener('click', ()=>{
+      if(App.selectionInspector && typeof App.selectionInspector.clear === 'function'){
+        App.selectionInspector.clear(true);
+        if(typeof App.showToast === 'function') App.showToast('Inspector cleared');
       }
     });
   }
@@ -185,12 +221,14 @@ function initTimeline(){
 
   window.addEventListener('resize', ()=>{
     if(rootBody.classList.contains('timeline-hidden')) return;
-    if(App.timelineChart && dock.dataset.view !== 'props') App.timelineChart.resize();
+    if(App.timelineChart && dock.dataset.view === 'chart') App.timelineChart.resize();
   });
 }
 
 function attachTimeline(){
   if(App.timelineChart && App.graph) App.timelineChart.attachGraph(App.graph);
   if(App.nodePropsPanel && App.graph) App.nodePropsPanel.attachGraph(App.graph);
+  if(App.selectionInspector && App.graph) App.selectionInspector.attachGraph(App.graph);
+  if(App.selectionInspector && App.canvas) App.selectionInspector.attachCanvas(App.canvas);
 }
 

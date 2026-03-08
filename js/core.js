@@ -776,16 +776,20 @@ function _drawCompactLinesInsideNode(ctx, node, lines){
 }
 
 function _drawHoverDetailBox(ctx, node, lines, x, margin){
-  if(!Array.isArray(lines) || !lines.length) return;
+  if(!Array.isArray(lines) || !lines.length){
+    if(node) node.__factInspectorActionRect = null;
+    return;
+  }
   const pad = 8;
   const lineHeight = 14;
+  const headerPad = 24;
   const maxBoxWidth = Math.min(460, Math.max(240, node.size[0] * 2.4));
   const theme = _getNodeStateTheme(node && node._state);
   const scale = _getCurrentCanvasScale();
   const lowScale = scale < 0.78;
   ctx.save();
   try{
-    ctx.font = '12px Inter, ui-sans-serif, system-ui, sans-serif';
+    ctx.font = '12px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
     const contentWidth = maxBoxWidth - pad * 2;
     const wrapped = [];
     for(const raw of lines){
@@ -799,13 +803,13 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     let textWidth = 0;
     for(const row of wrapped) textWidth = Math.max(textWidth, ctx.measureText(row).width);
     const boxWidth = Math.min(maxBoxWidth, Math.max(180, Math.ceil(textWidth + pad * 2)));
-    const boxHeight = wrapped.length * lineHeight + pad * 2;
+    const boxHeight = wrapped.length * lineHeight + pad * 2 + headerPad;
     const yTop = node.size[1] + margin;
     const boxX = x - 4;
     ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.12)';
     ctx.shadowBlur = lowScale ? 0 : 22;
     ctx.shadowOffsetY = lowScale ? 0 : 8;
-    ctx.fillStyle = 'rgba(255,255,255,0.97)';
+    ctx.fillStyle = 'rgba(255,255,255,0.94)';
     _drawCanvasCard(ctx, boxX, yTop, boxWidth + 8, boxHeight, 12);
     ctx.fill();
     ctx.shadowColor = 'transparent';
@@ -816,9 +820,30 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     ctx.fillStyle = theme.accent;
     _drawCanvasCard(ctx, boxX + 2, yTop + 2, 4, Math.max(14, boxHeight - 4), 3);
     ctx.fill();
+    ctx.font = '600 11px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    const chipLabel = 'Edit';
+    const chipWidth = Math.ceil(ctx.measureText(chipLabel).width) + 20;
+    const chipHeight = 18;
+    const chipX = boxX + boxWidth - chipWidth + 2;
+    const chipY = yTop + 8;
+    ctx.fillStyle = '#0a84ff';
+    _drawCanvasCard(ctx, chipX, chipY, chipWidth, chipHeight, 999);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(chipLabel, chipX + 10, chipY + chipHeight * 0.5);
+    if(node){
+      node.__factInspectorActionRect = {
+        x: (Number(node.pos?.[0]) || 0) + chipX,
+        y: (Number(node.pos?.[1]) || 0) + chipY,
+        w: chipWidth,
+        h: chipHeight
+      };
+    }
     ctx.fillStyle = 'rgba(17,17,17,0.82)';
+    ctx.font = '12px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
     ctx.textBaseline = 'top';
-    let yy = yTop + pad;
+    let yy = yTop + pad + headerPad - 4;
     for(const row of wrapped){
       ctx.fillText(row, x, yy, boxWidth - pad * 2);
       yy += lineHeight;
@@ -840,7 +865,10 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
     if(enforceNodeOverlayMinSize(node, compactLines)) return;
     _drawCompactLinesInsideNode(ctx, node, compactLines);
 
-    if(!_shouldShowNodeDetails(node)) return;
+    if(!_shouldShowNodeDetails(node)){
+      if(node) node.__factInspectorActionRect = null;
+      return;
+    }
 
     const detailLines = [];
     if(baseLines.length) detailLines.push(...baseLines);

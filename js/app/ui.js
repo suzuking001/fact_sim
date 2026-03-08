@@ -6,15 +6,74 @@ function initLiteContextMenuStyler(){
   if(App.__liteContextMenuStylerReady) return;
   App.__liteContextMenuStylerReady = true;
 
+  const DANGER_RE = /^(delete|clear|reset memo style)/i;
+  const MUTED_RE = /^(rename|resize|fit view|fit to screen|auto layout|center view|select nodes|duplicate)/i;
+  const UI_FONT = '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+  const ACCENT_BG = 'rgba(10,132,255,0.12)';
+  const ACCENT_BORDER = 'rgba(10,132,255,0.22)';
+  const ACCENT_TEXT = '#005ecb';
+  const shouldSuppressContextMenu = ()=> Number(App.__suppressContextMenusUntil || 0) > Date.now();
+
+  const clampMenuToViewport = (menu)=>{
+    if(!(menu instanceof HTMLElement)) return;
+    const padding = 12;
+    const maxHeight = Math.max(220, window.innerHeight - padding * 2);
+    menu.style.maxHeight = `${maxHeight}px`;
+    menu.style.overflowY = 'auto';
+    menu.style.overflowX = 'hidden';
+    requestAnimationFrame(()=>{
+      const rect = menu.getBoundingClientRect();
+      let left = rect.left;
+      let top = rect.top;
+      if(rect.right > window.innerWidth - padding){
+        left -= rect.right - (window.innerWidth - padding);
+      }
+      if(rect.bottom > window.innerHeight - padding){
+        top -= rect.bottom - (window.innerHeight - padding);
+      }
+      left = Math.max(padding, left);
+      top = Math.max(padding, top);
+      menu.style.left = `${Math.round(left)}px`;
+      menu.style.top = `${Math.round(top)}px`;
+    });
+  };
+
+  const pruneRedundantEntries = (menu)=>{
+    if(!(menu instanceof HTMLElement)) return;
+    const entries = Array.from(menu.querySelectorAll('.litemenu-entry'));
+    const hasEditGroupDialog = entries.some((entry)=> String(entry.textContent || '').trim() === 'Edit Group...');
+    if(hasEditGroupDialog){
+      entries.forEach((entry)=>{
+        const text = String(entry.textContent || '').trim();
+        if(text !== 'Edit Group') return;
+        if(entry.classList.contains('has_submenu')){
+          entry.remove();
+        }
+      });
+    }
+    const nextEntries = Array.from(menu.querySelectorAll('.litemenu-entry'));
+    nextEntries.forEach((entry, index)=>{
+      const text = String(entry.textContent || '').trim();
+      if(text) return;
+      const prev = nextEntries[index - 1];
+      const next = nextEntries[index + 1];
+      if(!prev || !next || !String(prev.textContent || '').trim() || !String(next.textContent || '').trim()){
+        entry.remove();
+      }
+    });
+  };
+
   const applyEntryStyles = (entry)=>{
     if(!(entry instanceof HTMLElement) || entry.__factStyledEntry) return;
     entry.__factStyledEntry = true;
+    const text = String(entry.textContent || '').trim();
     entry.style.setProperty('background', 'transparent', 'important');
     entry.style.setProperty('background-color', 'transparent', 'important');
     entry.style.setProperty('background-image', 'none', 'important');
-    entry.style.setProperty('color', '#111111', 'important');
-    entry.style.setProperty('border-radius', '11px', 'important');
+    entry.style.setProperty('color', '#1d1d1f', 'important');
+    entry.style.setProperty('border-radius', '13px', 'important');
     entry.style.setProperty('border', '1px solid transparent', 'important');
+    entry.style.setProperty('font-family', UI_FONT, 'important');
 
     if(entry.classList.contains('separator')){
       entry.style.setProperty('min-height', '0', 'important');
@@ -26,36 +85,56 @@ function initLiteContextMenuStyler(){
       return;
     }
 
+    if(DANGER_RE.test(text)) entry.classList.add('fact-menu-danger');
+    else if(MUTED_RE.test(text)) entry.classList.add('fact-menu-muted');
+
     entry.addEventListener('mouseenter', ()=>{
-      entry.style.setProperty('background', 'rgba(112,87,255,0.08)', 'important');
-      entry.style.setProperty('background-color', 'rgba(112,87,255,0.08)', 'important');
-      entry.style.setProperty('border-color', 'rgba(112,87,255,0.18)', 'important');
-      entry.style.setProperty('color', '#4c1d95', 'important');
+      if(entry.classList.contains('fact-menu-danger')){
+        entry.style.setProperty('background', 'rgba(180,35,24,0.08)', 'important');
+        entry.style.setProperty('background-color', 'rgba(180,35,24,0.08)', 'important');
+        entry.style.setProperty('border-color', 'rgba(180,35,24,0.16)', 'important');
+        entry.style.setProperty('color', '#7a1d16', 'important');
+      }else{
+        entry.style.setProperty('background', ACCENT_BG, 'important');
+        entry.style.setProperty('background-color', ACCENT_BG, 'important');
+        entry.style.setProperty('border-color', ACCENT_BORDER, 'important');
+        entry.style.setProperty('color', ACCENT_TEXT, 'important');
+      }
     });
     entry.addEventListener('mouseleave', ()=>{
       entry.style.setProperty('background', 'transparent', 'important');
       entry.style.setProperty('background-color', 'transparent', 'important');
       entry.style.setProperty('border-color', 'transparent', 'important');
-      entry.style.setProperty('color', entry.classList.contains('disabled') ? 'rgba(17,17,17,0.42)' : '#111111', 'important');
+      let color = '#111111';
+      if(entry.classList.contains('disabled')) color = 'rgba(29,29,31,0.42)';
+      else if(entry.classList.contains('fact-menu-danger')) color = '#b42318';
+      else if(entry.classList.contains('fact-menu-muted')) color = 'rgba(60,60,67,0.68)';
+      entry.style.setProperty('color', color, 'important');
     });
   };
 
   const applyMenuStyles = (menu)=>{
     if(!(menu instanceof HTMLElement)) return;
+    if(shouldSuppressContextMenu()){
+      menu.remove();
+      return;
+    }
+    pruneRedundantEntries(menu);
     if(!menu.__factStyledMenu){
       menu.__factStyledMenu = true;
       Object.assign(menu.style, {
-        border: '1px solid rgba(17,17,17,0.08)',
-        borderRadius: '16px',
-        background: 'rgba(255,255,255,0.96)',
-        boxShadow: '0 18px 44px rgba(15,23,42,0.12)',
-        backdropFilter: 'blur(14px)',
-        padding: '6px',
-        minWidth: '220px',
-        color: '#111111',
-        fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+        border: '1px solid rgba(255,255,255,0.88)',
+        borderRadius: '20px',
+        background: 'rgba(255,255,255,0.82)',
+        boxShadow: '0 28px 72px rgba(15,23,42,0.18)',
+        backdropFilter: 'blur(22px) saturate(1.35)',
+        padding: '8px',
+        minWidth: '236px',
+        color: '#1d1d1f',
+        fontFamily: UI_FONT
       });
     }
+    clampMenuToViewport(menu);
     menu.querySelectorAll('.litemenu-entry').forEach(applyEntryStyles);
   };
 
@@ -378,6 +457,15 @@ if(renderFpsSelect){
     return defs.find((d)=> d.key === key) || defs[0];
   };
 
+  const formatDowntimeEstimate = (meta)=>{
+    try{
+      const pct = App.stopGroups.estimateStopRatePercent(meta.type, meta.props);
+      return `${pct.toFixed(1)}%`;
+    }catch(_e){
+      return '-';
+    }
+  };
+
   const readMeta = ()=>{
     const def = getDef();
     const meta = {
@@ -408,19 +496,31 @@ if(renderFpsSelect){
   const updateStopRate = ()=>{
     try{
       const meta = readMeta();
-      const pct = App.stopGroups.estimateStopRatePercent(meta.type, meta.props);
-      rateEl.textContent = `Reference stop rate: ${pct.toFixed(1)}%`;
+      rateEl.textContent = `Estimated downtime: ${formatDowntimeEstimate(meta)}`;
     }catch(_e){
-      rateEl.textContent = 'Reference stop rate: -';
+      rateEl.textContent = 'Estimated downtime: -';
     }
   };
+
+  const updateGroupBuilderUi = ()=>{
+    const def = getDef();
+    const active = !!(App.placement && App.placement.active && App.placement.kind === 'group');
+    const label = active
+      ? _getPlacementItemLabel('group', App.placement.item)
+      : String(def.label || 'Stop Group');
+    btn.classList.toggle('is-cancel', active);
+    btn.textContent = active ? 'Cancel Placement' : `Place ${label}`;
+    if(descriptionEl){
+      descriptionEl.textContent = active
+        ? `Click on the canvas to place ${label}. Right-click or press Esc to cancel.`
+        : (GROUP_DESCRIPTIONS[def.key] || 'Configure a shared stop pattern for grouped nodes.');
+    }
+  };
+  App.refreshGroupBuilderUI = updateGroupBuilderUi;
 
   const renderFields = ()=>{
     const def = getDef();
     propsWrap.innerHTML = '';
-    if(descriptionEl){
-      descriptionEl.textContent = GROUP_DESCRIPTIONS[def.key] || 'Configure a shared stop pattern for grouped nodes.';
-    }
     for(const field of def.uiFields){
       propsWrap.appendChild(makeField(field));
     }
@@ -429,12 +529,18 @@ if(renderFpsSelect){
       el.addEventListener('change', updateStopRate);
     });
     updateStopRate();
+    updateGroupBuilderUi();
   };
 
   typeSel.addEventListener('change', renderFields);
   renderFields();
 
   btn.addEventListener('click', ()=>{
+    if(App.placement && App.placement.active && App.placement.kind === 'group'){
+      App.finishPlacement(false);
+      if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+      return;
+    }
     if(!App.graph || !App.canvas) return;
     try{
       const meta = readMeta();
@@ -570,48 +676,6 @@ if(btnBenchmark){
   }
 })();
 
-// Inline node title editor (double-click node to rename)
-(function(){
-  const input = document.getElementById('nodeTitleEditor');
-  if(!input) return;
-  let editingNode = null;
-  function hide(){ editingNode=null; input.style.display='none'; input.onblur=null; input.onkeydown=null; }
-  function commit(){ if(!editingNode) return hide(); const v=input.value.trim(); if(v){ editingNode.title=v; editingNode.setDirtyCanvas(true,true);} hide(); }
-  function openAt(evt, node){
-    editingNode = node;
-    input.value = node.title || '';
-    const e = evt || {}; const x = (e.clientX ?? 0) + 6; const y = (e.clientY ?? 0) + 6;
-    input.style.left = x + 'px'; input.style.top = y + 'px';
-    input.style.display = 'block';
-    input.focus(); input.select();
-    input.onblur = commit;
-    input.onkeydown = (ke)=>{ if(ke.key==='Enter') commit(); else if(ke.key==='Escape') hide(); };
-  }
-  function install(c){
-    if(!c || c.__titleEditHooked) return;
-    const handler = (e)=>{
-      if(e.button !== 0) return;
-      if(e.type === 'mousedown' && e.detail !== 2) return;
-      try{
-        const p = c.convertEventToCanvas(e);
-        const node = c.getNodeOnPos(p[0], p[1]);
-        if(!node) return;
-        if(e.stopPropagation) e.stopPropagation();
-        if(e.preventDefault) e.preventDefault();
-        openAt(e, node);
-      }catch(_err){}
-    };
-    const targets = [c.canvas, c.bgcanvas, c.top_canvas].filter(Boolean);
-    targets.forEach(t=>{
-      t.addEventListener('mousedown', handler, true);
-      t.addEventListener('dblclick', handler, true);
-    });
-    c.__titleEditHooked = true;
-  }
-  window.__attachTitleEditor = install;
-  if(App.canvas) install(App.canvas);
-})();
-
 // Placement mode (node/group follows cursor, left click to place)
 function _clearPlacementState(){
   if(!App.placement) return;
@@ -626,9 +690,41 @@ function _removePlacementItem(item){
   try{ App.graph.remove(item); }catch(_e){}
 }
 
+function _closeContextMenus(){
+  try{
+    document.querySelectorAll('.litegraph.litecontextmenu').forEach((menu)=> menu.remove());
+  }catch(_e){}
+}
+
+function _getPlacementItemLabel(kind, item){
+  if(!item) return kind === 'group' ? 'Stop Group' : 'Node';
+  if(_isNodePlacementItem(kind, item)){
+    return String(item.title || item.type || 'Node').trim() || 'Node';
+  }
+  const meta = (typeof App.stopGroups?.getGroupMeta === 'function')
+    ? App.stopGroups.getGroupMeta(item)
+    : null;
+  return String(meta?.title || item.title || 'Stop Group').trim() || 'Stop Group';
+}
+
+function _notifyPlacementUi(){
+  try{
+    if(typeof App.onPlacementStateChange === 'function'){
+      App.onPlacementStateChange({
+        active: !!App.placement?.active,
+        kind: String(App.placement?.kind || ''),
+        item: App.placement?.item || null,
+        label: _getPlacementItemLabel(App.placement?.kind || '', App.placement?.item || null)
+      });
+    }
+  }catch(_e){}
+}
+
 function _finishPlacement(commit){
   if(!App.placement || !App.placement.active) return;
   const item = App.placement.item;
+  const kind = String(App.placement.kind || '');
+  const label = _getPlacementItemLabel(kind, item);
   const pending = !!App.placement.pendingChange;
   if(!commit && item){
     _removePlacementItem(item);
@@ -637,6 +733,10 @@ function _finishPlacement(commit){
     try{ App.graph.afterChange(); }catch(_e){}
   }
   _clearPlacementState();
+  _notifyPlacementUi();
+  if(typeof App.showToast === 'function'){
+    App.showToast(commit ? `${label} placed` : `${label} placement canceled`);
+  }
 }
 App.finishPlacement = _finishPlacement;
 
@@ -673,6 +773,7 @@ function installPlacementHandlers(c){
   const opts = App.listenerOptions(true, controller);
   const el = c.canvas;
   if(!el) return;
+  const targets = [c.canvas, c.bgcanvas, c.top_canvas].filter(Boolean);
 
   const getCanvasPos = (e)=>{
     try{
@@ -686,7 +787,7 @@ function installPlacementHandlers(c){
     }catch(_e){ return null; }
   };
 
-  el.addEventListener('mousemove', (e)=>{
+  const handleMouseMove = (e)=>{
     if(!App.placement || !App.placement.active) return;
     const p = getCanvasPos(e);
     if(!p) return;
@@ -694,9 +795,9 @@ function installPlacementHandlers(c){
     if(!item) return;
     _setPlacementItemPos(item, App.placement.kind, p);
     c.setDirty(true, true);
-  }, opts);
+  };
 
-  el.addEventListener('mousedown', (e)=>{
+  const handleMouseDown = (e)=>{
     if(!App.placement || !App.placement.active) return;
     if(e.button === 0){
       _finishPlacement(true);
@@ -706,15 +807,38 @@ function installPlacementHandlers(c){
       return;
     }
     if(e.button === 2){
+      App.__suppressContextMenusUntil = Date.now() + 400;
       _finishPlacement(false);
       c.setDirty(true, true);
       e.preventDefault();
       e.stopPropagation();
+      _closeContextMenus();
+      requestAnimationFrame(_closeContextMenus);
       return;
     }
     e.preventDefault();
     e.stopPropagation();
-  }, opts);
+  };
+
+  const handleContextMenu = (e)=>{
+    if(!App.placement || !App.placement.active) return;
+    App.__suppressContextMenusUntil = Date.now() + 400;
+    _finishPlacement(false);
+    c.setDirty(true, true);
+    e.preventDefault();
+    e.stopPropagation();
+    _closeContextMenus();
+    requestAnimationFrame(_closeContextMenus);
+    window.setTimeout(_closeContextMenus, 0);
+    window.setTimeout(_closeContextMenus, 80);
+    window.setTimeout(_closeContextMenus, 180);
+  };
+
+  targets.forEach((target)=>{
+    target.addEventListener('mousemove', handleMouseMove, opts);
+    target.addEventListener('mousedown', handleMouseDown, opts);
+    target.addEventListener('contextmenu', handleContextMenu, opts);
+  });
 
   window.addEventListener('keydown', (e)=>{
     if(!App.placement || !App.placement.active) return;
@@ -757,8 +881,10 @@ function beginNodePlacement(node){
   if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
   App.canvas.selectNode(node);
   App.canvas.setDirty(true, true);
-  App.showToast('Left click to place / Right click or Esc to cancel');
+  _notifyPlacementUi();
+  App.showToast(`Placing ${_getPlacementItemLabel('node', node)}. Click on the canvas to place it. Right-click or press Esc to cancel.`);
 }
+window.beginNodePlacement = beginNodePlacement;
 
 function beginGroupPlacement(group){
   if(!App.graph || !App.canvas || !group) return;
@@ -776,8 +902,10 @@ function beginGroupPlacement(group){
   const p = App.canvas.__last_mouse || _defaultGraphPos();
   _setPlacementItemPos(group, 'group', p);
   App.canvas.setDirty(true, true);
-  App.showToast('Left click to place group / Right click or Esc to cancel');
+  _notifyPlacementUi();
+  App.showToast(`Placing ${_getPlacementItemLabel('group', group)}. Click on the canvas to place it. Right-click or press Esc to cancel.`);
 }
+window.beginGroupPlacement = beginGroupPlacement;
 
 // Add Node (from sidebar select + button)
 (function(){
@@ -1073,6 +1201,8 @@ function beginGroupPlacement(group){
     sel.innerHTML = '';
     if(!kinds.length){
       btn.disabled = true;
+      btn.classList.remove('is-cancel');
+      btn.textContent = 'No Matching Types';
       propsWrap.innerHTML = '<div class="placeholder">No node types match this filter.</div>';
       if(descriptionEl) descriptionEl.textContent = 'Try a different search term.';
       renderQuickPicks('');
@@ -1089,18 +1219,41 @@ function beginGroupPlacement(group){
     return true;
   }
 
+  function updateNodeBuilderUi(){
+    const selectedKind = sel.value || 'equip';
+    const meta = getNodeMeta(selectedKind);
+    const active = !!(App.placement && App.placement.active && App.placement.kind === 'node');
+    const label = active
+      ? _getPlacementItemLabel('node', App.placement.item)
+      : String(meta.label || 'Node');
+    btn.disabled = !sel.options.length;
+    btn.classList.toggle('is-cancel', active);
+    btn.textContent = active ? 'Cancel Placement' : `Place ${label}`;
+    if(descriptionEl && !active){
+      descriptionEl.textContent = meta.description || 'Configure the node before placement.';
+    }
+  }
+  App.refreshNodeBuilderUI = updateNodeBuilderUi;
+
   function renderFields(kind){
     const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
     const meta = getNodeMeta(kind);
     propsWrap.innerHTML = '';
-    if(descriptionEl) descriptionEl.textContent = meta.description || 'Configure the node before placement.';
+    const active = !!(App.placement && App.placement.active && App.placement.kind === 'node');
+    if(descriptionEl){
+      descriptionEl.textContent = active
+        ? `Click on the canvas to place ${_getPlacementItemLabel('node', App.placement.item)}. Right-click or press Esc to cancel.`
+        : (meta.description || 'Configure the node before placement.');
+    }
     if(!schema.props || !schema.props.length){
       const div = document.createElement('div'); div.className='placeholder'; div.textContent='No configurable properties.'; propsWrap.appendChild(div);
       renderQuickPicks(kind);
+      updateNodeBuilderUi();
       return;
     }
     schema.props.forEach(def=>{ propsWrap.appendChild(makeField(def)); });
     renderQuickPicks(kind);
+    updateNodeBuilderUi();
   }
 
   rebuildNodeSelect('');
@@ -1137,6 +1290,11 @@ function beginGroupPlacement(group){
   }
 
   btn.addEventListener('click', ()=>{
+    if(App.placement && App.placement.active && App.placement.kind === 'node'){
+      App.finishPlacement(false);
+      if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+      return;
+    }
     try{
       const kind = sel.value || 'equip';
       const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
@@ -1196,23 +1354,28 @@ function beginGroupPlacement(group){
   const addGroupPanel = document.getElementById('addGroupPanel');
   const btnAddNode = document.getElementById('btnAddNode');
   const btnAddGroup = document.getElementById('btnAddGroup');
+  const nodeKindSelect = document.getElementById('nodeKindSelect');
+  const groupKindSelect = document.getElementById('groupKindSelect');
+  const groupStopRate = document.getElementById('groupStopRate');
+  const overviewQuickTip = document.getElementById('overviewQuickTip');
+  const bgLayoutEnabled = document.getElementById('bgLayoutEnabled');
   if(!sidebar) return;
   const defaultCollapseState = {
     controls: false,
     backgroundPanel: true,
     addNodePanel: false,
     addGroupPanel: true,
-    advancedPanel: false,
+    advancedPanel: true,
     shortcutPanel: true,
     fileControls: true
   };
   const collapsibleIds = ['controls', 'backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
-  const collapseKey = 'fact_sim_sidebar_panels_v1';
+  const collapseKey = 'fact_sim_sidebar_panels_v2';
 
   function readCollapseState(){
     try{
       const raw = localStorage.getItem(collapseKey);
-      if(raw) return JSON.parse(raw);
+      if(raw) return { ...defaultCollapseState, ...(JSON.parse(raw) || {}) };
     }catch(_e){
       /* ignore */
     }
@@ -1225,11 +1388,39 @@ function beginGroupPlacement(group){
 
   const collapseState = readCollapseState();
 
+  function ensureHeaderChrome(header){
+    if(!header || header.__headerChromeReady) return header;
+    const labelText = String(header.textContent || '').trim();
+    header.textContent = '';
+    const label = document.createElement('span');
+    label.className = 'panelHeaderLabel';
+    label.textContent = labelText;
+    const meta = document.createElement('span');
+    meta.className = 'panelHeaderMeta';
+    meta.hidden = true;
+    header.appendChild(label);
+    header.appendChild(meta);
+    header.__labelEl = label;
+    header.__metaEl = meta;
+    header.__headerChromeReady = true;
+    return header;
+  }
+
+  function setPanelMeta(panelId, text){
+    const panel = document.getElementById(panelId);
+    const header = ensureHeaderChrome(panel?.querySelector('.panelHeader'));
+    const metaEl = header?.__metaEl;
+    if(!metaEl) return;
+    const value = String(text || '').trim();
+    metaEl.hidden = !value;
+    metaEl.textContent = value;
+  }
+
   function setPanelCollapsed(panel, collapsed){
     if(!panel) return;
     panel.classList.toggle('sidebar-panel-collapsible', true);
     panel.classList.toggle('is-collapsed', !!collapsed);
-    const header = panel.querySelector('.panelHeader');
+    const header = ensureHeaderChrome(panel.querySelector('.panelHeader'));
     if(header){
       header.setAttribute('role', 'button');
       header.setAttribute('tabindex', '0');
@@ -1243,7 +1434,7 @@ function beginGroupPlacement(group){
   collapsibleIds.forEach((id)=>{
     const panel = document.getElementById(id);
     if(!panel) return;
-    const header = panel.querySelector('.panelHeader');
+    const header = ensureHeaderChrome(panel.querySelector('.panelHeader'));
     if(!header) return;
     setPanelCollapsed(panel, !!collapseState[id]);
     if(header.__collapseHooked) return;
@@ -1258,6 +1449,76 @@ function beginGroupPlacement(group){
     });
     header.__collapseHooked = true;
   });
+
+  App.setSidebarPanelCollapsed = function(panelId, collapsed){
+    const panel = document.getElementById(panelId);
+    if(!panel) return false;
+    setPanelCollapsed(panel, collapsed);
+    return true;
+  };
+
+  function getSelectedOptionLabel(selectEl, fallback){
+    if(!selectEl) return fallback || '--';
+    return String(selectEl.options?.[selectEl.selectedIndex]?.textContent || selectEl.value || fallback || '--').trim();
+  }
+
+  function updateOverviewQuickTip(){
+    if(!overviewQuickTip) return;
+    const selectedMap = App.canvas && App.canvas.selected_nodes ? App.canvas.selected_nodes : null;
+    const count = selectedMap ? Object.keys(selectedMap).length : 0;
+    if(App.placement?.active){
+      const label = _getPlacementItemLabel(App.placement.kind, App.placement.item);
+      overviewQuickTip.textContent = `Click on the canvas to place ${label}. Right-click or press Esc to cancel.`;
+      return;
+    }
+    if(count > 0){
+      overviewQuickTip.textContent = `Selected ${count} node${count === 1 ? '' : 's'}. Open Inspector to edit the current node with one consistent flow.`;
+      return;
+    }
+    if(exampleSelect?.value){
+      overviewQuickTip.textContent = `${getSelectedOptionLabel(exampleSelect, 'Example')} is ready. Press Start to simulate, or open a node and edit it in Inspector.`;
+      return;
+    }
+    overviewQuickTip.textContent = 'Load an example, then press Start. Use Inspector to edit the model.';
+  }
+
+  function updateSidebarSummaries(){
+    const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
+    setPanelMeta('controls', `${getSelectedOptionLabel(exampleSelect, 'Manual')} · ${running ? 'Running' : 'Stopped'}`);
+    setPanelMeta('backgroundPanel', bgLayoutEnabled?.checked ? 'Visible' : 'Hidden');
+
+    if(App.placement?.active && App.placement.kind === 'node'){
+      setPanelMeta('addNodePanel', `Placing ${_getPlacementItemLabel('node', App.placement.item)}`);
+    }else{
+      setPanelMeta('addNodePanel', getSelectedOptionLabel(nodeKindSelect, 'Node'));
+    }
+
+    if(App.placement?.active && App.placement.kind === 'group'){
+      setPanelMeta('addGroupPanel', `Placing ${_getPlacementItemLabel('group', App.placement.item)}`);
+    }else{
+      const groupLabel = getSelectedOptionLabel(groupKindSelect, 'Stop Group');
+      const rateText = String(groupStopRate?.textContent || '')
+        .replace(/^Estimated downtime:\s*/i, '')
+        .trim();
+      setPanelMeta('addGroupPanel', rateText && rateText !== '-' ? `${groupLabel} · ${rateText} down` : groupLabel);
+    }
+
+    setPanelMeta('advancedPanel', `${getSelectedOptionLabel(simModeSelect, 'dt')} · ${renderFpsSelect?.value || '60'} FPS`);
+    setPanelMeta('shortcutPanel', 'Layout · Edit');
+    setPanelMeta('fileControls', 'JSON · URL · HTML');
+  }
+
+  App.onPlacementStateChange = ()=>{
+    if(typeof App.refreshNodeBuilderUI === 'function') App.refreshNodeBuilderUI();
+    if(typeof App.refreshGroupBuilderUI === 'function') App.refreshGroupBuilderUI();
+    updateOverviewQuickTip();
+    updateSidebarSummaries();
+  };
+  App.refreshSidebarChrome = ()=>{
+    updateSimulationSummary();
+    updateOverviewQuickTip();
+    updateSidebarSummaries();
+  };
 
   function updateSimulationSummary(){
     const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
@@ -1285,6 +1546,8 @@ function beginGroupPlacement(group){
       const count = selectedMap ? Object.keys(selectedMap).length : 0;
       simStatusSelection.textContent = `${count} node${count === 1 ? '' : 's'}`;
     }
+    updateOverviewQuickTip();
+    updateSidebarSummaries();
   }
 
   function installSubmitShortcut(panel, actionButton){
@@ -1318,6 +1581,18 @@ function beginGroupPlacement(group){
   if(simModeSelect && !simModeSelect.__summaryHooked){
     simModeSelect.addEventListener('change', updateSimulationSummary);
     simModeSelect.__summaryHooked = true;
+  }
+  if(nodeKindSelect && !nodeKindSelect.__summaryHooked){
+    nodeKindSelect.addEventListener('change', updateSidebarSummaries);
+    nodeKindSelect.__summaryHooked = true;
+  }
+  if(groupKindSelect && !groupKindSelect.__summaryHooked){
+    groupKindSelect.addEventListener('change', updateSidebarSummaries);
+    groupKindSelect.__summaryHooked = true;
+  }
+  if(bgLayoutEnabled && !bgLayoutEnabled.__summaryHooked){
+    bgLayoutEnabled.addEventListener('change', updateSidebarSummaries);
+    bgLayoutEnabled.__summaryHooked = true;
   }
 
   updateSimulationSummary();

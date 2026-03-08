@@ -633,36 +633,381 @@ var App = window.App || (window.App = {});
     return raw;
   }
 
-  function buildEditableMetaFromPrompt(group){
-    const current = getGroupMeta(group);
-    if(!current) return null;
-    const def = getTypeDef(current.type);
-    const fields = Array.isArray(def?.uiFields) ? def.uiFields : [];
-    const next = {
-      uid: current.uid,
-      type: current.type,
-      title: current.title,
-      props: { ...(current.props || {}) }
-    };
+  function describeType(type){
+    const key = normalizeType(type);
+    if(key === 'random_stop') return 'Randomized shared downtime using interval and duration distributions.';
+    if(key === 'scheduled_stop') return 'Fixed shared downtime for breaks, planned stops, and recurring pauses.';
+    return 'Shared stop behavior applied to nodes inside this group.';
+  }
 
-    for(const field of fields){
-      if(!field || !field.key) continue;
-      const isTitle = field.target === 'title';
-      const currentValue = isTitle
-        ? (next.title ?? '')
-        : (Object.prototype.hasOwnProperty.call(next.props, field.key) ? next.props[field.key] : field.default);
-      const promptLabel = `${field.label || field.key}`;
-      const raw = window.prompt(promptLabel, String(currentValue ?? ''));
-      if(raw == null) return null; // canceled
-      const parsed = parseUiFieldValue(field, raw, currentValue);
-      if(isTitle){
-        next.title = String(parsed == null ? '' : parsed).trim() || String(current.title || def.defaultTitle || 'Stop Group');
-      }else{
-        next.props[field.key] = parsed;
+  function cloneMeta(metaLike, overrides){
+    const src = normalizeMeta(metaLike);
+    const next = {
+      uid: overrides && Object.prototype.hasOwnProperty.call(overrides, 'uid') ? overrides.uid : src.uid,
+      type: overrides && Object.prototype.hasOwnProperty.call(overrides, 'type') ? overrides.type : src.type,
+      title: overrides && Object.prototype.hasOwnProperty.call(overrides, 'title') ? overrides.title : src.title,
+      props: {
+        ...(src.props || {}),
+        ...((overrides && overrides.props) || {})
       }
+    };
+    return normalizeMeta(next);
+  }
+
+  function createDetachedGroup(metaLike){
+    const meta = normalizeMeta(metaLike);
+    const group = new LiteGraph.LGraphGroup(meta.title);
+    setGroupBounds(group, 40, 160, GROUP_DEFAULT_W, GROUP_DEFAULT_H);
+    group.__stopGroupMeta = meta;
+    applyVisual(group, meta, false);
+    return { group, meta };
+  }
+
+  function fitViewToBounds(bounds, options){
+    if(!App.canvas || !bounds) return false;
+    const canvasEl = App.canvas.canvas;
+    if(!canvasEl || !App.canvas.ds) return false;
+    const rect = canvasEl.getBoundingClientRect();
+    const cw = rect.width || canvasEl.clientWidth || canvasEl.width || 800;
+    const ch = rect.height || canvasEl.clientHeight || canvasEl.height || 600;
+    const margin = Math.max(24, Number(options?.margin) || 48);
+    const w = Math.max(1, Number(bounds.w) || 1);
+    const h = Math.max(1, Number(bounds.h) || 1);
+    let scale = Math.min((cw - margin * 2) / w, (ch - margin * 2) / h);
+    if(App.canvas.ds.max_scale) scale = Math.min(scale, App.canvas.ds.max_scale);
+    if(App.canvas.ds.min_scale && scale < App.canvas.ds.min_scale){
+      App.canvas.ds.min_scale = scale;
+    }
+    if(!isFinite(scale) || scale <= 0) scale = 1;
+    const cx = (Number(bounds.x) || 0) + w * 0.5;
+    const cy = (Number(bounds.y) || 0) + h * 0.5;
+    App.canvas.ds.scale = scale;
+    App.canvas.ds.offset[0] = (cw * 0.5) / scale - cx;
+    App.canvas.ds.offset[1] = (ch * 0.5) / scale - cy;
+    App.canvas.setDirty(true, true);
+    return true;
+  }
+
+  function fitViewToGroup(group, options){
+    if(!group) return false;
+    return fitViewToBounds(groupBounds(group), options);
+  }
+
+  function selectGroupNodes(group){
+    if(!App.canvas || !App.graph || !group) return 0;
+    const ids = new Set();
+    collectGroupNodeIds(App.graph, group, ids);
+    const nodes = [];
+    for(const id of ids){
+      const node = App.graph.getNodeById ? App.graph.getNodeById(id) : null;
+      if(node) nodes.push(node);
+    }
+    if(!nodes.length) return 0;
+    try{
+      App.canvas.selectNodes(nodes, false);
+      App.canvas.setDirty(true, true);
+    }catch(_e){}
+    return nodes.length;
+  }
+
+  function removeGroup(group){
+    if(!group || !App.graph) return false;
+    try{
+      if(typeof App.graph.beforeChange === 'function') App.graph.beforeChange();
+      App.graph.remove(group);
+      clearGroupMeta(group, false);
+      bumpRevision(true);
+    }finally{
+      if(typeof App.graph.afterChange === 'function') App.graph.afterChange();
+    }
+    return true;
+  }
+
+  function duplicateGroup(group){
+    if(!group || !App.graph) return null;
+    const meta = getGroupMeta(group);
+    if(!meta) return null;
+    const duplicated = createDetachedGroup(cloneMeta(meta, {
+      uid: createUid(),
+      title: `${meta.title} Copy`
+    })).group;
+    const bounds = groupBounds(group);
+    setGroupBounds(duplicated, bounds.x + 28, bounds.y + 28, bounds.w, bounds.h);
+    try{
+      if(typeof App.graph.beforeChange === 'function') App.graph.beforeChange();
+      App.graph.add(duplicated);
+      bumpRevision(true);
+    }finally{
+      if(typeof App.graph.afterChange === 'function') App.graph.afterChange();
+    }
+    return duplicated;
+  }
+
+  function getModalRefs(){
+    const modal = document.getElementById('stopGroupModal');
+    if(!modal) return null;
+    return {
+      modal,
+      titleEl: document.getElementById('stopGroupModalTitle'),
+      typeEl: document.getElementById('stopGroupType'),
+      nameEl: document.getElementById('stopGroupTitleInput'),
+      descriptionEl: document.getElementById('stopGroupDescription'),
+      rateEl: document.getElementById('stopGroupRate'),
+      propsEl: document.getElementById('stopGroupFields'),
+      saveBtn: document.getElementById('stopGroupSave'),
+      cancelBtn: document.getElementById('stopGroupCancel'),
+      duplicateBtn: document.getElementById('stopGroupDuplicate'),
+      deleteBtn: document.getElementById('stopGroupDelete'),
+      selectBtn: document.getElementById('stopGroupSelectNodes'),
+      fitBtn: document.getElementById('stopGroupFitView')
+    };
+  }
+
+  function ensureModalBinding(){
+    const refs = getModalRefs();
+    if(!refs || refs.modal.__factBound) return refs;
+    refs.modal.__factBound = true;
+
+    const modalState = {
+      mode: 'edit',
+      group: null,
+      placementPos: null,
+      type: 'random_stop'
+    };
+    refs.modal.__factState = modalState;
+
+    function makeField(field, value){
+      const row = document.createElement('label');
+      row.className = 'stopGroupField';
+      const label = document.createElement('span');
+      label.className = 'stopGroupFieldLabel';
+      label.textContent = field.label || field.key;
+      row.appendChild(label);
+
+      let input = null;
+      if(field.type === 'textarea'){
+        input = document.createElement('textarea');
+        input.rows = field.rows || 3;
+      }else{
+        input = document.createElement('input');
+        input.type = field.type === 'number' ? 'number' : (field.type || 'text');
+      }
+      if(field.type === 'number'){
+        if(typeof field.step !== 'undefined') input.step = String(field.step);
+        if(typeof field.min !== 'undefined') input.min = String(field.min);
+        if(typeof field.max !== 'undefined') input.max = String(field.max);
+      }
+      if(typeof value !== 'undefined' && value !== null){
+        input.value = String(value);
+      }else if(typeof field.default !== 'undefined'){
+        input.value = String(field.default);
+      }
+      input.dataset.field = field.key;
+      input.dataset.fieldType = field.type || 'text';
+      row.appendChild(input);
+      return row;
     }
 
-    return normalizeMeta(next);
+    function currentTypeDef(){
+      return getTypeDef(refs.typeEl.value || modalState.type || 'random_stop');
+    }
+
+    function captureDraftState(){
+      const props = {};
+      refs.propsEl.querySelectorAll('[data-field]').forEach((input)=>{
+        const key = String(input.dataset.field || '').trim();
+        if(!key) return;
+        const fieldType = String(input.dataset.fieldType || 'text');
+        if(fieldType === 'number'){
+          const n = Number(input.value);
+          props[key] = isFinite(n) ? n : input.value;
+        }else{
+          props[key] = input.value;
+        }
+      });
+      return {
+        title: refs.nameEl.value,
+        props
+      };
+    }
+
+    function readDraftMeta(){
+      const def = currentTypeDef();
+      const meta = {
+        uid: modalState.group ? (getGroupMeta(modalState.group)?.uid || createUid()) : createUid(),
+        type: refs.typeEl.value || modalState.type || 'random_stop',
+        title: refs.nameEl.value,
+        props: {}
+      };
+      const fields = Array.isArray(def?.uiFields) ? def.uiFields : [];
+      for(const field of fields){
+        if(!field || !field.key) continue;
+        const input = refs.propsEl.querySelector(`[data-field="${field.key}"]`);
+        if(!input) continue;
+        const raw = input.value;
+        meta.props[field.key] = parseUiFieldValue(field, raw, field.default);
+      }
+      return normalizeMeta(meta);
+    }
+
+    function updateRateAndDescription(){
+      const draft = readDraftMeta();
+      const pct = estimateStopRatePercent(draft.type, draft.props);
+      refs.rateEl.textContent = `Reference stop rate: ${pct.toFixed(1)}%`;
+      refs.descriptionEl.textContent = describeType(draft.type);
+    }
+
+    function renderFields(metaLike, options){
+      const meta = cloneMeta(metaLike, { type: refs.typeEl.value || metaLike?.type || modalState.type });
+      modalState.type = meta.type;
+      refs.typeEl.value = meta.type;
+      if(!options?.preserveTitle){
+        refs.nameEl.value = meta.title || '';
+      }else if(!String(refs.nameEl.value || '').trim()){
+        refs.nameEl.value = meta.title || '';
+      }
+      refs.propsEl.innerHTML = '';
+      const def = currentTypeDef();
+      const fields = Array.isArray(def?.uiFields) ? def.uiFields : [];
+      for(const field of fields){
+        const value = Object.prototype.hasOwnProperty.call(meta.props || {}, field.key)
+          ? meta.props[field.key]
+          : field.default;
+        const row = makeField(field, value);
+        refs.propsEl.appendChild(row);
+      }
+      refs.propsEl.querySelectorAll('input,textarea,select').forEach((input)=>{
+        input.addEventListener('input', updateRateAndDescription);
+        input.addEventListener('change', updateRateAndDescription);
+      });
+      updateRateAndDescription();
+    }
+
+    function closeModal(){
+      refs.modal.style.display = 'none';
+      refs.modal.setAttribute('aria-hidden', 'true');
+      modalState.group = null;
+      modalState.placementPos = null;
+    }
+
+    function openModal(mode, group, options){
+      const meta = group ? getGroupMeta(group) : normalizeMeta(options?.meta || { type: options?.type || 'random_stop' });
+      if(!meta) return false;
+      modalState.mode = mode;
+      modalState.group = group || null;
+      modalState.placementPos = Array.isArray(options?.placementPos) ? options.placementPos.slice(0, 2) : null;
+      modalState.type = meta.type;
+
+      refs.titleEl.textContent = mode === 'create' ? 'Add Stop Group' : 'Edit Stop Group';
+      refs.duplicateBtn.style.display = mode === 'edit' ? '' : 'none';
+      refs.deleteBtn.style.display = mode === 'edit' ? '' : 'none';
+      refs.selectBtn.style.display = mode === 'edit' ? '' : 'none';
+      refs.fitBtn.style.display = mode === 'edit' ? '' : 'none';
+
+      refs.typeEl.innerHTML = '';
+      const defs = App.stopGroups.getTypeDefinitions().sort((a, b)=>
+        String(a.label || a.key).localeCompare(String(b.label || b.key))
+      );
+      for(const def of defs){
+        const option = document.createElement('option');
+        option.value = def.key;
+        option.textContent = def.label || def.key;
+        refs.typeEl.appendChild(option);
+      }
+      renderFields(meta);
+
+      refs.modal.style.display = 'block';
+      refs.modal.setAttribute('aria-hidden', 'false');
+      refs.nameEl.focus();
+      refs.nameEl.select();
+      return true;
+    }
+
+    refs.typeEl.addEventListener('change', ()=>{
+      const previous = captureDraftState();
+      const baseMeta = modalState.group
+        ? cloneMeta(getGroupMeta(modalState.group), {
+            type: refs.typeEl.value || modalState.type,
+            title: previous.title,
+            props: previous.props
+          })
+        : normalizeMeta({
+            type: refs.typeEl.value || modalState.type,
+            title: previous.title || refs.nameEl.value,
+            props: previous.props
+          });
+      renderFields(baseMeta, { preserveTitle: true });
+    });
+
+    refs.saveBtn.addEventListener('click', ()=>{
+      const meta = readDraftMeta();
+      if(modalState.mode === 'create'){
+        const group = App.stopGroups.createGroup(meta);
+        if(modalState.placementPos && App.canvas){
+          App.canvas.__last_mouse = modalState.placementPos.slice(0, 2);
+        }
+        if(typeof window.beginGroupPlacement === 'function'){
+          window.beginGroupPlacement(group);
+        }else if(App.graph){
+          App.graph.add(group);
+        }
+      }else if(modalState.group){
+        try{
+          if(App.graph && typeof App.graph.beforeChange === 'function') App.graph.beforeChange();
+          setGroupMeta(modalState.group, meta, true);
+        }finally{
+          if(App.graph && typeof App.graph.afterChange === 'function') App.graph.afterChange();
+        }
+      }
+      closeModal();
+    });
+
+    refs.cancelBtn.addEventListener('click', closeModal);
+    refs.modal.addEventListener('click', (e)=>{ if(e.target === refs.modal) closeModal(); });
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && refs.modal.style.display === 'block') closeModal();
+    });
+
+    refs.duplicateBtn.addEventListener('click', ()=>{
+      if(!modalState.group) return;
+      const copy = duplicateGroup(modalState.group);
+      if(copy){
+        App.showToast('Stop group duplicated');
+        closeModal();
+      }
+    });
+
+    refs.deleteBtn.addEventListener('click', ()=>{
+      if(!modalState.group) return;
+      if(window.confirm('Delete this stop group?')){
+        removeGroup(modalState.group);
+        closeModal();
+      }
+    });
+
+    refs.selectBtn.addEventListener('click', ()=>{
+      if(!modalState.group) return;
+      const count = selectGroupNodes(modalState.group);
+      App.showToast(count ? `Selected ${count} nodes` : 'No nodes inside group');
+    });
+
+    refs.fitBtn.addEventListener('click', ()=>{
+      if(!modalState.group) return;
+      if(fitViewToGroup(modalState.group, { margin: 54 })){
+        App.showToast('Fit view to group');
+      }
+    });
+
+    App.stopGroups.openGroupEditor = function(group){
+      if(!group || !getGroupMeta(group)) return false;
+      return openModal('edit', group, null);
+    };
+
+    App.stopGroups.openCreateGroupEditor = function(options){
+      return openModal('create', null, options || {});
+    };
+
+    return refs;
   }
 
   App.stopGroups = App.stopGroups || {};
@@ -699,24 +1044,6 @@ var App = window.App || (window.App = {});
   App.stopGroups.injectSerializedData = injectSerializedData;
   App.stopGroups.restoreSerializedData = restoreSerializedData;
   App.stopGroups.createRuntime = createRuntime;
-  App.stopGroups.openGroupEditor = function(group){
-    const targetGroup = group || null;
-    if(!targetGroup) return false;
-    const meta = getGroupMeta(targetGroup);
-    if(!meta) return false;
-
-    const next = buildEditableMetaFromPrompt(targetGroup);
-    if(!next) return false;
-
-    const graph = App.graph;
-    try{
-      if(graph && typeof graph.beforeChange === 'function') graph.beforeChange();
-      setGroupMeta(targetGroup, next, true);
-    }finally{
-      if(graph && typeof graph.afterChange === 'function') graph.afterChange();
-    }
-    return true;
-  };
   App.stopGroups.getRevision = function(){ return groupRevision; };
   App.stopGroups.isNodePaused = function(node){
     return !!(node && pausedNodeIds && pausedNodeIds.has(node.id));
@@ -732,13 +1059,38 @@ var App = window.App || (window.App = {});
   };
 
   App.stopGroups.createGroup = function(metaLike){
-    const meta = normalizeMeta(metaLike);
-    const group = new LiteGraph.LGraphGroup(meta.title);
-    setGroupBounds(group, 40, 160, GROUP_DEFAULT_W, GROUP_DEFAULT_H);
-    setGroupMeta(group, meta, false);
-    applyVisual(group, meta, false);
+    const created = createDetachedGroup(metaLike);
     bumpRevision(true);
-    return group;
+    return created.group;
+  };
+  App.stopGroups.cloneMeta = cloneMeta;
+  App.stopGroups.describeType = describeType;
+  App.stopGroups.removeGroup = removeGroup;
+  App.stopGroups.duplicateGroup = duplicateGroup;
+  App.stopGroups.selectGroupNodes = selectGroupNodes;
+  App.stopGroups.fitViewToGroup = fitViewToGroup;
+  App.stopGroups.getGroupBounds = groupBounds;
+  App.stopGroups.setGroupBounds = function(group, boundsLike, draw){
+    if(!group || !boundsLike) return false;
+    const bounds = boundsLike;
+    setGroupBounds(group, bounds.x, bounds.y, bounds.w, bounds.h);
+    bumpRevision(draw !== false);
+    return true;
+  };
+  App.stopGroups.listNodesInGroup = function(group, graph){
+    const g = graph || App.graph;
+    const ids = new Set();
+    collectGroupNodeIds(g, group, ids);
+    if(!g || typeof g.getNodeById !== 'function') return [];
+    const out = [];
+    ids.forEach((id)=>{
+      const node = g.getNodeById(id);
+      if(node) out.push(node);
+    });
+    return out;
+  };
+  App.stopGroups.countNodesInGroup = function(group, graph){
+    return App.stopGroups.listNodesInGroup(group, graph).length;
   };
 
   App.stopGroups.onGraphChanged = function(){
@@ -854,4 +1206,6 @@ var App = window.App || (window.App = {});
       { key: 'durationSec', label: 'Stop Duration (s)', type: 'number', min: 0, step: 0.1, default: 60 }
     ]
   };
+
+  ensureModalBinding();
 })();

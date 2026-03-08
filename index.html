@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="FACT SIM is a browser-based discrete-event simulator for factories, AGVs, logistics, traffic, and other real-world systems." />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#f5f5f7" />
   <title>FACT SIM - Browser-Based Discrete Event Simulation</title>
   <script>
     (function(){
@@ -24,7 +24,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260307j" />
+  <link rel="stylesheet" href="css/app.css?v=20260308d" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -175,7 +175,7 @@
       </div>
     </div>
     <div id="controls">
-      <div class="panelHeader">Overview</div>
+      <div class="panelHeader">Simulation</div>
       <div class="btn-row">
         <button id="btnStart">Start</button>
         <button id="btnStop">Stop</button>
@@ -186,7 +186,7 @@
         <input type="range" id="speedRange" value="2" min="0" max="12" step="1">
       </div>
       <div class="control-group">
-        <label for="exampleSelect">Example Graph</label>
+        <label for="exampleSelect">Example</label>
         <select id="exampleSelect" title="Examples">
           <option value="">Load example…</option>
           <option value="simple">Simple</option>
@@ -225,9 +225,10 @@
           </div>
         </div>
       </div>
+      <div id="overviewQuickTip" class="panel-help panel-help-compact">Load an example, then press Start. Use Inspector for focused edits.</div>
     </div>
     <div id="backgroundPanel">
-      <div class="panelHeader">Layout Background</div>
+      <div class="panelHeader">Background</div>
       <div class="btn-row">
         <button id="bgLayoutLoadBtn">Import Image</button>
         <button id="bgLayoutClearBtn">Clear</button>
@@ -264,15 +265,16 @@
     </div>
     <!-- Add Node panel -->
     <div id="addNodePanel">
-      <div class="panelHeader">Add Node</div>
+      <div class="panelHeader">Node Builder</div>
       <div id="nodeCategoryTabs" class="category-tabs" role="tablist" aria-label="Node categories"></div>
       <div class="field">
         <label for="nodeTypeSearch">Search</label>
-        <input id="nodeTypeSearch" type="search" placeholder="Filter node types">
+        <input id="nodeTypeSearch" type="search" placeholder="Search node types">
       </div>
       <div id="nodeQuickPicks" class="quick-pick-row" aria-label="Quick node picks"></div>
+      <div id="nodeKindDescription" class="panel-help panel-help-compact">Pick a common preset or search all node types. Press / to focus search.</div>
       <div class="field">
-        <label for="nodeKindSelect">Type</label>
+        <label for="nodeKindSelect">All node types</label>
         <select id="nodeKindSelect">
           <option value="equip">Equipment</option>
           <option value="note">Memo</option>
@@ -292,22 +294,23 @@
         </select>
       </div>
       <div id="addNodeProps" class="propFields"></div>
-      <button id="btnAddNode">Add Node</button>
+      <button id="btnAddNode">Place Node</button>
     </div>
     <div id="addGroupPanel">
-      <div class="panelHeader">Add Group</div>
+      <div class="panelHeader">Stop Group</div>
       <div class="field">
-        <label for="groupKindSelect">Type</label>
+        <label for="groupKindSelect">Pattern</label>
         <select id="groupKindSelect"></select>
       </div>
-      <div id="groupStopRate" class="group-stop-rate">Reference stop rate: -</div>
+      <div id="groupStopRate" class="group-stop-rate">Estimated downtime: -</div>
+      <div id="groupKindDescription" class="panel-help panel-help-compact">Choose a shared stop pattern, then click on the canvas to place the region.</div>
       <div id="addGroupProps" class="propFields"></div>
-      <button id="btnAddGroup">Add Group</button>
+      <button id="btnAddGroup">Place Group</button>
     </div>
     <div id="advancedPanel">
-      <div class="panelHeader">Simulation Detail</div>
+      <div class="panelHeader">Engine &amp; Benchmark</div>
       <div class="control-group">
-        <label for="renderFpsSelect">Render FPS</label>
+        <label for="renderFpsSelect">View FPS</label>
         <select id="renderFpsSelect">
           <option value="15">15</option>
           <option value="30">30</option>
@@ -319,17 +322,17 @@
         <div id="realtimeFpsValue" class="realtimeFpsValue">--</div>
       </div>
       <div class="control-group realtimeFactorGroup">
-        <label for="realtimeFactorValue">Realtime x (1s Sim/Wall)</label>
+        <label for="realtimeFactorValue">Realtime Speed</label>
         <div id="realtimeFactorValue" class="realtimeFactorValue">--</div>
       </div>
       <div class="control-group">
-        <label for="simModeSelect">Engine</label>
+        <label for="simModeSelect">Simulation Engine</label>
         <select id="simModeSelect">
           <option value="dt">dt (0.1s fixed)</option>
           <option value="event">event (heap)</option>
         </select>
       </div>
-        <button id="btnBenchmark">Compare Speed</button>
+        <button id="btnBenchmark">Run Benchmark</button>
       </div>
       <div id="shortcutPanel">
         <div class="panelHeader">Shortcuts</div>
@@ -417,7 +420,7 @@
     </div>
     <div class="sidebar-spacer"></div>
     <div id="fileControls">
-      <div class="panelHeader">Project</div>
+      <div class="panelHeader">Save &amp; Share</div>
       <button id="btnSave">Save</button>
       <button id="btnLoad">Load</button>
       <button id="btnShareUrl">Share URL</button>
@@ -430,52 +433,57 @@
   <div id="fastestModeOverlay" aria-hidden="true"></div>
   <div id="fastestModeNotice" aria-live="polite" role="status">FASTEST mode: Rendering disabled for maximum simulation speed.</div>
   <canvas id="graph"></canvas>
-  <input id="nodeTitleEditor" type="text" aria-label="Edit node title" />
   <div id="toast" role="status" aria-live="polite"></div>
   <!-- Timing Chart Dock -->
   <div id="timelineDock" data-view="chart">
     <div id="timelineResizeHandle" aria-label="Resize timing chart"></div>
     <div id="timelineHeader">
       <div class="timelineHeaderLeft">
-        <span class="timelineTitle">Analysis</span>
+        <span class="timelineTitle">Workspace</span>
         <div class="timelineTabs" role="tablist" aria-label="Timeline dock tabs">
-          <button id="timelineTabChart" class="timelineTab is-active" role="tab" aria-selected="true">Timing Chart</button>
-          <button id="timelineTabProps" class="timelineTab" role="tab" aria-selected="false">Node Properties</button>
+          <button id="timelineTabChart" class="timelineTab is-active" role="tab" aria-selected="true">Timeline</button>
+          <button id="timelineTabProps" class="timelineTab" role="tab" aria-selected="false">Table</button>
+          <button id="timelineTabInspector" class="timelineTab" role="tab" aria-selected="false">Inspector</button>
         </div>
       </div>
-      <span id="timelineSelection" class="timelineSelection">Work: -</span>
+      <span id="timelineSelection" class="timelineSelection">Selection: -</span>
       <span id="timelinePropsMeta" class="timelinePropsMeta" aria-live="polite"></span>
       <div id="timelineChartActions" class="timelineActions">
-        <button id="timelineAutoOrderBtn" class="timelineBtn">Auto Order</button>
+        <button id="timelineAutoOrderBtn" class="timelineBtn">Reset Order</button>
         <button id="timelineExportBtn" class="timelineBtn">Export CSV</button>
-        <button id="timelineFollowBtn" class="timelineBtn">Follow: ON</button>
+        <button id="timelineFollowBtn" class="timelineBtn">Auto Follow: ON</button>
       </div>
       <div id="timelinePropsActions" class="timelineActions">
         <button id="nodePropsRefreshBtn" class="timelineBtn">Refresh</button>
       </div>
+      <div id="timelineInspectorActions" class="timelineActions">
+        <button id="selectionInspectorRefreshBtn" class="timelineBtn">Refresh</button>
+        <button id="selectionInspectorClearBtn" class="timelineBtn">Clear</button>
+      </div>
     </div>
     <div id="timelineBody" class="view-chart">
       <canvas id="timelineCanvas"></canvas>
-      <div id="nodePropsPanel" aria-label="Node properties editor">
+      <div id="nodePropsPanel" aria-label="Node browser">
         <div class="nodePropsToolbar">
-          <input id="nodePropsFilter" type="text" placeholder="Filter node, connection, or JSON..." aria-label="Filter node properties" />
+          <input id="nodePropsFilter" type="text" placeholder="Search node, type, connection, or property..." aria-label="Filter nodes" />
           <span id="nodePropsSummary">0 rows</span>
         </div>
         <div class="nodePropsTableWrap">
-          <table id="nodePropsTable" aria-label="Node properties table">
+          <table id="nodePropsTable" aria-label="Node list">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Node</th>
                 <th>Type</th>
                 <th>Connected To</th>
-                <th>Properties (JSON)</th>
+                <th>Property Summary</th>
               </tr>
             </thead>
             <tbody id="nodePropsBody"></tbody>
           </table>
         </div>
       </div>
+      <div id="selectionInspectorPanel" aria-label="Selection inspector"></div>
     </div>
   </div>
   <div id="timelineRevealHandle" aria-label="Drag up to show bottom panel"></div>
@@ -555,6 +563,44 @@
     </div>
   </div>
 
+  <!-- Stop Group Editor Modal -->
+  <div id="stopGroupModal" aria-hidden="true" role="dialog">
+    <div id="stopGroupContainer" role="document" aria-label="Stop group editor">
+      <div class="stopGroupHeader">
+        <h2 id="stopGroupModalTitle">Edit Stop Group</h2>
+      </div>
+      <div class="stopGroupBody">
+        <div class="stopGroupIntro">
+          <p id="stopGroupDescription">Shared stop behavior applied to nodes inside this group.</p>
+          <span id="stopGroupRate" class="stopGroupRate">Reference stop rate: 0.0%</span>
+        </div>
+        <div class="stopGroupGrid">
+          <label class="stopGroupField">
+            <span class="stopGroupFieldLabel">Type</span>
+            <select id="stopGroupType" aria-label="Stop group type"></select>
+          </label>
+          <label class="stopGroupField">
+            <span class="stopGroupFieldLabel">Title</span>
+            <input id="stopGroupTitleInput" type="text" aria-label="Stop group title" />
+          </label>
+        </div>
+        <div id="stopGroupFields" class="stopGroupFields"></div>
+      </div>
+      <div class="stopGroupActions">
+        <div class="stopGroupActionsLeft">
+          <button id="stopGroupSelectNodes" type="button">Select Nodes</button>
+          <button id="stopGroupFitView" type="button">Fit View</button>
+          <button id="stopGroupDuplicate" type="button">Duplicate</button>
+        </div>
+        <div class="stopGroupActionsRight">
+          <button id="stopGroupDelete" class="danger" type="button">Delete</button>
+          <button id="stopGroupCancel" type="button">Cancel</button>
+          <button id="stopGroupSave" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- About / Licenses Modal -->
   <div id="aboutModal" aria-hidden="true" role="dialog">
     <div id="aboutContainer" role="document" aria-label="About and Licenses">
@@ -608,10 +654,10 @@ SOFTWARE.
   </div>
 
   <script src="js/app/landing.js?v=20260307b"></script>
-  <script src="js/core.js?v=20260307h"></script>
+  <script src="js/core.js?v=20260308b"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
-    <script src="js/nodes/menu.js?v=20260307a"></script>
+    <script src="js/nodes/menu.js?v=20260308i"></script>
     <script src="js/nodes/ioflip.js?v=20260306a"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
@@ -641,25 +687,26 @@ SOFTWARE.
   <script src="sample/carrier.js?v=20260223a"></script>
   <script src="sample/pallet_station_demo.js?v=20260226a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
-  <script src="js/timeline.js?v=20260226a"></script>
+  <script src="js/timeline.js?v=20260308a"></script>
   <script src="js/app/state.js?v=20260225b"></script>
   <script src="js/app/background-layout.js?v=20260303b"></script>
   <script src="js/app/graph-links.js?v=20260301a"></script>
-  <script src="js/app/stop-groups.js?v=20260225c"></script>
+  <script src="js/app/stop-groups.js?v=20260308b"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
   <script src="js/app/engine.js?v=20260225d"></script>
   <script src="js/app/sim.js?v=20260222a"></script>
   <script src="js/app/benchmark.js?v=20260307a"></script>
   <script src="js/app/history.js?v=20260307a"></script>
-  <script src="js/app/selection.js?v=20260224a"></script>
+  <script src="js/app/selection.js?v=20260308a"></script>
   <script src="js/app/fit.js?v=20260306a"></script>
-  <script src="js/app/node-props-panel.js?v=20260220b"></script>
-  <script src="js/app/timeline-init.js?v=20260226b"></script>
-  <script src="js/app/graph-init.js?v=20260307d"></script>
-  <script src="js/app/examples.js?v=20260307b"></script>
+  <script src="js/app/node-props-panel.js?v=20260308c"></script>
+  <script src="js/app/selection-inspector.js?v=20260308d"></script>
+  <script src="js/app/timeline-init.js?v=20260308b"></script>
+  <script src="js/app/graph-init.js?v=20260308b"></script>
+  <script src="js/app/examples.js?v=20260308a"></script>
   <script src="js/app/file-io.js?v=20260307a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
-  <script src="js/app/ui.js?v=20260307h"></script>
+  <script src="js/app/ui.js?v=20260308k"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

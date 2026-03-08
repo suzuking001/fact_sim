@@ -1,4 +1,4 @@
-// Node properties panel (one row per node, editable)
+// Node list panel (one row per node, inspector-first navigation)
 
 var App = window.App || (window.App = {});
 
@@ -9,7 +9,7 @@ var App = window.App || (window.App = {});
 
   function isInteractiveElement(target){
     if(!target || typeof target.closest !== 'function') return false;
-    return !!target.closest('input, textarea, select, button, a, [contenteditable="true"], [contenteditable=""]');
+    return !!target.closest('button, a, [contenteditable="true"], [contenteditable=""]');
   }
 
   function stringifyValue(v){
@@ -18,6 +18,34 @@ var App = window.App || (window.App = {});
     }catch(_e){
       return String(v);
     }
+  }
+
+  function summarizeValue(v){
+    if(typeof v === 'boolean') return v ? 'on' : 'off';
+    if(typeof v === 'number') return Number.isInteger(v) ? String(v) : String(Math.round(v * 1000) / 1000);
+    if(typeof v === 'string'){
+      const compact = v.replace(/\s+/g, ' ').trim();
+      if(!compact) return '(empty)';
+      return compact.length > 28 ? `${compact.slice(0, 28)}...` : compact;
+    }
+    if(Array.isArray(v)) return `${v.length} item${v.length === 1 ? '' : 's'}`;
+    if(isObjectLike(v)) return `${Object.keys(v).length} field${Object.keys(v).length === 1 ? '' : 's'}`;
+    if(v === null) return 'null';
+    return String(v);
+  }
+
+  function summarizeProperties(properties){
+    const entries = Object.entries(isObjectLike(properties) ? properties : {});
+    if(!entries.length) return 'No custom properties';
+    const parts = [];
+    for(let i = 0; i < entries.length && parts.length < 4; i++){
+      const [key, value] = entries[i];
+      parts.push(`${key}: ${key === 'script' ? 'custom logic' : summarizeValue(value)}`);
+    }
+    if(entries.length > parts.length){
+      parts.push(`+${entries.length - parts.length} more`);
+    }
+    return parts.join(' • ');
   }
 
   class NodePropsPanel{
@@ -118,6 +146,7 @@ var App = window.App || (window.App = {});
         const connectedTo = this._connectedToSummary(node);
         const properties = isObjectLike(node?.properties) ? node.properties : {};
         const propsText = stringifyValue(properties);
+        const propsSummary = summarizeProperties(properties);
         const searchable = `${nodeId} ${nodeTitle} ${nodeType} ${connectedTo} ${propsText}`.toLowerCase();
         if(q && searchable.indexOf(q) < 0) continue;
         rows.push({
@@ -126,8 +155,8 @@ var App = window.App || (window.App = {});
           nodeTitle,
           nodeType,
           connectedTo,
-          properties,
-          propsText
+          propsText,
+          propsSummary
         });
       }
       return rows;
@@ -164,56 +193,14 @@ var App = window.App || (window.App = {});
       }
     }
 
-    _notifyGraphChanged(){
-      try{
-        if(this.graph && typeof this.graph.onAfterChange === 'function'){
-          this.graph.onAfterChange();
-        }
-      }catch(_e){}
-    }
-
-    _commitTitle(row, nextTitle){
-      const node = row.node;
-      if(!node) return;
-      node.title = String(nextTitle ?? '');
-      try{
-        if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
-        if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
-      }catch(_e){}
-      this._notifyGraphChanged();
-    }
-
-    _commitPropertiesJson(row, text, inputEl){
-      const node = row.node;
-      if(!node) return;
-      let parsed = null;
-      try{
-        parsed = JSON.parse(String(text || '{}'));
-      }catch(_e){
-        if(inputEl) inputEl.classList.add('input-error');
-        return;
+    _openInspector(row){
+      if(!row?.node) return false;
+      if(App.selectionInspector && typeof App.selectionInspector.openNode === 'function'){
+        App.selectionInspector.openNode(row.node, true, true);
+        if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
+        return true;
       }
-      if(!isObjectLike(parsed)){
-        if(inputEl) inputEl.classList.add('input-error');
-        return;
-      }
-      if(inputEl) inputEl.classList.remove('input-error');
-
-      const oldProps = isObjectLike(node.properties) ? node.properties : {};
-      node.properties = parsed;
-
-      if(typeof node.onPropertyChanged === 'function'){
-        const keys = new Set([...Object.keys(oldProps), ...Object.keys(parsed)]);
-        keys.forEach((k)=>{
-          try{ node.onPropertyChanged(k); }catch(_e){}
-        });
-      }
-
-      try{
-        if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
-        if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
-      }catch(_e){}
-      this._notifyGraphChanged();
+      return false;
     }
 
     setSelectedNodeId(id, options){
@@ -254,7 +241,8 @@ var App = window.App || (window.App = {});
 
     refresh(){
       if(!this.bodyEl || !this.summaryEl) return;
-      const rows = this._rows(this.filterInput ? this.filterInput.value : '');
+      const query = String(this.filterInput ? this.filterInput.value : '').trim();
+      const rows = this._rows(query);
       this.bodyEl.innerHTML = '';
 
       rows.forEach((row)=>{
@@ -270,6 +258,10 @@ var App = window.App || (window.App = {});
             syncTimeline: true,
             forceRefresh: false
           });
+        });
+        tr.addEventListener('dblclick', (e)=>{
+          if(isInteractiveElement(e.target)) return;
+          this._openInspector(row);
         });
 
         const tdId = document.createElement('td');
@@ -294,12 +286,24 @@ var App = window.App || (window.App = {});
 
         const tdNode = document.createElement('td');
         tdNode.className = 'col-node';
-        const titleInput = document.createElement('input');
-        titleInput.type = 'text';
-        titleInput.value = row.nodeTitle;
-        titleInput.addEventListener('click', (e)=> e.stopPropagation());
-        titleInput.addEventListener('change', ()=> this._commitTitle(row, titleInput.value));
-        tdNode.appendChild(titleInput);
+        const nodeCell = document.createElement('div');
+        nodeCell.className = 'nodePropsNodeCell';
+        const titleText = document.createElement('div');
+        titleText.className = 'nodePropsTitle';
+        titleText.textContent = row.nodeTitle;
+        nodeCell.appendChild(titleText);
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'nodePropsInspectBtn';
+        editBtn.textContent = 'Open Inspector';
+        editBtn.title = 'Edit this node in Inspector';
+        editBtn.addEventListener('click', (e)=>{
+          e.preventDefault();
+          e.stopPropagation();
+          this._openInspector(row);
+        });
+        nodeCell.appendChild(editBtn);
+        tdNode.appendChild(nodeCell);
         tr.appendChild(tdNode);
 
         const tdType = document.createElement('td');
@@ -314,15 +318,35 @@ var App = window.App || (window.App = {});
 
         const tdProps = document.createElement('td');
         tdProps.className = 'col-props';
-        const propsArea = document.createElement('textarea');
-        propsArea.value = row.propsText;
-        propsArea.addEventListener('click', (e)=> e.stopPropagation());
-        propsArea.addEventListener('change', ()=> this._commitPropertiesJson(row, propsArea.value, propsArea));
-        tdProps.appendChild(propsArea);
+        const propsSummary = document.createElement('div');
+        propsSummary.className = 'nodePropsPropSummary';
+        propsSummary.textContent = row.propsSummary;
+        propsSummary.title = row.propsText;
+        tdProps.appendChild(propsSummary);
         tr.appendChild(tdProps);
 
         this.bodyEl.appendChild(tr);
       });
+
+      if(!rows.length){
+        const tr = document.createElement('tr');
+        tr.className = 'nodePropsEmptyRow';
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.className = 'nodePropsEmpty';
+        const title = document.createElement('div');
+        title.className = 'nodePropsEmptyTitle';
+        title.textContent = query ? 'No nodes match this search.' : 'No nodes available.';
+        const hint = document.createElement('div');
+        hint.className = 'nodePropsEmptyHint';
+        hint.textContent = query
+          ? `Clear or change "${query}" to see matching nodes.`
+          : 'Load an example or add a node to start browsing here.';
+        td.appendChild(title);
+        td.appendChild(hint);
+        tr.appendChild(td);
+        this.bodyEl.appendChild(tr);
+      }
 
       if(this._scrollSelectedOnRefresh && this.selectedNodeId !== null){
         this._scrollSelectedOnRefresh = false;
@@ -332,7 +356,10 @@ var App = window.App || (window.App = {});
         }
       }
 
-      this.summaryEl.textContent = `${rows.length.toLocaleString()} node(s)`;
+      const summary = [`${rows.length.toLocaleString()} row${rows.length === 1 ? '' : 's'}`];
+      if(query) summary.push(`filter: ${query}`);
+      if(this.selectedNodeId !== null) summary.push(`selected #${this.selectedNodeId}`);
+      this.summaryEl.textContent = summary.join(' • ');
     }
   }
 

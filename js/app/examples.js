@@ -126,6 +126,9 @@ function applyExampleData(data){
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
   resetHistory();
   attachTimeline();
+  try{
+    if(typeof App.refreshSidebarChrome === 'function') App.refreshSidebarChrome();
+  }catch(_e){}
 }
 
 function loadExampleFromFile(path, key, fallbackData, token){
@@ -157,13 +160,22 @@ function initExamples(){
   if(sel){
     sel.addEventListener('change', e=>{
       const v = e.target.value; if(!v) return;
-      makeExample(v);
+      Promise.resolve(makeExample(v)).then(()=>{
+        try{
+          if(typeof App.refreshSidebarChrome === 'function') App.refreshSidebarChrome();
+        }catch(_e){}
+      });
     });
   }
 
   // Default example: sample_line1
   if(sel) sel.value = 'sample_line1';
   const loadPromise = makeExample('sample_line1');
+  Promise.resolve(loadPromise).then(()=>{
+    try{
+      if(typeof App.refreshSidebarChrome === 'function') App.refreshSidebarChrome();
+    }catch(_e){}
+  });
   if(shouldAutoStartFromUrl()){
     Promise.resolve(loadPromise).then(()=>{
       queueAutoStart();

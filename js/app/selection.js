@@ -276,17 +276,48 @@ function installTimelineNodeSelection(c){
     if(App.placement && App.placement.active) return;
     const chart = App.timelineChart;
     const props = App.nodePropsPanel;
+    const inspector = App.selectionInspector;
     const canTimeline = !!(chart && typeof chart.selectNodeFromGraph === 'function');
     const canProps = !!(props && typeof props.selectNodeFromGraph === 'function');
-    if(!canTimeline && !canProps) return;
+    const canInspectorNode = !!(inspector && typeof inspector.setNode === 'function');
+    const canInspectorGroup = !!(inspector && typeof inspector.setGroup === 'function');
+    if(!canTimeline && !canProps && !canInspectorNode && !canInspectorGroup) return;
     const p = getCanvasPos(e);
     const node = findNodeAtCanvasPos(c, p[0], p[1]);
-    if(!node) return;
-    if(canTimeline){
-      chart.selectNodeFromGraph(node, { ensureVisible: true, draw: true });
+    if(node){
+      if(c.selected_group){
+        c.selected_group = null;
+        try{ c.setDirty(true, true); }catch(_e){}
+      }
+      if(canTimeline){
+        chart.selectNodeFromGraph(node, { ensureVisible: true, draw: true });
+      }
+      if(canProps){
+        props.selectNodeFromGraph(node, { ensureVisible: true, syncTimeline: false });
+      }
+      if(canInspectorNode){
+        inspector.setNode(node);
+      }
+      return;
     }
-    if(canProps){
-      props.selectNodeFromGraph(node, { ensureVisible: true, syncTimeline: false });
+    const group = (typeof App.getGroupAtCanvasPos === 'function') ? App.getGroupAtCanvasPos(p[0], p[1]) : null;
+    if(group){
+      c.selected_group = group;
+      try{
+        if(typeof c.deselectAllNodes === 'function') c.deselectAllNodes();
+        c.setDirty(true, true);
+      }catch(_e){}
+      if(canInspectorGroup){
+        inspector.setGroup(group);
+      }
+      return;
+    }
+    if(c.selected_group){
+      c.selected_group = null;
+      try{ c.setDirty(true, true); }catch(_e){}
+    }
+    if(inspector && typeof inspector.clear === 'function' && inspector.target?.kind === 'group'){
+      inspector.clear(true);
     }
   }, opts);
 

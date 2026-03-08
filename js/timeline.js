@@ -554,10 +554,19 @@
 
     _updateSelectionLabel(){
       if(!this._selectionEl) return;
-      const w = (this.selectedWorkId === null) ? '-' : this.selectedWorkId;
-      const a = (this.selectedAgvId === null) ? '-' : this.selectedAgvId;
-      const n = (this.selectedNodeId === null) ? '-' : this.selectedNodeId;
-      this._selectionEl.textContent = `Work: ${w}  AGV: ${a}  Node: ${n}`;
+      if(this.selectedNodeId !== null){
+        this._selectionEl.textContent = `Focus: Node #${this.selectedNodeId}`;
+        return;
+      }
+      if(this.selectedWorkId !== null){
+        this._selectionEl.textContent = `Focus: Work ${this.selectedWorkId}`;
+        return;
+      }
+      if(this.selectedAgvId !== null){
+        this._selectionEl.textContent = `Focus: AGV ${this.selectedAgvId}`;
+        return;
+      }
+      this._selectionEl.textContent = 'Focus: none';
     }
 
     exportCsv(){

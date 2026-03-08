@@ -52,20 +52,20 @@ function applyGraphVisualTheme(){
   LiteGraph.NODE_SLOT_HEIGHT = 18;
   LiteGraph.NODE_TITLE_COLOR = '#111111';
   LiteGraph.NODE_SELECTED_TITLE_COLOR = '#111111';
-  LiteGraph.NODE_DEFAULT_COLOR = '#ece9ff';
+  LiteGraph.NODE_DEFAULT_COLOR = '#e8f2ff';
   LiteGraph.NODE_DEFAULT_BGCOLOR = '#ffffff';
-  LiteGraph.NODE_DEFAULT_BOXCOLOR = '#7057ff';
-  LiteGraph.NODE_BOX_OUTLINE_COLOR = '#d7d7df';
+  LiteGraph.NODE_DEFAULT_BOXCOLOR = '#0a84ff';
+  LiteGraph.NODE_BOX_OUTLINE_COLOR = '#d4dde9';
   LiteGraph.LINK_COLOR = '#b9bec8';
-  LiteGraph.EVENT_LINK_COLOR = '#7057ff';
+  LiteGraph.EVENT_LINK_COLOR = '#0a84ff';
 
   LGraphCanvas.link_type_colors = Object.assign({}, LGraphCanvas.link_type_colors || {}, {
     '-1': '#b9bec8',
     number: '#b9bec8',
     string: '#b9bec8',
-    boolean: '#7057ff',
-    event: '#7057ff',
-    action: '#7057ff'
+    boolean: '#0a84ff',
+    event: '#0a84ff',
+    action: '#0a84ff'
   });
 
   if(!LGraphCanvas.prototype.__factZoomContrastPatched){
@@ -121,6 +121,9 @@ function initGraph(){
   };
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
+  if(typeof window.installContextMenuPointerTracking === 'function'){
+    window.installContextMenuPointerTracking(App.canvas);
+  }
   if(typeof App.installCanvasRenderThrottle === 'function'){
     App.installCanvasRenderThrottle(App.canvas);
   }
@@ -137,12 +140,11 @@ function initGraph(){
   }
   // expose for other helpers that hook into canvas
   window.canvas = App.canvas;
-  if(typeof window.__attachTitleEditor === 'function') window.__attachTitleEditor(App.canvas);
   // Let the CSS workspace background show through; do not use LiteGraph's bitmap pattern.
   App.canvas.background_image = null;
   App.canvas.pattern = null;
-  App.canvas.clear_background_color = '#fcfcfd';
-  App.canvas.bgcolor = 'rgba(255,255,255,0.82)';
+  App.canvas.clear_background_color = '#f6f8fb';
+  App.canvas.bgcolor = 'rgba(248,250,253,0.9)';
   function resize(){
     const r = App.canvas.canvas.getBoundingClientRect(), d = window.devicePixelRatio||1;
     App.canvas.canvas.width = r.width*d; App.canvas.canvas.height = r.height*d;
