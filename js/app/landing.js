@@ -1,6 +1,7 @@
 // Landing page + loading progress controller
 
 (function(){
+  const LANDING_PREVIEW_SPEED = 8;
   const html = document.documentElement;
   const skipLanding = html.classList.contains('skip-landing');
   const body = document.body;
@@ -164,6 +165,20 @@
     }catch(_e){}
   }
 
+  function applyPreviewSpeed(){
+    try{
+      if(typeof window.setFastestMode === 'function') window.setFastestMode(false);
+      if(typeof window.setSpeed === 'function') window.setSpeed(LANDING_PREVIEW_SPEED);
+    }catch(_e){}
+  }
+
+  function restoreEditorSpeed(){
+    try{
+      if(typeof window.setFastestMode === 'function') window.setFastestMode(false);
+      if(typeof window.setSpeed === 'function') window.setSpeed(1);
+    }catch(_e){}
+  }
+
   function startPreview(){
     if(previewStarted || previewReady) return true;
     if(!canStartPreview()) return false;
@@ -181,6 +196,7 @@
         if(opening || body.classList.contains('landing-hidden')) return;
         fitPreviewViewport();
         try{
+          applyPreviewSpeed();
           window.startSimulation();
           markPreviewReady();
           if(!bootstrapReady){
@@ -222,6 +238,7 @@
     try{
       if(typeof window.stopSimulation === 'function') window.stopSimulation();
     }catch(_e){}
+    restoreEditorSpeed();
 
     const snapshot = clonePayload(previewSnapshot);
     if(snapshot && typeof App.applyGraphData === 'function'){

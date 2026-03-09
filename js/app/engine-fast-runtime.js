@@ -165,10 +165,25 @@ var App = window.App || (window.App = {});
       const meta = this.compiled.meta || {};
       const kernelNodeCount = Number(meta.kernelNodeCount) || 0;
       const fallbackNodeCount = Number(meta.fallbackNodeCount) || 0;
-      this.runtimeMode = (!this.options.forceCompiled
-        && kernelNodeCount <= 0
-        && fallbackNodeCount > 0
-        && typeof App.createLegacySimEngine === 'function')
+      const fallbackProfile = (this.compat && typeof this.compat.getFallbackProfile === 'function')
+        ? this.compat.getFallbackProfile()
+        : null;
+      this.fallbackProfile = fallbackProfile || {
+        totalCount: fallbackNodeCount,
+        executableCount: 0,
+        passiveCount: fallbackNodeCount,
+        executableNodeIds: [],
+        executableTypes: [],
+        allNodeIds: []
+      };
+      const executableFallbackCount = Number(this.fallbackProfile.executableCount) || 0;
+      const mustUseLegacyCompat = !this.options.forceCompiled
+        && typeof App.createLegacySimEngine === 'function'
+        && (
+          (kernelNodeCount <= 0 && fallbackNodeCount > 0)
+          || executableFallbackCount > 0
+        );
+      this.runtimeMode = mustUseLegacyCompat
         ? 'legacy-compat'
         : (fallbackNodeCount > 0 ? 'compiled-hybrid' : 'compiled');
       this.legacyEngine = (this.runtimeMode === 'legacy-compat')
@@ -195,6 +210,10 @@ var App = window.App || (window.App = {});
         boundaryHits: 0,
         runtimeMode: this.runtimeMode || 'compiled',
         fallbackNodeCount: this.compiled.meta && Array.isArray(this.compiled.meta.fallbackNodeIds) ? this.compiled.meta.fallbackNodeIds.length : 0,
+        executableFallbackCount: this.fallbackProfile ? (Number(this.fallbackProfile.executableCount) || 0) : 0,
+        executableFallbackTypes: this.fallbackProfile && Array.isArray(this.fallbackProfile.executableTypes)
+          ? this.fallbackProfile.executableTypes.slice()
+          : [],
         lastCompileMs: 0,
         lastUpdateWallMs: 0,
         maxQueueA: 0,

@@ -41,6 +41,34 @@ function _captureViewState(){
   return out;
 }
 
+function _hasGraphViewState(view){
+  if(!view || typeof view !== 'object') return false;
+  const graphView = view.graph;
+  if(!graphView || typeof graphView !== 'object') return false;
+  const scale = Number(graphView.scale);
+  const rawOffset = graphView.offset;
+  const ox = Array.isArray(rawOffset) ? Number(rawOffset[0]) : Number(graphView.offsetX);
+  const oy = Array.isArray(rawOffset) ? Number(rawOffset[1]) : Number(graphView.offsetY);
+  return isFinite(scale) && isFinite(ox) && isFinite(oy);
+}
+
+function _scheduleFitViewport(){
+  if(typeof window.fitToScreen !== 'function') return;
+  const apply = ()=>{
+    try{
+      if(!App.canvas || !App.graph) return;
+      window.fitToScreen({ silent:true });
+    }catch(_e){}
+  };
+  try{
+    window.requestAnimationFrame(()=>{
+      window.requestAnimationFrame(apply);
+    });
+  }catch(_e){
+    window.setTimeout(apply, 0);
+  }
+}
+
 function _applyViewState(view){
   if(!view || typeof view !== 'object') return false;
   let applied = false;
@@ -151,6 +179,7 @@ function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
   const viewState = data.__factSimView || null;
+  const hasSavedGraphView = _hasGraphViewState(viewState);
   const opts = options || {};
   if(typeof window.stopSimulation === 'function'){
     try{ window.stopSimulation(); }catch(_e){}
@@ -212,6 +241,11 @@ function _applyGraphData(data, options){
   }
   if(viewState){
     _applyViewState(viewState);
+  }else if(opts.fitViewport !== false){
+    _scheduleFitViewport();
+  }
+  if(viewState && !hasSavedGraphView && opts.fitViewport !== false){
+    _scheduleFitViewport();
   }
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
   try{

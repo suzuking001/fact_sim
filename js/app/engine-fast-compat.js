@@ -5,6 +5,20 @@ var App = window.App || (window.App = {});
 (function(){
   const EPSILON_MS = 0.001;
 
+  function normalizeType(type){
+    return String(type || '').trim().toLowerCase();
+  }
+
+  function isPassiveFallbackType(type){
+    const text = normalizeType(type);
+    return text === 'factory/carrierconfig'
+      || text === 'factory/carrierhome'
+      || text === 'factory/palletcarrierconfig'
+      || text === 'factory/palletcarrier'
+      || text === 'factory/note'
+      || text === 'factory/memo';
+  }
+
   function hasTimedState(node){
     if(!node) return false;
     const state = String(node._state || '').toUpperCase();
@@ -53,15 +67,42 @@ var App = window.App || (window.App = {});
 
   App.createFastCompatAdapter = function(graph, compiled){
     const nodeRefs = new Array(compiled && compiled.nodeCount || 0);
+    const fallbackInfos = [];
     if(graph && typeof graph.getNodeById === 'function' && compiled && compiled.nodeIds){
       for(let i = 0; i < compiled.nodeCount; i += 1){
         nodeRefs[i] = graph.getNodeById(compiled.nodeIds[i]) || null;
+        if(compiled.fallbackMask && compiled.fallbackMask[i]){
+          const node = nodeRefs[i] || null;
+          const type = normalizeType(node && node.type);
+          const executable = !!node
+            && !isPassiveFallbackType(type)
+            && (typeof node.onExecute === 'function' || typeof node.getEventUntil === 'function');
+          fallbackInfos.push({
+            nodeIndex: i,
+            nodeId: Number(compiled.nodeIds[i]),
+            type,
+            executable
+          });
+        }
       }
     }
+
+    const executableFallbackInfos = fallbackInfos.filter((info)=> info && info.executable);
+    const fallbackProfile = {
+      totalCount: fallbackInfos.length,
+      executableCount: executableFallbackInfos.length,
+      passiveCount: fallbackInfos.length - executableFallbackInfos.length,
+      executableNodeIds: executableFallbackInfos.map((info)=> info.nodeId),
+      executableTypes: Array.from(new Set(executableFallbackInfos.map((info)=> info.type).filter(Boolean))),
+      allNodeIds: fallbackInfos.map((info)=> info.nodeId)
+    };
 
     return {
       getNode(nodeIndex){
         return nodeRefs[nodeIndex] || null;
+      },
+      getFallbackProfile(){
+        return fallbackProfile;
       },
       captureInitial(nodeIndex){
         const node = nodeRefs[nodeIndex] || null;
