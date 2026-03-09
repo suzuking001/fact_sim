@@ -19,6 +19,16 @@ var App = window.App || (window.App = {});
     return (renderCase === 'render') ? 'render:on' : 'render:off';
   }
 
+  function getDefaultBenchmarkModes(){
+    if(window.App && typeof App.getSupportedSimModes === 'function'){
+      const modes = App.getSupportedSimModes()
+        .map((mode)=> App.normalizeSimMode(mode))
+        .filter((mode, index, arr)=> mode && arr.indexOf(mode) === index);
+      if(modes.length) return modes;
+    }
+    return ['dt', 'event'];
+  }
+
   function getDefaultRenderViewport(){
     const fallback = { width: 1280, height: 720 };
     const canvasEl = App.canvas && App.canvas.canvas;
@@ -96,11 +106,11 @@ var App = window.App || (window.App = {});
 
   function createBenchmarkConfig(options){
     const opts = options || {};
-    const wallMs = Math.max(100, Number(opts.wallMs) || 1200);
+    const wallMs = Math.max(100, Number(opts.wallMs) || 2000);
     const realStepMs = Math.max(1, Number(opts.realStepMs) || 16);
     const requestedModes = (Array.isArray(opts.modes) && opts.modes.length)
       ? opts.modes
-      : ['dt', 'event'];
+      : getDefaultBenchmarkModes();
     const requestedRenderCases = (Array.isArray(opts.renderCases) && opts.renderCases.length)
       ? opts.renderCases
       : ((opts.includeRender === false) ? ['headless'] : ['headless', 'render']);

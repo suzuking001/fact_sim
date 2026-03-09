@@ -104,7 +104,7 @@ export type DoeParamGridInput = {
   parameters: DoeParameterInput[];
   topK?: number;
   maxExperiments?: number;
-  mode?: "dt" | "event";
+  mode?: "dt" | "event" | "event-fast";
   fastest?: boolean;
   includeBenchmark?: boolean;
   benchmarkWallMs?: number;

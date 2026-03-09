@@ -230,7 +230,7 @@
     }
 
     const sel = document.getElementById('exampleSelect');
-    const exampleKey = String((sel && sel.value) || 'sample_line1').trim() || 'sample_line1';
+    const exampleKey = String((sel && sel.value) || 'sample_line2').trim() || 'sample_line2';
     if(typeof window.makeExample === 'function'){
       return Promise.resolve(window.makeExample(exampleKey)).then(()=> true);
     }

@@ -314,13 +314,13 @@ export function registerRuntimeMethodsGroup03(
       });
     };
 
-  (FactSimRuntimeClass.prototype as any).runSimulationFor = async function (this: any, wallMs: number, mode?: "dt" | "event", fastest?: boolean, includeBenchmark?: boolean, benchmarkWallMs?: number): Promise<RunSimulationForOutput> {
+  (FactSimRuntimeClass.prototype as any).runSimulationFor = async function (this: any, wallMs: number, mode?: "dt" | "event" | "event-fast", fastest?: boolean, includeBenchmark?: boolean, benchmarkWallMs?: number): Promise<RunSimulationForOutput> {
       const waitMs = Math.max(100, Math.min(10 * 60 * 1000, Math.floor(Number(wallMs) || 0)));
       if (!Number.isFinite(waitMs)) {
         throw new Error("wallMs must be a finite number");
       }
   
-      if (mode === "dt" || mode === "event") {
+      if (mode === "dt" || mode === "event" || mode === "event-fast") {
         await this.setSimulationMode(mode);
       }
   

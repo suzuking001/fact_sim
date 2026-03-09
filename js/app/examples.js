@@ -13,7 +13,8 @@ const EXAMPLE_FILES = {
   shuttle_line5: 'sample/shuttle_line5.json',
   carrier: 'sample/graph (3).json',
   pallet_station_demo: 'sample/pallet_station_demo.json',
-  sample_line1: 'sample/sample_line1.json'
+  sample_line1: 'sample/sample_line1.json',
+  sample_line2: 'sample/sample_line2.json'
 };
 
 function shouldAutoStartFromUrl(){
@@ -53,6 +54,16 @@ function resolveExampleKey(kind){
   const key = String(kind || '').trim();
   if(!key) return '';
   return EXAMPLE_ALIASES[key] || key;
+}
+
+function encodeRequestPath(path){
+  return String(path || '')
+    .split('/')
+    .map((segment, index)=>{
+      if(index === 0 && segment === '') return '';
+      return encodeURIComponent(segment);
+    })
+    .join('/');
 }
 
 function _nextGraphLoadToken(){
@@ -137,7 +148,7 @@ function applyExampleData(data){
 
 function loadExampleFromFile(path, key, fallbackData, token){
   if(!App.graph) return Promise.resolve(false);
-  const requestPath = encodeURI(path);
+  const requestPath = encodeRequestPath(path);
   return fetch(requestPath)
     .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
     .then(data=>{
@@ -172,9 +183,9 @@ function initExamples(){
     });
   }
 
-  // Default example: sample_line1
-  if(sel) sel.value = 'sample_line1';
-  const loadPromise = makeExample('sample_line1');
+  // Default example: sample_line2
+  if(sel) sel.value = 'sample_line2';
+  const loadPromise = makeExample('sample_line2');
   Promise.resolve(loadPromise).then(()=>{
     try{
       if(typeof App.refreshSidebarChrome === 'function') App.refreshSidebarChrome();

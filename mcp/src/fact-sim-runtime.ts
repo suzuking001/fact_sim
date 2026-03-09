@@ -38,6 +38,7 @@ function toErrorMessage(error: unknown): string {
 
 import type {
   BenchmarkOutput,
+  EngineTestOutput,
   SimulationStatus,
   SinkKpi,
   KpiSummary,
@@ -108,6 +109,7 @@ import type {
 
 export type {
   BenchmarkOutput,
+  EngineTestOutput,
   SimulationStatus,
   SinkKpi,
   KpiSummary,
@@ -232,6 +234,8 @@ export interface FactSimRuntime {
   startSimulation(): Promise<{ running: boolean; mode: string | null; simTimeMs: number | null }>;
   stopSimulation(): Promise<{ running: boolean; simTimeMs: number | null }>;
   runBenchmark(wallMs?: number): Promise<BenchmarkOutput>;
+  runEngineTests(options?: Record<string, unknown>): Promise<EngineTestOutput>;
+  getLatestEngineTestReport(): Promise<EngineTestOutput | null>;
   exportTimelineCsv(): Promise<{ lineCount: number; csv: string }>;
   buildShareUrl(): Promise<{ url: string; length: number }>;
   getSimulationStatus(): Promise<SimulationStatus>;
@@ -245,7 +249,7 @@ export interface FactSimRuntime {
   getRandomSeed(): Promise<GetRandomSeedOutput>;
   clearGraph(): Promise<ClearGraphOutput>;
   repairGraphLinks(): Promise<RepairGraphLinksOutput>;
-  runSimulationFor(wallMs: number, mode?: "dt" | "event", fastest?: boolean, includeBenchmark?: boolean, benchmarkWallMs?: number): Promise<RunSimulationForOutput>;
+  runSimulationFor(wallMs: number, mode?: "dt" | "event" | "event-fast", fastest?: boolean, includeBenchmark?: boolean, benchmarkWallMs?: number): Promise<RunSimulationForOutput>;
   getBottleneckReport(topN?: number, minSampleSec?: number): Promise<BottleneckReportOutput>;
   captureSnapshotPng(fileName?: string): Promise<SnapshotOutput>;
   exportGraphJson(pretty?: boolean): Promise<ExportGraphJsonOutput>;

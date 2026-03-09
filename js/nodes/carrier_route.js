@@ -369,12 +369,33 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(!isFinite(n) || n < 0 || n >= slots.length) return -1;
     return slots[Math.floor(n)];
   }
+  _sharedWorkInputSlot(){
+    const slots = this._workInputSlots();
+    if(!slots.length) return -1;
+    if(slots.length === 1) return slots[0];
+    const linked = this._linkedWorkInputSlots();
+    if(linked.length === 1) return linked[0];
+    return -1;
+  }
   _workOutSlotForLane(lane){
     const slots = this._workOutputSlots();
     if(!slots.length) return -1;
     const n = Number(lane);
-    if(!isFinite(n) || n < 0 || n >= slots.length) return -1;
-    return slots[Math.floor(n)];
+    if(isFinite(n) && n >= 0 && n < slots.length){
+      return slots[Math.floor(n)];
+    }
+    return this._sharedWorkOutputSlot();
+  }
+  _sharedWorkOutputSlot(){
+    const slots = this._workOutputSlots();
+    if(!slots.length) return -1;
+    if(slots.length === 1) return slots[0];
+    const linked = slots.filter((slot)=>{
+      const p = this.outputs && this.outputs[slot];
+      return !!(p && p.links && p.links.length);
+    });
+    if(linked.length === 1) return linked[0];
+    return -1;
   }
   _palletInSlotForLane(lane){
     const slots = this._palletInputSlots();
@@ -410,10 +431,14 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(laneSlot >= 0){
       const p = this.inputs && this.inputs[laneSlot];
       if(p && p.link != null) return laneSlot;
+      const sharedSlot = this._sharedWorkInputSlot();
+      if(sharedSlot >= 0 && sharedSlot !== laneSlot) return sharedSlot;
       // Lane exists but is unconnected: treat as "no input" for this lane.
       // Caller can decide to pass-through/unload instead of waiting.
       return laneSlot;
     }
+    const sharedSlot = this._sharedWorkInputSlot();
+    if(sharedSlot >= 0) return sharedSlot;
     // Compatibility fallback is only safe for single-lane carrier routes.
     // In multi-lane routes this would break lane-to-work pairing and can deadlock.
     if(this._carrierLaneCount() <= 1){
@@ -423,9 +448,16 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     return -1;
   }
   _hasWorkOutLinkForLane(lane){
-    const slot = this._workOutSlotForLane(lane);
+    let slot = this._workOutSlotForLane(lane);
+    let p = slot >= 0 ? this.outputs[slot] : null;
+    if(!(p && p.links && p.links.length)){
+      const sharedSlot = this._sharedWorkOutputSlot();
+      if(sharedSlot >= 0){
+        slot = sharedSlot;
+        p = this.outputs[slot];
+      }
+    }
     if(slot < 0) return false;
-    const p = this.outputs[slot];
     return !!(p && p.links && p.links.length);
   }
   _hasPalletInLinkForLane(lane){
@@ -1302,7 +1334,15 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   }
 
   _emitWorkOffer(){
-    const outSlot = this._workOutSlotForLane(this._currentCarrierLane);
+    let outSlot = this._workOutSlotForLane(this._currentCarrierLane);
+    let out = outSlot >= 0 ? this.outputs[outSlot] : null;
+    if(!(out && out.links && out.links.length)){
+      const sharedSlot = this._sharedWorkOutputSlot();
+      if(sharedSlot >= 0){
+        outSlot = sharedSlot;
+        out = this.outputs[outSlot];
+      }
+    }
     if(outSlot < 0) return;
     this._clearWorkOutputs();
     try{ this.setOutputData(outSlot, this._workOffer); }catch(_e){}
@@ -1432,14 +1472,22 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   }
 
   _downstreamWorkReady(){
-    const outSlot = this._workOutSlotForLane(this._currentCarrierLane);
-    const out = this.outputs[outSlot];
+    let outSlot = this._workOutSlotForLane(this._currentCarrierLane);
+    let out = this.outputs[outSlot];
+    if(!(out && out.links && out.links.length)){
+      const sharedSlot = this._sharedWorkOutputSlot();
+      if(sharedSlot >= 0){
+        outSlot = sharedSlot;
+        out = this.outputs[outSlot];
+      }
+    }
     if(!out || !out.links || out.links.length === 0) return false;
+    const pendingWork = this._workOffer || (Array.isArray(this._pendingUnload) ? this._pendingUnload[0] : null) || null;
     for(const id of out.links){
       const link = this.graph.links[id]; if(!link) continue;
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(typeof t.canAcceptWorkInput === 'function'){
-        if(!t.canAcceptWorkInput(link.target_slot, this._workOffer)) return false;
+        if(!t.canAcceptWorkInput(link.target_slot, pendingWork)) return false;
         continue;
       }
       if(typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
@@ -1465,8 +1513,15 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   _workAccepted(){
     if(!this._workOffer) return false;
-    const outSlot = this._workOutSlotForLane(this._currentCarrierLane);
-    const out = this.outputs[outSlot];
+    let outSlot = this._workOutSlotForLane(this._currentCarrierLane);
+    let out = this.outputs[outSlot];
+    if(!(out && out.links && out.links.length)){
+      const sharedSlot = this._sharedWorkOutputSlot();
+      if(sharedSlot >= 0){
+        outSlot = sharedSlot;
+        out = this.outputs[outSlot];
+      }
+    }
     if(!out || !out.links) return false;
     for(const id of out.links){
       const link = this.graph.links[id]; if(!link) continue;

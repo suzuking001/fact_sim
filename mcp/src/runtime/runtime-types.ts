@@ -14,6 +14,73 @@ export type BenchmarkOutput = {
   }>;
 };
 
+export type EngineTestIssue = {
+  severity: "error" | "warn";
+  code: string;
+  message: string;
+  engine?: string;
+  scenario?: string;
+  path?: string;
+  nodeId?: string | number | null;
+};
+
+export type EngineTestCaseResult = {
+  engine: string;
+  scenario: string;
+  sourceKind: string;
+  ok: boolean;
+  status: "PASS" | "WARN" | "FAIL";
+  failures: EngineTestIssue[];
+  warnings: EngineTestIssue[];
+  metrics: {
+    simTimeMs: number;
+    wallMs: number;
+    loops: number;
+    nodeCount: number;
+    linkCount: number;
+    sinkCount: number;
+    totalCompleted: number;
+  };
+  sinks: Array<{
+    id: string | number | null;
+    title: string;
+    completedCount: number;
+    throughputPerHour: number;
+  }>;
+};
+
+export type EngineTestOutput = {
+  kind: string;
+  version: number;
+  ok: boolean;
+  status: "PASS" | "WARN" | "FAIL";
+  startedAt: string;
+  finishedAt: string | null;
+  options: Record<string, unknown>;
+  engines: string[];
+  failures: EngineTestIssue[];
+  warnings: EngineTestIssue[];
+  results: EngineTestCaseResult[];
+  comparisons: Array<{
+    scenario: string;
+    baselineEngine: string;
+    candidateEngine: string;
+    completedDelta: number;
+  }>;
+  summary: {
+    passed: number;
+    warned: number;
+    failed: number;
+    caseCount: number;
+    failureCount: number;
+    warningCount: number;
+  } | null;
+  mcpHint?: {
+    tool: string;
+    action: string;
+  };
+};
+
 export type SimulationStatus = {
   running: boolean;
   mode: string | null;

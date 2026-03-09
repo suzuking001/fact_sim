@@ -581,9 +581,9 @@ if(btnBenchmark){
 
       let bench;
       const benchOptions = {
-        wallMs: 5000,
+        wallMs: 2000,
         realStepMs: 16,
-        modes: ['dt', 'event'],
+        modes: (typeof App.getSupportedSimModes === 'function') ? App.getSupportedSimModes() : ['dt', 'event', 'event-fast'],
         renderCases: ['headless', 'render']
       };
       if(typeof App.runEngineBenchmarkAsync === 'function'){
@@ -1391,7 +1391,7 @@ window.beginGroupPlacement = beginGroupPlacement;
   if(!sidebar) return;
   const defaultCollapseState = {
     controls: false,
-    backgroundPanel: true,
+    backgroundPanel: false,
     addNodePanel: true,
     addGroupPanel: true,
     advancedPanel: true,
@@ -1400,7 +1400,7 @@ window.beginGroupPlacement = beginGroupPlacement;
   };
   const collapsibleIds = ['controls', 'backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
   const accordionIds = ['backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
-  const collapseKey = 'fact_sim_sidebar_panels_v4';
+  const collapseKey = 'fact_sim_sidebar_panels_v6';
 
   function readCollapseState(){
     try{
@@ -1417,6 +1417,25 @@ window.beginGroupPlacement = beginGroupPlacement;
   }
 
   const collapseState = readCollapseState();
+
+  function revealSidebarPanel(panel){
+    if(!panel || !sidebar || typeof panel.getBoundingClientRect !== 'function') return;
+    window.requestAnimationFrame(()=>{
+      try{
+        const panelRect = panel.getBoundingClientRect();
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const topGap = panelRect.top - sidebarRect.top;
+        const bottomGap = panelRect.bottom - sidebarRect.bottom;
+        if(topGap < 12){
+          sidebar.scrollTop += topGap - 12;
+          return;
+        }
+        if(bottomGap > -12){
+          sidebar.scrollTop += bottomGap + 12;
+        }
+      }catch(_e){}
+    });
+  }
 
   function ensureHeaderChrome(header){
     if(!header || header.__headerChromeReady) return header;
@@ -1467,6 +1486,7 @@ window.beginGroupPlacement = beginGroupPlacement;
       if(!target) return;
       setPanelCollapsed(target, id !== panelId);
     });
+    revealSidebarPanel(document.getElementById(panelId));
   }
 
   collapsibleIds.forEach((id)=>{
@@ -1479,7 +1499,10 @@ window.beginGroupPlacement = beginGroupPlacement;
     const toggle = ()=>{
       if(panel.classList.contains('is-collapsed')){
         if(accordionIds.includes(panel.id)) expandPanelExclusive(panel.id);
-        else setPanelCollapsed(panel, false);
+        else{
+          setPanelCollapsed(panel, false);
+          revealSidebarPanel(panel);
+        }
         return;
       }
       setPanelCollapsed(panel, true);
@@ -1501,6 +1524,7 @@ window.beginGroupPlacement = beginGroupPlacement;
       return true;
     }
     setPanelCollapsed(panel, collapsed);
+    if(!collapsed) revealSidebarPanel(panel);
     return true;
   };
 
@@ -1508,7 +1532,10 @@ window.beginGroupPlacement = beginGroupPlacement;
     const panel = document.getElementById(panelId);
     if(!panel) return false;
     if(accordionIds.includes(panelId)) expandPanelExclusive(panelId);
-    else setPanelCollapsed(panel, false);
+    else{
+      setPanelCollapsed(panel, false);
+      revealSidebarPanel(panel);
+    }
     return true;
   };
 

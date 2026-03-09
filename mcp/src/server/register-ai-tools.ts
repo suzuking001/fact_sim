@@ -68,6 +68,44 @@ function summarizeBenchmark(result: Awaited<ReturnType<FactSimRuntime["runBenchm
   };
 }
 
+function summarizeEngineTest(result: Awaited<ReturnType<FactSimRuntime["runEngineTests"]>> | Awaited<ReturnType<FactSimRuntime["getLatestEngineTestReport"]>>) {
+  if (!result) {
+    return { report: null };
+  }
+  return {
+    ok: result.ok,
+    status: result.status,
+    startedAt: result.startedAt,
+    finishedAt: result.finishedAt,
+    engines: result.engines,
+    summary: result.summary,
+    comparisons: result.comparisons,
+    results: result.results.map((row) => ({
+      engine: row.engine,
+      scenario: row.scenario,
+      sourceKind: row.sourceKind,
+      status: row.status,
+      simTimeMs: Number(row.metrics.simTimeMs.toFixed(3)),
+      wallMs: Number(row.metrics.wallMs.toFixed(3)),
+      loops: row.metrics.loops,
+      totalCompleted: row.metrics.totalCompleted,
+      sinkCount: row.metrics.sinkCount,
+      failureCount: row.failures.length,
+      warningCount: row.warnings.length
+    })),
+    issues: [...result.failures, ...result.warnings].map((entry) => ({
+      severity: entry.severity,
+      code: entry.code,
+      engine: entry.engine ?? null,
+      scenario: entry.scenario ?? null,
+      path: entry.path ?? null,
+      nodeId: typeof entry.nodeId === "undefined" ? null : entry.nodeId,
+      message: entry.message
+    })),
+    mcpHint: result.mcpHint ?? null
+  };
+}
+
 function summarizePorts(result: Awaited<ReturnType<FactSimRuntime["getNodePorts"]>>) {
   return {
     nodeId: result.nodeId,
@@ -141,7 +179,7 @@ async function collectRunReport(
   options: {
     example?: string;
     wallMs?: number;
-    mode?: "dt" | "event";
+    mode?: "dt" | "event" | "event-fast";
     speed?: number;
     fastest?: boolean;
     seed?: number;
@@ -398,7 +436,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
       description: "One-shot session setup for example, mode, speed, fastest, seed, and optional reset.",
       inputSchema: {
         example: z.string().min(1).optional(),
-        mode: z.enum(["dt", "event"]).optional(),
+        mode: z.enum(["dt", "event", "event-fast"]).optional(),
         speed: z.number().positive().optional(),
         fastest: z.boolean().optional(),
         seed: z.number().int().optional(),
@@ -495,7 +533,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           "set_seed",
           "get_seed"
         ]),
-        mode: z.enum(["dt", "event"]).optional(),
+        mode: z.enum(["dt", "event", "event-fast"]).optional(),
         wallMs: z.number().int().positive().optional(),
         speed: z.number().positive().optional(),
         fastest: z.boolean().optional(),
@@ -576,7 +614,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
       inputSchema: {
         example: z.string().min(1).optional(),
         wallMs: z.number().int().positive().optional(),
-        mode: z.enum(["dt", "event"]).optional(),
+        mode: z.enum(["dt", "event", "event-fast"]).optional(),
         speed: z.number().positive().optional(),
         fastest: z.boolean().optional(),
         seed: z.number().int().optional(),
@@ -629,7 +667,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         xPitch: z.number().positive().optional(),
         yPitch: z.number().positive().optional(),
         wallMs: z.number().int().positive().optional(),
-        mode: z.enum(["dt", "event"]).optional(),
+        mode: z.enum(["dt", "event", "event-fast"]).optional(),
         speed: z.number().positive().optional(),
         fastest: z.boolean().optional(),
         seed: z.number().int().optional(),
@@ -956,6 +994,46 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
   );
 
   server.registerTool(
+    "engine_test",
+    {
+      description: "Run engine correctness tests or return the latest engine test report.",
+      inputSchema: {
+        action: z.enum(["run", "latest"]),
+        engines: z.array(z.string().min(1)).optional(),
+        includeCurrentGraph: z.boolean().optional(),
+        includeExamples: z.boolean().optional(),
+        examples: z.array(z.string().min(1)).optional(),
+        targetSimMs: z.number().int().positive().optional(),
+        maxWallMs: z.number().int().positive().optional(),
+        realStepMs: z.number().int().positive().optional(),
+        maxLoops: z.number().int().positive().optional(),
+        seed: z.number().int().optional()
+      }
+    },
+    async ({ action, engines, includeCurrentGraph, includeExamples, examples, targetSimMs, maxWallMs, realStepMs, maxLoops, seed }, extra) => {
+      const requestId = String(extra.requestId);
+      return invokeTool(requestId, "engine_test", { action }, async () => {
+        if (action === "latest") {
+          return summarizeEngineTest(await runtime.getLatestEngineTestReport());
+        }
+        return summarizeEngineTest(
+          await runtime.runEngineTests({
+            engines,
+            includeCurrentGraph,
+            includeExamples,
+            examples,
+            targetSimMs,
+            maxWallMs,
+            realStepMs,
+            maxLoops,
+            seed
+          })
+        );
+      });
+    }
+  );
+
+  server.registerTool(
     "optimize",
     {
       description: "Run topology suggestions, scoring, DOE, layout validation, or bottleneck optimization.",
@@ -1091,7 +1169,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
       description: "Legacy alias of simulate(run_for).",
       inputSchema: {
         wallMs: z.number().int().positive(),
-        mode: z.enum(["dt", "event"]).optional(),
+        mode: z.enum(["dt", "event", "event-fast"]).optional(),
         fastest: z.boolean().optional(),
         includeBenchmark: z.boolean().optional(),
         benchmarkWallMs: z.number().int().positive().optional()

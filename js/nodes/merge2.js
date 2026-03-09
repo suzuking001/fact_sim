@@ -50,6 +50,9 @@ class MergeNode extends EquipmentNode{
     const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
     if(typeof this.properties.processTime2 === 'undefined') this.properties.processTime2 = this.properties.processTime;
     this.properties.processTime2 = clamp(this.properties.processTime2);
+    if(typeof this.properties.strictIdMatch === 'undefined') this.properties.strictIdMatch = false;
+    this._mergeMismatchCount = 0;
+    this._lastMergeMismatch = null;
 
     // Ensure flip menu wrapper is reapplied
     if(this.constructor && this.constructor.prototype.__flipMenuPatched) delete this.constructor.prototype.__flipMenuPatched;
@@ -135,6 +138,47 @@ class MergeNode extends EquipmentNode{
     }catch(_e){}
   }
 
+  _handleIdMismatch(expectedWork, actualWork){
+    const expectedId = expectedWork ? expectedWork.id : '-';
+    const actualId = actualWork ? actualWork.id : '-';
+    this._mergeMismatchCount = (Number(this._mergeMismatchCount) || 0) + 1;
+    this._lastMergeMismatch = {
+      atMs: simNow(),
+      expectedId,
+      actualId,
+      count: this._mergeMismatchCount
+    };
+
+    if(this.properties && this.properties.strictIdMatch){
+      try{
+        alert(`Merge ID mismatch: expected=${expectedId} actual=${actualId}`);
+      }catch(_e){}
+      this._state = 'ERROR';
+      try{
+        if(typeof window.stopSimulation === 'function') window.stopSimulation();
+        else if(this.graph && typeof this.graph.stop === 'function') this.graph.stop();
+      }catch(_e){}
+      return false;
+    }
+
+    console.warn(`[merge] ID mismatch on node #${this.id}: expected=${expectedId} actual=${actualId}. Resetting merge cycle.`);
+    const activeSlots = Array.isArray(this._activeSlots) ? this._activeSlots.slice() : [];
+    for(const activeSlot of activeSlots){
+      try{
+        this._lastInRefBySlot[activeSlot] = this.getInputData(activeSlot) || null;
+      }catch(_e){
+        this._lastInRefBySlot[activeSlot] = null;
+      }
+    }
+    this._state = 'IDLE';
+    this._until = 0;
+    this.setOutputData(0, null);
+    this._setWaitIcon(false);
+    this._resetCycleData(false);
+    if(typeof this.setDirtyCanvas === 'function') this.setDirtyCanvas(true, true);
+    return false;
+  }
+
   _acceptFromExpectedSlot(now){
     const slot = this._expectedSlot();
     if(slot < 0) return false;
@@ -157,16 +201,7 @@ class MergeNode extends EquipmentNode{
       const firstSlot = this._activeSlots[0];
       const firstWork = this._worksBySlot[firstSlot];
       if(!firstWork || w.id !== firstWork.id){
-        try{
-          alert(`Merge ID mismatch: expected=${firstWork ? firstWork.id : '-'} actual=${w.id}`);
-        }catch(_e){}
-        this._state = 'ERROR';
-        // Stop the whole simulation loop (strict mode), not only graph status.
-        try{
-          if(typeof window.stopSimulation === 'function') window.stopSimulation();
-          else if(this.graph && typeof this.graph.stop === 'function') this.graph.stop();
-        }catch(_e){}
-        return false;
+        return this._handleIdMismatch(firstWork, w);
       }
     }
 
@@ -306,6 +341,9 @@ class MergeNode extends EquipmentNode{
       const clamp = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
       this.properties.processTime2 = clamp(this.properties.processTime2);
     }
+    if(n === 'strictIdMatch'){
+      this.properties.strictIdMatch = !!this.properties.strictIdMatch;
+    }
   }
 
   canAcceptWorkInput(slotIndex){
@@ -325,7 +363,8 @@ class MergeNode extends EquipmentNode{
       `Inputs: ${accepted}/${needed < 2 ? 2 : needed}`,
       `Remain(s): ${(rem/1000).toFixed(1)}`,
       `Proc1(s): ${this.properties.processTime}  ProcN(s): ${this.properties.processTime2}`,
-      `Down(s): ${this.properties.downTime}`
+      `Down(s): ${this.properties.downTime}`,
+      `Strict ID Match: ${!!this.properties.strictIdMatch}  Mismatch: ${this._mergeMismatchCount || 0}`
     ];
     drawStateBelow(ctx, this, lines, 8, 6);
   }

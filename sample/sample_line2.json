@@ -1,0 +1,7813 @@
+{
+  "last_node_id": 193,
+  "last_link_id": 285,
+  "nodes": [
+    {
+      "id": 5,
+      "type": "factory/carrierconfig",
+      "pos": [
+        4712.58203125,
+        2016.6162109375
+      ],
+      "size": [
+        142.8000030517578,
+        26
+      ],
+      "inputs": [],
+      "outputs": [],
+      "title": "Carrier Config #1",
+      "properties": {
+        "carrierId": "Carrier-1",
+        "capacity": 2
+      }
+    },
+    {
+      "id": 7,
+      "type": "factory/equip",
+      "pos": [
+        8092.45458984375,
+        1669.462158203125
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 26,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            46
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 16,
+      "type": "factory/carrierroute",
+      "pos": [
+        5374.58251953125,
+        2076.6162109375
+      ],
+      "size": [
+        186.39999389648438,
+        86
+      ],
+      "order": 31,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 30,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 22,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 25,
+          "pos": [
+            176.39999389648438,
+            74
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            23
+          ],
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            24
+          ],
+          "pos": [
+            10,
+            74
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": "",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 10,
+      "type": "factory/carrierroute",
+      "pos": [
+        5096.58203125,
+        1664.61572265625
+      ],
+      "size": [
+        186.39999389648438,
+        106
+      ],
+      "order": 27,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": null
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 34
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "workIn2",
+          "type": "work",
+          "link": 20
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 33
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            15
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut2",
+          "type": "work",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            19
+          ],
+          "slot_index": 3,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 1,
+        "downTime": 0.3,
+        "initialCarrier": "Carrier-1",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 4,
+      "type": "factory/carrierroute",
+      "pos": [
+        5071.58203125,
+        2077.6162109375
+      ],
+      "size": [
+        186.39999389648438,
+        86
+      ],
+      "order": 24,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 23,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 24,
+          "pos": [
+            176.39999389648438,
+            74
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            34
+          ],
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "__lastSet": null,
+          "__animToken": null,
+          "slot_index": 1
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            33
+          ],
+          "pos": [
+            10,
+            74
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Route R2",
+      "properties": {
+        "processTime": 1,
+        "downTime": 0.3,
+        "initialCarrier": "Carrier-2",
+        "outSequence": "",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 19,
+      "type": "factory/carrierconfig",
+      "pos": [
+        4714.58203125,
+        2130.6162109375
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 1,
+      "inputs": [],
+      "outputs": [],
+      "title": "Carrier Config",
+      "properties": {
+        "carrierId": "Carrier-2",
+        "capacity": 2
+      }
+    },
+    {
+      "id": 26,
+      "type": "factory/shuttle_stage",
+      "pos": [
+        8289.498046875,
+        1680.934814453125
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 36,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 46
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            47
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 5,
+        "groupId": "shuttle-1"
+      }
+    },
+    {
+      "id": 27,
+      "type": "factory/shuttle_stage",
+      "pos": [
+        8502.4482421875,
+        1689.507080078125
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 37,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 47
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            48
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 5,
+        "groupId": "shuttle-1"
+      }
+    },
+    {
+      "id": 28,
+      "type": "factory/shuttle_stage",
+      "pos": [
+        8708.447265625,
+        1683.707275390625
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 38,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 48
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            49
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 20,
+        "groupId": "shuttle-1"
+      }
+    },
+    {
+      "id": 29,
+      "type": "factory/shuttle_stage",
+      "pos": [
+        8888.4462890625,
+        1678.707275390625
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 39,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 49
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            50
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 5,
+        "groupId": "shuttle-1"
+      }
+    },
+    {
+      "id": 30,
+      "type": "factory/shuttle_stage",
+      "pos": [
+        9071.8671875,
+        1686.368408203125
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 40,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 50
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            51
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 5,
+        "groupId": "shuttle-1"
+      }
+    },
+    {
+      "id": 33,
+      "type": "factory/equip",
+      "pos": [
+        1061.408935546875,
+        59.1939697265625
+      ],
+      "size": [
+        181.71395874023438,
+        50
+      ],
+      "order": 42,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 53
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            57
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 34,
+      "type": "factory/equip",
+      "pos": [
+        820.0128173828125,
+        22.0244140625
+      ],
+      "size": [
+        210,
+        98
+      ],
+      "order": 43,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 54
+        },
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": 55
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": 56
+        },
+        {
+          "name": "sigIn2",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            53
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": null,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": null,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut2",
+          "type": "string",
+          "links": null,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "sigExtra": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 35,
+      "type": "factory/equip",
+      "pos": [
+        1349.408935546875,
+        55.1939697265625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 44,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 57
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            58
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 36,
+      "type": "factory/equip",
+      "pos": [
+        1660.408935546875,
+        55.1939697265625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 45,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 58
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            87
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 37,
+      "type": "factory/equip",
+      "pos": [
+        2332.408935546875,
+        415.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 46,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 59
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            60
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 38,
+      "type": "factory/equip",
+      "pos": [
+        2662.408935546875,
+        414.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 47,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 60
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            61
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 39,
+      "type": "factory/equip",
+      "pos": [
+        3045.408935546875,
+        408.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 48,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 61
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            81
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 42,
+      "type": "factory/equip",
+      "pos": [
+        407.408935546875,
+        737.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 49,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 166
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            63
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 43,
+      "type": "factory/equip",
+      "pos": [
+        722.408935546875,
+        734.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 50,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 63
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            64
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 44,
+      "type": "factory/equip",
+      "pos": [
+        1037.408935546875,
+        730.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 51,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 64
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            65
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 45,
+      "type": "factory/merge2",
+      "pos": [
+        1397.408935546875,
+        951.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 52,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 65
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 66
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            74
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 47,
+      "type": "factory/equip",
+      "pos": [
+        1021.408935546875,
+        1561.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 53,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 67
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            70
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": {
+            "id": 13,
+            "type": "A"
+          }
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 48,
+      "type": "factory/equip",
+      "pos": [
+        689.408935546875,
+        1558.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 54,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 68
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            67
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": {
+            "id": 13,
+            "type": "A"
+          }
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 49,
+      "type": "factory/equip",
+      "pos": [
+        388.408935546875,
+        1569.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 55,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 168
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            68
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 50,
+      "type": "factory/merge2",
+      "pos": [
+        1371.408935546875,
+        1768.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 56,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 70
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 71
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            75
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 51,
+      "type": "factory/equip",
+      "pos": [
+        1041.408935546875,
+        1112.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 57,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 167
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            66
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 52,
+      "type": "factory/equip",
+      "pos": [
+        1030.408935546875,
+        1949.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 58,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 169
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            71
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 54,
+      "type": "factory/equip",
+      "pos": [
+        1691.408935546875,
+        941.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 59,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 74
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            76
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 55,
+      "type": "factory/equip",
+      "pos": [
+        1686.408935546875,
+        1751.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 60,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 75
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            77
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 56,
+      "type": "factory/merge2",
+      "pos": [
+        2028.408935546875,
+        1305.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 61,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 76
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 77
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            79
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 57,
+      "type": "factory/equip",
+      "pos": [
+        2701.408935546875,
+        1302.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 62,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 78
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            80
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 58,
+      "type": "factory/equip",
+      "pos": [
+        2372.408935546875,
+        1304.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 63,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 79
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            78
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 59,
+      "type": "factory/equip",
+      "pos": [
+        3009.408935546875,
+        1305.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 64,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 80
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            82
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 60,
+      "type": "factory/merge2",
+      "pos": [
+        3509.408935546875,
+        882.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 65,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 81
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 82
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            85
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": {
+            "id": 11,
+            "type": "A"
+          }
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 62,
+      "type": "factory/equip",
+      "pos": [
+        4425.4091796875,
+        871.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 67,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 84
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            86
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 63,
+      "type": "factory/equip",
+      "pos": [
+        3837.408935546875,
+        878.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 68,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 85
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            83
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 65,
+      "type": "factory/merge2",
+      "pos": [
+        2017.408935546875,
+        250.1939697265625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 70,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 87
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 88
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            59
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 67,
+      "type": "factory/equip",
+      "pos": [
+        1620.408935546875,
+        451.19384765625
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 71,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 165
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            88
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 32,
+      "type": "factory/equip",
+      "pos": [
+        487.013427734375,
+        17.0244140625
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "order": 41,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 164
+        },
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            54
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": [
+            55
+          ],
+          "slot_index": 1,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": [
+            56
+          ],
+          "slot_index": 2,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 1,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\n\n\n// work: Work object (work.id, work.type など)\n// signalArr: sigIn の配列\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // デフォルト\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// true を返すとこのワークを受け入れて PROCESS に入る\nreturn true;\n",
+        "sigExtra": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 120,
+      "type": "factory/equip",
+      "pos": [
+        -558,
+        58
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 10,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 158
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            160
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 121,
+      "type": "factory/equip",
+      "pos": [
+        -614,
+        289
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 11,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 159
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            161
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 127,
+      "type": "factory/equip",
+      "pos": [
+        -576,
+        812
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 12,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 174
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            175
+          ],
+          "slot_index": 0,
+          "__lastSet": {
+            "id": 13,
+            "type": "A"
+          },
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 128,
+      "type": "factory/equip",
+      "pos": [
+        -527,
+        1186
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 13,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 176
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            177
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 129,
+      "type": "factory/equip",
+      "pos": [
+        -512,
+        1559
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 14,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 178
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            179
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 130,
+      "type": "factory/equip",
+      "pos": [
+        -508,
+        2016
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 15,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 180
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            181
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 122,
+      "type": "factory/carrierconfig",
+      "pos": [
+        -13,
+        252
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 2,
+      "inputs": [],
+      "outputs": [],
+      "title": "Carrier Config",
+      "properties": {
+        "carrierId": "Carrier-1",
+        "capacity": 1
+      }
+    },
+    {
+      "id": 125,
+      "type": "factory/carrierroute",
+      "pos": [
+        -238,
+        1549
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 76,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 179
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 170
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            168
+          ],
+          "__lastSet": null,
+          "__animToken": null,
+          "slot_index": 0
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            171
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 126,
+      "type": "factory/carrierroute",
+      "pos": [
+        -255,
+        1999
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 77,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 181
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 171
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            169
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            170
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "Carrier-3",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 132,
+      "type": "factory/carrierconfig",
+      "pos": [
+        -38,
+        1815
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 3,
+      "inputs": [],
+      "outputs": [],
+      "title": "Carrier Config",
+      "properties": {
+        "carrierId": "Carrier-3",
+        "capacity": 1
+      }
+    },
+    {
+      "id": 124,
+      "type": "factory/carrierroute",
+      "pos": [
+        -294,
+        796
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 75,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 175
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 182,
+          "slot_index": 1
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            166
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            172
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 110,
+      "type": "factory/carrierroute",
+      "pos": [
+        -204,
+        415
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 73,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 161
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 162
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            165
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            182
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "Carrier-1",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 107,
+      "type": "factory/carrierroute",
+      "pos": [
+        -211,
+        -10
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 72,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 160
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 183
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            164
+          ],
+          "__lastSet": null,
+          "__animToken": null,
+          "slot_index": 0
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            162
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 123,
+      "type": "factory/carrierroute",
+      "pos": [
+        -293,
+        1182.355224609375
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 74,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 177
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 172
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            167
+          ],
+          "__lastSet": null,
+          "__animToken": null,
+          "slot_index": 0
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            183
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 61,
+      "type": "factory/equip",
+      "pos": [
+        4127,
+        874
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 66,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 83
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            84
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 20,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 133,
+      "type": "factory/equip",
+      "pos": [
+        335.89794921875,
+        2495.19287109375
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "order": 78,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 184
+        },
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": null
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            186
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": [
+            187
+          ],
+          "slot_index": 1,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": [
+            188
+          ],
+          "slot_index": 2,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 4,
+        "downTime": 0.5,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\n\n\n// work: Work object (work.id, work.type など)\n// signalArr: sigIn の配列\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // デフォルト\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// true を返すとこのワークを受け入れて PROCESS に入る\nreturn true;\n",
+        "sigExtra": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 134,
+      "type": "factory/equip",
+      "pos": [
+        910.29345703125,
+        2537.3623046875
+      ],
+      "size": [
+        181.71395874023438,
+        50
+      ],
+      "order": 79,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 185
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            189
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 135,
+      "type": "factory/equip",
+      "pos": [
+        668.8973388671875,
+        2500.19287109375
+      ],
+      "size": [
+        210,
+        98
+      ],
+      "order": 80,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 186
+        },
+        {
+          "name": "sigIn0",
+          "type": "string",
+          "link": 187
+        },
+        {
+          "name": "sigIn1",
+          "type": "string",
+          "link": 188
+        },
+        {
+          "name": "sigIn2",
+          "type": "string",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            185
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut0",
+          "type": "string",
+          "links": null,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut1",
+          "type": "string",
+          "links": null,
+          "__animToken": null,
+          "__lastSet": null
+        },
+        {
+          "name": "sigOut2",
+          "type": "string",
+          "links": null,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "sigExtra": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 136,
+      "type": "factory/equip",
+      "pos": [
+        1198.29345703125,
+        2533.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 81,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 189
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            190
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 137,
+      "type": "factory/equip",
+      "pos": [
+        1509.29345703125,
+        2533.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 82,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 190
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            219
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 138,
+      "type": "factory/equip",
+      "pos": [
+        2181.29345703125,
+        2893.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 83,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 191
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            192
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 139,
+      "type": "factory/equip",
+      "pos": [
+        2511.29345703125,
+        2892.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 84,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 192
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            193
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 140,
+      "type": "factory/equip",
+      "pos": [
+        2894.29345703125,
+        2886.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 85,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 193
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            213
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 141,
+      "type": "factory/equip",
+      "pos": [
+        256.29345703125,
+        3215.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 86,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 194
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            195
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 142,
+      "type": "factory/equip",
+      "pos": [
+        571.29345703125,
+        3212.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 87,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 195
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            196
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 143,
+      "type": "factory/equip",
+      "pos": [
+        886.29345703125,
+        3208.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 88,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 196
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            197
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 144,
+      "type": "factory/merge2",
+      "pos": [
+        1246.29345703125,
+        3429.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 89,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 197
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 198
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            206
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 145,
+      "type": "factory/equip",
+      "pos": [
+        870.29345703125,
+        4039.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 90,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 199
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            202
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 146,
+      "type": "factory/equip",
+      "pos": [
+        538.29345703125,
+        4036.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 91,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 200
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            199
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 147,
+      "type": "factory/equip",
+      "pos": [
+        237.29345703125,
+        4047.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 92,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 201
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            200
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 148,
+      "type": "factory/merge2",
+      "pos": [
+        1220.29345703125,
+        4246.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 93,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 202
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 203
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            207
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 149,
+      "type": "factory/equip",
+      "pos": [
+        890.29345703125,
+        3590.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 94,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 204
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            198
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 150,
+      "type": "factory/equip",
+      "pos": [
+        879.29345703125,
+        4427.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 95,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 205
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            203
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 151,
+      "type": "factory/equip",
+      "pos": [
+        1540.29345703125,
+        3419.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 96,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 206
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            208
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 152,
+      "type": "factory/equip",
+      "pos": [
+        1535.29345703125,
+        4229.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 97,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 207
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            209
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 153,
+      "type": "factory/merge2",
+      "pos": [
+        1877.29345703125,
+        3783.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 98,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 208
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 209
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            211
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 154,
+      "type": "factory/equip",
+      "pos": [
+        2550.29345703125,
+        3780.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 99,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 210
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            212
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": {
+            "id": 16,
+            "type": "B"
+          }
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 155,
+      "type": "factory/equip",
+      "pos": [
+        2221.29345703125,
+        3782.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 100,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 211
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            210
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": {
+            "id": 16,
+            "type": "B"
+          }
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 156,
+      "type": "factory/equip",
+      "pos": [
+        2858.29345703125,
+        3783.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 101,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 212
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            214
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 157,
+      "type": "factory/merge2",
+      "pos": [
+        3358.29345703125,
+        3360.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 102,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 213
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 214
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            217
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 158,
+      "type": "factory/equip",
+      "pos": [
+        3975.884521484375,
+        3352.16845703125
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 103,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 215
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            216
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 20,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 159,
+      "type": "factory/equip",
+      "pos": [
+        4274.29345703125,
+        3349.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 104,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 216
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            218
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 160,
+      "type": "factory/equip",
+      "pos": [
+        3686.29345703125,
+        3356.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 105,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 217
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            215
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 162,
+      "type": "factory/merge2",
+      "pos": [
+        1866.29345703125,
+        2728.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 107,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 219
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 220
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            191
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "processTime2": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 166,
+      "type": "factory/carrierroute",
+      "pos": [
+        -355.115478515625,
+        2893.16845703125
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 110,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 225
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 226
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            221
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            233
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "Carrier-1",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 169,
+      "type": "factory/equip",
+      "pos": [
+        -709.115478515625,
+        2536.16845703125
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 16,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 228
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            223
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 170,
+      "type": "factory/equip",
+      "pos": [
+        -765.115478515625,
+        2767.16845703125
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 17,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 229
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            225
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 171,
+      "type": "factory/carrierconfig",
+      "pos": [
+        -164.115478515625,
+        2730.16845703125
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 4,
+      "inputs": [],
+      "outputs": [],
+      "title": "Carrier Config",
+      "properties": {
+        "carrierId": "Carrier-1",
+        "capacity": 1
+      }
+    },
+    {
+      "id": 172,
+      "type": "factory/carrierroute",
+      "pos": [
+        -444.115478515625,
+        3660.5234375
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 111,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 230
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 231
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            204
+          ],
+          "__lastSet": null,
+          "__animToken": null,
+          "slot_index": 0
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            224
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 173,
+      "type": "factory/carrierroute",
+      "pos": [
+        -445.115478515625,
+        3274.16845703125
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 112,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 232
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 233,
+          "slot_index": 1
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            194
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            231
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 174,
+      "type": "factory/carrierroute",
+      "pos": [
+        -389.115478515625,
+        4027.16845703125
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 113,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 234
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 235
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            201
+          ],
+          "__lastSet": null,
+          "__animToken": null,
+          "slot_index": 0
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            237
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 175,
+      "type": "factory/carrierroute",
+      "pos": [
+        -406.115478515625,
+        4477.16845703125
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 114,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 236
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 237
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            205
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            235
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "Carrier-3",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 176,
+      "type": "factory/equip",
+      "pos": [
+        -727.115478515625,
+        3290.16845703125
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 18,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 238
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            232
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 177,
+      "type": "factory/equip",
+      "pos": [
+        -678.115478515625,
+        3664.16845703125
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 19,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 239
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            230
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 178,
+      "type": "factory/equip",
+      "pos": [
+        -663.115478515625,
+        4037.16845703125
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 20,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 240
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            234
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 179,
+      "type": "factory/equip",
+      "pos": [
+        -659.115478515625,
+        4494.16845703125
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 21,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 241
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            236
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 180,
+      "type": "factory/carrierconfig",
+      "pos": [
+        -189.115478515625,
+        4293.16845703125
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 5,
+      "inputs": [],
+      "outputs": [],
+      "title": "Carrier Config",
+      "properties": {
+        "carrierId": "Carrier-3",
+        "capacity": 1
+      }
+    },
+    {
+      "id": 163,
+      "type": "factory/equip",
+      "pos": [
+        1469,
+        2929
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 108,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 221
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            220
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 165,
+      "type": "factory/carrierroute",
+      "pos": [
+        -362,
+        2468
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 109,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": 223
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 224
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            184
+          ],
+          "__lastSet": null,
+          "__animToken": null,
+          "slot_index": 0
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            226
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 168,
+      "type": "factory/split",
+      "pos": [
+        -1470,
+        2558
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 9,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 244
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": 0,
+          "links": [
+            228
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut2",
+          "type": 0,
+          "links": [
+            229
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut3",
+          "type": 0,
+          "links": [
+            238
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut4",
+          "type": 0,
+          "links": [
+            239
+          ],
+          "slot_index": 3,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut5",
+          "type": 0,
+          "links": [
+            240
+          ],
+          "slot_index": 4,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut6",
+          "type": 0,
+          "links": [
+            241
+          ],
+          "slot_index": 5,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "ratio": 0.5,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 117,
+      "type": "factory/split",
+      "pos": [
+        -1456.59033203125,
+        1830.96435546875
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 8,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 243
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": 0,
+          "links": [
+            158
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut2",
+          "type": 0,
+          "links": [
+            159
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut3",
+          "type": 0,
+          "links": [
+            174
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut4",
+          "type": 0,
+          "links": [
+            176
+          ],
+          "slot_index": 3,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut5",
+          "type": 0,
+          "links": [
+            178
+          ],
+          "slot_index": 4,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut6",
+          "type": 0,
+          "links": [
+            180
+          ],
+          "slot_index": 5,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "ratio": 0.5,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 116,
+      "type": "factory/source",
+      "pos": [
+        -2010.498779296875,
+        2193.717529296875
+      ],
+      "size": [
+        140,
+        26
+      ],
+      "order": 6,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            245
+          ],
+          "__animToken": null,
+          "__lastSet": null,
+          "slot_index": 0
+        }
+      ],
+      "title": "Source",
+      "properties": {
+        "sequence": "A,B"
+      }
+    },
+    {
+      "id": 181,
+      "type": "factory/branch",
+      "pos": [
+        -1741,
+        2182
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 7,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 245
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut A",
+          "type": 0,
+          "links": [
+            243
+          ],
+          "__branchWorkOut": true,
+          "routeType": "A",
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut B",
+          "type": 0,
+          "links": [
+            244
+          ],
+          "__branchWorkOut": true,
+          "routeType": "B",
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 3,
+      "type": "factory/sink",
+      "pos": [
+        9280.8623046875,
+        1679.890869140625
+      ],
+      "size": [
+        220,
+        170
+      ],
+      "order": 23,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 51
+        }
+      ],
+      "outputs": [],
+      "title": "Sink"
+    },
+    {
+      "id": 161,
+      "type": "factory/equip",
+      "pos": [
+        4624.29345703125,
+        3353.3623046875
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 106,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 218
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            249
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 6,
+      "type": "factory/equip",
+      "pos": [
+        4835,
+        1603
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 25,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 44
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            20
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 64,
+      "type": "factory/equip",
+      "pos": [
+        4687,
+        870
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "order": 69,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 86
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            248
+          ],
+          "slot_index": 0,
+          "__animToken": null,
+          "__lastSet": null
+        }
+      ],
+      "properties": {
+        "processTime": 2,
+        "downTime": 3,
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 24,
+      "type": "factory/equip",
+      "pos": [
+        4832,
+        1230
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 35,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 248,
+          "pos": [
+            130,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            43
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "flipIO": true,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 23,
+      "type": "factory/equip",
+      "pos": [
+        4833,
+        1409
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 34,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 43
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            44
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 17,
+      "type": "factory/join",
+      "pos": [
+        7898,
+        1667
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 32,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": 0,
+          "link": 27
+        },
+        {
+          "name": "workIn2",
+          "type": 0,
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            29
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "properties": {
+        "processTime": 5,
+        "downTime": 6,
+        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\n// Join passes works in arrival order by default.\nreturn true;",
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 13,
+      "type": "factory/carrierroute",
+      "pos": [
+        5358.58251953125,
+        1670.61572265625
+      ],
+      "size": [
+        186.39999389648438,
+        86
+      ],
+      "order": 29,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": null
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 15
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            250
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            253
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 1,
+        "downTime": 0.3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 182,
+      "type": "factory/carrierroute",
+      "pos": [
+        5686,
+        1673
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 115,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 250
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 253
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            251
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            252
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 184,
+      "type": "factory/carrierroute",
+      "pos": [
+        6306,
+        1683
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 117,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 254
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 255
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            256
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            257
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 185,
+      "type": "factory/carrierroute",
+      "pos": [
+        6619,
+        1691
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 118,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 256
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 257
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            258
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            259
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 186,
+      "type": "factory/carrierroute",
+      "pos": [
+        6919,
+        1693
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 119,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 258
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 259
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            264
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            265
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 2,
+      "type": "factory/carrierroute",
+      "pos": [
+        7557,
+        1662
+      ],
+      "size": [
+        186.39999389648438,
+        106
+      ],
+      "order": 22,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": null
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 266
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "workIn2",
+          "type": "work",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 267
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": [
+            27
+          ],
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            282
+          ],
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "workOut2",
+          "type": "work",
+          "links": [
+            28
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            283
+          ],
+          "slot_index": 3,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Route R1",
+      "properties": {
+        "processTime": 1,
+        "downTime": 0.3,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 187,
+      "type": "factory/carrierroute",
+      "pos": [
+        7226,
+        1698
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 120,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 264
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 265
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            266
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            267
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 183,
+      "type": "factory/carrierroute",
+      "pos": [
+        6006,
+        1674
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 116,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 251
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 252
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            254
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            255
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": ""
+      }
+    },
+    {
+      "id": 191,
+      "type": "factory/carrierroute",
+      "pos": [
+        6933.74365234375,
+        2096.023681640625
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 124,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 270,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 271,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            272
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            273
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": "",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 190,
+      "type": "factory/carrierroute",
+      "pos": [
+        6634,
+        2093.535888671875
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 123,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 272,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 273,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            274
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            275
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "Carrier-1",
+        "outSequence": "",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 192,
+      "type": "factory/carrierroute",
+      "pos": [
+        7241,
+        2101
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 125,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 284,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 285,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            270
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            271
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": "",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 14,
+      "type": "factory/equip",
+      "pos": [
+        5422.87548828125,
+        2437.831787109375
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 30,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 37,
+          "slot_index": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            30
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 21,
+      "type": "factory/equip",
+      "pos": [
+        5422,
+        2603
+      ],
+      "size": [
+        140,
+        50
+      ],
+      "order": 33,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 249,
+          "slot_index": 0,
+          "pos": [
+            130,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            37
+          ],
+          "__lastSet": {
+            "id": 14,
+            "type": "B"
+          },
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 4,
+        "downTime": 2,
+        "flipIO": true,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 193,
+      "type": "factory/carrierroute",
+      "pos": [
+        7506,
+        2098
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 126,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 282,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 283,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            284
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            285
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": "",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 11,
+      "type": "factory/carrierroute",
+      "pos": [
+        5686,
+        2074
+      ],
+      "size": [
+        186.39999389648438,
+        86
+      ],
+      "order": 28,
+      "inputs": [
+        {
+          "name": "workIn1",
+          "type": "work",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 280,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 281,
+          "pos": [
+            176.39999389648438,
+            74
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut1",
+          "type": "work",
+          "links": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            22
+          ],
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "slot_index": 1,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "__lastSet": null,
+          "__animToken": null
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            25
+          ],
+          "pos": [
+            10,
+            74
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true,
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 1,
+        "downTime": 0.3,
+        "initialCarrier": "Carrier-1",
+        "outSequence": "1,2",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 188,
+      "type": "factory/carrierroute",
+      "pos": [
+        6021,
+        2077
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 121,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 278,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 279,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            280
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            281
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "",
+        "outSequence": "",
+        "flipIO": true
+      }
+    },
+    {
+      "id": 189,
+      "type": "factory/carrierroute",
+      "pos": [
+        6321,
+        2086
+      ],
+      "size": [
+        186.39999389648438,
+        66
+      ],
+      "order": 122,
+      "inputs": [
+        {
+          "name": "carrierIn1",
+          "type": "AGV",
+          "link": 274,
+          "pos": [
+            176.39999389648438,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "palletIn1",
+          "type": "PALLET",
+          "link": null,
+          "pos": [
+            176.39999389648438,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierIn2",
+          "type": "AGV",
+          "link": 275,
+          "pos": [
+            176.39999389648438,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 4,
+          "__flipActive": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "carrierOut1",
+          "type": "AGV",
+          "links": [
+            278
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            14
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "palletOut1",
+          "type": "PALLET",
+          "links": null,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            34
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        },
+        {
+          "name": "carrierOut2",
+          "type": "AGV",
+          "links": [
+            279
+          ],
+          "slot_index": 2,
+          "__lastSet": null,
+          "__animToken": null,
+          "pos": [
+            10,
+            54
+          ],
+          "_flipPrevDir": null,
+          "dir": 3,
+          "__flipActive": true
+        }
+      ],
+      "title": "Carrier Route",
+      "properties": {
+        "processTime": 3,
+        "downTime": 0.5,
+        "initialCarrier": "Carrier-1",
+        "outSequence": "",
+        "flipIO": true
+      }
+    }
+  ],
+  "links": [
+    [
+      15,
+      10,
+      1,
+      13,
+      1,
+      "AGV"
+    ],
+    [
+      19,
+      10,
+      4,
+      13,
+      3,
+      "AGV"
+    ],
+    [
+      20,
+      6,
+      0,
+      10,
+      3,
+      "work"
+    ],
+    [
+      22,
+      11,
+      1,
+      16,
+      1,
+      "AGV"
+    ],
+    [
+      23,
+      16,
+      1,
+      4,
+      1,
+      "AGV"
+    ],
+    [
+      24,
+      16,
+      3,
+      4,
+      3,
+      "AGV"
+    ],
+    [
+      25,
+      11,
+      3,
+      16,
+      3,
+      "AGV"
+    ],
+    [
+      27,
+      2,
+      0,
+      17,
+      0,
+      "work"
+    ],
+    [
+      28,
+      2,
+      3,
+      17,
+      1,
+      "work"
+    ],
+    [
+      29,
+      17,
+      0,
+      7,
+      0,
+      0
+    ],
+    [
+      30,
+      14,
+      0,
+      16,
+      0,
+      "work"
+    ],
+    [
+      33,
+      4,
+      3,
+      10,
+      4,
+      "AGV"
+    ],
+    [
+      34,
+      4,
+      1,
+      10,
+      1,
+      "AGV"
+    ],
+    [
+      37,
+      21,
+      0,
+      14,
+      0,
+      0
+    ],
+    [
+      43,
+      24,
+      0,
+      23,
+      0,
+      0
+    ],
+    [
+      44,
+      23,
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      46,
+      7,
+      0,
+      26,
+      0,
+      0
+    ],
+    [
+      47,
+      26,
+      0,
+      27,
+      0,
+      0
+    ],
+    [
+      48,
+      27,
+      0,
+      28,
+      0,
+      0
+    ],
+    [
+      49,
+      28,
+      0,
+      29,
+      0,
+      0
+    ],
+    [
+      50,
+      29,
+      0,
+      30,
+      0,
+      0
+    ],
+    [
+      51,
+      30,
+      0,
+      3,
+      0,
+      0
+    ],
+    [
+      53,
+      34,
+      0,
+      33,
+      0,
+      0
+    ],
+    [
+      54,
+      32,
+      0,
+      34,
+      0,
+      0
+    ],
+    [
+      55,
+      32,
+      1,
+      34,
+      1,
+      "string"
+    ],
+    [
+      56,
+      32,
+      2,
+      34,
+      2,
+      "string"
+    ],
+    [
+      57,
+      33,
+      0,
+      35,
+      0,
+      0
+    ],
+    [
+      58,
+      35,
+      0,
+      36,
+      0,
+      0
+    ],
+    [
+      59,
+      65,
+      0,
+      37,
+      0,
+      0
+    ],
+    [
+      60,
+      37,
+      0,
+      38,
+      0,
+      0
+    ],
+    [
+      61,
+      38,
+      0,
+      39,
+      0,
+      0
+    ],
+    [
+      63,
+      42,
+      0,
+      43,
+      0,
+      0
+    ],
+    [
+      64,
+      43,
+      0,
+      44,
+      0,
+      0
+    ],
+    [
+      65,
+      44,
+      0,
+      45,
+      0,
+      0
+    ],
+    [
+      66,
+      51,
+      0,
+      45,
+      1,
+      0
+    ],
+    [
+      67,
+      48,
+      0,
+      47,
+      0,
+      0
+    ],
+    [
+      68,
+      49,
+      0,
+      48,
+      0,
+      0
+    ],
+    [
+      70,
+      47,
+      0,
+      50,
+      0,
+      0
+    ],
+    [
+      71,
+      52,
+      0,
+      50,
+      1,
+      0
+    ],
+    [
+      74,
+      45,
+      0,
+      54,
+      0,
+      0
+    ],
+    [
+      75,
+      50,
+      0,
+      55,
+      0,
+      0
+    ],
+    [
+      76,
+      54,
+      0,
+      56,
+      0,
+      0
+    ],
+    [
+      77,
+      55,
+      0,
+      56,
+      1,
+      0
+    ],
+    [
+      78,
+      58,
+      0,
+      57,
+      0,
+      0
+    ],
+    [
+      79,
+      56,
+      0,
+      58,
+      0,
+      0
+    ],
+    [
+      80,
+      57,
+      0,
+      59,
+      0,
+      0
+    ],
+    [
+      81,
+      39,
+      0,
+      60,
+      0,
+      0
+    ],
+    [
+      82,
+      59,
+      0,
+      60,
+      1,
+      0
+    ],
+    [
+      83,
+      63,
+      0,
+      61,
+      0,
+      0
+    ],
+    [
+      84,
+      61,
+      0,
+      62,
+      0,
+      0
+    ],
+    [
+      85,
+      60,
+      0,
+      63,
+      0,
+      0
+    ],
+    [
+      86,
+      62,
+      0,
+      64,
+      0,
+      0
+    ],
+    [
+      87,
+      36,
+      0,
+      65,
+      0,
+      0
+    ],
+    [
+      88,
+      67,
+      0,
+      65,
+      1,
+      0
+    ],
+    [
+      158,
+      117,
+      0,
+      120,
+      0,
+      0
+    ],
+    [
+      159,
+      117,
+      1,
+      121,
+      0,
+      0
+    ],
+    [
+      160,
+      120,
+      0,
+      107,
+      0,
+      "work"
+    ],
+    [
+      161,
+      121,
+      0,
+      110,
+      0,
+      "work"
+    ],
+    [
+      162,
+      107,
+      1,
+      110,
+      1,
+      "AGV"
+    ],
+    [
+      164,
+      107,
+      0,
+      32,
+      0,
+      "work"
+    ],
+    [
+      165,
+      110,
+      0,
+      67,
+      0,
+      "work"
+    ],
+    [
+      166,
+      124,
+      0,
+      42,
+      0,
+      "work"
+    ],
+    [
+      167,
+      123,
+      0,
+      51,
+      0,
+      "work"
+    ],
+    [
+      168,
+      125,
+      0,
+      49,
+      0,
+      "work"
+    ],
+    [
+      169,
+      126,
+      0,
+      52,
+      0,
+      "work"
+    ],
+    [
+      170,
+      126,
+      1,
+      125,
+      1,
+      "AGV"
+    ],
+    [
+      171,
+      125,
+      1,
+      126,
+      1,
+      "AGV"
+    ],
+    [
+      172,
+      124,
+      1,
+      123,
+      1,
+      "AGV"
+    ],
+    [
+      174,
+      117,
+      2,
+      127,
+      0,
+      0
+    ],
+    [
+      175,
+      127,
+      0,
+      124,
+      0,
+      "work"
+    ],
+    [
+      176,
+      117,
+      3,
+      128,
+      0,
+      0
+    ],
+    [
+      177,
+      128,
+      0,
+      123,
+      0,
+      "work"
+    ],
+    [
+      178,
+      117,
+      4,
+      129,
+      0,
+      0
+    ],
+    [
+      179,
+      129,
+      0,
+      125,
+      0,
+      "work"
+    ],
+    [
+      180,
+      117,
+      5,
+      130,
+      0,
+      0
+    ],
+    [
+      181,
+      130,
+      0,
+      126,
+      0,
+      "work"
+    ],
+    [
+      182,
+      110,
+      1,
+      124,
+      1,
+      "AGV"
+    ],
+    [
+      183,
+      123,
+      1,
+      107,
+      1,
+      "AGV"
+    ],
+    [
+      184,
+      165,
+      0,
+      133,
+      0,
+      "work"
+    ],
+    [
+      185,
+      135,
+      0,
+      134,
+      0,
+      0
+    ],
+    [
+      186,
+      133,
+      0,
+      135,
+      0,
+      0
+    ],
+    [
+      187,
+      133,
+      1,
+      135,
+      1,
+      "string"
+    ],
+    [
+      188,
+      133,
+      2,
+      135,
+      2,
+      "string"
+    ],
+    [
+      189,
+      134,
+      0,
+      136,
+      0,
+      0
+    ],
+    [
+      190,
+      136,
+      0,
+      137,
+      0,
+      0
+    ],
+    [
+      191,
+      162,
+      0,
+      138,
+      0,
+      0
+    ],
+    [
+      192,
+      138,
+      0,
+      139,
+      0,
+      0
+    ],
+    [
+      193,
+      139,
+      0,
+      140,
+      0,
+      0
+    ],
+    [
+      194,
+      173,
+      0,
+      141,
+      0,
+      "work"
+    ],
+    [
+      195,
+      141,
+      0,
+      142,
+      0,
+      0
+    ],
+    [
+      196,
+      142,
+      0,
+      143,
+      0,
+      0
+    ],
+    [
+      197,
+      143,
+      0,
+      144,
+      0,
+      0
+    ],
+    [
+      198,
+      149,
+      0,
+      144,
+      1,
+      0
+    ],
+    [
+      199,
+      146,
+      0,
+      145,
+      0,
+      0
+    ],
+    [
+      200,
+      147,
+      0,
+      146,
+      0,
+      0
+    ],
+    [
+      201,
+      174,
+      0,
+      147,
+      0,
+      "work"
+    ],
+    [
+      202,
+      145,
+      0,
+      148,
+      0,
+      0
+    ],
+    [
+      203,
+      150,
+      0,
+      148,
+      1,
+      0
+    ],
+    [
+      204,
+      172,
+      0,
+      149,
+      0,
+      "work"
+    ],
+    [
+      205,
+      175,
+      0,
+      150,
+      0,
+      "work"
+    ],
+    [
+      206,
+      144,
+      0,
+      151,
+      0,
+      0
+    ],
+    [
+      207,
+      148,
+      0,
+      152,
+      0,
+      0
+    ],
+    [
+      208,
+      151,
+      0,
+      153,
+      0,
+      0
+    ],
+    [
+      209,
+      152,
+      0,
+      153,
+      1,
+      0
+    ],
+    [
+      210,
+      155,
+      0,
+      154,
+      0,
+      0
+    ],
+    [
+      211,
+      153,
+      0,
+      155,
+      0,
+      0
+    ],
+    [
+      212,
+      154,
+      0,
+      156,
+      0,
+      0
+    ],
+    [
+      213,
+      140,
+      0,
+      157,
+      0,
+      0
+    ],
+    [
+      214,
+      156,
+      0,
+      157,
+      1,
+      0
+    ],
+    [
+      215,
+      160,
+      0,
+      158,
+      0,
+      0
+    ],
+    [
+      216,
+      158,
+      0,
+      159,
+      0,
+      0
+    ],
+    [
+      217,
+      157,
+      0,
+      160,
+      0,
+      0
+    ],
+    [
+      218,
+      159,
+      0,
+      161,
+      0,
+      0
+    ],
+    [
+      219,
+      137,
+      0,
+      162,
+      0,
+      0
+    ],
+    [
+      220,
+      163,
+      0,
+      162,
+      1,
+      0
+    ],
+    [
+      221,
+      166,
+      0,
+      163,
+      0,
+      "work"
+    ],
+    [
+      223,
+      169,
+      0,
+      165,
+      0,
+      "work"
+    ],
+    [
+      224,
+      172,
+      1,
+      165,
+      1,
+      "AGV"
+    ],
+    [
+      225,
+      170,
+      0,
+      166,
+      0,
+      "work"
+    ],
+    [
+      226,
+      165,
+      1,
+      166,
+      1,
+      "AGV"
+    ],
+    [
+      228,
+      168,
+      0,
+      169,
+      0,
+      0
+    ],
+    [
+      229,
+      168,
+      1,
+      170,
+      0,
+      0
+    ],
+    [
+      230,
+      177,
+      0,
+      172,
+      0,
+      "work"
+    ],
+    [
+      231,
+      173,
+      1,
+      172,
+      1,
+      "AGV"
+    ],
+    [
+      232,
+      176,
+      0,
+      173,
+      0,
+      "work"
+    ],
+    [
+      233,
+      166,
+      1,
+      173,
+      1,
+      "AGV"
+    ],
+    [
+      234,
+      178,
+      0,
+      174,
+      0,
+      "work"
+    ],
+    [
+      235,
+      175,
+      1,
+      174,
+      1,
+      "AGV"
+    ],
+    [
+      236,
+      179,
+      0,
+      175,
+      0,
+      "work"
+    ],
+    [
+      237,
+      174,
+      1,
+      175,
+      1,
+      "AGV"
+    ],
+    [
+      238,
+      168,
+      2,
+      176,
+      0,
+      0
+    ],
+    [
+      239,
+      168,
+      3,
+      177,
+      0,
+      0
+    ],
+    [
+      240,
+      168,
+      4,
+      178,
+      0,
+      0
+    ],
+    [
+      241,
+      168,
+      5,
+      179,
+      0,
+      0
+    ],
+    [
+      243,
+      181,
+      0,
+      117,
+      0,
+      0
+    ],
+    [
+      244,
+      181,
+      1,
+      168,
+      0,
+      0
+    ],
+    [
+      245,
+      116,
+      0,
+      181,
+      0,
+      0
+    ],
+    [
+      248,
+      64,
+      0,
+      24,
+      0,
+      0
+    ],
+    [
+      249,
+      161,
+      0,
+      21,
+      0,
+      0
+    ],
+    [
+      250,
+      13,
+      1,
+      182,
+      0,
+      "AGV"
+    ],
+    [
+      251,
+      182,
+      0,
+      183,
+      0,
+      "AGV"
+    ],
+    [
+      252,
+      182,
+      2,
+      183,
+      2,
+      "AGV"
+    ],
+    [
+      253,
+      13,
+      3,
+      182,
+      2,
+      "AGV"
+    ],
+    [
+      254,
+      183,
+      0,
+      184,
+      0,
+      "AGV"
+    ],
+    [
+      255,
+      183,
+      2,
+      184,
+      2,
+      "AGV"
+    ],
+    [
+      256,
+      184,
+      0,
+      185,
+      0,
+      "AGV"
+    ],
+    [
+      257,
+      184,
+      2,
+      185,
+      2,
+      "AGV"
+    ],
+    [
+      258,
+      185,
+      0,
+      186,
+      0,
+      "AGV"
+    ],
+    [
+      259,
+      185,
+      2,
+      186,
+      2,
+      "AGV"
+    ],
+    [
+      264,
+      186,
+      0,
+      187,
+      0,
+      "AGV"
+    ],
+    [
+      265,
+      186,
+      2,
+      187,
+      2,
+      "AGV"
+    ],
+    [
+      266,
+      187,
+      0,
+      2,
+      1,
+      "AGV"
+    ],
+    [
+      267,
+      187,
+      2,
+      2,
+      4,
+      "AGV"
+    ],
+    [
+      270,
+      192,
+      0,
+      191,
+      0,
+      "AGV"
+    ],
+    [
+      271,
+      192,
+      2,
+      191,
+      2,
+      "AGV"
+    ],
+    [
+      272,
+      191,
+      0,
+      190,
+      0,
+      "AGV"
+    ],
+    [
+      273,
+      191,
+      2,
+      190,
+      2,
+      "AGV"
+    ],
+    [
+      274,
+      190,
+      0,
+      189,
+      0,
+      "AGV"
+    ],
+    [
+      275,
+      190,
+      2,
+      189,
+      2,
+      "AGV"
+    ],
+    [
+      278,
+      189,
+      0,
+      188,
+      0,
+      "AGV"
+    ],
+    [
+      279,
+      189,
+      2,
+      188,
+      2,
+      "AGV"
+    ],
+    [
+      280,
+      188,
+      0,
+      11,
+      1,
+      "AGV"
+    ],
+    [
+      281,
+      188,
+      2,
+      11,
+      3,
+      "AGV"
+    ],
+    [
+      282,
+      2,
+      1,
+      193,
+      0,
+      "AGV"
+    ],
+    [
+      283,
+      2,
+      4,
+      193,
+      2,
+      "AGV"
+    ],
+    [
+      284,
+      193,
+      0,
+      192,
+      0,
+      "AGV"
+    ],
+    [
+      285,
+      193,
+      2,
+      192,
+      2,
+      "AGV"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "Random Stop Group",
+      "bounding": [
+        172,
+        -197,
+        3622,
+        2407
+      ],
+      "color": "#f59e0b"
+    }
+  ],
+  "extra": {
+    "stopGroupsV1": [
+      {
+        "index": 0,
+        "uid": "sg-mm0fze25-2",
+        "type": "random_stop",
+        "title": "Random Stop Group",
+        "props": {
+          "intervalMedianSec": 30,
+          "intervalSigmaSec": 30,
+          "durationMedianSec": 45,
+          "durationSigmaSec": 8,
+          "randomSeed": "1"
+        }
+      }
+    ]
+  },
+  "version": 0.4
+}

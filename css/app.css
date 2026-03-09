@@ -795,6 +795,7 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 #sidebar .sidebar-spacer{ flex: 1 1 auto; }
 #sidebarHeader,
 #sidebar #controls,
+#backgroundPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -1751,9 +1752,20 @@ body.timeline-hidden #timelineRevealHandle{
   display:none; position:fixed; inset:0; z-index:2100;
   background: rgba(0,0,0,0.28); backdrop-filter: blur(3px);
 }
+#engineTestModal{
+  display:none; position:fixed; inset:0; z-index:2100;
+  background: rgba(0,0,0,0.28); backdrop-filter: blur(3px);
+}
 #benchmarkContainer{
   position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
   width:min(920px, 94%); max-height: 82vh; overflow:auto;
+  background:#fff; border:1px solid var(--panel-border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding:14px; box-sizing:border-box;
+}
+#engineTestContainer{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:min(1040px, 95%); max-height: 84vh; overflow:auto;
   background:#fff; border:1px solid var(--panel-border);
   border-radius: var(--radius); box-shadow: var(--shadow);
   padding:14px; box-sizing:border-box;
@@ -1798,6 +1810,12 @@ body.timeline-hidden #timelineRevealHandle{
   border-collapse: collapse;
   font-size:13px;
 }
+#engineTestCasesTable,
+#engineTestFailuresTable{
+  width:100%;
+  border-collapse: collapse;
+  font-size:13px;
+}
 #benchmarkTable th,
 #benchmarkTable td{
   border-bottom:1px solid var(--panel-border);
@@ -1805,7 +1823,23 @@ body.timeline-hidden #timelineRevealHandle{
   text-align:left;
   vertical-align:middle;
 }
+#engineTestCasesTable th,
+#engineTestCasesTable td,
+#engineTestFailuresTable th,
+#engineTestFailuresTable td{
+  border-bottom:1px solid var(--panel-border);
+  padding:8px 10px;
+  text-align:left;
+  vertical-align:top;
+}
 #benchmarkTable thead th{
+  position:sticky;
+  top:0;
+  background:#f4f4f4;
+  z-index:1;
+}
+#engineTestCasesTable thead th,
+#engineTestFailuresTable thead th{
   position:sticky;
   top:0;
   background:#f4f4f4;
@@ -1837,6 +1871,69 @@ body.timeline-hidden #timelineRevealHandle{
 .benchMono{
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-variant-numeric: tabular-nums;
+}
+.performanceActionsRow{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.engineTestToolbar{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin:10px 0 6px;
+}
+.engineTestToolbarActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.engineTestSection{
+  margin-top:16px;
+}
+.engineTestSection h3{
+  margin:0 0 8px;
+  font-size:14px;
+  letter-spacing:0.01em;
+}
+.engineTestStatusPill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:62px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  border:1px solid rgba(15,23,42,0.12);
+  background:rgba(255,255,255,0.88);
+}
+.engineTestStatusPill.is-pass{
+  color:#166534;
+  border-color:rgba(22,101,52,0.18);
+  background:rgba(22,163,74,0.10);
+}
+.engineTestStatusPill.is-warn{
+  color:#92400e;
+  border-color:rgba(146,64,14,0.18);
+  background:rgba(245,158,11,0.12);
+}
+.engineTestStatusPill.is-fail{
+  color:#991b1b;
+  border-color:rgba(153,27,27,0.18);
+  background:rgba(239,68,68,0.11);
+}
+.engineTestMessage{
+  color:var(--muted);
+  line-height:1.45;
+}
+.engineTestMono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  white-space:nowrap;
 }
 
 /* === Share URL modal === */
@@ -2736,6 +2833,7 @@ body:not(.sidebar-hidden) #graph{
 
 #scriptEditorModal,
 #benchmarkModal,
+#engineTestModal,
 #shareUrlModal,
 #stopGroupModal,
 #aboutModal{
@@ -2745,6 +2843,7 @@ body:not(.sidebar-hidden) #graph{
 
 #scriptEditorContainer,
 #benchmarkContainer,
+#engineTestContainer,
 #shareUrlContainer,
 #stopGroupContainer,
 #aboutContainer{
@@ -2774,6 +2873,7 @@ body:not(.sidebar-hidden) #graph{
 
 #scriptEditorControls button,
 #benchmarkContainer button,
+#engineTestContainer button,
 #shareUrlContainer button,
 #stopGroupContainer button,
 #aboutContainer button{
@@ -2788,6 +2888,7 @@ body:not(.sidebar-hidden) #graph{
 #scriptEditorSave,
 #shareUrlCopyBtn,
 #benchmarkClose,
+#engineTestClose,
 #stopGroupSave,
 #shareUrlClose,
 #aboutClose{
@@ -2798,6 +2899,7 @@ body:not(.sidebar-hidden) #graph{
 
 #scriptEditorControls button:hover,
 #benchmarkContainer button:hover,
+#engineTestContainer button:hover,
 #shareUrlContainer button:hover,
 #stopGroupContainer button:hover,
 #aboutContainer button:hover{
@@ -3149,10 +3251,12 @@ pre,
 
 #sidebar{
   width: 356px;
-  background: linear-gradient(180deg, rgba(249,250,252,0.76), rgba(242,245,249,0.68));
-  border-left: 1px solid rgba(255,255,255,0.74);
-  box-shadow: -28px 0 60px rgba(15,23,42,0.10);
-  backdrop-filter: blur(30px) saturate(1.4);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.30), rgba(240,244,249,0.20)),
+    linear-gradient(180deg, rgba(10,132,255,0.05), rgba(255,255,255,0));
+  border-left: 1px solid rgba(255,255,255,0.48);
+  box-shadow: -20px 0 54px rgba(15,23,42,0.06);
+  backdrop-filter: blur(38px) saturate(1.58);
 }
 
 body:not(.sidebar-hidden) #graph{
@@ -3161,8 +3265,8 @@ body:not(.sidebar-hidden) #graph{
 
 #sidebar::before{
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.38), rgba(255,255,255,0)),
-    linear-gradient(180deg, rgba(10,132,255,0.08), transparent 28%);
+    linear-gradient(180deg, rgba(255,255,255,0.46), rgba(255,255,255,0.03)),
+    linear-gradient(180deg, rgba(10,132,255,0.08), transparent 32%);
   opacity: 1;
 }
 
@@ -3177,10 +3281,12 @@ body:not(.sidebar-hidden) #graph{
   position: relative;
   overflow: hidden;
   border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.82);
-  background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(249,250,252,0.74));
-  box-shadow: 0 22px 48px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.54);
-  backdrop-filter: blur(22px) saturate(1.35);
+  border: 1px solid rgba(255,255,255,0.58);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.52), rgba(248,250,253,0.36)),
+    linear-gradient(180deg, rgba(10,132,255,0.03), rgba(255,255,255,0));
+  box-shadow: 0 16px 34px rgba(15,23,42,0.05), inset 0 1px 0 rgba(255,255,255,0.42);
+  backdrop-filter: blur(28px) saturate(1.48);
 }
 
 #sidebarHeader::after,
@@ -3196,7 +3302,7 @@ body:not(.sidebar-hidden) #graph{
   inset: 1px 1px auto 1px;
   height: 44%;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0));
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0));
   pointer-events: none;
 }
 
@@ -3479,23 +3585,39 @@ body:not(.sidebar-hidden) #graph{
 }
 
 #timelineDock{
-  border-top: 1px solid rgba(255,255,255,0.72);
-  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(246,248,251,0.76));
-  box-shadow: 0 -20px 48px rgba(15,23,42,0.10);
-  backdrop-filter: blur(26px) saturate(1.4);
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.52);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.34), rgba(242,246,251,0.24)),
+    linear-gradient(180deg, rgba(10,132,255,0.04), rgba(255,255,255,0));
+  box-shadow: 0 -16px 44px rgba(15,23,42,0.06);
+  backdrop-filter: blur(34px) saturate(1.52);
+}
+
+#timelineDock::before{
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 42%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0));
+  pointer-events: none;
 }
 
 #timelineHeader{
-  background: rgba(255,255,255,0.42);
-  border-bottom: 1px solid rgba(255,255,255,0.74);
+  background: rgba(255,255,255,0.16);
+  border-bottom: 1px solid rgba(255,255,255,0.46);
 }
 
 #timelineHeader .timelineTabs{
   padding: 4px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.58);
-  border: 1px solid rgba(255,255,255,0.84);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.48);
+  background: rgba(255,255,255,0.26);
+  border: 1px solid rgba(255,255,255,0.56);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.34);
 }
 
 #timelineHeader .timelineTab{
@@ -3510,9 +3632,9 @@ body:not(.sidebar-hidden) #graph{
 
 #timelineHeader .timelineTab.is-active{
   color: #1d1d1f;
-  background: rgba(255,255,255,0.94);
-  border-color: rgba(255,255,255,0.92);
-  box-shadow: 0 10px 20px rgba(15,23,42,0.08);
+  background: rgba(255,255,255,0.58);
+  border-color: rgba(255,255,255,0.62);
+  box-shadow: 0 6px 16px rgba(15,23,42,0.05);
 }
 
 #timelineHeader .timelineTitle,

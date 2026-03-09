@@ -195,6 +195,7 @@
           <option value="carrier_config">Carrier Config Example</option>
           <option value="pallet_station_demo">Pallet Station Demo</option>
           <option value="sample_line1">Sample Line1</option>
+          <option value="sample_line2">Sample Line2</option>
         </select>
       </div>
       <div id="simStatusCard" class="simStatusCard" aria-live="polite">
@@ -349,9 +350,13 @@
         <select id="simModeSelect">
           <option value="dt">dt (0.1s fixed)</option>
           <option value="event">event (heap)</option>
+          <option value="event-fast">event-fast (compiled)</option>
         </select>
       </div>
+      <div class="performanceActionsRow">
         <button id="btnBenchmark">Benchmark</button>
+        <button id="btnEngineTest" class="button-secondary">Engine Test</button>
+      </div>
       </div>
       <div id="shortcutPanel">
         <div class="panelHeader">Canvas Tools</div>
@@ -584,6 +589,63 @@
     </div>
   </div>
 
+  <!-- Engine Test Modal -->
+  <div id="engineTestModal" aria-hidden="true" role="dialog">
+    <div id="engineTestContainer" role="document" aria-label="Engine test results">
+      <div class="benchmarkHeader">
+        <h2>Engine Test</h2>
+        <button id="engineTestClose" aria-label="Close">Close</button>
+      </div>
+      <div id="engineTestProgressWrap" class="benchmarkProgressWrap" aria-live="polite">
+        <div id="engineTestProgressLabel" class="benchmarkProgressLabel">Engine test running...</div>
+        <div class="benchmarkProgressTrack">
+          <div id="engineTestProgressBar" class="benchmarkProgressBar"></div>
+        </div>
+      </div>
+      <div id="engineTestToolbar" class="engineTestToolbar">
+        <p id="engineTestSummary" class="benchmarkSummary"></p>
+        <div class="engineTestToolbarActions">
+          <button id="engineTestRerunBtn">Run Again</button>
+          <button id="engineTestCopyBtn">Copy Report JSON</button>
+        </div>
+      </div>
+      <p id="engineTestLegend" class="benchmarkLegend">
+        Engine Test runs clone graphs only. It checks monotonic simulation time, graph integrity, finite numeric state, sink completion metrics, and engine stalls without touching the live canvas graph.
+      </p>
+      <div class="engineTestSection">
+        <h3>Cases</h3>
+        <table id="engineTestCasesTable" aria-label="Engine test case table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Engine</th>
+              <th>Scenario</th>
+              <th>Sim Time</th>
+              <th>Completed</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="engineTestCasesBody"></tbody>
+        </table>
+      </div>
+      <div class="engineTestSection">
+        <h3>Issues</h3>
+        <table id="engineTestFailuresTable" aria-label="Engine test failures table">
+          <thead>
+            <tr>
+              <th>Severity</th>
+              <th>Code</th>
+              <th>Engine</th>
+              <th>Scenario</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="engineTestFailuresBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- Stop Group Editor Modal -->
   <div id="stopGroupModal" aria-hidden="true" role="dialog">
     <div id="stopGroupContainer" role="document" aria-label="Stop group editor">
@@ -674,7 +736,7 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260308a"></script>
+  <script src="js/app/landing.js?v=20260309a"></script>
   <script src="js/core.js?v=20260308b"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
@@ -691,13 +753,13 @@ SOFTWARE.
   <script src="js/nodes/source.js?v=20260307c"></script>
   <script src="js/nodes/split.js?v=20260307b"></script>
   <script src="js/nodes/branch.js?v=20260307b"></script>
-  <script src="js/nodes/merge2.js?v=20260307b"></script>
+  <script src="js/nodes/merge2.js?v=20260309a"></script>
   <script src="js/nodes/join.js?v=20260307b"></script>
   <script src="js/nodes/agv_route.js?v=20260307b"></script>
   <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
   <script src="js/nodes/carrier_config.js?v=20260307b"></script>
   <script src="js/nodes/pallet_carrier_config.js?v=20260307b"></script>
-  <script src="js/nodes/carrier_route.js?v=20260307b"></script>
+  <script src="js/nodes/carrier_route.js?v=20260309a"></script>
   <script src="js/nodes/carrier_route_ui.js?v=20260226a"></script>
   <script src="js/nodes/station.js?v=20260307b"></script>
   <script src="js/nodes/sink.js?v=20260307c"></script>
@@ -708,6 +770,7 @@ SOFTWARE.
   <script src="sample/carrier.js?v=20260223a"></script>
   <script src="sample/pallet_station_demo.js?v=20260226a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
+  <script src="sample/sample_line2.js?v=20260309b"></script>
   <script src="js/timeline.js?v=20260308a"></script>
   <script src="js/app/state.js?v=20260225b"></script>
   <script src="js/app/background-layout.js?v=20260303b"></script>
@@ -715,8 +778,14 @@ SOFTWARE.
   <script src="js/app/stop-groups.js?v=20260308c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
   <script src="js/app/engine.js?v=20260225d"></script>
+  <script src="js/app/engine-fast-kernels.js?v=20260308d"></script>
+  <script src="js/app/engine-fast-compiler.js?v=20260308d"></script>
+  <script src="js/app/engine-fast-compat.js?v=20260308d"></script>
+  <script src="js/app/engine-fast-runtime.js?v=20260308d"></script>
+  <script src="js/app/engine-fast-mode.js?v=20260308d"></script>
   <script src="js/app/sim.js?v=20260222a"></script>
   <script src="js/app/benchmark.js?v=20260307a"></script>
+  <script src="js/app/engine-test.js?v=20260308a"></script>
   <script src="js/app/history.js?v=20260307a"></script>
   <script src="js/app/selection.js?v=20260308a"></script>
   <script src="js/app/fit.js?v=20260306a"></script>
@@ -724,7 +793,7 @@ SOFTWARE.
   <script src="js/app/selection-inspector.js?v=20260308e"></script>
   <script src="js/app/timeline-init.js?v=20260308b"></script>
   <script src="js/app/graph-init.js?v=20260308b"></script>
-  <script src="js/app/examples.js?v=20260308b"></script>
+  <script src="js/app/examples.js?v=20260309a"></script>
   <script src="js/app/file-io.js?v=20260308a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
   <script src="js/app/ui.js?v=20260308k"></script>

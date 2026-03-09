@@ -8,6 +8,7 @@ import { Browser, BrowserContext, Page, chromium } from "playwright";
 
 import type {
   BenchmarkOutput,
+  EngineTestOutput,
   SimulationStatus,
   SinkKpi,
   KpiSummary,
@@ -164,6 +165,40 @@ export function registerRuntimeMethodsGroup01(
   
         return app.runEngineBenchmarkAsync(options);
       }, wallMs);
+    };
+
+  (FactSimRuntimeClass.prototype as any).runEngineTests = async function (this: any, options?: Record<string, unknown>): Promise<EngineTestOutput> {
+      const page = await this.ensureReady();
+      return page.evaluate(async (requestedOptions: any) => {
+        const w = window as unknown as Record<string, unknown>;
+        const app = w.App as {
+          runEngineTestsAsync?: (options?: Record<string, unknown>) => Promise<EngineTestOutput>;
+        } | undefined;
+
+        if (!app || typeof app.runEngineTestsAsync !== "function") {
+          throw new Error("App.runEngineTestsAsync is not available");
+        }
+
+        return app.runEngineTestsAsync(
+          requestedOptions && typeof requestedOptions === "object" ? requestedOptions : undefined
+        );
+      }, options ?? null);
+    };
+
+  (FactSimRuntimeClass.prototype as any).getLatestEngineTestReport = async function (this: any): Promise<EngineTestOutput | null> {
+      const page = await this.ensureReady();
+      return page.evaluate(() => {
+        const w = window as unknown as Record<string, unknown>;
+        const app = w.App as {
+          getLatestEngineTestReport?: () => EngineTestOutput | null;
+        } | undefined;
+
+        if (!app || typeof app.getLatestEngineTestReport !== "function") {
+          throw new Error("App.getLatestEngineTestReport is not available");
+        }
+
+        return app.getLatestEngineTestReport();
+      });
     };
 
   (FactSimRuntimeClass.prototype as any).exportTimelineCsv = async function (this: any): Promise<{ lineCount: number; csv: string }> {
