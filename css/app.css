@@ -4161,4 +4161,156 @@ body.landing-preview-live #graph canvas{
   transform: rotate(-90deg);
 }
 
+/* Sidebar-first workspace layout */
+:root{
+  --sidebar-width: 356px;
+}
+
+#sidebar{
+  width: var(--sidebar-width);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  padding-bottom: 12px;
+}
+
+body:not(.timeline-hidden) #sidebar{
+  bottom: 0;
+  height: 100%;
+}
+
+body:not(.sidebar-hidden) #graph{
+  right: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+}
+
+body.sidebar-hidden #graph{
+  right: 0;
+  width: 100%;
+}
+
+body:not(.timeline-hidden) #graph{
+  height: calc(100% - var(--timeline-height));
+}
+
+body.timeline-hidden #graph{
+  height: 100%;
+}
+
+#timelineDock{
+  left: 0;
+  width: auto;
+}
+
+body:not(.sidebar-hidden) #timelineDock{
+  right: var(--sidebar-width);
+}
+
+body.sidebar-hidden #timelineDock{
+  right: 0;
+}
+
+body:not(.sidebar-hidden) #timelineRevealHandle{
+  right: var(--sidebar-width);
+}
+
+body.sidebar-hidden #timelineRevealHandle{
+  right: 0;
+}
+
+#timelineHeader{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "left actions"
+    "meta meta";
+  height: auto;
+  min-height: var(--timeline-header);
+  padding: 10px 12px 12px;
+  gap: 10px 12px;
+  align-items: center;
+}
+
+#timelineHeader .timelineHeaderLeft{
+  grid-area: left;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#timelineHeader .timelineTabs{
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+#timelineHeader .timelineSelection,
+#timelineHeader .timelinePropsMeta{
+  grid-area: meta;
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+#timelineHeader .timelineActions{
+  grid-area: actions;
+  justify-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: min(100%, 420px);
+}
+
+#timelineHeader .timelineBtn{
+  min-height: 34px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.nodePropsToolbar{
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+#nodePropsFilter{
+  flex: 1 1 240px;
+  width: auto;
+  min-width: 180px;
+}
+
+#nodePropsSummary{
+  margin-left: auto;
+}
+
+@media (max-width: 980px){
+  :root{
+    --sidebar-width: 332px;
+  }
+}
+
+@media (max-width: 1360px){
+  #timelineHeader{
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "left"
+      "actions"
+      "meta";
+  }
+
+  #timelineHeader .timelineActions{
+    justify-self: stretch;
+    justify-content: flex-start;
+    max-width: none;
+  }
+
+  body:not(.sidebar-hidden) #selectionInspectorPanel .selectionInspectorLayout{
+    grid-template-columns: 1fr;
+  }
+}
+
 

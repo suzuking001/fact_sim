@@ -132,6 +132,41 @@ function openInspectorForGroup(group){
   return false;
 }
 
+function removeCanvasGroup(group, isStopGroup){
+  if(!group) return false;
+  const label = isStopGroup ? 'this stop group' : 'this group';
+  if(!window.confirm(`Delete ${label}?`)) return false;
+
+  let removed = false;
+  if(isStopGroup && typeof window.App?.stopGroups?.removeGroup === 'function'){
+    removed = !!window.App.stopGroups.removeGroup(group);
+  }else{
+    const graph = group.graph || window.App?.graph;
+    if(graph){
+      try{
+        if(typeof graph.beforeChange === 'function') graph.beforeChange();
+        graph.remove(group);
+        removed = true;
+      }finally{
+        if(typeof graph.afterChange === 'function') graph.afterChange();
+      }
+    }
+  }
+
+  if(!removed) return false;
+  if(window.App?.canvas){
+    window.App.canvas.selected_group = null;
+    try{ window.App.canvas.setDirty(true, true); }catch(_e){}
+  }
+  if(window.App?.selectionInspector?.clear){
+    try{ window.App.selectionInspector.clear(true); }catch(_e){}
+  }
+  if(window.App?.showToast){
+    window.App.showToast(isStopGroup ? 'Stop group deleted' : 'Group deleted');
+  }
+  return true;
+}
+
 function syncCanvasMouse(canvas, event){
   if(!canvas || !event) return null;
   try{
@@ -354,6 +389,7 @@ window.runNodeMutation = runNodeMutation;
         }
         if(label === 'Remove'){
           deleteItem = relabelMenuItem(item, isStopGroup ? 'Delete Stop Group' : 'Delete Group');
+          deleteItem.callback = ()=> removeCanvasGroup(group, isStopGroup);
           continue;
         }
         if(/^Edit Group(?:\.\.\.)?$/i.test(label) || /^Edit Group(?:\.\.\.)?$/i.test(normalizedLabel)){

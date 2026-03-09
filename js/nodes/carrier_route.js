@@ -429,19 +429,15 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _resolveActiveWorkInSlot(){
     const laneSlot = this._workInSlotForLane(this._currentCarrierLane);
     if(laneSlot >= 0){
-      const p = this.inputs && this.inputs[laneSlot];
-      if(p && p.link != null) return laneSlot;
-      const sharedSlot = this._sharedWorkInputSlot();
-      if(sharedSlot >= 0 && sharedSlot !== laneSlot) return sharedSlot;
-      // Lane exists but is unconnected: treat as "no input" for this lane.
-      // Caller can decide to pass-through/unload instead of waiting.
+      // Multi-lane carrier routes use strict lane pairing:
+      // carrierInN can only receive from workInN.
+      // If that lane is unconnected or empty, caller should pass-through/unload.
       return laneSlot;
     }
-    const sharedSlot = this._sharedWorkInputSlot();
-    if(sharedSlot >= 0) return sharedSlot;
-    // Compatibility fallback is only safe for single-lane carrier routes.
-    // In multi-lane routes this would break lane-to-work pairing and can deadlock.
+    // Single-lane compatibility fallback only.
     if(this._carrierLaneCount() <= 1){
+      const sharedSlot = this._sharedWorkInputSlot();
+      if(sharedSlot >= 0) return sharedSlot;
       const linked = this._linkedWorkInputSlots();
       if(linked.length === 1) return linked[0];
     }
@@ -972,6 +968,10 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(this._currentAgv || this._departingAgv) return;
     const id = this._normalizeInitialCarrierId();
     if(!id) return;
+    if(this._carrierComponentHasCarrierId(id)){
+      this._initialCarrierSpawned = true;
+      return;
+    }
     const agv = new AGV(id, 1);
     const cfg = this._findCarrierConfigById(id);
     if(cfg && typeof cfg.applyToCarrier === 'function') cfg.applyToCarrier(agv);
@@ -979,6 +979,73 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(this._adoptIncomingAgv(agv, false, 0, inSlot)){
       this._initialCarrierSpawned = true;
     }
+  }
+
+  _isCarrierRouteLikeNode(node){
+    if(!node || typeof node !== 'object') return false;
+    if(typeof node._carrierInputSlots === 'function' || typeof node._carrierOutputSlots === 'function'){
+      return true;
+    }
+    const type = String(node.type || '').toLowerCase();
+    return type.indexOf('carrierroute') >= 0;
+  }
+
+  _carrierComponentNodeIds(){
+    if(!this.graph || typeof this.graph.getNodeById !== 'function' || typeof this.id === 'undefined'){
+      return [];
+    }
+    const seen = new Set();
+    const queue = [this.id];
+    while(queue.length){
+      const nodeId = queue.shift();
+      if(seen.has(nodeId)) continue;
+      seen.add(nodeId);
+
+      const node = this.graph.getNodeById(nodeId);
+      if(!this._isCarrierRouteLikeNode(node)) continue;
+
+      const inputSlots = (typeof node._carrierInputSlots === 'function') ? node._carrierInputSlots() : [];
+      for(const slot of inputSlots){
+        const input = node.inputs && node.inputs[slot];
+        if(!input || input.link == null) continue;
+        const link = this.graph.links && this.graph.links[input.link];
+        if(!link) continue;
+        const originId = link.origin_id;
+        if(typeof originId === 'undefined' || seen.has(originId)) continue;
+        const origin = this.graph.getNodeById(originId);
+        if(this._isCarrierRouteLikeNode(origin)) queue.push(originId);
+      }
+
+      const outputSlots = (typeof node._carrierOutputSlots === 'function') ? node._carrierOutputSlots() : [];
+      for(const slot of outputSlots){
+        const output = node.outputs && node.outputs[slot];
+        const links = (output && Array.isArray(output.links)) ? output.links : [];
+        for(const linkId of links){
+          const link = this.graph.links && this.graph.links[linkId];
+          if(!link) continue;
+          const targetId = link.target_id;
+          if(typeof targetId === 'undefined' || seen.has(targetId)) continue;
+          const target = this.graph.getNodeById(targetId);
+          if(this._isCarrierRouteLikeNode(target)) queue.push(targetId);
+        }
+      }
+    }
+    return Array.from(seen);
+  }
+
+  _carrierComponentHasCarrierId(id){
+    const carrierId = String(id || '').trim();
+    if(!carrierId || !this.graph) return false;
+    const nodeIds = this._carrierComponentNodeIds();
+    for(const nodeId of nodeIds){
+      const node = this.graph.getNodeById(nodeId);
+      if(!node) continue;
+      const current = node._currentAgv;
+      if(current && String(current.id || '').trim() === carrierId) return true;
+      const departing = node._departingAgv;
+      if(departing && String(departing.id || '').trim() === carrierId) return true;
+    }
+    return false;
   }
 
   _normalizeAgv(agv){
@@ -1627,17 +1694,9 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const w = this.getInputData(inSlot);
     if(!w){
       this._lastWorkInRefBySlot[inSlot] = null;
-      // Do not wait forever for "full load". If partially loaded and no input is
-      // currently available, proceed with unload/depart to avoid route deadlocks.
-      if(inWorkIdle && this._currentAgv){
-        const load = this._carrierWorkCount(this._currentAgv);
-        const cap = this._isPalletCarrier(this._currentAgv)
-          ? Number.MAX_SAFE_INTEGER
-          : Math.max(0, Number(this._currentAgv.capacity) || 0);
-        if(load > 0 && load < cap){
-          this._beginUnloadPhase();
-        }
-      }
+      // If this lane has a connected work input, keep waiting until the matching
+      // carrier reaches capacity. Unload only starts when capacity is reached or
+      // the route has no active work input for this lane.
       return;
     }
     if(this._lastWorkInRefBySlot[inSlot] === w) return;

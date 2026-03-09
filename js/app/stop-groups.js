@@ -375,6 +375,7 @@ var App = window.App || (window.App = {});
       this._pauseNodeCount = -1;
       this._lastUpdateNowMs = NaN;
       this._lastUpdateRevision = -1;
+      this._pausedTimedNodes = new Map();
     }
 
     reset(nowMs){
@@ -390,6 +391,7 @@ var App = window.App || (window.App = {});
       this._pauseNodeCount = -1;
       this._lastUpdateNowMs = NaN;
       this._lastUpdateRevision = -1;
+      this._pausedTimedNodes = new Map();
       pausedNodeIds = this.pausedNodeIds;
       hasPausedNodes = false;
       this._sync(nowMs);
@@ -408,6 +410,7 @@ var App = window.App || (window.App = {});
       this._pauseNodeCount = -1;
       this._lastUpdateNowMs = NaN;
       this._lastUpdateRevision = -1;
+      this._pausedTimedNodes.clear();
     }
 
     _makeSignature(){
@@ -525,15 +528,51 @@ var App = window.App || (window.App = {});
       return keys.join('|');
     }
 
-    _rebuildPausedNodes(){
+    _applyPausedTiming(nowMs, nextPausedIds, pausedNodes){
+      const now = Number(nowMs);
+      if(!isFinite(now)) return;
+
+      const nextIds = nextPausedIds instanceof Set ? nextPausedIds : new Set();
+      for(const [nodeId, entry] of this._pausedTimedNodes){
+        if(nextIds.has(nodeId)) continue;
+        const node = entry && entry.node;
+        const sinceMs = Number(entry && entry.sinceMs);
+        if(node && isFinite(sinceMs)){
+          const pauseMs = now - sinceMs;
+          if(pauseMs > EPS_MS){
+            const until = Number(node._until);
+            if(isFinite(until)) node._until = until + pauseMs;
+          }
+        }
+        this._pausedTimedNodes.delete(nodeId);
+      }
+
+      if(!Array.isArray(pausedNodes) || !pausedNodes.length) return;
+      for(const node of pausedNodes){
+        if(!node || typeof node.id === 'undefined' || !hasTimedState(node)) continue;
+        const existing = this._pausedTimedNodes.get(node.id);
+        if(existing){
+          existing.node = node;
+          continue;
+        }
+        this._pausedTimedNodes.set(node.id, { node, sinceMs: now });
+      }
+    }
+
+    _clearPausedNodes(nowMs){
+      this._applyPausedTiming(nowMs, new Set(), []);
+      if(this.pausedNodeIds.size || this.pausedNodes.length || this._pausedTimedNodes.size){
+        this.pausedNodeIds = new Set();
+        this.pausedNodes = [];
+        pausedNodeIds = this.pausedNodeIds;
+        hasPausedNodes = false;
+      }
+    }
+
+    _rebuildPausedNodes(nowMs){
       const activeStates = this.states.filter((st)=> st && st.active && st.group);
       if(!activeStates.length){
-        if(this.pausedNodeIds.size || this.pausedNodes.length){
-          this.pausedNodeIds = new Set();
-          this.pausedNodes = [];
-          pausedNodeIds = this.pausedNodeIds;
-          hasPausedNodes = false;
-        }
+        this._clearPausedNodes(nowMs);
         return;
       }
 
@@ -549,6 +588,7 @@ var App = window.App || (window.App = {});
           pausedNodes.push(node);
         }
       }
+      this._applyPausedTiming(nowMs, next, pausedNodes);
       this.pausedNodeIds = next;
       this.pausedNodes = pausedNodes;
       pausedNodeIds = this.pausedNodeIds;
@@ -565,12 +605,7 @@ var App = window.App || (window.App = {});
       }
       this._sync(now);
       if(!this.states.length){
-        if(this.pausedNodeIds.size || this.pausedNodes.length){
-          this.pausedNodeIds = new Set();
-          this.pausedNodes = [];
-          pausedNodeIds = this.pausedNodeIds;
-          hasPausedNodes = false;
-        }
+        this._clearPausedNodes(now);
         this._pausedDirty = false;
         this._activeStateSignature = '';
         this._pauseNodeCount = Array.isArray(this.graph?._nodes) ? this.graph._nodes.length : 0;
@@ -588,7 +623,7 @@ var App = window.App || (window.App = {});
       if(nodeCount !== this._pauseNodeCount) this._pausedDirty = true;
 
       if(this._pausedDirty){
-        this._rebuildPausedNodes();
+        this._rebuildPausedNodes(now);
         this._pausedDirty = false;
         this._activeStateSignature = activeSignature;
         this._pauseNodeCount = nodeCount;
@@ -612,16 +647,8 @@ var App = window.App || (window.App = {});
 
     beforeAdvance(nowMs, deltaMs){
       const now = Number(nowMs);
-      const delta = Number(deltaMs);
-      if(!isFinite(now) || !isFinite(delta) || delta <= 0) return;
+      if(!isFinite(now)) return;
       this.update(now);
-      if(!this.pausedNodes.length) return;
-      for(const node of this.pausedNodes){
-        if(!node || !hasTimedState(node)) continue;
-        const until = Number(node._until);
-        if(!isFinite(until)) continue;
-        node._until = until + delta;
-      }
     }
   }
 

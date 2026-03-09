@@ -201,8 +201,8 @@ var App = window.App || (window.App = {});
     const scale = Math.max(0.0001, Number(canvas?.ds?.scale) || 1);
     const ox = Number(canvas?.ds?.offset?.[0]) || 0;
     const oy = Number(canvas?.ds?.offset?.[1]) || 0;
-    const toGraphX = (clientX)=> (clientX - rect.left - ox) / scale;
-    const toGraphY = (clientY)=> (clientY - rect.top - oy) / scale;
+    const toGraphX = (clientX)=> ((clientX - rect.left) / scale) - ox;
+    const toGraphY = (clientY)=> ((clientY - rect.top) / scale) - oy;
 
     return {
       left: toGraphX(safeLeft),
