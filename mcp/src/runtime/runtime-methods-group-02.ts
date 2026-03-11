@@ -149,7 +149,8 @@ export function registerRuntimeMethodsGroup02(
           "shuttle_line5",
           "carrier_config",
           "pallet_station_demo",
-          "sample_line1"
+          "sample_line1",
+          "sample_line2"
         ];
   
         const select = document.getElementById("exampleSelect") as

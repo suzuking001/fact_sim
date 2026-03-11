@@ -283,11 +283,59 @@ function _to2Tuple(v){
   return v;
 }
 
+function _compactLinks(links){
+  if(!links || typeof links !== 'object') return links;
+  const out = [];
+  const entries = Array.isArray(links)
+    ? links.map((value, index)=> [String(index), value])
+    : Object.entries(links);
+  for(const [rawKey, rawLink] of entries){
+    if(!rawLink) continue;
+    if(Array.isArray(rawLink)){
+      if(rawLink.length < 6) continue;
+      out.push([
+        Number(rawLink[0]) || Number(rawKey) || 0,
+        rawLink[1],
+        Number(rawLink[2]) || 0,
+        rawLink[3],
+        Number(rawLink[4]) || 0,
+        (typeof rawLink[5] === 'undefined') ? 0 : rawLink[5]
+      ]);
+      continue;
+    }
+    if(typeof rawLink !== 'object') continue;
+    const link = rawLink;
+    let linkId = Number(link.id);
+    if(!isFinite(linkId) || linkId <= 0) linkId = Number(rawKey);
+    const originId = link.origin_id;
+    const originSlot = Number(link.origin_slot);
+    const targetId = link.target_id;
+    const targetSlot = Number(link.target_slot);
+    if(!isFinite(linkId) || linkId <= 0) continue;
+    if((typeof originId !== 'string' && typeof originId !== 'number') ||
+       (typeof targetId !== 'string' && typeof targetId !== 'number') ||
+       !isFinite(originSlot) || !isFinite(targetSlot)){
+      continue;
+    }
+    out.push([
+      Math.floor(linkId),
+      originId,
+      Math.floor(originSlot),
+      targetId,
+      Math.floor(targetSlot),
+      (typeof link.type === 'undefined') ? 0 : link.type
+    ]);
+  }
+  out.sort((a,b)=> Number(a[0]) - Number(b[0]));
+  return out;
+}
+
 function _compactGraphData(graph){
   if(!graph || typeof graph !== 'object') return graph;
   const g = JSON.parse(JSON.stringify(graph));
   if(g.config && typeof g.config === 'object' && Object.keys(g.config).length === 0) delete g.config;
   if(g.extra && typeof g.extra === 'object' && Object.keys(g.extra).length === 0) delete g.extra;
+  if(typeof g.links !== 'undefined') g.links = _compactLinks(g.links);
 
   const defaultScriptText = (typeof window.defaultScript === 'function') ? String(window.defaultScript()) : '';
   const nodes = Array.isArray(g.nodes) ? g.nodes : [];
@@ -318,6 +366,10 @@ function _compactGraphData(graph){
 
 App.serializeGraphData = function(){
   return _serializeGraph();
+};
+
+App.compactGraphData = function(graph){
+  return _compactGraphData(graph);
 };
 
 App.applyGraphData = function(data, options){

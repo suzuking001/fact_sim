@@ -150,16 +150,28 @@ export function registerRuntimeMethodsGroup13(
         if (!row || !Number.isFinite(row.speed)) return null;
         return Number(row.speed);
       };
+
+      const headlessByMode: Record<string, number | null> = {};
+      const renderByMode: Record<string, number | null> = {};
+      const modeSet = new Set<string>();
+      for (const row of result.results) {
+        if (row && typeof row.mode === "string" && row.mode.trim()) {
+          modeSet.add(row.mode.trim());
+        }
+      }
+      for (const mode of modeSet) {
+        headlessByMode[mode] = speedFor(mode, "headless");
+        renderByMode[mode] = speedFor(mode, "render");
+      }
   
       const headlessDtSpeed = speedFor("dt", "headless");
       const headlessEventSpeed = speedFor("event", "headless");
       const renderDtSpeed = speedFor("dt", "render");
       const renderEventSpeed = speedFor("event", "render");
   
-      const headlessCandidates = [
-        { mode: "dt", speed: headlessDtSpeed },
-        { mode: "event", speed: headlessEventSpeed }
-      ].filter((item) => typeof item.speed === "number") as Array<{ mode: string; speed: number }>;
+      const headlessCandidates = Object.entries(headlessByMode)
+        .filter((entry): entry is [string, number] => typeof entry[1] === "number")
+        .map(([mode, speed]) => ({ mode, speed }));
   
       const bestHeadless =
         headlessCandidates.length > 0
@@ -172,8 +184,93 @@ export function registerRuntimeMethodsGroup13(
         headlessDtSpeed,
         headlessEventSpeed,
         renderDtSpeed,
-        renderEventSpeed
+        renderEventSpeed,
+        headlessByMode,
+        renderByMode
       };
+    };
+
+  (FactSimRuntimeClass.prototype as any).waitForAppGraph = async function (this: any, page: Page): Promise<void> {
+      await page.waitForFunction(() => {
+        const w = window as unknown as Record<string, unknown>;
+        const app = w.App as { graph?: unknown } | undefined;
+        return !!app?.graph;
+      }, undefined, { timeout: 30000 });
+    };
+
+  (FactSimRuntimeClass.prototype as any).getAppUrl = function (this: any, cacheBust?: string): string {
+      const suffix = String(cacheBust ?? "").trim();
+      const query = suffix ? `?skipLanding=1&v=${encodeURIComponent(suffix)}` : "?skipLanding=1";
+      return `http://127.0.0.1:${this.port}/index.html${query}`;
+    };
+
+  (FactSimRuntimeClass.prototype as any).pageHasHeadlessTools = async function (
+      this: any,
+      page: Page,
+      requiredModes?: string[]
+    ): Promise<boolean> {
+      return page.evaluate((requestedModes: unknown) => {
+        const w = window as unknown as Record<string, unknown>;
+        const app = w.App as
+          | {
+              runEngineBenchmarkAsync?: unknown;
+              runEngineTestsAsync?: unknown;
+              createHeadlessSimRunner?: unknown;
+              getBenchmarkSimModes?: unknown;
+              getEngineTestModes?: unknown;
+              normalizeHeadlessSimMode?: unknown;
+            }
+          | undefined;
+
+        if (
+          !app
+          || typeof app.runEngineBenchmarkAsync !== "function"
+          || typeof app.runEngineTestsAsync !== "function"
+          || typeof app.createHeadlessSimRunner !== "function"
+          || typeof app.getBenchmarkSimModes !== "function"
+          || typeof app.getEngineTestModes !== "function"
+        ) {
+          return false;
+        }
+
+        const rawRequired = Array.isArray(requestedModes) ? requestedModes : [];
+        if (!rawRequired.length) return true;
+
+        const normalize = typeof app.normalizeHeadlessSimMode === "function"
+          ? app.normalizeHeadlessSimMode as (mode: unknown) => string
+          : (mode: unknown) => String(mode ?? "").trim().toLowerCase();
+        const supported = new Set(
+          (app.getEngineTestModes as () => unknown[])()
+            .map((mode) => normalize(mode))
+            .filter((mode) => !!mode)
+        );
+        return rawRequired.every((mode) => supported.has(normalize(mode)));
+      }, Array.isArray(requiredModes) ? requiredModes : []);
+    };
+
+  (FactSimRuntimeClass.prototype as any).reloadPage = async function (this: any): Promise<Page> {
+      const page = await this.ensureReady();
+      const cacheBust = Date.now().toString(36);
+      await page.goto(this.getAppUrl(cacheBust), { waitUntil: "domcontentloaded", timeout: 30000 });
+      await this.waitForAppGraph(page);
+      return page;
+    };
+
+  (FactSimRuntimeClass.prototype as any).ensureHeadlessToolsReady = async function (
+      this: any,
+      requiredModes?: string[]
+    ): Promise<Page> {
+      const page = await this.ensureReady();
+      if (await this.pageHasHeadlessTools(page, requiredModes)) {
+        return page;
+      }
+
+      const reloaded = await this.reloadPage();
+      if (await this.pageHasHeadlessTools(reloaded, requiredModes)) {
+        return reloaded;
+      }
+
+      throw new Error("Headless benchmark/test capabilities are not available after page reload");
     };
 
   (FactSimRuntimeClass.prototype as any).resolveSnapshotPath = function (this: any, fileName?: string): string {
@@ -279,13 +376,9 @@ export function registerRuntimeMethodsGroup13(
         });
         this.page = await this.browserContext.newPage();
   
-        const appUrl = `http://127.0.0.1:${this.port}/index.html`;
+        const appUrl = this.getAppUrl("bootstrap");
         await this.page.goto(appUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-        await this.page.waitForFunction(() => {
-          const w = window as unknown as Record<string, unknown>;
-          const app = w.App as { graph?: unknown } | undefined;
-          return !!app?.graph;
-        }, undefined, { timeout: 30000 });
+        await this.waitForAppGraph(this.page);
       } catch (error) {
         await this.close();
         const message = toErrorMessage(error);

@@ -181,7 +181,7 @@ var App = window.App || (window.App = {});
         && typeof App.createLegacySimEngine === 'function'
         && (
           (kernelNodeCount <= 0 && fallbackNodeCount > 0)
-          || executableFallbackCount > 0
+          || (executableFallbackCount > 0 && !this.options.allowExecutableFallback)
         );
       this.runtimeMode = mustUseLegacyCompat
         ? 'legacy-compat'

@@ -3,6 +3,32 @@
 var App = window.App || (window.App = {});
 
 (function(){
+  function normalizeBenchMode(mode){
+    if(window.App && typeof App.normalizeHeadlessSimMode === 'function'){
+      return App.normalizeHeadlessSimMode(mode);
+    }
+    if(window.App && typeof App.normalizeSimMode === 'function'){
+      return App.normalizeSimMode(mode);
+    }
+    return String(mode || '').trim().toLowerCase() === 'event' ? 'event' : 'dt';
+  }
+
+  function getModeLabel(mode){
+    if(window.App && typeof App.getHeadlessModeLabel === 'function'){
+      return App.getHeadlessModeLabel(mode);
+    }
+    if(window.App && typeof App.getSimModeLabel === 'function'){
+      return App.getSimModeLabel(mode);
+    }
+    return String(mode || '');
+  }
+
+  function isHeadlessOnlyMode(mode){
+    return !!(window.App
+      && typeof App.isHeadlessOnlyBenchmarkMode === 'function'
+      && App.isHeadlessOnlyBenchmarkMode(mode));
+  }
+
   function nowSimMs(){
     return (typeof window.simNow === 'function') ? window.simNow() : 0;
   }
@@ -20,9 +46,15 @@ var App = window.App || (window.App = {});
   }
 
   function getDefaultBenchmarkModes(){
+    if(window.App && typeof App.getBenchmarkSimModes === 'function'){
+      const modes = App.getBenchmarkSimModes()
+        .map(normalizeBenchMode)
+        .filter((mode, index, arr)=> mode && arr.indexOf(mode) === index);
+      if(modes.length) return modes;
+    }
     if(window.App && typeof App.getSupportedSimModes === 'function'){
       const modes = App.getSupportedSimModes()
-        .map((mode)=> App.normalizeSimMode(mode))
+        .map(normalizeBenchMode)
         .filter((mode, index, arr)=> mode && arr.indexOf(mode) === index);
       if(modes.length) return modes;
     }
@@ -115,15 +147,18 @@ var App = window.App || (window.App = {});
       ? opts.renderCases
       : ((opts.includeRender === false) ? ['headless'] : ['headless', 'render']);
     const modes = requestedModes
-      .map(m=> App.normalizeSimMode(m))
+      .map(normalizeBenchMode)
       .filter((m, i, arr)=> arr.indexOf(m) === i);
     const renderCases = requestedRenderCases
       .map(normalizeRenderCase)
       .filter((m, i, arr)=> arr.indexOf(m) === i);
 
     const runs = [];
-    for(const renderCase of renderCases){
-      for(const mode of modes){
+    for(const mode of modes){
+      const modeRenderCases = isHeadlessOnlyMode(mode)
+        ? ['headless']
+        : renderCases;
+      for(const renderCase of modeRenderCases){
         runs.push({ mode, renderCase });
       }
     }
@@ -132,8 +167,11 @@ var App = window.App || (window.App = {});
 
   function createBenchmarkRunContext(){
     if(!App.graph) throw new Error('graph is not initialized');
-    const snapshot = App.graph.serialize();
-    if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
+    const snapshot = (typeof App.serializeGraphData === 'function')
+      ? App.serializeGraphData()
+      : App.graph.serialize();
+    if(!(typeof App.serializeGraphData === 'function')
+      && App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
       App.stopGroups.injectSerializedData(snapshot, App.graph);
     }
     const originalTime = nowSimMs();
@@ -150,13 +188,9 @@ var App = window.App || (window.App = {});
     if(typeof window.updateSimTime === 'function') window.updateSimTime();
   }
 
-  function rafYield(){
+  function cooperativeYield(){
     return new Promise(resolve=>{
-      if(typeof window.requestAnimationFrame === 'function'){
-        window.requestAnimationFrame(()=> resolve());
-      }else{
-        setTimeout(resolve, 0);
-      }
+      setTimeout(resolve, 0);
     });
   }
 
@@ -187,79 +221,108 @@ var App = window.App || (window.App = {});
         const renderLabel = getRenderCaseLabel(renderCase);
         const progressInfo = {
           mode,
-          modeLabel: App.getSimModeLabel(mode),
+          modeLabel: getModeLabel(mode),
           renderCase,
           renderLabel,
           runIndex,
           totalRuns: runs.length
         };
 
-        const graph = new LGraph();
-        const data = ctx.cloneData();
-        graph.configure(data);
-        if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
-          App.repairGraphLinks(graph);
+        const data = (typeof App.compactGraphData === 'function') ? App.compactGraphData(ctx.cloneData()) : ctx.cloneData();
+        const useHeadlessRunner = isHeadlessOnlyMode(mode) && typeof App.createHeadlessSimRunner === 'function';
+        const graph = useHeadlessRunner ? null : new LGraph();
+        if(graph){
+          graph.configure(data);
+          if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
+            App.repairGraphLinks(graph);
+          }
+          if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+            App.stopGroups.restoreSerializedData(graph, data, false);
+          }
+          if(typeof configureGraphClock === 'function') configureGraphClock(graph);
         }
-        if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
-          App.stopGroups.restoreSerializedData(graph, data, false);
-        }
-        if(typeof configureGraphClock === 'function') configureGraphClock(graph);
 
-        const engine = App.createSimEngine(mode, graph);
-        if(engine && typeof engine.reset === 'function') engine.reset();
+        const runner = useHeadlessRunner
+          ? App.createHeadlessSimRunner(mode, data, { reason: 'benchmark', engineOptions: { benchmark: true }, seed: opts.seed })
+          : App.createSimEngine(mode, graph);
+        if(runner && typeof runner.reset === 'function') runner.reset();
+        if(runner && typeof runner.resetAsync === 'function') await runner.resetAsync();
         const renderHarness = (renderCase === 'render') ? createRenderHarness(graph, opts) : null;
 
         try{
-          graph.status = LGraph.STATUS_RUNNING;
-          graph.starttime = LiteGraph.getTime();
-          graph.last_update_time = graph.starttime;
-          try{ graph.sendEventToAllNodes('onStart'); }catch(_e){}
+          if(runner && typeof runner.runBenchmarkCaseAsync === 'function'){
+            const payload = await runner.runBenchmarkCaseAsync({
+              wallMs,
+              realStepMs,
+              renderCase
+            });
+            const simMs = Number(payload && payload.simTimeMs) || 0;
+            const spentMs = Math.max(0, Number(payload && payload.wallMs) || 0);
+            const loops = Math.max(0, Number(payload && payload.loops) || 0);
+            results.push({
+              mode,
+              modeLabel: getModeLabel(mode),
+              renderCase,
+              renderLabel,
+              wallMs: spentMs,
+              simMs,
+              loops,
+              simSec: simMs / 1000,
+              speed: simMs / Math.max(1, spentMs)
+            });
+          }else{
+            graph.status = LGraph.STATUS_RUNNING;
+            graph.starttime = LiteGraph.getTime();
+            graph.last_update_time = graph.starttime;
+            try{ graph.sendEventToAllNodes('onStart'); }catch(_e){}
 
-          if(typeof window.setSimTime === 'function') window.setSimTime(0);
+            if(typeof window.setSimTime === 'function') window.setSimTime(0);
 
-          const started = performance.now();
-          let now = started;
-          let loops = 0;
+            const started = performance.now();
+            let now = started;
+            let loops = 0;
 
-          while((now - started) < wallMs){
-            const burstStarted = now;
-            while((now - started) < wallMs && (now - burstStarted) < yieldEveryMs){
-              if(engine && typeof engine.update === 'function') engine.update(realStepMs);
-              if(renderHarness) renderHarness.draw();
-              loops++;
-              now = performance.now();
+            while((now - started) < wallMs){
+              const burstStarted = now;
+              while((now - started) < wallMs && (now - burstStarted) < yieldEveryMs){
+                if(runner && typeof runner.update === 'function') runner.update(realStepMs);
+                if(renderHarness) renderHarness.draw();
+                loops++;
+                now = performance.now();
+              }
+
+              const runProgress = Math.min(1, (now - started) / wallMs);
+              emitProgress((runIndex + runProgress) / runs.length, progressInfo);
+
+              if((now - started) < wallMs){
+                await cooperativeYield();
+                now = performance.now();
+              }
             }
+            const simMs = nowSimMs();
+            const spentMs = Math.max(0, now - started);
+            try{ graph.sendEventToAllNodes('onStop'); }catch(_e){}
 
-            const runProgress = Math.min(1, (now - started) / wallMs);
-            emitProgress((runIndex + runProgress) / runs.length, progressInfo);
-
-            if((now - started) < wallMs){
-              await rafYield();
-              now = performance.now();
-            }
+            results.push({
+              mode,
+              modeLabel: getModeLabel(mode),
+              renderCase,
+              renderLabel,
+              wallMs: spentMs,
+              simMs,
+              loops,
+              simSec: simMs / 1000,
+              speed: simMs / Math.max(1, spentMs)
+            });
           }
-
-          const simMs = nowSimMs();
-          const spentMs = Math.max(0, now - started);
-          try{ graph.sendEventToAllNodes('onStop'); }catch(_e){}
-
-          results.push({
-            mode,
-            modeLabel: App.getSimModeLabel(mode),
-            renderCase,
-            renderLabel,
-            wallMs: spentMs,
-            simMs,
-            loops,
-            simSec: simMs / 1000,
-            speed: simMs / Math.max(1, spentMs)
-          });
         }finally{
           if(renderHarness) renderHarness.dispose();
+          if(runner && typeof runner.stopAsync === 'function') await runner.stopAsync();
+          if(runner && typeof runner.disposeAsync === 'function') await runner.disposeAsync();
         }
 
         emitProgress((runIndex + 1) / runs.length, progressInfo);
-        await rafYield();
+        await cooperativeYield();
       }
     }finally{
       applyBenchmarkRunContext(ctx);
@@ -284,8 +347,11 @@ var App = window.App || (window.App = {});
         const mode = run.mode;
         const renderCase = run.renderCase;
         const renderLabel = getRenderCaseLabel(renderCase);
+        if(isHeadlessOnlyMode(mode)){
+          throw new Error(`${mode} requires runEngineBenchmarkAsync()`);
+        }
         const graph = new LGraph();
-        const data = ctx.cloneData();
+        const data = (typeof App.compactGraphData === 'function') ? App.compactGraphData(ctx.cloneData()) : ctx.cloneData();
         graph.configure(data);
         if(App.repairGraphLinks && typeof App.repairGraphLinks === "function"){
           App.repairGraphLinks(graph);
@@ -323,7 +389,7 @@ var App = window.App || (window.App = {});
 
           results.push({
             mode,
-            modeLabel: App.getSimModeLabel(mode),
+            modeLabel: getModeLabel(mode),
             renderCase,
             renderLabel,
             wallMs: spentMs,

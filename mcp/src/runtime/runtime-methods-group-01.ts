@@ -149,7 +149,7 @@ export function registerRuntimeMethodsGroup01(
     };
 
   (FactSimRuntimeClass.prototype as any).runBenchmark = async function (this: any, wallMs?: number): Promise<BenchmarkOutput> {
-      const page = await this.ensureReady();
+      const page = await this.ensureHeadlessToolsReady();
       return page.evaluate(async (requestedWallMs: any) => {
         const w = window as unknown as Record<string, unknown>;
         const app = w.App as { runEngineBenchmarkAsync?: (options: Record<string, unknown>) => Promise<BenchmarkOutput> } | undefined;
@@ -168,7 +168,10 @@ export function registerRuntimeMethodsGroup01(
     };
 
   (FactSimRuntimeClass.prototype as any).runEngineTests = async function (this: any, options?: Record<string, unknown>): Promise<EngineTestOutput> {
-      const page = await this.ensureReady();
+      const requestedModes = Array.isArray(options?.engines)
+        ? options.engines.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        : undefined;
+      const page = await this.ensureHeadlessToolsReady(requestedModes);
       return page.evaluate(async (requestedOptions: any) => {
         const w = window as unknown as Record<string, unknown>;
         const app = w.App as {
@@ -186,7 +189,7 @@ export function registerRuntimeMethodsGroup01(
     };
 
   (FactSimRuntimeClass.prototype as any).getLatestEngineTestReport = async function (this: any): Promise<EngineTestOutput | null> {
-      const page = await this.ensureReady();
+      const page = await this.ensureHeadlessToolsReady();
       return page.evaluate(() => {
         const w = window as unknown as Record<string, unknown>;
         const app = w.App as {

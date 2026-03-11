@@ -228,6 +228,19 @@ if(btnResizeNodes){
 
 const simModeSelect = document.getElementById('simModeSelect');
 if(simModeSelect){
+  const supportedModes = (typeof App.getSupportedSimModes === 'function')
+    ? App.getSupportedSimModes()
+    : ['dt', 'event', 'event-fast'];
+  for(const mode of supportedModes){
+    const value = String(mode || '').trim();
+    if(!value) continue;
+    const exists = Array.from(simModeSelect.options || []).some((option)=> option.value === value);
+    if(exists) continue;
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = (typeof App.getSimModeLabel === 'function') ? App.getSimModeLabel(value) : value;
+    simModeSelect.appendChild(option);
+  }
   let currentMode = (App.setSimMode ? App.setSimMode('dt') : 'dt');
   simModeSelect.value = currentMode;
   simModeSelect.addEventListener('change', ()=>{
@@ -583,7 +596,7 @@ if(btnBenchmark){
       const benchOptions = {
         wallMs: 2000,
         realStepMs: 16,
-        modes: (typeof App.getSupportedSimModes === 'function') ? App.getSupportedSimModes() : ['dt', 'event', 'event-fast'],
+        modes: (typeof App.getBenchmarkSimModes === 'function') ? App.getBenchmarkSimModes() : ((typeof App.getSupportedSimModes === 'function') ? App.getSupportedSimModes() : ['dt', 'event', 'event-fast']),
         renderCases: ['headless', 'render']
       };
       if(typeof App.runEngineBenchmarkAsync === 'function'){

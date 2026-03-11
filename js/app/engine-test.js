@@ -63,21 +63,39 @@ var App = window.App || (window.App = {});
     return response.json();
   }
   function supportedEngines(){
+    if(window.App && typeof App.getEngineTestModes === 'function') return uniq(App.getEngineTestModes());
     if(window.App && typeof App.getSupportedSimModes === 'function') return uniq(App.getSupportedSimModes());
     return ['dt', 'event'];
   }
+  function normalizeEngineMode(mode){
+    if(window.App && typeof App.normalizeHeadlessSimMode === 'function') return App.normalizeHeadlessSimMode(mode);
+    if(window.App && typeof App.normalizeSimMode === 'function') return App.normalizeSimMode(mode);
+    return String(mode || '').trim().toLowerCase() === 'event' ? 'event' : 'dt';
+  }
+  function isHeadlessOnlyMode(mode){
+    return !!(window.App
+      && typeof App.isHeadlessOnlyBenchmarkMode === 'function'
+      && App.isHeadlessOnlyBenchmarkMode(mode));
+  }
   function normalizeOptions(options){
-    const raw = Object.assign({}, DEFAULTS, options || {});
+    const source = (options && typeof options === 'object') ? options : {};
+    const raw = Object.assign({}, DEFAULTS, source);
     const selected = (window.App && typeof App.getSimMode === 'function') ? App.getSimMode() : 'dt';
+    const targetSimMs = Math.max(1000, Number(raw.targetSimMs) || DEFAULTS.targetSimMs);
+    const realStepMs = Math.max(1, Number(raw.realStepMs) || DEFAULTS.realStepMs);
+    const derivedLoopFloor = Math.ceil(targetSimMs / realStepMs) + 1024;
+    const hasExplicitMaxLoops = Object.prototype.hasOwnProperty.call(source, 'maxLoops') && Number.isFinite(Number(raw.maxLoops));
     return {
-      engines: uniq(raw.engines && raw.engines.length ? raw.engines : [selected || 'dt']),
+      engines: uniq(raw.engines && raw.engines.length ? raw.engines : [selected || 'dt']).map(normalizeEngineMode),
       includeCurrentGraph: raw.includeCurrentGraph !== false,
       includeExamples: !!raw.includeExamples,
       examples: uniq(raw.examples && raw.examples.length ? raw.examples : DEFAULT_EXAMPLES),
-      targetSimMs: Math.max(1000, Number(raw.targetSimMs) || DEFAULTS.targetSimMs),
+      targetSimMs,
       maxWallMs: Math.max(250, Number(raw.maxWallMs) || DEFAULTS.maxWallMs),
-      realStepMs: Math.max(1, Number(raw.realStepMs) || DEFAULTS.realStepMs),
-      maxLoops: Math.max(100, Math.floor(Number(raw.maxLoops) || DEFAULTS.maxLoops)),
+      realStepMs,
+      maxLoops: hasExplicitMaxLoops
+        ? Math.max(100, Math.floor(Number(raw.maxLoops)))
+        : Math.max(DEFAULTS.maxLoops, derivedLoopFloor),
       seed: Number.isFinite(Number(raw.seed)) ? Math.floor(Math.abs(Number(raw.seed))) : null
     };
   }
@@ -94,8 +112,13 @@ var App = window.App || (window.App = {});
   }
   function createRunContext(){
     if(!App.graph || typeof App.graph.serialize !== 'function') throw new Error('App.graph is not ready');
-    const snapshot = App.graph.serialize();
-    if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function') App.stopGroups.injectSerializedData(snapshot, App.graph);
+    const snapshot = (typeof App.serializeGraphData === 'function')
+      ? App.serializeGraphData()
+      : App.graph.serialize();
+    if(!(typeof App.serializeGraphData === 'function')
+      && App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
+      App.stopGroups.injectSerializedData(snapshot, App.graph);
+    }
     return {
       snapshot,
       originalTime: nowSimMs(),
@@ -111,7 +134,7 @@ var App = window.App || (window.App = {});
     if(typeof window.updateSimTime === 'function') try{ window.updateSimTime(); }catch(_e){}
   }
   function createGraphFromData(data){
-    const payload = cloneJson(data);
+    const payload = (typeof App.compactGraphData === 'function') ? App.compactGraphData(cloneJson(data)) : cloneJson(data);
     const graph = new LGraph();
     graph.configure(payload);
     if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function') App.repairGraphLinks(graph);
@@ -225,6 +248,12 @@ var App = window.App || (window.App = {});
       };
       const seen = new Set();
       const startWall = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
+      const payload = (typeof App.compactGraphData === 'function') ? App.compactGraphData(cloneJson(source.data)) : cloneJson(source.data);
+      const baselineGraph = createGraphFromData(payload);
+      const expected = {
+        nodeCount: Array.isArray(baselineGraph && baselineGraph._nodes) ? baselineGraph._nodes.length : 0,
+        linkCount: getLinkCount(baselineGraph)
+      };
       let graph = null;
       let simEngine = null;
       let simMs = 0;
@@ -234,74 +263,117 @@ var App = window.App || (window.App = {});
           pushIssue(result.failures, seen, issue('error', 'ENGINE_UNSUPPORTED', `Engine "${engine}" is not registered in App.getSupportedSimModes()`, { engine, scenario: source.name }), 24);
           return finalizeCase(result, startWall, simMs, loops);
         }
-        graph = createGraphFromData(source.data);
-        const expected = { nodeCount: Array.isArray(graph._nodes) ? graph._nodes.length : 0, linkCount: getLinkCount(graph) };
         result.metrics.nodeCount = expected.nodeCount;
         result.metrics.linkCount = expected.linkCount;
         if(typeof window.setSimTime === 'function') window.setSimTime(0);
         if(typeof window.updateSimTime === 'function') window.updateSimTime();
         simMs = nowSimMs();
-        simEngine = App.createSimEngine(engine, graph);
-        if(!simEngine || typeof simEngine.update !== 'function'){
-          pushIssue(result.failures, seen, issue('error', 'ENGINE_CREATE_FAILED', `Engine "${engine}" did not return an update() runner`, { engine, scenario: source.name }), 24);
-          return finalizeCase(result, startWall, simMs, loops);
-        }
-        if(typeof simEngine.reset === 'function') simEngine.reset();
-        graph.status = LGraph.STATUS_RUNNING;
-        graph.starttime = LiteGraph.getTime();
-        graph.last_update_time = graph.starttime;
-        try{ graph.sendEventToAllNodes('onStart'); }catch(err){
-          pushIssue(result.warnings, seen, issue('warn', 'START_HOOK_ERROR', String((err && err.message) || err), { engine, scenario: source.name }), 24);
-        }
-        let madeProgress = false;
-        let nextCheckAt = Math.max(1000, Math.round(options.targetSimMs / 6));
-        while(simMs < options.targetSimMs){
-          const currentWall = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
-          if((currentWall - startWall) > options.maxWallMs){
+        if(isHeadlessOnlyMode(engine) && typeof App.createHeadlessSimRunner === 'function'){
+          simEngine = App.createHeadlessSimRunner(engine, source.data, {
+            reason: 'engine-test',
+            engineOptions: { engineTest: true },
+            seed: options.seed
+          });
+          if(!simEngine || typeof simEngine.runUntilSimTimeAsync !== 'function'){
+            pushIssue(result.failures, seen, issue('error', 'ENGINE_CREATE_FAILED', `Engine "${engine}" did not return an async headless runner`, { engine, scenario: source.name }), 24);
+            return finalizeCase(result, startWall, simMs, loops);
+          }
+          const payload = await simEngine.runUntilSimTimeAsync({
+            targetSimMs: options.targetSimMs,
+            maxWallMs: options.maxWallMs,
+            realStepMs: options.realStepMs,
+            maxLoops: options.maxLoops
+          });
+          simMs = Number(payload && payload.simTimeMs) || 0;
+          loops = Math.max(0, Number(payload && payload.loops) || 0);
+          if(payload && payload.finalGraphData){
+            graph = createGraphFromData(payload.finalGraphData);
+          }
+          if(simMs + 0.001 < options.targetSimMs && Number(payload && payload.wallMs) >= options.maxWallMs){
             pushIssue(result.failures, seen, issue('error', 'ENGINE_STALLED', `Engine "${engine}" did not reach ${options.targetSimMs} ms within ${options.maxWallMs} ms wall time`, { engine, scenario: source.name }), 24);
-            break;
           }
-          if(loops >= options.maxLoops){
+          if(loops >= options.maxLoops && simMs + 0.001 < options.targetSimMs){
             pushIssue(result.failures, seen, issue('error', 'LOOP_LIMIT_EXCEEDED', `Engine "${engine}" exceeded ${options.maxLoops} update loops`, { engine, scenario: source.name }), 24);
-            break;
           }
-          loops += 1;
-          let nextSim = simMs;
-          try{
-            simEngine.update(options.realStepMs);
-            nextSim = nowSimMs();
-          }catch(err){
-            pushIssue(result.failures, seen, issue('error', 'ENGINE_UPDATE_ERROR', String((err && err.message) || err), { engine, scenario: source.name }), 24);
-            break;
-          }
-          if(!Number.isFinite(nextSim)){
+          if(!Number.isFinite(simMs)){
             pushIssue(result.failures, seen, issue('error', 'NON_FINITE_SIM_TIME', 'Simulation time became non-finite', { engine, scenario: source.name }), 24);
-            break;
           }
-          if(nextSim + 0.001 < simMs){
-            pushIssue(result.failures, seen, issue('error', 'SIM_TIME_REVERSED', `Simulation time reversed from ${simMs.toFixed(3)} to ${nextSim.toFixed(3)}`, { engine, scenario: source.name }), 24);
-            break;
+          if(simMs <= 0.001){
+            pushIssue(result.failures, seen, issue('error', 'NO_SIM_PROGRESS', `Engine "${engine}" made no simulation progress`, { engine, scenario: source.name }), 24);
           }
-          if(nextSim > simMs + 0.001) madeProgress = true;
-          simMs = nextSim;
-          if(simMs >= nextCheckAt){
-            const scan = collectInvariantIssues(graph, expected);
-            for(const failure of scan.failures) pushIssue(result.failures, seen, Object.assign(failure, { engine, scenario: source.name }), 24);
-            for(const warning of scan.warnings) pushIssue(result.warnings, seen, Object.assign(warning, { engine, scenario: source.name }), 24);
-            nextCheckAt += Math.max(1000, Math.round(options.targetSimMs / 6));
-            if(result.failures.length >= 24) break;
+          if(payload && payload.sinkMetrics){
+            result.sinks = Array.isArray(payload.sinkMetrics.sinks) ? payload.sinkMetrics.sinks : [];
+            result.metrics.sinkCount = Math.max(0, Number(payload.sinkMetrics.sinkCount) || 0);
+            result.metrics.totalCompleted = Math.max(0, Number(payload.sinkMetrics.totalCompleted) || 0);
           }
+        }else{
+          graph = baselineGraph;
+          simEngine = App.createSimEngine(engine, graph);
+          if(!simEngine || typeof simEngine.update !== 'function'){
+            pushIssue(result.failures, seen, issue('error', 'ENGINE_CREATE_FAILED', `Engine "${engine}" did not return an update() runner`, { engine, scenario: source.name }), 24);
+            return finalizeCase(result, startWall, simMs, loops);
+          }
+          if(typeof simEngine.reset === 'function') simEngine.reset();
+          graph.status = LGraph.STATUS_RUNNING;
+          graph.starttime = LiteGraph.getTime();
+          graph.last_update_time = graph.starttime;
+          try{ graph.sendEventToAllNodes('onStart'); }catch(err){
+            pushIssue(result.warnings, seen, issue('warn', 'START_HOOK_ERROR', String((err && err.message) || err), { engine, scenario: source.name }), 24);
+          }
+          let madeProgress = false;
+          let nextCheckAt = Math.max(1000, Math.round(options.targetSimMs / 6));
+          while(simMs < options.targetSimMs){
+            const currentWall = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
+            if((currentWall - startWall) > options.maxWallMs){
+              pushIssue(result.failures, seen, issue('error', 'ENGINE_STALLED', `Engine "${engine}" did not reach ${options.targetSimMs} ms within ${options.maxWallMs} ms wall time`, { engine, scenario: source.name }), 24);
+              break;
+            }
+            if(loops >= options.maxLoops){
+              pushIssue(result.failures, seen, issue('error', 'LOOP_LIMIT_EXCEEDED', `Engine "${engine}" exceeded ${options.maxLoops} update loops`, { engine, scenario: source.name }), 24);
+              break;
+            }
+            loops += 1;
+            let nextSim = simMs;
+            try{
+              simEngine.update(options.realStepMs);
+              nextSim = nowSimMs();
+            }catch(err){
+              pushIssue(result.failures, seen, issue('error', 'ENGINE_UPDATE_ERROR', String((err && err.message) || err), { engine, scenario: source.name }), 24);
+              break;
+            }
+            if(!Number.isFinite(nextSim)){
+              pushIssue(result.failures, seen, issue('error', 'NON_FINITE_SIM_TIME', 'Simulation time became non-finite', { engine, scenario: source.name }), 24);
+              break;
+            }
+            if(nextSim + 0.001 < simMs){
+              pushIssue(result.failures, seen, issue('error', 'SIM_TIME_REVERSED', `Simulation time reversed from ${simMs.toFixed(3)} to ${nextSim.toFixed(3)}`, { engine, scenario: source.name }), 24);
+              break;
+            }
+            if(nextSim > simMs + 0.001) madeProgress = true;
+            simMs = nextSim;
+            if(simMs >= nextCheckAt){
+              const scan = collectInvariantIssues(graph, expected);
+              for(const failure of scan.failures) pushIssue(result.failures, seen, Object.assign(failure, { engine, scenario: source.name }), 24);
+              for(const warning of scan.warnings) pushIssue(result.warnings, seen, Object.assign(warning, { engine, scenario: source.name }), 24);
+              nextCheckAt += Math.max(1000, Math.round(options.targetSimMs / 6));
+              if(result.failures.length >= 24) break;
+            }
+          }
+          if(!madeProgress) pushIssue(result.failures, seen, issue('error', 'NO_SIM_PROGRESS', `Engine "${engine}" made no simulation progress`, { engine, scenario: source.name }), 24);
         }
-        if(!madeProgress) pushIssue(result.failures, seen, issue('error', 'NO_SIM_PROGRESS', `Engine "${engine}" made no simulation progress`, { engine, scenario: source.name }), 24);
         const finalScan = collectInvariantIssues(graph, expected);
         for(const failure of finalScan.failures) pushIssue(result.failures, seen, Object.assign(failure, { engine, scenario: source.name }), 24);
         for(const warning of finalScan.warnings) pushIssue(result.warnings, seen, Object.assign(warning, { engine, scenario: source.name }), 24);
-        const sinks = collectSinkMetrics(graph);
-        result.sinks = sinks.sinks;
-        result.metrics.sinkCount = sinks.sinkCount;
-        result.metrics.totalCompleted = sinks.totalCompleted;
+        if(!result.sinks.length && !result.metrics.sinkCount && !result.metrics.totalCompleted){
+          const sinks = collectSinkMetrics(graph);
+          result.sinks = sinks.sinks;
+          result.metrics.sinkCount = sinks.sinkCount;
+          result.metrics.totalCompleted = sinks.totalCompleted;
+        }
       } finally {
         if(graph) try{ graph.sendEventToAllNodes('onStop'); }catch(_e){}
+        if(simEngine && typeof simEngine.stopAsync === 'function') try{ await simEngine.stopAsync(); }catch(_e){}
+        if(simEngine && typeof simEngine.disposeAsync === 'function') try{ await simEngine.disposeAsync(); }catch(_e){}
         if(simEngine && typeof simEngine.stop === 'function') try{ simEngine.stop(); }catch(_e){}
       }
       return finalizeCase(result, startWall, simMs, loops);
@@ -549,13 +621,13 @@ var App = window.App || (window.App = {});
     runBtn.addEventListener('click', ()=>{
       const modeSelect = document.getElementById('simModeSelect');
       const selected = (modeSelect && modeSelect.value) || ((typeof App.getSimMode === 'function') ? App.getSimMode() : 'dt');
-      runWithOptions({ engines: [selected], includeCurrentGraph: true, includeExamples: false });
+      runWithOptions({ engines: [normalizeEngineMode(selected)], includeCurrentGraph: true, includeExamples: false });
     });
     rerunBtn.addEventListener('click', ()=>{
       const latest = App.getLatestEngineTestReport();
       const modeSelect = document.getElementById('simModeSelect');
       const selected = (modeSelect && modeSelect.value) || ((typeof App.getSimMode === 'function') ? App.getSimMode() : 'dt');
-      runWithOptions(lastOptions || (latest && latest.options) || { engines: [selected], includeCurrentGraph: true, includeExamples: false });
+      runWithOptions(lastOptions || (latest && latest.options) || { engines: [normalizeEngineMode(selected)], includeCurrentGraph: true, includeExamples: false });
     });
     copyBtn.addEventListener('click', async ()=>{
       const latest = App.getLatestEngineTestReport();

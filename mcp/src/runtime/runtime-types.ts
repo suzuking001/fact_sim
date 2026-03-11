@@ -124,6 +124,8 @@ export type ScenarioBenchmarkSummary = {
   headlessEventSpeed: number | null;
   renderDtSpeed: number | null;
   renderEventSpeed: number | null;
+  headlessByMode: Record<string, number | null>;
+  renderByMode: Record<string, number | null>;
 };
 
 export type ScenarioMatrixItem = {
