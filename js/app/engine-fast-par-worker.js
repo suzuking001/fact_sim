@@ -111,8 +111,12 @@
   }
 
   function importRequiredScripts(){
+    try{
+      importScripts('../vendor/litegraph.min.js');
+    }catch(_e){
+      importScripts('https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js');
+    }
     importScripts(
-      'https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js',
       '../nodes-config.js',
       '../nodes/work.js',
       '../nodes/sigports.js',
@@ -291,22 +295,22 @@
     for(const message of messages){
       if(!message) continue;
       const link = graph.links ? graph.links[message.linkId] : null;
-      const value = cloneJson(message.value);
+      const payloadValue = cloneJson(message.value);
       if(link){
-        link.data = value;
-        link._data = value;
+        link.data = cloneJson(payloadValue);
+        link._data = cloneJson(payloadValue);
       }
       const source = graph && typeof graph.getNodeById === 'function'
         ? graph.getNodeById(message.originId)
         : null;
       if(source && Array.isArray(source.outputs) && source.outputs[message.originSlot]){
-        source.outputs[message.originSlot]._data = value;
+        source.outputs[message.originSlot]._data = cloneJson(payloadValue);
       }
       const target = graph && typeof graph.getNodeById === 'function'
         ? graph.getNodeById(message.targetId)
         : null;
       if(target && Array.isArray(target.inputs) && target.inputs[message.targetSlot]){
-        target.inputs[message.targetSlot].value = value;
+        target.inputs[message.targetSlot].value = cloneJson(payloadValue);
       }
       if(graph.__dirtyNodeIds && typeof graph.__dirtyNodeIds.add === 'function'){
         graph.__dirtyNodeIds.add(Number(message.targetId));
@@ -428,9 +432,40 @@
         ownedNodes.push(nodeData);
       }
     }
+    const runtimeLinks = [];
+    const runtimeNodes = [];
+    const graphNodes = Array.isArray(graph && graph._nodes) ? graph._nodes : [];
+    for(const node of graphNodes){
+      if(!node || !ownedNodeIdSet.has(Number(node.id))) continue;
+      runtimeNodes.push({
+        nodeId: Number(node.id),
+        _state: typeof node._state !== 'undefined' ? cloneJson(node._state) : null,
+        _stateName: typeof node._stateName !== 'undefined' ? cloneJson(node._stateName) : null,
+        _until: Number.isFinite(Number(node._until)) ? Number(node._until) : null
+      });
+    }
+    runtimeNodes.sort((a, b)=> a.nodeId - b.nodeId);
+    const rawLinks = graph && graph.links && typeof graph.links === 'object'
+      ? Object.values(graph.links)
+      : [];
+    for(const link of rawLinks){
+      if(!link) continue;
+      if(!ownedNodeIdSet.has(Number(link.origin_id))) continue;
+      runtimeLinks.push({
+        linkId: Number(link.id),
+        originId: Number(link.origin_id),
+        originSlot: Number(link.origin_slot),
+        targetId: Number(link.target_id),
+        targetSlot: Number(link.target_slot),
+        data: cloneJson(typeof link.data !== 'undefined' ? link.data : null),
+        _data: cloneJson(typeof link._data !== 'undefined' ? link._data : null)
+      });
+    }
     return {
       nodeIds: Array.from(ownedNodeIdSet),
       ownedNodes,
+      runtimeNodes,
+      runtimeLinks,
       sinkMetrics: collectOwnedSinkMetrics(graph),
       stats: collectStats()
     };

@@ -149,6 +149,15 @@ class LinkAnimator{
     this._max = Math.max(200, Number(cfg.maxTransient) || 1500);
     this._sampleOffset = 0;
   }
+  clear(graph){
+    if(!graph){
+      this.animations.length = 0;
+      this._sampleOffset = 0;
+      return;
+    }
+    this.animations = this.animations.filter((anim)=> anim && anim.graph && anim.graph !== graph);
+    if(!this.animations.length) this._sampleOffset = 0;
+  }
   _trimTransient(){
     if(this.animations.length <= this._max) return;
     let over = this.animations.length - this._max;

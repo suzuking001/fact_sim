@@ -82,6 +82,7 @@ function summarizeEngineTest(result: Awaited<ReturnType<FactSimRuntime["runEngin
     comparisons: result.comparisons,
     results: result.results.map((row) => ({
       engine: row.engine,
+      seed: typeof row.seed === "number" ? row.seed : null,
       scenario: row.scenario,
       sourceKind: row.sourceKind,
       status: row.status,
@@ -1003,14 +1004,17 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         includeCurrentGraph: z.boolean().optional(),
         includeExamples: z.boolean().optional(),
         examples: z.array(z.string().min(1)).optional(),
+        suite: z.enum(["quick", "standard", "soak"]).optional(),
         targetSimMs: z.number().int().positive().optional(),
         maxWallMs: z.number().int().positive().optional(),
         realStepMs: z.number().int().positive().optional(),
         maxLoops: z.number().int().positive().optional(),
-        seed: z.number().int().optional()
+        seed: z.number().int().optional(),
+        seeds: z.array(z.number().int()).optional(),
+        strictFinalParity: z.boolean().optional()
       }
     },
-    async ({ action, engines, includeCurrentGraph, includeExamples, examples, targetSimMs, maxWallMs, realStepMs, maxLoops, seed }, extra) => {
+    async ({ action, engines, includeCurrentGraph, includeExamples, examples, suite, targetSimMs, maxWallMs, realStepMs, maxLoops, seed, seeds, strictFinalParity }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "engine_test", { action }, async () => {
         if (action === "latest") {
@@ -1022,11 +1026,14 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
             includeCurrentGraph,
             includeExamples,
             examples,
+            suite,
             targetSimMs,
             maxWallMs,
             realStepMs,
             maxLoops,
-            seed
+            seed,
+            seeds,
+            strictFinalParity
           })
         );
       });

@@ -115,8 +115,12 @@ return true;`;
   }
 
   function importRequiredScripts(){
+    try{
+      importScripts('../vendor/litegraph.min.js');
+    }catch(_e){
+      importScripts('https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js');
+    }
     importScripts(
-      'https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js',
       '../nodes-config.js',
       '../nodes/work.js',
       '../nodes/sigports.js',
@@ -222,6 +226,50 @@ return true;`;
     return engine && typeof engine.getDebugStats === 'function' ? engine.getDebugStats() : null;
   }
 
+  function collectRuntimeLinkStates(targetGraph){
+    const rows = [];
+    const rawLinks = targetGraph && targetGraph.links && typeof targetGraph.links === 'object'
+      ? Object.values(targetGraph.links)
+      : [];
+    for(const link of rawLinks){
+      if(!link) continue;
+      rows.push({
+        linkId: Number(link.id),
+        originId: Number(link.origin_id),
+        originSlot: Number(link.origin_slot),
+        targetId: Number(link.target_id),
+        targetSlot: Number(link.target_slot),
+        data: cloneJson(typeof link.data !== 'undefined' ? link.data : null),
+        _data: cloneJson(typeof link._data !== 'undefined' ? link._data : null)
+      });
+    }
+    rows.sort((a, b)=> a.linkId - b.linkId);
+    return rows;
+  }
+  function collectRuntimeNodeStates(targetGraph){
+    const rows = [];
+    const nodes = Array.isArray(targetGraph && targetGraph._nodes) ? targetGraph._nodes : [];
+    for(const node of nodes){
+      if(!node) continue;
+      rows.push({
+        nodeId: Number(node.id),
+        _state: typeof node._state !== 'undefined' ? cloneJson(node._state) : null,
+        _stateName: typeof node._stateName !== 'undefined' ? cloneJson(node._stateName) : null,
+        _until: Number.isFinite(Number(node._until)) ? Number(node._until) : null
+      });
+    }
+    rows.sort((a, b)=> a.nodeId - b.nodeId);
+    return rows;
+  }
+
+  function snapshotGraphData(targetGraph){
+    if(!targetGraph) return null;
+    const data = targetGraph.serialize();
+    data.__factSimRuntimeNodes = collectRuntimeNodeStates(targetGraph);
+    data.__factSimRuntimeLinks = collectRuntimeLinkStates(targetGraph);
+    return data;
+  }
+
   function runBenchmarkCase(payload){
     if(!engine || !graph) throw new Error('worker engine is not initialized');
     const wallMs = Math.max(100, Number(payload && payload.wallMs) || 2000);
@@ -257,7 +305,7 @@ return true;`;
     engine.update(simDeltaMs);
     return {
       simTimeMs: simNow(),
-      graphData: payload && payload.snapshot ? graph.serialize() : null,
+      graphData: payload && payload.snapshot ? snapshotGraphData(graph) : null,
       stats: collectStats()
     };
   }
@@ -280,7 +328,7 @@ return true;`;
       loops += 1;
     }
     const finished = performance.now();
-    const finalGraphData = graph ? graph.serialize() : null;
+    const finalGraphData = snapshotGraphData(graph);
     const sinkMetrics = collectSinkMetrics(graph);
     stopCurrentGraph();
     return {

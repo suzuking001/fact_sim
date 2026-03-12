@@ -175,6 +175,22 @@ function _stripNodeScripts(data){
   }
 }
 
+function _clearRuntimeVisualState(graph){
+  try{
+    if(window.WorkLinkAnimator && typeof window.WorkLinkAnimator.clear === 'function'){
+      window.WorkLinkAnimator.clear();
+    }
+  }catch(_e){}
+  if(!graph || typeof graph !== 'object') return;
+  try{
+    graph.__outputDirty = false;
+    if(graph.__dirtyNodeIds && typeof graph.__dirtyNodeIds.clear === 'function'){
+      graph.__dirtyNodeIds.clear();
+    }
+    graph.__dirtyNodeIds = null;
+  }catch(_e){}
+}
+
 function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
@@ -184,6 +200,7 @@ function _applyGraphData(data, options){
   if(typeof window.stopSimulation === 'function'){
     try{ window.stopSimulation(); }catch(_e){}
   }
+  _clearRuntimeVisualState(App.graph);
   const expectedRevision = Number(opts.expectedRevision);
   if(isFinite(expectedRevision)){
     const currentRevision = (typeof App.getGraphLoadRevision === 'function')
@@ -232,6 +249,7 @@ function _applyGraphData(data, options){
     App.history.lock = false;
   }
   configureGraphClock(App.graph);
+  _clearRuntimeVisualState(App.graph);
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
   if(typeof updateSimTime === 'function') updateSimTime();
   resetHistory();
@@ -374,6 +392,10 @@ App.compactGraphData = function(graph){
 
 App.applyGraphData = function(data, options){
   return _applyGraphData(data, options);
+};
+
+App.clearRuntimeVisualState = function(graph){
+  _clearRuntimeVisualState(graph || App.graph || null);
 };
 
 function _hasCompressionStreams(){

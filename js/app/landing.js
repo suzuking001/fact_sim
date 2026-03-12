@@ -246,6 +246,10 @@
       return true;
     }
 
+    if(typeof App.resetToInitialState === 'function'){
+      return Promise.resolve(App.resetToInitialState()).then(()=> true);
+    }
+
     const sel = document.getElementById('exampleSelect');
     const exampleKey = String((sel && sel.value) || 'sample_line2').trim() || 'sample_line2';
     if(typeof window.makeExample === 'function'){

@@ -26,6 +26,7 @@ export type EngineTestIssue = {
 
 export type EngineTestCaseResult = {
   engine: string;
+  seed?: number | null;
   scenario: string;
   sourceKind: string;
   ok: boolean;
@@ -63,6 +64,7 @@ export type EngineTestOutput = {
   results: EngineTestCaseResult[];
   comparisons: Array<{
     scenario: string;
+    seed?: number | null;
     baselineEngine: string;
     candidateEngine: string;
     completedDelta: number;
@@ -74,6 +76,11 @@ export type EngineTestOutput = {
     caseCount: number;
     failureCount: number;
     warningCount: number;
+    engineCount?: number;
+    exampleCount?: number;
+    seedCount?: number;
+    suite?: string;
+    includesCurrentGraph?: boolean;
   } | null;
   mcpHint?: {
     tool: string;

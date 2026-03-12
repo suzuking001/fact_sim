@@ -6,6 +6,7 @@ const EXAMPLE_ALIASES = {
   agv_config: 'carrier',
   carrier_config: 'carrier'
 };
+const DEFAULT_EXAMPLE_KEY = 'sample_line2';
 
 const EXAMPLE_FILES = {
   simple: 'sample/simple.json',
@@ -14,7 +15,7 @@ const EXAMPLE_FILES = {
   carrier: 'sample/graph (3).json',
   pallet_station_demo: 'sample/pallet_station_demo.json',
   sample_line1: 'sample/sample_line1.json',
-  sample_line2: 'sample/sample_line2.json'
+  sample_line2: 'sample/sample_line2.json?v=20260313a'
 };
 
 function shouldAutoStartFromUrl(){
@@ -56,14 +57,31 @@ function resolveExampleKey(kind){
   return EXAMPLE_ALIASES[key] || key;
 }
 
+function getDefaultExampleKey(){
+  return DEFAULT_EXAMPLE_KEY;
+}
+
+function syncExampleSelection(kind){
+  const sel = document.getElementById('exampleSelect');
+  if(!sel) return;
+  const key = resolveExampleKey(kind) || DEFAULT_EXAMPLE_KEY;
+  sel.value = key;
+}
+
 function encodeRequestPath(path){
-  return String(path || '')
+  const raw = String(path || '');
+  const qIndex = raw.indexOf('?');
+  const hashIndex = raw.indexOf('#');
+  const splitIndex = [qIndex, hashIndex].filter((v)=> v >= 0).sort((a, b)=> a - b)[0];
+  const pathname = splitIndex >= 0 ? raw.slice(0, splitIndex) : raw;
+  const suffix = splitIndex >= 0 ? raw.slice(splitIndex) : '';
+  return pathname
     .split('/')
     .map((segment, index)=>{
       if(index === 0 && segment === '') return '';
       return encodeURIComponent(segment);
     })
-    .join('/');
+    .join('/') + suffix;
 }
 
 function _nextGraphLoadToken(){
@@ -184,8 +202,8 @@ function initExamples(){
   }
 
   // Default example: sample_line2
-  if(sel) sel.value = 'sample_line2';
-  const loadPromise = makeExample('sample_line2');
+  syncExampleSelection(DEFAULT_EXAMPLE_KEY);
+  const loadPromise = makeExample(DEFAULT_EXAMPLE_KEY);
   Promise.resolve(loadPromise).then(()=>{
     try{
       if(typeof App.refreshSidebarChrome === 'function') App.refreshSidebarChrome();
@@ -197,6 +215,22 @@ function initExamples(){
     });
   }
 }
+
+App.getDefaultExampleKey = getDefaultExampleKey;
+App.loadDefaultExample = function(){
+  const key = getDefaultExampleKey();
+  syncExampleSelection(key);
+  return Promise.resolve(makeExample(key));
+};
+App.resetToInitialState = function(){
+  if(typeof window.stopSimulation === 'function'){
+    try{ window.stopSimulation(); }catch(_e){}
+  }
+  if(typeof App.loadDefaultExample === 'function'){
+    return App.loadDefaultExample();
+  }
+  return Promise.resolve(false);
+};
 
 
 

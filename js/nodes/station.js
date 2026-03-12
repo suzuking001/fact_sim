@@ -148,6 +148,11 @@ class StationNode extends LiteGraph.LGraphNode{
     return !!(out && out.links && out.links.length);
   }
 
+  _hasConnectedWorkInput(){
+    const port = this.inputs && this.inputs[0];
+    return !!(port && port.link != null);
+  }
+
   _isFull(){
     if(!this._pallet || !Array.isArray(this._pallet.works)) return false;
     const cap = this._normalizePalletCapacity(this._pallet.capacity || this.properties.palletWorkCapacity);
@@ -357,6 +362,14 @@ class StationNode extends LiteGraph.LGraphNode{
       this._lastWorkInRef = workIn;
       this._startProcess('work_in', workIn);
       return true;
+    }
+
+    // When a work input is connected, keep prioritizing pallet loading until
+    // the pallet is full. This avoids event-driven same-time reordering from
+    // partially unloading a pallet before upstream sources have a chance to
+    // present the next work item, which should match dt behavior.
+    if(this._hasConnectedWorkInput()){
+      return false;
     }
 
     const workOut = this._firstWork();

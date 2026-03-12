@@ -171,6 +171,7 @@ export function registerRuntimeMethodsGroup01(
       const requestedModes = Array.isArray(options?.engines)
         ? options.engines.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
         : undefined;
+      await this.reloadPage();
       const page = await this.ensureHeadlessToolsReady(requestedModes);
       return page.evaluate(async (requestedOptions: any) => {
         const w = window as unknown as Record<string, unknown>;

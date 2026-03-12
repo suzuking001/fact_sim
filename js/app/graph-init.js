@@ -107,6 +107,9 @@ function applyGraphVisualTheme(){
 function initGraph(){
   applyGraphVisualTheme();
   if(App.graph) stopSimulation();
+  if(typeof App.clearRuntimeVisualState === 'function'){
+    App.clearRuntimeVisualState(App.graph || null);
+  }
   workCounter = 0;
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
   if(App.stopGroups && typeof App.stopGroups.clearRuntimeState === 'function'){

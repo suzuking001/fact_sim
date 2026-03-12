@@ -157,7 +157,17 @@ const btnStop = document.getElementById('btnStop');
 if(btnStop) btnStop.onclick = ()=>{ stopSimulation(); };
 
 const btnReset = document.getElementById('btnReset');
-if(btnReset) btnReset.onclick = ()=>{ stopSimulation(); initGraph(); };
+if(btnReset) btnReset.onclick = ()=>{
+  if(typeof App.resetToInitialState === 'function'){
+    Promise.resolve(App.resetToInitialState()).catch((err)=>{
+      console.error(err);
+      alert('Reset failed');
+    });
+    return;
+  }
+  stopSimulation();
+  initGraph();
+};
 
 const btnFit = document.getElementById('btnFit');
 if(btnFit) btnFit.addEventListener('click', ()=> fitToScreen());

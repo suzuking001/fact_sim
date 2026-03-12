@@ -7780,34 +7780,6 @@
       "AGV"
     ]
   ],
-  "groups": [
-    {
-      "title": "Random Stop Group",
-      "bounding": [
-        172,
-        -197,
-        3622,
-        2407
-      ],
-      "color": "#f59e0b"
-    }
-  ],
-  "extra": {
-    "stopGroupsV1": [
-      {
-        "index": 0,
-        "uid": "sg-mm0fze25-2",
-        "type": "random_stop",
-        "title": "Random Stop Group",
-        "props": {
-          "intervalMedianSec": 30,
-          "intervalSigmaSec": 30,
-          "durationMedianSec": 45,
-          "durationSigmaSec": 8,
-          "randomSeed": "1"
-        }
-      }
-    ]
-  },
+  "groups": [],
   "version": 0.4
 }

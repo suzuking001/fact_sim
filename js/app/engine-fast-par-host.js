@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const PAR_MODE = 'event-fast-par';
-  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260311b';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260313a';
   const MAX_FLUSH_ROUNDS = 16;
 
   function cloneJson(value){
@@ -32,6 +32,223 @@ var App = window.App || (window.App = {});
     return (typeof App.compactGraphData === 'function')
       ? App.compactGraphData(cloneJson(graphOrData))
       : cloneJson(graphOrData);
+  }
+
+  function createGraphFromData(graphData){
+    const data = (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(graphData))
+      : cloneJson(graphData);
+    const graph = new LGraph();
+    graph.configure(data);
+    if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function'){
+      try{ App.repairGraphLinks(graph); }catch(_e){}
+    }
+    if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+      try{ App.stopGroups.restoreSerializedData(graph, data, false); }catch(_e){}
+    }
+    if(typeof configureGraphClock === 'function'){
+      try{ configureGraphClock(graph); }catch(_e){}
+    }
+    return graph;
+  }
+
+  function collectNodeIdSetFromGraph(graph){
+    const out = new Set();
+    const nodes = Array.isArray(graph && graph._nodes) ? graph._nodes : [];
+    for(const node of nodes){
+      const id = Number(node && node.id);
+      if(Number.isFinite(id)) out.add(id);
+    }
+    return out;
+  }
+
+  function collectNodeIdSetFromData(graphData){
+    const out = new Set();
+    const nodes = Array.isArray(graphData && graphData.nodes) ? graphData.nodes : [];
+    for(const node of nodes){
+      const id = Number(node && node.id);
+      if(Number.isFinite(id)) out.add(id);
+    }
+    return out;
+  }
+
+  function collectLinkIdSetFromGraph(graph){
+    const out = new Set();
+    const links = graph && graph.links && typeof graph.links === 'object' ? Object.values(graph.links) : [];
+    for(const link of links){
+      const id = Number(link && link.id);
+      if(Number.isFinite(id)) out.add(id);
+    }
+    return out;
+  }
+
+  function collectLinkIdSetFromData(graphData){
+    const out = new Set();
+    const links = Array.isArray(graphData && graphData.links) ? graphData.links : [];
+    for(const row of links){
+      const id = Array.isArray(row) ? Number(row[0]) : Number(row && row.id);
+      if(Number.isFinite(id)) out.add(id);
+    }
+    return out;
+  }
+
+  function sameIdSet(a, b){
+    if(a.size !== b.size) return false;
+    for(const value of a){
+      if(!b.has(value)) return false;
+    }
+    return true;
+  }
+
+  function graphStructureMatchesSnapshot(graph, graphData){
+    if(!graph || !graphData) return false;
+    return sameIdSet(collectNodeIdSetFromGraph(graph), collectNodeIdSetFromData(graphData))
+      && sameIdSet(collectLinkIdSetFromGraph(graph), collectLinkIdSetFromData(graphData));
+  }
+
+  function reportLiveSyncError(mode, error){
+    const message = String(error && error.message ? error.message : error || 'unknown live sync error');
+    try{
+      App._lastLiveSyncError = { mode: String(mode || ''), message, at: Date.now() };
+    }catch(_e){}
+    try{ console.error(`[${mode || PAR_MODE}] live sync failed`, error); }catch(_e){}
+    try{
+      const now = Date.now();
+      const prevAt = Number(App._lastLiveSyncToastAt) || 0;
+      if((now - prevAt) > 3000 && typeof App.showToast === 'function'){
+        App._lastLiveSyncToastAt = now;
+        App.showToast(`Live sync failed (${mode || 'parallel'}).`);
+      }
+    }catch(_e){}
+  }
+
+  function reduceGlobalSimTime(current, rows){
+    const values = [];
+    for(const row of Array.isArray(rows) ? rows : []){
+      const value = Number(row && row.simTimeMs);
+      if(Number.isFinite(value)) values.push(value);
+    }
+    if(!values.length) return Number.isFinite(Number(current)) ? Number(current) : 0;
+    const next = Math.min.apply(null, values);
+    return Number.isFinite(Number(current)) ? Math.max(Number(current), next) : next;
+  }
+
+  function buildRuntimeLinkStates(snapshotLinks){
+    const states = [];
+    const byId = new Map();
+    for(const snapshot of Array.isArray(snapshotLinks) ? snapshotLinks : []){
+      const runtimeLinks = Array.isArray(snapshot && snapshot.runtimeLinks) ? snapshot.runtimeLinks : [];
+      for(const row of runtimeLinks){
+        const linkId = Number(row && row.linkId);
+        if(!Number.isFinite(linkId)) continue;
+        byId.set(linkId, {
+          linkId,
+          originId: Number(row.originId),
+          originSlot: Number(row.originSlot),
+          targetId: Number(row.targetId),
+          targetSlot: Number(row.targetSlot),
+          data: cloneJson(typeof row.data !== 'undefined' ? row.data : null),
+          _data: cloneJson(typeof row._data !== 'undefined' ? row._data : null)
+        });
+      }
+    }
+    for(const row of byId.values()) states.push(row);
+    states.sort((a, b)=> a.linkId - b.linkId);
+    return states;
+  }
+  function buildRuntimeNodeStates(snapshotNodes){
+    const states = [];
+    const byId = new Map();
+    for(const snapshot of Array.isArray(snapshotNodes) ? snapshotNodes : []){
+      const runtimeNodes = Array.isArray(snapshot && snapshot.runtimeNodes) ? snapshot.runtimeNodes : [];
+      for(const row of runtimeNodes){
+        const nodeId = Number(row && row.nodeId);
+        if(!Number.isFinite(nodeId)) continue;
+        byId.set(nodeId, {
+          nodeId,
+          _state: cloneJson(typeof row._state !== 'undefined' ? row._state : null),
+          _stateName: cloneJson(typeof row._stateName !== 'undefined' ? row._stateName : null),
+          _until: Number.isFinite(Number(row && row._until)) ? Number(row._until) : null
+        });
+      }
+    }
+    for(const row of byId.values()) states.push(row);
+    states.sort((a, b)=> a.nodeId - b.nodeId);
+    return states;
+  }
+
+  function applyRuntimeNodeStates(graph, graphData){
+    if(!graph || typeof graph.getNodeById !== 'function') return;
+    const states = Array.isArray(graphData && graphData.__factSimRuntimeNodes) ? graphData.__factSimRuntimeNodes : [];
+    for(const row of states){
+      const node = graph.getNodeById(Number(row && row.nodeId));
+      if(!node) continue;
+      if(Object.prototype.hasOwnProperty.call(row || {}, '_state')) node._state = cloneJson(row._state);
+      if(Object.prototype.hasOwnProperty.call(row || {}, '_stateName')) node._stateName = cloneJson(row._stateName);
+      if(Object.prototype.hasOwnProperty.call(row || {}, '_until') && Number.isFinite(Number(row._until))) node._until = Number(row._until);
+    }
+  }
+
+  function applyRuntimeLinkStates(graph, graphData){
+    if(!graph || !graph.links || typeof graph.links !== 'object') return;
+    const states = Array.isArray(graphData && graphData.__factSimRuntimeLinks) ? graphData.__factSimRuntimeLinks : [];
+    const byId = new Map(states.map((row)=> [Number(row && row.linkId), row]));
+    for(const raw of Object.values(graph.links)){
+      if(!raw) continue;
+      const linkId = Number(raw.id);
+      const state = byId.get(linkId) || null;
+      const nextValue = cloneJson(state ? (typeof state.data !== 'undefined' ? state.data : state._data) : null);
+      raw.data = nextValue;
+      raw._data = cloneJson(nextValue);
+      if(typeof graph.getNodeById === 'function'){
+        const source = graph.getNodeById(Number(raw.origin_id));
+        if(source && Array.isArray(source.outputs) && source.outputs[raw.origin_slot]){
+          source.outputs[raw.origin_slot]._data = cloneJson(nextValue);
+        }
+        const target = graph.getNodeById(Number(raw.target_id));
+        if(target && Array.isArray(target.inputs) && target.inputs[raw.target_slot]){
+          target.inputs[raw.target_slot].value = cloneJson(nextValue);
+        }
+      }
+    }
+  }
+
+  function syncLiveGraph(graph, graphData){
+    if(!graph || !graphData) return false;
+    const data = (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(graphData))
+      : cloneJson(graphData);
+    try{
+      if(!graphStructureMatchesSnapshot(graph, data)){
+        graph.configure(data);
+        if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function'){
+          try{ App.repairGraphLinks(graph); }catch(_e){}
+        }
+        if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+          try{ App.stopGroups.restoreSerializedData(graph, data, false); }catch(_e){}
+        }
+      }
+      applyRuntimeNodeStates(graph, graphData);
+      applyRuntimeLinkStates(graph, graphData);
+      graph.status = LGraph.STATUS_RUNNING;
+      graph.last_update_time = LiteGraph.getTime();
+      if(App.timelineChart){
+        try{
+          if(typeof App.timelineChart.attachGraph === 'function'){
+            if(App.timelineChart.graph !== graph) App.timelineChart.attachGraph(graph);
+          }
+          else App.timelineChart.graph = graph;
+        }catch(_e){}
+      }
+      try{
+        if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+        else if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+      }catch(_e){}
+      return true;
+    }catch(_e){
+      reportLiveSyncError(PAR_MODE, _e);
+      return false;
+    }
   }
 
   function bucketMessages(messages, partitionCount){
@@ -64,6 +281,8 @@ var App = window.App || (window.App = {});
       }
     }
     merged.nodes = nodes;
+    merged.__factSimRuntimeNodes = buildRuntimeNodeStates(snapshots);
+    merged.__factSimRuntimeLinks = buildRuntimeLinkStates(snapshots);
     return merged;
   }
 
@@ -258,7 +477,7 @@ var App = window.App || (window.App = {});
         if(!canUseParWorker() || !plan || !plan.canParallelize){
           const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
           this._runner = App.createHeadlessSimRunner(fallbackMode, this.graphData, this.options);
-          this.runtimeMode = `fallback-${fallbackMode}`;
+          this.runtimeMode = this._runner && this._runner.runtimeMode ? this._runner.runtimeMode : `fallback-${fallbackMode}`;
           return { runtimeMode: this.runtimeMode, stats: null };
         }
         this._workers = plan.partitions.map((part)=>
@@ -270,7 +489,7 @@ var App = window.App || (window.App = {});
           await Promise.all(this._workers.map((worker)=> worker.disposeAsync()));
           this._workers = [];
           this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
-          this.runtimeMode = 'fallback-event-fast-worker';
+          this.runtimeMode = this._runner && this._runner.runtimeMode ? this._runner.runtimeMode : 'fallback-event-fast-worker';
           return { runtimeMode: this.runtimeMode, stats: null };
         }
         this._independentPartitions = Number(plan.cutEdgeCount) === 0;
@@ -317,6 +536,7 @@ var App = window.App || (window.App = {});
           }
         }
       }
+      aggregate.simTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, list);
       return aggregate;
     }
 
@@ -341,7 +561,7 @@ var App = window.App || (window.App = {});
       let latestStats = null;
       for(let stepIndex = 0; stepIndex < substeps; stepIndex += 1){
         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
-        this._lastSimTimeMs = Math.max(this._lastSimTimeMs, ...results.map((row)=> Number(row && row.simTimeMs) || 0));
+        this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
         const statsByPartition = results.map((row)=> row && row.stats);
         let buckets = bucketMessages(
           results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
@@ -357,7 +577,7 @@ var App = window.App || (window.App = {});
           const flushResults = await Promise.all(
             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
           );
-          this._lastSimTimeMs = Math.max(this._lastSimTimeMs, ...flushResults.map((row)=> Number(row && row.simTimeMs) || 0));
+          this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, flushResults);
           for(let i = 0; i < touched.length; i += 1){
             const partitionIndex = touched[i];
             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
@@ -382,7 +602,7 @@ var App = window.App || (window.App = {});
       }
       if(this._independentPartitions){
         const payloads = await Promise.all(this._workers.map((worker)=> worker.runBenchmarkCaseAsync(options)));
-        this._lastSimTimeMs = Math.max(0, ...payloads.map((row)=> Number(row && row.simTimeMs) || 0));
+        this._lastSimTimeMs = reduceGlobalSimTime(0, payloads);
         this._lastStats = this._aggregateStats(payloads.map((row)=> row && row.stats));
         return {
           simTimeMs: this._lastSimTimeMs,
@@ -418,7 +638,7 @@ var App = window.App || (window.App = {});
       }
       if(this._independentPartitions){
         const payloads = await Promise.all(this._workers.map((worker)=> worker.runUntilSimTimeAsync(options)));
-        this._lastSimTimeMs = Math.max(0, ...payloads.map((row)=> Number(row && row.simTimeMs) || 0));
+        this._lastSimTimeMs = reduceGlobalSimTime(0, payloads);
         this._lastStats = this._aggregateStats(payloads.map((row)=> row && row.stats));
         const snapshots = payloads.map((row)=> row && row.ownedSnapshot).filter(Boolean);
         const sinkMetrics = { sinkCount: 0, totalCompleted: 0, sinks: [] };
@@ -471,6 +691,29 @@ var App = window.App || (window.App = {});
       };
     }
 
+    async stepAsync(options){
+      await this._ensureRunner();
+      const opts = Object.assign({}, options || {});
+      const simDeltaMs = Math.max(0.5, Number(opts.simDeltaMs) || 4);
+      if(this._runner && typeof this._runner.stepAsync === 'function'){
+        const payload = await this._runner.stepAsync(opts);
+        this._lastSimTimeMs = Math.max(this._lastSimTimeMs, Number(payload && payload.simTimeMs) || 0);
+        this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+        return payload;
+      }
+      const stepped = await this._stepParallel(simDeltaMs);
+      let graphData = null;
+      if(opts.snapshot){
+        const snapshots = await Promise.all(this._workers.map((worker)=> worker.getSnapshotAsync()));
+        graphData = mergeOwnedNodeSnapshots(this.graphData, snapshots);
+      }
+      return {
+        simTimeMs: this._lastSimTimeMs,
+        graphData,
+        stats: stepped && stepped.stats ? stepped.stats : this._lastStats
+      };
+    }
+
     async getDebugStatsAsync(){
       await this._ensureRunner();
       if(this._runner && typeof this._runner.getDebugStatsAsync === 'function'){
@@ -506,7 +749,203 @@ var App = window.App || (window.App = {});
     }
   }
 
+  class LiveEventFastParEngine{
+    constructor(graph, options){
+      this.mode = PAR_MODE;
+      this.graph = graph;
+      this.options = Object.assign({}, options || {});
+      this._lastStats = null;
+      this._stopped = false;
+      this._disposed = false;
+      this._queuedDeltaMs = 0;
+      this._accumMs = 0;
+      this._inFlight = null;
+      this._lastSnapshotAt = 0;
+      this._snapshotIntervalMs = 0;
+      this._liveQuantumMs = Math.max(1, (((typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1) * 1000));
+      this._liveFallbackEngine = null;
+      this._runner = null;
+
+      const graphData = serializeGraphData(graph);
+      const plan = (typeof App.createEventFastParPlan === 'function')
+        ? App.createEventFastParPlan(graphData, { partitionCount: this.options.partitionCount })
+        : null;
+      const canRunParallel = canUseParWorker() && !!(plan && plan.canParallelize);
+
+      if(canRunParallel){
+        this.runtimeMode = 'parallel-live';
+        this._runner = new EventFastParHost(graphData, Object.assign({}, this.options, {
+          partitionSubsteps: 1
+        }));
+      }else{
+        this._runner = null;
+        this._liveFallbackEngine = App.createSimEngine('event-fast', graph);
+        this.runtimeMode = (this._liveFallbackEngine && this._liveFallbackEngine.runtimeMode)
+          ? this._liveFallbackEngine.runtimeMode
+          : `fallback-live-${plan && plan.fallbackMode ? plan.fallbackMode : 'event-fast'}`;
+      }
+    }
+
+    reset(){
+      this._stopped = false;
+      this._queuedDeltaMs = 0;
+      this._accumMs = 0;
+      this._inFlight = null;
+      this._lastSnapshotAt = 0;
+      if(this._liveFallbackEngine && typeof this._liveFallbackEngine.reset === 'function'){
+        this._liveFallbackEngine.reset();
+        this._lastStats = (typeof this._liveFallbackEngine.getDebugStats === 'function')
+          ? this._liveFallbackEngine.getDebugStats()
+          : this._lastStats;
+        return;
+      }
+      if(this._runner){
+        this._readyPromise = this._runner.resetAsync().then((payload)=>{
+          this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+          return payload;
+        }).catch((err)=>{
+          console.error(err);
+          return null;
+        });
+      }
+    }
+
+    _scheduleDrain(){
+      if(this._stopped || this._disposed || this._liveFallbackEngine || !this._runner) return;
+      if(this._inFlight || this._queuedDeltaMs <= 0) return;
+      if(this._queuedDeltaMs + 0.001 < this._liveQuantumMs) return;
+      const deltaMs = this._liveQuantumMs;
+      this._queuedDeltaMs = Math.max(0, this._queuedDeltaMs - deltaMs);
+      const requestSnapshot = true;
+      const ready = this._readyPromise || Promise.resolve();
+      this._inFlight = ready
+        .then(()=> this._runner.stepAsync({ simDeltaMs: deltaMs, snapshot: requestSnapshot }))
+        .then((payload)=>{
+          if(this._stopped || this._disposed || !payload) return;
+          if(Number.isFinite(Number(payload.simTimeMs)) && typeof window.setSimTime === 'function'){
+            try{ window.setSimTime(Number(payload.simTimeMs)); }catch(_e){}
+          }
+          if(payload.graphData && syncLiveGraph(this.graph, payload.graphData)){
+            this._lastSnapshotAt = performance.now();
+          }
+          this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+          try{
+            if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
+              App.timelineChart.onStep(false);
+            }
+            if(typeof window.updateSimTime === 'function') window.updateSimTime();
+            if(App.timelineChart && typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
+          }catch(_e){}
+        })
+        .catch((err)=>{
+          console.error(err);
+        })
+        .finally(()=>{
+          this._inFlight = null;
+          if(this._queuedDeltaMs > 0 && !this._stopped && !this._disposed){
+            this._scheduleDrain();
+          }
+        });
+    }
+
+    update(simDeltaMs){
+      if(this._disposed || this._stopped) return;
+      if(this._liveFallbackEngine && typeof this._liveFallbackEngine.update === 'function'){
+        this._liveFallbackEngine.update(simDeltaMs);
+        this._lastStats = (typeof this._liveFallbackEngine.getDebugStats === 'function')
+          ? this._liveFallbackEngine.getDebugStats()
+          : this._lastStats;
+        return;
+      }
+      const delta = Number(simDeltaMs);
+      if(Number.isFinite(delta) && delta > 0){
+        this._accumMs += delta;
+        while(this._accumMs + 0.001 >= this._liveQuantumMs){
+          this._queuedDeltaMs += this._liveQuantumMs;
+          this._accumMs -= this._liveQuantumMs;
+        }
+      }
+      this._scheduleDrain();
+    }
+
+    stop(){
+      const queuedDeltaMs = Math.max(0, this._queuedDeltaMs) + Math.max(0, this._accumMs);
+      this._stopped = true;
+      this._queuedDeltaMs = 0;
+      this._accumMs = 0;
+      if(this._liveFallbackEngine && typeof this._liveFallbackEngine.stop === 'function'){
+        if(queuedDeltaMs >= 0.5 && typeof this._liveFallbackEngine.update === 'function'){
+          try{ this._liveFallbackEngine.update(queuedDeltaMs); }catch(_e){}
+        }
+        try{ this._liveFallbackEngine.stop(); }catch(_e){}
+        return;
+      }
+      if(this._runner && queuedDeltaMs >= 0.5 && typeof this._runner.stepAsync === 'function'){
+        const ready = Promise.resolve(this._inFlight).catch(()=> null).then(()=> this._readyPromise || null);
+        this._inFlight = ready
+          .then(()=> this._runner.stepAsync({ simDeltaMs: queuedDeltaMs, snapshot: true }))
+          .then((payload)=>{
+            if(!payload) return;
+            if(Number.isFinite(Number(payload.simTimeMs)) && typeof window.setSimTime === 'function'){
+              try{ window.setSimTime(Number(payload.simTimeMs)); }catch(_e){}
+            }
+            if(payload.graphData) syncLiveGraph(this.graph, payload.graphData);
+            this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+            try{ if(typeof window.updateSimTime === 'function') window.updateSimTime(); }catch(_e){}
+          })
+          .catch((err)=>{ console.error(err); })
+          .finally(()=>{
+            if(this._runner && typeof this._runner.stopAsync === 'function'){
+              this._runner.stopAsync().catch(()=> null);
+            }
+            this._inFlight = null;
+          });
+        return;
+      }
+      if(this._runner && typeof this._runner.stopAsync === 'function'){
+        this._runner.stopAsync().catch(()=> null);
+      }
+    }
+
+    getDebugStats(){
+      if(this._liveFallbackEngine && typeof this._liveFallbackEngine.getDebugStats === 'function'){
+        return this._liveFallbackEngine.getDebugStats();
+      }
+      return this._lastStats ? cloneJson(this._lastStats) : null;
+    }
+
+    async stopAsync(){
+      this.stop();
+      if(this._inFlight){
+        try{ await this._inFlight; }catch(_e){}
+      }
+      return null;
+    }
+
+    async disposeAsync(){
+      if(this._disposed) return;
+      this._disposed = true;
+      this.stop();
+      if(this._runner && typeof this._runner.disposeAsync === 'function'){
+        try{ await this._runner.disposeAsync(); }catch(_e){}
+      }
+    }
+  }
+
   App.EventFastParHost = EventFastParHost;
+  App.LiveEventFastParEngine = LiveEventFastParEngine;
+  const legacyGetSupportedSimModes = (typeof App.getSupportedSimModes === 'function')
+    ? App.getSupportedSimModes.bind(App)
+    : (()=> ['dt', 'event', 'event-fast']);
+  const legacyNormalizeSimMode = (typeof App.normalizeSimMode === 'function')
+    ? App.normalizeSimMode.bind(App)
+    : ((mode)=> String(mode || '').trim().toLowerCase() === 'event' ? 'event' : 'dt');
+  const legacyGetSimModeLabel = (typeof App.getSimModeLabel === 'function')
+    ? App.getSimModeLabel.bind(App)
+    : ((mode)=> String(mode || ''));
+  const legacyCreateSimEngine = (typeof App.createSimEngine === 'function')
+    ? App.createSimEngine.bind(App)
+    : (()=> null);
   const legacyNormalizeHeadlessSimMode = (typeof App.normalizeHeadlessSimMode === 'function')
     ? App.normalizeHeadlessSimMode.bind(App)
     : ((typeof App.normalizeSimMode === 'function') ? App.normalizeSimMode.bind(App) : ((mode)=> String(mode || '')));
@@ -526,6 +965,31 @@ var App = window.App || (window.App = {});
     ? App.createHeadlessSimRunner.bind(App)
     : null;
 
+  App.getSupportedSimModes = function(){
+    const list = Array.isArray(legacyGetSupportedSimModes()) ? legacyGetSupportedSimModes().slice() : ['dt', 'event', 'event-fast'];
+    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+    return list;
+  };
+  App.normalizeSimMode = function(mode){
+    const normalized = normalizeParMode(mode);
+    if(normalized) return normalized;
+    return legacyNormalizeSimMode(mode);
+  };
+  App.getSimModeLabel = function(mode){
+    const normalized = App.normalizeSimMode(mode);
+    if(normalized === PAR_MODE) return 'event-fast-par (multi worker)';
+    return legacyGetSimModeLabel(normalized);
+  };
+  App.createSimEngine = function(mode, graphOrData){
+    const normalized = App.normalizeSimMode(mode);
+    if(normalized === PAR_MODE){
+      const graphInput = (graphOrData && typeof graphOrData.serialize === 'function')
+        ? graphOrData
+        : createGraphFromData(graphOrData);
+      return new LiveEventFastParEngine(graphInput, {});
+    }
+    return legacyCreateSimEngine(normalized, graphOrData);
+  };
   App.normalizeHeadlessSimMode = function(mode){
     const normalized = normalizeParMode(mode);
     if(normalized) return normalized;

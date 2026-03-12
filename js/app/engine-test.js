@@ -1,7 +1,7 @@
 var App = window.App || (window.App = {});
 
 (function(){
-  const DEFAULT_EXAMPLES = ['simple', 'branch', 'sample_line1'];
+  const DEFAULT_EXAMPLES = [];
   const EXAMPLE_ALIASES = { agv_config: 'carrier', carrier_config: 'carrier' };
   const EXAMPLE_FILES = {
     simple: 'sample/simple.json',
@@ -9,19 +9,61 @@ var App = window.App || (window.App = {});
     shuttle_line5: 'sample/shuttle_line5.json',
     carrier: 'sample/graph (3).json',
     pallet_station_demo: 'sample/pallet_station_demo.json',
-    sample_line1: 'sample/sample_line1.json'
+    sample_line1: 'sample/sample_line1.json',
+    sample_line2: 'sample/sample_line2.json'
   };
   const DEFAULTS = {
+    suite: 'standard',
     includeCurrentGraph: true,
-    includeExamples: false,
+    includeExamples: true,
     examples: DEFAULT_EXAMPLES,
     targetSimMs: 30000,
     maxWallMs: 2500,
     realStepMs: 16,
     maxLoops: 25000,
-    seed: 1
+    liveProbeTargetSimMs: 5000,
+    liveProbeMaxWallMs: 1200,
+    liveProbeMaxLoops: 320,
+    liveStateSampleStepMs: 250,
+    strictFinalParity: false,
+    seed: 1,
+    seeds: null
   };
+  const SUITE_PRESETS = {
+    quick: {
+      targetSimMs: 10000,
+      maxWallMs: 1800,
+      liveProbeTargetSimMs: 3000,
+      liveProbeMaxWallMs: 900,
+      liveProbeMaxLoops: 220,
+      liveStateSampleStepMs: 250,
+      strictFinalParity: false,
+      seeds: [1]
+    },
+    standard: {
+      targetSimMs: 30000,
+      maxWallMs: 2500,
+      liveProbeTargetSimMs: 5000,
+      liveProbeMaxWallMs: 1200,
+      liveProbeMaxLoops: 320,
+      liveStateSampleStepMs: 250,
+      strictFinalParity: false,
+      seeds: [1]
+    },
+    soak: {
+      targetSimMs: 120000,
+      maxWallMs: 6000,
+      liveProbeTargetSimMs: 10000,
+      liveProbeMaxWallMs: 2500,
+      liveProbeMaxLoops: 900,
+      liveStateSampleStepMs: 200,
+      strictFinalParity: true,
+      seeds: [1, 7]
+    }
+  };
+  const FINAL_SNAPSHOT_SETTLE_EPS_MS = 0.001;
   const SCAN_SKIP = new Set(['app', 'canvas', 'constructor', 'flags', 'graph', 'inputs', 'outputs', 'parent', 'widgets', 'widgets_values']);
+  const LIVE_PROBE_ENGINES = new Set(['dt', 'event-fast-worker', 'event-fast-par']);
 
   function nowSimMs(){ return (typeof window.simNow === 'function') ? Number(window.simNow()) : 0; }
   function getLinkCount(graph){ return (graph && graph.links && typeof graph.links === 'object') ? Object.keys(graph.links).length : 0; }
@@ -34,6 +76,28 @@ var App = window.App || (window.App = {});
       if(!value || seen.has(value)) continue;
       seen.add(value);
       out.push(value);
+    }
+    return out;
+  }
+  function toFinitePositiveInt(value){
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.max(1, Math.floor(Math.abs(n))) : null;
+  }
+  function normalizeSeedList(values){
+    const out = [];
+    const seen = new Set();
+    const push = (value)=>{
+      const normalized = toFinitePositiveInt(value);
+      if(!normalized || seen.has(normalized)) return;
+      seen.add(normalized);
+      out.push(normalized);
+    };
+    if(Array.isArray(values)){
+      for(const value of values) push(value);
+    }else if(typeof values === 'string'){
+      for(const token of values.split(/[,\s]+/)) push(token);
+    }else if(typeof values !== 'undefined' && values !== null){
+      push(values);
     }
     return out;
   }
@@ -67,6 +131,47 @@ var App = window.App || (window.App = {});
     if(window.App && typeof App.getSupportedSimModes === 'function') return uniq(App.getSupportedSimModes());
     return ['dt', 'event'];
   }
+  function defaultEngineTestEngines(){
+    const all = supportedEngines().map(normalizeEngineMode);
+    const ordered = [];
+    const seen = new Set();
+    const push = (value)=>{
+      const normalized = normalizeEngineMode(value);
+      if(!normalized || seen.has(normalized)) return;
+      seen.add(normalized);
+      ordered.push(normalized);
+    };
+    push('dt');
+    for(const engine of all) push(engine);
+    return ordered;
+  }
+  function defaultExampleIds(){
+    const ordered = [];
+    const seen = new Set();
+    const push = (value)=>{
+      const normalized = resolveExampleKey(value);
+      if(!normalized || seen.has(normalized)) return;
+      seen.add(normalized);
+      ordered.push(normalized);
+    };
+    try{
+      const select = document.getElementById('exampleSelect');
+      if(select && select.options){
+        for(const option of Array.from(select.options)){
+          const value = String(option && option.value == null ? '' : option.value).trim();
+          if(!value) continue;
+          push(value);
+        }
+      }
+    }catch(_e){}
+    Object.keys(EXAMPLE_FILES).forEach(push);
+    try{
+      if(window.EXAMPLES && typeof window.EXAMPLES === 'object'){
+        Object.keys(window.EXAMPLES).forEach(push);
+      }
+    }catch(_e){}
+    return ordered;
+  }
   function normalizeEngineMode(mode){
     if(window.App && typeof App.normalizeHeadlessSimMode === 'function') return App.normalizeHeadlessSimMode(mode);
     if(window.App && typeof App.normalizeSimMode === 'function') return App.normalizeSimMode(mode);
@@ -80,23 +185,41 @@ var App = window.App || (window.App = {});
   function normalizeOptions(options){
     const source = (options && typeof options === 'object') ? options : {};
     const raw = Object.assign({}, DEFAULTS, source);
-    const selected = (window.App && typeof App.getSimMode === 'function') ? App.getSimMode() : 'dt';
-    const targetSimMs = Math.max(1000, Number(raw.targetSimMs) || DEFAULTS.targetSimMs);
+    const requestedSuite = String(raw.suite || DEFAULTS.suite || 'standard').trim().toLowerCase();
+    const suite = Object.prototype.hasOwnProperty.call(SUITE_PRESETS, requestedSuite) ? requestedSuite : DEFAULTS.suite;
+    const preset = SUITE_PRESETS[suite] || SUITE_PRESETS.standard;
+    const engines = uniq(raw.engines && raw.engines.length ? raw.engines : defaultEngineTestEngines()).map(normalizeEngineMode);
+    if(engines.some((engine)=> LIVE_PROBE_ENGINES.has(engine) && engine !== 'dt') && engines.indexOf('dt') < 0){
+      engines.unshift('dt');
+    }
+    const targetSimMs = Math.max(1000, Number(Object.prototype.hasOwnProperty.call(source, 'targetSimMs') ? raw.targetSimMs : preset.targetSimMs) || DEFAULTS.targetSimMs);
     const realStepMs = Math.max(1, Number(raw.realStepMs) || DEFAULTS.realStepMs);
     const derivedLoopFloor = Math.ceil(targetSimMs / realStepMs) + 1024;
     const hasExplicitMaxLoops = Object.prototype.hasOwnProperty.call(source, 'maxLoops') && Number.isFinite(Number(raw.maxLoops));
+    const normalizedSeeds = normalizeSeedList(
+      Object.prototype.hasOwnProperty.call(source, 'seeds')
+        ? raw.seeds
+        : (Object.prototype.hasOwnProperty.call(source, 'seed') ? [raw.seed] : preset.seeds)
+    );
     return {
-      engines: uniq(raw.engines && raw.engines.length ? raw.engines : [selected || 'dt']).map(normalizeEngineMode),
+      suite,
+      engines,
       includeCurrentGraph: raw.includeCurrentGraph !== false,
-      includeExamples: !!raw.includeExamples,
-      examples: uniq(raw.examples && raw.examples.length ? raw.examples : DEFAULT_EXAMPLES),
+      includeExamples: raw.includeExamples !== false,
+      examples: uniq(raw.examples && raw.examples.length ? raw.examples : defaultExampleIds()),
       targetSimMs,
-      maxWallMs: Math.max(250, Number(raw.maxWallMs) || DEFAULTS.maxWallMs),
+      maxWallMs: Math.max(250, Number(Object.prototype.hasOwnProperty.call(source, 'maxWallMs') ? raw.maxWallMs : preset.maxWallMs) || DEFAULTS.maxWallMs),
       realStepMs,
       maxLoops: hasExplicitMaxLoops
         ? Math.max(100, Math.floor(Number(raw.maxLoops)))
         : Math.max(DEFAULTS.maxLoops, derivedLoopFloor),
-      seed: Number.isFinite(Number(raw.seed)) ? Math.floor(Math.abs(Number(raw.seed))) : null
+      liveProbeTargetSimMs: Math.max(1000, Number(Object.prototype.hasOwnProperty.call(source, 'liveProbeTargetSimMs') ? raw.liveProbeTargetSimMs : preset.liveProbeTargetSimMs) || DEFAULTS.liveProbeTargetSimMs),
+      liveProbeMaxWallMs: Math.max(250, Number(Object.prototype.hasOwnProperty.call(source, 'liveProbeMaxWallMs') ? raw.liveProbeMaxWallMs : preset.liveProbeMaxWallMs) || DEFAULTS.liveProbeMaxWallMs),
+      liveProbeMaxLoops: Math.max(32, Math.floor(Number(Object.prototype.hasOwnProperty.call(source, 'liveProbeMaxLoops') ? raw.liveProbeMaxLoops : preset.liveProbeMaxLoops) || DEFAULTS.liveProbeMaxLoops)),
+      liveStateSampleStepMs: Math.max(50, Math.floor(Number(Object.prototype.hasOwnProperty.call(source, 'liveStateSampleStepMs') ? raw.liveStateSampleStepMs : preset.liveStateSampleStepMs) || DEFAULTS.liveStateSampleStepMs)),
+      strictFinalParity: Object.prototype.hasOwnProperty.call(source, 'strictFinalParity') ? !!raw.strictFinalParity : !!preset.strictFinalParity,
+      seed: normalizedSeeds.length ? normalizedSeeds[0] : (Number.isFinite(Number(raw.seed)) ? Math.floor(Math.abs(Number(raw.seed))) : null),
+      seeds: normalizedSeeds.length ? normalizedSeeds : [1]
     };
   }
   function createSeededRandom(seed){
@@ -109,6 +232,9 @@ var App = window.App || (window.App = {});
     const original = Math.random;
     Math.random = createSeededRandom(seed);
     try{ return await runner(); } finally { Math.random = original; }
+  }
+  function nextTick(){
+    return new Promise((resolve)=> setTimeout(resolve, 0));
   }
   function createRunContext(){
     if(!App.graph || typeof App.graph.serialize !== 'function') throw new Error('App.graph is not ready');
@@ -139,8 +265,496 @@ var App = window.App || (window.App = {});
     graph.configure(payload);
     if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function') App.repairGraphLinks(graph);
     if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function') App.stopGroups.restoreSerializedData(graph, payload, false);
+    applySerializedRuntimeNodeStates(graph, payload);
+    applySerializedRuntimeLinkStates(graph, payload);
     if(typeof configureGraphClock === 'function') configureGraphClock(graph);
     return graph;
+  }
+  function applySerializedRuntimeNodeStates(graph, graphData){
+    if(!graph || typeof graph.getNodeById !== 'function') return;
+    const states = Array.isArray(graphData && graphData.__factSimRuntimeNodes) ? graphData.__factSimRuntimeNodes : [];
+    for(const row of states){
+      const node = graph.getNodeById(Number(row && row.nodeId));
+      if(!node) continue;
+      if(Object.prototype.hasOwnProperty.call(row || {}, '_state')) node._state = cloneJson(row._state);
+      if(Object.prototype.hasOwnProperty.call(row || {}, '_stateName')) node._stateName = cloneJson(row._stateName);
+      if(Object.prototype.hasOwnProperty.call(row || {}, '_until') && Number.isFinite(Number(row._until))) node._until = Number(row._until);
+    }
+  }
+  function applySerializedRuntimeLinkStates(graph, graphData){
+    if(!graph || !graph.links || typeof graph.links !== 'object') return;
+    const states = Array.isArray(graphData && graphData.__factSimRuntimeLinks) ? graphData.__factSimRuntimeLinks : [];
+    const byId = new Map(states.map((row)=> [Number(row && row.linkId), row]));
+    for(const raw of Object.values(graph.links)){
+      if(!raw) continue;
+      const state = byId.get(Number(raw.id)) || null;
+      const nextValue = cloneJson(state ? (typeof state.data !== 'undefined' ? state.data : state._data) : null);
+      raw.data = nextValue;
+      raw._data = cloneJson(nextValue);
+      if(typeof graph.getNodeById === 'function'){
+        const source = graph.getNodeById(Number(raw.origin_id));
+        if(source && Array.isArray(source.outputs) && source.outputs[raw.origin_slot]){
+          source.outputs[raw.origin_slot]._data = cloneJson(nextValue);
+        }
+        const target = graph.getNodeById(Number(raw.target_id));
+        if(target && Array.isArray(target.inputs) && target.inputs[raw.target_slot]){
+          target.inputs[raw.target_slot].value = cloneJson(nextValue);
+        }
+      }
+    }
+  }
+  function shouldRunLiveProbe(engine){
+    return LIVE_PROBE_ENGINES.has(String(engine || '').trim());
+  }
+  function resolveEffectiveLiveEngine(engine){
+    const seen = new Set();
+    let current = engine || null;
+    while(current && current._liveFallbackEngine && !seen.has(current)){
+      seen.add(current);
+      current = current._liveFallbackEngine;
+    }
+    return current || engine || null;
+  }
+  function inspectTimelineEntries(timeline){
+    const entries = timeline && timeline.entries;
+    if(!entries || typeof entries.forEach !== 'function') return { entryCount: 0, segmentCount: 0, maxEndSec: 0 };
+    let entryCount = 0;
+    let segmentCount = 0;
+    let maxEndSec = 0;
+    entries.forEach((entry)=>{
+      entryCount += 1;
+      const segments = Array.isArray(entry && entry.segments) ? entry.segments : [];
+      segmentCount += segments.length;
+      for(const seg of segments){
+        const end = Number(seg && seg.end);
+        if(Number.isFinite(end) && end > maxEndSec) maxEndSec = end;
+      }
+    });
+    return { entryCount, segmentCount, maxEndSec };
+  }
+  function isWorkPortName(name){
+    return /work/i.test(String(name == null ? '' : name));
+  }
+  function extractWorkRefs(value, out, depth, seen){
+    if(value == null || depth > 4) return;
+    if(Array.isArray(value)){
+      for(const item of value) extractWorkRefs(item, out, depth + 1, seen);
+      return;
+    }
+    if(typeof value !== 'object') return;
+    if(seen && seen.has(value)) return;
+    if(seen) seen.add(value);
+    if(Object.prototype.hasOwnProperty.call(value, 'id')){
+      const type = Object.prototype.hasOwnProperty.call(value, 'type') ? String(value.type == null ? '' : value.type) : '';
+      out.push(`${String(value.id)}:${type}`);
+      return;
+    }
+    const candidateKeys = ['work', 'payload', 'item', 'items', 'cargo', 'works', 'queue', 'currentWork'];
+    for(const key of candidateKeys){
+      if(Object.prototype.hasOwnProperty.call(value, key)){
+        extractWorkRefs(value[key], out, depth + 1, seen);
+      }
+    }
+  }
+  function inspectWorkLinkEntries(graph){
+    const rawLinks = graph && graph.links && typeof graph.links === 'object'
+      ? Object.values(graph.links)
+      : [];
+    const observedLinkKeys = new Set();
+    const observedWorkRefs = new Set();
+    let activeLinkCount = 0;
+    let payloadCount = 0;
+    for(const link of rawLinks){
+      if(!link) continue;
+      const source = graph && typeof graph.getNodeById === 'function' ? graph.getNodeById(Number(link.origin_id)) : null;
+      const target = graph && typeof graph.getNodeById === 'function' ? graph.getNodeById(Number(link.target_id)) : null;
+      const sourcePort = source && Array.isArray(source.outputs) ? source.outputs[link.origin_slot] : null;
+      const targetPort = target && Array.isArray(target.inputs) ? target.inputs[link.target_slot] : null;
+      const sourceName = sourcePort && typeof sourcePort.name !== 'undefined' ? sourcePort.name : '';
+      const targetName = targetPort && typeof targetPort.name !== 'undefined' ? targetPort.name : '';
+      if(!isWorkPortName(sourceName) && !isWorkPortName(targetName)) continue;
+      let payload = typeof link.data !== 'undefined' ? link.data : undefined;
+      if((typeof payload === 'undefined' || payload === null) && typeof link._data !== 'undefined') payload = link._data;
+      if((typeof payload === 'undefined' || payload === null) && sourcePort && typeof sourcePort._data !== 'undefined') payload = sourcePort._data;
+      if((typeof payload === 'undefined' || payload === null) && targetPort && typeof targetPort.value !== 'undefined') payload = targetPort.value;
+      const refs = [];
+      extractWorkRefs(payload, refs, 0, new WeakSet());
+      if(!refs.length) continue;
+      activeLinkCount += 1;
+      payloadCount += refs.length;
+      const deduped = Array.from(new Set(refs)).sort();
+      const pathKey = `${Number(source && source.id)}:${String(sourceName)}->${Number(target && target.id)}:${String(targetName)}`;
+      for(const ref of deduped){
+        observedWorkRefs.add(ref);
+        observedLinkKeys.add(`${pathKey}:${ref}`);
+      }
+    }
+    return {
+      activeLinkCount,
+      payloadCount,
+      observedLinkKeys: Array.from(observedLinkKeys).sort(),
+      observedWorkRefs: Array.from(observedWorkRefs).sort()
+    };
+  }
+  function getNodeStateToken(node){
+    if(!node || (typeof node._state === 'undefined' && typeof node._stateName === 'undefined')) return '';
+    const state = String(node && typeof node._state !== 'undefined' && node._state !== null ? node._state : '').trim().toUpperCase();
+    const stateName = String(node && typeof node._stateName !== 'undefined' && node._stateName !== null ? node._stateName : '').trim();
+    if(stateName) return `${stateName}|${state || 'UNKNOWN'}`;
+    return state || '';
+  }
+  function collectStateSnapshot(graph){
+    const rows = [];
+    const nodes = Array.isArray(graph && graph._nodes) ? graph._nodes.slice() : [];
+    nodes.sort((a, b)=> (Number(a && a.id) || 0) - (Number(b && b.id) || 0));
+    for(const node of nodes){
+      const token = getNodeStateToken(node);
+      if(!token) continue;
+      const nodeId = Number(node && node.id);
+      rows.push({
+        key: `${nodeId}:${String(node && (node.title || node.type || `Node #${nodeId}`))}`,
+        nodeId,
+        label: String(node && (node.title || node.type || `Node #${nodeId}`)),
+        state: token
+      });
+    }
+    return { nodeCount: rows.length, rows };
+  }
+  function collectEntityLedger(graph){
+    const locationsByRef = new Map();
+    const duplicateRefs = [];
+    const uniqueRefs = new Set();
+    const candidateKeys = ['_recv', '_queue', 'queue', '_buf', 'buffer', 'cargo', '_cargo', 'works', '_works', 'currentWork', '_currentWork', 'payload', '_payload', 'item', 'items', 'work', 'workOffer', 'pendingUnload', 'pendingWork'];
+    const recordRefs = (location, refs)=>{
+      const deduped = Array.from(new Set(Array.isArray(refs) ? refs : [])).sort();
+      for(const ref of deduped){
+        uniqueRefs.add(ref);
+        const list = locationsByRef.get(ref) || [];
+        list.push(location);
+        locationsByRef.set(ref, list);
+      }
+    };
+    const nodes = Array.isArray(graph && graph._nodes) ? graph._nodes : [];
+    for(const node of nodes){
+      if(!node) continue;
+      const refs = [];
+      for(const key of candidateKeys){
+        if(!Object.prototype.hasOwnProperty.call(node, key)) continue;
+        extractWorkRefs(node[key], refs, 0, new WeakSet());
+      }
+      if(refs.length){
+        recordRefs(`node:${Number(node.id)}`, refs);
+      }
+    }
+    for(const [ref, locations] of locationsByRef.entries()){
+      if((locations || []).length > 1){
+        duplicateRefs.push({ ref, locations: locations.slice(0, 8) });
+      }
+    }
+    duplicateRefs.sort((a, b)=> String(a.ref).localeCompare(String(b.ref)));
+    return {
+      uniqueCount: uniqueRefs.size,
+      refs: Array.from(uniqueRefs).sort(),
+      duplicateRefs
+    };
+  }
+  function normalizeSinkSnapshot(sinks){
+    const rows = [];
+    for(const sink of Array.isArray(sinks) ? sinks : []){
+      const id = Number(sink && sink.id);
+      const title = String(sink && (sink.title || `Sink #${id}`));
+      rows.push({
+        key: `${id}:${title}`,
+        id,
+        title,
+        completedCount: Math.max(0, Number(sink && sink.completedCount) || 0)
+      });
+    }
+    rows.sort((a, b)=> a.id - b.id || String(a.title).localeCompare(String(b.title)));
+    return rows;
+  }
+  function isStatefulNode(node){
+    return !!getNodeStateToken(node);
+  }
+  function captureStateSample(graph, probe, sampleMs){
+    if(!graph || !probe) return;
+    const nodes = Array.isArray(graph._nodes) ? graph._nodes.slice() : [];
+    nodes.sort((a, b)=> (Number(a && a.id) || 0) - (Number(b && b.id) || 0));
+    const sampleSec = Number(sampleMs) / 1000;
+    probe.sampleTimesSec.push(Number(sampleSec.toFixed(3)));
+    for(const node of nodes){
+      if(!isStatefulNode(node)) continue;
+      const nodeId = Number(node && node.id);
+      if(!Number.isFinite(nodeId)) continue;
+      const key = `${nodeId}:${String(node && (node.title || node.type || 'node'))}`;
+      let row = probe.nodeStates.get(key);
+      if(!row){
+        row = {
+          nodeId,
+          label: String(node && (node.title || node.type || `Node #${nodeId}`)),
+          sequence: []
+        };
+        probe.nodeStates.set(key, row);
+      }
+      row.sequence.push(getNodeStateToken(node));
+    }
+  }
+  function finalizeStateProbe(probe){
+    if(!probe) return null;
+    const nodeStates = Array.from(probe.nodeStates.entries())
+      .sort((a, b)=> a[1].nodeId - b[1].nodeId)
+      .map(([key, row])=> ({
+        key,
+        nodeId: row.nodeId,
+        label: row.label,
+        sequence: row.sequence.slice()
+      }));
+    let changingNodeCount = 0;
+    for(const row of nodeStates){
+      if(new Set(row.sequence).size > 1) changingNodeCount += 1;
+    }
+    return {
+      sampleStepMs: probe.sampleStepMs,
+      sampleTimesSec: probe.sampleTimesSec.slice(),
+      sampleCount: probe.sampleTimesSec.length,
+      nodeCount: nodeStates.length,
+      changingNodeCount,
+      nodeStates
+    };
+  }
+  function isMeaningfulStateSequence(sequence){
+    const seq = Array.isArray(sequence) ? sequence : [];
+    if(!seq.length) return false;
+    const unique = new Set(seq);
+    if(unique.size > 1) return true;
+    const token = String(seq[0] || '').toUpperCase();
+    return token.indexOf('IDLE') < 0;
+  }
+  function compactStateSequence(sequence){
+    const seq = Array.isArray(sequence) ? sequence : [];
+    const out = [];
+    for(const token of seq){
+      const value = String(token || '');
+      if(!out.length || out[out.length - 1] !== value) out.push(value);
+    }
+    return out;
+  }
+  function stateSequencesEquivalent(baseSeq, rowSeq){
+    const a = compactStateSequence(baseSeq);
+    const b = compactStateSequence(rowSeq);
+    if(JSON.stringify(a) === JSON.stringify(b)) return true;
+    if(Math.abs(a.length - b.length) > 1) return false;
+    const shortSeq = a.length <= b.length ? a : b;
+    const longSeq = a.length <= b.length ? b : a;
+    if(JSON.stringify(shortSeq) === JSON.stringify(longSeq.slice(0, shortSeq.length))) return true;
+    return false;
+  }
+  function buildTimelineSignature(timeline, quantMs){
+    const entries = timeline && timeline.entries;
+    const quantSec = Math.max(0.05, Number(quantMs) / 1000);
+    if(!entries || typeof entries.forEach !== 'function'){
+      return { quantMs, rowCount: 0, activeRowCount: 0, rows: [] };
+    }
+    const rows = [];
+    entries.forEach((entry, key)=>{
+      const label = String(entry && entry.label || key || '');
+      const rawSegments = Array.isArray(entry && entry.segments) ? entry.segments : [];
+      const compacted = [];
+      for(const seg of rawSegments){
+        if(!seg) continue;
+        const state = String(seg.state || 'other').toLowerCase();
+        const start = Number(seg.start);
+        const end = Number(seg.end);
+        const durationSec = (Number.isFinite(start) && Number.isFinite(end)) ? Math.max(0, end - start) : 0;
+        const durationBins = Math.max(0, Math.round(durationSec / quantSec));
+        if(!durationBins) continue;
+        const last = compacted[compacted.length - 1];
+        if(last && last.state === state){
+          last.durationBins += durationBins;
+        }else{
+          compacted.push({ state, durationBins });
+        }
+      }
+      while(compacted.length && (compacted[0].state === 'idle' || compacted[0].state === 'other')){
+        compacted.shift();
+      }
+      while(compacted.length && (compacted[compacted.length - 1].state === 'idle' || compacted[compacted.length - 1].state === 'other')){
+        compacted.pop();
+      }
+      const meaningful = compacted.some((seg)=> seg.state !== 'idle' && seg.state !== 'other');
+      rows.push({
+        key: String(key),
+        label,
+        meaningful,
+        signature: compacted
+      });
+    });
+    rows.sort((a, b)=>{
+      const aid = Number(String(a.key).split(':')[0]);
+      const bid = Number(String(b.key).split(':')[0]);
+      if(Number.isFinite(aid) && Number.isFinite(bid) && aid !== bid) return aid - bid;
+      return String(a.label).localeCompare(String(b.label));
+    });
+    return {
+      quantMs,
+      rowCount: rows.length,
+      activeRowCount: rows.filter((row)=> row.meaningful).length,
+      rows
+    };
+  }
+  function timelineSignaturesEquivalent(baseSig, rowSig){
+    const a = Array.isArray(baseSig) ? baseSig : [];
+    const b = Array.isArray(rowSig) ? rowSig : [];
+    if(a.length === 0 && b.length === 0) return true;
+    if(Math.abs(a.length - b.length) > 1) return false;
+    const limit = Math.min(a.length, b.length);
+    for(let i = 0; i < limit; i += 1){
+      if(String(a[i].state) !== String(b[i].state)) return false;
+      const tolerance = (i === limit - 1) ? 2 : 1;
+      if(Math.abs(Number(a[i].durationBins) - Number(b[i].durationBins)) > tolerance) return false;
+    }
+    if(a.length === b.length) return true;
+    const tail = (a.length > b.length ? a[a.length - 1] : b[b.length - 1]) || null;
+    return !!(tail && Number(tail.durationBins) <= 1);
+  }
+  async function runLiveTimelineProbe(source, engine, options){
+    if(typeof TimelineChart === 'undefined' || typeof document === 'undefined' || !document.body) return { skipped: true, reason: 'timeline-unavailable' };
+    const payload = (typeof App.compactGraphData === 'function') ? App.compactGraphData(cloneJson(source.data)) : cloneJson(source.data);
+    const graph = createGraphFromData(payload);
+    const prevTime = nowSimMs();
+    const prevTimeline = App.timelineChart;
+    const prevWindowTimeline = window.timelineChart;
+    const prevCanvas = App.canvas;
+    const prevWindowCanvas = window.canvas;
+    const prevSuspendTimeline = !!App._suspendTimeline;
+    const host = document.createElement('div');
+    host.style.position = 'fixed';
+    host.style.left = '-20000px';
+    host.style.top = '-20000px';
+    host.style.width = '1280px';
+    host.style.height = '360px';
+    host.style.opacity = '0';
+    host.style.pointerEvents = 'none';
+    const canvas = document.createElement('canvas');
+    canvas.width = 1280;
+    canvas.height = 360;
+    canvas.style.width = '1280px';
+    canvas.style.height = '360px';
+    host.appendChild(canvas);
+    document.body.appendChild(host);
+    const timeline = new TimelineChart(canvas);
+    const stubCanvas = { setDirty(){}, draw(){} };
+    let simEngine = null;
+    let effectiveEngine = null;
+    let simMs = 0;
+    let loops = 0;
+    let wallMs = 0;
+    const flowProbe = {
+      nonEmptySteps: 0,
+      maxActiveLinks: 0,
+      maxPayloadCount: 0,
+      observedLinkKeys: new Set(),
+      observedWorkRefs: new Set()
+    };
+    const stateProbe = {
+      sampleStepMs: options.liveStateSampleStepMs,
+      nextSampleAtMs: 0,
+      sampleTimesSec: [],
+      nodeStates: new Map()
+    };
+    try{
+      App.timelineChart = timeline;
+      window.timelineChart = timeline;
+      App.canvas = stubCanvas;
+      window.canvas = stubCanvas;
+      App._suspendTimeline = false;
+      timeline.attachGraph(graph);
+      if(typeof window.setSimTime === 'function') window.setSimTime(0);
+      simEngine = App.createSimEngine(engine, graph);
+      effectiveEngine = resolveEffectiveLiveEngine(simEngine);
+      const liveRuntimeMode = String((simEngine && simEngine.runtimeMode) || (effectiveEngine && effectiveEngine.runtimeMode) || '').trim();
+      if(simEngine !== effectiveEngine || /^fallback-live-/i.test(liveRuntimeMode)){
+        return { skipped: true, runtimeMode: liveRuntimeMode || null, reason: 'fallback-live-runtime' };
+      }
+      if(!effectiveEngine || typeof effectiveEngine.update !== 'function'){
+        return { ok: false, code: 'LIVE_ENGINE_CREATE_FAILED', message: `Engine "${engine}" did not return a live update() runner` };
+      }
+      if(typeof simEngine._snapshotIntervalMs === 'number') simEngine._snapshotIntervalMs = 0;
+      if(effectiveEngine !== simEngine && typeof effectiveEngine._snapshotIntervalMs === 'number') effectiveEngine._snapshotIntervalMs = 0;
+      if(typeof effectiveEngine.reset === 'function') effectiveEngine.reset();
+      graph.status = LGraph.STATUS_RUNNING;
+      graph.starttime = LiteGraph.getTime();
+      graph.last_update_time = graph.starttime;
+      try{ graph.sendEventToAllNodes('onStart'); }catch(_e){}
+      const started = performance.now();
+      captureStateSample(graph, stateProbe, 0);
+      stateProbe.nextSampleAtMs = Math.max(0, Number(options.liveStateSampleStepMs) || 250);
+      while(simMs < options.liveProbeTargetSimMs){
+        const now = performance.now();
+        if((now - started) > options.liveProbeMaxWallMs) break;
+        if(loops >= options.liveProbeMaxLoops) break;
+        effectiveEngine.update(options.realStepMs);
+        if(effectiveEngine && effectiveEngine._inFlight && typeof effectiveEngine._inFlight.then === 'function'){
+          try{ await effectiveEngine._inFlight; }catch(_e){}
+        }else if(simEngine && simEngine !== effectiveEngine && simEngine._inFlight && typeof simEngine._inFlight.then === 'function'){
+          try{ await simEngine._inFlight; }catch(_e){}
+        }else{
+          await nextTick();
+        }
+        simMs = nowSimMs();
+        loops += 1;
+        while(stateProbe.nextSampleAtMs <= simMs + 0.001){
+          captureStateSample(graph, stateProbe, stateProbe.nextSampleAtMs);
+          stateProbe.nextSampleAtMs += stateProbe.sampleStepMs;
+        }
+        const flow = inspectWorkLinkEntries(graph);
+        if(flow.activeLinkCount > 0) flowProbe.nonEmptySteps += 1;
+        if(flow.activeLinkCount > flowProbe.maxActiveLinks) flowProbe.maxActiveLinks = flow.activeLinkCount;
+        if(flow.payloadCount > flowProbe.maxPayloadCount) flowProbe.maxPayloadCount = flow.payloadCount;
+        for(const key of flow.observedLinkKeys){
+          if(flowProbe.observedLinkKeys.size < 512) flowProbe.observedLinkKeys.add(key);
+        }
+        for(const key of flow.observedWorkRefs){
+          if(flowProbe.observedWorkRefs.size < 512) flowProbe.observedWorkRefs.add(key);
+        }
+      }
+      wallMs = Math.max(0, performance.now() - started);
+      const scan = inspectTimelineEntries(timeline);
+      if(simMs <= 0.001){
+        return { ok: false, code: 'LIVE_NO_SIM_PROGRESS', message: `Live engine "${engine}" made no simulation progress`, simMs, loops, wallMs, timeline: scan, state: finalizeStateProbe(stateProbe) };
+      }
+      if(scan.entryCount <= 0 || scan.segmentCount <= 0 || scan.maxEndSec <= 0){
+        return { ok: false, code: 'LIVE_TIMELINE_EMPTY', message: `Live engine "${engine}" did not populate timeline entries`, simMs, loops, wallMs, timeline: scan, flow: {
+          nonEmptySteps: flowProbe.nonEmptySteps,
+          maxActiveLinks: flowProbe.maxActiveLinks,
+          maxPayloadCount: flowProbe.maxPayloadCount,
+          observedLinkKeys: Array.from(flowProbe.observedLinkKeys).sort(),
+          observedWorkRefs: Array.from(flowProbe.observedWorkRefs).sort()
+        }, state: finalizeStateProbe(stateProbe), timelineSignature: buildTimelineSignature(timeline, options.liveStateSampleStepMs) };
+      }
+      return { ok: true, simMs, loops, wallMs, timeline: scan, flow: {
+        nonEmptySteps: flowProbe.nonEmptySteps,
+        maxActiveLinks: flowProbe.maxActiveLinks,
+        maxPayloadCount: flowProbe.maxPayloadCount,
+        observedLinkKeys: Array.from(flowProbe.observedLinkKeys).sort(),
+        observedWorkRefs: Array.from(flowProbe.observedWorkRefs).sort()
+      }, state: finalizeStateProbe(stateProbe), timelineSignature: buildTimelineSignature(timeline, options.liveStateSampleStepMs) };
+    } finally {
+      if(graph) try{ graph.sendEventToAllNodes('onStop'); }catch(_e){}
+      if(simEngine && typeof simEngine.stopAsync === 'function') try{ await simEngine.stopAsync(); }catch(_e){}
+      if(simEngine && typeof simEngine.disposeAsync === 'function') try{ await simEngine.disposeAsync(); }catch(_e){}
+      if(simEngine && typeof simEngine.stop === 'function') try{ simEngine.stop(); }catch(_e){}
+      if(effectiveEngine && effectiveEngine !== simEngine && typeof effectiveEngine.stopAsync === 'function') try{ await effectiveEngine.stopAsync(); }catch(_e){}
+      if(effectiveEngine && effectiveEngine !== simEngine && typeof effectiveEngine.disposeAsync === 'function') try{ await effectiveEngine.disposeAsync(); }catch(_e){}
+      if(effectiveEngine && effectiveEngine !== simEngine && typeof effectiveEngine.stop === 'function') try{ effectiveEngine.stop(); }catch(_e){}
+      App.timelineChart = prevTimeline;
+      window.timelineChart = prevWindowTimeline;
+      App.canvas = prevCanvas;
+      window.canvas = prevWindowCanvas;
+      App._suspendTimeline = prevSuspendTimeline;
+      if(typeof window.setSimTime === 'function') try{ window.setSimTime(prevTime); }catch(_e){}
+      try{ if(host.parentNode) host.parentNode.removeChild(host); }catch(_e){}
+    }
   }
   function collectSinkMetrics(graph){
     const nodes = Array.isArray(graph && graph._nodes) ? graph._nodes : [];
@@ -233,18 +847,26 @@ var App = window.App || (window.App = {});
     result.ok = result.status !== 'FAIL';
     return result;
   }
-  async function runCase(source, engine, options){
-    return withSeed(options.seed, async ()=>{
+  async function runCase(source, engine, options, seed){
+    return withSeed(seed, async ()=>{
       const result = {
         engine,
+        seed: Number.isFinite(seed) ? seed : null,
         scenario: source.name,
         sourceKind: source.kind,
         ok: false,
         status: 'FAIL',
         failures: [],
         warnings: [],
-        metrics: { simTimeMs: 0, wallMs: 0, loops: 0, nodeCount: 0, linkCount: 0, sinkCount: 0, totalCompleted: 0 },
-        sinks: []
+        metrics: { simTimeMs: 0, wallMs: 0, loops: 0, nodeCount: 0, linkCount: 0, sinkCount: 0, totalCompleted: 0, liveProbeSimTimeMs: 0, liveProbeWallMs: 0, liveProbeLoops: 0, liveTimelineEntries: 0, liveTimelineSegments: 0 },
+        liveFlowProbe: null,
+        liveStateProbe: null,
+        liveTimelineSignature: null,
+        sinks: [],
+        finalStateSnapshot: null,
+        finalWorkSnapshot: null,
+        finalSinkSnapshot: null,
+        finalEntityLedger: null
       };
       const seen = new Set();
       const startWall = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
@@ -272,14 +894,14 @@ var App = window.App || (window.App = {});
           simEngine = App.createHeadlessSimRunner(engine, source.data, {
             reason: 'engine-test',
             engineOptions: { engineTest: true },
-            seed: options.seed
+            seed
           });
           if(!simEngine || typeof simEngine.runUntilSimTimeAsync !== 'function'){
             pushIssue(result.failures, seen, issue('error', 'ENGINE_CREATE_FAILED', `Engine "${engine}" did not return an async headless runner`, { engine, scenario: source.name }), 24);
             return finalizeCase(result, startWall, simMs, loops);
           }
           const payload = await simEngine.runUntilSimTimeAsync({
-            targetSimMs: options.targetSimMs,
+            targetSimMs: options.targetSimMs + FINAL_SNAPSHOT_SETTLE_EPS_MS,
             maxWallMs: options.maxWallMs,
             realStepMs: options.realStepMs,
             maxLoops: options.maxLoops
@@ -359,6 +981,15 @@ var App = window.App || (window.App = {});
               if(result.failures.length >= 24) break;
             }
           }
+          if(!result.failures.length){
+            try{
+              simEngine.update(FINAL_SNAPSHOT_SETTLE_EPS_MS);
+              const settledSim = nowSimMs();
+              if(Number.isFinite(settledSim) && settledSim >= simMs){
+                simMs = settledSim;
+              }
+            }catch(_e){}
+          }
           if(!madeProgress) pushIssue(result.failures, seen, issue('error', 'NO_SIM_PROGRESS', `Engine "${engine}" made no simulation progress`, { engine, scenario: source.name }), 24);
         }
         const finalScan = collectInvariantIssues(graph, expected);
@@ -369,6 +1000,26 @@ var App = window.App || (window.App = {});
           result.sinks = sinks.sinks;
           result.metrics.sinkCount = sinks.sinkCount;
           result.metrics.totalCompleted = sinks.totalCompleted;
+        }
+        result.finalStateSnapshot = collectStateSnapshot(graph);
+        result.finalWorkSnapshot = inspectWorkLinkEntries(graph);
+        result.finalSinkSnapshot = normalizeSinkSnapshot(result.sinks);
+        result.finalEntityLedger = collectEntityLedger(graph);
+        if(shouldRunLiveProbe(engine)){
+          const liveProbe = await runLiveTimelineProbe(source, engine, options);
+          if(liveProbe && !liveProbe.skipped){
+            result.metrics.liveProbeSimTimeMs = Number(liveProbe.simMs) || 0;
+            result.metrics.liveProbeWallMs = Number(liveProbe.wallMs) || 0;
+            result.metrics.liveProbeLoops = Math.max(0, Number(liveProbe.loops) || 0);
+            result.metrics.liveTimelineEntries = Math.max(0, Number(liveProbe.timeline && liveProbe.timeline.entryCount) || 0);
+            result.metrics.liveTimelineSegments = Math.max(0, Number(liveProbe.timeline && liveProbe.timeline.segmentCount) || 0);
+            result.liveFlowProbe = liveProbe.flow ? cloneJson(liveProbe.flow) : null;
+            result.liveStateProbe = liveProbe.state ? cloneJson(liveProbe.state) : null;
+            result.liveTimelineSignature = liveProbe.timelineSignature ? cloneJson(liveProbe.timelineSignature) : null;
+            if(!liveProbe.ok){
+              pushIssue(result.failures, seen, issue('error', String(liveProbe.code || 'LIVE_PROBE_FAILED'), String(liveProbe.message || 'Live engine probe failed'), { engine, scenario: source.name }), 24);
+            }
+          }
         }
       } finally {
         if(graph) try{ graph.sendEventToAllNodes('onStop'); }catch(_e){}
@@ -383,7 +1034,7 @@ var App = window.App || (window.App = {});
     const grouped = new Map();
     const seen = new Set();
     for(const row of report.results){
-      const key = `${row.sourceKind}:${row.scenario}`;
+      const key = `${row.sourceKind}:${row.scenario}:seed:${Number.isFinite(Number(row.seed)) ? Number(row.seed) : 'default'}`;
       const list = grouped.get(key) || [];
       list.push(row);
       grouped.set(key, list);
@@ -395,10 +1046,194 @@ var App = window.App || (window.App = {});
       for(const row of list){
         if(row === baseline) continue;
         const delta = row.metrics.totalCompleted - baseline.metrics.totalCompleted;
-        report.comparisons.push({ scenario: row.scenario, baselineEngine: baseline.engine, candidateEngine: row.engine, completedDelta: delta });
+        report.comparisons.push({ scenario: row.scenario, seed: Number.isFinite(Number(row.seed)) ? Number(row.seed) : null, baselineEngine: baseline.engine, candidateEngine: row.engine, completedDelta: delta });
         const tolerance = Math.max(1, Math.ceil(Math.max(1, baseline.metrics.totalCompleted) * 0.05));
         if(Math.abs(delta) > tolerance){
-          pushIssue(report.warnings, seen, issue('warn', 'COMPLETION_COUNT_DELTA', `Completed count differs from baseline by ${delta} on ${row.scenario}`, { engine: row.engine, scenario: row.scenario }), 32);
+          pushIssue(report.warnings, seen, issue('warn', 'COMPLETION_COUNT_DELTA', `Completed count differs from baseline by ${delta} on ${row.scenario} (seed ${row.seed})`, { engine: row.engine, scenario: row.scenario }), 32);
+        }
+        if(report.options && report.options.strictFinalParity){
+          const baseSinkMap = new Map((Array.isArray(baseline.finalSinkSnapshot) ? baseline.finalSinkSnapshot : []).map((entry)=> [entry.key, entry.completedCount]));
+          const rowSinkMap = new Map((Array.isArray(row.finalSinkSnapshot) ? row.finalSinkSnapshot : []).map((entry)=> [entry.key, entry.completedCount]));
+          if(baseSinkMap.size || rowSinkMap.size){
+            const missingSinks = [];
+            const extraSinks = [];
+            const changedSinks = [];
+            for(const [key, count] of baseSinkMap.entries()){
+              if(!rowSinkMap.has(key)){
+                if(missingSinks.length < 6) missingSinks.push(key);
+                continue;
+              }
+              const rowCount = rowSinkMap.get(key);
+              if(Number(rowCount) !== Number(count) && changedSinks.length < 6){
+                changedSinks.push(`${key}: ${count} != ${rowCount}`);
+              }
+            }
+            for(const [key] of rowSinkMap.entries()){
+              if(!baseSinkMap.has(key) && extraSinks.length < 6) extraSinks.push(key);
+            }
+            if(missingSinks.length || extraSinks.length || changedSinks.length){
+              pushIssue(report.failures, seen, issue('error', 'SINK_COMPLETION_DELTA', `Sink-level completions differ from dt on ${row.scenario}`, {
+                engine: row.engine,
+                scenario: row.scenario,
+                message: `Sink-level completions differ from dt on ${row.scenario}${missingSinks.length ? `, missing=${missingSinks.join(', ')}` : ''}${extraSinks.length ? `, extra=${extraSinks.join(', ')}` : ''}${changedSinks.length ? `, changed=${changedSinks.join(' | ')}` : ''}`
+              }), 32);
+            }
+          }
+          const baseFinalState = baseline.finalStateSnapshot;
+          const rowFinalState = row.finalStateSnapshot;
+          if(baseFinalState && rowFinalState && Array.isArray(baseFinalState.rows) && Array.isArray(rowFinalState.rows)){
+            const baseMap = new Map(baseFinalState.rows.map((entry)=> [entry.key, entry.state]));
+            const rowMap = new Map(rowFinalState.rows.map((entry)=> [entry.key, entry.state]));
+            const missingStates = [];
+            const extraStates = [];
+            const changedStates = [];
+            for(const [key, baseState] of baseMap.entries()){
+              if(!rowMap.has(key)){
+                if(missingStates.length < 6) missingStates.push(key);
+                continue;
+              }
+              const rowState = rowMap.get(key);
+              if(String(baseState) !== String(rowState) && changedStates.length < 6){
+                changedStates.push(`${key}: ${baseState} != ${rowState}`);
+              }
+            }
+            for(const [key] of rowMap.entries()){
+              if(!baseMap.has(key) && extraStates.length < 6) extraStates.push(key);
+            }
+            if(missingStates.length || extraStates.length || changedStates.length){
+              pushIssue(report.failures, seen, issue('error', 'FINAL_STATE_DELTA', `Final node states differ from dt on ${row.scenario}`, {
+                engine: row.engine,
+                scenario: row.scenario,
+                message: `Final node states differ from dt on ${row.scenario}${missingStates.length ? `, missing=${missingStates.join(', ')}` : ''}${extraStates.length ? `, extra=${extraStates.join(', ')}` : ''}${changedStates.length ? `, changed=${changedStates.join(' | ')}` : ''}`
+              }), 32);
+            }
+          }
+          const baseFinalWork = baseline.finalWorkSnapshot;
+          const rowFinalWork = row.finalWorkSnapshot;
+          if(baseFinalWork && rowFinalWork){
+            const baseLinks = new Set(Array.isArray(baseFinalWork.observedLinkKeys) ? baseFinalWork.observedLinkKeys : []);
+            const rowLinks = new Set(Array.isArray(rowFinalWork.observedLinkKeys) ? rowFinalWork.observedLinkKeys : []);
+            const missingFinal = [];
+            const extraFinal = [];
+            for(const key of baseLinks){ if(!rowLinks.has(key) && missingFinal.length < 8) missingFinal.push(key); }
+            for(const key of rowLinks){ if(!baseLinks.has(key) && extraFinal.length < 8) extraFinal.push(key); }
+            if(Number(baseFinalWork.activeLinkCount) !== Number(rowFinalWork.activeLinkCount)
+              || Number(baseFinalWork.payloadCount) !== Number(rowFinalWork.payloadCount)
+              || missingFinal.length
+              || extraFinal.length){
+              pushIssue(report.failures, seen, issue('error', 'FINAL_WORK_LINK_DELTA', `Final work-link occupancy differs from dt on ${row.scenario}`, {
+                engine: row.engine,
+                scenario: row.scenario,
+                message: `Final work-link occupancy differs from dt on ${row.scenario} (baseline active=${baseFinalWork.activeLinkCount}, candidate active=${rowFinalWork.activeLinkCount}, baseline payload=${baseFinalWork.payloadCount}, candidate payload=${rowFinalWork.payloadCount}${missingFinal.length ? `, missing=${missingFinal.join(', ')}` : ''}${extraFinal.length ? `, extra=${extraFinal.join(', ')}` : ''})`
+              }), 32);
+            }
+          }
+          const baseEntityLedger = baseline.finalEntityLedger;
+          const rowEntityLedger = row.finalEntityLedger;
+          const shouldCompareEntityLedger = !isHeadlessOnlyMode(baseline.engine) && !isHeadlessOnlyMode(row.engine);
+          if(shouldCompareEntityLedger && baseEntityLedger && rowEntityLedger){
+            const baseRefs = new Set(Array.isArray(baseEntityLedger.refs) ? baseEntityLedger.refs : []);
+            const rowRefs = new Set(Array.isArray(rowEntityLedger.refs) ? rowEntityLedger.refs : []);
+            const missingRefs = [];
+            const extraRefs = [];
+            for(const ref of baseRefs){ if(!rowRefs.has(ref) && missingRefs.length < 8) missingRefs.push(ref); }
+            for(const ref of rowRefs){ if(!baseRefs.has(ref) && extraRefs.length < 8) extraRefs.push(ref); }
+            const baseDupes = Array.isArray(baseEntityLedger.duplicateRefs) ? baseEntityLedger.duplicateRefs : [];
+            const rowDupes = Array.isArray(rowEntityLedger.duplicateRefs) ? rowEntityLedger.duplicateRefs : [];
+            if(missingRefs.length || extraRefs.length || baseDupes.length !== rowDupes.length){
+              pushIssue(report.failures, seen, issue('error', 'FINAL_ENTITY_SET_DELTA', `Final entity set differs from dt on ${row.scenario}`, {
+                engine: row.engine,
+                scenario: row.scenario,
+                message: `Final entity set differs from dt on ${row.scenario}${missingRefs.length ? `, missing=${missingRefs.join(', ')}` : ''}${extraRefs.length ? `, extra=${extraRefs.join(', ')}` : ''}${baseDupes.length !== rowDupes.length ? `, duplicates=${baseDupes.length} != ${rowDupes.length}` : ''}`
+              }), 32);
+            }
+          }
+        }
+        const baseFlow = baseline.liveFlowProbe;
+        const rowFlow = row.liveFlowProbe;
+        if(baseFlow && rowFlow && Number(baseFlow.maxActiveLinks) > 0){
+          const baseLinks = new Set(Array.isArray(baseFlow.observedLinkKeys) ? baseFlow.observedLinkKeys : []);
+          const rowLinks = new Set(Array.isArray(rowFlow.observedLinkKeys) ? rowFlow.observedLinkKeys : []);
+          const missing = [];
+          const extra = [];
+          for(const key of baseLinks){ if(!rowLinks.has(key) && missing.length < 8) missing.push(key); }
+          for(const key of rowLinks){ if(!baseLinks.has(key) && extra.length < 8) extra.push(key); }
+          const hasFlowDelta = baseFlow.maxActiveLinks > 0 && rowFlow.maxActiveLinks <= 0;
+          const hasSetDelta = missing.length > 0 || extra.length > 0 || baseLinks.size !== rowLinks.size;
+          if(hasFlowDelta || hasSetDelta){
+            pushIssue(report.failures, seen, issue('error', 'LIVE_WORKFLOW_DELTA', `Visible work-link flow differs from dt on ${row.scenario}`, {
+              engine: row.engine,
+              scenario: row.scenario,
+              message: `Visible work-link flow differs from dt on ${row.scenario} (baseline links=${baseLinks.size}, candidate links=${rowLinks.size}${missing.length ? `, missing=${missing.join(', ')}` : ''}${extra.length ? `, extra=${extra.join(', ')}` : ''})`
+            }), 32);
+          }
+        }
+        const baseState = baseline.liveStateProbe;
+        const rowState = row.liveStateProbe;
+        if(baseState && rowState && Array.isArray(baseState.nodeStates) && Array.isArray(rowState.nodeStates)){
+          const baseMap = new Map(baseState.nodeStates.map((entry)=> [entry.key, entry.sequence]));
+          const rowMap = new Map(rowState.nodeStates.map((entry)=> [entry.key, entry.sequence]));
+          const missingStates = [];
+          const extraStates = [];
+          const changedStates = [];
+          for(const [key, baseSeq] of baseMap.entries()){
+            if(!isMeaningfulStateSequence(baseSeq)) continue;
+            if(!rowMap.has(key)){
+              if(missingStates.length < 6) missingStates.push(key);
+              continue;
+            }
+            const rowSeq = rowMap.get(key);
+            if(!stateSequencesEquivalent(baseSeq, rowSeq) && changedStates.length < 6){
+              changedStates.push(`${key}: ${compactStateSequence(baseSeq).join(' -> ')} != ${compactStateSequence(Array.isArray(rowSeq) ? rowSeq : []).join(' -> ')}`);
+            }
+          }
+          for(const [key, rowSeq] of rowMap.entries()){
+            if(!isMeaningfulStateSequence(rowSeq)) continue;
+            if(!baseMap.has(key) && extraStates.length < 6){
+              extraStates.push(key);
+            }
+          }
+          if(missingStates.length || extraStates.length || changedStates.length){
+            pushIssue(report.failures, seen, issue('error', 'LIVE_STATE_DELTA', `Visible state transitions differ from dt on ${row.scenario}`, {
+              engine: row.engine,
+              scenario: row.scenario,
+              message: `Visible state transitions differ from dt on ${row.scenario}${missingStates.length ? `, missing=${missingStates.join(', ')}` : ''}${extraStates.length ? `, extra=${extraStates.join(', ')}` : ''}${changedStates.length ? `, changed=${changedStates.join(' | ')}` : ''}`
+            }), 32);
+          }
+        }
+        const baseTimeline = baseline.liveTimelineSignature;
+        const rowTimeline = row.liveTimelineSignature;
+        if(baseTimeline && rowTimeline && Array.isArray(baseTimeline.rows) && Array.isArray(rowTimeline.rows)){
+          const baseMap = new Map(baseTimeline.rows.map((entry)=> [entry.key, entry]));
+          const rowMap = new Map(rowTimeline.rows.map((entry)=> [entry.key, entry]));
+          const missingRows = [];
+          const extraRows = [];
+          const changedRows = [];
+          for(const [key, baseEntry] of baseMap.entries()){
+            if(!baseEntry || !baseEntry.meaningful) continue;
+            if(!rowMap.has(key)){
+              if(missingRows.length < 6) missingRows.push(`${key}:${baseEntry.label}`);
+              continue;
+            }
+            const rowEntry = rowMap.get(key);
+            if(!timelineSignaturesEquivalent(baseEntry.signature, rowEntry && rowEntry.signature) && changedRows.length < 6){
+              const fmt = (segments)=> (Array.isArray(segments) ? segments.map((seg)=> `${seg.state}@${seg.durationBins}`).join(' -> ') : '');
+              changedRows.push(`${key}:${fmt(baseEntry.signature)} != ${fmt(rowEntry && rowEntry.signature)}`);
+            }
+          }
+          for(const [key, rowEntry] of rowMap.entries()){
+            if(!rowEntry || !rowEntry.meaningful) continue;
+            if(!baseMap.has(key) && extraRows.length < 6){
+              extraRows.push(`${key}:${rowEntry.label}`);
+            }
+          }
+          if(missingRows.length || extraRows.length || changedRows.length){
+            pushIssue(report.failures, seen, issue('error', 'LIVE_TIMELINE_DELTA', `Timing chart differs from dt on ${row.scenario}`, {
+              engine: row.engine,
+              scenario: row.scenario,
+              message: `Timing chart differs from dt on ${row.scenario}${missingRows.length ? `, missing=${missingRows.join(', ')}` : ''}${extraRows.length ? `, extra=${extraRows.join(', ')}` : ''}${changedRows.length ? `, changed=${changedRows.join(' | ')}` : ''}`
+            }), 32);
+          }
         }
       }
     }
@@ -443,24 +1278,42 @@ var App = window.App || (window.App = {});
       const built = await buildSources(normalized, ctx);
       for(const entry of built.issues) pushIssue(report.failures, seen, entry, 32);
       if(!built.sources.length) pushIssue(report.failures, seen, issue('error', 'NO_TEST_SOURCES', 'No graph sources were available for engine testing'), 32);
-      const totalCases = Math.max(1, built.sources.length * normalized.engines.length);
+      const seeds = Array.isArray(normalized.seeds) && normalized.seeds.length ? normalized.seeds : [normalized.seed || 1];
+      const totalCases = Math.max(1, built.sources.length * normalized.engines.length * seeds.length);
       let caseIndex = 0;
       for(const source of built.sources){
-        for(const engine of normalized.engines){
-          caseIndex += 1;
-          if(onProgress) try{ onProgress(caseIndex / totalCases, { engine, scenario: source.name, caseIndex, totalCases }); }catch(_e){}
-          const result = await runCase(source, engine, normalized);
-          report.results.push(result);
-          for(const entry of result.failures) pushIssue(report.failures, seen, entry, 32);
-          for(const entry of result.warnings) pushIssue(report.warnings, seen, entry, 32);
+        for(const seed of seeds){
+          for(const engine of normalized.engines){
+            caseIndex += 1;
+            if(onProgress) try{ onProgress(caseIndex / totalCases, { engine, scenario: source.name, seed, caseIndex, totalCases, suite: normalized.suite }); }catch(_e){}
+            const result = await runCase(source, engine, normalized, seed);
+            report.results.push(result);
+            for(const entry of result.failures) pushIssue(report.failures, seen, entry, 32);
+            for(const entry of result.warnings) pushIssue(report.warnings, seen, entry, 32);
+          }
         }
       }
       compareResults(report);
-      const passed = report.results.filter((row)=> row.status === 'PASS').length;
-      const warned = report.results.filter((row)=> row.status === 'WARN').length;
-      const failed = report.results.filter((row)=> row.status === 'FAIL').length;
-      report.summary = { passed, warned, failed, caseCount: report.results.length, failureCount: report.failures.length, warningCount: report.warnings.length };
-      report.status = engineStatus(failed + report.failures.length, warned + report.warnings.length);
+      const passedCases = report.results.filter((row)=> row.status === 'PASS').length;
+      const warnedCases = report.results.filter((row)=> row.status === 'WARN').length;
+      const failedCases = report.results.filter((row)=> row.status === 'FAIL').length;
+      report.summary = {
+        passed: passedCases,
+        warned: warnedCases,
+        failed: failedCases + report.failures.length,
+        passedCases,
+        warnedCases,
+        failedCases,
+        caseCount: report.results.length,
+        failureCount: report.failures.length,
+        warningCount: report.warnings.length,
+        engineCount: normalized.engines.length,
+        suite: normalized.suite,
+        seedCount: seeds.length,
+        exampleCount: built.sources.filter((row)=> row.kind === 'example').length,
+        includesCurrentGraph: !!built.sources.find((row)=> row.kind === 'current_graph')
+      };
+      report.status = engineStatus(failedCases + report.failures.length, warnedCases + report.warnings.length);
       report.ok = report.status !== 'FAIL';
       report.finishedAt = new Date().toISOString();
       saveLatestReport(report);
@@ -485,8 +1338,8 @@ var App = window.App || (window.App = {});
     const failuresBody = document.getElementById('engineTestFailuresBody');
     const legend = document.getElementById('engineTestLegend');
     if(!summary || !casesBody || !failuresBody || !legend) return false;
-    const info = report && report.summary ? report.summary : { passed: 0, warned: 0, failed: 0, caseCount: 0, failureCount: 0, warningCount: 0 };
-    summary.textContent = `Status: ${report.status} | Cases: ${info.caseCount} | Passed: ${info.passed} | Warned: ${info.warned} | Failed: ${info.failed} | Global issues: ${info.failureCount + info.warningCount}`;
+    const info = report && report.summary ? report.summary : { passed: 0, warned: 0, failed: 0, passedCases: 0, warnedCases: 0, failedCases: 0, caseCount: 0, failureCount: 0, warningCount: 0, engineCount: 0, exampleCount: 0, includesCurrentGraph: false, suite: 'standard', seedCount: 1 };
+    summary.textContent = `Status: ${report.status} | Suite: ${String(info.suite || 'standard')} | Cases: ${info.caseCount} | Engines: ${info.engineCount} | Seeds: ${info.seedCount} | Examples: ${info.exampleCount}${info.includesCurrentGraph ? ' + current graph' : ''} | Passed cases: ${info.passedCases} | Warned cases: ${info.warnedCases} | Failed cases: ${info.failedCases} | Global failures: ${info.failureCount} | Global warnings: ${info.warningCount}`;
     casesBody.innerHTML = '';
     for(const row of (Array.isArray(report && report.results) ? report.results : [])){
       const tr = document.createElement('tr');
@@ -499,6 +1352,10 @@ var App = window.App || (window.App = {});
       const scenarioTd = document.createElement('td');
       scenarioTd.textContent = row.scenario || '-';
       tr.appendChild(scenarioTd);
+      const seedTd = document.createElement('td');
+      seedTd.className = 'engineTestMono';
+      seedTd.textContent = Number.isFinite(Number(row.seed)) ? String(row.seed) : '-';
+      tr.appendChild(seedTd);
       const simTd = document.createElement('td');
       simTd.className = 'engineTestMono';
       simTd.textContent = `${Number(row.metrics && row.metrics.simTimeMs || 0).toFixed(1)} ms`;
@@ -546,9 +1403,9 @@ var App = window.App || (window.App = {});
         failuresBody.appendChild(tr);
       }
     }
-    legend.textContent = report.comparisons && report.comparisons.length
-      ? `Engine Test uses clone graphs only. ${report.comparisons.length} differential comparison(s) were recorded against a baseline engine.`
-      : 'Engine Test runs clone graphs only. It checks monotonic simulation time, graph integrity, finite numeric state, sink completion metrics, and engine stalls without touching the live canvas graph.';
+      legend.textContent = report.comparisons && report.comparisons.length
+      ? `Engine Test uses clone graphs only. ${report.comparisons.length} differential comparison(s) were recorded against a baseline engine. It now supports Quick / Standard / Soak suites, seed sweeps, hidden-canvas live probes for visible work-link parity, sampled node state-transition parity, timing-chart parity, and optional strict final parity for sink completions, final node states, final work-link occupancy, and final entity-set parity against dt.`
+      : 'Engine Test runs clone graphs only. It checks monotonic simulation time, graph integrity, finite numeric state, sink completion metrics, engine stalls, hidden-canvas live probes for timeline population, visible work-link parity, sampled node state-transition parity, timing-chart parity, and optional strict final parity for sink completions, final node states, final work-link occupancy, and final entity-set parity against dt.';
     return true;
   }
   (function initEngineTestUi(){
@@ -557,6 +1414,9 @@ var App = window.App || (window.App = {});
     const runBtn = document.getElementById('btnEngineTest');
     const rerunBtn = document.getElementById('engineTestRerunBtn');
     const copyBtn = document.getElementById('engineTestCopyBtn');
+    const suiteSelect = document.getElementById('engineTestSuiteSelect');
+    const strictToggle = document.getElementById('engineTestStrictToggle');
+    const seedsInput = document.getElementById('engineTestSeedsInput');
     const progressWrap = document.getElementById('engineTestProgressWrap');
     const progressLabel = document.getElementById('engineTestProgressLabel');
     const progressBar = document.getElementById('engineTestProgressBar');
@@ -592,6 +1452,26 @@ var App = window.App || (window.App = {});
       open();
       return true;
     };
+    function readControlOptions(){
+      const suite = suiteSelect && suiteSelect.value ? suiteSelect.value : 'standard';
+      const strictFinalParity = !!(strictToggle && strictToggle.checked);
+      const seeds = normalizeSeedList(seedsInput && typeof seedsInput.value === 'string' ? seedsInput.value : '');
+      return {
+        suite,
+        strictFinalParity,
+        engines: defaultEngineTestEngines(),
+        includeCurrentGraph: true,
+        includeExamples: true,
+        examples: defaultExampleIds(),
+        seeds: seeds.length ? seeds : undefined
+      };
+    }
+    function applyControlOptions(options){
+      const normalized = normalizeOptions(options);
+      if(suiteSelect) suiteSelect.value = normalized.suite || 'standard';
+      if(strictToggle) strictToggle.checked = !!normalized.strictFinalParity;
+      if(seedsInput) seedsInput.value = Array.isArray(normalized.seeds) ? normalized.seeds.join(', ') : '';
+    }
     async function runWithOptions(options){
       if(running) return;
       lastOptions = cloneJson(options);
@@ -619,15 +1499,13 @@ var App = window.App || (window.App = {});
       }
     }
     runBtn.addEventListener('click', ()=>{
-      const modeSelect = document.getElementById('simModeSelect');
-      const selected = (modeSelect && modeSelect.value) || ((typeof App.getSimMode === 'function') ? App.getSimMode() : 'dt');
-      runWithOptions({ engines: [normalizeEngineMode(selected)], includeCurrentGraph: true, includeExamples: false });
+      runWithOptions(readControlOptions());
     });
     rerunBtn.addEventListener('click', ()=>{
       const latest = App.getLatestEngineTestReport();
-      const modeSelect = document.getElementById('simModeSelect');
-      const selected = (modeSelect && modeSelect.value) || ((typeof App.getSimMode === 'function') ? App.getSimMode() : 'dt');
-      runWithOptions(lastOptions || (latest && latest.options) || { engines: [normalizeEngineMode(selected)], includeCurrentGraph: true, includeExamples: false });
+      const options = lastOptions || (latest && latest.options) || readControlOptions();
+      applyControlOptions(options);
+      runWithOptions(options);
     });
     copyBtn.addEventListener('click', async ()=>{
       const latest = App.getLatestEngineTestReport();
@@ -642,5 +1520,6 @@ var App = window.App || (window.App = {});
     closeBtn.addEventListener('click', close);
     modal.addEventListener('click', (e)=>{ if(e.target === modal) close(); });
     window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.style.display === 'block') close(); });
+    applyControlOptions({ suite: DEFAULTS.suite, strictFinalParity: SUITE_PRESETS[DEFAULTS.suite] && SUITE_PRESETS[DEFAULTS.suite].strictFinalParity, seeds: SUITE_PRESETS[DEFAULTS.suite] && SUITE_PRESETS[DEFAULTS.suite].seeds });
   })();
 })();
