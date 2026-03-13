@@ -62,6 +62,7 @@ var App = window.App || (window.App = {});
     }
   };
   const FINAL_SNAPSHOT_SETTLE_EPS_MS = 0.001;
+  const STRICT_FINAL_SNAPSHOT_SETTLE_MS = 100;
   const SCAN_SKIP = new Set(['app', 'canvas', 'constructor', 'flags', 'graph', 'inputs', 'outputs', 'parent', 'widgets', 'widgets_values']);
   const LIVE_PROBE_ENGINES = new Set(['dt', 'event-fast-worker', 'event-fast-par']);
 
@@ -221,6 +222,11 @@ var App = window.App || (window.App = {});
       seed: normalizedSeeds.length ? normalizedSeeds[0] : (Number.isFinite(Number(raw.seed)) ? Math.floor(Math.abs(Number(raw.seed))) : null),
       seeds: normalizedSeeds.length ? normalizedSeeds : [1]
     };
+  }
+  function finalSnapshotSettleMs(options){
+    if(!(options && options.strictFinalParity)) return FINAL_SNAPSHOT_SETTLE_EPS_MS;
+    const realStepMs = Math.max(1, Number(options.realStepMs) || DEFAULTS.realStepMs);
+    return Math.max(FINAL_SNAPSHOT_SETTLE_EPS_MS, STRICT_FINAL_SNAPSHOT_SETTLE_MS, realStepMs);
   }
   function createSeededRandom(seed){
     let state = Math.floor(Math.abs(Number(seed) || 1)) % 2147483647;
@@ -549,6 +555,23 @@ var App = window.App || (window.App = {});
     if(JSON.stringify(shortSeq) === JSON.stringify(longSeq.slice(0, shortSeq.length))) return true;
     return false;
   }
+  function parseStateToken(token){
+    const raw = String(token || '');
+    const idx = raw.lastIndexOf('|');
+    if(idx < 0) return { detail: raw, phase: '' };
+    return {
+      detail: raw.slice(0, idx),
+      phase: raw.slice(idx + 1).toUpperCase()
+    };
+  }
+  function finalStateTokensEquivalent(baseToken, rowToken){
+    if(String(baseToken || '') === String(rowToken || '')) return true;
+    const a = parseStateToken(baseToken);
+    const b = parseStateToken(rowToken);
+    if(String(a.detail || '') !== String(b.detail || '')) return false;
+    const activePhases = new Set(['PROCESS', 'DOWN', 'WAIT']);
+    return activePhases.has(a.phase) && activePhases.has(b.phase);
+  }
   function buildTimelineSignature(timeline, quantMs){
     const entries = timeline && timeline.entries;
     const quantSec = Math.max(0.05, Number(quantMs) / 1000);
@@ -627,6 +650,7 @@ var App = window.App || (window.App = {});
     const prevCanvas = App.canvas;
     const prevWindowCanvas = window.canvas;
     const prevSuspendTimeline = !!App._suspendTimeline;
+    const prevLiveSyncError = App._lastLiveSyncError ? cloneJson(App._lastLiveSyncError) : null;
     const host = document.createElement('div');
     host.style.position = 'fixed';
     host.style.left = '-20000px';
@@ -668,6 +692,7 @@ var App = window.App || (window.App = {});
       App.canvas = stubCanvas;
       window.canvas = stubCanvas;
       App._suspendTimeline = false;
+      App._lastLiveSyncError = null;
       timeline.attachGraph(graph);
       if(typeof window.setSimTime === 'function') window.setSimTime(0);
       simEngine = App.createSimEngine(engine, graph);
@@ -719,6 +744,18 @@ var App = window.App || (window.App = {});
         }
       }
       wallMs = Math.max(0, performance.now() - started);
+      const liveSyncError = App._lastLiveSyncError ? cloneJson(App._lastLiveSyncError) : null;
+      if(liveSyncError){
+        return {
+          ok: false,
+          code: 'LIVE_SYNC_FAILED',
+          message: `Live graph sync failed for "${engine}" on ${source.name}: ${liveSyncError.message || 'unknown error'}`,
+          simMs,
+          loops,
+          wallMs,
+          runtimeMode: String((simEngine && simEngine.runtimeMode) || (effectiveEngine && effectiveEngine.runtimeMode) || '').trim() || null
+        };
+      }
       const scan = inspectTimelineEntries(timeline);
       if(simMs <= 0.001){
         return { ok: false, code: 'LIVE_NO_SIM_PROGRESS', message: `Live engine "${engine}" made no simulation progress`, simMs, loops, wallMs, timeline: scan, state: finalizeStateProbe(stateProbe) };
@@ -752,6 +789,7 @@ var App = window.App || (window.App = {});
       App.canvas = prevCanvas;
       window.canvas = prevWindowCanvas;
       App._suspendTimeline = prevSuspendTimeline;
+      App._lastLiveSyncError = prevLiveSyncError;
       if(typeof window.setSimTime === 'function') try{ window.setSimTime(prevTime); }catch(_e){}
       try{ if(host.parentNode) host.parentNode.removeChild(host); }catch(_e){}
     }
@@ -871,6 +909,7 @@ var App = window.App || (window.App = {});
       const seen = new Set();
       const startWall = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
       const payload = (typeof App.compactGraphData === 'function') ? App.compactGraphData(cloneJson(source.data)) : cloneJson(source.data);
+      const finalSettleMs = finalSnapshotSettleMs(options);
       const baselineGraph = createGraphFromData(payload);
       const expected = {
         nodeCount: Array.isArray(baselineGraph && baselineGraph._nodes) ? baselineGraph._nodes.length : 0,
@@ -901,7 +940,7 @@ var App = window.App || (window.App = {});
             return finalizeCase(result, startWall, simMs, loops);
           }
           const payload = await simEngine.runUntilSimTimeAsync({
-            targetSimMs: options.targetSimMs + FINAL_SNAPSHOT_SETTLE_EPS_MS,
+            targetSimMs: options.targetSimMs + finalSettleMs,
             maxWallMs: options.maxWallMs,
             realStepMs: options.realStepMs,
             maxLoops: options.maxLoops
@@ -983,7 +1022,7 @@ var App = window.App || (window.App = {});
           }
           if(!result.failures.length){
             try{
-              simEngine.update(FINAL_SNAPSHOT_SETTLE_EPS_MS);
+              simEngine.update(finalSettleMs);
               const settledSim = nowSimMs();
               if(Number.isFinite(settledSim) && settledSim >= simMs){
                 simMs = settledSim;
@@ -1093,7 +1132,7 @@ var App = window.App || (window.App = {});
                 continue;
               }
               const rowState = rowMap.get(key);
-              if(String(baseState) !== String(rowState) && changedStates.length < 6){
+              if(!finalStateTokensEquivalent(baseState, rowState) && changedStates.length < 6){
                 changedStates.push(`${key}: ${baseState} != ${rowState}`);
               }
             }

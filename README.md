@@ -4,10 +4,12 @@
 [![License](https://img.shields.io/badge/license-Research%20%2F%20Non--Commercial-blue)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/suzuking001/fact_sim?style=social)](https://github.com/suzuking001/fact_sim)
 
-**Prove takt and throughput before you buy equipment.**
+**A general-purpose browser-based discrete-event simulator.**
 
-`fact_sim` is an open-source, browser-based discrete-event simulator for production-line design.
-It helps manufacturing teams validate takt feasibility, throughput, bottlenecks, and resource sizing (equipment, buffers, AGVs, carriers) with explainable timing charts instead of presentation-only animations.
+`fact_sim` is an open-source, browser-based discrete-event simulator for modeling flows of work, resources, queues, transport, and state transitions.
+It is especially strong for production-line design, but the core value is broader: it is a **general-purpose discrete-event simulator** that can be used anywhere entities move through events, buffers, routing, and timing constraints.
+
+Manufacturing is the primary example in this repository, so the bundled nodes and samples focus on lines, equipment, AGVs, carriers, pallets, and stations. But the same engine and visualization approach can be applied to many other systems, such as logistics flows, warehouse operations, internal transport, service processes, and resource-constrained workflows.
 
 ![fact_sim demo](docs/assets/fact_sim_demo.gif)
 
@@ -16,45 +18,52 @@ https://suzuking001.github.io/fact_sim/
 
 ## Core Message
 fact_sim is not a tool for making flashy robot animations.
-It is a production-line simulator designed to answer the questions that matter at planning stage, with second-level explainability:
+It is a **general-purpose discrete-event simulator** designed to explain why a system behaves the way it does, with second-level visibility into state transitions, routing, waiting, blocking, transport, and bottlenecks.
+
+In manufacturing, that typically means questions like:
 
 - Will the line meet takt?
 - What throughput can we achieve?
 - Where is the bottleneck?
 - Are equipment, buffers, AGVs, and carriers sized correctly?
 
-It runs fully in the browser and visualizes *why* a line meets or misses target via timing charts and CSV.
-Before major CAPEX, it helps teams build decision-grade evidence fast.
+More generally, the same modeling approach helps answer:
+
+- Where does work wait or accumulate?
+- Which resource is constraining the system?
+- How do routing rules change overall throughput?
+- What happens if processing time, downtime, or transport capacity changes?
+
+It runs fully in the browser and visualizes *why* a system meets or misses target via timing charts and CSV.
+Before changing layouts, staffing, transport logic, or capital plans, it helps teams build decision-grade evidence fast.
 
 ## Why fact_sim
 - Browser-native workflow for fast iteration
-- Node-based modeling that maps to real line design
-- Discrete-event simulation with practical engine options (`dt`, `event`)
+- Node-based modeling for generic event-driven systems
+- Discrete-event simulation with practical engine options (`dt`, `event`, `event-fast*`)
 - Explainable analysis with timing chart + CSV export
+- Works well for both domain-specific industrial models and broader workflow simulation
 - URL-based scenario sharing for fast team reviews
 
 ## Core Capabilities
 - **Modeling:** Source, Equipment, Split, Branch, Merge, Join, Carrier Route, Carrier Config, Pallet Carrier Config, Station, Sink
 - **Simulation:** engine switching, speed scaling, large scenario execution
-- **Analysis:** timing chart, node highlighting, benchmark comparison, CSV export
+- **Analysis:** timing chart, node highlighting, benchmark comparison, engine test, CSV export
 - **Collaboration:** JSON save/load and shareable URL state
+
+## Typical Use Cases
+- Production lines and takt verification
+- Warehouse and internal logistics flow simulation
+- AGV, carrier, pallet, and transport routing studies
+- Queueing and resource-capacity analysis
+- General workflow simulation where entities move through states and events
 
 ## Quick Start (2 Minutes)
 1. Open the live demo.
-2. Select `Sample Line1` or `Carrier Config Example`.
+2. Select `Sample Line2`, `Sample Line1`, or `Carrier Config Example`.
 3. Click `Start`.
 4. Inspect `Timing Chart` to verify state transitions.
 5. Export CSV when you need evidence for review.
-
-## Product Hunt Copy
-**Tagline**
-Prove takt and throughput before you buy equipment.
-
-**Short description**
-A browser-based discrete-event simulator for manufacturing engineers. Validate takt, throughput, bottlenecks, and AGV/buffer sizing with explainable timing charts.
-
-**Launch post**
-fact_sim was built for one purpose: make production decisions explainable before CAPEX. Not flashy robot animation, but second-level operational truth. Model quickly, run in-browser, inspect timing charts, export CSV, and share scenarios by URL. If your team asks “Will this line really meet takt?”, fact_sim gives a defensible answer.
 
 ## note Article Intro
 “Moving visuals” make meetings easier.
@@ -74,6 +83,12 @@ This article shares practical simulation design for real factories, not presenta
 python -m http.server 8123
 ```
 Open `http://127.0.0.1:8123`
+
+Windows users can also start the local server with:
+
+```bat
+start_fact_sim_server.bat
+```
 
 ## Documentation
 - Research notes: `docs/research.md`

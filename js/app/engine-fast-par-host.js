@@ -218,6 +218,18 @@ var App = window.App || (window.App = {});
     const data = (typeof App.compactGraphData === 'function')
       ? App.compactGraphData(cloneJson(graphData))
       : cloneJson(graphData);
+    const canvas = App.canvas || null;
+    const inspector = App.selectionInspector || null;
+    const preservedNodeIds = [];
+    const inspectorNodeId = Number(inspector && inspector.target && inspector.target.kind === 'node' ? inspector.target.nodeId : NaN);
+    const hadGroupSelection = !!(canvas && canvas.selected_group);
+    if(canvas && canvas.selected_nodes && typeof canvas.selected_nodes === 'object'){
+      for(const key of Object.keys(canvas.selected_nodes)){
+        const node = canvas.selected_nodes[key];
+        const nodeId = Number(node && node.id);
+        if(Number.isFinite(nodeId) && preservedNodeIds.indexOf(nodeId) < 0) preservedNodeIds.push(nodeId);
+      }
+    }
     try{
       if(!graphStructureMatchesSnapshot(graph, data)){
         graph.configure(data);
@@ -226,6 +238,28 @@ var App = window.App || (window.App = {});
         }
         if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
           try{ App.stopGroups.restoreSerializedData(graph, data, false); }catch(_e){}
+        }
+        if(canvas){
+          try{
+            if(typeof canvas.deselectAllNodes === 'function') canvas.deselectAllNodes();
+            else if(canvas.selected_nodes && typeof canvas.selected_nodes === 'object') canvas.selected_nodes = {};
+            canvas.selected_group = null;
+            if(preservedNodeIds.length && typeof graph.getNodeById === 'function' && typeof canvas.selectNodes === 'function'){
+              const nodes = preservedNodeIds.map((id)=> graph.getNodeById(id)).filter(Boolean);
+              if(nodes.length) canvas.selectNodes(nodes, false);
+            }
+          }catch(_e){}
+        }
+        if(inspector){
+          try{
+            if(Number.isFinite(inspectorNodeId) && typeof graph.getNodeById === 'function'){
+              const node = graph.getNodeById(inspectorNodeId);
+              if(node && typeof inspector.setNode === 'function') inspector.setNode(node);
+              else if(hadGroupSelection && typeof inspector.clear === 'function') inspector.clear(true);
+            }else if(hadGroupSelection && typeof inspector.clear === 'function'){
+              inspector.clear(true);
+            }
+          }catch(_e){}
         }
       }
       applyRuntimeNodeStates(graph, graphData);
@@ -477,7 +511,15 @@ var App = window.App || (window.App = {});
         if(!canUseParWorker() || !plan || !plan.canParallelize){
           const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
           this._runner = App.createHeadlessSimRunner(fallbackMode, this.graphData, this.options);
-          this.runtimeMode = this._runner && this._runner.runtimeMode ? this._runner.runtimeMode : `fallback-${fallbackMode}`;
+          let initial = null;
+          if(this._runner && typeof this._runner.resetAsync === 'function'){
+            try{ initial = await this._runner.resetAsync(); }catch(_e){}
+          }
+          this.runtimeMode = String(
+            (initial && initial.runtimeMode)
+            || (this._runner && this._runner.runtimeMode)
+            || `fallback-${fallbackMode}`
+          );
           return { runtimeMode: this.runtimeMode, stats: null };
         }
         this._workers = plan.partitions.map((part)=>
@@ -489,7 +531,15 @@ var App = window.App || (window.App = {});
           await Promise.all(this._workers.map((worker)=> worker.disposeAsync()));
           this._workers = [];
           this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
-          this.runtimeMode = this._runner && this._runner.runtimeMode ? this._runner.runtimeMode : 'fallback-event-fast-worker';
+          let initial = null;
+          if(this._runner && typeof this._runner.resetAsync === 'function'){
+            try{ initial = await this._runner.resetAsync(); }catch(_e){}
+          }
+          this.runtimeMode = String(
+            (initial && initial.runtimeMode)
+            || (this._runner && this._runner.runtimeMode)
+            || 'fallback-event-fast-worker'
+          );
           return { runtimeMode: this.runtimeMode, stats: null };
         }
         this._independentPartitions = Number(plan.cutEdgeCount) === 0;
@@ -546,6 +596,12 @@ var App = window.App || (window.App = {});
       if(this._runner && typeof this._runner.resetAsync === 'function'){
         const payload = await this._runner.resetAsync();
         this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+        this.runtimeMode = String(
+          (payload && payload.runtimeMode)
+          || (payload && payload.stats && payload.stats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+        );
         return payload;
       }
       const payloads = await Promise.all(this._workers.map((worker)=> worker.resetAsync(this.options.seed)));
@@ -598,6 +654,12 @@ var App = window.App || (window.App = {});
       if(this._runner && typeof this._runner.runBenchmarkCaseAsync === 'function'){
         const payload = await this._runner.runBenchmarkCaseAsync(options);
         this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+        this.runtimeMode = String(
+          (payload && payload.runtimeMode)
+          || (payload && payload.stats && payload.stats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+        );
         return payload;
       }
       if(this._independentPartitions){
@@ -634,6 +696,12 @@ var App = window.App || (window.App = {});
       if(this._runner && typeof this._runner.runUntilSimTimeAsync === 'function'){
         const payload = await this._runner.runUntilSimTimeAsync(options);
         this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+        this.runtimeMode = String(
+          (payload && payload.runtimeMode)
+          || (payload && payload.stats && payload.stats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+        );
         return payload;
       }
       if(this._independentPartitions){
@@ -699,6 +767,12 @@ var App = window.App || (window.App = {});
         const payload = await this._runner.stepAsync(opts);
         this._lastSimTimeMs = Math.max(this._lastSimTimeMs, Number(payload && payload.simTimeMs) || 0);
         this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+        this.runtimeMode = String(
+          (payload && payload.runtimeMode)
+          || (payload && payload.stats && payload.stats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+        );
         return payload;
       }
       const stepped = await this._stepParallel(simDeltaMs);
@@ -718,6 +792,11 @@ var App = window.App || (window.App = {});
       await this._ensureRunner();
       if(this._runner && typeof this._runner.getDebugStatsAsync === 'function'){
         this._lastStats = await this._runner.getDebugStatsAsync();
+        this.runtimeMode = String(
+          (this._lastStats && this._lastStats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+        );
         return this._lastStats;
       }
       const rows = await Promise.all(this._workers.map((worker)=> worker.getDebugStatsAsync()));
@@ -760,6 +839,7 @@ var App = window.App || (window.App = {});
       this._queuedDeltaMs = 0;
       this._accumMs = 0;
       this._inFlight = null;
+      this._epoch = 0;
       this._lastSnapshotAt = 0;
       this._snapshotIntervalMs = 0;
       this._liveQuantumMs = Math.max(1, (((typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1) * 1000));
@@ -787,6 +867,7 @@ var App = window.App || (window.App = {});
     }
 
     reset(){
+      this._epoch += 1;
       this._stopped = false;
       this._queuedDeltaMs = 0;
       this._accumMs = 0;
@@ -814,6 +895,7 @@ var App = window.App || (window.App = {});
       if(this._stopped || this._disposed || this._liveFallbackEngine || !this._runner) return;
       if(this._inFlight || this._queuedDeltaMs <= 0) return;
       if(this._queuedDeltaMs + 0.001 < this._liveQuantumMs) return;
+      const epoch = this._epoch;
       const deltaMs = this._liveQuantumMs;
       this._queuedDeltaMs = Math.max(0, this._queuedDeltaMs - deltaMs);
       const requestSnapshot = true;
@@ -821,6 +903,7 @@ var App = window.App || (window.App = {});
       this._inFlight = ready
         .then(()=> this._runner.stepAsync({ simDeltaMs: deltaMs, snapshot: requestSnapshot }))
         .then((payload)=>{
+          if(epoch !== this._epoch) return;
           if(this._stopped || this._disposed || !payload) return;
           if(Number.isFinite(Number(payload.simTimeMs)) && typeof window.setSimTime === 'function'){
             try{ window.setSimTime(Number(payload.simTimeMs)); }catch(_e){}
@@ -841,6 +924,10 @@ var App = window.App || (window.App = {});
           console.error(err);
         })
         .finally(()=>{
+          if(epoch !== this._epoch){
+            this._inFlight = null;
+            return;
+          }
           this._inFlight = null;
           if(this._queuedDeltaMs > 0 && !this._stopped && !this._disposed){
             this._scheduleDrain();
@@ -925,7 +1012,8 @@ var App = window.App || (window.App = {});
     async disposeAsync(){
       if(this._disposed) return;
       this._disposed = true;
-      this.stop();
+      this._epoch += 1;
+      await this.stopAsync();
       if(this._runner && typeof this._runner.disposeAsync === 'function'){
         try{ await this._runner.disposeAsync(); }catch(_e){}
       }

@@ -117,8 +117,8 @@ return true;`;
   function importRequiredScripts(){
     try{
       importScripts('../vendor/litegraph.min.js');
-    }catch(_e){
-      importScripts('https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js');
+    }catch(err){
+      throw new Error(`Failed to load local LiteGraph in worker: ${err && err.message ? err.message : err}`);
     }
     importScripts(
       '../nodes-config.js',

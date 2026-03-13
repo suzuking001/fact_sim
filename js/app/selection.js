@@ -43,6 +43,7 @@ function installBoxSelect(c){
     const node = findNodeAtCanvasPos(c, p[0], p[1]);
     if(node) return;
     selecting = true;
+    c.__boxSelectActive = true;
     c.dragging_rectangle = new Float32Array([p[0], p[1], 1, 1]);
     c.setDirty(true, true);
     e.preventDefault();
@@ -60,6 +61,7 @@ function installBoxSelect(c){
   window.addEventListener('mouseup', (e)=>{
     if(!selecting) return;
     selecting = false;
+    c.__boxSelectActive = false;
     c.__rectSelectForce = false;
     const rect = c.dragging_rectangle;
     c.dragging_rectangle = null;
@@ -82,6 +84,13 @@ function installBoxSelect(c){
     c.setDirty(true, true);
   }, opts);
 
+  window.addEventListener('blur', ()=>{
+    selecting = false;
+    c.__boxSelectActive = false;
+    c.dragging_rectangle = null;
+    try{ c.setDirty(true, true); }catch(_e){}
+  }, opts);
+
   c.__boxSelectHooked = true;
 }
 
@@ -92,7 +101,10 @@ function installBoxSelectOverlay(c){
     try{
       if(typeof prev === 'function') prev.call(this, ctx);
       const rect = this.dragging_rectangle;
-      if(!rect) return;
+      if(!rect || !this.__boxSelectActive){
+        if(rect && !this.__boxSelectActive) this.dragging_rectangle = null;
+        return;
+      }
       const x = rect[2] < 0 ? rect[0] + rect[2] : rect[0];
       const y = rect[3] < 0 ? rect[1] + rect[3] : rect[1];
       const w = Math.abs(rect[2]);

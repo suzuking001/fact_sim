@@ -19,6 +19,7 @@ var App = window.App || (window.App = {});
   let loadToken = 0;
   let controls = null;
   let mouseState = null;
+  let hoverMode = '';
 
   function _num(v, fallback){
     const n = Number(v);
@@ -91,6 +92,13 @@ var App = window.App || (window.App = {});
       if(typeof c.setDirty === 'function') c.setDirty(true, true);
       c.draw(true, true);
     }catch(_e){}
+  }
+
+  function _setHoverMode(nextMode){
+    const normalized = String(nextMode || '');
+    if(normalized === hoverMode) return;
+    hoverMode = normalized;
+    _drawNow();
   }
 
   function _updateUi(){
@@ -333,6 +341,7 @@ var App = window.App || (window.App = {});
       if(!mode) return;
       mouseState.active = true;
       mouseState.mode = mode;
+      _setHoverMode(mode);
       mouseState.startX = p[0];
       mouseState.startY = p[1];
       mouseState.baseX = Number(state.x) || 0;
@@ -360,6 +369,7 @@ var App = window.App || (window.App = {});
       if(!state.mouseEdit || !state.src || !state.enabled){
         mouseState.active = false;
         mouseState.mode = '';
+        _setHoverMode('');
         _applyCursor(canvas, '');
         return;
       }
@@ -394,6 +404,7 @@ var App = window.App || (window.App = {});
 
     el.addEventListener('mousemove', (e)=>{
       if(!state.mouseEdit || !state.src || !state.enabled){
+        _setHoverMode('');
         _applyCursor(canvas, '');
         return;
       }
@@ -402,13 +413,21 @@ var App = window.App || (window.App = {});
         return;
       }
       const mode = _hitTest(p[0], p[1]);
+      _setHoverMode(mode);
       _applyCursor(canvas, mode);
+    }, true);
+
+    el.addEventListener('mouseleave', ()=>{
+      if(mouseState && mouseState.active) return;
+      _setHoverMode('');
+      _applyCursor(canvas, '');
     }, true);
 
     window.addEventListener('mouseup', ()=>{
       if(!mouseState || !mouseState.active) return;
       mouseState.active = false;
       mouseState.mode = '';
+      _setHoverMode('');
       _applyCursor(canvas, '');
       _updateUi();
       _drawNow();
@@ -419,6 +438,9 @@ var App = window.App || (window.App = {});
 
   function _drawMouseEditOverlay(ctx, canvas){
     if(!state.mouseEdit || !state.src || !state.enabled) return;
+    const activeMode = mouseState && mouseState.active ? String(mouseState.mode || '') : '';
+    const mode = activeMode || hoverMode;
+    if(!mode) return;
     const w = Math.max(1, Number(state.width) || 1);
     const h = Math.max(1, Number(state.height) || 1);
     const scale = _getScale();
@@ -426,16 +448,23 @@ var App = window.App || (window.App = {});
     const rotateOffset = 24 / scale;
     const center = _center();
     const rotateLabel = `${Math.round(_normalizeAngle(state.rotation))} deg`;
+    const isMove = mode === 'move';
+    const accentStroke = isMove ? 'rgba(60,60,67,0.38)' : 'rgba(10,132,255,0.88)';
+    const accentFill = isMove ? 'rgba(60,60,67,0.18)' : 'rgba(10,132,255,0.18)';
+    const handleFill = isMove ? 'rgba(60,60,67,0.72)' : 'rgba(10,132,255,0.92)';
 
     ctx.save();
     ctx.translate(center.x, center.y);
     ctx.rotate(_degToRad(state.rotation));
-    ctx.lineWidth = 1.5 / scale;
-    ctx.strokeStyle = 'rgba(37,99,235,0.95)';
-    ctx.setLineDash([6 / scale, 4 / scale]);
+    ctx.lineWidth = 1.25 / scale;
+    ctx.strokeStyle = accentStroke;
+    ctx.fillStyle = accentFill;
+    _drawRoundedRectPath(ctx, -w * 0.5, -h * 0.5, w, h, Math.max(8 / scale, 6));
+    ctx.fill();
+    ctx.setLineDash([5 / scale, 4 / scale]);
     ctx.strokeRect(-w * 0.5, -h * 0.5, w, h);
     ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(37,99,235,0.95)';
+    ctx.fillStyle = handleFill;
     ctx.fillRect(w * 0.5 - hs, h * 0.5 - hs, hs, hs);
     ctx.beginPath();
     ctx.moveTo(0, -h * 0.5);
@@ -444,12 +473,27 @@ var App = window.App || (window.App = {});
     ctx.beginPath();
     ctx.arc(0, -h * 0.5 - rotateOffset, hs * 0.55, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(15,23,42,0.88)';
+    ctx.fillStyle = 'rgba(15,23,42,0.74)';
     ctx.font = `${Math.max(10, 11 / scale)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(rotateLabel, 0, -h * 0.5 - rotateOffset - hs * 0.8);
+    if(mode === 'rotate' || activeMode === 'rotate') ctx.fillText(rotateLabel, 0, -h * 0.5 - rotateOffset - hs * 0.8);
     ctx.restore();
+  }
+
+  function _drawRoundedRectPath(ctx, x, y, w, h, r){
+    const rr = Math.max(0, Math.min(Number(r) || 0, Math.min(w, h) * 0.5));
+    ctx.beginPath();
+    if(rr <= 0){
+      ctx.rect(x, y, w, h);
+      return;
+    }
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
   }
 
   App.backgroundLayout = {
