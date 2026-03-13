@@ -24,7 +24,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260312c" />
+  <link rel="stylesheet" href="css/app.css?v=20260313d" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -478,17 +478,20 @@
         <button id="timelineAutoOrderBtn" class="timelineBtn">Reset Order</button>
         <button id="timelineExportBtn" class="timelineBtn">Export CSV</button>
         <button id="timelineFollowBtn" class="timelineBtn">Auto Follow: ON</button>
+        <button id="timelineChartPopoutBtn" class="timelineBtn">Open Window</button>
       </div>
       <div id="timelinePropsActions" class="timelineActions">
         <button id="nodePropsRefreshBtn" class="timelineBtn">Refresh</button>
+        <button id="timelinePropsPopoutBtn" class="timelineBtn">Open Window</button>
       </div>
       <div id="timelineInspectorActions" class="timelineActions">
         <button id="selectionInspectorRefreshBtn" class="timelineBtn">Refresh</button>
         <button id="selectionInspectorClearBtn" class="timelineBtn">Clear</button>
+        <button id="timelineInspectorPopoutBtn" class="timelineBtn">Open Window</button>
       </div>
     </div>
     <div id="timelineBody" class="view-chart">
-      <canvas id="timelineCanvas"></canvas>
+      <div id="timelineChartPanel"><canvas id="timelineCanvas"></canvas></div>
       <div id="nodePropsPanel" aria-label="Node browser">
         <div class="nodePropsToolbar">
           <input id="nodePropsFilter" type="text" placeholder="Search node, type, connection, or property..." aria-label="Filter nodes" />
@@ -790,7 +793,7 @@ SOFTWARE.
   <script src="sample/pallet_station_demo.js?v=20260226a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
   <script src="sample/sample_line2.js?v=20260313a"></script>
-  <script src="js/timeline.js?v=20260308a"></script>
+  <script src="js/timeline.js?v=20260313b"></script>
   <script src="js/app/state.js?v=20260225b"></script>
   <script src="js/app/background-layout.js?v=20260313b"></script>
   <script src="js/app/graph-links.js?v=20260301a"></script>
@@ -815,7 +818,7 @@ SOFTWARE.
   <script src="js/app/fit.js?v=20260306a"></script>
   <script src="js/app/node-props-panel.js?v=20260308c"></script>
   <script src="js/app/selection-inspector.js?v=20260308e"></script>
-  <script src="js/app/timeline-init.js?v=20260308b"></script>
+  <script src="js/app/timeline-init.js?v=20260313a"></script>
   <script src="js/app/graph-init.js?v=20260313a"></script>
   <script src="js/app/examples.js?v=20260313c"></script>
   <script src="js/app/file-io.js?v=20260313a"></script>

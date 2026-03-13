@@ -1246,6 +1246,10 @@ body.timeline-hidden #timelineRevealHandle{
   width: 100%;
   min-height: 0;
 }
+#timelineChartPanel{
+  position: absolute;
+  inset: 0;
+}
 #timelineCanvas{
   width: 100%;
   height: 100%;
@@ -1253,14 +1257,22 @@ body.timeline-hidden #timelineRevealHandle{
   background: #ffffff;
   touch-action: none;
 }
-#timelineBody.view-props #timelineCanvas,
-#timelineBody.view-inspector #timelineCanvas{
+#timelineBody.view-props #timelineChartPanel,
+#timelineBody.view-inspector #timelineChartPanel{
   display: none;
 }
 #timelineBody.view-chart #nodePropsPanel,
 #timelineBody.view-chart #selectionInspectorPanel,
 #timelineBody.view-props #selectionInspectorPanel,
 #timelineBody.view-inspector #nodePropsPanel{
+  display: none;
+}
+#timelineBody.view-chart .workspacePopoutPlaceholder[data-view="props"],
+#timelineBody.view-chart .workspacePopoutPlaceholder[data-view="inspector"],
+#timelineBody.view-props .workspacePopoutPlaceholder[data-view="chart"],
+#timelineBody.view-props .workspacePopoutPlaceholder[data-view="inspector"],
+#timelineBody.view-inspector .workspacePopoutPlaceholder[data-view="chart"],
+#timelineBody.view-inspector .workspacePopoutPlaceholder[data-view="props"]{
   display: none;
 }
 
@@ -4285,6 +4297,131 @@ body.sidebar-hidden #timelineRevealHandle{
   min-height: 34px;
   padding: 0 12px;
   white-space: nowrap;
+}
+
+.workspacePopoutPlaceholder{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(251,251,252,0.88), rgba(238,240,244,0.92));
+  color: #4b5563;
+  text-align: center;
+}
+
+.workspacePopoutPlaceholderCard{
+  max-width: 360px;
+  border: 1px solid rgba(15,23,42,0.08);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.82);
+  box-shadow: 0 16px 30px rgba(15,23,42,0.08);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.workspacePopoutPlaceholderTitle{
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.workspacePopoutPlaceholderText{
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.workspacePopoutRoot{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #eef2f7;
+  color: #111827;
+}
+
+.workspacePopoutHeader{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 14px;
+  align-items: center;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid rgba(15,23,42,0.08);
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(14px) saturate(1.15);
+}
+
+.workspacePopoutHeading{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.workspacePopoutEyebrow{
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.workspacePopoutTitle{
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.workspacePopoutMeta{
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.workspacePopoutActions{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.workspacePopoutActions .timelineBtn,
+.workspacePopoutPlaceholder .timelineBtn{
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.9);
+  color: #111827;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.workspacePopoutActions .timelineBtn:hover,
+.workspacePopoutPlaceholder .timelineBtn:hover{
+  filter: brightness(1.03);
+}
+
+.workspacePopoutContent{
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.workspacePopoutContent > #timelineChartPanel,
+.workspacePopoutContent > #nodePropsPanel,
+.workspacePopoutContent > #selectionInspectorPanel{
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+}
+
+.workspacePopoutContent > #timelineChartPanel #timelineCanvas{
+  width: 100%;
+  height: 100%;
 }
 
 .nodePropsToolbar{

@@ -49,6 +49,9 @@
       this._rowDrag = null;
       this._autoOrderCacheKey = '';
       this._autoOrderCache = new Map();
+      this._interactionWindow = null;
+      this._windowMouseMoveHandler = null;
+      this._windowMouseUpHandler = null;
       this.width = 0;
       this.height = 0;
       this._installEvents();
@@ -853,7 +856,7 @@
         };
         e.preventDefault();
       });
-      window.addEventListener('mousemove', (e)=>{
+      this._windowMouseMoveHandler = (e)=>{
         if(this._rowDrag){
           const rd = this._rowDrag;
           if(Math.abs(e.clientY - rd.y) > 3) rd.moved = true;
@@ -888,8 +891,8 @@
         if(this.offsetSec < 0) this.offsetSec = 0;
         this.setFollow(false);
         this.draw();
-      });
-      window.addEventListener('mouseup', (e)=>{
+      };
+      this._windowMouseUpHandler = (e)=>{
         if(this._rowDrag){
           const rd = this._rowDrag;
           if(rd.moved){
@@ -905,11 +908,26 @@
           this._handleClick(e);
         }
         this._drag = null;
-      });
+      };
+      this.bindInteractionWindow(window);
       el.addEventListener('dblclick', ()=>{
         this.setFollow(true);
         this.draw();
       });
+    }
+
+    bindInteractionWindow(targetWindow){
+      const nextWindow = targetWindow || window;
+      const prevWindow = this._interactionWindow;
+      if(prevWindow && this._windowMouseMoveHandler && this._windowMouseUpHandler){
+        try{ prevWindow.removeEventListener('mousemove', this._windowMouseMoveHandler); }catch(_e){}
+        try{ prevWindow.removeEventListener('mouseup', this._windowMouseUpHandler); }catch(_e){}
+      }
+      this._interactionWindow = nextWindow;
+      if(this._windowMouseMoveHandler && this._windowMouseUpHandler){
+        try{ nextWindow.addEventListener('mousemove', this._windowMouseMoveHandler); }catch(_e){}
+        try{ nextWindow.addEventListener('mouseup', this._windowMouseUpHandler); }catch(_e){}
+      }
     }
 
     _handleClick(e){
