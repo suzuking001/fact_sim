@@ -7,10 +7,11 @@ class SinkNode extends LiteGraph.LGraphNode{
     super();
     this.title = 'Sink';
     this.addInput('workIn', 0);
-    this.size = [220,170];
+    this.size = [244,224];
     this.color = '#fbefbe';
     this.bgcolor = '#fffdf3';
     this.boxcolor = '#f1c40f';
+    this.__disableCompactOverlay = true;
     this._recv = [];
     this._history = [];
     this._maxSamples = 60;
@@ -22,10 +23,10 @@ class SinkNode extends LiteGraph.LGraphNode{
     if(window.enableFlipIO) window.enableFlipIO(this);
   }
 
-  _recordSample(ts){
+  _recordSample(ts, tph){
     const cycle = this._prevAt != null ? Math.max(0, ts - this._prevAt) : 0;
     this._prevAt = ts;
-    this._history.push({ t: ts, cycle });
+    this._history.push({ t: ts, cycle, tph: Math.max(0, Number(tph) || 0) });
     if(this._history.length > this._maxSamples) this._history.shift();
   }
 
@@ -72,7 +73,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   onExecute(){
     const d = this.getInputData(0);
     const now = simNow();
-    this._calcThroughputPerHour(now);
+    const currentTph = this._calcThroughputPerHour(now);
 
     if(!d){
       this._lastInRef = null;
@@ -88,72 +89,184 @@ class SinkNode extends LiteGraph.LGraphNode{
     this._pruneRecentRecvTimes(now);
     this._lastWork = d;
     this._lastAt = now;
-    this._recordSample(now);
-
     const tph = this._calcThroughputPerHour(now);
+    this._recordSample(now, tph || currentTph);
     this.tooltip = `Got:${this._recv.length} | TPH(1h): ${this._formatThroughputPerHour(tph)}`;
   }
 
   onDrawForeground(ctx){
-    this._drawHistory(ctx);
+    if(this._ensureMinimumSize()) return;
     const tph = this._formatThroughputPerHour(this._calcThroughputPerHour(simNow()));
+    const lastCycleSec = this._history.length ? (Math.max(0, Number(this._history[this._history.length - 1].cycle) || 0) / 1000) : 0;
+    this._drawMetrics(ctx, tph, lastCycleSec);
+    this._drawHistory(ctx);
     const lines = [
       `Received: ${this._recv.length}`,
-      `TPH(1h): ${tph}`
+      `TPH(1h): ${tph}`,
+      `Last CT: ${lastCycleSec.toFixed(1)}s`
     ];
     drawStateBelow(ctx, this, lines, 8, 6);
   }
 
+  _ensureMinimumSize(){
+    const minW = 244;
+    const minH = 224;
+    const size = Array.isArray(this.size) ? this.size : null;
+    if(!size) return false;
+    const nextW = Math.max(minW, Number(size[0]) || 0);
+    const nextH = Math.max(minH, Number(size[1]) || 0);
+    if(nextW !== size[0] || nextH !== size[1]){
+      size[0] = nextW;
+      size[1] = nextH;
+      if(typeof this.setDirtyCanvas === 'function') this.setDirtyCanvas(true, true);
+      return true;
+    }
+    return false;
+  }
+
+  _drawMetrics(ctx, tphText, lastCycleSec){
+    const top = 30;
+    const left = 10;
+    const gap = 6;
+    const cardHeight = 28;
+    const cardWidth = Math.floor((this.size[0] - left * 2 - gap * 2) / 3);
+    const specs = [
+      { label: 'Received', value: String(this._recv.length) },
+      { label: 'TPH(1h)', value: tphText },
+      { label: 'Last CT', value: `${lastCycleSec.toFixed(1)}s` }
+    ];
+    ctx.save();
+    try{
+      specs.forEach((spec, idx)=>{
+        const x = left + idx * (cardWidth + gap);
+        ctx.fillStyle = 'rgba(255,255,255,0.78)';
+        ctx.strokeStyle = 'rgba(166, 142, 29, 0.22)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(x, top, cardWidth, cardHeight, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(93, 80, 16, 0.82)';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(spec.label, x + 8, top + 11);
+        ctx.fillStyle = '#594f14';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(spec.value, x + 8, top + 23);
+      });
+    }finally{
+      ctx.restore();
+    }
+  }
+
   _drawHistory(ctx){
-    if(!this._history.length) return;
     const pad = 12;
-    const topOffset = 30;
-    const width = this.size[0] - pad * 2;
-    const height = this.size[1] - topOffset - pad*2;
-    const baseY = this.size[1] - height - pad;
-    const minT = this._history[0].t;
-    const maxT = this._history[this._history.length-1].t || (minT+1);
+    const topOffset = 68;
+    const axisWidth = 34;
+    const chartGap = 8;
+    const width = Math.max(60, this.size[0] - pad * 2 - axisWidth);
+    const totalHeight = Math.max(92, this.size[1] - topOffset - pad);
+    const chartHeight = Math.max(40, Math.floor((totalHeight - chartGap) / 2));
+    const samples = Array.isArray(this._history) ? this._history : [];
+    const minT = samples.length ? samples[0].t : 0;
+    const maxT = samples.length ? (samples[samples.length - 1].t || (minT + 1)) : 1;
     const span = Math.max(1, maxT - minT);
-    const maxCycle = Math.max(...this._history.map(h=>h.cycle), 1);
-    const lastCycle = (this._history[this._history.length-1].cycle/1000).toFixed(1);
-    const tphText = this._formatThroughputPerHour(this._calcThroughputPerHour(simNow()));
+    const maxCycle = Math.max(1, ...samples.map((entry)=> Number(entry && entry.cycle) || 0));
+    const maxTph = Math.max(1, ...samples.map((entry)=> Number(entry && entry.tph) || 0));
+
+    this._drawSeriesChart(ctx, {
+      x: pad,
+      y: topOffset,
+      width,
+      height: chartHeight,
+      label: 'Cycle Time',
+      color: '#f39c12',
+      samples,
+      span,
+      minT,
+      maxValue: maxCycle,
+      valueAccessor: (sample)=> Number(sample && sample.cycle) || 0,
+      valueFormatter: (value)=> `${(value / 1000).toFixed(1)}s`
+    });
+
+    this._drawSeriesChart(ctx, {
+      x: pad,
+      y: topOffset + chartHeight + chartGap,
+      width,
+      height: chartHeight,
+      label: 'Throughput',
+      color: '#2d8f6f',
+      samples,
+      span,
+      minT,
+      maxValue: maxTph,
+      valueAccessor: (sample)=> Number(sample && sample.tph) || 0,
+      valueFormatter: (value)=> this._formatThroughputPerHour(value)
+    });
+  }
+
+  _drawSeriesChart(ctx, config){
+    const x = Number(config.x) || 0;
+    const y = Number(config.y) || 0;
+    const width = Math.max(40, Number(config.width) || 0);
+    const height = Math.max(30, Number(config.height) || 0);
+    const samples = Array.isArray(config.samples) ? config.samples : [];
+    const span = Math.max(1, Number(config.span) || 1);
+    const minT = Number(config.minT) || 0;
+    const maxValue = Math.max(1, Number(config.maxValue) || 1);
+    const valueAccessor = typeof config.valueAccessor === 'function' ? config.valueAccessor : ((sample)=> Number(sample) || 0);
+    const valueFormatter = typeof config.valueFormatter === 'function' ? config.valueFormatter : ((value)=> String(value));
+    const label = String(config.label || '');
+    const color = config.color || '#f39c12';
+    const plotInsetTop = 18;
+    const plotInsetBottom = 6;
+    const plotHeight = Math.max(18, height - plotInsetTop - plotInsetBottom);
+    const divisions = 3;
 
     ctx.save();
-    ctx.translate(pad, baseY);
-    ctx.fillStyle = 'rgba(0,0,0,0.08)';
-    ctx.fillRect(0,0,width,height);
-
-    // grid
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.translate(x, y);
+    ctx.fillStyle = 'rgba(82,72,14,0.06)';
+    ctx.strokeStyle = 'rgba(166, 142, 29, 0.18)';
     ctx.lineWidth = 1;
-    const divisions = 4;
-    for(let i=0;i<=divisions;i++){
-      const y = (i/divisions)*height;
-      ctx.beginPath();
-      ctx.moveTo(0,y);
-      ctx.lineTo(width,y);
-      ctx.stroke();
-      const labelVal = maxCycle * (1 - i/divisions);
-      ctx.fillStyle = '#666';
-      ctx.font = '10px sans-serif';
-      ctx.fillText(`${(labelVal/1000).toFixed(1)}s`, width - 40, y - 2);
-    }
-
-    ctx.strokeStyle = '#f39c12';
-    ctx.lineWidth = 2;
     ctx.beginPath();
-    this._history.forEach((sample, idx)=>{
-      const x = span > 0 ? ((sample.t - minT)/span) * width : 0;
-      const y = height - (sample.cycle / maxCycle) * (height-10) - 5;
-      if(idx===0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
+    ctx.roundRect(0, 0, width, height, 8);
+    ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#444';
-    ctx.font = '12px sans-serif';
-    ctx.fillText(`Last CT: ${lastCycle}s`, 4, 14);
-    ctx.fillText(`TPH(1h): ${tphText}`, 4, 28);
+    ctx.fillStyle = '#594f14';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(label, 8, 12);
+
+    ctx.strokeStyle = 'rgba(82,72,14,0.10)';
+    ctx.lineWidth = 1;
+    for(let i = 0; i <= divisions; i++){
+      const yy = plotInsetTop + (i / divisions) * plotHeight;
+      ctx.beginPath();
+      ctx.moveTo(0, yy);
+      ctx.lineTo(width, yy);
+      ctx.stroke();
+      const labelValue = maxValue * (1 - i / divisions);
+      ctx.fillStyle = 'rgba(93, 80, 16, 0.68)';
+      ctx.font = '10px sans-serif';
+      ctx.fillText(valueFormatter(labelValue), width + 6, Math.max(10, yy + 3));
+    }
+
+    if(samples.length){
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      samples.forEach((sample, idx)=>{
+        const xx = span > 0 ? ((Number(sample && sample.t) || 0) - minT) / span * width : 0;
+        const raw = Math.max(0, valueAccessor(sample));
+        const yy = plotInsetTop + plotHeight - (raw / maxValue) * Math.max(8, plotHeight - 6) - 3;
+        if(idx === 0) ctx.moveTo(xx, yy);
+        else ctx.lineTo(xx, yy);
+      });
+      ctx.stroke();
+    }else{
+      ctx.fillStyle = 'rgba(93, 80, 16, 0.45)';
+      ctx.font = '10px sans-serif';
+      ctx.fillText('No samples yet', 8, plotInsetTop + 16);
+    }
     ctx.restore();
   }
 }

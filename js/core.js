@@ -995,8 +995,11 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
     const compactSrc = baseLines.length ? baseLines : sigLines;
     const importantCount = Math.max(1, Math.min(6, Number(node?.properties?.overlayImportantCount) || 4));
     const compactLines = _pickCompactOverlayLines(compactSrc, importantCount);
-    if(enforceNodeOverlayMinSize(node, compactLines)) return;
-    _drawCompactLinesInsideNode(ctx, node, compactLines);
+    const suppressCompact = !!(node && (node.__disableCompactOverlay || node?.properties?.overlayCompactDisabled));
+    if(!suppressCompact){
+      if(enforceNodeOverlayMinSize(node, compactLines)) return;
+      _drawCompactLinesInsideNode(ctx, node, compactLines);
+    }
 
     if(!_shouldShowNodeDetails(node)){
       if(node){
