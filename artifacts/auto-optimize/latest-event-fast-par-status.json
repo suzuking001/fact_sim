@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "sessionId": "2026-03-14T18-04-55-900Z__overnight-event-fast-par-restart-20260315-030453",
+  "status": "WARN",
+  "startedAt": "2026-03-14T18:04:55.906Z",
+  "finishedAt": "2026-03-14T23:04:56.488Z",
+  "elapsedHours": 5,
+  "targetEngine": "event-fast-par",
+  "benchmarkExample": "parallel_benchmark",
+  "iterationCount": 672,
+  "maxIterations": 9999,
+  "minRuntimeHours": 5,
+  "maxNoImprovementIterations": 60,
+  "consecutiveNoImprovement": 672,
+  "initialTargetSpeed": 7920.032,
+  "bestTargetSpeed": 7920.032,
+  "currentImprovementPct": 0,
+  "latestIteration": {
+    "index": 672,
+    "status": "delegate-failed",
+    "baselineSpeed": 7920.032,
+    "afterSpeed": null,
+    "deltaPct": null,
+    "note": ""
+  }
+}

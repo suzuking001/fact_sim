@@ -1,0 +1,117 @@
+{
+  "quantMs": 250,
+  "rowCount": 10,
+  "activeRowCount": 6,
+  "rows": [
+    {
+      "key": "2",
+      "label": "Route R1 #2",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 1
+        }
+      ]
+    },
+    {
+      "key": "4",
+      "label": "Route R2 #4",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 4
+        },
+        {
+          "state": "wait",
+          "durationBins": 1
+        },
+        {
+          "state": "down",
+          "durationBins": 1
+        }
+      ]
+    },
+    {
+      "key": "6",
+      "label": "Equipment #6",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 9
+        }
+      ]
+    },
+    {
+      "key": "7",
+      "label": "Equipment #7",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "10",
+      "label": "Carrier Route #10",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 4
+        },
+        {
+          "state": "down",
+          "durationBins": 1
+        },
+        {
+          "state": "process",
+          "durationBins": 4
+        }
+      ]
+    },
+    {
+      "key": "11",
+      "label": "Carrier Route #11",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "13",
+      "label": "Carrier Route #13",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 4
+        },
+        {
+          "state": "down",
+          "durationBins": 1
+        }
+      ]
+    },
+    {
+      "key": "14",
+      "label": "Equipment #14",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 9
+        }
+      ]
+    },
+    {
+      "key": "16",
+      "label": "Carrier Route #16",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "17",
+      "label": "Join #17",
+      "meaningful": false,
+      "signature": []
+    }
+  ]
+}

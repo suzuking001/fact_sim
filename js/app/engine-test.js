@@ -6,6 +6,7 @@ var App = window.App || (window.App = {});
   const EXAMPLE_FILES = {
     simple: 'sample/simple.json',
     branch: 'sample/branch.json',
+    parallel_benchmark: 'sample/parallel_benchmark.json',
     shuttle_line5: 'sample/shuttle_line5.json',
     carrier: 'sample/graph (3).json',
     pallet_station_demo: 'sample/pallet_station_demo.json',
@@ -1326,15 +1327,40 @@ var App = window.App || (window.App = {});
       }
     }
   }
+  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
+  function cloneLatestReport(report){
+    const cloned = cloneJson(report);
+    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
+    if(String(cloned.kind || '') !== 'engine-test-report') return null;
+    if(typeof cloned.status !== 'string') return null;
+    if(!Array.isArray(cloned.results)) return null;
+    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
+    return cloned;
+  }
   function saveLatestReport(report){
-    App.latestEngineTestReport = cloneJson(report);
-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
+    const latest = cloneLatestReport(report);
+    App.latestEngineTestReport = latest;
+    try{
+      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
+      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
+    }catch(_e){}
   }
   App.getLatestEngineTestReport = function(){
-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
+    const latest = cloneLatestReport(App.latestEngineTestReport);
+    if(latest){
+      App.latestEngineTestReport = cloneJson(latest);
+      return latest;
+    }
     try{
-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
-      return raw ? JSON.parse(raw) : null;
+      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
+      if(!raw) return null;
+      const parsed = cloneLatestReport(JSON.parse(raw));
+      if(!parsed){
+        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
+        return null;
+      }
+      App.latestEngineTestReport = cloneJson(parsed);
+      return parsed;
     }catch(_e){
       return null;
     }

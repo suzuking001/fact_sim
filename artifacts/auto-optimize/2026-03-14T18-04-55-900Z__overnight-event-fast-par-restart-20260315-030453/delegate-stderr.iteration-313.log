@@ -1,0 +1,635 @@
+2026-03-14T21:51:42.448748Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+OpenAI Codex v0.115.0-alpha.4 (research preview)
+--------
+workdir: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\suzuk\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019cee55-6eaf-7481-a7ff-0b023c89ec00
+--------
+user
+Use the existing AGENTS.md instructions in this repo.
+Fix the single target failure described below.
+Only edit allowed paths. Do not modify protected engines or unrelated files.
+
+Target failure:
+```json
+{}
+```
+
+Protected engines: dt, event
+Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js, js/app/engine-fast-worker.js, js/app/engine-fast-worker-host.js, js/app/engine-fast-runtime.js, js/app/engine-fast-compat.js, js/app/engine-fast-kernels.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+
+Requirements:
+- Apply the smallest defensible patch that resolves this failure.
+- Keep dt and event behavior untouched.
+- Prefer fixing event-fast* engines or engine-test helpers only.
+- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.
+- Do not browse external websites.
+- After editing, run a focused verification for the same failure if possible.
+- Use reruns=0 and strictFinalParity=false as guidance.
+- Benchmark regressions are not acceptable (wallMs=0).
+
+At the end, summarize:
+1. what changed
+2. which verification you ran
+3. any residual risk
+mcp: linear starting
+mcp: fact_sim_ai starting
+mcp: git starting
+mcp: filesystem starting
+mcp: github starting
+mcp: excel starting
+mcp: playwright starting
+mcp: figma starting
+2026-03-14T21:51:42.521385Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.linear.app/.well-known/oauth-protected-resource\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+mcp: linear failed: The linear MCP server is not logged in. Run `codex mcp login linear`.
+mcp: excel ready
+mcp: git failed: MCP client for `git` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: figma ready
+mcp: github ready
+mcp: playwright ready
+mcp: filesystem failed: MCP client for `filesystem` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: fact_sim_ai ready
+mcp startup: ready: excel, figma, github, playwright, fact_sim_ai; failed: linear, git, filesystem
+codex
+I’m checking the repo instructions and the fast-engine code paths first, then I’ll reproduce or infer the failing path and patch the smallest allowed file set.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Force' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg --files -g AGENTS.md -g package.json -g "js/app/engine-fast*" -g "js/app/*test*"' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 375ms:
+
+
+    ディレクトリ: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d--h--        2026/03/15      6:51                .git                                                                 
+d-----        2026/03/15      6:51                js                                                                   
+-a----        2026/03/07     23:16           2332 AGENTS.md                                                            
+
+
+ succeeded in 297ms:
+js\app\engine-fast-worker.js
+js\app\engine-fast-worker-host.js
+js\app\engine-fast-runtime.js
+js\app\engine-fast-par-worker.js
+js\app\engine-fast-par-partitioner.js
+js\app\engine-fast-par-host.js
+js\app\engine-fast-kernels.js
+js\app\engine-fast-compat.js
+AGENTS.md
+codex
+I’ve confirmed the workspace is minimal and only contains the allowed fast-engine files, so I’m reading those directly to infer the failing code path.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content AGENTS.md' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-partitioner.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-worker.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 367ms:
+# fact_sim Agent Notes
+
+## Preferred control path
+
+For `fact_sim` tasks, prefer the integrated MCP server `fact-sim-ai` over manual browser interaction when the task is one of these:
+
+- load or inspect example graphs
+- run simulation for a fixed time
+- collect KPI, bottleneck, benchmark, or graph overview summaries
+- add, update, connect, disconnect, or remove nodes
+- build small graphs from blueprints
+- export graph, HTML, snapshot, or CSV artifacts
+
+Use browser automation only when the task is explicitly visual/UI-focused and cannot be answered from MCP outputs alone.
+
+## Preferred tool order
+
+1. `prepare_session`
+2. `run_report`
+3. `graph`
+ succeeded in 490ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const MAX_DEFAULT_PARTITIONS = 4;
+  const MIN_PAR_NODE_COUNT = 8;
+  const MAX_CUT_RATIO = 0.45;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function compactGraphData(data){
+    return (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(data))
+      : cloneJson(data);
+  }
+
+  function createGraphFromData(graphData){
+    const data = compactGraphData(graphData);
+    const graph = new LGraph();
+ succeeded in 446ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let partition = null;
+  let ownedNodeIdSet = new Set();
+  let ownedSinkIdSet = new Set();
+  let lastGraphData = null;
+  let lastSentByLinkId = new Map();
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+ succeeded in 474ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+codex
+I’ve narrowed this to the parallel fast engine glue. Next I’m comparing the parallel host/worker behavior against the single-worker fast host to find a small parity bug rather than guessing at a broad rewrite.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "runtimeMode|disposeAsync|stopAsync|runUntilSimTime|getEngineTestModes|fallbackMode|ownedSnapshot|createHeadlessSimRunner|strictFinalParity|reruns|benchmark" js/app/engine-fast-*.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 407ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const WORKER_MODE = 'event-fast-worker';
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260313a';
+  const UNSAFE_WORKER_TYPES = new Set([
+    'factory/carrierroute',
+    'factory/shuttle_stage'
+  ]);
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeWorkerMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === WORKER_MODE || raw === 'event_fast_worker' || raw === 'eventfastworker' || raw === 'fast-worker'){
+      return WORKER_MODE;
+    }
+    return null;
+ succeeded in 390ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let lastGraphData = null;
+  let seededRandom = null;
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+    getElementById: function(){ return null; },
+    querySelector: function(){ return null; },
+    querySelectorAll: function(){ return []; },
+ exited 1 in 312ms:
+rg: js/app/engine-fast-*.js: IO error for operation on js/app/engine-fast-*.js: ファイル名、ディレクトリ名、またはボリューム ラベルの構文が間違っています。 (os error 123)
+codex
+The strongest concrete defect so far is in host teardown and fallback behavior, but I want the exact surrounding code before editing so I don’t widen the patch.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"disposeAsync\\(|stopAsync\\(|createHeadlessSimRunner|getEngineTestModes|fallbackMode|runUntilSimTimeAsync\\(|runBenchmarkCaseAsync\\(|stepAsync\\(|applyAndFlushAsync\\(|_ensureRunner|_stepParallel|_independentPartitions|runtimeMode\" js/app/engine-fast-par-host.js" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 260 -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 520 -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 385ms:
+388:    async stepAsync(simDeltaMs){
+397:    async runBenchmarkCaseAsync(options){
+409:    async runUntilSimTimeAsync(options){
+428:    async applyAndFlushAsync(messages){
+463:    async stopAsync(){
+477:    async disposeAsync(){
+480:      try{ await this.stopAsync(); }catch(_e){}
+500:      this.runtimeMode = 'parallel-pending';
+503:      this._independentPartitions = false;
+506:    async _ensureRunner(){
+514:          const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
+515:          this._runner = App.createHeadlessSimRunner(fallbackMode, this.graphData, this.options);
+520:          this.runtimeMode = String(
+521:            (initial && initial.runtimeMode)
+522:            || (this._runner && this._runner.runtimeMode)
+523:            || `fallback-${fallbackMode}`
+525:          return { runtimeMode: this.runtimeMode, stats: null };
+531:        const legacy = ready.find((row)=> row && row.runtimeMode === 'legacy-compat');
+533:          await Promise.all(this._workers.map((worker)=> worker.disposeAsync()));
+535:          this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
+ succeeded in 449ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+ succeeded in 477ms:
+            (initial && initial.runtimeMode)
+            || (this._runner && this._runner.runtimeMode)
+            || `fallback-${fallbackMode}`
+          );
+          return { runtimeMode: this.runtimeMode, stats: null };
+        }
+        this._workers = plan.partitions.map((part)=>
+          new PartitionWorkerHost(plan.graphData, part, this.options)
+        );
+        const ready = await Promise.all(this._workers.map((worker)=> worker._ready));
+        const legacy = ready.find((row)=> row && row.runtimeMode === 'legacy-compat');
+        if(legacy){
+          await Promise.all(this._workers.map((worker)=> worker.disposeAsync()));
+          this._workers = [];
+          this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
+          let initial = null;
+          if(this._runner && typeof this._runner.resetAsync === 'function'){
+            try{ initial = await this._runner.resetAsync(); }catch(_e){}
+          }
+          this.runtimeMode = String(
+ succeeded in 491ms:
+            }
+          }catch(_e){}
+        }
+      }
+      applyRuntimeNodeStates(graph, graphData);
+      applyRuntimeLinkStates(graph, graphData);
+      graph.status = LGraph.STATUS_RUNNING;
+      graph.last_update_time = LiteGraph.getTime();
+      if(App.timelineChart){
+        try{
+          if(typeof App.timelineChart.attachGraph === 'function'){
+            if(App.timelineChart.graph !== graph) App.timelineChart.attachGraph(graph);
+          }
+          else App.timelineChart.graph = graph;
+        }catch(_e){}
+      }
+      try{
+        if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+        else if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+      }catch(_e){}
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 780 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 400ms:
+      let graphData = null;
+      if(opts.snapshot){
+        const snapshots = await Promise.all(this._workers.map((worker)=> worker.getSnapshotAsync()));
+        graphData = mergeOwnedNodeSnapshots(this.graphData, snapshots);
+      }
+      return {
+        simTimeMs: this._lastSimTimeMs,
+        graphData,
+        stats: stepped && stepped.stats ? stepped.stats : this._lastStats
+      };
+    }
+
+    async getDebugStatsAsync(){
+      await this._ensureRunner();
+      if(this._runner && typeof this._runner.getDebugStatsAsync === 'function'){
+        this._lastStats = await this._runner.getDebugStatsAsync();
+        this.runtimeMode = String(
+          (this._lastStats && this._lastStats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+codex
+Plan:
+1. Inspect the parallel host/worker/partitioner paths for a concrete parity bug with the single-worker implementation.
+2. Patch the smallest allowed file set that fixes that bug without touching `dt` or `event`.
+3. Run a focused verification around the same path and check the edited diff stays minimal.
+Plan update
+  ✓ Inspect parallel fast-engine host/worker/partitioner behavior and identify the smallest defensible defect
+  → Patch the allowed fast-engine file(s) minimally
+  • Run focused verification for the repaired path and review diff
+codex
+I’ve got a likely repro target: partition worker disposal marks the host disposed before asking the worker to stop, which can suppress the stop RPC entirely. I’m validating that with a small harness before I patch it.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs = require('fs');
+const vm = require('vm');
+
+const source = fs.readFileSync('js/app/engine-fast-par-host.js', 'utf8');
+const workerInstances = [];
+class FakeWorker {
+  constructor(url){
+    this.url = url;
+    this.listeners = { message: [], error: [] };
+    this.messages = [];
+    workerInstances.push(this);
+  }
+  addEventListener(type, fn){
+    (this.listeners[type] || (this.listeners[type] = [])).push(fn);
+  }
+  postMessage(msg){
+    this.messages.push(msg);
+    const payload = msg.type === 'init'
+      ? { runtimeMode: 'parallel', stats: {} }
+      : msg.type === 'stop'
+        ? { stopped: true }
+        : { stats: {} };
+    queueMicrotask(() => {
+      for(const fn of this.listeners.message || []) fn({ data: { id: msg.id, ok: true, payload } });
+    });
+  }
+  terminate(){ this.terminated = true; }
+}
+
+const context = {
+  window: { location: { protocol: 'https:' } },
+  Worker: FakeWorker,
+  LGraph: function(){},
+  LiteGraph: { getTime(){ return 0; }, STATUS_RUNNING: 1, STATUS_STOPPED: 2 },
+  configureGraphClock(){},
+  performance: { now(){ return 0; } },
+  console,
+  setTimeout,
+  clearTimeout,
+  Promise,
+  Math,
+  JSON,
+};
+context.window.App = {
+  createHeadlessSimRunner(){ throw new Error('unexpected fallback'); }
+};
+context.App = context.window.App;
+vm.createContext(context);
+vm.runInContext(source, context);
+
+(async () => {
+  const host = new context.window.App.EventFastParHost({ nodes: [], links: [] }, {
+    __precomputedPlan: {
+      canParallelize: true,
+      cutEdgeCount: 1,
+      graphData: { nodes: [], links: [] },
+      partitions: [
+        { partitionId: 0, nodeIds: [1], outgoingCutEdges: [] },
+        { partitionId: 1, nodeIds: [2], outgoingCutEdges: [] }
+      ]
+    }
+  });
+  await host.resetAsync();
+  await host.disposeAsync();
+  console.log(JSON.stringify(workerInstances.map((w) => w.messages.map((m) => m.type))));
+})().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+'@ | node -" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 373ms:
+[["init","reset"],["init","reset"]]
+codex
+I’ve reproduced a concrete defect: disposing a parallel partition host never sends the worker `stop` message because `_disposed` is set too early. I’m making the smallest fix in the parallel host only.
+file update
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016\js\app\engine-fast-par-host.js
+@@ -478,4 +478,4 @@
+       if(this._disposed) return;
++      try{ await this.stopAsync(); }catch(_e){}
+       this._disposed = true;
+-      try{ await this.stopAsync(); }catch(_e){}
+       try{ this._worker.terminate(); }catch(_e){}
+apply_patch(auto_approved=true) exited 0 in 159ms:
+Success. Updated the following files:
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016\js\app\engine-fast-par-host.js
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..d51f347d58f6afc8c6958106490234fd64980094
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -476,8 +476,8 @@
+ 
+     async disposeAsync(){
+       if(this._disposed) return;
++      try{ await this.stopAsync(); }catch(_e){}
+       this._disposed = true;
+-      try{ await this.stopAsync(); }catch(_e){}
+       try{ this._worker.terminate(); }catch(_e){}
+       for(const pending of this._pending.values()){
+         pending.reject(new Error('partition worker host disposed'));
+
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..d51f347d58f6afc8c6958106490234fd64980094
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -476,8 +476,8 @@
+ 
+     async disposeAsync(){
+       if(this._disposed) return;
++      try{ await this.stopAsync(); }catch(_e){}
+       this._disposed = true;
+-      try{ await this.stopAsync(); }catch(_e){}
+       try{ this._worker.terminate(); }catch(_e){}
+       for(const pending of this._pending.values()){
+         pending.reject(new Error('partition worker host disposed'));
+
+codex
+The patch is in. I’m re-running the focused harness against the same disposal path, then I’ll inspect the diff and stop there if it’s clean.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs = require('fs');
+const vm = require('vm');
+
+const source = fs.readFileSync('js/app/engine-fast-par-host.js', 'utf8');
+const workerInstances = [];
+class FakeWorker {
+  constructor(url){
+    this.url = url;
+    this.listeners = { message: [], error: [] };
+    this.messages = [];
+    workerInstances.push(this);
+  }
+  addEventListener(type, fn){
+    (this.listeners[type] || (this.listeners[type] = [])).push(fn);
+  }
+  postMessage(msg){
+    this.messages.push(msg);
+    const payload = msg.type === 'init'
+      ? { runtimeMode: 'parallel', stats: {} }
+      : msg.type === 'stop'
+        ? { stopped: true }
+        : { stats: {} };
+    queueMicrotask(() => {
+      for(const fn of this.listeners.message || []) fn({ data: { id: msg.id, ok: true, payload } });
+    });
+  }
+  terminate(){ this.terminated = true; }
+}
+
+const context = {
+  window: { location: { protocol: 'https:' } },
+  Worker: FakeWorker,
+  LGraph: function(){},
+  LiteGraph: { getTime(){ return 0; }, STATUS_RUNNING: 1, STATUS_STOPPED: 2 },
+  configureGraphClock(){},
+  performance: { now(){ return 0; } },
+  console,
+  setTimeout,
+  clearTimeout,
+  Promise,
+  Math,
+  JSON,
+};
+context.window.App = {
+  createHeadlessSimRunner(){ throw new Error('unexpected fallback'); }
+};
+context.App = context.window.App;
+vm.createContext(context);
+vm.runInContext(source, context);
+
+(async () => {
+  const host = new context.window.App.EventFastParHost({ nodes: [], links: [] }, {
+    __precomputedPlan: {
+      canParallelize: true,
+      cutEdgeCount: 1,
+      graphData: { nodes: [], links: [] },
+      partitions: [
+        { partitionId: 0, nodeIds: [1], outgoingCutEdges: [] },
+        { partitionId: 1, nodeIds: [2], outgoingCutEdges: [] }
+      ]
+    }
+  });
+  await host.resetAsync();
+  await host.disposeAsync();
+  const messages = workerInstances.map((w) => w.messages.map((m) => m.type));
+  const ok = messages.every((types) => types.includes('stop'));
+  console.log(JSON.stringify({ ok, messages }));
+  if("'!ok) process.exit(1);
+})().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+'"'@ | node -" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git diff -- js/app/engine-fast-par-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 381ms:
+{"ok":true,"messages":[["init","reset","stop"],["init","reset","stop"]]}
+ succeeded in 332ms:
+
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..d51f347d58f6afc8c6958106490234fd64980094
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -476,8 +476,8 @@
+ 
+     async disposeAsync(){
+       if(this._disposed) return;
++      try{ await this.stopAsync(); }catch(_e){}
+       this._disposed = true;
+-      try{ await this.stopAsync(); }catch(_e){}
+       try{ this._worker.terminate(); }catch(_e){}
+       for(const pending of this._pending.values()){
+         pending.reject(new Error('partition worker host disposed'));
+
+Plan update
+  ✓ Inspect parallel fast-engine host/worker/partitioner behavior and identify the smallest defensible defect
+  ✓ Patch the allowed fast-engine file(s) minimally
+  ✓ Run focused verification for the repaired path and review diff
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..d51f347d58f6afc8c6958106490234fd64980094
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -476,8 +476,8 @@
+ 
+     async disposeAsync(){
+       if(this._disposed) return;
++      try{ await this.stopAsync(); }catch(_e){}
+       this._disposed = true;
+-      try{ await this.stopAsync(); }catch(_e){}
+       try{ this._worker.terminate(); }catch(_e){}
+       for(const pending of this._pending.values()){
+         pending.reject(new Error('partition worker host disposed'));
+
+codex
+The targeted verification passed. I’m pulling the exact line reference for the edited method and then I’ll summarize the change, the check I ran, and the remaining risk.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"async disposeAsync\\(\\)|this\\._disposed = true;|await this\\.stopAsync\\(\\);\" js/app/engine-fast-par-host.js" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773525102050-29016 succeeded in 290ms:
+477:    async disposeAsync(){
+479:      try{ await this.stopAsync(); }catch(_e){}
+480:      this._disposed = true;
+820:    async disposeAsync(){
+1014:    async disposeAsync(){
+1016:      this._disposed = true;
+1018:      await this.stopAsync();
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..d51f347d58f6afc8c6958106490234fd64980094
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -476,8 +476,8 @@
+ 
+     async disposeAsync(){
+       if(this._disposed) return;
++      try{ await this.stopAsync(); }catch(_e){}
+       this._disposed = true;
+-      try{ await this.stopAsync(); }catch(_e){}
+       try{ this._worker.terminate(); }catch(_e){}
+       for(const pending of this._pending.values()){
+         pending.reject(new Error('partition worker host disposed'));
+
+codex
+1. Changed [`js/app/engine-fast-par-host.js` line 477](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773525102050-29016/js/app/engine-fast-par-host.js#L477) so `PartitionWorkerHost.disposeAsync()` calls `stopAsync()` before setting `_disposed = true`. Before this, dispose suppressed the worker `stop` RPC entirely.
+
+2. Verification run:
+   I used a focused Node `vm` harness that loaded the edited file with a fake `Worker`, created an `EventFastParHost` with two partitions, called `resetAsync()` then `disposeAsync()`, and asserted each worker received `["init","reset","stop"]`. It passed after the patch.
+
+3. Residual risk:
+   This was a narrow teardown-path fix, not a full engine suite run. It does not change `dt`, `event`, or fast-engine stepping/benchmark behavior, but I did not run an end-to-end browser simulation or broader correctness suite in this workspace.
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..d51f347d58f6afc8c6958106490234fd64980094
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -476,8 +476,8 @@
+ 
+     async disposeAsync(){
+       if(this._disposed) return;
++      try{ await this.stopAsync(); }catch(_e){}
+       this._disposed = true;
+-      try{ await this.stopAsync(); }catch(_e){}
+       try{ this._worker.terminate(); }catch(_e){}
+       for(const pending of this._pending.values()){
+         pending.reject(new Error('partition worker host disposed'));
+
+tokens used
+130,423

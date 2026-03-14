@@ -1,0 +1,1186 @@
+2026-03-14T17:40:11.622931Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+OpenAI Codex v0.115.0-alpha.4 (research preview)
+--------
+workdir: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\suzuk\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019ced6f-2a31-79f1-a3fa-ef331d1b0169
+--------
+user
+Use the existing AGENTS.md instructions in this repo.
+Fix the single target failure described below.
+Only edit allowed paths. Do not modify protected engines or unrelated files.
+
+Target failure:
+```json
+{}
+```
+
+Protected engines: dt, event
+Allowed paths: js/app/engine-test.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js, js/app/engine-fast-worker.js, js/app/engine-fast-worker-host.js, js/app/engine-fast-runtime.js, js/app/engine-fast-compat.js, js/app/engine-fast-kernels.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+
+Requirements:
+- Apply the smallest defensible patch that resolves this failure.
+- Keep dt and event behavior untouched.
+- Prefer fixing event-fast* engines or engine-test helpers only.
+- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.
+- Do not browse external websites.
+- After editing, run a focused verification for the same failure if possible.
+- Use reruns=0 and strictFinalParity=false as guidance.
+- Benchmark regressions are not acceptable (wallMs=0).
+
+At the end, summarize:
+1. what changed
+2. which verification you ran
+3. any residual risk
+mcp: git starting
+mcp: figma starting
+mcp: linear starting
+mcp: excel starting
+mcp: playwright starting
+mcp: github starting
+mcp: filesystem starting
+mcp: fact_sim_ai starting
+2026-03-14T17:40:11.697141Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.linear.app/.well-known/oauth-protected-resource\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+mcp: linear failed: The linear MCP server is not logged in. Run `codex mcp login linear`.
+mcp: excel ready
+mcp: git failed: MCP client for `git` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: github ready
+mcp: figma ready
+mcp: filesystem failed: MCP client for `filesystem` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: playwright ready
+mcp: fact_sim_ai ready
+mcp startup: ready: excel, github, figma, playwright, fact_sim_ai; failed: linear, git, filesystem
+codex
+I’m inspecting the fast-engine test path and the allowed files first, then I’ll reproduce the failure in the narrowest way available and patch only the relevant fast engine code.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Force' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"engine_test|engine-test|strictFinalParity|reruns|wallMs|fast-par|target failure|\\{\\}\" js/app" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 416ms:
+
+
+    ディレクトリ: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d--h--        2026/03/15      2:40                .git                                                                 
+d-----        2026/03/15      2:40                js                                                                   
+-a----        2026/03/07     23:16           2332 AGENTS.md                                                            
+
+
+ succeeded in 367ms:
+?? AGENTS.md
+?? js/
+ succeeded in 540ms:
+js/app\engine-fast-compat.js:3:var App = window.App || (window.App = {});
+js/app\engine-fast-kernels.js:3:var App = window.App || (window.App = {});
+js/app\engine-fast-kernels.js:262:    }catch(_e){}
+js/app\engine-fast-kernels.js:730:  const api = App.fastKernels || (App.fastKernels = {});
+js/app\engine-fast-par-host.js:1:var App = window.App || (window.App = {});
+js/app\engine-fast-par-host.js:4:  const PAR_MODE = 'event-fast-par';
+js/app\engine-fast-par-host.js:5:  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+js/app\engine-fast-par-host.js:14:    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+js/app\engine-fast-par-host.js:44:      try{ App.repairGraphLinks(graph); }catch(_e){}
+js/app\engine-fast-par-host.js:47:      try{ App.stopGroups.restoreSerializedData(graph, data, false); }catch(_e){}
+js/app\engine-fast-par-host.js:50:      try{ configureGraphClock(graph); }catch(_e){}
+js/app\engine-fast-par-host.js:113:    }catch(_e){}
+js/app\engine-fast-par-host.js:114:    try{ console.error(`[${mode || PAR_MODE}] live sync failed`, error); }catch(_e){}
+js/app\engine-fast-par-host.js:122:    }catch(_e){}
+js/app\engine-fast-par-host.js:186:      if(Object.prototype.hasOwnProperty.call(row || {}, '_state')) node._state = cloneJson(row._state);
+js/app\engine-fast-par-host.js:187:      if(Object.prototype.hasOwnProperty.call(row || {}, '_stateName')) node._stateName = cloneJson(row._stateName);
+js/app\engine-fast-par-host.js:188:      if(Object.prototype.hasOwnProperty.call(row || {}, '_until') && Number.isFinite(Number(row._until))) node._until = Number(row._until);
+js/app\engine-fast-par-host.js:237:          try{ App.repairGraphLinks(graph); }catch(_e){}
+js/app\engine-fast-par-host.js:240:          try{ App.stopGroups.restoreSerializedData(graph, data, false); }catch(_e){}
+js/app\engine-fast-par-host.js:245:            else if(canvas.selected_nodes && typeof canvas.selected_nodes === 'object') canvas.selected_nodes = {};
+codex
+I’ve narrowed this to the fast-engine and engine-test surface. Next I’m reading the reporting and parallel host/worker code around result propagation, because the empty `{}` failure suggests a swallowed or under-populated result object rather than a deterministic simulation mismatch.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-test.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-test.js | Select-Object -Skip 1310 -First 70' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-worker.js | Select-Object -Skip 360 -First 180' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 620 -First 180' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 442ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const DEFAULT_EXAMPLES = [];
+  const EXAMPLE_ALIASES = { agv_config: 'carrier', carrier_config: 'carrier' };
+  const EXAMPLE_FILES = {
+    simple: 'sample/simple.json',
+    branch: 'sample/branch.json',
+    parallel_benchmark: 'sample/parallel_benchmark.json',
+    shuttle_line5: 'sample/shuttle_line5.json',
+    carrier: 'sample/graph (3).json',
+    pallet_station_demo: 'sample/pallet_station_demo.json',
+    sample_line1: 'sample/sample_line1.json',
+    sample_line2: 'sample/sample_line2.json'
+  };
+  const DEFAULTS = {
+    suite: 'standard',
+    includeCurrentGraph: true,
+    includeExamples: true,
+    examples: DEFAULT_EXAMPLES,
+ succeeded in 445ms:
+            }
+          }
+          for(const [key, rowEntry] of rowMap.entries()){
+            if(!rowEntry || !rowEntry.meaningful) continue;
+            if(!baseMap.has(key) && extraRows.length < 6){
+              extraRows.push(`${key}:${rowEntry.label}`);
+            }
+          }
+          if(missingRows.length || extraRows.length || changedRows.length){
+            pushIssue(report.failures, seen, issue('error', 'LIVE_TIMELINE_DELTA', `Timing chart differs from dt on ${row.scenario}`, {
+              engine: row.engine,
+              scenario: row.scenario,
+              message: `Timing chart differs from dt on ${row.scenario}${missingRows.length ? `, missing=${missingRows.join(', ')}` : ''}${extraRows.length ? `, extra=${extraRows.join(', ')}` : ''}${changedRows.length ? `, changed=${changedRows.join(' | ')}` : ''}`
+            }), 32);
+          }
+        }
+      }
+    }
+  }
+  function saveLatestReport(report){
+ succeeded in 441ms:
+    if(engine.runtimeMode !== 'legacy-compat'){
+      while(rounds < maxRounds){
+        const dirtyBefore = graph.__dirtyNodeIds ? graph.__dirtyNodeIds.size : 0;
+        if(typeof engine._pullGraphDirtyIds === 'function') engine._pullGraphDirtyIds();
+        if(typeof engine._runDirtyBatches === 'function') engine._runDirtyBatches(nowMs);
+        let due = 0;
+        if(typeof engine._drainDue === 'function') due = engine._drainDue(nowMs);
+        if(due > 0 && typeof engine._runDirtyBatches === 'function'){
+          engine._runDirtyBatches(nowMs);
+        }
+        rounds += 1;
+        const dirtyAfter = graph.__dirtyNodeIds ? graph.__dirtyNodeIds.size : 0;
+        if(dirtyBefore === 0 && dirtyAfter === 0 && due === 0) break;
+      }
+    }
+    return {
+      simTimeMs: simNow(),
+      rounds,
+      emittedMessages: collectOutgoingMessages(),
+      stats: collectStats()
+ succeeded in 392ms:
+        const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+        this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+        const statsByPartition = results.map((row)=> row && row.stats);
+        let buckets = bucketMessages(
+          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+          partitionCount
+        );
+        for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+          const touched = [];
+          for(let i = 0; i < buckets.length; i += 1){
+            if(buckets[i] && buckets[i].length) touched.push(i);
+          }
+          const hasMessages = touched.length > 0;
+          if(!hasMessages) break;
+          const flushResults = await Promise.all(
+            touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+          );
+          this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, flushResults);
+          for(let i = 0; i < touched.length; i += 1){
+            const partitionIndex = touched[i];
+codex
+I haven’t found an explicit failing assertion yet, so I’m checking how the fast parallel engine reports snapshots/stats versus what the engine-test harness expects. If the harness can receive an empty payload or `null` and continue, that would explain the opaque `{}` target failure.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "latestEngineTestReport|getLatestEngineTestReport|fact_sim_latest_engine_test_report|runEngineTestsAsync|runCaseWithReruns|runSingleCase|runCaseAsync" js/app/engine-test.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-test.js | Select-Object -Skip 820 -First 360' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-partitioner.js | Select-Object -First 460' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -First 220' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 339ms:
+1081:  async function runCaseWithReruns(source, engine, options, seed){
+1331:    App.latestEngineTestReport = cloneJson(report);
+1332:    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
+1334:  App.getLatestEngineTestReport = function(){
+1335:    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
+1337:      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+1343:  App.runEngineTestsAsync = async function(options){
+1379:            const result = await runCaseWithReruns(source, engine, normalized, seed);
+1593:        const report = await App.runEngineTestsAsync(Object.assign({}, options, {
+1614:      const latest = App.getLatestEngineTestReport();
+1620:      const latest = App.getLatestEngineTestReport();
+ succeeded in 454ms:
+  }
+  function scanNonFinite(value, path, depth, seen, issues, limit){
+    if(issues.length >= limit) return;
+    if(typeof value === 'number'){ if(!Number.isFinite(value)) issues.push({ path }); return; }
+    if(!value || typeof value !== 'object' || seen.has(value)) return;
+    seen.add(value);
+    if(Array.isArray(value)){
+      if(depth >= 2) return;
+      for(let i = 0; i < value.length && i < 12 && issues.length < limit; i += 1) scanNonFinite(value[i], `${path}[${i}]`, depth + 1, seen, issues, limit);
+      return;
+    }
+    if(depth >= 2) return;
+    for(const key of Object.keys(value).slice(0, 24)){
+      if(SCAN_SKIP.has(key) || typeof value[key] === 'function') continue;
+      scanNonFinite(value[key], `${path}.${key}`, depth + 1, seen, issues, limit);
+      if(issues.length >= limit) break;
+    }
+  }
+  function collectInvariantIssues(graph, expected){
+    const failures = [];
+ succeeded in 425ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const MAX_DEFAULT_PARTITIONS = 4;
+  const MIN_PAR_NODE_COUNT = 8;
+  const MAX_CUT_RATIO = 0.45;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function compactGraphData(data){
+    return (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(data))
+      : cloneJson(data);
+  }
+
+  function createGraphFromData(graphData){
+    const data = compactGraphData(graphData);
+    const graph = new LGraph();
+ succeeded in 427ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+codex
+I’ve confirmed the parallel host/worker code is self-contained and the partitioner can choose an “independent partitions” path. I’m now looking for places where that path can legitimately return incomplete data to the test harness, because that’s the most likely source of an empty-object failure.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "createHeadlessSimRunner|event-fast-par|event-fast-worker|getSupportedSimModes|getEngineTestModes|normalizeHeadlessSimMode|isHeadlessOnlyBenchmarkMode" js/app' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 383ms:
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\AGENTS.md
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-compat.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-kernels.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-par-host.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-par-partitioner.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-par-worker.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-runtime.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-worker-host.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-fast-worker.js
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-test.js
+ succeeded in 293ms:
+js/app\engine-fast-par-partitioner.js:296:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:307:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:322:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:341:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:361:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-host.js:4:  const PAR_MODE = 'event-fast-par';
+js/app\engine-fast-par-host.js:514:          const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
+js/app\engine-fast-par-host.js:515:          this._runner = App.createHeadlessSimRunner(fallbackMode, this.graphData, this.options);
+js/app\engine-fast-par-host.js:535:          this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
+js/app\engine-fast-par-host.js:543:            || 'fallback-event-fast-worker'
+js/app\engine-fast-par-host.js:1027:  const legacyGetSupportedSimModes = (typeof App.getSupportedSimModes === 'function')
+js/app\engine-fast-par-host.js:1028:    ? App.getSupportedSimModes.bind(App)
+js/app\engine-fast-par-host.js:1039:  const legacyNormalizeHeadlessSimMode = (typeof App.normalizeHeadlessSimMode === 'function')
+js/app\engine-fast-par-host.js:1040:    ? App.normalizeHeadlessSimMode.bind(App)
+js/app\engine-fast-par-host.js:1045:  const legacyIsHeadlessOnlyBenchmarkMode = (typeof App.isHeadlessOnlyBenchmarkMode === 'function')
+js/app\engine-fast-par-host.js:1046:    ? App.isHeadlessOnlyBenchmarkMode.bind(App)
+js/app\engine-fast-par-host.js:1051:  const legacyGetEngineTestModes = (typeof App.getEngineTestModes === 'function')
+js/app\engine-fast-par-host.js:1052:    ? App.getEngineTestModes.bind(App)
+js/app\engine-fast-par-host.js:1054:  const legacyCreateHeadlessSimRunner = (typeof App.createHeadlessSimRunner === 'function')
+js/app\engine-fast-par-host.js:1055:    ? App.createHeadlessSimRunner.bind(App)
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js | Select-Object -Skip 856 -First 90' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 1024 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 398ms:
+    ? App.getSupportedSimModes.bind(App)
+    : function(){ return ['dt', 'event', 'event-fast']; };
+  const legacyNormalizeSimMode = (typeof App.normalizeSimMode === 'function')
+    ? App.normalizeSimMode.bind(App)
+    : function(mode){ return String(mode || '').trim().toLowerCase() === 'event' ? 'event' : 'dt'; };
+  const legacyGetSimModeLabel = (typeof App.getSimModeLabel === 'function')
+    ? App.getSimModeLabel.bind(App)
+    : function(mode){ return String(mode || ''); };
+  const legacyCreateSimEngine = (typeof App.createSimEngine === 'function')
+    ? App.createSimEngine.bind(App)
+    : function(){ return null; };
+  App.getSupportedSimModes = function(){
+    const base = Array.isArray(legacyGetSupportedSimModes()) ? legacyGetSupportedSimModes().slice() : ['dt', 'event', 'event-fast'];
+    if(canUseWorkerMode() && base.indexOf(WORKER_MODE) < 0){
+      base.push(WORKER_MODE);
+    }
+    return uniqueModes(base);
+  };
+  App.normalizeSimMode = function(mode){
+    const worker = normalizeWorkerMode(mode);
+ succeeded in 424ms:
+  App.EventFastParHost = EventFastParHost;
+  App.LiveEventFastParEngine = LiveEventFastParEngine;
+  const legacyGetSupportedSimModes = (typeof App.getSupportedSimModes === 'function')
+    ? App.getSupportedSimModes.bind(App)
+    : (()=> ['dt', 'event', 'event-fast']);
+  const legacyNormalizeSimMode = (typeof App.normalizeSimMode === 'function')
+    ? App.normalizeSimMode.bind(App)
+    : ((mode)=> String(mode || '').trim().toLowerCase() === 'event' ? 'event' : 'dt');
+  const legacyGetSimModeLabel = (typeof App.getSimModeLabel === 'function')
+    ? App.getSimModeLabel.bind(App)
+    : ((mode)=> String(mode || ''));
+  const legacyCreateSimEngine = (typeof App.createSimEngine === 'function')
+    ? App.createSimEngine.bind(App)
+    : (()=> null);
+  const legacyNormalizeHeadlessSimMode = (typeof App.normalizeHeadlessSimMode === 'function')
+    ? App.normalizeHeadlessSimMode.bind(App)
+    : ((typeof App.normalizeSimMode === 'function') ? App.normalizeSimMode.bind(App) : ((mode)=> String(mode || '')));
+  const legacyGetHeadlessModeLabel = (typeof App.getHeadlessModeLabel === 'function')
+    ? App.getHeadlessModeLabel.bind(App)
+    : ((typeof App.getSimModeLabel === 'function') ? App.getSimModeLabel.bind(App) : ((mode)=> String(mode || '')));
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 220 -First 420' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "mergeOwnedNodeSnapshots|_aggregateStats|independentPartitions|localGraphData|ownedSnapshot|sinkMetrics|runtimeMode" js/app/engine-fast-par-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 304ms:
+300:  function mergeOwnedNodeSnapshots(graphData, snapshots){
+326:      this.graphData = cloneJson((partition && partition.localGraphData) ? partition.localGraphData : graphData);
+500:      this.runtimeMode = 'parallel-pending';
+503:      this._independentPartitions = false;
+520:          this.runtimeMode = String(
+521:            (initial && initial.runtimeMode)
+522:            || (this._runner && this._runner.runtimeMode)
+525:          return { runtimeMode: this.runtimeMode, stats: null };
+531:        const legacy = ready.find((row)=> row && row.runtimeMode === 'legacy-compat');
+540:          this.runtimeMode = String(
+541:            (initial && initial.runtimeMode)
+542:            || (this._runner && this._runner.runtimeMode)
+545:          return { runtimeMode: this.runtimeMode, stats: null };
+547:        this._independentPartitions = Number(plan.cutEdgeCount) === 0;
+548:        this.runtimeMode = this._independentPartitions ? 'parallel-independent' : 'parallel';
+549:        this._lastStats = this._aggregateStats(ready.map((row)=> row && row.stats));
+550:        return { runtimeMode: this.runtimeMode, stats: this._lastStats };
+555:    _aggregateStats(statsList){
+559:        runtimeMode: this.runtimeMode,
+582:          if(key === 'engine' || key === 'runtimeMode' || key === 'partitionCount' || key === 'simTimeMs' || key === 'perPartition') continue;
+ succeeded in 416ms:
+    const canvas = App.canvas || null;
+    const inspector = App.selectionInspector || null;
+    const preservedNodeIds = [];
+    const inspectorNodeId = Number(inspector && inspector.target && inspector.target.kind === 'node' ? inspector.target.nodeId : NaN);
+    const hadGroupSelection = !!(canvas && canvas.selected_group);
+    if(canvas && canvas.selected_nodes && typeof canvas.selected_nodes === 'object'){
+      for(const key of Object.keys(canvas.selected_nodes)){
+        const node = canvas.selected_nodes[key];
+        const nodeId = Number(node && node.id);
+        if(Number.isFinite(nodeId) && preservedNodeIds.indexOf(nodeId) < 0) preservedNodeIds.push(nodeId);
+      }
+    }
+    try{
+      if(!graphStructureMatchesSnapshot(graph, data)){
+        graph.configure(data);
+        if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function'){
+          try{ App.repairGraphLinks(graph); }catch(_e){}
+        }
+        if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+          try{ App.stopGroups.restoreSerializedData(graph, data, false); }catch(_e){}
+codex
+The code path that stands out so far is the headless `event-fast-par` runner’s fallback/independent-partition behavior. I’m checking the runner contract end-to-end now: creation, reset, run-until, final graph snapshot, and stats/runtime-mode propagation.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"inspectFastWorkerSupport|fallbackMode|canUseWorker|runtimeMode =|return \\{ runtimeMode|legacy-compat|createHeadlessSimRunner\\(\" js/app/engine-fast-worker-host.js js/app/engine-fast-par-host.js" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js | Select-Object -Skip 260 -First 420' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 334ms:
+js/app/engine-fast-par-host.js:500:      this.runtimeMode = 'parallel-pending';
+js/app/engine-fast-par-host.js:514:          const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
+js/app/engine-fast-par-host.js:515:          this._runner = App.createHeadlessSimRunner(fallbackMode, this.graphData, this.options);
+js/app/engine-fast-par-host.js:520:          this.runtimeMode = String(
+js/app/engine-fast-par-host.js:523:            || `fallback-${fallbackMode}`
+js/app/engine-fast-par-host.js:525:          return { runtimeMode: this.runtimeMode, stats: null };
+js/app/engine-fast-par-host.js:531:        const legacy = ready.find((row)=> row && row.runtimeMode === 'legacy-compat');
+js/app/engine-fast-par-host.js:535:          this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
+js/app/engine-fast-par-host.js:540:          this.runtimeMode = String(
+js/app/engine-fast-par-host.js:545:          return { runtimeMode: this.runtimeMode, stats: null };
+js/app/engine-fast-par-host.js:548:        this.runtimeMode = this._independentPartitions ? 'parallel-independent' : 'parallel';
+js/app/engine-fast-par-host.js:550:        return { runtimeMode: this.runtimeMode, stats: this._lastStats };
+js/app/engine-fast-par-host.js:601:        this.runtimeMode = String(
+js/app/engine-fast-par-host.js:611:      return { runtimeMode: this.runtimeMode, stats: this._lastStats };
+js/app/engine-fast-par-host.js:659:        this.runtimeMode = String(
+js/app/engine-fast-par-host.js:701:        this.runtimeMode = String(
+js/app/engine-fast-par-host.js:772:        this.runtimeMode = String(
+js/app/engine-fast-par-host.js:797:        this.runtimeMode = String(
+js/app/engine-fast-par-host.js:858:        this.runtimeMode = 'parallel-live';
+js/app/engine-fast-par-host.js:865:        this.runtimeMode = (this._liveFallbackEngine && this._liveFallbackEngine.runtimeMode)
+ succeeded in 415ms:
+    for(const node of nodes){
+      const type = String(node && node.type || '').toLowerCase();
+      if(UNSAFE_WORKER_TYPES.has(type)) return true;
+    }
+    return false;
+  }
+
+  function inspectFastWorkerSupport(graphOrData){
+    const graphData = serializeGraphForWorker(graphOrData);
+    const support = {
+      graphData,
+      canUseWorker: false,
+      reason: 'unknown',
+      fallbackMode: 'event-fast',
+      runtimeMode: null,
+      executableFallbackCount: 0,
+      unsafeTypes: hasUnsafeWorkerTypes(graphData)
+    };
+    if(!canUseWorkerMode()){
+      support.reason = 'worker-unavailable';
+ succeeded in 417ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const WORKER_MODE = 'event-fast-worker';
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260313a';
+  const UNSAFE_WORKER_TYPES = new Set([
+    'factory/carrierroute',
+    'factory/shuttle_stage'
+  ]);
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeWorkerMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === WORKER_MODE || raw === 'event_fast_worker' || raw === 'eventfastworker' || raw === 'fast-worker'){
+      return WORKER_MODE;
+    }
+    return null;
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-test.js | Select-Object -Skip 1220 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-test.js | Select-Object -Skip 1370 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 395ms:
+          const rowEntityLedger = row.finalEntityLedger;
+          const shouldCompareEntityLedger = !isHeadlessOnlyMode(baseline.engine) && !isHeadlessOnlyMode(row.engine);
+          if(shouldCompareEntityLedger && baseEntityLedger && rowEntityLedger){
+            const baseRefs = new Set(Array.isArray(baseEntityLedger.refs) ? baseEntityLedger.refs : []);
+            const rowRefs = new Set(Array.isArray(rowEntityLedger.refs) ? rowEntityLedger.refs : []);
+            const missingRefs = [];
+            const extraRefs = [];
+            for(const ref of baseRefs){ if(!rowRefs.has(ref) && missingRefs.length < 8) missingRefs.push(ref); }
+            for(const ref of rowRefs){ if(!baseRefs.has(ref) && extraRefs.length < 8) extraRefs.push(ref); }
+            const baseDupes = Array.isArray(baseEntityLedger.duplicateRefs) ? baseEntityLedger.duplicateRefs : [];
+            const rowDupes = Array.isArray(rowEntityLedger.duplicateRefs) ? rowEntityLedger.duplicateRefs : [];
+            if(missingRefs.length || extraRefs.length || baseDupes.length !== rowDupes.length){
+              pushIssue(report.failures, seen, issue('error', 'FINAL_ENTITY_SET_DELTA', `Final entity set differs from dt on ${row.scenario}`, {
+                engine: row.engine,
+                scenario: row.scenario,
+                message: `Final entity set differs from dt on ${row.scenario}${missingRefs.length ? `, missing=${missingRefs.join(', ')}` : ''}${extraRefs.length ? `, extra=${extraRefs.join(', ')}` : ''}${baseDupes.length !== rowDupes.length ? `, duplicates=${baseDupes.length} != ${rowDupes.length}` : ''}`
+              }), 32);
+            }
+          }
+        }
+ succeeded in 424ms:
+      const seeds = Array.isArray(normalized.seeds) && normalized.seeds.length ? normalized.seeds : [normalized.seed || 1];
+      const totalCases = Math.max(1, built.sources.length * normalized.engines.length * seeds.length);
+      let caseIndex = 0;
+      outer: for(const source of built.sources){
+        for(const seed of seeds){
+          for(const engine of normalized.engines){
+            caseIndex += 1;
+            if(onProgress) try{ onProgress(caseIndex / totalCases, { engine, scenario: source.name, seed, caseIndex, totalCases, suite: normalized.suite }); }catch(_e){}
+            const result = await runCaseWithReruns(source, engine, normalized, seed);
+            report.results.push(result);
+            for(const entry of result.failures) pushIssue(report.failures, seen, entry, 32);
+            for(const entry of result.warnings) pushIssue(report.warnings, seen, entry, 32);
+            if(normalized.stopOnFirstFailure && result.status === 'FAIL'){
+              stoppedEarly = true;
+              break outer;
+            }
+          }
+        }
+      }
+      compareResults(report);
+codex
+I’ve finished the static pass. I’m running a focused engine-test check through the fact-sim MCP now, constrained to the fast parallel engine with the recommended lightweight settings, to see whether the failure reproduces as a real contract mismatch.
+tool fact_sim_ai.engine_test({"action":"latest"})
+fact_sim_ai.engine_test({"action":"latest"}) success in 3.55s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"report\":null}"
+    }
+  ]
+}
+tool fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["event-fast-par"],"examples":["sample_line1"],"includeCurrentGraph":false,"includeExamples":true,"reruns":0,"strictFinalParity":false,"stopOnFirstFailure":false,"seed":1,"maxWallMs":1200,"targetSimMs":3000})
+fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["event-fast-par"],"examples":["sample_line1"],"includeCurrentGraph":false,"includeExamples":true,"reruns":0,"strictFinalParity":false,"stopOnFirstFailure":false,"seed":1,"maxWallMs":1200,"targetSimMs":3000}) success in 1.34s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-14T17:42:30.107Z\",\"finishedAt\":\"2026-03-14T17:42:31.134Z\",\"engines\":[\"dt\",\"event-fast-par\"],\"summary\":{\"passed\":2,\"warned\":0,\"failed\":0,\"passedCases\":2,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":2,\"failureCount\":0,\"warningCount\":0,\"engineCount\":2,\"suite\":\"quick\",\"seedCount\":1,\"exampleCount\":1,\"includesCurrentGraph\":false,\"stoppedEarly\":false,\"reruns\":0,\"stopOnFirstFailure\":false},\"comparisons\":[{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":938.6,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":84.3,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":null,\"artifactFiles\":null,\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+tool fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["event-fast-worker","event-fast-par"],"includeCurrentGraph":false,"includeExamples":true,"examples":["sample_line1","sample_line2","simple","branch","parallel_benchmark","carrier"],"reruns":0,"strictFinalParity":false,"stopOnFirstFailure":false,"seed":1,"maxWallMs":1200,"targetSimMs":3000})
+fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["event-fast-worker","event-fast-par"],"includeCurrentGraph":false,"includeExamples":true,"examples":["sample_line1","sample_line2","simple","branch","parallel_benchmark","carrier"],"reruns":0,"strictFinalParity":false,"stopOnFirstFailure":false,"seed":1,"maxWallMs":1200,"targetSimMs":3000}) success in 7.43s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-14T17:42:45.634Z\",\"finishedAt\":\"2026-03-14T17:42:52.699Z\",\"engines\":[\"dt\",\"event-fast-worker\",\"event-fast-par\"],\"summary\":{\"passed\":18,\"warned\":0,\"failed\":0,\"passedCases\":18,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":18,\"failureCount\":0,\"warningCount\":0,\"engineCount\":3,\"suite\":\"quick\",\"seedCount\":1,\"exampleCount\":6,\"includesCurrentGraph\":false,\"stoppedEarly\":false,\"reruns\":0,\"stopOnFirstFailure\":false},\"comparisons\":[{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-worker\",\"completedDelta\":0},{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line2\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-worker\",\"completedDelta\":0},{\"scenario\":\"sample_line2\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"simple\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-worker\",\"completedDelta\":0},{\"scenario\":\"simple\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"branch\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-worker\",\"completedDelta\":0},{\"scenario\":\"branch\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"parallel_benchmark\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-worker\",\"completedDelta\":0},{\"scenario\":\"parallel_benchmark\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"carrier\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-worker\",\"completedDelta\":0},{\"scenario\":\"carrier\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":944.7,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-worker\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":41.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":74.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":962.1,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-worker\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":79.7,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":98.6,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":917,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-worker\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":174.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":186.1,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":909.1,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-worker\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":166.1,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":185.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"parallel_benchmark\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":915.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":8,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-worker\",\"seed\":1,\"scenario\":\"parallel_benchmark\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":181.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":8,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"parallel_benchmark\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":222.6,\"loops\":376,\"totalCompleted\":0,\"sinkCount\":8,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":927.5,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-worker\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":22.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":49.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":null,\"artifactFiles\":null,\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+codex
+The MCP run didn’t reproduce a simulation parity failure. That shifts the likely defect toward a helper/reporting contract issue, especially around cached engine-test results or fast-engine metadata that can collapse to an empty object and confuse the caller.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"\\|\\| \\{\\}|return \\{\\}|JSON\\.parse\\(raw\\)|latest.*report|report\\s*=\\s*\\{\\}|payload \\|\\| \\{\\}\" js/app" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker.js | Select-Object -Skip 240 -First 140' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-worker.js | Select-Object -Skip 120 -First 220' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 347ms:
+js/app\engine-fast-runtime.js:149:      this.options = Object.assign({}, options || {});
+js/app\engine-fast-runtime.js:152:      this.kernels = App.fastKernels || {};
+js/app\engine-fast-runtime.js:165:      const meta = this.compiled.meta || {};
+js/app\engine-fast-runtime.js:503:          const result = this._getNodeResult(nodeIndex, nowMs) || {};
+js/app\engine-fast-par-partitioner.js:195:    for(const [rawLinkId, link] of Object.entries(links || {})){
+js/app\engine-fast-par-partitioner.js:299:        compiledMeta: compiled.meta || {},
+js/app\engine-fast-par-partitioner.js:310:        compiledMeta: compiled.meta || {},
+js/app\engine-fast-par-partitioner.js:325:        compiledMeta: compiled.meta || {},
+js/app\engine-fast-par-partitioner.js:345:        compiledMeta: compiled.meta || {},
+js/app\engine-fast-par-partitioner.js:364:        compiledMeta: compiled.meta || {},
+js/app\engine-fast-par-partitioner.js:378:      compiledMeta: cloneJson(compiled.meta || {}),
+js/app\engine-fast-par-host.js:186:      if(Object.prototype.hasOwnProperty.call(row || {}, '_state')) node._state = cloneJson(row._state);
+js/app\engine-fast-par-host.js:187:      if(Object.prototype.hasOwnProperty.call(row || {}, '_stateName')) node._stateName = cloneJson(row._stateName);
+js/app\engine-fast-par-host.js:188:      if(Object.prototype.hasOwnProperty.call(row || {}, '_until') && Number.isFinite(Number(row._until))) node._until = Number(row._until);
+js/app\engine-fast-par-host.js:327:      this.options = Object.assign({}, options || {});
+js/app\engine-fast-par-host.js:335:      this._ready = this._call((App.eventFastParProtocol || {}).INIT || 'init', {
+js/app\engine-fast-par-host.js:338:        engineOptions: this.options.engineOptions || {},
+js/app\engine-fast-par-host.js:372:        this._worker.postMessage({ id, type, payload: payload || {} });
+js/app\engine-fast-par-host.js:378:      const payload = await this._call((App.eventFastParProtocol || {}).RESET || 'reset', {
+js/app\engine-fast-par-host.js:381:        engineOptions: this.options.engineOptions || {},
+ succeeded in 411ms:
+        targetSlot: Number(link.target_slot),
+        data: cloneJson(typeof link.data !== 'undefined' ? link.data : null),
+        _data: cloneJson(typeof link._data !== 'undefined' ? link._data : null)
+      });
+    }
+    rows.sort((a, b)=> a.linkId - b.linkId);
+    return rows;
+  }
+  function collectRuntimeNodeStates(targetGraph){
+    const rows = [];
+    const nodes = Array.isArray(targetGraph && targetGraph._nodes) ? targetGraph._nodes : [];
+    for(const node of nodes){
+      if(!node) continue;
+      rows.push({
+        nodeId: Number(node.id),
+        _state: typeof node._state !== 'undefined' ? cloneJson(node._state) : null,
+        _stateName: typeof node._stateName !== 'undefined' ? cloneJson(node._stateName) : null,
+        _until: Number.isFinite(Number(node._until)) ? Number(node._until) : null
+      });
+    }
+ succeeded in 394ms:
+    if(t === 'string' || t === 'number' || t === 'boolean'){
+      return `${t}:${String(value)}`;
+    }
+    try{
+      return `json:${JSON.stringify(value)}`;
+    }catch(_e){
+      return `obj:${Object.prototype.toString.call(value)}`;
+    }
+  }
+
+  function importRequiredScripts(){
+    try{
+      importScripts('../vendor/litegraph.min.js');
+    }catch(err){
+      throw new Error(`Failed to load local LiteGraph in partition worker: ${err && err.message ? err.message : err}`);
+    }
+    importScripts(
+      '../nodes-config.js',
+      '../nodes/work.js',
+      '../nodes/sigports.js',
+codex
+The strongest concrete defect candidate is stale or malformed cached engine-test data being accepted as a valid “latest report.” That matches the empty `{}` symptom exactly and it can be fixed without touching protected engines or changing runtime behavior.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-test.js | Select-Object -Skip 1324 -First 24' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-test.js | Select-Object -Skip 1500 -First 180' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 397ms:
+        const messageTd = document.createElement('td');
+        messageTd.className = 'engineTestMessage';
+        messageTd.textContent = entry.message || '-';
+        tr.appendChild(messageTd);
+        failuresBody.appendChild(tr);
+      }
+    }
+      legend.textContent = report.comparisons && report.comparisons.length
+      ? `Engine Test uses clone graphs only. ${report.comparisons.length} differential comparison(s) were recorded against a baseline engine. It now supports Quick / Standard / Soak suites, seed sweeps, hidden-canvas live probes for visible work-link parity, sampled node state-transition parity, timing-chart parity, and optional strict final parity for sink completions, final node states, final work-link occupancy, and final entity-set parity against dt.`
+      : 'Engine Test runs clone graphs only. It checks monotonic simulation time, graph integrity, finite numeric state, sink completion metrics, engine stalls, hidden-canvas live probes for timeline population, visible work-link parity, sampled node state-transition parity, timing-chart parity, and optional strict final parity for sink completions, final node states, final work-link occupancy, and final entity-set parity against dt.';
+    return true;
+  }
+  (function initEngineTestUi(){
+    const modal = document.getElementById('engineTestModal');
+    const closeBtn = document.getElementById('engineTestClose');
+    const runBtn = document.getElementById('btnEngineTest');
+    const rerunBtn = document.getElementById('engineTestRerunBtn');
+    const copyBtn = document.getElementById('engineTestCopyBtn');
+    const suiteSelect = document.getElementById('engineTestSuiteSelect');
+    const strictToggle = document.getElementById('engineTestStrictToggle');
+ succeeded in 406ms:
+          }
+        }
+      }
+    }
+  }
+  function saveLatestReport(report){
+    App.latestEngineTestReport = cloneJson(report);
+    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
+  }
+  App.getLatestEngineTestReport = function(){
+    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
+    try{
+      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+      return raw ? JSON.parse(raw) : null;
+    }catch(_e){
+      return null;
+    }
+  };
+  App.runEngineTestsAsync = async function(options){
+    const normalized = normalizeOptions(options);
+codex
+I’m making a narrow helper patch in `engine-test.js` now. It will reject malformed cached “latest report” objects instead of returning them as if they were valid reports, which preserves runtime behavior and addresses the empty-object symptom without touching dt/event execution.
+file update
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-test.js
+@@ -1329,11 +1329,36 @@
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+apply_patch(auto_approved=true) exited 0 in 159ms:
+Success. Updated the following files:
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700\js\app\engine-test.js
+file update:
+diff --git a/js/app/engine-test.js b/js/app/engine-test.js
+index 069d639f1c89bf31cc9f45cdded1c983eeb48443..0bc1379cea68fd640af2a4cde062f6e4c67ac70f
+--- a/js/app/engine-test.js
++++ b/js/app/engine-test.js
+@@ -1327,15 +1327,40 @@
+       }
+     }
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+       return null;
+     }
+
+file update:
+diff --git a/js/app/engine-test.js b/js/app/engine-test.js
+index 069d639f1c89bf31cc9f45cdded1c983eeb48443..0bc1379cea68fd640af2a4cde062f6e4c67ac70f
+--- a/js/app/engine-test.js
++++ b/js/app/engine-test.js
+@@ -1327,15 +1327,40 @@
+       }
+     }
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+       return null;
+     }
+
+codex
+The patch is in. I’m verifying two things now: the exact malformed-cache case that would yield `{}`, and a quick fast-engine MCP run to confirm I didn’t disturb normal engine-test behavior.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs = require('fs');
+const vm = require('vm');
+const path = 'C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773510011240-2700/js/app/engine-test.js';
+const code = fs.readFileSync(path, 'utf8');
+const storage = new Map();
+const context = {
+  console,
+  setTimeout,
+  clearTimeout,
+  performance: { now: () => 0 },
+  fetch: async () => ({ ok: true, json: async () => ({}) }),
+  navigator: { clipboard: { writeText: async () => {} } },
+  alert: () => {},
+  LGraph: function(){},
+  LiteGraph: { getTime: () => 0, STATUS_RUNNING: 1, STATUS_STOPPED: 0 },
+  document: { getElementById: () => null, createElement: () => ({ className: '', classList: { add(){} }, appendChild(){}, style: {}, setAttribute(){}, addEventListener(){}, textContent: '', innerHTML: '' }) },
+  localStorage: {
+    getItem: (k) => storage.has(k) ? storage.get(k) : null,
+    setItem: (k, v) => { storage.set(k, String(v)); },
+    removeItem: (k) => { storage.delete(k); }
+  },
+  window: null,
+  App: {}
+};
+context.window = context;
+vm.createContext(context);
+vm.runInContext(code, context, { filename: path });
+
+storage.set('fact_sim_latest_engine_test_report', '{}');
+const invalidFromStorage = context.App.getLatestEngineTestReport();
+if (invalidFromStorage "'!== null) {
+  throw new Error(`expected null for invalid storage report, got ${JSON.stringify(invalidFromStorage)}`);
+}
+if (storage.has('"'fact_sim_latest_engine_test_report')) {
+  throw new Error('expected invalid storage report to be cleared');
+}
+context.App.latestEngineTestReport = {};
+const invalidFromMemory = context.App.getLatestEngineTestReport();
+if (invalidFromMemory "'!== null) {
+  throw new Error(`expected null for invalid in-memory report, got ${JSON.stringify(invalidFromMemory)}`);
+}
+storage.set('"'fact_sim_latest_engine_test_report', JSON.stringify({ kind: 'engine-test-report', status: 'PASS', results: [], summary: {} }));
+const valid = context.App.getLatestEngineTestReport();
+if ("'!valid || valid.kind !== '"'engine-test-report' || valid.status "'!== '"'PASS' || "'!Array.isArray(valid.results)) {
+  throw new Error(`expected valid report roundtrip, got ${JSON.stringify(valid)}`);
+}
+console.log('"'engine-test latest report validation OK');
+'@ | node -" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 372ms:
+engine-test latest report validation OK
+tool fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["event-fast-par"],"examples":["sample_line1"],"includeCurrentGraph":false,"includeExamples":true,"reruns":0,"strictFinalParity":false,"stopOnFirstFailure":false,"seed":1,"maxWallMs":1200,"targetSimMs":3000})
+fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["event-fast-par"],"examples":["sample_line1"],"includeCurrentGraph":false,"includeExamples":true,"reruns":0,"strictFinalParity":false,"stopOnFirstFailure":false,"seed":1,"maxWallMs":1200,"targetSimMs":3000}) success in 1.32s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-14T17:44:37.261Z\",\"finishedAt\":\"2026-03-14T17:44:38.279Z\",\"engines\":[\"dt\",\"event-fast-par\"],\"summary\":{\"passed\":2,\"warned\":0,\"failed\":0,\"passedCases\":2,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":2,\"failureCount\":0,\"warningCount\":0,\"engineCount\":2,\"suite\":\"quick\",\"seedCount\":1,\"exampleCount\":1,\"includesCurrentGraph\":false,\"stoppedEarly\":false,\"reruns\":0,\"stopOnFirstFailure\":false},\"comparisons\":[{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":935.7,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":79.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":null,\"artifactFiles\":null,\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+file update:
+diff --git a/js/app/engine-test.js b/js/app/engine-test.js
+index 069d639f1c89bf31cc9f45cdded1c983eeb48443..0bc1379cea68fd640af2a4cde062f6e4c67ac70f
+--- a/js/app/engine-test.js
++++ b/js/app/engine-test.js
+@@ -1327,15 +1327,40 @@
+       }
+     }
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+       return null;
+     }
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git diff -- js/app/engine-test.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 304ms:
+
+file update:
+diff --git a/js/app/engine-test.js b/js/app/engine-test.js
+index 069d639f1c89bf31cc9f45cdded1c983eeb48443..0bc1379cea68fd640af2a4cde062f6e4c67ac70f
+--- a/js/app/engine-test.js
++++ b/js/app/engine-test.js
+@@ -1327,15 +1327,40 @@
+       }
+     }
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+       return null;
+     }
+
+codex
+The helper verification passed: malformed cached reports now resolve to `null` instead of surfacing as `{}`, and the normal fast-par quick engine test still passes unchanged. I’m gathering exact file references for the close-out.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$lines = Get-Content js/app/engine-test.js; for($i=1328; $i -le 1360; $i++){ if($i -le $lines.Length){ '"'{0}:{1}' -f "'$i, $lines[$i-1] } }' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 339ms:
+1328:    }
+1329:  }
+1330:  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
+1331:  function cloneLatestReport(report){
+1332:    const cloned = cloneJson(report);
+1333:    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
+1334:    if(String(cloned.kind || '') !== 'engine-test-report') return null;
+1335:    if(typeof cloned.status !== 'string') return null;
+1336:    if(!Array.isArray(cloned.results)) return null;
+1337:    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
+1338:    return cloned;
+1339:  }
+1340:  function saveLatestReport(report){
+1341:    const latest = cloneLatestReport(report);
+1342:    App.latestEngineTestReport = latest;
+1343:    try{
+1344:      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
+1345:      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
+1346:    }catch(_e){}
+1347:  }
+file update:
+diff --git a/js/app/engine-test.js b/js/app/engine-test.js
+index 069d639f1c89bf31cc9f45cdded1c983eeb48443..0bc1379cea68fd640af2a4cde062f6e4c67ac70f
+--- a/js/app/engine-test.js
++++ b/js/app/engine-test.js
+@@ -1327,15 +1327,40 @@
+       }
+     }
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+       return null;
+     }
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$lines = Get-Content js/app/engine-test.js; for($i=1360; $i -le 1368; $i++){ if($i -le $lines.Length){ '"'{0}:{1}' -f "'$i, $lines[$i-1] } }' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773510011240-2700 succeeded in 335ms:
+1360:        return null;
+1361:      }
+1362:      App.latestEngineTestReport = cloneJson(parsed);
+1363:      return parsed;
+1364:    }catch(_e){
+1365:      return null;
+1366:    }
+1367:  };
+1368:  App.runEngineTestsAsync = async function(options){
+file update:
+diff --git a/js/app/engine-test.js b/js/app/engine-test.js
+index 069d639f1c89bf31cc9f45cdded1c983eeb48443..0bc1379cea68fd640af2a4cde062f6e4c67ac70f
+--- a/js/app/engine-test.js
++++ b/js/app/engine-test.js
+@@ -1327,15 +1327,40 @@
+       }
+     }
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+       return null;
+     }
+
+codex
+1. What changed
+
+I patched [engine-test.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773510011240-2700/js/app/engine-test.js#L1330) so cached “latest engine test report” data is validated before being returned. Malformed cached values like `{}` are now treated as invalid and cleared instead of being surfaced as a report. This only affects the engine-test helper path; dt/event execution and fast engine runtime behavior are untouched.
+
+2. Which verification I ran
+
+I ran a focused inline Node verification against [engine-test.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773510011240-2700/js/app/engine-test.js#L1348) that confirmed:
+- invalid in-memory report `{}` returns `null`
+- invalid localStorage report `{}` returns `null` and is cleared
+- a valid report still round-trips correctly
+
+I also ran a fact-sim MCP engine test with `suite=quick`, `engines=["event-fast-par"]`, `examples=["sample_line1"]`, `reruns=0`, `strictFinalParity=false`, and it passed.
+
+3. Residual risk
+
+The validation is intentionally stricter: any older malformed cached report shape will now be discarded instead of returned. That is the main compatibility risk, but it is limited to cached engine-test metadata and does not affect engine performance or simulation behavior.
+file update:
+diff --git a/js/app/engine-test.js b/js/app/engine-test.js
+index 069d639f1c89bf31cc9f45cdded1c983eeb48443..0bc1379cea68fd640af2a4cde062f6e4c67ac70f
+--- a/js/app/engine-test.js
++++ b/js/app/engine-test.js
+@@ -1327,15 +1327,40 @@
+       }
+     }
+   }
++  const LATEST_ENGINE_TEST_REPORT_KEY = 'fact_sim_latest_engine_test_report';
++  function cloneLatestReport(report){
++    const cloned = cloneJson(report);
++    if(!cloned || typeof cloned !== 'object' || Array.isArray(cloned)) return null;
++    if(String(cloned.kind || '') !== 'engine-test-report') return null;
++    if(typeof cloned.status !== 'string') return null;
++    if(!Array.isArray(cloned.results)) return null;
++    if(!cloned.summary || typeof cloned.summary !== 'object' || Array.isArray(cloned.summary)) return null;
++    return cloned;
++  }
+   function saveLatestReport(report){
+-    App.latestEngineTestReport = cloneJson(report);
+-    try{ localStorage.setItem('fact_sim_latest_engine_test_report', JSON.stringify(report)); }catch(_e){}
++    const latest = cloneLatestReport(report);
++    App.latestEngineTestReport = latest;
++    try{
++      if(latest) localStorage.setItem(LATEST_ENGINE_TEST_REPORT_KEY, JSON.stringify(latest));
++      else localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY);
++    }catch(_e){}
+   }
+   App.getLatestEngineTestReport = function(){
+-    if(App.latestEngineTestReport) return cloneJson(App.latestEngineTestReport);
++    const latest = cloneLatestReport(App.latestEngineTestReport);
++    if(latest){
++      App.latestEngineTestReport = cloneJson(latest);
++      return latest;
++    }
+     try{
+-      const raw = localStorage.getItem('fact_sim_latest_engine_test_report');
+-      return raw ? JSON.parse(raw) : null;
++      const raw = localStorage.getItem(LATEST_ENGINE_TEST_REPORT_KEY);
++      if(!raw) return null;
++      const parsed = cloneLatestReport(JSON.parse(raw));
++      if(!parsed){
++        try{ localStorage.removeItem(LATEST_ENGINE_TEST_REPORT_KEY); }catch(_e){}
++        return null;
++      }
++      App.latestEngineTestReport = cloneJson(parsed);
++      return parsed;
+     }catch(_e){
+       return null;
+     }
+
+tokens used
+197,099

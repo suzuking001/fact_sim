@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-14T18:56:43.717Z",
+  "finishedAt": "2026-03-14T18:56:43.717Z",
+  "status": "error",
+  "message": "Error: EBUSY: resource busy or locked, rmdir 'C:\\Users\\suzuk\\AppData\\Local\\Temp\\fact-sim-auto-patch\\1773514596072-19748'"
+}

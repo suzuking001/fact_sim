@@ -1,0 +1,16 @@
+1. What changed
+
+I patched [engine-test.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773510011240-2700/js/app/engine-test.js#L1330) so cached “latest engine test report” data is validated before being returned. Malformed cached values like `{}` are now treated as invalid and cleared instead of being surfaced as a report. This only affects the engine-test helper path; dt/event execution and fast engine runtime behavior are untouched.
+
+2. Which verification I ran
+
+I ran a focused inline Node verification against [engine-test.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773510011240-2700/js/app/engine-test.js#L1348) that confirmed:
+- invalid in-memory report `{}` returns `null`
+- invalid localStorage report `{}` returns `null` and is cleared
+- a valid report still round-trips correctly
+
+I also ran a fact-sim MCP engine test with `suite=quick`, `engines=["event-fast-par"]`, `examples=["sample_line1"]`, `reruns=0`, `strictFinalParity=false`, and it passed.
+
+3. Residual risk
+
+The validation is intentionally stricter: any older malformed cached report shape will now be discarded instead of returned. That is the main compatibility risk, but it is limited to cached engine-test metadata and does not affect engine performance or simulation behavior.

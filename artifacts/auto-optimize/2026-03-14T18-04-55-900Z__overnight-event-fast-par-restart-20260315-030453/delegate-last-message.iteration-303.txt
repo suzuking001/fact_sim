@@ -1,0 +1,20 @@
+**Change**
+Updated [js/app/engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773522196208-10248/js/app/engine-fast-par-host.js) to stop forcing `partitionCount` to `2` in the event-fast parallel host. The new helper preserves:
+- unset `partitionCount` as unset, so the partitioner can use its own default sizing
+- explicit `partitionCount: 1` as `1`, so the partitioner can trigger its intended single-partition fallback
+
+This only touches the event-fast parallel host path; `dt` and `event` code paths were not modified.
+
+**Verification**
+Ran a focused Node harness against the edited host file to verify the exact contract that was wrong before. The captured planner inputs were:
+```json
+[{}, {"partitionCount":1}]
+```
+That confirms the host no longer rewrites both cases to `{ "partitionCount": 2 }`. I also ran:
+```bash
+node --check js/app/engine-fast-par-host.js
+```
+and it passed.
+
+**Residual Risk**
+I verified the planning contract and syntax, but not a full end-to-end simulation run, because this workspace only contains the isolated engine files and not a runnable app/test harness. The remaining risk is limited to runtime behavior outside this planning entry point.

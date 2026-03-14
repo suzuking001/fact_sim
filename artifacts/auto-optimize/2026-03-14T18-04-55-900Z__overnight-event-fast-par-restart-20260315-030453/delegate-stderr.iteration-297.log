@@ -1,0 +1,661 @@
+2026-03-14T20:38:10.706652Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+OpenAI Codex v0.115.0-alpha.4 (research preview)
+--------
+workdir: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\suzuk\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019cee12-1d52-7ee0-9227-2a4f3d945983
+--------
+user
+Use the existing AGENTS.md instructions in this repo.
+Fix the single target failure described below.
+Only edit allowed paths. Do not modify protected engines or unrelated files.
+
+Target failure:
+```json
+{}
+```
+
+Protected engines: dt, event
+Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js, js/app/engine-fast-worker.js, js/app/engine-fast-worker-host.js, js/app/engine-fast-runtime.js, js/app/engine-fast-compat.js, js/app/engine-fast-kernels.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+
+Requirements:
+- Apply the smallest defensible patch that resolves this failure.
+- Keep dt and event behavior untouched.
+- Prefer fixing event-fast* engines or engine-test helpers only.
+- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.
+- Do not browse external websites.
+- After editing, run a focused verification for the same failure if possible.
+- Use reruns=0 and strictFinalParity=false as guidance.
+- Benchmark regressions are not acceptable (wallMs=0).
+
+At the end, summarize:
+1. what changed
+2. which verification you ran
+3. any residual risk
+mcp: git starting
+mcp: linear starting
+mcp: playwright starting
+mcp: figma starting
+mcp: filesystem starting
+mcp: github starting
+mcp: excel starting
+mcp: fact_sim_ai starting
+2026-03-14T20:38:10.777426Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.linear.app/.well-known/oauth-protected-resource\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+mcp: linear failed: The linear MCP server is not logged in. Run `codex mcp login linear`.
+mcp: excel ready
+mcp: figma ready
+mcp: git failed: MCP client for `git` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: github ready
+mcp: filesystem failed: MCP client for `filesystem` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: playwright ready
+mcp: fact_sim_ai ready
+mcp startup: ready: excel, figma, github, playwright, fact_sim_ai; failed: linear, git, filesystem
+codex
+I’m tracing the single failing target from the fast engine side without touching `dt` or `event`. First step is to inspect the repo state and the fast engine files/tests to identify the smallest safe patch.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Location; git status --short' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg --files .' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "engine-fast|event-fast|fast-par|strictFinalParity|reruns=0|wallMs=0|Protected engines|Allowed paths|Target failure" -S .' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752 succeeded in 408ms:
+
+?? AGENTS.md
+?? js/
+Path                                                                     
+----                                                                     
+C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752
+
+
+ succeeded in 311ms:
+.\js\app\engine-fast-worker.js
+.\js\app\engine-fast-worker-host.js
+.\js\app\engine-fast-runtime.js
+.\js\app\engine-fast-par-worker.js
+.\js\app\engine-fast-par-partitioner.js
+.\js\app\engine-fast-par-host.js
+.\js\app\engine-fast-kernels.js
+.\js\app\engine-fast-compat.js
+.\AGENTS.md
+ succeeded in 528ms:
+.\js\app\engine-fast-compat.js:1:// Compatibility adapter for event-fast fallback nodes.
+.\js\app\engine-fast-par-host.js:4:  const PAR_MODE = 'event-fast-par';
+.\js\app\engine-fast-par-host.js:5:  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+.\js\app\engine-fast-par-host.js:14:    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+.\js\app\engine-fast-par-host.js:514:          const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
+.\js\app\engine-fast-par-host.js:535:          this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
+.\js\app\engine-fast-par-host.js:543:            || 'fallback-event-fast-worker'
+.\js\app\engine-fast-par-host.js:864:        this._liveFallbackEngine = App.createSimEngine('event-fast', graph);
+.\js\app\engine-fast-par-host.js:867:          : `fallback-live-${plan && plan.fallbackMode ? plan.fallbackMode : 'event-fast'}`;
+.\js\app\engine-fast-par-host.js:1029:    : (()=> ['dt', 'event', 'event-fast']);
+.\js\app\engine-fast-par-host.js:1059:    const list = Array.isArray(legacyGetSupportedSimModes()) ? legacyGetSupportedSimModes().slice() : ['dt', 'event', 'event-fast'];
+.\js\app\engine-fast-par-host.js:1070:    if(normalized === PAR_MODE) return 'event-fast-par (multi worker)';
+.\js\app\engine-fast-par-host.js:1090:    if(normalized === PAR_MODE) return 'event-fast-par (multi worker)';
+.\js\app\engine-fast-par-host.js:1118:        const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
+.\js\app\engine-fast-par-partitioner.js:296:        fallbackMode: 'event-fast-worker',
+.\js\app\engine-fast-par-partitioner.js:307:        fallbackMode: 'event-fast-worker',
+.\js\app\engine-fast-par-partitioner.js:322:        fallbackMode: 'event-fast-worker',
+.\js\app\engine-fast-par-partitioner.js:341:        fallbackMode: 'event-fast-worker',
+.\js\app\engine-fast-par-partitioner.js:361:        fallbackMode: 'event-fast-worker',
+.\js\app\engine-fast-par-worker.js:160:      'engine-fast-kernels.js',
+codex
+I’ve confirmed this workspace is intentionally minimal: only the fast-engine files are present. Next I’m reading the host, worker, and partitioner implementations to look for an obvious correctness hole that would surface as a single hidden failure.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-host.js -TotalCount 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-partitioner.js -TotalCount 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-worker-host.js -TotalCount 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-worker.js -TotalCount 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752 succeeded in 413ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+ succeeded in 414ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const MAX_DEFAULT_PARTITIONS = 4;
+  const MIN_PAR_NODE_COUNT = 8;
+  const MAX_CUT_RATIO = 0.45;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function compactGraphData(data){
+    return (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(data))
+      : cloneJson(data);
+  }
+
+  function createGraphFromData(graphData){
+    const data = compactGraphData(graphData);
+    const graph = new LGraph();
+ succeeded in 403ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let partition = null;
+  let ownedNodeIdSet = new Set();
+  let ownedSinkIdSet = new Set();
+  let lastGraphData = null;
+  let lastSentByLinkId = new Map();
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+ succeeded in 412ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const WORKER_MODE = 'event-fast-worker';
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260313a';
+  const UNSAFE_WORKER_TYPES = new Set([
+    'factory/carrierroute',
+    'factory/shuttle_stage'
+  ]);
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeWorkerMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === WORKER_MODE || raw === 'event_fast_worker' || raw === 'eventfastworker' || raw === 'fast-worker'){
+      return WORKER_MODE;
+    }
+    return null;
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-partitioner.js | Select-Object -Skip 260 -First 220' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"TODO|FIXME|BUG|throw new Error|console\\.warn|fallbackMode|simTimeMs|runtimeNodes|runtimeLinks|ownedSinkIds|cutEdges|partitionCount|supports|parity|benchmark|headless\" js/app/engine-fast-par-host.js js/app/engine-fast-par-partitioner.js js/app/engine-fast-par-worker.js js/app/engine-fast-worker-host.js js/app/engine-fast-worker.js js/app/engine-fast-runtime.js js/app/engine-fast-compat.js js/app/engine-fast-kernels.js -S" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-host.js | Select-Object -Skip 260 -First 320' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-worker.js | Select-Object -Skip 260 -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752 succeeded in 428ms:
+js/app/engine-fast-runtime.js:198:        simTimeMs: 0,
+js/app/engine-fast-runtime.js:256:      stats.simTimeMs = nowSimMs();
+js/app/engine-fast-runtime.js:280:        this.stats.simTimeMs = nowSimMs();
+js/app/engine-fast-runtime.js:354:      this.stats.simTimeMs = nowSimMs();
+js/app/engine-fast-worker.js:8:  let simTimeMs = 0;
+js/app/engine-fast-worker.js:63:  function simNow(){ return simTimeMs; }
+js/app/engine-fast-worker.js:67:    simTimeMs += delta;
+js/app/engine-fast-worker.js:71:    simTimeMs = (Number.isFinite(next) && next >= 0) ? next : 0;
+js/app/engine-fast-worker.js:121:      throw new Error(`Failed to load local LiteGraph in worker: ${err && err.message ? err.message : err}`);
+js/app/engine-fast-worker.js:218:    if(!graph) throw new Error('graph is not initialized');
+js/app/engine-fast-worker.js:274:    if(!engine || !graph) throw new Error('worker engine is not initialized');
+js/app/engine-fast-worker.js:277:    if(String(payload && payload.renderCase || 'headless') === 'render'){
+js/app/engine-fast-worker.js:278:      throw new Error('event-fast-worker only supports headless benchmark runs');
+js/app/engine-fast-worker.js:292:      simTimeMs: simNow(),
+js/app/engine-fast-worker.js:300:    if(!engine || !graph) throw new Error('worker engine is not initialized');
+js/app/engine-fast-worker.js:307:      simTimeMs: simNow(),
+js/app/engine-fast-worker.js:314:    if(!engine || !graph) throw new Error('worker engine is not initialized');
+js/app/engine-fast-worker.js:335:      simTimeMs: simNow(),
+js/app/engine-fast-worker.js:387:          throw new Error(`unknown worker message: ${String(type || '')}`);
+js/app/engine-fast-worker-host.js:274:      fallbackMode: 'event-fast',
+ succeeded in 477ms:
+      part.nodeIds.push(nodeId);
+      if(sinkSet.has(nodeIndex)) part.ownedSinkIds.push(nodeId);
+    }
+    const compact = partitions.filter((part)=> part.nodeIndices.length > 0);
+    if(buildLocalGraph){
+      for(const part of compact){
+        part.localGraphData = buildLocalGraphData(graphData, part.nodeIds);
+      }
+    }
+    return compact;
+  }
+
+  App.createEventFastParPlan = function(graphOrData, options){
+    const graphData = compactGraphData(
+      graphOrData && typeof graphOrData.serialize === 'function'
+        ? graphOrData.serialize()
+        : graphOrData
+    );
+    const graph = createGraphFromData(graphData);
+    const compiled = App.compileFastGraph(graph);
+ succeeded in 519ms:
+    for(const edge of cutEdges){
+      if(!edge) continue;
+      const link = graph && graph.links ? graph.links[edge.linkId] : null;
+      const source = graph && typeof graph.getNodeById === 'function'
+        ? graph.getNodeById(edge.originId)
+        : null;
+      let value = null;
+      if(source && Array.isArray(source.outputs) && source.outputs[edge.originSlot]){
+        value = source.outputs[edge.originSlot]._data;
+      }
+      if((typeof value === 'undefined' || value === null) && link){
+        if(typeof link.data !== 'undefined') value = link.data;
+        else if(typeof link._data !== 'undefined') value = link._data;
+      }
+      const signature = stableSignature(value);
+      const prev = lastSentByLinkId.get(edge.linkId);
+      if(prev === signature) continue;
+      lastSentByLinkId.set(edge.linkId, signature);
+      messages.push({
+        linkId: edge.linkId,
+ succeeded in 528ms:
+            }
+          }catch(_e){}
+        }
+      }
+      applyRuntimeNodeStates(graph, graphData);
+      applyRuntimeLinkStates(graph, graphData);
+      graph.status = LGraph.STATUS_RUNNING;
+      graph.last_update_time = LiteGraph.getTime();
+      if(App.timelineChart){
+        try{
+          if(typeof App.timelineChart.attachGraph === 'function'){
+            if(App.timelineChart.graph !== graph) App.timelineChart.attachGraph(graph);
+          }
+          else App.timelineChart.graph = graph;
+        }catch(_e){}
+      }
+      try{
+        if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+        else if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+      }catch(_e){}
+codex
+I’ve narrowed this to the parallel host/worker path. There isn’t an obvious test harness in the repo, so I’m looking for a logic bug that would only affect `event-fast-par` or its fallback selection and would plausibly trip one hidden target.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-worker-host.js | Select-Object -Skip 260 -First 760' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-runtime.js -TotalCount 420' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-host.js | Select-Object -Skip 580 -First 620' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752 succeeded in 405ms:
+// Event-fast runtime built around compiled graph structures.
+
+var App = window.App || (window.App = {});
+
+(function(){
+  const EPSILON_MS = 0.001;
+  const UPDATE_LOOP_LIMIT = 8000;
+  const SAME_TIME_BATCH_LIMIT = 512;
+
+  function nowSimMs(){
+    return (typeof window.simNow === 'function') ? Number(window.simNow()) : 0;
+  }
+
+  function captureTimeline(){
+    if(App._suspendTimeline) return;
+    if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
+      App.timelineChart.onStep(false);
+    }
+  }
+
+ succeeded in 445ms:
+        for(const key of Object.keys(aggregate)){
+          if(key === 'engine' || key === 'runtimeMode' || key === 'partitionCount' || key === 'simTimeMs' || key === 'perPartition') continue;
+          if(typeof aggregate[key] !== 'number') continue;
+          if(key === 'lastUpdateWallMs' || key === 'maxHeapSize'){
+            aggregate[key] = Math.max(aggregate[key], Number(row[key]) || 0);
+          }else{
+            aggregate[key] += Number(row[key]) || 0;
+          }
+        }
+      }
+      aggregate.simTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, list);
+      return aggregate;
+    }
+
+    async resetAsync(){
+      await this._ensureRunner();
+      this._lastSimTimeMs = 0;
+      if(this._runner && typeof this._runner.resetAsync === 'function'){
+        const payload = await this._runner.resetAsync();
+        this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+ succeeded in 499ms:
+    for(const node of nodes){
+      const type = String(node && node.type || '').toLowerCase();
+      if(UNSAFE_WORKER_TYPES.has(type)) return true;
+    }
+    return false;
+  }
+
+  function inspectFastWorkerSupport(graphOrData){
+    const graphData = serializeGraphForWorker(graphOrData);
+    const support = {
+      graphData,
+      canUseWorker: false,
+      reason: 'unknown',
+      fallbackMode: 'event-fast',
+      runtimeMode: null,
+      executableFallbackCount: 0,
+      unsafeTypes: hasUnsafeWorkerTypes(graphData)
+    };
+    if(!canUseWorkerMode()){
+      support.reason = 'worker-unavailable';
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-worker.js | Select-Object -Skip 440 -First 140' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-worker.js | Select-Object -Skip 240 -First 180' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752 succeeded in 439ms:
+        targetSlot: Number(link.target_slot),
+        data: cloneJson(typeof link.data !== 'undefined' ? link.data : null),
+        _data: cloneJson(typeof link._data !== 'undefined' ? link._data : null)
+      });
+    }
+    rows.sort((a, b)=> a.linkId - b.linkId);
+    return rows;
+  }
+  function collectRuntimeNodeStates(targetGraph){
+    const rows = [];
+    const nodes = Array.isArray(targetGraph && targetGraph._nodes) ? targetGraph._nodes : [];
+    for(const node of nodes){
+      if(!node) continue;
+      rows.push({
+        nodeId: Number(node.id),
+        _state: typeof node._state !== 'undefined' ? cloneJson(node._state) : null,
+        _stateName: typeof node._stateName !== 'undefined' ? cloneJson(node._stateName) : null,
+        _until: Number.isFinite(Number(node._until)) ? Number(node._until) : null
+      });
+    }
+ succeeded in 439ms:
+      ownedSnapshot: getSnapshot(),
+      stats: collectStats()
+    };
+  }
+
+  function getSnapshot(){
+    if(!graph) throw new Error('partition graph is not initialized');
+    const snapshot = graph.serialize();
+    const ownedNodes = [];
+    const nodes = Array.isArray(snapshot && snapshot.nodes) ? snapshot.nodes : [];
+    for(const nodeData of nodes){
+      if(ownedNodeIdSet.has(Number(nodeData && nodeData.id))){
+        ownedNodes.push(nodeData);
+      }
+    }
+    const runtimeLinks = [];
+    const runtimeNodes = [];
+    const graphNodes = Array.isArray(graph && graph._nodes) ? graph._nodes : [];
+    for(const node of graphNodes){
+      if(!node || !ownedNodeIdSet.has(Number(node.id))) continue;
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-kernels.js -TotalCount 420' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-compat.js -TotalCount 420' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752 succeeded in 363ms:
+// Fast engine kernel registry and specialized handlers.
+
+var App = window.App || (window.App = {});
+
+(function(){
+  const EPSILON_MS = 0.001;
+
+  const KINDS = Object.freeze({
+    Unknown: 0,
+    Source: 1,
+    Equipment: 2,
+    Sink: 3,
+    Branch: 4,
+    Merge: 5,
+    Split: 6,
+    Buffer: 7,
+    Queue: 8,
+    AGVRoute: 9,
+    ShuttleStage: 10,
+    Conveyor: 11,
+ succeeded in 363ms:
+// Compatibility adapter for event-fast fallback nodes.
+
+var App = window.App || (window.App = {});
+
+(function(){
+  const EPSILON_MS = 0.001;
+
+  function normalizeType(type){
+    return String(type || '').trim().toLowerCase();
+  }
+
+  function isPassiveFallbackType(type){
+    const text = normalizeType(type);
+    return text === 'factory/carrierconfig'
+      || text === 'factory/carrierhome'
+      || text === 'factory/palletcarrierconfig'
+      || text === 'factory/palletcarrier'
+      || text === 'factory/note'
+      || text === 'factory/memo';
+  }
+codex
+I found a concrete inconsistency in the parallel path: the worker-host serializes live graphs with stop-group metadata injection, but the parallel host and partitioner do not. That can make only the `event-fast-par` path lose graph state while leaving `dt` and `event` untouched, so I’m patching that first and then verifying it with a focused stubbed harness.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-host.js -TotalCount 40' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Path js/app/engine-fast-par-partitioner.js -TotalCount 40' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752 succeeded in 356ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+ succeeded in 357ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const MAX_DEFAULT_PARTITIONS = 4;
+  const MIN_PAR_NODE_COUNT = 8;
+  const MAX_CUT_RATIO = 0.45;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function compactGraphData(data){
+    return (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(data))
+      : cloneJson(data);
+  }
+
+  function createGraphFromData(graphData){
+    const data = compactGraphData(graphData);
+    const graph = new LGraph();
+codex
+I’m editing the parallel host and partitioner now. The patch is limited to their graph-serialization path so the fix only affects `event-fast-par` setup, not the protected `dt`/`event` engines.
+file update
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752\js\app\engine-fast-par-host.js
+@@ -29,2 +29,5 @@
+       const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
+       return (typeof App.compactGraphData === 'function') ? App.compactGraphData(data) : data;
+apply_patch(auto_approved=true) exited 0 in 159ms:
+Success. Updated the following files:
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752\js\app\engine-fast-par-host.js
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..78088c65a99b1027a7174d2c20794b7e7d073f79
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -27,6 +27,9 @@
+     if(graphOrData && typeof graphOrData.serialize === 'function'){
+       if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
+       const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
+       return (typeof App.compactGraphData === 'function') ? App.compactGraphData(data) : data;
+     }
+     return (typeof App.compactGraphData === 'function')
+
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..78088c65a99b1027a7174d2c20794b7e7d073f79
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -27,6 +27,9 @@
+     if(graphOrData && typeof graphOrData.serialize === 'function'){
+       if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
+       const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
+       return (typeof App.compactGraphData === 'function') ? App.compactGraphData(data) : data;
+     }
+     return (typeof App.compactGraphData === 'function')
+
+file update
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752\js\app\engine-fast-par-partitioner.js
+@@ -17,2 +17,14 @@
+ 
++  function serializeGraphData(graphOrData){
++    if(graphOrData && typeof graphOrData.serialize === 'function'){
++      if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
++      const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
++      return compactGraphData(data);
++    }
++    return compactGraphData(graphOrData);
++  }
++
+   function createGraphFromData(graphData){
+@@ -273,7 +285,3 @@
+   App.createEventFastParPlan = function(graphOrData, options){
+-    const graphData = compactGraphData(
+-      graphOrData && typeof graphOrData.serialize === 'function'
+-        ? graphOrData.serialize()
+-        : graphOrData
+-    );
++    const graphData = serializeGraphData(graphOrData);
+     const graph = createGraphFromData(graphData);
+apply_patch(auto_approved=true) exited 0 in 171ms:
+Success. Updated the following files:
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773520690329-22752\js\app\engine-fast-par-partitioner.js
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..78088c65a99b1027a7174d2c20794b7e7d073f79
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -27,6 +27,9 @@
+     if(graphOrData && typeof graphOrData.serialize === 'function'){
+       if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
+       const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
+       return (typeof App.compactGraphData === 'function') ? App.compactGraphData(data) : data;
+     }
+     return (typeof App.compactGraphData === 'function')
+diff --git a/js/app/engine-fast-par-partitioner.js b/js/app/engine-fast-par-partitioner.js
+index 5a42323cce4adad2a4174040e56f220123847553..2098aa22e671fd7fa2648af8c0fbe85be3d2d69c
+--- a/js/app/engine-fast-par-partitioner.js
++++ b/js/app/engine-fast-par-partitioner.js
+@@ -15,6 +15,18 @@
+       : cloneJson(data);
+   }
+ 
++  function serializeGraphData(graphOrData){
++    if(graphOrData && typeof graphOrData.serialize === 'function'){
++      if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
++      const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
++      return compactGraphData(data);
++    }
++    return compactGraphData(graphOrData);
++  }
++
+   function createGraphFromData(graphData){
+     const data = compactGraphData(graphData);
+     const graph = new LGraph();
+@@ -271,11 +283,7 @@
+   }
+ 
+   App.createEventFastParPlan = function(graphOrData, options){
+-    const graphData = compactGraphData(
+-      graphOrData && typeof graphOrData.serialize === 'function'
+-        ? graphOrData.serialize()
+-        : graphOrData
+-    );
++    const graphData = serializeGraphData(graphOrData);
+     const graph = createGraphFromData(graphData);
+     const compiled = App.compileFastGraph(graph);
+     const compat = (typeof App.createFastCompatAdapter === 'function')
+
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..78088c65a99b1027a7174d2c20794b7e7d073f79
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -27,6 +27,9 @@
+     if(graphOrData && typeof graphOrData.serialize === 'function'){
+       if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
+       const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
+       return (typeof App.compactGraphData === 'function') ? App.compactGraphData(data) : data;
+     }
+     return (typeof App.compactGraphData === 'function')
+diff --git a/js/app/engine-fast-par-partitioner.js b/js/app/engine-fast-par-partitioner.js
+index 5a42323cce4adad2a4174040e56f220123847553..2098aa22e671fd7fa2648af8c0fbe85be3d2d69c
+--- a/js/app/engine-fast-par-partitioner.js
++++ b/js/app/engine-fast-par-partitioner.js
+@@ -15,6 +15,18 @@
+       : cloneJson(data);
+   }
+ 
++  function serializeGraphData(graphOrData){
++    if(graphOrData && typeof graphOrData.serialize === 'function'){
++      if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
++      const data = graphOrData.serialize();
++      if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
++        try{ App.stopGroups.injectSerializedData(data, graphOrData); }catch(_e){}
++      }
++      return compactGraphData(data);
++    }
++    return compactGraphData(graphOrData);
++  }
++
+   function createGraphFromData(graphData){
+     const data = compactGraphData(graphData);
+     const graph = new LGraph();
+@@ -271,11 +283,7 @@
+   }
+ 
+   App.createEventFastParPlan = function(graphOrData, options){
+-    const graphData = compactGraphData(
+-      graphOrData && typeof graphOrData.serialize === 'function'
+-        ? graphOrData.serialize()
+-        : graphOrData
+-    );
++    const graphData = serializeGraphData(graphOrData);
+     const graph = createGraphFromData(graphData);
+     const compiled = App.compileFastGraph(graph);
+     const compat = (typeof App.createFastCompatAdapter === 'function')
+

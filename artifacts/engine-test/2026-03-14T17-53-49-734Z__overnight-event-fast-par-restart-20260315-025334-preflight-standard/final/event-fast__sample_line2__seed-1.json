@@ -1,0 +1,776 @@
+{
+  "finalStateSnapshot": {
+    "nodeCount": 119,
+    "rows": [
+      {
+        "key": "2:Route R1",
+        "nodeId": 2,
+        "label": "Route R1",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "4:Route R2",
+        "nodeId": 4,
+        "label": "Route R2",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "6:Equipment",
+        "nodeId": 6,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "7:Equipment",
+        "nodeId": 7,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "10:Carrier Route",
+        "nodeId": 10,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "11:Carrier Route",
+        "nodeId": 11,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "13:Carrier Route",
+        "nodeId": 13,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "14:Equipment",
+        "nodeId": 14,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "16:Carrier Route",
+        "nodeId": 16,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "17:Join",
+        "nodeId": 17,
+        "label": "Join",
+        "state": "IDLE"
+      },
+      {
+        "key": "21:Equipment",
+        "nodeId": 21,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "23:Equipment",
+        "nodeId": 23,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "24:Equipment",
+        "nodeId": 24,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "26:Shuttle Stage",
+        "nodeId": 26,
+        "label": "Shuttle Stage",
+        "state": "IDLE"
+      },
+      {
+        "key": "27:Shuttle Stage",
+        "nodeId": 27,
+        "label": "Shuttle Stage",
+        "state": "IDLE"
+      },
+      {
+        "key": "28:Shuttle Stage",
+        "nodeId": 28,
+        "label": "Shuttle Stage",
+        "state": "IDLE"
+      },
+      {
+        "key": "29:Shuttle Stage",
+        "nodeId": 29,
+        "label": "Shuttle Stage",
+        "state": "IDLE"
+      },
+      {
+        "key": "30:Shuttle Stage",
+        "nodeId": 30,
+        "label": "Shuttle Stage",
+        "state": "IDLE"
+      },
+      {
+        "key": "32:EquipmentNode",
+        "nodeId": 32,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "33:EquipmentNode",
+        "nodeId": 33,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "34:EquipmentNode",
+        "nodeId": 34,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "35:EquipmentNode",
+        "nodeId": 35,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "36:EquipmentNode",
+        "nodeId": 36,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "37:EquipmentNode",
+        "nodeId": 37,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "38:EquipmentNode",
+        "nodeId": 38,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "39:EquipmentNode",
+        "nodeId": 39,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "42:EquipmentNode",
+        "nodeId": 42,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "43:EquipmentNode",
+        "nodeId": 43,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "44:EquipmentNode",
+        "nodeId": 44,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "45:Merge",
+        "nodeId": 45,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "47:EquipmentNode",
+        "nodeId": 47,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "48:EquipmentNode",
+        "nodeId": 48,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "49:EquipmentNode",
+        "nodeId": 49,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "50:Merge",
+        "nodeId": 50,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "51:EquipmentNode",
+        "nodeId": 51,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "52:EquipmentNode",
+        "nodeId": 52,
+        "label": "EquipmentNode",
+        "state": "WAIT"
+      },
+      {
+        "key": "54:EquipmentNode",
+        "nodeId": 54,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "55:EquipmentNode",
+        "nodeId": 55,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "56:Merge",
+        "nodeId": 56,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "57:EquipmentNode",
+        "nodeId": 57,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "58:EquipmentNode",
+        "nodeId": 58,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "59:EquipmentNode",
+        "nodeId": 59,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "60:Merge",
+        "nodeId": 60,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "61:EquipmentNode",
+        "nodeId": 61,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "62:EquipmentNode",
+        "nodeId": 62,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "63:EquipmentNode",
+        "nodeId": 63,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "64:EquipmentNode",
+        "nodeId": 64,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "65:Merge",
+        "nodeId": 65,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "67:EquipmentNode",
+        "nodeId": 67,
+        "label": "EquipmentNode",
+        "state": "WAIT"
+      },
+      {
+        "key": "107:Carrier Route",
+        "nodeId": 107,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "110:Carrier Route",
+        "nodeId": 110,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "117:Split",
+        "nodeId": 117,
+        "label": "Split",
+        "state": "WAIT"
+      },
+      {
+        "key": "120:Equipment",
+        "nodeId": 120,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "121:Equipment",
+        "nodeId": 121,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "123:Carrier Route",
+        "nodeId": 123,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "124:Carrier Route",
+        "nodeId": 124,
+        "label": "Carrier Route",
+        "state": "workIn_process_1|PROCESS"
+      },
+      {
+        "key": "125:Carrier Route",
+        "nodeId": 125,
+        "label": "Carrier Route",
+        "state": "workIn_process_1|PROCESS"
+      },
+      {
+        "key": "126:Carrier Route",
+        "nodeId": 126,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "127:Equipment",
+        "nodeId": 127,
+        "label": "Equipment",
+        "state": "DOWN"
+      },
+      {
+        "key": "128:Equipment",
+        "nodeId": 128,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "129:Equipment",
+        "nodeId": 129,
+        "label": "Equipment",
+        "state": "DOWN"
+      },
+      {
+        "key": "130:Equipment",
+        "nodeId": 130,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "133:EquipmentNode",
+        "nodeId": 133,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "134:EquipmentNode",
+        "nodeId": 134,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "135:EquipmentNode",
+        "nodeId": 135,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "136:EquipmentNode",
+        "nodeId": 136,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "137:EquipmentNode",
+        "nodeId": 137,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "138:EquipmentNode",
+        "nodeId": 138,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "139:EquipmentNode",
+        "nodeId": 139,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "140:EquipmentNode",
+        "nodeId": 140,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "141:EquipmentNode",
+        "nodeId": 141,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "142:EquipmentNode",
+        "nodeId": 142,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "143:EquipmentNode",
+        "nodeId": 143,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "144:Merge",
+        "nodeId": 144,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "145:EquipmentNode",
+        "nodeId": 145,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "146:EquipmentNode",
+        "nodeId": 146,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "147:EquipmentNode",
+        "nodeId": 147,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "148:Merge",
+        "nodeId": 148,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "149:EquipmentNode",
+        "nodeId": 149,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "150:EquipmentNode",
+        "nodeId": 150,
+        "label": "EquipmentNode",
+        "state": "WAIT"
+      },
+      {
+        "key": "151:EquipmentNode",
+        "nodeId": 151,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "152:EquipmentNode",
+        "nodeId": 152,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "153:Merge",
+        "nodeId": 153,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "154:EquipmentNode",
+        "nodeId": 154,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "155:EquipmentNode",
+        "nodeId": 155,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "156:EquipmentNode",
+        "nodeId": 156,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "157:Merge",
+        "nodeId": 157,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "158:EquipmentNode",
+        "nodeId": 158,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "159:EquipmentNode",
+        "nodeId": 159,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "160:EquipmentNode",
+        "nodeId": 160,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "161:EquipmentNode",
+        "nodeId": 161,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "162:Merge",
+        "nodeId": 162,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "163:EquipmentNode",
+        "nodeId": 163,
+        "label": "EquipmentNode",
+        "state": "WAIT"
+      },
+      {
+        "key": "165:Carrier Route",
+        "nodeId": 165,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "166:Carrier Route",
+        "nodeId": 166,
+        "label": "Carrier Route",
+        "state": "agvOut_down|DOWN"
+      },
+      {
+        "key": "168:Split",
+        "nodeId": 168,
+        "label": "Split",
+        "state": "WAIT"
+      },
+      {
+        "key": "169:Equipment",
+        "nodeId": 169,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "170:Equipment",
+        "nodeId": 170,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "172:Carrier Route",
+        "nodeId": 172,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "173:Carrier Route",
+        "nodeId": 173,
+        "label": "Carrier Route",
+        "state": "agv_process|PROCESS"
+      },
+      {
+        "key": "174:Carrier Route",
+        "nodeId": 174,
+        "label": "Carrier Route",
+        "state": "agv_process|PROCESS"
+      },
+      {
+        "key": "175:Carrier Route",
+        "nodeId": 175,
+        "label": "Carrier Route",
+        "state": "agvOut_down|DOWN"
+      },
+      {
+        "key": "176:Equipment",
+        "nodeId": 176,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "177:Equipment",
+        "nodeId": 177,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "178:Equipment",
+        "nodeId": 178,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "179:Equipment",
+        "nodeId": 179,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "181:Branch",
+        "nodeId": 181,
+        "label": "Branch",
+        "state": "PROCESS"
+      },
+      {
+        "key": "182:Carrier Route",
+        "nodeId": 182,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "183:Carrier Route",
+        "nodeId": 183,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "184:Carrier Route",
+        "nodeId": 184,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "185:Carrier Route",
+        "nodeId": 185,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "186:Carrier Route",
+        "nodeId": 186,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "187:Carrier Route",
+        "nodeId": 187,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "188:Carrier Route",
+        "nodeId": 188,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "189:Carrier Route",
+        "nodeId": 189,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "190:Carrier Route",
+        "nodeId": 190,
+        "label": "Carrier Route",
+        "state": "agv_process|PROCESS"
+      },
+      {
+        "key": "191:Carrier Route",
+        "nodeId": 191,
+        "label": "Carrier Route",
+        "state": "agvOut_down|DOWN"
+      },
+      {
+        "key": "192:Carrier Route",
+        "nodeId": 192,
+        "label": "Carrier Route",
+        "state": "agv_process|PROCESS"
+      },
+      {
+        "key": "193:Carrier Route",
+        "nodeId": 193,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 2,
+    "payloadCount": 2,
+    "observedLinkKeys": [
+      "127:workOut->124:workIn1:1:A",
+      "129:workOut->125:workIn1:1:A"
+    ],
+    "observedWorkRefs": [
+      "1:A"
+    ]
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "3:Sink",
+      "id": 3,
+      "title": "Sink",
+      "completedCount": 0
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 5,
+    "refs": [
+      "1:A",
+      "2:B",
+      "3:A",
+      "4:B",
+      "5:A"
+    ],
+    "duplicateRefs": [
+      {
+        "ref": "1:A",
+        "locations": [
+          "node:52",
+          "node:67",
+          "node:120",
+          "node:127",
+          "node:128",
+          "node:129",
+          "node:125",
+          "node:124"
+        ]
+      },
+      {
+        "ref": "2:B",
+        "locations": [
+          "node:150",
+          "node:169",
+          "node:176",
+          "node:177",
+          "node:178",
+          "node:163"
+        ]
+      }
+    ]
+  }
+}

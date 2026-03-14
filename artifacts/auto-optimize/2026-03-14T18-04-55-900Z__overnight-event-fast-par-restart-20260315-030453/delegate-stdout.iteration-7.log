@@ -1,0 +1,16 @@
+1. What changed
+
+I patched the fast host serializers in [engine-fast-par-host.js:28](C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773513326615-12556/js/app/engine-fast-par-host.js#L28) and [engine-fast-worker-host.js:58](C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773513326615-12556/js/app/engine-fast-worker-host.js#L58) to call `App.serializeGraphData(graphOrData)` instead of `App.serializeGraphData()`. That keeps `event-fast-worker` and `event-fast-par` tied to the graph instance they were asked to run, instead of accidentally serializing the global/current app graph. I did not touch `dt` or `event`.
+
+2. Which verification I ran
+
+I ran a focused static check with Node to confirm both host files now forward `graphOrData` and no zero-argument serializer call remains. It returned `serializer-forwarding-ok`.
+
+I also ran `fact-sim-ai` `engine_test` with:
+`action=run`, `engines=["dt","event-fast-worker","event-fast-par"]`, `reruns=0`, `strictFinalParity=false`, `stopOnFirstFailure=true`, `maxWallMs=1500`, `targetSimMs=30000`.
+
+Result: `PASS`, `27/27` cases, including the `parallel_benchmark` scenario.
+
+3. Residual risk
+
+The visible correctness suite passes, but I could not reproduce the hidden failing case directly. Residual risk is limited to any code path that intentionally relied on `App.serializeGraphData` ignoring its argument; this patch changes that behavior only for the fast worker/par hosts.

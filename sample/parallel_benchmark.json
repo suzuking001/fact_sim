@@ -1,0 +1,57 @@
+{
+  "last_node_id": 32,
+  "last_link_id": 24,
+  "nodes": [
+    { "id": 1, "type": "factory/source", "pos": [40, 60], "title": "Source 1", "properties": { "sequence": "A" } },
+    { "id": 2, "type": "factory/equip", "pos": [240, 60], "title": "Equip 1A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 3, "type": "factory/equip", "pos": [440, 60], "title": "Equip 1B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 4, "type": "factory/sink", "pos": [640, 60], "title": "Sink 1", "properties": {} },
+
+    { "id": 5, "type": "factory/source", "pos": [40, 180], "title": "Source 2", "properties": { "sequence": "A" } },
+    { "id": 6, "type": "factory/equip", "pos": [240, 180], "title": "Equip 2A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 7, "type": "factory/equip", "pos": [440, 180], "title": "Equip 2B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 8, "type": "factory/sink", "pos": [640, 180], "title": "Sink 2", "properties": {} },
+
+    { "id": 9, "type": "factory/source", "pos": [40, 300], "title": "Source 3", "properties": { "sequence": "A" } },
+    { "id": 10, "type": "factory/equip", "pos": [240, 300], "title": "Equip 3A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 11, "type": "factory/equip", "pos": [440, 300], "title": "Equip 3B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 12, "type": "factory/sink", "pos": [640, 300], "title": "Sink 3", "properties": {} },
+
+    { "id": 13, "type": "factory/source", "pos": [40, 420], "title": "Source 4", "properties": { "sequence": "A" } },
+    { "id": 14, "type": "factory/equip", "pos": [240, 420], "title": "Equip 4A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 15, "type": "factory/equip", "pos": [440, 420], "title": "Equip 4B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 16, "type": "factory/sink", "pos": [640, 420], "title": "Sink 4", "properties": {} },
+
+    { "id": 17, "type": "factory/source", "pos": [860, 60], "title": "Source 5", "properties": { "sequence": "A" } },
+    { "id": 18, "type": "factory/equip", "pos": [1060, 60], "title": "Equip 5A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 19, "type": "factory/equip", "pos": [1260, 60], "title": "Equip 5B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 20, "type": "factory/sink", "pos": [1460, 60], "title": "Sink 5", "properties": {} },
+
+    { "id": 21, "type": "factory/source", "pos": [860, 180], "title": "Source 6", "properties": { "sequence": "A" } },
+    { "id": 22, "type": "factory/equip", "pos": [1060, 180], "title": "Equip 6A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 23, "type": "factory/equip", "pos": [1260, 180], "title": "Equip 6B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 24, "type": "factory/sink", "pos": [1460, 180], "title": "Sink 6", "properties": {} },
+
+    { "id": 25, "type": "factory/source", "pos": [860, 300], "title": "Source 7", "properties": { "sequence": "A" } },
+    { "id": 26, "type": "factory/equip", "pos": [1060, 300], "title": "Equip 7A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 27, "type": "factory/equip", "pos": [1260, 300], "title": "Equip 7B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 28, "type": "factory/sink", "pos": [1460, 300], "title": "Sink 7", "properties": {} },
+
+    { "id": 29, "type": "factory/source", "pos": [860, 420], "title": "Source 8", "properties": { "sequence": "A" } },
+    { "id": 30, "type": "factory/equip", "pos": [1060, 420], "title": "Equip 8A", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 31, "type": "factory/equip", "pos": [1260, 420], "title": "Equip 8B", "properties": { "processTime": 1, "downTime": 3 } },
+    { "id": 32, "type": "factory/sink", "pos": [1460, 420], "title": "Sink 8", "properties": {} }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, 0], [2, 2, 0, 3, 0, 0], [3, 3, 0, 4, 0, 0],
+    [4, 5, 0, 6, 0, 0], [5, 6, 0, 7, 0, 0], [6, 7, 0, 8, 0, 0],
+    [7, 9, 0, 10, 0, 0], [8, 10, 0, 11, 0, 0], [9, 11, 0, 12, 0, 0],
+    [10, 13, 0, 14, 0, 0], [11, 14, 0, 15, 0, 0], [12, 15, 0, 16, 0, 0],
+    [13, 17, 0, 18, 0, 0], [14, 18, 0, 19, 0, 0], [15, 19, 0, 20, 0, 0],
+    [16, 21, 0, 22, 0, 0], [17, 22, 0, 23, 0, 0], [18, 23, 0, 24, 0, 0],
+    [19, 25, 0, 26, 0, 0], [20, 26, 0, 27, 0, 0], [21, 27, 0, 28, 0, 0],
+    [22, 29, 0, 30, 0, 0], [23, 30, 0, 31, 0, 0], [24, 31, 0, 32, 0, 0]
+  ],
+  "groups": [],
+  "version": 0.4
+}

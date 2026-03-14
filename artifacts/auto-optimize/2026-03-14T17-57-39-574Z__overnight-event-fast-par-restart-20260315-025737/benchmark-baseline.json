@@ -1,0 +1,94 @@
+{
+  "wallMs": 500,
+  "realStepMs": 16,
+  "results": [
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 500,
+      "simMs": 1365700,
+      "loops": 85357,
+      "simSec": 1365.7,
+      "speed": 2731.4
+    },
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 504.5,
+      "simMs": 764200,
+      "loops": 47763,
+      "simSec": 764.2,
+      "speed": 1514.767096134787
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 500.19999998807907,
+      "simMs": 2146016,
+      "loops": 134126,
+      "simSec": 2146.016,
+      "speed": 4290.315873752788
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 500,
+      "simMs": 1315056,
+      "loops": 82191,
+      "simSec": 1315.056,
+      "speed": 2630.112
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 500,
+      "simMs": 2650560,
+      "loops": 165660,
+      "simSec": 2650.56,
+      "speed": 5301.12
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 501.19999998807907,
+      "simMs": 1768016,
+      "loops": 110501,
+      "simSec": 1768.016,
+      "speed": 3527.565842063152
+    },
+    {
+      "mode": "event-fast-worker",
+      "modeLabel": "event-fast-worker",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 500,
+      "simMs": 4597008,
+      "loops": 287313,
+      "simSec": 4597.008,
+      "speed": 9194.016
+    },
+    {
+      "mode": "event-fast-par",
+      "modeLabel": "event-fast-par (multi worker)",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 500,
+      "simMs": 4839504,
+      "loops": 606174,
+      "simSec": 4839.504,
+      "speed": 9679.008
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "engine": "event-fast-worker",
+  "seed": 1,
+  "scenario": "branch",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 30112,
+    "wallMs": 199,
+    "loops": 1882,
+    "nodeCount": 5,
+    "linkCount": 4,
+    "sinkCount": 1,
+    "totalCompleted": 1,
+    "liveProbeSimTimeMs": 0,
+    "liveProbeWallMs": 0,
+    "liveProbeLoops": 0,
+    "liveTimelineEntries": 0,
+    "liveTimelineSegments": 0
+  },
+  "liveFlowProbe": null,
+  "liveStateProbe": null,
+  "liveTimelineSignature": null,
+  "sinks": [
+    {
+      "id": 5,
+      "title": "Sink",
+      "completedCount": 1
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 3,
+    "rows": [
+      {
+        "key": "2:Split",
+        "nodeId": 2,
+        "label": "Split",
+        "state": "WAIT"
+      },
+      {
+        "key": "3:Line A",
+        "nodeId": 3,
+        "label": "Line A",
+        "state": "IDLE"
+      },
+      {
+        "key": "4:Line B",
+        "nodeId": 4,
+        "label": "Line B",
+        "state": "WAIT"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 0,
+    "payloadCount": 0,
+    "observedLinkKeys": [],
+    "observedWorkRefs": []
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "5:Sink",
+      "id": 5,
+      "title": "Sink",
+      "completedCount": 1
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": []
+  },
+  "attempts": 1,
+  "maxAttempts": 3,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}

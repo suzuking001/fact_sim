@@ -1,0 +1,1385 @@
+# Auto Optimize Session
+
+- Session ID: `2026-03-14T18-04-55-900Z__overnight-event-fast-par-restart-20260315-030453`
+- Status: `WARN`
+- Target engine: `event-fast-par`
+- Started: `2026-03-14T18:04:55.906Z`
+- Finished: `2026-03-14T23:04:56.488Z`
+- Min improvement: `1%`
+- Min runtime hours: `5`
+- Max no-improvement iterations: `60`
+- Initial target speed: `7920.032x`
+- Best target speed: `7920.032x`
+- Current improvement: `0.00%`
+
+## Iterations
+
+- #1: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #2: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #3: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #4: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #5: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #6: `delegate-failed`
+  Baseline speed: 7920.032
+- #7: `delegate-failed`
+  Baseline speed: 7920.032
+- #8: `delegate-failed`
+  Baseline speed: 7920.032
+- #9: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #10: `delegate-failed`
+  Baseline speed: 7920.032
+- #11: `error`
+  Baseline speed: 7920.032
+- #12: `error`
+  Baseline speed: 7920.032
+- #13: `error`
+  Baseline speed: 7920.032
+- #14: `error`
+  Baseline speed: 7920.032
+- #15: `error`
+  Baseline speed: 7920.032
+- #16: `error`
+  Baseline speed: 7920.032
+- #17: `error`
+  Baseline speed: 7920.032
+- #18: `error`
+  Baseline speed: 7920.032
+- #19: `delegate-failed`
+  Baseline speed: 7920.032
+- #20: `error`
+  Baseline speed: 7920.032
+- #21: `error`
+  Baseline speed: 7920.032
+- #22: `error`
+  Baseline speed: 7920.032
+- #23: `error`
+  Baseline speed: 7920.032
+- #24: `error`
+  Baseline speed: 7920.032
+- #25: `error`
+  Baseline speed: 7920.032
+- #26: `error`
+  Baseline speed: 7920.032
+- #27: `error`
+  Baseline speed: 7920.032
+- #28: `error`
+  Baseline speed: 7920.032
+- #29: `error`
+  Baseline speed: 7920.032
+- #30: `error`
+  Baseline speed: 7920.032
+- #31: `error`
+  Baseline speed: 7920.032
+- #32: `error`
+  Baseline speed: 7920.032
+- #33: `delegate-failed`
+  Baseline speed: 7920.032
+- #34: `error`
+  Baseline speed: 7920.032
+- #35: `error`
+  Baseline speed: 7920.032
+- #36: `delegate-failed`
+  Baseline speed: 7920.032
+- #37: `error`
+  Baseline speed: 7920.032
+- #38: `error`
+  Baseline speed: 7920.032
+- #39: `error`
+  Baseline speed: 7920.032
+- #40: `error`
+  Baseline speed: 7920.032
+- #41: `error`
+  Baseline speed: 7920.032
+- #42: `error`
+  Baseline speed: 7920.032
+- #43: `error`
+  Baseline speed: 7920.032
+- #44: `error`
+  Baseline speed: 7920.032
+- #45: `delegate-failed`
+  Baseline speed: 7920.032
+- #46: `delegate-failed`
+  Baseline speed: 7920.032
+- #47: `delegate-failed`
+  Baseline speed: 7920.032
+- #48: `delegate-failed`
+  Baseline speed: 7920.032
+- #49: `delegate-failed`
+  Baseline speed: 7920.032
+- #50: `delegate-failed`
+  Baseline speed: 7920.032
+- #51: `error`
+  Baseline speed: 7920.032
+- #52: `error`
+  Baseline speed: 7920.032
+- #53: `error`
+  Baseline speed: 7920.032
+- #54: `error`
+  Baseline speed: 7920.032
+- #55: `delegate-failed`
+  Baseline speed: 7920.032
+- #56: `delegate-failed`
+  Baseline speed: 7920.032
+- #57: `delegate-failed`
+  Baseline speed: 7920.032
+- #58: `delegate-failed`
+  Baseline speed: 7920.032
+- #59: `delegate-failed`
+  Baseline speed: 7920.032
+- #60: `delegate-failed`
+  Baseline speed: 7920.032
+- #61: `error`
+  Baseline speed: 7920.032
+- #62: `delegate-failed`
+  Baseline speed: 7920.032
+- #63: `delegate-failed`
+  Baseline speed: 7920.032
+- #64: `delegate-failed`
+  Baseline speed: 7920.032
+- #65: `delegate-failed`
+  Baseline speed: 7920.032
+- #66: `delegate-failed`
+  Baseline speed: 7920.032
+- #67: `delegate-failed`
+  Baseline speed: 7920.032
+- #68: `delegate-failed`
+  Baseline speed: 7920.032
+- #69: `delegate-failed`
+  Baseline speed: 7920.032
+- #70: `delegate-failed`
+  Baseline speed: 7920.032
+- #71: `delegate-failed`
+  Baseline speed: 7920.032
+- #72: `delegate-failed`
+  Baseline speed: 7920.032
+- #73: `delegate-failed`
+  Baseline speed: 7920.032
+- #74: `delegate-failed`
+  Baseline speed: 7920.032
+- #75: `delegate-failed`
+  Baseline speed: 7920.032
+- #76: `delegate-failed`
+  Baseline speed: 7920.032
+- #77: `delegate-failed`
+  Baseline speed: 7920.032
+- #78: `delegate-failed`
+  Baseline speed: 7920.032
+- #79: `delegate-failed`
+  Baseline speed: 7920.032
+- #80: `delegate-failed`
+  Baseline speed: 7920.032
+- #81: `delegate-failed`
+  Baseline speed: 7920.032
+- #82: `delegate-failed`
+  Baseline speed: 7920.032
+- #83: `delegate-failed`
+  Baseline speed: 7920.032
+- #84: `delegate-failed`
+  Baseline speed: 7920.032
+- #85: `delegate-failed`
+  Baseline speed: 7920.032
+- #86: `delegate-failed`
+  Baseline speed: 7920.032
+- #87: `delegate-failed`
+  Baseline speed: 7920.032
+- #88: `delegate-failed`
+  Baseline speed: 7920.032
+- #89: `delegate-failed`
+  Baseline speed: 7920.032
+- #90: `delegate-failed`
+  Baseline speed: 7920.032
+- #91: `delegate-failed`
+  Baseline speed: 7920.032
+- #92: `delegate-failed`
+  Baseline speed: 7920.032
+- #93: `delegate-failed`
+  Baseline speed: 7920.032
+- #94: `delegate-failed`
+  Baseline speed: 7920.032
+- #95: `delegate-failed`
+  Baseline speed: 7920.032
+- #96: `delegate-failed`
+  Baseline speed: 7920.032
+- #97: `delegate-failed`
+  Baseline speed: 7920.032
+- #98: `delegate-failed`
+  Baseline speed: 7920.032
+- #99: `delegate-failed`
+  Baseline speed: 7920.032
+- #100: `delegate-failed`
+  Baseline speed: 7920.032
+- #101: `delegate-failed`
+  Baseline speed: 7920.032
+- #102: `delegate-failed`
+  Baseline speed: 7920.032
+- #103: `delegate-failed`
+  Baseline speed: 7920.032
+- #104: `delegate-failed`
+  Baseline speed: 7920.032
+- #105: `delegate-failed`
+  Baseline speed: 7920.032
+- #106: `delegate-failed`
+  Baseline speed: 7920.032
+- #107: `delegate-failed`
+  Baseline speed: 7920.032
+- #108: `delegate-failed`
+  Baseline speed: 7920.032
+- #109: `delegate-failed`
+  Baseline speed: 7920.032
+- #110: `delegate-failed`
+  Baseline speed: 7920.032
+- #111: `delegate-failed`
+  Baseline speed: 7920.032
+- #112: `delegate-failed`
+  Baseline speed: 7920.032
+- #113: `delegate-failed`
+  Baseline speed: 7920.032
+- #114: `delegate-failed`
+  Baseline speed: 7920.032
+- #115: `delegate-failed`
+  Baseline speed: 7920.032
+- #116: `delegate-failed`
+  Baseline speed: 7920.032
+- #117: `delegate-failed`
+  Baseline speed: 7920.032
+- #118: `delegate-failed`
+  Baseline speed: 7920.032
+- #119: `delegate-failed`
+  Baseline speed: 7920.032
+- #120: `delegate-failed`
+  Baseline speed: 7920.032
+- #121: `delegate-failed`
+  Baseline speed: 7920.032
+- #122: `delegate-failed`
+  Baseline speed: 7920.032
+- #123: `delegate-failed`
+  Baseline speed: 7920.032
+- #124: `delegate-failed`
+  Baseline speed: 7920.032
+- #125: `delegate-failed`
+  Baseline speed: 7920.032
+- #126: `delegate-failed`
+  Baseline speed: 7920.032
+- #127: `delegate-failed`
+  Baseline speed: 7920.032
+- #128: `delegate-failed`
+  Baseline speed: 7920.032
+- #129: `delegate-failed`
+  Baseline speed: 7920.032
+- #130: `delegate-failed`
+  Baseline speed: 7920.032
+- #131: `delegate-failed`
+  Baseline speed: 7920.032
+- #132: `delegate-failed`
+  Baseline speed: 7920.032
+- #133: `delegate-failed`
+  Baseline speed: 7920.032
+- #134: `delegate-failed`
+  Baseline speed: 7920.032
+- #135: `delegate-failed`
+  Baseline speed: 7920.032
+- #136: `delegate-failed`
+  Baseline speed: 7920.032
+- #137: `delegate-failed`
+  Baseline speed: 7920.032
+- #138: `delegate-failed`
+  Baseline speed: 7920.032
+- #139: `delegate-failed`
+  Baseline speed: 7920.032
+- #140: `delegate-failed`
+  Baseline speed: 7920.032
+- #141: `delegate-failed`
+  Baseline speed: 7920.032
+- #142: `delegate-failed`
+  Baseline speed: 7920.032
+- #143: `delegate-failed`
+  Baseline speed: 7920.032
+- #144: `delegate-failed`
+  Baseline speed: 7920.032
+- #145: `delegate-failed`
+  Baseline speed: 7920.032
+- #146: `delegate-failed`
+  Baseline speed: 7920.032
+- #147: `delegate-failed`
+  Baseline speed: 7920.032
+- #148: `delegate-failed`
+  Baseline speed: 7920.032
+- #149: `delegate-failed`
+  Baseline speed: 7920.032
+- #150: `delegate-failed`
+  Baseline speed: 7920.032
+- #151: `delegate-failed`
+  Baseline speed: 7920.032
+- #152: `delegate-failed`
+  Baseline speed: 7920.032
+- #153: `delegate-failed`
+  Baseline speed: 7920.032
+- #154: `delegate-failed`
+  Baseline speed: 7920.032
+- #155: `delegate-failed`
+  Baseline speed: 7920.032
+- #156: `delegate-failed`
+  Baseline speed: 7920.032
+- #157: `delegate-failed`
+  Baseline speed: 7920.032
+- #158: `delegate-failed`
+  Baseline speed: 7920.032
+- #159: `delegate-failed`
+  Baseline speed: 7920.032
+- #160: `delegate-failed`
+  Baseline speed: 7920.032
+- #161: `delegate-failed`
+  Baseline speed: 7920.032
+- #162: `delegate-failed`
+  Baseline speed: 7920.032
+- #163: `delegate-failed`
+  Baseline speed: 7920.032
+- #164: `delegate-failed`
+  Baseline speed: 7920.032
+- #165: `delegate-failed`
+  Baseline speed: 7920.032
+- #166: `delegate-failed`
+  Baseline speed: 7920.032
+- #167: `delegate-failed`
+  Baseline speed: 7920.032
+- #168: `delegate-failed`
+  Baseline speed: 7920.032
+- #169: `delegate-failed`
+  Baseline speed: 7920.032
+- #170: `delegate-failed`
+  Baseline speed: 7920.032
+- #171: `delegate-failed`
+  Baseline speed: 7920.032
+- #172: `delegate-failed`
+  Baseline speed: 7920.032
+- #173: `delegate-failed`
+  Baseline speed: 7920.032
+- #174: `delegate-failed`
+  Baseline speed: 7920.032
+- #175: `delegate-failed`
+  Baseline speed: 7920.032
+- #176: `delegate-failed`
+  Baseline speed: 7920.032
+- #177: `delegate-failed`
+  Baseline speed: 7920.032
+- #178: `delegate-failed`
+  Baseline speed: 7920.032
+- #179: `delegate-failed`
+  Baseline speed: 7920.032
+- #180: `delegate-failed`
+  Baseline speed: 7920.032
+- #181: `delegate-failed`
+  Baseline speed: 7920.032
+- #182: `delegate-failed`
+  Baseline speed: 7920.032
+- #183: `delegate-failed`
+  Baseline speed: 7920.032
+- #184: `delegate-failed`
+  Baseline speed: 7920.032
+- #185: `delegate-failed`
+  Baseline speed: 7920.032
+- #186: `delegate-failed`
+  Baseline speed: 7920.032
+- #187: `delegate-failed`
+  Baseline speed: 7920.032
+- #188: `delegate-failed`
+  Baseline speed: 7920.032
+- #189: `delegate-failed`
+  Baseline speed: 7920.032
+- #190: `delegate-failed`
+  Baseline speed: 7920.032
+- #191: `delegate-failed`
+  Baseline speed: 7920.032
+- #192: `delegate-failed`
+  Baseline speed: 7920.032
+- #193: `delegate-failed`
+  Baseline speed: 7920.032
+- #194: `delegate-failed`
+  Baseline speed: 7920.032
+- #195: `delegate-failed`
+  Baseline speed: 7920.032
+- #196: `delegate-failed`
+  Baseline speed: 7920.032
+- #197: `delegate-failed`
+  Baseline speed: 7920.032
+- #198: `delegate-failed`
+  Baseline speed: 7920.032
+- #199: `delegate-failed`
+  Baseline speed: 7920.032
+- #200: `delegate-failed`
+  Baseline speed: 7920.032
+- #201: `delegate-failed`
+  Baseline speed: 7920.032
+- #202: `delegate-failed`
+  Baseline speed: 7920.032
+- #203: `delegate-failed`
+  Baseline speed: 7920.032
+- #204: `delegate-failed`
+  Baseline speed: 7920.032
+- #205: `delegate-failed`
+  Baseline speed: 7920.032
+- #206: `delegate-failed`
+  Baseline speed: 7920.032
+- #207: `delegate-failed`
+  Baseline speed: 7920.032
+- #208: `delegate-failed`
+  Baseline speed: 7920.032
+- #209: `delegate-failed`
+  Baseline speed: 7920.032
+- #210: `delegate-failed`
+  Baseline speed: 7920.032
+- #211: `delegate-failed`
+  Baseline speed: 7920.032
+- #212: `delegate-failed`
+  Baseline speed: 7920.032
+- #213: `delegate-failed`
+  Baseline speed: 7920.032
+- #214: `delegate-failed`
+  Baseline speed: 7920.032
+- #215: `delegate-failed`
+  Baseline speed: 7920.032
+- #216: `delegate-failed`
+  Baseline speed: 7920.032
+- #217: `delegate-failed`
+  Baseline speed: 7920.032
+- #218: `delegate-failed`
+  Baseline speed: 7920.032
+- #219: `delegate-failed`
+  Baseline speed: 7920.032
+- #220: `delegate-failed`
+  Baseline speed: 7920.032
+- #221: `delegate-failed`
+  Baseline speed: 7920.032
+- #222: `delegate-failed`
+  Baseline speed: 7920.032
+- #223: `delegate-failed`
+  Baseline speed: 7920.032
+- #224: `delegate-failed`
+  Baseline speed: 7920.032
+- #225: `delegate-failed`
+  Baseline speed: 7920.032
+- #226: `delegate-failed`
+  Baseline speed: 7920.032
+- #227: `delegate-failed`
+  Baseline speed: 7920.032
+- #228: `delegate-failed`
+  Baseline speed: 7920.032
+- #229: `delegate-failed`
+  Baseline speed: 7920.032
+- #230: `delegate-failed`
+  Baseline speed: 7920.032
+- #231: `delegate-failed`
+  Baseline speed: 7920.032
+- #232: `delegate-failed`
+  Baseline speed: 7920.032
+- #233: `delegate-failed`
+  Baseline speed: 7920.032
+- #234: `delegate-failed`
+  Baseline speed: 7920.032
+- #235: `delegate-failed`
+  Baseline speed: 7920.032
+- #236: `delegate-failed`
+  Baseline speed: 7920.032
+- #237: `delegate-failed`
+  Baseline speed: 7920.032
+- #238: `delegate-failed`
+  Baseline speed: 7920.032
+- #239: `delegate-failed`
+  Baseline speed: 7920.032
+- #240: `delegate-failed`
+  Baseline speed: 7920.032
+- #241: `delegate-failed`
+  Baseline speed: 7920.032
+- #242: `delegate-failed`
+  Baseline speed: 7920.032
+- #243: `delegate-failed`
+  Baseline speed: 7920.032
+- #244: `delegate-failed`
+  Baseline speed: 7920.032
+- #245: `delegate-failed`
+  Baseline speed: 7920.032
+- #246: `delegate-failed`
+  Baseline speed: 7920.032
+- #247: `delegate-failed`
+  Baseline speed: 7920.032
+- #248: `delegate-failed`
+  Baseline speed: 7920.032
+- #249: `delegate-failed`
+  Baseline speed: 7920.032
+- #250: `delegate-failed`
+  Baseline speed: 7920.032
+- #251: `delegate-failed`
+  Baseline speed: 7920.032
+- #252: `delegate-failed`
+  Baseline speed: 7920.032
+- #253: `delegate-failed`
+  Baseline speed: 7920.032
+- #254: `delegate-failed`
+  Baseline speed: 7920.032
+- #255: `delegate-failed`
+  Baseline speed: 7920.032
+- #256: `delegate-failed`
+  Baseline speed: 7920.032
+- #257: `delegate-failed`
+  Baseline speed: 7920.032
+- #258: `delegate-failed`
+  Baseline speed: 7920.032
+- #259: `delegate-failed`
+  Baseline speed: 7920.032
+- #260: `delegate-failed`
+  Baseline speed: 7920.032
+- #261: `delegate-failed`
+  Baseline speed: 7920.032
+- #262: `delegate-failed`
+  Baseline speed: 7920.032
+- #263: `delegate-failed`
+  Baseline speed: 7920.032
+- #264: `delegate-failed`
+  Baseline speed: 7920.032
+- #265: `delegate-failed`
+  Baseline speed: 7920.032
+- #266: `delegate-failed`
+  Baseline speed: 7920.032
+- #267: `delegate-failed`
+  Baseline speed: 7920.032
+- #268: `delegate-failed`
+  Baseline speed: 7920.032
+- #269: `delegate-failed`
+  Baseline speed: 7920.032
+- #270: `delegate-failed`
+  Baseline speed: 7920.032
+- #271: `delegate-failed`
+  Baseline speed: 7920.032
+- #272: `delegate-failed`
+  Baseline speed: 7920.032
+- #273: `delegate-failed`
+  Baseline speed: 7920.032
+- #274: `delegate-failed`
+  Baseline speed: 7920.032
+- #275: `delegate-failed`
+  Baseline speed: 7920.032
+- #276: `delegate-failed`
+  Baseline speed: 7920.032
+- #277: `delegate-failed`
+  Baseline speed: 7920.032
+- #278: `delegate-failed`
+  Baseline speed: 7920.032
+- #279: `delegate-failed`
+  Baseline speed: 7920.032
+- #280: `delegate-failed`
+  Baseline speed: 7920.032
+- #281: `delegate-failed`
+  Baseline speed: 7920.032
+- #282: `delegate-failed`
+  Baseline speed: 7920.032
+- #283: `delegate-failed`
+  Baseline speed: 7920.032
+- #284: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #285: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #286: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #287: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #288: `delegate-failed`
+  Baseline speed: 7920.032
+- #289: `delegate-failed`
+  Baseline speed: 7920.032
+- #290: `delegate-failed`
+  Baseline speed: 7920.032
+- #291: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #292: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #293: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #294: `delegate-failed`
+  Baseline speed: 7920.032
+- #295: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #296: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #297: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #298: `delegate-failed`
+  Baseline speed: 7920.032
+- #299: `delegate-failed`
+  Baseline speed: 7920.032
+- #300: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #301: `delegate-failed`
+  Baseline speed: 7920.032
+- #302: `delegate-failed`
+  Baseline speed: 7920.032
+- #303: `delegate-failed`
+  Baseline speed: 7920.032
+- #304: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #305: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #306: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #307: `delegate-failed`
+  Baseline speed: 7920.032
+- #308: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #309: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #310: `delegate-failed`
+  Baseline speed: 7920.032
+- #311: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #312: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #313: `delegate-failed`
+  Baseline speed: 7920.032
+- #314: `delegate-timeout`
+  Baseline speed: 7920.032
+  Note: Delegate timed out after 5 minutes.
+- #315: `delegate-failed`
+  Baseline speed: 7920.032
+- #316: `delegate-failed`
+  Baseline speed: 7920.032
+- #317: `delegate-failed`
+  Baseline speed: 7920.032
+- #318: `delegate-failed`
+  Baseline speed: 7920.032
+- #319: `delegate-failed`
+  Baseline speed: 7920.032
+- #320: `delegate-failed`
+  Baseline speed: 7920.032
+- #321: `delegate-failed`
+  Baseline speed: 7920.032
+- #322: `delegate-failed`
+  Baseline speed: 7920.032
+- #323: `delegate-failed`
+  Baseline speed: 7920.032
+- #324: `delegate-failed`
+  Baseline speed: 7920.032
+- #325: `delegate-failed`
+  Baseline speed: 7920.032
+- #326: `delegate-failed`
+  Baseline speed: 7920.032
+- #327: `delegate-failed`
+  Baseline speed: 7920.032
+- #328: `delegate-failed`
+  Baseline speed: 7920.032
+- #329: `delegate-failed`
+  Baseline speed: 7920.032
+- #330: `delegate-failed`
+  Baseline speed: 7920.032
+- #331: `delegate-failed`
+  Baseline speed: 7920.032
+- #332: `delegate-failed`
+  Baseline speed: 7920.032
+- #333: `delegate-failed`
+  Baseline speed: 7920.032
+- #334: `delegate-failed`
+  Baseline speed: 7920.032
+- #335: `delegate-failed`
+  Baseline speed: 7920.032
+- #336: `delegate-failed`
+  Baseline speed: 7920.032
+- #337: `delegate-failed`
+  Baseline speed: 7920.032
+- #338: `delegate-failed`
+  Baseline speed: 7920.032
+- #339: `delegate-failed`
+  Baseline speed: 7920.032
+- #340: `delegate-failed`
+  Baseline speed: 7920.032
+- #341: `delegate-failed`
+  Baseline speed: 7920.032
+- #342: `delegate-failed`
+  Baseline speed: 7920.032
+- #343: `delegate-failed`
+  Baseline speed: 7920.032
+- #344: `delegate-failed`
+  Baseline speed: 7920.032
+- #345: `delegate-failed`
+  Baseline speed: 7920.032
+- #346: `delegate-failed`
+  Baseline speed: 7920.032
+- #347: `delegate-failed`
+  Baseline speed: 7920.032
+- #348: `delegate-failed`
+  Baseline speed: 7920.032
+- #349: `delegate-failed`
+  Baseline speed: 7920.032
+- #350: `delegate-failed`
+  Baseline speed: 7920.032
+- #351: `delegate-failed`
+  Baseline speed: 7920.032
+- #352: `delegate-failed`
+  Baseline speed: 7920.032
+- #353: `delegate-failed`
+  Baseline speed: 7920.032
+- #354: `delegate-failed`
+  Baseline speed: 7920.032
+- #355: `delegate-failed`
+  Baseline speed: 7920.032
+- #356: `delegate-failed`
+  Baseline speed: 7920.032
+- #357: `delegate-failed`
+  Baseline speed: 7920.032
+- #358: `delegate-failed`
+  Baseline speed: 7920.032
+- #359: `delegate-failed`
+  Baseline speed: 7920.032
+- #360: `delegate-failed`
+  Baseline speed: 7920.032
+- #361: `delegate-failed`
+  Baseline speed: 7920.032
+- #362: `delegate-failed`
+  Baseline speed: 7920.032
+- #363: `delegate-failed`
+  Baseline speed: 7920.032
+- #364: `delegate-failed`
+  Baseline speed: 7920.032
+- #365: `delegate-failed`
+  Baseline speed: 7920.032
+- #366: `delegate-failed`
+  Baseline speed: 7920.032
+- #367: `delegate-failed`
+  Baseline speed: 7920.032
+- #368: `delegate-failed`
+  Baseline speed: 7920.032
+- #369: `delegate-failed`
+  Baseline speed: 7920.032
+- #370: `delegate-failed`
+  Baseline speed: 7920.032
+- #371: `delegate-failed`
+  Baseline speed: 7920.032
+- #372: `delegate-failed`
+  Baseline speed: 7920.032
+- #373: `delegate-failed`
+  Baseline speed: 7920.032
+- #374: `delegate-failed`
+  Baseline speed: 7920.032
+- #375: `delegate-failed`
+  Baseline speed: 7920.032
+- #376: `delegate-failed`
+  Baseline speed: 7920.032
+- #377: `delegate-failed`
+  Baseline speed: 7920.032
+- #378: `delegate-failed`
+  Baseline speed: 7920.032
+- #379: `delegate-failed`
+  Baseline speed: 7920.032
+- #380: `delegate-failed`
+  Baseline speed: 7920.032
+- #381: `delegate-failed`
+  Baseline speed: 7920.032
+- #382: `delegate-failed`
+  Baseline speed: 7920.032
+- #383: `delegate-failed`
+  Baseline speed: 7920.032
+- #384: `delegate-failed`
+  Baseline speed: 7920.032
+- #385: `delegate-failed`
+  Baseline speed: 7920.032
+- #386: `delegate-failed`
+  Baseline speed: 7920.032
+- #387: `delegate-failed`
+  Baseline speed: 7920.032
+- #388: `delegate-failed`
+  Baseline speed: 7920.032
+- #389: `delegate-failed`
+  Baseline speed: 7920.032
+- #390: `delegate-failed`
+  Baseline speed: 7920.032
+- #391: `delegate-failed`
+  Baseline speed: 7920.032
+- #392: `delegate-failed`
+  Baseline speed: 7920.032
+- #393: `delegate-failed`
+  Baseline speed: 7920.032
+- #394: `delegate-failed`
+  Baseline speed: 7920.032
+- #395: `delegate-failed`
+  Baseline speed: 7920.032
+- #396: `delegate-failed`
+  Baseline speed: 7920.032
+- #397: `delegate-failed`
+  Baseline speed: 7920.032
+- #398: `delegate-failed`
+  Baseline speed: 7920.032
+- #399: `delegate-failed`
+  Baseline speed: 7920.032
+- #400: `delegate-failed`
+  Baseline speed: 7920.032
+- #401: `delegate-failed`
+  Baseline speed: 7920.032
+- #402: `delegate-failed`
+  Baseline speed: 7920.032
+- #403: `delegate-failed`
+  Baseline speed: 7920.032
+- #404: `delegate-failed`
+  Baseline speed: 7920.032
+- #405: `delegate-failed`
+  Baseline speed: 7920.032
+- #406: `delegate-failed`
+  Baseline speed: 7920.032
+- #407: `delegate-failed`
+  Baseline speed: 7920.032
+- #408: `delegate-failed`
+  Baseline speed: 7920.032
+- #409: `delegate-failed`
+  Baseline speed: 7920.032
+- #410: `delegate-failed`
+  Baseline speed: 7920.032
+- #411: `delegate-failed`
+  Baseline speed: 7920.032
+- #412: `delegate-failed`
+  Baseline speed: 7920.032
+- #413: `delegate-failed`
+  Baseline speed: 7920.032
+- #414: `delegate-failed`
+  Baseline speed: 7920.032
+- #415: `delegate-failed`
+  Baseline speed: 7920.032
+- #416: `delegate-failed`
+  Baseline speed: 7920.032
+- #417: `delegate-failed`
+  Baseline speed: 7920.032
+- #418: `delegate-failed`
+  Baseline speed: 7920.032
+- #419: `delegate-failed`
+  Baseline speed: 7920.032
+- #420: `delegate-failed`
+  Baseline speed: 7920.032
+- #421: `delegate-failed`
+  Baseline speed: 7920.032
+- #422: `delegate-failed`
+  Baseline speed: 7920.032
+- #423: `delegate-failed`
+  Baseline speed: 7920.032
+- #424: `delegate-failed`
+  Baseline speed: 7920.032
+- #425: `delegate-failed`
+  Baseline speed: 7920.032
+- #426: `delegate-failed`
+  Baseline speed: 7920.032
+- #427: `delegate-failed`
+  Baseline speed: 7920.032
+- #428: `delegate-failed`
+  Baseline speed: 7920.032
+- #429: `delegate-failed`
+  Baseline speed: 7920.032
+- #430: `delegate-failed`
+  Baseline speed: 7920.032
+- #431: `delegate-failed`
+  Baseline speed: 7920.032
+- #432: `delegate-failed`
+  Baseline speed: 7920.032
+- #433: `delegate-failed`
+  Baseline speed: 7920.032
+- #434: `delegate-failed`
+  Baseline speed: 7920.032
+- #435: `delegate-failed`
+  Baseline speed: 7920.032
+- #436: `delegate-failed`
+  Baseline speed: 7920.032
+- #437: `delegate-failed`
+  Baseline speed: 7920.032
+- #438: `delegate-failed`
+  Baseline speed: 7920.032
+- #439: `delegate-failed`
+  Baseline speed: 7920.032
+- #440: `delegate-failed`
+  Baseline speed: 7920.032
+- #441: `delegate-failed`
+  Baseline speed: 7920.032
+- #442: `delegate-failed`
+  Baseline speed: 7920.032
+- #443: `delegate-failed`
+  Baseline speed: 7920.032
+- #444: `delegate-failed`
+  Baseline speed: 7920.032
+- #445: `delegate-failed`
+  Baseline speed: 7920.032
+- #446: `delegate-failed`
+  Baseline speed: 7920.032
+- #447: `delegate-failed`
+  Baseline speed: 7920.032
+- #448: `delegate-failed`
+  Baseline speed: 7920.032
+- #449: `delegate-failed`
+  Baseline speed: 7920.032
+- #450: `delegate-failed`
+  Baseline speed: 7920.032
+- #451: `delegate-failed`
+  Baseline speed: 7920.032
+- #452: `delegate-failed`
+  Baseline speed: 7920.032
+- #453: `delegate-failed`
+  Baseline speed: 7920.032
+- #454: `delegate-failed`
+  Baseline speed: 7920.032
+- #455: `delegate-failed`
+  Baseline speed: 7920.032
+- #456: `delegate-failed`
+  Baseline speed: 7920.032
+- #457: `delegate-failed`
+  Baseline speed: 7920.032
+- #458: `delegate-failed`
+  Baseline speed: 7920.032
+- #459: `delegate-failed`
+  Baseline speed: 7920.032
+- #460: `delegate-failed`
+  Baseline speed: 7920.032
+- #461: `delegate-failed`
+  Baseline speed: 7920.032
+- #462: `delegate-failed`
+  Baseline speed: 7920.032
+- #463: `delegate-failed`
+  Baseline speed: 7920.032
+- #464: `delegate-failed`
+  Baseline speed: 7920.032
+- #465: `delegate-failed`
+  Baseline speed: 7920.032
+- #466: `delegate-failed`
+  Baseline speed: 7920.032
+- #467: `delegate-failed`
+  Baseline speed: 7920.032
+- #468: `delegate-failed`
+  Baseline speed: 7920.032
+- #469: `delegate-failed`
+  Baseline speed: 7920.032
+- #470: `delegate-failed`
+  Baseline speed: 7920.032
+- #471: `delegate-failed`
+  Baseline speed: 7920.032
+- #472: `delegate-failed`
+  Baseline speed: 7920.032
+- #473: `delegate-failed`
+  Baseline speed: 7920.032
+- #474: `delegate-failed`
+  Baseline speed: 7920.032
+- #475: `delegate-failed`
+  Baseline speed: 7920.032
+- #476: `delegate-failed`
+  Baseline speed: 7920.032
+- #477: `delegate-failed`
+  Baseline speed: 7920.032
+- #478: `delegate-failed`
+  Baseline speed: 7920.032
+- #479: `delegate-failed`
+  Baseline speed: 7920.032
+- #480: `delegate-failed`
+  Baseline speed: 7920.032
+- #481: `delegate-failed`
+  Baseline speed: 7920.032
+- #482: `delegate-failed`
+  Baseline speed: 7920.032
+- #483: `delegate-failed`
+  Baseline speed: 7920.032
+- #484: `delegate-failed`
+  Baseline speed: 7920.032
+- #485: `delegate-failed`
+  Baseline speed: 7920.032
+- #486: `delegate-failed`
+  Baseline speed: 7920.032
+- #487: `delegate-failed`
+  Baseline speed: 7920.032
+- #488: `delegate-failed`
+  Baseline speed: 7920.032
+- #489: `delegate-failed`
+  Baseline speed: 7920.032
+- #490: `delegate-failed`
+  Baseline speed: 7920.032
+- #491: `delegate-failed`
+  Baseline speed: 7920.032
+- #492: `delegate-failed`
+  Baseline speed: 7920.032
+- #493: `delegate-failed`
+  Baseline speed: 7920.032
+- #494: `delegate-failed`
+  Baseline speed: 7920.032
+- #495: `delegate-failed`
+  Baseline speed: 7920.032
+- #496: `delegate-failed`
+  Baseline speed: 7920.032
+- #497: `delegate-failed`
+  Baseline speed: 7920.032
+- #498: `delegate-failed`
+  Baseline speed: 7920.032
+- #499: `delegate-failed`
+  Baseline speed: 7920.032
+- #500: `delegate-failed`
+  Baseline speed: 7920.032
+- #501: `delegate-failed`
+  Baseline speed: 7920.032
+- #502: `delegate-failed`
+  Baseline speed: 7920.032
+- #503: `delegate-failed`
+  Baseline speed: 7920.032
+- #504: `delegate-failed`
+  Baseline speed: 7920.032
+- #505: `delegate-failed`
+  Baseline speed: 7920.032
+- #506: `delegate-failed`
+  Baseline speed: 7920.032
+- #507: `delegate-failed`
+  Baseline speed: 7920.032
+- #508: `delegate-failed`
+  Baseline speed: 7920.032
+- #509: `delegate-failed`
+  Baseline speed: 7920.032
+- #510: `delegate-failed`
+  Baseline speed: 7920.032
+- #511: `delegate-failed`
+  Baseline speed: 7920.032
+- #512: `delegate-failed`
+  Baseline speed: 7920.032
+- #513: `delegate-failed`
+  Baseline speed: 7920.032
+- #514: `delegate-failed`
+  Baseline speed: 7920.032
+- #515: `delegate-failed`
+  Baseline speed: 7920.032
+- #516: `delegate-failed`
+  Baseline speed: 7920.032
+- #517: `delegate-failed`
+  Baseline speed: 7920.032
+- #518: `delegate-failed`
+  Baseline speed: 7920.032
+- #519: `delegate-failed`
+  Baseline speed: 7920.032
+- #520: `delegate-failed`
+  Baseline speed: 7920.032
+- #521: `delegate-failed`
+  Baseline speed: 7920.032
+- #522: `delegate-failed`
+  Baseline speed: 7920.032
+- #523: `delegate-failed`
+  Baseline speed: 7920.032
+- #524: `delegate-failed`
+  Baseline speed: 7920.032
+- #525: `delegate-failed`
+  Baseline speed: 7920.032
+- #526: `delegate-failed`
+  Baseline speed: 7920.032
+- #527: `delegate-failed`
+  Baseline speed: 7920.032
+- #528: `delegate-failed`
+  Baseline speed: 7920.032
+- #529: `delegate-failed`
+  Baseline speed: 7920.032
+- #530: `delegate-failed`
+  Baseline speed: 7920.032
+- #531: `delegate-failed`
+  Baseline speed: 7920.032
+- #532: `delegate-failed`
+  Baseline speed: 7920.032
+- #533: `delegate-failed`
+  Baseline speed: 7920.032
+- #534: `delegate-failed`
+  Baseline speed: 7920.032
+- #535: `delegate-failed`
+  Baseline speed: 7920.032
+- #536: `delegate-failed`
+  Baseline speed: 7920.032
+- #537: `delegate-failed`
+  Baseline speed: 7920.032
+- #538: `delegate-failed`
+  Baseline speed: 7920.032
+- #539: `delegate-failed`
+  Baseline speed: 7920.032
+- #540: `delegate-failed`
+  Baseline speed: 7920.032
+- #541: `delegate-failed`
+  Baseline speed: 7920.032
+- #542: `delegate-failed`
+  Baseline speed: 7920.032
+- #543: `delegate-failed`
+  Baseline speed: 7920.032
+- #544: `delegate-failed`
+  Baseline speed: 7920.032
+- #545: `delegate-failed`
+  Baseline speed: 7920.032
+- #546: `delegate-failed`
+  Baseline speed: 7920.032
+- #547: `delegate-failed`
+  Baseline speed: 7920.032
+- #548: `delegate-failed`
+  Baseline speed: 7920.032
+- #549: `delegate-failed`
+  Baseline speed: 7920.032
+- #550: `delegate-failed`
+  Baseline speed: 7920.032
+- #551: `delegate-failed`
+  Baseline speed: 7920.032
+- #552: `delegate-failed`
+  Baseline speed: 7920.032
+- #553: `delegate-failed`
+  Baseline speed: 7920.032
+- #554: `delegate-failed`
+  Baseline speed: 7920.032
+- #555: `delegate-failed`
+  Baseline speed: 7920.032
+- #556: `delegate-failed`
+  Baseline speed: 7920.032
+- #557: `delegate-failed`
+  Baseline speed: 7920.032
+- #558: `delegate-failed`
+  Baseline speed: 7920.032
+- #559: `delegate-failed`
+  Baseline speed: 7920.032
+- #560: `delegate-failed`
+  Baseline speed: 7920.032
+- #561: `delegate-failed`
+  Baseline speed: 7920.032
+- #562: `delegate-failed`
+  Baseline speed: 7920.032
+- #563: `delegate-failed`
+  Baseline speed: 7920.032
+- #564: `delegate-failed`
+  Baseline speed: 7920.032
+- #565: `delegate-failed`
+  Baseline speed: 7920.032
+- #566: `delegate-failed`
+  Baseline speed: 7920.032
+- #567: `delegate-failed`
+  Baseline speed: 7920.032
+- #568: `delegate-failed`
+  Baseline speed: 7920.032
+- #569: `delegate-failed`
+  Baseline speed: 7920.032
+- #570: `delegate-failed`
+  Baseline speed: 7920.032
+- #571: `delegate-failed`
+  Baseline speed: 7920.032
+- #572: `delegate-failed`
+  Baseline speed: 7920.032
+- #573: `delegate-failed`
+  Baseline speed: 7920.032
+- #574: `delegate-failed`
+  Baseline speed: 7920.032
+- #575: `delegate-failed`
+  Baseline speed: 7920.032
+- #576: `delegate-failed`
+  Baseline speed: 7920.032
+- #577: `delegate-failed`
+  Baseline speed: 7920.032
+- #578: `delegate-failed`
+  Baseline speed: 7920.032
+- #579: `delegate-failed`
+  Baseline speed: 7920.032
+- #580: `delegate-failed`
+  Baseline speed: 7920.032
+- #581: `delegate-failed`
+  Baseline speed: 7920.032
+- #582: `delegate-failed`
+  Baseline speed: 7920.032
+- #583: `delegate-failed`
+  Baseline speed: 7920.032
+- #584: `delegate-failed`
+  Baseline speed: 7920.032
+- #585: `delegate-failed`
+  Baseline speed: 7920.032
+- #586: `delegate-failed`
+  Baseline speed: 7920.032
+- #587: `delegate-failed`
+  Baseline speed: 7920.032
+- #588: `delegate-failed`
+  Baseline speed: 7920.032
+- #589: `delegate-failed`
+  Baseline speed: 7920.032
+- #590: `delegate-failed`
+  Baseline speed: 7920.032
+- #591: `delegate-failed`
+  Baseline speed: 7920.032
+- #592: `delegate-failed`
+  Baseline speed: 7920.032
+- #593: `delegate-failed`
+  Baseline speed: 7920.032
+- #594: `delegate-failed`
+  Baseline speed: 7920.032
+- #595: `delegate-failed`
+  Baseline speed: 7920.032
+- #596: `delegate-failed`
+  Baseline speed: 7920.032
+- #597: `delegate-failed`
+  Baseline speed: 7920.032
+- #598: `delegate-failed`
+  Baseline speed: 7920.032
+- #599: `delegate-failed`
+  Baseline speed: 7920.032
+- #600: `delegate-failed`
+  Baseline speed: 7920.032
+- #601: `delegate-failed`
+  Baseline speed: 7920.032
+- #602: `delegate-failed`
+  Baseline speed: 7920.032
+- #603: `delegate-failed`
+  Baseline speed: 7920.032
+- #604: `delegate-failed`
+  Baseline speed: 7920.032
+- #605: `delegate-failed`
+  Baseline speed: 7920.032
+- #606: `delegate-failed`
+  Baseline speed: 7920.032
+- #607: `delegate-failed`
+  Baseline speed: 7920.032
+- #608: `delegate-failed`
+  Baseline speed: 7920.032
+- #609: `delegate-failed`
+  Baseline speed: 7920.032
+- #610: `delegate-failed`
+  Baseline speed: 7920.032
+- #611: `delegate-failed`
+  Baseline speed: 7920.032
+- #612: `delegate-failed`
+  Baseline speed: 7920.032
+- #613: `delegate-failed`
+  Baseline speed: 7920.032
+- #614: `delegate-failed`
+  Baseline speed: 7920.032
+- #615: `delegate-failed`
+  Baseline speed: 7920.032
+- #616: `delegate-failed`
+  Baseline speed: 7920.032
+- #617: `delegate-failed`
+  Baseline speed: 7920.032
+- #618: `delegate-failed`
+  Baseline speed: 7920.032
+- #619: `delegate-failed`
+  Baseline speed: 7920.032
+- #620: `delegate-failed`
+  Baseline speed: 7920.032
+- #621: `delegate-failed`
+  Baseline speed: 7920.032
+- #622: `delegate-failed`
+  Baseline speed: 7920.032
+- #623: `delegate-failed`
+  Baseline speed: 7920.032
+- #624: `delegate-failed`
+  Baseline speed: 7920.032
+- #625: `delegate-failed`
+  Baseline speed: 7920.032
+- #626: `delegate-failed`
+  Baseline speed: 7920.032
+- #627: `delegate-failed`
+  Baseline speed: 7920.032
+- #628: `delegate-failed`
+  Baseline speed: 7920.032
+- #629: `delegate-failed`
+  Baseline speed: 7920.032
+- #630: `delegate-failed`
+  Baseline speed: 7920.032
+- #631: `delegate-failed`
+  Baseline speed: 7920.032
+- #632: `delegate-failed`
+  Baseline speed: 7920.032
+- #633: `delegate-failed`
+  Baseline speed: 7920.032
+- #634: `delegate-failed`
+  Baseline speed: 7920.032
+- #635: `delegate-failed`
+  Baseline speed: 7920.032
+- #636: `delegate-failed`
+  Baseline speed: 7920.032
+- #637: `delegate-failed`
+  Baseline speed: 7920.032
+- #638: `delegate-failed`
+  Baseline speed: 7920.032
+- #639: `delegate-failed`
+  Baseline speed: 7920.032
+- #640: `delegate-failed`
+  Baseline speed: 7920.032
+- #641: `delegate-failed`
+  Baseline speed: 7920.032
+- #642: `delegate-failed`
+  Baseline speed: 7920.032
+- #643: `delegate-failed`
+  Baseline speed: 7920.032
+- #644: `delegate-failed`
+  Baseline speed: 7920.032
+- #645: `delegate-failed`
+  Baseline speed: 7920.032
+- #646: `delegate-failed`
+  Baseline speed: 7920.032
+- #647: `delegate-failed`
+  Baseline speed: 7920.032
+- #648: `delegate-failed`
+  Baseline speed: 7920.032
+- #649: `delegate-failed`
+  Baseline speed: 7920.032
+- #650: `delegate-failed`
+  Baseline speed: 7920.032
+- #651: `delegate-failed`
+  Baseline speed: 7920.032
+- #652: `delegate-failed`
+  Baseline speed: 7920.032
+- #653: `delegate-failed`
+  Baseline speed: 7920.032
+- #654: `delegate-failed`
+  Baseline speed: 7920.032
+- #655: `delegate-failed`
+  Baseline speed: 7920.032
+- #656: `delegate-failed`
+  Baseline speed: 7920.032
+- #657: `delegate-failed`
+  Baseline speed: 7920.032
+- #658: `delegate-failed`
+  Baseline speed: 7920.032
+- #659: `delegate-failed`
+  Baseline speed: 7920.032
+- #660: `delegate-failed`
+  Baseline speed: 7920.032
+- #661: `delegate-failed`
+  Baseline speed: 7920.032
+- #662: `delegate-failed`
+  Baseline speed: 7920.032
+- #663: `delegate-failed`
+  Baseline speed: 7920.032
+- #664: `delegate-failed`
+  Baseline speed: 7920.032
+- #665: `delegate-failed`
+  Baseline speed: 7920.032
+- #666: `delegate-failed`
+  Baseline speed: 7920.032
+- #667: `delegate-failed`
+  Baseline speed: 7920.032
+- #668: `delegate-failed`
+  Baseline speed: 7920.032
+- #669: `delegate-failed`
+  Baseline speed: 7920.032
+- #670: `delegate-failed`
+  Baseline speed: 7920.032
+- #671: `delegate-failed`
+  Baseline speed: 7920.032
+- #672: `delegate-failed`
+  Baseline speed: 7920.032

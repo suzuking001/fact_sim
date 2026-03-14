@@ -1,0 +1,111 @@
+{
+  "sampleStepMs": 250,
+  "sampleTimesSec": [
+    0,
+    0.25,
+    0.5,
+    0.75,
+    1
+  ],
+  "sampleCount": 5,
+  "nodeCount": 8,
+  "changingNodeCount": 2,
+  "nodeStates": [
+    {
+      "key": "2:Carrier Route IN",
+      "nodeId": 2,
+      "label": "Carrier Route IN",
+      "sequence": [
+        "agvIn_idle|IDLE",
+        "agv_process|PROCESS",
+        "agv_process|PROCESS",
+        "agv_process|PROCESS",
+        "agv_process|PROCESS"
+      ]
+    },
+    {
+      "key": "3:Carrier Route OUT",
+      "nodeId": 3,
+      "label": "Carrier Route OUT",
+      "sequence": [
+        "agvIn_idle|IDLE",
+        "agv_process|PROCESS",
+        "agv_process|PROCESS",
+        "agv_process|PROCESS",
+        "agv_process|PROCESS"
+      ]
+    },
+    {
+      "key": "6:Station",
+      "nodeId": 6,
+      "label": "Station",
+      "sequence": [
+        "idle|IDLE",
+        "idle|IDLE",
+        "idle|IDLE",
+        "idle|IDLE",
+        "idle|IDLE"
+      ]
+    },
+    {
+      "key": "8:Carrier Route",
+      "nodeId": 8,
+      "label": "Carrier Route",
+      "sequence": [
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE"
+      ]
+    },
+    {
+      "key": "9:Carrier Route",
+      "nodeId": 9,
+      "label": "Carrier Route",
+      "sequence": [
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE"
+      ]
+    },
+    {
+      "key": "10:Carrier Route",
+      "nodeId": 10,
+      "label": "Carrier Route",
+      "sequence": [
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE"
+      ]
+    },
+    {
+      "key": "11:Carrier Route",
+      "nodeId": 11,
+      "label": "Carrier Route",
+      "sequence": [
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE",
+        "agvIn_idle|IDLE"
+      ]
+    },
+    {
+      "key": "12:Equipment",
+      "nodeId": 12,
+      "label": "Equipment",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    }
+  ]
+}

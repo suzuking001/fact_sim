@@ -1,0 +1,7 @@
+1. I changed the fast benchmark paths to honor an explicit `wallMs: 0` instead of coercing it to `100` or `2000`, while still keeping the `2000` ms default when `wallMs` is omitted. The edits are in [js/app/engine-fast-worker.js:275](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773511090000-21208/js/app/engine-fast-worker.js#L275), [js/app/engine-fast-par-worker.js:398](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773511090000-21208/js/app/engine-fast-par-worker.js#L398), and [js/app/engine-fast-par-host.js:678](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773511090000-21208/js/app/engine-fast-par-host.js#L678). `dt` and `event` were not touched.
+
+2. I ran two focused checks:
+   - A direct Node-based harness against the edited worker code paths. Result: `engine-fast-worker.js` and `engine-fast-par-worker.js` both returned `loops: 0` for `wallMs: 0`, and still produced positive loop counts with the default benchmark budget.
+   - `fact-sim-ai` `engine_test` quick suite with `reruns=0` and `strictFinalParity=false`. Result: `PASS`, 40/40 cases across `dt`, `event`, `event-fast`, `event-fast-worker`, and `event-fast-par`.
+
+3. Residual risk: I did not directly isolate the local non-worker benchmark branch inside `engine-fast-par-host.js`; I changed it with the same normalization logic and the full quick engine suite still passed, so the remaining risk is low and limited to unusual caller inputs outside the verified `wallMs: 0` case.

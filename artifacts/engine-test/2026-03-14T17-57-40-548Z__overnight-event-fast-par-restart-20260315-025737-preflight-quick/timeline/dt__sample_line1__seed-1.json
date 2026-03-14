@@ -1,0 +1,378 @@
+{
+  "quantMs": 250,
+  "rowCount": 47,
+  "activeRowCount": 13,
+  "rows": [
+    {
+      "key": "2",
+      "label": "EquipmentNode #2",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        },
+        {
+          "state": "down",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "3",
+      "label": "EquipmentNode #3",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "4",
+      "label": "EquipmentNode #4",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "5",
+      "label": "EquipmentNode #5",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "6",
+      "label": "EquipmentNode #6",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "8",
+      "label": "EquipmentNode #8",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "9",
+      "label": "EquipmentNode #9",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "10",
+      "label": "EquipmentNode #10",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "13",
+      "label": "EquipmentNode #13",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        },
+        {
+          "state": "down",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "14",
+      "label": "EquipmentNode #14",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "15",
+      "label": "EquipmentNode #15",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "17",
+      "label": "Merge #17",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "23",
+      "label": "EquipmentNode #23",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "24",
+      "label": "EquipmentNode #24",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "25",
+      "label": "EquipmentNode #25",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        },
+        {
+          "state": "down",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "26",
+      "label": "Merge #26",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "27",
+      "label": "EquipmentNode #27",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        },
+        {
+          "state": "wait",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "28",
+      "label": "EquipmentNode #28",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        },
+        {
+          "state": "wait",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "30",
+      "label": "EquipmentNode #30",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "31",
+      "label": "EquipmentNode #31",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "32",
+      "label": "Merge #32",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "33",
+      "label": "EquipmentNode #33",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "34",
+      "label": "EquipmentNode #34",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "35",
+      "label": "EquipmentNode #35",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "36",
+      "label": "Merge #36",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "37",
+      "label": "EquipmentNode #37",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "38",
+      "label": "EquipmentNode #38",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "39",
+      "label": "EquipmentNode #39",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "40",
+      "label": "EquipmentNode #40",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "42",
+      "label": "Merge #42",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "44",
+      "label": "EquipmentNode #44",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        },
+        {
+          "state": "wait",
+          "durationBins": 3
+        }
+      ]
+    },
+    {
+      "key": "46",
+      "label": "AGV Route #46",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "47",
+      "label": "AGV Route #47",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "48",
+      "label": "AGV Route #48",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 11
+        }
+      ]
+    },
+    {
+      "key": "49",
+      "label": "AGV Route #49",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "50",
+      "label": "AGV Route #50",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "51",
+      "label": "AGV Route #51",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "52",
+      "label": "Equipment #52",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 11
+        }
+      ]
+    },
+    {
+      "key": "53",
+      "label": "Equipment #53",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "56",
+      "label": "AGV Route #56",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "57",
+      "label": "AGV Route #57",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "59",
+      "label": "AGV Route #59",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "60",
+      "label": "AGV Route #60",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 11
+        }
+      ]
+    },
+    {
+      "key": "61",
+      "label": "AGV Route #61",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "62",
+      "label": "AGV Route #62",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "63",
+      "label": "Equipment #63",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "64",
+      "label": "Equipment #64",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 11
+        }
+      ]
+    }
+  ]
+}

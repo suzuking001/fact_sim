@@ -1,0 +1,27 @@
+{
+  "kind": "engine-test-report",
+  "version": 1,
+  "ok": true,
+  "status": "PASS",
+  "startedAt": "2026-03-14T16:16:17.800Z",
+  "finishedAt": "2026-03-14T16:16:19.229Z",
+  "summary": {
+    "passed": 5,
+    "warned": 0,
+    "failed": 0,
+    "passedCases": 5,
+    "warnedCases": 0,
+    "failedCases": 0,
+    "caseCount": 5,
+    "failureCount": 0,
+    "warningCount": 0,
+    "engineCount": 5,
+    "suite": "standard",
+    "seedCount": 1,
+    "exampleCount": 1,
+    "includesCurrentGraph": false,
+    "stoppedEarly": false,
+    "reruns": 2,
+    "stopOnFirstFailure": true
+  }
+}

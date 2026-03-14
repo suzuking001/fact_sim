@@ -1,0 +1,5 @@
+1. Changed [`js/app/engine-fast-par-worker.js` ](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773513031173-4912/js/app/engine-fast-par-worker.js#L259) so cut-edge message dedupe is scoped to the current `simTimeMs`, not forever by payload alone. That keeps intra-tick flush dedupe, but allows the same value to be sent again when it is emitted at a later simulation time. `dt` and `event` were untouched.
+
+2. Verification run: `fact-sim-ai engine_test` with `engines=["event-fast-par"]`, all built-in examples plus `current_graph`, `targetSimMs=30000`, `reruns=0`, `strictFinalParity=false`. Result: `PASS` with 16/16 passing cases and no new failures.
+
+3. Residual risk: I could not reproduce the hidden failure directly from the provided `{}` payload, so this is a targeted correctness fix based on the most likely fast-par gap. Same-value emissions that occur multiple times within the exact same simulation instant are still intentionally coalesced. The existing non-strict parity delta on `sample_line1` at 30s remained present and unchanged.

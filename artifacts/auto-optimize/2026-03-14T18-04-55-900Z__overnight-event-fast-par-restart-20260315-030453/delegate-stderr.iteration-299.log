@@ -1,0 +1,541 @@
+2026-03-14T20:46:41.331354Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+OpenAI Codex v0.115.0-alpha.4 (research preview)
+--------
+workdir: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\suzuk\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019cee19-e821-7ed1-9e26-44f388ea5219
+--------
+user
+Use the existing AGENTS.md instructions in this repo.
+Fix the single target failure described below.
+Only edit allowed paths. Do not modify protected engines or unrelated files.
+
+Target failure:
+```json
+{}
+```
+
+Protected engines: dt, event
+Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js, js/app/engine-fast-worker.js, js/app/engine-fast-worker-host.js, js/app/engine-fast-runtime.js, js/app/engine-fast-compat.js, js/app/engine-fast-kernels.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+
+Requirements:
+- Apply the smallest defensible patch that resolves this failure.
+- Keep dt and event behavior untouched.
+- Prefer fixing event-fast* engines or engine-test helpers only.
+- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.
+- Do not browse external websites.
+- After editing, run a focused verification for the same failure if possible.
+- Use reruns=0 and strictFinalParity=false as guidance.
+- Benchmark regressions are not acceptable (wallMs=0).
+
+At the end, summarize:
+1. what changed
+2. which verification you ran
+3. any residual risk
+mcp: git starting
+mcp: fact_sim_ai starting
+mcp: playwright starting
+mcp: github starting
+mcp: filesystem starting
+mcp: figma starting
+mcp: excel starting
+mcp: linear starting
+2026-03-14T20:46:41.402474Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.linear.app/.well-known/oauth-protected-resource\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+mcp: linear failed: The linear MCP server is not logged in. Run `codex mcp login linear`.
+mcp: excel ready
+mcp: git failed: MCP client for `git` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: github ready
+mcp: filesystem failed: MCP client for `filesystem` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: figma ready
+mcp: playwright ready
+mcp: fact_sim_ai ready
+mcp startup: ready: excel, github, figma, playwright, fact_sim_ai; failed: linear, git, filesystem
+codex
+I’m checking the repo instructions and the fast-engine files first so I can localize the single failure without touching protected `dt` or `event` engines.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content AGENTS.md' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg --files' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744 succeeded in 390ms:
+# fact_sim Agent Notes
+
+## Preferred control path
+
+For `fact_sim` tasks, prefer the integrated MCP server `fact-sim-ai` over manual browser interaction when the task is one of these:
+
+- load or inspect example graphs
+- run simulation for a fixed time
+- collect KPI, bottleneck, benchmark, or graph overview summaries
+- add, update, connect, disconnect, or remove nodes
+- build small graphs from blueprints
+- export graph, HTML, snapshot, or CSV artifacts
+
+Use browser automation only when the task is explicitly visual/UI-focused and cannot be answered from MCP outputs alone.
+
+## Preferred tool order
+
+1. `prepare_session`
+2. `run_report`
+3. `graph`
+ succeeded in 338ms:
+js\app\engine-fast-worker.js
+js\app\engine-fast-worker-host.js
+js\app\engine-fast-runtime.js
+js\app\engine-fast-par-worker.js
+js\app\engine-fast-par-partitioner.js
+js\app\engine-fast-par-host.js
+js\app\engine-fast-kernels.js
+js\app\engine-fast-compat.js
+AGENTS.md
+ succeeded in 381ms:
+?? AGENTS.md
+?? js/
+codex
+I’ve confirmed the workspace is minimal and only contains the allowed fast-engine files, so I’m reading the parallel fast-engine implementation next and looking for a defect that could surface as an empty failure object.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-worker.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-partitioner.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744 succeeded in 528ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+ succeeded in 489ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let lastGraphData = null;
+  let seededRandom = null;
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+    getElementById: function(){ return null; },
+    querySelector: function(){ return null; },
+    querySelectorAll: function(){ return []; },
+ succeeded in 506ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let partition = null;
+  let ownedNodeIdSet = new Set();
+  let ownedSinkIdSet = new Set();
+  let lastGraphData = null;
+  let lastSentByLinkId = new Map();
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+ succeeded in 450ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const MAX_DEFAULT_PARTITIONS = 4;
+  const MIN_PAR_NODE_COUNT = 8;
+  const MAX_CUT_RATIO = 0.45;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function compactGraphData(data){
+    return (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(data))
+      : cloneJson(data);
+  }
+
+  function createGraphFromData(graphData){
+    const data = compactGraphData(graphData);
+    const graph = new LGraph();
+ succeeded in 513ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const WORKER_MODE = 'event-fast-worker';
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260313a';
+  const UNSAFE_WORKER_TYPES = new Set([
+    'factory/carrierroute',
+    'factory/shuttle_stage'
+  ]);
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeWorkerMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === WORKER_MODE || raw === 'event_fast_worker' || raw === 'eventfastworker' || raw === 'fast-worker'){
+      return WORKER_MODE;
+    }
+    return null;
+codex
+The failure payload is uninformative, so I’m tracing the fast engine interfaces and headless runner contract now. I want the smallest patch that lines up `event-fast-par` behavior with the existing worker host instead of guessing at a broader runtime change.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "createHeadlessSimRunner|EventFastEngine|runtimeMode|runUntilSimTime|strictFinalParity|engine test|engine_test|benchmark" js/app/engine-fast-runtime.js js/app/engine-fast-compat.js js/app/engine-fast-kernels.js js/app/engine-fast-par-host.js js/app/engine-fast-worker-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-runtime.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-compat.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744 succeeded in 355ms:
+js/app/engine-fast-worker-host.js:275:      runtimeMode: null,
+js/app/engine-fast-worker-host.js:287:    if(typeof App.EventFastEngine !== 'function'){
+js/app/engine-fast-worker-host.js:295:      engine = new App.EventFastEngine(graph);
+js/app/engine-fast-worker-host.js:299:      support.runtimeMode = stats && stats.runtimeMode ? String(stats.runtimeMode) : null;
+js/app/engine-fast-worker-host.js:301:      support.canUseWorker = support.runtimeMode !== 'legacy-compat' && support.executableFallbackCount <= 0;
+js/app/engine-fast-worker-host.js:304:        : (support.runtimeMode === 'legacy-compat' ? 'legacy-compat' : 'executable-fallback');
+js/app/engine-fast-worker-host.js:397:      this.runtimeMode = this._lastRuntimeMode;
+js/app/engine-fast-worker-host.js:425:        (engine && engine.runtimeMode)
+js/app/engine-fast-worker-host.js:426:        || (engine && typeof engine.getDebugStats === 'function' && engine.getDebugStats() && engine.getDebugStats().runtimeMode)
+js/app/engine-fast-worker-host.js:429:      this.runtimeMode = this._lastRuntimeMode;
+js/app/engine-fast-worker-host.js:453:      this.runtimeMode = this._lastRuntimeMode;
+js/app/engine-fast-worker-host.js:454:      return { runtimeMode: this._lastRuntimeMode, stats: this._lastStats };
+js/app/engine-fast-worker-host.js:475:        this.runtimeMode = this._lastRuntimeMode;
+js/app/engine-fast-worker-host.js:487:    async runUntilSimTimeAsync(options){
+js/app/engine-fast-worker-host.js:508:        this.runtimeMode = this._lastRuntimeMode;
+js/app/engine-fast-worker-host.js:607:    async runUntilSimTimeAsync(options){
+js/app/engine-fast-worker-host.js:610:        (App.eventFastWorkerProtocol || {}).RUN_UNTIL_SIM_TIME || 'runUntilSimTime',
+js/app/engine-fast-worker-host.js:688:        this.runtimeMode = 'worker-live';
+js/app/engine-fast-worker-host.js:693:        this.runtimeMode = String(
+js/app/engine-fast-worker-host.js:694:          (this._liveFallbackEngine && this._liveFallbackEngine.runtimeMode)
+ succeeded in 355ms:
+// Compatibility adapter for event-fast fallback nodes.
+
+var App = window.App || (window.App = {});
+
+(function(){
+  const EPSILON_MS = 0.001;
+
+  function normalizeType(type){
+    return String(type || '').trim().toLowerCase();
+  }
+
+  function isPassiveFallbackType(type){
+    const text = normalizeType(type);
+    return text === 'factory/carrierconfig'
+      || text === 'factory/carrierhome'
+      || text === 'factory/palletcarrierconfig'
+      || text === 'factory/palletcarrier'
+      || text === 'factory/note'
+      || text === 'factory/memo';
+  }
+ succeeded in 382ms:
+// Event-fast runtime built around compiled graph structures.
+
+var App = window.App || (window.App = {});
+
+(function(){
+  const EPSILON_MS = 0.001;
+  const UPDATE_LOOP_LIMIT = 8000;
+  const SAME_TIME_BATCH_LIMIT = 512;
+
+  function nowSimMs(){
+    return (typeof window.simNow === 'function') ? Number(window.simNow()) : 0;
+  }
+
+  function captureTimeline(){
+    if(App._suspendTimeline) return;
+    if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
+      App.timelineChart.onStep(false);
+    }
+  }
+
+codex
+I’ve narrowed it to the `event-fast-par` host contract. The next read is the initialization and fallback path around `createHeadlessSimRunner`, because an empty failure object is consistent with the host returning the wrong shape or tripping its own disposal path before tests can report a message.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$lines = Get-Content js/app/engine-fast-par-host.js; $lines[450..760]' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$lines = Get-Content js/app/engine-fast-par-host.js; $lines[760..1135]' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744 succeeded in 407ms:
+
+    async getDebugStatsAsync(){
+      await this._ready;
+      const payload = await this._call((App.eventFastParProtocol || {}).GET_STATS || 'getStats', {});
+      this._lastStats = payload || this._lastStats;
+      return payload;
+    }
+
+    getDebugStats(){
+      return this._lastStats ? cloneJson(this._lastStats) : null;
+    }
+
+    async stopAsync(){
+      if(this._disposed) return null;
+      try{
+        await this._ready;
+      }catch(_e){
+        return null;
+      }
+      try{
+ succeeded in 368ms:
+      };
+    }
+
+    async stepAsync(options){
+      await this._ensureRunner();
+      const opts = Object.assign({}, options || {});
+      const simDeltaMs = Math.max(0.5, Number(opts.simDeltaMs) || 4);
+      if(this._runner && typeof this._runner.stepAsync === 'function'){
+        const payload = await this._runner.stepAsync(opts);
+        this._lastSimTimeMs = Math.max(this._lastSimTimeMs, Number(payload && payload.simTimeMs) || 0);
+        this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+        this.runtimeMode = String(
+          (payload && payload.runtimeMode)
+          || (payload && payload.stats && payload.stats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+        );
+        return payload;
+      }
+      const stepped = await this._stepParallel(simDeltaMs);
+codex
+I’ve got a likely interface-level fault, but I want one concrete reproduction signal before patching. I’m querying the built-in fact-sim test/example tooling next so I can verify the same `event-fast-par` path with `reruns=0`, `strictFinalParity=false`, and no benchmark wall time.
+tool fact_sim_ai.examples({"action":"list"})
+fact_sim_ai.examples({"action":"list"}) success in 3.43s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"examples\":[\"simple\",\"branch\",\"shuttle_line5\",\"carrier_config\",\"pallet_station_demo\",\"sample_line1\",\"sample_line2\"]}"
+    }
+  ]
+}
+tool fact_sim_ai.engine_test({"action":"latest_report"})
+fact_sim_ai.engine_test({"action":"latest_report"}) failed in 1ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "MCP error -32602: Input validation error: Invalid arguments for tool engine_test: [\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      \"run\",\n      \"latest\"\n    ],\n    \"path\": [\n      \"action\"\n    ],\n    \"message\": \"Invalid option: expected one of \\\"run\\\"|\\\"latest\\\"\"\n  }\n]"
+    }
+  ],
+  "isError": true
+}
+tool fact_sim_ai.engine_test({"action":"latest"})
+fact_sim_ai.engine_test({"action":"latest"}) success in 4ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"report\":null}"
+    }
+  ]
+}
+tool fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple"],"reruns":0,"strictFinalParity":false,"maxWallMs":0,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true})
+fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple"],"reruns":0,"strictFinalParity":false,"maxWallMs":0,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true}) failed in 1ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "MCP error -32602: Input validation error: Invalid arguments for tool engine_test: [\n  {\n    \"origin\": \"number\",\n    \"code\": \"too_small\",\n    \"minimum\": 0,\n    \"inclusive\": false,\n    \"path\": [\n      \"maxWallMs\"\n    ],\n    \"message\": \"Too small: expected number to be >0\"\n  }\n]"
+    }
+  ],
+  "isError": true
+}
+tool fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple"],"reruns":0,"strictFinalParity":false,"maxWallMs":1,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true})
+fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple"],"reruns":0,"strictFinalParity":false,"maxWallMs":1,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true}) success in 3.21s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-14T20:48:56.317Z\",\"finishedAt\":\"2026-03-14T20:48:59.150Z\",\"engines\":[\"dt\",\"event-fast-par\"],\"summary\":{\"passed\":4,\"warned\":0,\"failed\":0,\"passedCases\":4,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":4,\"failureCount\":0,\"warningCount\":0,\"engineCount\":2,\"suite\":\"standard\",\"seedCount\":1,\"exampleCount\":1,\"includesCurrentGraph\":true,\"stoppedEarly\":false,\"reruns\":0,\"stopOnFirstFailure\":true},\"comparisons\":[{\"scenario\":\"current_graph\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"simple\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1287.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":125.3,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1210.8,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":203.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":null,\"artifactFiles\":null,\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+tool fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple","branch","shuttle_line5","carrier_config","pallet_station_demo","sample_line1","sample_line2"],"reruns":0,"strictFinalParity":false,"maxWallMs":1,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true})
+fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple","branch","shuttle_line5","carrier_config","pallet_station_demo","sample_line1","sample_line2"],"reruns":0,"strictFinalParity":false,"maxWallMs":1,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true}) success in 10.93s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-14T20:49:07.676Z\",\"finishedAt\":\"2026-03-14T20:49:18.241Z\",\"engines\":[\"dt\",\"event-fast-par\"],\"summary\":{\"passed\":16,\"warned\":0,\"failed\":0,\"passedCases\":16,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":16,\"failureCount\":0,\"warningCount\":0,\"engineCount\":2,\"suite\":\"standard\",\"seedCount\":1,\"exampleCount\":7,\"includesCurrentGraph\":true,\"stoppedEarly\":false,\"reruns\":0,\"stopOnFirstFailure\":true},\"comparisons\":[{\"scenario\":\"current_graph\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"simple\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"branch\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"shuttle_line5\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"carrier\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"pallet_station_demo\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line2\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1264.6,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":124.1,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1207.2,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":176,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1207.3,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":188.2,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1208.5,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":26.2,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1221.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":41.2,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1211,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":30,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1223.1,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":62.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1271.2,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":94.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":null,\"artifactFiles\":null,\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+codex
+I’ve identified a narrow API mismatch in the `event-fast-par` headless mode registration: the mode can run headlessly via fallback, but it’s only exposed to benchmark/test discovery when real parallel workers are available. I’m patching just that registration path so the target mode remains discoverable without changing `dt` or `event` execution.
+file update
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744\js\app\engine-fast-par-host.js
+@@ -1099,3 +1099,3 @@
+     const list = Array.isArray(legacyGetBenchmarkSimModes()) ? legacyGetBenchmarkSimModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+@@ -1104,3 +1104,3 @@
+     const list = Array.isArray(legacyGetEngineTestModes()) ? legacyGetEngineTestModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+apply_patch(auto_approved=true) exited 0 in 177ms:
+Success. Updated the following files:
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744\js\app\engine-fast-par-host.js
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..3c1442c1f50b469e64705c47e94aaedf00a75319
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -1097,12 +1097,12 @@
+   };
+   App.getBenchmarkSimModes = function(){
+     const list = Array.isArray(legacyGetBenchmarkSimModes()) ? legacyGetBenchmarkSimModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.getEngineTestModes = function(){
+     const list = Array.isArray(legacyGetEngineTestModes()) ? legacyGetEngineTestModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.createHeadlessSimRunner = function(mode, graphOrData, options){
+
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..3c1442c1f50b469e64705c47e94aaedf00a75319
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -1097,12 +1097,12 @@
+   };
+   App.getBenchmarkSimModes = function(){
+     const list = Array.isArray(legacyGetBenchmarkSimModes()) ? legacyGetBenchmarkSimModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.getEngineTestModes = function(){
+     const list = Array.isArray(legacyGetEngineTestModes()) ? legacyGetEngineTestModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.createHeadlessSimRunner = function(mode, graphOrData, options){
+
+codex
+The patch is in. I’m doing a focused verification now: a syntax check on the edited file and the same `event-fast-par` engine test pass I used for baseline, to confirm no behavioral regression under the current harness.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "node -e \"new Function(require('fs').readFileSync('js/app/engine-fast-par-host.js','utf8'))\"" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git diff -- js/app/engine-fast-par-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773521201002-11744 succeeded in 358ms:
+
+ succeeded in 310ms:
+
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..3c1442c1f50b469e64705c47e94aaedf00a75319
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -1097,12 +1097,12 @@
+   };
+   App.getBenchmarkSimModes = function(){
+     const list = Array.isArray(legacyGetBenchmarkSimModes()) ? legacyGetBenchmarkSimModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.getEngineTestModes = function(){
+     const list = Array.isArray(legacyGetEngineTestModes()) ? legacyGetEngineTestModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.createHeadlessSimRunner = function(mode, graphOrData, options){
+
+tool fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple","branch","shuttle_line5","carrier_config","pallet_station_demo","sample_line1","sample_line2"],"reruns":0,"strictFinalParity":false,"maxWallMs":1,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true})
+fact_sim_ai.engine_test({"action":"run","engines":["event-fast-par"],"examples":["simple","branch","shuttle_line5","carrier_config","pallet_station_demo","sample_line1","sample_line2"],"reruns":0,"strictFinalParity":false,"maxWallMs":1,"targetSimMs":3000,"realStepMs":16,"maxLoops":5000,"stopOnFirstFailure":true}) success in 11.04s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-14T20:50:47.051Z\",\"finishedAt\":\"2026-03-14T20:50:57.704Z\",\"engines\":[\"dt\",\"event-fast-par\"],\"summary\":{\"passed\":16,\"warned\":0,\"failed\":0,\"passedCases\":16,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":16,\"failureCount\":0,\"warningCount\":0,\"engineCount\":2,\"suite\":\"standard\",\"seedCount\":1,\"exampleCount\":7,\"includesCurrentGraph\":true,\"stoppedEarly\":false,\"reruns\":0,\"stopOnFirstFailure\":true},\"comparisons\":[{\"scenario\":\"current_graph\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"simple\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"branch\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"shuttle_line5\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"carrier\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"pallet_station_demo\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line2\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1277.5,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":116.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1206.8,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":193.2,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1207.6,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":218.4,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1210.3,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":28.6,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1221.6,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":51.1,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1219.6,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":32.5,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1222.9,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":71.8,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3000,\"wallMs\":1266.3,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":3008,\"wallMs\":102.3,\"loops\":188,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":null,\"artifactFiles\":null,\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..3c1442c1f50b469e64705c47e94aaedf00a75319
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -1097,12 +1097,12 @@
+   };
+   App.getBenchmarkSimModes = function(){
+     const list = Array.isArray(legacyGetBenchmarkSimModes()) ? legacyGetBenchmarkSimModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.getEngineTestModes = function(){
+     const list = Array.isArray(legacyGetEngineTestModes()) ? legacyGetEngineTestModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.createHeadlessSimRunner = function(mode, graphOrData, options){
+
+codex
+1. Changed [engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773521201002-11744/js/app/engine-fast-par-host.js) so `App.getBenchmarkSimModes()` and `App.getEngineTestModes()` always include `event-fast-par` instead of hiding it behind `canUseParWorker()`. This is the smallest fix that keeps headless test/benchmark discovery aligned with the existing fallback runner path, without changing `dt` or `event` behavior.
+
+2. Verification ran:
+- Syntax check: `node -e "new Function(require('fs').readFileSync('js/app/engine-fast-par-host.js','utf8'))"`
+- Focused engine test: `engine_test` with `action="run"`, `engines=["event-fast-par"]`, all built-in examples, `reruns=0`, `strictFinalParity=false`, `targetSimMs=3000`, `realStepMs=16`, `maxLoops=5000`, `stopOnFirstFailure=true`
+- Result: PASS, 16/16 cases passed.
+- I used `maxWallMs=1` because the MCP tool rejects `maxWallMs=0`.
+
+3. Residual risk:
+- I could not reproduce the exact empty `{}` failure locally because the current harness already supports workers and passes end-to-end.
+- The fix is aimed at the headless discovery gap for `event-fast-par` in environments where real parallel workers are unavailable.
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..3c1442c1f50b469e64705c47e94aaedf00a75319
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -1097,12 +1097,12 @@
+   };
+   App.getBenchmarkSimModes = function(){
+     const list = Array.isArray(legacyGetBenchmarkSimModes()) ? legacyGetBenchmarkSimModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.getEngineTestModes = function(){
+     const list = Array.isArray(legacyGetEngineTestModes()) ? legacyGetEngineTestModes().slice() : [];
+-    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
++    if(list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+     return list;
+   };
+   App.createHeadlessSimRunner = function(mode, graphOrData, options){
+
+tokens used
+78,425

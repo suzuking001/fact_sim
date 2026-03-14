@@ -1,0 +1,9 @@
+
+> fact_sim_mcp@0.3.0 nightly:optimize
+> node scripts/auto-optimize-event-fast.mjs --profile nightly --label overnight-event-fast-par-20260315-021914 --allow-dirty --min-runtime-hours 5 --max-no-improvement-iterations 60 --max-iterations 9999 --benchmark-wall-ms 500 --target-engine event-fast-par --optimize-engines event-fast-par --benchmark-example parallel_benchmark --no-current-graph
+
+I could not write the actual repo files from this session. The Windows sandbox is failing on the current `G:` workspace path during ACL setup, so every repo edit tool dies before touching the file system with `SetNamedSecurityInfoW failed: 87`.
+
+I still isolated a minimal patch for [engine-fast-par-worker.js](/g:/マイドライブ/プログラミング/github/fact_sim/js/app/engine-fast-par-worker.js): build a `nodeById` cache once in `preparePartitionGraph`, then use that cache in `collectOutgoingMessages` and `applyRemoteMessages`, and hoist the dirty-set lookup out of the per-message loop. I syntax-checked the transformed file at [engine-fast-par-worker.updated.js](/C:/Users/suzuk/.codex/memories/engine-fast-par-worker.updated.js) and saved the exact diff at [event-fast-par-worker-node-cache.patch](/C:/Users/suzuk/.codex/memories/event-fast-par-worker-node-cache.patch).
+
+Verification on the current unmodified workspace is clean: `engine_test` passed both requested suites, `quick` and `standard`, for `dt` vs `event-fast-par` with `strictFinalParity=true`, `reruns=2`, `stopOnFirstFailure=true`, `seed=1`, and `parallel_benchmark` included. The performance hypothesis for the patch is straightforward: it removes repeated `graph.getNodeById()` work on every boundary-message send/apply, so it should reduce cross-partition overhead in headless `event-fast-par` without changing event ordering or message payload semantics. If you reopen this repo from an ASCII-only writable path, I can land this exact patch and rerun verification on the modified code.

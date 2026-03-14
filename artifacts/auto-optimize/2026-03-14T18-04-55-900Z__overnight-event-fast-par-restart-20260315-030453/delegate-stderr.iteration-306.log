@@ -1,0 +1,574 @@
+2026-03-14T21:18:03.563268Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+OpenAI Codex v0.115.0-alpha.4 (research preview)
+--------
+workdir: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\suzuk\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019cee36-a051-7792-9a91-d7efc0bdffca
+--------
+user
+Use the existing AGENTS.md instructions in this repo.
+Fix the single target failure described below.
+Only edit allowed paths. Do not modify protected engines or unrelated files.
+
+Target failure:
+```json
+{}
+```
+
+Protected engines: dt, event
+Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js, js/app/engine-fast-worker.js, js/app/engine-fast-worker-host.js, js/app/engine-fast-runtime.js, js/app/engine-fast-compat.js, js/app/engine-fast-kernels.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+
+Requirements:
+- Apply the smallest defensible patch that resolves this failure.
+- Keep dt and event behavior untouched.
+- Prefer fixing event-fast* engines or engine-test helpers only.
+- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.
+- Do not browse external websites.
+- After editing, run a focused verification for the same failure if possible.
+- Use reruns=0 and strictFinalParity=false as guidance.
+- Benchmark regressions are not acceptable (wallMs=0).
+
+At the end, summarize:
+1. what changed
+2. which verification you ran
+3. any residual risk
+mcp: linear starting
+mcp: excel starting
+mcp: figma starting
+mcp: git starting
+mcp: playwright starting
+mcp: fact_sim_ai starting
+mcp: filesystem starting
+mcp: github starting
+2026-03-14T21:18:03.669442Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.linear.app/.well-known/oauth-protected-resource\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+mcp: linear failed: The linear MCP server is not logged in. Run `codex mcp login linear`.
+mcp: excel ready
+mcp: git failed: MCP client for `git` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: github ready
+mcp: figma ready
+mcp: filesystem failed: MCP client for `filesystem` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: playwright ready
+mcp: fact_sim_ai ready
+mcp startup: ready: excel, github, figma, playwright, fact_sim_ai; failed: linear, git, filesystem
+codex
+I’m inspecting the workspace and the engine-fast files first so I can identify the single failing target, reproduce it, and patch only the allowed path set.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Force' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "engine-fast|fast-par|event-fast|strictFinalParity|reruns|wallMs" -S js test .' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg --files' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 282ms:
+js\app\engine-fast-worker.js
+js\app\engine-fast-worker-host.js
+js\app\engine-fast-runtime.js
+js\app\engine-fast-par-worker.js
+js\app\engine-fast-par-partitioner.js
+js\app\engine-fast-par-host.js
+js\app\engine-fast-kernels.js
+js\app\engine-fast-compat.js
+AGENTS.md
+ succeeded in 382ms:
+
+
+    ディレクトリ: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d--h--        2026/03/15      6:18                .git                                                                 
+d-----        2026/03/15      6:18                js                                                                   
+-a----        2026/03/07     23:16           2332 AGENTS.md                                                            
+
+
+ exited 1 in 548ms:
+.\AGENTS.md:42:  `Use fact-sim-ai MCP. Prepare session with example=<name>, mode=<dt|event>, reset=true. Then run_report for <wallMs> ms and return KPI, top <N> bottlenecks, and a short conclusion.`
+.\AGENTS.md:45:  `Use fact-sim-ai MCP. Apply edit_graph batch operations with ref names, then run_report for <wallMs> ms and tell me whether throughput improved.`
+.\AGENTS.md:48:  `Use fact-sim-ai MCP. Build the graph from a blueprint with build_blueprint_report, run for <wallMs> ms, and return node/link counts, KPI, and bottleneck summary.`
+.\js\app\engine-fast-compat.js:1:// Compatibility adapter for event-fast fallback nodes.
+js\app\engine-fast-compat.js:1:// Compatibility adapter for event-fast fallback nodes.
+.\js\app\engine-fast-par-host.js:4:  const PAR_MODE = 'event-fast-par';
+.\js\app\engine-fast-par-host.js:5:  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+.\js\app\engine-fast-par-host.js:14:    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+.\js\app\engine-fast-par-host.js:514:          const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
+.\js\app\engine-fast-par-host.js:535:          this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
+.\js\app\engine-fast-par-host.js:543:            || 'fallback-event-fast-worker'
+.\js\app\engine-fast-par-host.js:673:          wallMs: Math.max(0, ...payloads.map((row)=> Number(row && row.wallMs) || 0)),
+.\js\app\engine-fast-par-host.js:678:      const wallMs = Math.max(100, Number(options && options.wallMs) || 2000);
+.\js\app\engine-fast-par-host.js:683:      while((now - started) < wallMs){
+.\js\app\engine-fast-par-host.js:690:        wallMs: Math.max(0, now - started),
+.\js\app\engine-fast-par-host.js:724:          wallMs: Math.max(0, ...payloads.map((row)=> Number(row && row.wallMs) || 0)),
+.\js\app\engine-fast-par-host.js:756:        wallMs: Math.max(0, finished - started),
+.\js\app\engine-fast-par-host.js:864:        this._liveFallbackEngine = App.createSimEngine('event-fast', graph);
+.\js\app\engine-fast-par-host.js:867:          : `fallback-live-${plan && plan.fallbackMode ? plan.fallbackMode : 'event-fast'}`;
+.\js\app\engine-fast-par-host.js:1029:    : (()=> ['dt', 'event', 'event-fast']);
+codex
+I have a very small workspace: only the engine-fast files are present, so this is almost certainly a hidden-test failure in the `event-fast-*` path. I’m reading the recommended host/worker/partitioner implementations next and looking for a narrow correctness bug rather than broad refactors.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-partitioner.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-worker.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 403ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+ succeeded in 417ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const MAX_DEFAULT_PARTITIONS = 4;
+  const MIN_PAR_NODE_COUNT = 8;
+  const MAX_CUT_RATIO = 0.45;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function compactGraphData(data){
+    return (typeof App.compactGraphData === 'function')
+      ? App.compactGraphData(cloneJson(data))
+      : cloneJson(data);
+  }
+
+  function createGraphFromData(graphData){
+    const data = compactGraphData(graphData);
+    const graph = new LGraph();
+ succeeded in 416ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let partition = null;
+  let ownedNodeIdSet = new Set();
+  let ownedSinkIdSet = new Set();
+  let lastGraphData = null;
+  let lastSentByLinkId = new Map();
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+codex
+The likely failure surface is the new parallel engine plumbing rather than the runtime kernels. I’m checking the support/partition/merge paths now for edge cases a hidden test would hit, especially empty or non-browser inputs and benchmark-only headless flows.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 260 -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-partitioner.js | Select-Object -Skip 260 -First 220' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 520 -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 449ms:
+            }
+          }catch(_e){}
+        }
+      }
+      applyRuntimeNodeStates(graph, graphData);
+      applyRuntimeLinkStates(graph, graphData);
+      graph.status = LGraph.STATUS_RUNNING;
+      graph.last_update_time = LiteGraph.getTime();
+      if(App.timelineChart){
+        try{
+          if(typeof App.timelineChart.attachGraph === 'function'){
+            if(App.timelineChart.graph !== graph) App.timelineChart.attachGraph(graph);
+          }
+          else App.timelineChart.graph = graph;
+        }catch(_e){}
+      }
+      try{
+        if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+        else if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+      }catch(_e){}
+ succeeded in 438ms:
+            (initial && initial.runtimeMode)
+            || (this._runner && this._runner.runtimeMode)
+            || `fallback-${fallbackMode}`
+          );
+          return { runtimeMode: this.runtimeMode, stats: null };
+        }
+        this._workers = plan.partitions.map((part)=>
+          new PartitionWorkerHost(plan.graphData, part, this.options)
+        );
+        const ready = await Promise.all(this._workers.map((worker)=> worker._ready));
+        const legacy = ready.find((row)=> row && row.runtimeMode === 'legacy-compat');
+        if(legacy){
+          await Promise.all(this._workers.map((worker)=> worker.disposeAsync()));
+          this._workers = [];
+          this._runner = App.createHeadlessSimRunner('event-fast-worker', this.graphData, this.options);
+          let initial = null;
+          if(this._runner && typeof this._runner.resetAsync === 'function'){
+            try{ initial = await this._runner.resetAsync(); }catch(_e){}
+          }
+          this.runtimeMode = String(
+ succeeded in 461ms:
+      part.nodeIds.push(nodeId);
+      if(sinkSet.has(nodeIndex)) part.ownedSinkIds.push(nodeId);
+    }
+    const compact = partitions.filter((part)=> part.nodeIndices.length > 0);
+    if(buildLocalGraph){
+      for(const part of compact){
+        part.localGraphData = buildLocalGraphData(graphData, part.nodeIds);
+      }
+    }
+    return compact;
+  }
+
+  App.createEventFastParPlan = function(graphOrData, options){
+    const graphData = compactGraphData(
+      graphOrData && typeof graphOrData.serialize === 'function'
+        ? graphOrData.serialize()
+        : graphOrData
+    );
+    const graph = createGraphFromData(graphData);
+    const compiled = App.compileFastGraph(graph);
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-worker.js | Select-Object -Skip 260 -First 320' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 780 -First 420' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 456ms:
+      let graphData = null;
+      if(opts.snapshot){
+        const snapshots = await Promise.all(this._workers.map((worker)=> worker.getSnapshotAsync()));
+        graphData = mergeOwnedNodeSnapshots(this.graphData, snapshots);
+      }
+      return {
+        simTimeMs: this._lastSimTimeMs,
+        graphData,
+        stats: stepped && stepped.stats ? stepped.stats : this._lastStats
+      };
+    }
+
+    async getDebugStatsAsync(){
+      await this._ensureRunner();
+      if(this._runner && typeof this._runner.getDebugStatsAsync === 'function'){
+        this._lastStats = await this._runner.getDebugStatsAsync();
+        this.runtimeMode = String(
+          (this._lastStats && this._lastStats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+ succeeded in 465ms:
+    for(const edge of cutEdges){
+      if(!edge) continue;
+      const link = graph && graph.links ? graph.links[edge.linkId] : null;
+      const source = graph && typeof graph.getNodeById === 'function'
+        ? graph.getNodeById(edge.originId)
+        : null;
+      let value = null;
+      if(source && Array.isArray(source.outputs) && source.outputs[edge.originSlot]){
+        value = source.outputs[edge.originSlot]._data;
+      }
+      if((typeof value === 'undefined' || value === null) && link){
+        if(typeof link.data !== 'undefined') value = link.data;
+        else if(typeof link._data !== 'undefined') value = link._data;
+      }
+      const signature = stableSignature(value);
+      const prev = lastSentByLinkId.get(edge.linkId);
+      if(prev === signature) continue;
+      lastSentByLinkId.set(edge.linkId, signature);
+      messages.push({
+        linkId: edge.linkId,
+ succeeded in 415ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const WORKER_MODE = 'event-fast-worker';
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260313a';
+  const UNSAFE_WORKER_TYPES = new Set([
+    'factory/carrierroute',
+    'factory/shuttle_stage'
+  ]);
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeWorkerMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === WORKER_MODE || raw === 'event_fast_worker' || raw === 'eventfastworker' || raw === 'fast-worker'){
+      return WORKER_MODE;
+    }
+    return null;
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js | Select-Object -Skip 260 -First 360' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-runtime.js | Select-Object -First 320' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-compat.js | Select-Object -First 320' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 429ms:
+// Event-fast runtime built around compiled graph structures.
+
+var App = window.App || (window.App = {});
+
+(function(){
+  const EPSILON_MS = 0.001;
+  const UPDATE_LOOP_LIMIT = 8000;
+  const SAME_TIME_BATCH_LIMIT = 512;
+
+  function nowSimMs(){
+    return (typeof window.simNow === 'function') ? Number(window.simNow()) : 0;
+  }
+
+  function captureTimeline(){
+    if(App._suspendTimeline) return;
+    if(App.timelineChart && typeof App.timelineChart.onStep === 'function'){
+      App.timelineChart.onStep(false);
+    }
+  }
+
+ succeeded in 464ms:
+    for(const node of nodes){
+      const type = String(node && node.type || '').toLowerCase();
+      if(UNSAFE_WORKER_TYPES.has(type)) return true;
+    }
+    return false;
+  }
+
+  function inspectFastWorkerSupport(graphOrData){
+    const graphData = serializeGraphForWorker(graphOrData);
+    const support = {
+      graphData,
+      canUseWorker: false,
+      reason: 'unknown',
+      fallbackMode: 'event-fast',
+      runtimeMode: null,
+      executableFallbackCount: 0,
+      unsafeTypes: hasUnsafeWorkerTypes(graphData)
+    };
+    if(!canUseWorkerMode()){
+      support.reason = 'worker-unavailable';
+ succeeded in 417ms:
+// Compatibility adapter for event-fast fallback nodes.
+
+var App = window.App || (window.App = {});
+
+(function(){
+  const EPSILON_MS = 0.001;
+
+  function normalizeType(type){
+    return String(type || '').trim().toLowerCase();
+  }
+
+  function isPassiveFallbackType(type){
+    const text = normalizeType(type);
+    return text === 'factory/carrierconfig'
+      || text === 'factory/carrierhome'
+      || text === 'factory/palletcarrierconfig'
+      || text === 'factory/palletcarrier'
+      || text === 'factory/note'
+      || text === 'factory/memo';
+  }
+codex
+I’ve narrowed it to integration glue. The compiled runtime looks internally coherent; the riskier pieces are mode registration, worker lifecycle, and partition graph reconstruction. I’m comparing the parallel host against the single-worker host to find a mismatch that would surface as a single hidden failure.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js | Select-Object -Skip 620 -First 340' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker.js | Select-Object -Skip 260 -First 220' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker.js | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 421ms:
+        Object.assign({}, options || {})
+      );
+      this._lastStats = payload && payload.stats ? payload.stats : this._lastStats;
+      return payload;
+    }
+
+    async getDebugStatsAsync(){
+      await this._ready;
+      const payload = await this._call((App.eventFastWorkerProtocol || {}).GET_STATS || 'getStats', {});
+      this._lastStats = payload || this._lastStats;
+      return payload;
+    }
+
+    getDebugStats(){
+      return this._lastStats ? cloneJson(this._lastStats) : null;
+    }
+
+    async stopAsync(){
+      if(this._disposed) return null;
+      try{
+ succeeded in 397ms:
+    rows.sort((a, b)=> a.nodeId - b.nodeId);
+    return rows;
+  }
+
+  function snapshotGraphData(targetGraph){
+    if(!targetGraph) return null;
+    const data = targetGraph.serialize();
+    data.__factSimRuntimeNodes = collectRuntimeNodeStates(targetGraph);
+    data.__factSimRuntimeLinks = collectRuntimeLinkStates(targetGraph);
+    return data;
+  }
+
+  function runBenchmarkCase(payload){
+    if(!engine || !graph) throw new Error('worker engine is not initialized');
+    const wallMs = Math.max(100, Number(payload && payload.wallMs) || 2000);
+    const realStepMs = Math.max(1, Number(payload && payload.realStepMs) || 16);
+    if(String(payload && payload.renderCase || 'headless') === 'render'){
+      throw new Error('event-fast-worker only supports headless benchmark runs');
+    }
+    if(lastGraphData) initEngine(lastGraphData, {}, payload && payload.seed);
+ succeeded in 413ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let lastGraphData = null;
+  let seededRandom = null;
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+    getElementById: function(){ return null; },
+    querySelector: function(){ return null; },
+    querySelectorAll: function(){ return []; },
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"TODO|FIXME|BUG|HACK|legacy-compat|disposeAsync\\(|stopAsync\\(|canParallelize|fallbackMode|normalizeHeadlessSimMode|getEngineTestModes\" js/app/engine-fast-*.js js/app/engine-fast-*.js -S" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "node -e \"console.log('node', process.version)\"" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 exited 1 in 345ms:
+rg: js/app/engine-fast-*.js: ファイル名、ディレクトリ名、またはボリューム ラベルの構文が間違っています。 (os error 123)
+rg: js/app/engine-fast-*.js: ファイル名、ディレクトリ名、またはボリューム ラベルの構文が間違っています。 (os error 123)
+ succeeded in 326ms:
+?? AGENTS.md
+?? js/
+ succeeded in 368ms:
+node v22.20.0
+codex
+I’ve confirmed Node is available, so after the patch I can run a targeted JS-level verification instead of guessing blindly. I’m now looking for a concrete mismatch that would break the parallel headless path under test.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"legacy-compat|disposeAsync\\(|stopAsync\\(|canParallelize|fallbackMode|normalizeHeadlessSimMode|getEngineTestModes|payload \\|\\| null|response\\(\" js/app" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-worker-host.js | Select-Object -Skip 880 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content js/app/engine-fast-par-host.js | Select-Object -Skip 1080 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 340ms:
+js/app\engine-fast-worker.js:344:  function response(id, ok, payload, error){
+js/app\engine-fast-worker.js:345:    root.postMessage({ id, ok, payload: payload || null, error: error ? String(error) : null });
+js/app\engine-fast-worker.js:390:      response(id, true, payloadOut, null);
+js/app\engine-fast-worker.js:392:      response(id, false, null, err && err.stack ? err.stack : err);
+js/app\engine-fast-par-partitioner.js:295:        canParallelize: false,
+js/app\engine-fast-par-partitioner.js:296:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:306:        canParallelize: false,
+js/app\engine-fast-par-partitioner.js:307:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:321:        canParallelize: false,
+js/app\engine-fast-par-partitioner.js:322:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:340:        canParallelize: false,
+js/app\engine-fast-par-partitioner.js:341:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:360:        canParallelize: false,
+js/app\engine-fast-par-partitioner.js:361:        fallbackMode: 'event-fast-worker',
+js/app\engine-fast-par-partitioner.js:370:      canParallelize: true,
+js/app\engine-fast-runtime.js:187:        ? 'legacy-compat'
+js/app\engine-fast-runtime.js:189:      this.legacyEngine = (this.runtimeMode === 'legacy-compat')
+js/app\engine-fast-runtime.js:237:      if(this.runtimeMode === 'legacy-compat') return;
+js/app\engine-fast-runtime.js:248:      if(this.runtimeMode === 'legacy-compat') return;
+js/app\engine-fast-runtime.js:276:      if(this.runtimeMode === 'legacy-compat' && this.legacyEngine && typeof this.legacyEngine.update === 'function'){
+ succeeded in 441ms:
+    const normalized = App.normalizeSimMode(mode);
+    if(normalized === WORKER_MODE) return 'event-fast-worker (web worker)';
+    return legacyGetSimModeLabel(normalized);
+  };
+  App.createSimEngine = function(mode, graphOrData){
+    const normalized = App.normalizeSimMode(mode);
+    if(normalized === WORKER_MODE){
+      const graphInput = (graphOrData && typeof graphOrData.serialize === 'function')
+        ? graphOrData
+        : createGraphFromData(graphOrData);
+      return new LiveEventFastWorkerEngine(graphInput, {});
+    }
+    return legacyCreateSimEngine(normalized, graphOrData);
+  };
+  App.normalizeHeadlessSimMode = normalizeHeadlessMode;
+  App.getHeadlessModeLabel = getHeadlessModeLabel;
+  App.isHeadlessOnlyBenchmarkMode = function(mode){
+    return normalizeHeadlessMode(mode) === WORKER_MODE;
+  };
+  App.getBenchmarkSimModes = function(){
+ succeeded in 406ms:
+    return legacyCreateSimEngine(normalized, graphOrData);
+  };
+  App.normalizeHeadlessSimMode = function(mode){
+    const normalized = normalizeParMode(mode);
+    if(normalized) return normalized;
+    return legacyNormalizeHeadlessSimMode(mode);
+  };
+  App.getHeadlessModeLabel = function(mode){
+    const normalized = App.normalizeHeadlessSimMode(mode);
+    if(normalized === PAR_MODE) return 'event-fast-par (multi worker)';
+    return legacyGetHeadlessModeLabel(normalized);
+  };
+  App.isHeadlessOnlyBenchmarkMode = function(mode){
+    const normalized = App.normalizeHeadlessSimMode(mode);
+    if(normalized === PAR_MODE) return true;
+    return legacyIsHeadlessOnlyBenchmarkMode(normalized);
+  };
+  App.getBenchmarkSimModes = function(){
+    const list = Array.isArray(legacyGetBenchmarkSimModes()) ? legacyGetBenchmarkSimModes().slice() : [];
+    if(canUseParWorker() && list.indexOf(PAR_MODE) < 0) list.push(PAR_MODE);
+codex
+I found a credible load-order failure candidate: if `engine-fast-worker-host.js` loads after `engine-fast-par-host.js`, the headless runner registration for `event-fast-par` can be overwritten and return a live engine instead of an async headless runner. I’m reproducing that exact scenario in Node before patching.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const fs = require('fs');
+const vm = require('vm');
+const path = require('path');
+
+const g = globalThis;
+g.window = g;
+g.self = g;
+g.performance = { now: () => 0 };
+g.LiteGraph = { getTime: () => 0 };
+g.Worker = function(){};
+g.location = { protocol: 'http:' };
+g.LGraph = class {
+  constructor(){ this.links = {}; this._nodes = []; this.status = 0; }
+  configure(){}
+  serialize(){ return { nodes: [], links: [] }; }
+  getNodeById(){ return null; }
+};
+g.App = {
+  compactGraphData: (x) => x,
+  normalizeSimMode(mode){ return String(mode || '').trim().toLowerCase() === 'event' ? 'event' : 'dt'; },
+  getSimModeLabel(mode){ return String(mode || ''); },
+  getSupportedSimModes(){ return ['dt','event','event-fast']; },
+  createSimEngine(mode, graph){ return { kind: 'base-engine', mode, graph, runtimeMode: "'`base-${mode}` }; },
+  getBenchmarkSimModes(){ return ['"'dt','event-fast']; },
+  getEngineTestModes(){ return ['event-fast']; },
+  isHeadlessOnlyBenchmarkMode(){ return false; }
+};
+
+for (const rel of ['js/app/engine-fast-par-host.js', 'js/app/engine-fast-worker-host.js']) {
+  const code = fs.readFileSync(path.join(process.cwd(), rel), 'utf8');
+  vm.runInThisContext(code, { filename: rel });
+}
+
+const runner = App.createHeadlessSimRunner('event-fast-par', { nodes: [], links: [] }, {});
+const result = {
+  mode: runner && runner.mode,
+  hasRunBenchmarkCaseAsync: "'!!(runner && typeof runner.runBenchmarkCaseAsync === '"'function'),
+  ctor: runner && runner.constructor ? runner.constructor.name : null,
+  runtimeMode: runner && runner.runtimeMode
+};
+console.log(JSON.stringify(result, null, 2));
+'@ | node -" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773523083161-10428 succeeded in 369ms:
+{
+  "mode": "event-fast-par",
+  "hasRunBenchmarkCaseAsync": false,
+  "ctor": "LiveEventFastParEngine",
+  "runtimeMode": "base-dt"
+}

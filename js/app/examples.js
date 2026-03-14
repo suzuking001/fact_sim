@@ -15,6 +15,7 @@ const _exampleUtf8Encoder = new TextEncoder();
 const EXAMPLE_FILES = {
   simple: 'sample/simple.json',
   branch: 'sample/branch.json',
+  parallel_benchmark: 'sample/parallel_benchmark.json',
   shuttle_line5: 'sample/shuttle_line5.json',
   carrier: 'sample/graph (3).json',
   pallet_station_demo: 'sample/pallet_station_demo.json',

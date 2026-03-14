@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "sessionId": "2026-03-14T17-18-40-548Z__min-runtime-dryrun",
+  "startedAt": "2026-03-14T17:18:40.555Z",
+  "finishedAt": "2026-03-14T17:18:50.970Z",
+  "status": "DRY-RUN",
+  "profile": "nightly",
+  "config": {
+    "engines": [
+      "dt",
+      "event-fast-worker",
+      "event-fast-par"
+    ],
+    "optimizeEngines": [
+      "event-fast-par"
+    ],
+    "targetEngine": "event-fast-par",
+    "examples": [
+      "parallel_benchmark"
+    ],
+    "benchmarkExample": "parallel_benchmark",
+    "seeds": [
+      1
+    ],
+    "includeCurrentGraph": false,
+    "includeExamples": true,
+    "strict": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true,
+    "benchmarkWallMs": 300,
+    "minImprovementPct": 1,
+    "maxIterations": 2,
+    "minRuntimeHours": 0.001,
+    "maxNoImprovementIterations": 2,
+    "statusFile": ""
+  },
+  "baselineBenchmark": {
+    "dt": {
+      "speed": 2317,
+      "simSec": 695.1,
+      "wallMs": 300
+    },
+    "event": {
+      "speed": 3120.4790422874153,
+      "simSec": 938.016,
+      "wallMs": 300.5999999642372
+    },
+    "event-fast": {
+      "speed": 4390.026666666667,
+      "simSec": 1317.008,
+      "wallMs": 300
+    },
+    "event-fast-worker": {
+      "speed": 7615.2,
+      "simSec": 2284.56,
+      "wallMs": 300
+    },
+    "event-fast-par": {
+      "speed": 6792.48,
+      "simSec": 2037.744,
+      "wallMs": 300
+    }
+  },
+  "bestBenchmark": {
+    "dt": {
+      "speed": 2317,
+      "simSec": 695.1,
+      "wallMs": 300
+    },
+    "event": {
+      "speed": 3120.4790422874153,
+      "simSec": 938.016,
+      "wallMs": 300.5999999642372
+    },
+    "event-fast": {
+      "speed": 4390.026666666667,
+      "simSec": 1317.008,
+      "wallMs": 300
+    },
+    "event-fast-worker": {
+      "speed": 7615.2,
+      "simSec": 2284.56,
+      "wallMs": 300
+    },
+    "event-fast-par": {
+      "speed": 6792.48,
+      "simSec": 2037.744,
+      "wallMs": 300
+    }
+  },
+  "initialTargetSpeed": 6792.48,
+  "bestTargetSpeed": 6792.48,
+  "currentImprovementPct": 0,
+  "consecutiveNoImprovement": 0,
+  "iterations": [
+    {
+      "index": 1,
+      "status": "dry-run",
+      "baselineSpeed": 6792.48,
+      "requestPath": "artifacts/auto-optimize/2026-03-14T17-18-40-548Z__min-runtime-dryrun/optimization-request.iteration-1.json",
+      "note": "Dry run only. No delegate executed."
+    }
+  ]
+}

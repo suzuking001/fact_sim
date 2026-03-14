@@ -1,0 +1,17 @@
+{
+  "scenario": "sample_line1",
+  "seed": 1,
+  "baselineEngine": "dt",
+  "candidateEngine": "event-fast-worker",
+  "completedDelta": 1,
+  "sinkCompletedDelta": [
+    {
+      "key": "55:Sink",
+      "baseline": 0,
+      "candidate": 1,
+      "delta": 1
+    }
+  ],
+  "finalStateDeltaCount": 0,
+  "workflowDeltaCount": 1
+}

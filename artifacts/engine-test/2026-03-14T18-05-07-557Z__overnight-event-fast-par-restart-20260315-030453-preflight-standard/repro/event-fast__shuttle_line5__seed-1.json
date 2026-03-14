@@ -1,0 +1,22 @@
+{
+  "action": "run",
+  "suite": "standard",
+  "engines": [
+    "event-fast"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "shuttle_line5"
+  ],
+  "seeds": [
+    1
+  ],
+  "strictFinalParity": true,
+  "targetSimMs": 30000,
+  "maxWallMs": 2500,
+  "realStepMs": 16,
+  "maxLoops": 25000,
+  "saveArtifacts": true,
+  "artifactLabel": "repro-event-fast__shuttle_line5__seed-1"
+}

@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const PAR_MODE = 'event-fast-par';
-  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260313a';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
   const MAX_FLUSH_ROUNDS = 16;
 
   function cloneJson(value){
@@ -322,8 +322,8 @@ var App = window.App || (window.App = {});
 
   class PartitionWorkerHost{
     constructor(graphData, partition, options){
-      this.graphData = cloneJson(graphData);
       this.partition = cloneJson(partition);
+      this.graphData = cloneJson((partition && partition.localGraphData) ? partition.localGraphData : graphData);
       this.options = Object.assign({}, options || {});
       this._requestId = 1;
       this._pending = new Map();
@@ -492,6 +492,7 @@ var App = window.App || (window.App = {});
       this.asyncOnly = true;
       this.options = Object.assign({ partitionSubsteps: 2 }, options || {});
       this.graphData = serializeGraphData(graphOrData);
+      this._precomputedPlan = this.options.__precomputedPlan || null;
       this._workers = [];
       this._runner = null;
       this._lastStats = null;
@@ -506,7 +507,8 @@ var App = window.App || (window.App = {});
       if(this._initPromise) return this._initPromise;
       this._initPromise = (async ()=>{
         const requestedPartitions = Math.max(2, Math.floor(Number(this.options.partitionCount) || 0) || 0);
-        const plan = App.createEventFastParPlan(this.graphData, requestedPartitions > 0 ? { partitionCount: requestedPartitions } : {});
+        const plan = this._precomputedPlan
+          || App.createEventFastParPlan(this.graphData, requestedPartitions > 0 ? { partitionCount: requestedPartitions } : {});
         this._plan = plan;
         if(!canUseParWorker() || !plan || !plan.canParallelize){
           const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
@@ -1106,7 +1108,20 @@ var App = window.App || (window.App = {});
   App.createHeadlessSimRunner = function(mode, graphOrData, options){
     const normalized = App.normalizeHeadlessSimMode(mode);
     if(normalized === PAR_MODE){
-      return new EventFastParHost(graphOrData, options);
+      const graphData = serializeGraphData(graphOrData);
+      const requestedPartitions = Math.max(2, Math.floor(Number(options && options.partitionCount) || 0) || 0);
+      const plan = App.createEventFastParPlan(
+        graphData,
+        requestedPartitions > 0 ? { partitionCount: requestedPartitions } : {}
+      );
+      if(!canUseParWorker() || !plan || !plan.canParallelize){
+        const fallbackMode = (plan && plan.fallbackMode) || 'event-fast-worker';
+        if(legacyCreateHeadlessSimRunner){
+          return legacyCreateHeadlessSimRunner(fallbackMode, graphData, options);
+        }
+        return new EventFastParHost(graphData, Object.assign({}, options, { __precomputedPlan: plan }));
+      }
+      return new EventFastParHost(graphData, Object.assign({}, options, { __precomputedPlan: plan }));
     }
     return legacyCreateHeadlessSimRunner ? legacyCreateHeadlessSimRunner(normalized, graphOrData, options) : null;
   };

@@ -13,6 +13,7 @@
     "auto-fix-runner": "node scripts/auto-fix-runner.mjs",
     "auto-patch-event-fast": "node scripts/auto-patch-event-fast.mjs",
     "auto-optimize-event-fast": "node scripts/auto-optimize-event-fast.mjs",
+    "watch:auto-optimize": "node scripts/watch-auto-optimize-status.mjs",
     "nightly": "node scripts/auto-fix-runner.mjs --profile nightly",
     "nightly:auto-patch": "node scripts/auto-fix-runner.mjs --profile nightly --patch-command \"node scripts/auto-patch-event-fast.mjs\"",
     "nightly:optimize": "node scripts/auto-optimize-event-fast.mjs --profile nightly"

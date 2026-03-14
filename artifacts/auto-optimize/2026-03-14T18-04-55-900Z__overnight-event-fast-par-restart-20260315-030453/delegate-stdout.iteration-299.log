@@ -1,0 +1,11 @@
+1. Changed [engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773521201002-11744/js/app/engine-fast-par-host.js) so `App.getBenchmarkSimModes()` and `App.getEngineTestModes()` always include `event-fast-par` instead of hiding it behind `canUseParWorker()`. This is the smallest fix that keeps headless test/benchmark discovery aligned with the existing fallback runner path, without changing `dt` or `event` behavior.
+
+2. Verification ran:
+- Syntax check: `node -e "new Function(require('fs').readFileSync('js/app/engine-fast-par-host.js','utf8'))"`
+- Focused engine test: `engine_test` with `action="run"`, `engines=["event-fast-par"]`, all built-in examples, `reruns=0`, `strictFinalParity=false`, `targetSimMs=3000`, `realStepMs=16`, `maxLoops=5000`, `stopOnFirstFailure=true`
+- Result: PASS, 16/16 cases passed.
+- I used `maxWallMs=1` because the MCP tool rejects `maxWallMs=0`.
+
+3. Residual risk:
+- I could not reproduce the exact empty `{}` failure locally because the current harness already supports workers and passes end-to-end.
+- The fix is aimed at the headless discovery gap for `event-fast-par` in environments where real parallel workers are unavailable.

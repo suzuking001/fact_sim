@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-14T18:05:07.557Z",
+  "finishedAt": "2026-03-14T18:05:19.466Z",
+  "status": "PASS",
+  "suite": "standard",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event",
+    "event-fast",
+    "event-fast-worker",
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "simple",
+    "branch",
+    "shuttle_line5",
+    "carrier",
+    "pallet_station_demo",
+    "sample_line1",
+    "sample_line2",
+    "parallel_benchmark"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": "overnight-event-fast-par-restart-20260315-030453-preflight-standard"
+}

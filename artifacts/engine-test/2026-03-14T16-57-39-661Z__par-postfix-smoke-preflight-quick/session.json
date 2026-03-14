@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-14T16:57:39.661Z",
+  "finishedAt": "2026-03-14T16:57:40.984Z",
+  "status": "PASS",
+  "suite": "quick",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event-fast-worker",
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "parallel_benchmark"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": "par-postfix-smoke-preflight-quick"
+}

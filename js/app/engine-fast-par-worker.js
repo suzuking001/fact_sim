@@ -39,7 +39,25 @@
   root.refreshFlipIO = root.refreshFlipIO || function(){};
   root.runNodeMutation = root.runNodeMutation || function(_node, fn){ return typeof fn === 'function' ? fn() : null; };
   root.applyNodeStateTheme = root.applyNodeStateTheme || function(){};
-  root.defaultScript = root.defaultScript || function(){ return 'return true;'; };
+  root.defaultScript = root.defaultScript || function(){
+    return `// work: Work object (work.id, work.type, etc.)
+// signalArr: array of sigIn values
+
+if(work.type === 'A'){
+  this.properties.processTime = 5.0;
+  this.properties.downTime = 3.0;
+}else if(work.type === 'B'){
+  this.properties.processTime = 4.0;
+  this.properties.downTime = 2.0;
+}else{
+  // default
+  this.properties.processTime = 10.0;
+  this.properties.downTime = 2.0;
+}
+
+// Return true to accept this work item into PROCESS
+return true;`;
+  };
   root.WorkLinkAnimator = null;
   root.alert = root.alert || function(){};
   root.confirm = root.confirm || function(){ return false; };
@@ -148,6 +166,9 @@
   }
 
   importRequiredScripts();
+  root.App.createLegacySimEngine = (typeof root.App.createSimEngine === 'function')
+    ? root.App.createSimEngine.bind(root.App)
+    : function(){ return null; };
 
   function buildGraph(data){
     const payload = cloneJson(data);

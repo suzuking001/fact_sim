@@ -1,0 +1,96 @@
+Use the existing AGENTS.md instructions in this repo.
+Optimize the target event-fast* engine for speed while preserving dt parity.
+Only edit allowed paths. Do not modify dt or event (heap).
+Do not edit engine-test or other test-only helpers as part of performance optimization.
+
+Optimization request:
+```json
+{
+  "version": 1,
+  "sessionId": "2026-03-14T17-53-37-773Z__overnight-event-fast-par-restart-20260315-025334",
+  "iteration": 1,
+  "targetEngine": "event-fast-par",
+  "profile": "nightly",
+  "examples": null,
+  "benchmarkExample": "parallel_benchmark",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event",
+    "event-fast",
+    "event-fast-worker",
+    "event-fast-par"
+  ],
+  "constraints": {
+    "protectEngines": [
+      "dt",
+      "event"
+    ],
+    "allowedPaths": [
+      "js/app/engine-fast-par-worker.js",
+      "js/app/engine-fast-par-host.js",
+      "js/app/engine-fast-par-partitioner.js",
+      "js/app/engine-fast-worker.js",
+      "js/app/engine-fast-worker-host.js",
+      "js/app/engine-fast-runtime.js",
+      "js/app/engine-fast-compat.js",
+      "js/app/engine-fast-kernels.js"
+    ]
+  },
+  "recommendedFiles": [
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-partitioner.js"
+  ],
+  "benchmark": {
+    "wallMs": 500,
+    "baseline": {
+      "dt": {
+        "speed": 2242,
+        "simSec": 1121,
+        "wallMs": 500
+      },
+      "event": {
+        "speed": 3237.056,
+        "simSec": 1618.528,
+        "wallMs": 500
+      },
+      "event-fast": {
+        "speed": 4337.333333333333,
+        "simSec": 2186.016,
+        "wallMs": 504
+      },
+      "event-fast-worker": {
+        "speed": 6810.368,
+        "simSec": 3405.184,
+        "wallMs": 500
+      },
+      "event-fast-par": {
+        "speed": 6570.016,
+        "simSec": 3285.008,
+        "wallMs": 500
+      }
+    },
+    "targetSpeed": 6570.016,
+    "minImprovementPct": 1
+  },
+  "verification": {
+    "suites": [
+      "quick",
+      "standard"
+    ],
+    "strictFinalParity": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true
+  }
+}
+```
+
+Requirements:
+- Make one small, defensible performance improvement.
+- Preserve correctness relative to dt.
+- Prefer changes that improve headless benchmark speed for the target engine.
+- Do not broaden the patch beyond the allowed paths.
+- After editing, summarize the expected performance hypothesis.

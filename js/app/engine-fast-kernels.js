@@ -43,7 +43,13 @@ var App = window.App || (window.App = {});
     if(src.indexOf('merge') >= 0 || src.indexOf('join') >= 0) return KINDS.Merge;
     if(src.indexOf('split') >= 0) return KINDS.Split;
     if(src.indexOf('sink') >= 0) return KINDS.Sink;
-    if(src.indexOf('equipment') >= 0 || src.indexOf('machine') >= 0 || src.indexOf('process') >= 0) return KINDS.Equipment;
+    if(
+      src.indexOf('equipment') >= 0
+      || src.indexOf('/equip') >= 0
+      || src.indexOf(' equip') >= 0
+      || src.indexOf('machine') >= 0
+      || src.indexOf('process') >= 0
+    ) return KINDS.Equipment;
     if(src.indexOf('buffer') >= 0 || src.indexOf('queue') >= 0 || src.indexOf('stocker') >= 0) return KINDS.Buffer;
     if(src.indexOf('agv_route') >= 0 || src.indexOf('agv route') >= 0 || src.indexOf('carrier_route') >= 0 || src.indexOf('carrier route') >= 0) return KINDS.AGVRoute;
     if(src.indexOf('shuttle') >= 0) return KINDS.ShuttleStage;

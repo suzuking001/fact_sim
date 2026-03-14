@@ -1,10 +1,17 @@
 import path from "node:path";
 import process from "node:process";
+import os from "node:os";
 import { spawn } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 
 const cwd = process.cwd();
 const repoRoot = path.resolve(cwd, "..");
+const DEFAULT_CODEX_TIMEOUT_MS = 15 * 60 * 1000;
+
+function getCodexTimeoutMs() {
+  const raw = Number(process.env.FACT_SIM_CODEX_TIMEOUT_MS || DEFAULT_CODEX_TIMEOUT_MS);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_CODEX_TIMEOUT_MS;
+}
 
 function nowIso() {
   return new Date().toISOString();
@@ -81,6 +88,15 @@ async function writeText(filePath, value) {
   await writeFile(filePath, String(value ?? ""), "utf8");
 }
 
+async function pathExists(filePath) {
+  try {
+    await stat(filePath);
+    return true;
+  } catch (_error) {
+    return false;
+  }
+}
+
 function normalizeFileList(values) {
   const out = [];
   const seen = new Set();
@@ -129,8 +145,16 @@ function computeNewTouchedPaths(beforeRows, afterRows) {
   return normalizeFileList(touched);
 }
 
+async function killProcessTree(pid) {
+  await runCommand("taskkill", ["/PID", String(pid), "/T", "/F"], {
+    cwd: repoRoot,
+    stdio: ["ignore", "pipe", "pipe"]
+  }).catch(() => null);
+}
+
 async function runCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
+    let settled = false;
     const child = spawn(command, args, {
       cwd: options.cwd || repoRoot,
       env: { ...process.env, ...(options.env || {}) },
@@ -141,8 +165,25 @@ async function runCommand(command, args, options = {}) {
     let stderr = "";
     if (child.stdout) child.stdout.on("data", (chunk) => { stdout += String(chunk); });
     if (child.stderr) child.stderr.on("data", (chunk) => { stderr += String(chunk); });
-    child.on("error", reject);
+    let timeoutHandle = null;
+    if (Number.isFinite(options.timeoutMs) && Number(options.timeoutMs) > 0) {
+      timeoutHandle = setTimeout(async () => {
+        if (settled) return;
+        settled = true;
+        await killProcessTree(child.pid).catch(() => null);
+        resolve({ code: 124, stdout, stderr, timedOut: true });
+      }, Number(options.timeoutMs));
+    }
+    child.on("error", (error) => {
+      if (settled) return;
+      settled = true;
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+      reject(error);
+    });
     child.on("exit", (code) => {
+      if (settled) return;
+      settled = true;
+      if (timeoutHandle) clearTimeout(timeoutHandle);
       resolve({ code: Number(code ?? 1), stdout, stderr });
     });
     if (options.stdinText && child.stdin) {
@@ -196,6 +237,8 @@ function buildPrompt(patchRequest, targetFailure) {
   lines.push("- Apply the smallest defensible patch that resolves this failure.");
   lines.push("- Keep dt and event behavior untouched.");
   lines.push("- Prefer fixing event-fast* engines or engine-test helpers only.");
+  lines.push("- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.");
+  lines.push("- Do not browse external websites.");
   lines.push("- After editing, run a focused verification for the same failure if possible.");
   lines.push(`- Use reruns=${Number(verify.reruns || 0)} and strictFinalParity=${verify.strict ? "true" : "false"} as guidance.`);
   lines.push(`- Benchmark regressions are not acceptable (wallMs=${Number(verify.benchmarkWallMs || 0)}).`);
@@ -207,20 +250,54 @@ function buildPrompt(patchRequest, targetFailure) {
   return lines.join("\n");
 }
 
-async function runCodexDelegate(prompt, outputPath) {
+async function seedWorkspace(workspaceDir, seedPaths) {
+  await rm(workspaceDir, { recursive: true, force: true });
+  await ensureDir(workspaceDir);
+  for (const relativePath of normalizeFileList(seedPaths)) {
+    const sourcePath = path.join(repoRoot, relativePath);
+    if (!(await pathExists(sourcePath))) continue;
+    const targetPath = path.join(workspaceDir, relativePath);
+    await ensureDir(path.dirname(targetPath));
+    await copyFile(sourcePath, targetPath);
+  }
+  const gitInit = await runCommand("git", ["init", "-q"], { cwd: workspaceDir });
+  if (gitInit.code === 0) {
+    await runCommand("git", ["config", "user.name", "fact-sim-auto-patch"], { cwd: workspaceDir });
+    await runCommand("git", ["config", "user.email", "fact-sim-auto-patch@example.invalid"], { cwd: workspaceDir });
+  }
+}
+
+async function collectWorkspaceFiles(rootDir, baseDir = rootDir) {
+  const out = [];
+  const entries = await readdir(rootDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const nextPath = path.join(rootDir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === ".git") continue;
+      out.push(...await collectWorkspaceFiles(nextPath, baseDir));
+      continue;
+    }
+    const relativePath = path.relative(baseDir, nextPath).replace(/\\/g, "/");
+    out.push(relativePath);
+  }
+  return out;
+}
+
+async function runCodexDelegate(prompt, outputPath, workspaceDir) {
   const args = [
     "exec",
     "--full-auto",
     "-C",
-    repoRoot,
+    workspaceDir,
     "--output-last-message",
     outputPath,
     "-"
   ];
   return runCommand("codex", args, {
-    cwd: repoRoot,
+    cwd: workspaceDir,
     stdinText: prompt,
-    stdio: ["pipe", "inherit", "inherit"]
+    stdio: ["pipe", "pipe", "pipe"],
+    timeoutMs: getCodexTimeoutMs()
   });
 }
 
@@ -240,8 +317,10 @@ async function runShellDelegate(command, env) {
 async function main() {
   const cli = parseArgs(process.argv.slice(2));
   const sessionDir = path.resolve(cli.sessionDir || process.env.FACT_SIM_SESSION_DIR || path.join(repoRoot, "artifacts", "auto-patch-manual"));
-  const patchRequestPath = path.resolve(cli.patchRequestPath || process.env.FACT_SIM_PATCH_REQUEST || "");
-  const targetFailurePath = path.resolve(cli.targetFailurePath || process.env.FACT_SIM_TARGET_FAILURE || "");
+  const patchRequestInput = String(cli.patchRequestPath || process.env.FACT_SIM_PATCH_REQUEST || "").trim();
+  const targetFailureInput = String(cli.targetFailurePath || process.env.FACT_SIM_TARGET_FAILURE || "").trim();
+  const patchRequestPath = patchRequestInput ? path.resolve(patchRequestInput) : "";
+  const targetFailurePath = targetFailureInput ? path.resolve(targetFailureInput) : "";
   const iteration = String(cli.iteration || process.env.FACT_SIM_ITERATION || "").trim() || null;
   const delegate = cli.delegate || process.env.FACT_SIM_PATCH_DELEGATE || "";
 
@@ -271,12 +350,15 @@ async function main() {
     protectedEngines,
     changedPaths: [],
     forbiddenPaths: [],
+    workspaceExtraPaths: [],
     notes: []
   };
 
   const prompt = buildPrompt(patchRequest, targetFailure);
   const promptPath = path.join(sessionDir, iteration ? `codex-prompt.iteration-${iteration}.md` : "codex-prompt.md");
   const delegateMessagePath = path.join(sessionDir, iteration ? `delegate-last-message.iteration-${iteration}.txt` : "delegate-last-message.txt");
+  const delegateStdoutPath = path.join(sessionDir, iteration ? `delegate-stdout.iteration-${iteration}.log` : "delegate-stdout.log");
+  const delegateStderrPath = path.join(sessionDir, iteration ? `delegate-stderr.iteration-${iteration}.log` : "delegate-stderr.log");
   const patchDiffPath = path.join(sessionDir, iteration ? `patch.iteration-${iteration}.diff` : "patch.diff");
   const resultPath = path.join(sessionDir, iteration ? `patch-result.iteration-${iteration}.json` : "patch-result.json");
   await writeText(promptPath, prompt);
@@ -299,6 +381,11 @@ async function main() {
   }
 
   const beforeStatus = await gitStatus();
+  const beforeFiles = new Map();
+  for (const relativePath of allowedPaths) {
+    const sourcePath = path.join(repoRoot, relativePath);
+    beforeFiles.set(relativePath, (await pathExists(sourcePath)) ? await readFile(sourcePath, "utf8") : null);
+  }
 
   if (cli.dryRun) {
     result.status = "dry-run";
@@ -319,8 +406,35 @@ async function main() {
     });
     delegateExit = Number(response.code || 1);
   } else if (cli.useCodex && await hasCodexCli()) {
-    const response = await runCodexDelegate(prompt, delegateMessagePath);
+    const workspaceRoot = path.join(os.tmpdir(), "fact-sim-auto-patch", `${Date.now()}-${process.pid}`);
+    const workspaceSeedPaths = normalizeFileList(["AGENTS.md", ...allowedPaths]);
+    const workspaceMessagePath = path.join(workspaceRoot, "delegate-last-message.txt");
+    await seedWorkspace(workspaceRoot, workspaceSeedPaths);
+    result.workspaceRoot = workspaceRoot;
+    const response = await runCodexDelegate(prompt, workspaceMessagePath, workspaceRoot);
     delegateExit = Number(response.code || 1);
+    if (response.stdout) await writeText(delegateStdoutPath, response.stdout);
+    if (response.stderr) await writeText(delegateStderrPath, response.stderr);
+    if (await pathExists(workspaceMessagePath)) {
+      await copyFile(workspaceMessagePath, delegateMessagePath);
+    }
+    const workspaceFiles = await collectWorkspaceFiles(workspaceRoot);
+    result.workspaceExtraPaths = workspaceFiles.filter((item) => !workspaceSeedPaths.includes(item));
+    if (delegateExit === 0) {
+      for (const relativePath of allowedPaths) {
+        const workspacePath = path.join(workspaceRoot, relativePath);
+        const sourcePath = path.join(repoRoot, relativePath);
+        const nextContent = (await pathExists(workspacePath)) ? await readFile(workspacePath, "utf8") : null;
+        if (nextContent === beforeFiles.get(relativePath)) continue;
+        await ensureDir(path.dirname(sourcePath));
+        if (nextContent == null) {
+          await rm(sourcePath, { force: true });
+        } else {
+          await writeFile(sourcePath, nextContent, "utf8");
+        }
+      }
+    }
+    await rm(workspaceRoot, { recursive: true, force: true });
   } else {
     result.status = "blocked";
     result.notes.push("No delegate command was provided and codex CLI was not available.");
@@ -332,7 +446,8 @@ async function main() {
 
   result.delegateExitCode = delegateExit;
   if (delegateExit !== 0) {
-    result.status = "delegate-failed";
+    result.status = delegateExit === 124 ? "delegate-timeout" : "delegate-failed";
+    if (delegateExit === 124) result.notes.push(`Delegate timed out after ${Math.round(getCodexTimeoutMs() / 60000)} minutes.`);
     result.finishedAt = nowIso();
     await writeJson(resultPath, result);
     process.exitCode = delegateExit || 1;

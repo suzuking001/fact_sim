@@ -217,7 +217,30 @@ var App = window.App || (window.App = {});
     return { cutEdges, byPartition };
   }
 
-  function buildPartitions(compiled, partitionIdByNode, partitionCount, byPartition){
+  function stripStopGroupExtra(graphData){
+    const data = cloneJson(graphData);
+    if(data && data.extra && typeof data.extra === 'object'){
+      delete data.extra.stopGroupsV1;
+      if(Object.keys(data.extra).length === 0) delete data.extra;
+    }
+    return data;
+  }
+
+  function buildLocalGraphData(graphData, nodeIds){
+    const idSet = new Set(Array.isArray(nodeIds) ? nodeIds.map((id)=> Number(id)) : []);
+    const data = stripStopGroupExtra(graphData);
+    data.nodes = (Array.isArray(data.nodes) ? data.nodes : []).filter((node)=> idSet.has(Number(node && node.id)));
+    data.links = (Array.isArray(data.links) ? data.links : []).filter((row)=>{
+      if(Array.isArray(row)){
+        return idSet.has(Number(row[1])) && idSet.has(Number(row[3]));
+      }
+      return idSet.has(Number(row && row.origin_id)) && idSet.has(Number(row && row.target_id));
+    });
+    data.groups = [];
+    return data;
+  }
+
+  function buildPartitions(graphData, compiled, partitionIdByNode, partitionCount, byPartition, buildLocalGraph){
     const partitions = new Array(partitionCount);
     for(let p = 0; p < partitionCount; p += 1){
       partitions[p] = {
@@ -238,7 +261,13 @@ var App = window.App || (window.App = {});
       part.nodeIds.push(nodeId);
       if(sinkSet.has(nodeIndex)) part.ownedSinkIds.push(nodeId);
     }
-    return partitions.filter((part)=> part.nodeIndices.length > 0);
+    const compact = partitions.filter((part)=> part.nodeIndices.length > 0);
+    if(buildLocalGraph){
+      for(const part of compact){
+        part.localGraphData = buildLocalGraphData(graphData, part.nodeIds);
+      }
+    }
+    return compact;
   }
 
   App.createEventFastParPlan = function(graphOrData, options){
@@ -318,7 +347,14 @@ var App = window.App || (window.App = {});
       };
     }
 
-    const partitions = buildPartitions(compiled, assignment.partitionIdByNode, assignment.partitionCount, byPartition);
+    const partitions = buildPartitions(
+      graphData,
+      compiled,
+      assignment.partitionIdByNode,
+      assignment.partitionCount,
+      byPartition,
+      cutEdges.length === 0
+    );
     if(partitions.length < 2){
       return {
         canParallelize: false,

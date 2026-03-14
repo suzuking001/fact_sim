@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-14T17:34:02.656Z",
+  "finishedAt": "2026-03-14T17:39:07.881Z",
+  "status": "delegate-failed",
+  "sessionDir": "artifacts/auto-optimize/delegate-check",
+  "iteration": "1",
+  "patchRequestPath": "artifacts/auto-optimize/2026-03-14T17-19-16-906Z__overnight-event-fast-par-20260315-021914/optimization-request.iteration-1.json",
+  "targetFailurePath": null,
+  "targetFailure": null,
+  "delegate": "codex",
+  "recommendedFiles": [
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-partitioner.js"
+  ],
+  "allowedPaths": [
+    "js/app/engine-test.js",
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-partitioner.js",
+    "js/app/engine-fast-worker.js",
+    "js/app/engine-fast-worker-host.js",
+    "js/app/engine-fast-runtime.js",
+    "js/app/engine-fast-compat.js",
+    "js/app/engine-fast-kernels.js"
+  ],
+  "protectedEngines": [
+    "dt",
+    "event"
+  ],
+  "changedPaths": [],
+  "forbiddenPaths": [],
+  "workspaceExtraPaths": [],
+  "notes": [],
+  "workspaceRoot": "C:\\Users\\suzuk\\AppData\\Local\\Temp\\fact-sim-auto-patch\\1773509642904-28660",
+  "delegateExitCode": 101
+}
