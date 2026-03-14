@@ -22,6 +22,7 @@ export type EngineTestIssue = {
   scenario?: string;
   path?: string;
   nodeId?: string | number | null;
+  artifacts?: Record<string, string> | null;
 };
 
 export type EngineTestCaseResult = {
@@ -31,6 +32,10 @@ export type EngineTestCaseResult = {
   sourceKind: string;
   ok: boolean;
   status: "PASS" | "WARN" | "FAIL";
+  attempts?: number;
+  maxAttempts?: number;
+  attemptStatuses?: string[];
+  flaky?: boolean;
   failures: EngineTestIssue[];
   warnings: EngineTestIssue[];
   metrics: {
@@ -81,7 +86,12 @@ export type EngineTestOutput = {
     seedCount?: number;
     suite?: string;
     includesCurrentGraph?: boolean;
+    stoppedEarly?: boolean;
+    reruns?: number;
+    stopOnFirstFailure?: boolean;
   } | null;
+  artifactDir?: string | null;
+  artifactFiles?: Record<string, string> | null;
   mcpHint?: {
     tool: string;
     action: string;

@@ -86,6 +86,8 @@ function summarizeEngineTest(result: Awaited<ReturnType<FactSimRuntime["runEngin
       scenario: row.scenario,
       sourceKind: row.sourceKind,
       status: row.status,
+      attempts: typeof row.attempts === "number" ? row.attempts : 1,
+      flaky: !!row.flaky,
       simTimeMs: Number(row.metrics.simTimeMs.toFixed(3)),
       wallMs: Number(row.metrics.wallMs.toFixed(3)),
       loops: row.metrics.loops,
@@ -101,8 +103,11 @@ function summarizeEngineTest(result: Awaited<ReturnType<FactSimRuntime["runEngin
       scenario: entry.scenario ?? null,
       path: entry.path ?? null,
       nodeId: typeof entry.nodeId === "undefined" ? null : entry.nodeId,
-      message: entry.message
+      message: entry.message,
+      artifacts: entry.artifacts ?? null
     })),
+    artifactDir: result.artifactDir ?? null,
+    artifactFiles: result.artifactFiles ?? null,
     mcpHint: result.mcpHint ?? null
   };
 }
@@ -1011,10 +1016,14 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         maxLoops: z.number().int().positive().optional(),
         seed: z.number().int().optional(),
         seeds: z.array(z.number().int()).optional(),
-        strictFinalParity: z.boolean().optional()
+        strictFinalParity: z.boolean().optional(),
+        reruns: z.number().int().nonnegative().optional(),
+        stopOnFirstFailure: z.boolean().optional(),
+        saveArtifacts: z.boolean().optional(),
+        artifactLabel: z.string().min(1).optional()
       }
     },
-    async ({ action, engines, includeCurrentGraph, includeExamples, examples, suite, targetSimMs, maxWallMs, realStepMs, maxLoops, seed, seeds, strictFinalParity }, extra) => {
+    async ({ action, engines, includeCurrentGraph, includeExamples, examples, suite, targetSimMs, maxWallMs, realStepMs, maxLoops, seed, seeds, strictFinalParity, reruns, stopOnFirstFailure, saveArtifacts, artifactLabel }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "engine_test", { action }, async () => {
         if (action === "latest") {
@@ -1033,7 +1042,11 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
             maxLoops,
             seed,
             seeds,
-            strictFinalParity
+            strictFinalParity,
+            reruns,
+            stopOnFirstFailure,
+            saveArtifacts,
+            artifactLabel
           })
         );
       });

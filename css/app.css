@@ -1932,6 +1932,7 @@ body.timeline-hidden #timelineRevealHandle{
   color:#4b5563;
 }
 .engineTestToolbarActions input[type="text"],
+.engineTestToolbarActions input[type="number"],
 .engineTestToolbarActions select{
   min-width:88px;
   padding:6px 8px;

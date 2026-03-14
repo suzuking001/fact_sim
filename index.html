@@ -635,8 +635,16 @@
             <input id="engineTestSeedsInput" type="text" placeholder="1, 7" />
           </label>
           <label>
+            Reruns
+            <input id="engineTestRerunsInput" type="number" min="0" step="1" value="0" />
+          </label>
+          <label>
             <input id="engineTestStrictToggle" type="checkbox" checked />
             Strict Final Parity
+          </label>
+          <label>
+            <input id="engineTestStopOnFirstFailureToggle" type="checkbox" />
+            Stop on First Failure
           </label>
         </div>
         <p id="engineTestSummary" class="benchmarkSummary"></p>

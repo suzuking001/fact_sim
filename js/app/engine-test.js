@@ -27,7 +27,11 @@ var App = window.App || (window.App = {});
     liveStateSampleStepMs: 250,
     strictFinalParity: false,
     seed: 1,
-    seeds: null
+    seeds: null,
+    reruns: 0,
+    stopOnFirstFailure: false,
+    saveArtifacts: false,
+    artifactLabel: ''
   };
   const SUITE_PRESETS = {
     quick: {
@@ -220,7 +224,11 @@ var App = window.App || (window.App = {});
       liveStateSampleStepMs: Math.max(50, Math.floor(Number(Object.prototype.hasOwnProperty.call(source, 'liveStateSampleStepMs') ? raw.liveStateSampleStepMs : preset.liveStateSampleStepMs) || DEFAULTS.liveStateSampleStepMs)),
       strictFinalParity: Object.prototype.hasOwnProperty.call(source, 'strictFinalParity') ? !!raw.strictFinalParity : !!preset.strictFinalParity,
       seed: normalizedSeeds.length ? normalizedSeeds[0] : (Number.isFinite(Number(raw.seed)) ? Math.floor(Math.abs(Number(raw.seed))) : null),
-      seeds: normalizedSeeds.length ? normalizedSeeds : [1]
+      seeds: normalizedSeeds.length ? normalizedSeeds : [1],
+      reruns: Math.max(0, Math.floor(Number(raw.reruns) || 0)),
+      stopOnFirstFailure: !!raw.stopOnFirstFailure,
+      saveArtifacts: !!raw.saveArtifacts,
+      artifactLabel: String(raw.artifactLabel || '').trim()
     };
   }
   function finalSnapshotSettleMs(options){
@@ -1069,6 +1077,47 @@ var App = window.App || (window.App = {});
       return finalizeCase(result, startWall, simMs, loops);
     });
   }
+  async function runCaseWithReruns(source, engine, options, seed){
+    const maxAttempts = Math.max(1, 1 + Math.max(0, Number(options && options.reruns) || 0));
+    const attemptStatuses = [];
+    let recovered = false;
+    let result = null;
+    for(let attempt = 1; attempt <= maxAttempts; attempt += 1){
+      result = await runCase(source, engine, options, seed);
+      attemptStatuses.push(result.status);
+      result.attempts = attempt;
+      result.maxAttempts = maxAttempts;
+      result.attemptStatuses = attemptStatuses.slice();
+      if(result.status !== 'FAIL'){
+        recovered = attempt > 1 && attemptStatuses.slice(0, -1).some((status)=> status === 'FAIL');
+        break;
+      }
+    }
+    if(!result){
+      result = await runCase(source, engine, options, seed);
+      attemptStatuses.push(result.status);
+    }
+    result.attempts = attemptStatuses.length;
+    result.maxAttempts = maxAttempts;
+    result.attemptStatuses = attemptStatuses.slice();
+    if(recovered){
+      const seen = new Set();
+      for(const failure of (Array.isArray(result.failures) ? result.failures : [])){
+        seen.add([failure.code || '', failure.message || '', failure.engine || '', failure.scenario || ''].join('|'));
+      }
+      pushIssue(result.warnings, seen, issue('warn', 'FLAKY_CASE_RECOVERED', `Case recovered after ${attemptStatuses.length} attempts`, {
+        engine,
+        scenario: source.name,
+        message: `Case recovered after ${attemptStatuses.length} attempts (${attemptStatuses.join(' -> ')})`
+      }), 24);
+      result.status = engineStatus(result.failures.length, result.warnings.length);
+      result.ok = result.status !== 'FAIL';
+      result.flaky = true;
+    }else{
+      result.flaky = false;
+    }
+    return result;
+  }
   function compareResults(report){
     const grouped = new Map();
     const seen = new Set();
@@ -1310,6 +1359,7 @@ var App = window.App || (window.App = {});
     };
     const seen = new Set();
     const onProgress = (typeof options?.onProgress === 'function') ? options.onProgress : null;
+    let stoppedEarly = false;
     if(typeof window.isSimRunning === 'function' && window.isSimRunning() && typeof window.stopSimulation === 'function') try{ window.stopSimulation(); }catch(_e){}
     const ctx = createRunContext();
     App._suspendTimeline = true;
@@ -1320,15 +1370,19 @@ var App = window.App || (window.App = {});
       const seeds = Array.isArray(normalized.seeds) && normalized.seeds.length ? normalized.seeds : [normalized.seed || 1];
       const totalCases = Math.max(1, built.sources.length * normalized.engines.length * seeds.length);
       let caseIndex = 0;
-      for(const source of built.sources){
+      outer: for(const source of built.sources){
         for(const seed of seeds){
           for(const engine of normalized.engines){
             caseIndex += 1;
             if(onProgress) try{ onProgress(caseIndex / totalCases, { engine, scenario: source.name, seed, caseIndex, totalCases, suite: normalized.suite }); }catch(_e){}
-            const result = await runCase(source, engine, normalized, seed);
+            const result = await runCaseWithReruns(source, engine, normalized, seed);
             report.results.push(result);
             for(const entry of result.failures) pushIssue(report.failures, seen, entry, 32);
             for(const entry of result.warnings) pushIssue(report.warnings, seen, entry, 32);
+            if(normalized.stopOnFirstFailure && result.status === 'FAIL'){
+              stoppedEarly = true;
+              break outer;
+            }
           }
         }
       }
@@ -1350,7 +1404,10 @@ var App = window.App || (window.App = {});
         suite: normalized.suite,
         seedCount: seeds.length,
         exampleCount: built.sources.filter((row)=> row.kind === 'example').length,
-        includesCurrentGraph: !!built.sources.find((row)=> row.kind === 'current_graph')
+        includesCurrentGraph: !!built.sources.find((row)=> row.kind === 'current_graph'),
+        stoppedEarly: stoppedEarly,
+        reruns: normalized.reruns,
+        stopOnFirstFailure: normalized.stopOnFirstFailure
       };
       report.status = engineStatus(failedCases + report.failures.length, warnedCases + report.warnings.length);
       report.ok = report.status !== 'FAIL';
@@ -1377,8 +1434,8 @@ var App = window.App || (window.App = {});
     const failuresBody = document.getElementById('engineTestFailuresBody');
     const legend = document.getElementById('engineTestLegend');
     if(!summary || !casesBody || !failuresBody || !legend) return false;
-    const info = report && report.summary ? report.summary : { passed: 0, warned: 0, failed: 0, passedCases: 0, warnedCases: 0, failedCases: 0, caseCount: 0, failureCount: 0, warningCount: 0, engineCount: 0, exampleCount: 0, includesCurrentGraph: false, suite: 'standard', seedCount: 1 };
-    summary.textContent = `Status: ${report.status} | Suite: ${String(info.suite || 'standard')} | Cases: ${info.caseCount} | Engines: ${info.engineCount} | Seeds: ${info.seedCount} | Examples: ${info.exampleCount}${info.includesCurrentGraph ? ' + current graph' : ''} | Passed cases: ${info.passedCases} | Warned cases: ${info.warnedCases} | Failed cases: ${info.failedCases} | Global failures: ${info.failureCount} | Global warnings: ${info.warningCount}`;
+    const info = report && report.summary ? report.summary : { passed: 0, warned: 0, failed: 0, passedCases: 0, warnedCases: 0, failedCases: 0, caseCount: 0, failureCount: 0, warningCount: 0, engineCount: 0, exampleCount: 0, includesCurrentGraph: false, suite: 'standard', seedCount: 1, stoppedEarly: false, reruns: 0, stopOnFirstFailure: false };
+    summary.textContent = `Status: ${report.status} | Suite: ${String(info.suite || 'standard')} | Cases: ${info.caseCount} | Engines: ${info.engineCount} | Seeds: ${info.seedCount} | Examples: ${info.exampleCount}${info.includesCurrentGraph ? ' + current graph' : ''} | Passed cases: ${info.passedCases} | Warned cases: ${info.warnedCases} | Failed cases: ${info.failedCases} | Global failures: ${info.failureCount} | Global warnings: ${info.warningCount} | Reruns: ${Math.max(0, Number(info.reruns) || 0)}${info.stopOnFirstFailure ? ' | Stop on first fail: ON' : ''}${info.stoppedEarly ? ' | Stopped early' : ''}`;
     casesBody.innerHTML = '';
     for(const row of (Array.isArray(report && report.results) ? report.results : [])){
       const tr = document.createElement('tr');
@@ -1405,7 +1462,12 @@ var App = window.App || (window.App = {});
       tr.appendChild(completedTd);
       const notesTd = document.createElement('td');
       notesTd.className = 'engineTestMessage';
-      notesTd.textContent = row.failures && row.failures.length ? `${row.failures.length} error(s)` : row.warnings && row.warnings.length ? `${row.warnings.length} warning(s)` : `Loops: ${Number(row.metrics && row.metrics.loops || 0).toLocaleString()}`;
+      const attempts = Math.max(1, Number(row.attempts) || 1);
+      notesTd.textContent = row.failures && row.failures.length
+        ? `${row.failures.length} error(s)${attempts > 1 ? ` | attempts: ${attempts}` : ''}`
+        : row.warnings && row.warnings.length
+          ? `${row.warnings.length} warning(s)${attempts > 1 ? ` | attempts: ${attempts}` : ''}`
+          : `Loops: ${Number(row.metrics && row.metrics.loops || 0).toLocaleString()}${attempts > 1 ? ` | attempts: ${attempts}` : ''}`;
       tr.appendChild(notesTd);
       casesBody.appendChild(tr);
     }
@@ -1456,6 +1518,8 @@ var App = window.App || (window.App = {});
     const suiteSelect = document.getElementById('engineTestSuiteSelect');
     const strictToggle = document.getElementById('engineTestStrictToggle');
     const seedsInput = document.getElementById('engineTestSeedsInput');
+    const rerunsInput = document.getElementById('engineTestRerunsInput');
+    const stopOnFirstFailureToggle = document.getElementById('engineTestStopOnFirstFailureToggle');
     const progressWrap = document.getElementById('engineTestProgressWrap');
     const progressLabel = document.getElementById('engineTestProgressLabel');
     const progressBar = document.getElementById('engineTestProgressBar');
@@ -1495,6 +1559,7 @@ var App = window.App || (window.App = {});
       const suite = suiteSelect && suiteSelect.value ? suiteSelect.value : 'standard';
       const strictFinalParity = !!(strictToggle && strictToggle.checked);
       const seeds = normalizeSeedList(seedsInput && typeof seedsInput.value === 'string' ? seedsInput.value : '');
+      const reruns = Math.max(0, Math.floor(Number(rerunsInput && rerunsInput.value) || 0));
       return {
         suite,
         strictFinalParity,
@@ -1502,7 +1567,9 @@ var App = window.App || (window.App = {});
         includeCurrentGraph: true,
         includeExamples: true,
         examples: defaultExampleIds(),
-        seeds: seeds.length ? seeds : undefined
+        seeds: seeds.length ? seeds : undefined,
+        reruns,
+        stopOnFirstFailure: !!(stopOnFirstFailureToggle && stopOnFirstFailureToggle.checked)
       };
     }
     function applyControlOptions(options){
@@ -1510,6 +1577,8 @@ var App = window.App || (window.App = {});
       if(suiteSelect) suiteSelect.value = normalized.suite || 'standard';
       if(strictToggle) strictToggle.checked = !!normalized.strictFinalParity;
       if(seedsInput) seedsInput.value = Array.isArray(normalized.seeds) ? normalized.seeds.join(', ') : '';
+      if(rerunsInput) rerunsInput.value = String(Math.max(0, Number(normalized.reruns) || 0));
+      if(stopOnFirstFailureToggle) stopOnFirstFailureToggle.checked = !!normalized.stopOnFirstFailure;
     }
     async function runWithOptions(options){
       if(running) return;
@@ -1559,6 +1628,6 @@ var App = window.App || (window.App = {});
     closeBtn.addEventListener('click', close);
     modal.addEventListener('click', (e)=>{ if(e.target === modal) close(); });
     window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && modal.style.display === 'block') close(); });
-    applyControlOptions({ suite: DEFAULTS.suite, strictFinalParity: SUITE_PRESETS[DEFAULTS.suite] && SUITE_PRESETS[DEFAULTS.suite].strictFinalParity, seeds: SUITE_PRESETS[DEFAULTS.suite] && SUITE_PRESETS[DEFAULTS.suite].seeds });
+    applyControlOptions({ suite: DEFAULTS.suite, strictFinalParity: SUITE_PRESETS[DEFAULTS.suite] && SUITE_PRESETS[DEFAULTS.suite].strictFinalParity, seeds: SUITE_PRESETS[DEFAULTS.suite] && SUITE_PRESETS[DEFAULTS.suite].seeds, reruns: DEFAULTS.reruns, stopOnFirstFailure: DEFAULTS.stopOnFirstFailure });
   })();
 })();

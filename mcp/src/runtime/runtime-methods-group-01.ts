@@ -87,6 +87,236 @@ export function registerRuntimeMethodsGroup01(
 ): void {
   const { getMimeType, toErrorMessage } = helpers;
 
+  function sanitizeArtifactPart(value: unknown): string {
+    const text = String(value ?? "").trim();
+    if (!text) {
+      return "";
+    }
+    return text
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 80);
+  }
+
+  function makeArtifactTimestamp(value?: string | null): string {
+    const source = value && String(value).trim() ? new Date(String(value)) : new Date();
+    const iso = Number.isNaN(source.getTime()) ? new Date().toISOString() : source.toISOString();
+    return iso.replace(/[:.]/g, "-");
+  }
+
+  function toRepoRelative(repoRoot: string, filePath: string): string {
+    return path.relative(repoRoot, filePath).replace(/\\/g, "/");
+  }
+
+  async function writeJsonArtifact(filePath: string, value: unknown): Promise<void> {
+    await mkdir(path.dirname(filePath), { recursive: true });
+    await writeFile(filePath, JSON.stringify(value, null, 2), "utf8");
+  }
+
+  function extractIssueSeed(entry: { message?: string }): number | null {
+    const message = String(entry?.message ?? "");
+    const match = message.match(/\bseed\s+(\d+)\b/i);
+    return match ? Number(match[1]) : null;
+  }
+
+  function buildEngineTestDiff(baseline: any, candidate: any): Record<string, unknown> {
+    const baselineCompleted = Number(baseline?.metrics?.totalCompleted ?? 0);
+    const candidateCompleted = Number(candidate?.metrics?.totalCompleted ?? 0);
+    const baselineSinks = Array.isArray(baseline?.finalSinkSnapshot) ? baseline.finalSinkSnapshot : [];
+    const candidateSinks = Array.isArray(candidate?.finalSinkSnapshot) ? candidate.finalSinkSnapshot : [];
+    const baselineStates = Array.isArray(baseline?.finalStateSnapshot?.rows) ? baseline.finalStateSnapshot.rows : [];
+    const candidateStates = Array.isArray(candidate?.finalStateSnapshot?.rows) ? candidate.finalStateSnapshot.rows : [];
+    const baselineWork = Array.isArray(baseline?.finalWorkSnapshot?.observedLinkKeys) ? baseline.finalWorkSnapshot.observedLinkKeys : [];
+    const candidateWork = Array.isArray(candidate?.finalWorkSnapshot?.observedLinkKeys) ? candidate.finalWorkSnapshot.observedLinkKeys : [];
+    return {
+      scenario: candidate?.scenario ?? baseline?.scenario ?? null,
+      seed: typeof candidate?.seed === "number" ? candidate.seed : (typeof baseline?.seed === "number" ? baseline.seed : null),
+      baselineEngine: baseline?.engine ?? "dt",
+      candidateEngine: candidate?.engine ?? null,
+      completedDelta: candidateCompleted - baselineCompleted,
+      sinkCompletedDelta: candidateSinks.reduce((acc: Array<Record<string, unknown>>, row: any) => {
+        const key = String(row?.key ?? "");
+        const base = baselineSinks.find((entry: any) => String(entry?.key ?? "") === key);
+        const delta = Number(row?.completedCount ?? 0) - Number(base?.completedCount ?? 0);
+        if (delta !== 0) {
+          acc.push({ key, baseline: Number(base?.completedCount ?? 0), candidate: Number(row?.completedCount ?? 0), delta });
+        }
+        return acc;
+      }, []),
+      finalStateDeltaCount: Math.abs(candidateStates.length - baselineStates.length),
+      workflowDeltaCount: Math.abs(candidateWork.length - baselineWork.length)
+    };
+  }
+
+  async function captureCurrentGraphSnapshot(page: Page): Promise<unknown | null> {
+    try {
+      return await page.evaluate(() => {
+        const w = window as unknown as Record<string, unknown>;
+        const app = w.App as { graph?: { serialize?: () => unknown }; serializeGraphData?: () => unknown } | undefined;
+        if (app && typeof app.serializeGraphData === "function") {
+          return app.serializeGraphData();
+        }
+        if (app?.graph && typeof app.graph.serialize === "function") {
+          return app.graph.serialize();
+        }
+        return null;
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  async function saveEngineTestArtifacts(
+    repoRoot: string,
+    page: Page,
+    report: EngineTestOutput,
+    options?: Record<string, unknown>
+  ): Promise<{ artifactDir: string; artifactFiles: Record<string, string> }> {
+    const label = sanitizeArtifactPart(options?.artifactLabel);
+    const dirName = label
+      ? `${makeArtifactTimestamp(report.startedAt)}__${label}`
+      : makeArtifactTimestamp(report.startedAt);
+    const absoluteDir = path.join(repoRoot, "artifacts", "engine-test", dirName);
+    await mkdir(absoluteDir, { recursive: true });
+
+    const artifactFiles: Record<string, string> = {};
+    const capture = async (name: string, relativePath: string, value: unknown) => {
+      const fullPath = path.join(absoluteDir, relativePath);
+      await writeJsonArtifact(fullPath, value);
+      artifactFiles[name] = toRepoRelative(repoRoot, fullPath);
+      return fullPath;
+    };
+
+    await capture("session", "session.json", {
+      version: 1,
+      startedAt: report.startedAt,
+      finishedAt: report.finishedAt,
+      status: report.status,
+      suite: (report.summary && report.summary.suite) || null,
+      seeds: Array.isArray((report.options as any)?.seeds) ? (report.options as any).seeds : [],
+      engines: report.engines,
+      includeCurrentGraph: !!(report.summary && report.summary.includesCurrentGraph),
+      includeExamples: !!(report.options as any)?.includeExamples,
+      examples: Array.isArray((report.options as any)?.examples) ? (report.options as any).examples : [],
+      strictFinalParity: !!(report.options as any)?.strictFinalParity,
+      saveArtifacts: !!(report.options as any)?.saveArtifacts,
+      artifactLabel: String((report.options as any)?.artifactLabel || "")
+    });
+
+    await capture("summary", "summary.json", {
+      kind: report.kind,
+      version: report.version,
+      ok: report.ok,
+      status: report.status,
+      startedAt: report.startedAt,
+      finishedAt: report.finishedAt,
+      summary: report.summary
+    });
+
+    await capture("cases", "cases.json", report.results);
+
+    const includeCurrentGraph = !!(report.summary && report.summary.includesCurrentGraph);
+    if (includeCurrentGraph) {
+      const currentGraph = await captureCurrentGraphSnapshot(page);
+      if (currentGraph) {
+        await capture("graphCurrent", "graph-current.json", currentGraph);
+      }
+    }
+
+    const grouped = new Map<string, any[]>();
+    for (const row of Array.isArray(report.results) ? report.results : []) {
+      const scenario = sanitizeArtifactPart((row as any)?.scenario || "scenario");
+      const seed = Number.isFinite(Number((row as any)?.seed)) ? Number((row as any).seed) : 0;
+      const key = `${scenario}__seed-${seed}`;
+      const list = grouped.get(key) || [];
+      list.push(row);
+      grouped.set(key, list);
+    }
+
+    const issueArtifacts = new Map<string, Record<string, string>>();
+    for (const [groupKey, rows] of grouped.entries()) {
+      const baseline = rows.find((row: any) => row?.engine === "dt") || rows[0];
+      if (baseline) {
+        const baselinePath = path.join(absoluteDir, "baseline-dt", `${groupKey}.json`);
+        await writeJsonArtifact(baselinePath, baseline);
+      }
+      for (const row of rows) {
+        const engine = sanitizeArtifactPart((row as any)?.engine || "engine");
+        const rowBaseName = `${engine}__${groupKey}`;
+        const candidatePath = path.join(absoluteDir, "candidate", `${rowBaseName}.json`);
+        await writeJsonArtifact(candidatePath, row);
+        if ((row as any)?.liveTimelineSignature) {
+          await writeJsonArtifact(path.join(absoluteDir, "timeline", `${rowBaseName}.json`), (row as any).liveTimelineSignature);
+        }
+        if ((row as any)?.liveStateProbe) {
+          await writeJsonArtifact(path.join(absoluteDir, "state", `${rowBaseName}.json`), (row as any).liveStateProbe);
+        }
+        if ((row as any)?.liveFlowProbe) {
+          await writeJsonArtifact(path.join(absoluteDir, "workflow", `${rowBaseName}.json`), (row as any).liveFlowProbe);
+        }
+        await writeJsonArtifact(path.join(absoluteDir, "final", `${rowBaseName}.json`), {
+          finalStateSnapshot: (row as any)?.finalStateSnapshot ?? null,
+          finalWorkSnapshot: (row as any)?.finalWorkSnapshot ?? null,
+          finalSinkSnapshot: (row as any)?.finalSinkSnapshot ?? null,
+          finalEntityLedger: (row as any)?.finalEntityLedger ?? null
+        });
+
+        if (baseline && row !== baseline) {
+          const diffPath = path.join(absoluteDir, "diff", `${rowBaseName}.json`);
+          await writeJsonArtifact(diffPath, buildEngineTestDiff(baseline, row));
+          const reproPayload = {
+            action: "run",
+            suite: (report.summary && report.summary.suite) || (report.options as any)?.suite || "standard",
+            engines: [row.engine],
+            includeCurrentGraph: row.sourceKind === "current_graph",
+            includeExamples: row.sourceKind !== "current_graph",
+            examples: row.sourceKind !== "current_graph" ? [row.scenario] : [],
+            seeds: Number.isFinite(Number(row.seed)) ? [Number(row.seed)] : [],
+            strictFinalParity: !!(report.options as any)?.strictFinalParity,
+            targetSimMs: (report.options as any)?.targetSimMs,
+            maxWallMs: (report.options as any)?.maxWallMs,
+            realStepMs: (report.options as any)?.realStepMs,
+            maxLoops: (report.options as any)?.maxLoops,
+            saveArtifacts: true,
+            artifactLabel: `repro-${rowBaseName}`
+          };
+          const reproPath = path.join(absoluteDir, "repro", `${rowBaseName}.json`);
+          await writeJsonArtifact(reproPath, reproPayload);
+          issueArtifacts.set(`${row.engine}|${row.scenario}|${Number.isFinite(Number(row.seed)) ? Number(row.seed) : ""}`, {
+            repro: toRepoRelative(repoRoot, reproPath),
+            baseline: toRepoRelative(repoRoot, path.join(absoluteDir, "baseline-dt", `${groupKey}.json`)),
+            candidate: toRepoRelative(repoRoot, candidatePath),
+            diff: toRepoRelative(repoRoot, diffPath)
+          });
+        }
+      }
+    }
+
+    const decorateIssues = (issues: any[]) => issues.map((entry) => {
+      const seed = extractIssueSeed(entry);
+      const exactKey = `${String(entry?.engine ?? "")}|${String(entry?.scenario ?? "")}|${seed ?? ""}`;
+      const fallbackKey = `${String(entry?.engine ?? "")}|${String(entry?.scenario ?? "")}|`;
+      const artifacts = issueArtifacts.get(exactKey) || issueArtifacts.get(fallbackKey) || null;
+      return artifacts ? { ...entry, artifacts } : entry;
+    });
+
+    report.failures = decorateIssues(Array.isArray(report.failures) ? report.failures : []);
+    report.warnings = decorateIssues(Array.isArray(report.warnings) ? report.warnings : []);
+
+    await capture("failures", "failures.json", {
+      failures: report.failures,
+      warnings: report.warnings
+    });
+
+    report.artifactDir = toRepoRelative(repoRoot, absoluteDir);
+    report.artifactFiles = artifactFiles;
+    return {
+      artifactDir: report.artifactDir,
+      artifactFiles
+    };
+  }
+
   (FactSimRuntimeClass.prototype as any).loadExample = async function (this: any, example: string): Promise<{ example: string; nodeCount: number }> {
       const page = await this.ensureReady();
       await page.evaluate(async (requestedExample: any) => {
@@ -173,7 +403,7 @@ export function registerRuntimeMethodsGroup01(
         : undefined;
       await this.reloadPage();
       const page = await this.ensureHeadlessToolsReady(requestedModes);
-      return page.evaluate(async (requestedOptions: any) => {
+      const report = await page.evaluate(async (requestedOptions: any) => {
         const w = window as unknown as Record<string, unknown>;
         const app = w.App as {
           runEngineTestsAsync?: (options?: Record<string, unknown>) => Promise<EngineTestOutput>;
@@ -187,6 +417,24 @@ export function registerRuntimeMethodsGroup01(
           requestedOptions && typeof requestedOptions === "object" ? requestedOptions : undefined
         );
       }, options ?? null);
+      if (options && options.saveArtifacts) {
+        await saveEngineTestArtifacts(this.repoRoot, page, report, options);
+        await page.evaluate((artifactMeta: any) => {
+          const w = window as unknown as Record<string, unknown>;
+          const app = w.App as { latestEngineTestReport?: Record<string, unknown> } | undefined;
+          if (!app || !app.latestEngineTestReport || typeof app.latestEngineTestReport !== "object") {
+            return;
+          }
+          app.latestEngineTestReport.artifactDir = artifactMeta?.artifactDir ?? null;
+          app.latestEngineTestReport.artifactFiles = artifactMeta?.artifactFiles ?? null;
+          try {
+            localStorage.setItem("fact_sim_latest_engine_test_report", JSON.stringify(app.latestEngineTestReport));
+          } catch {
+            // ignore storage failures
+          }
+        }, { artifactDir: report.artifactDir ?? null, artifactFiles: report.artifactFiles ?? null });
+      }
+      return report;
     };
 
   (FactSimRuntimeClass.prototype as any).getLatestEngineTestReport = async function (this: any): Promise<EngineTestOutput | null> {
