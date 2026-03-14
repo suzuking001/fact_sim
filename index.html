@@ -24,7 +24,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260313d" />
+  <link rel="stylesheet" href="css/app.css?v=20260314b" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -176,7 +176,7 @@
     </div>
     <div id="controls">
       <div class="panelHeader">Simulation</div>
-      <div class="btn-row">
+      <div class="btn-row simulationRunGrid">
         <button id="btnStart">Start</button>
         <button id="btnStop">Stop</button>
         <button id="btnReset">Reset</button>
@@ -188,7 +188,7 @@
       <div class="control-group">
         <label for="exampleSelect">Example</label>
         <select id="exampleSelect" title="Examples">
-          <option value="">Load example…</option>
+          <option value="">Choose example…</option>
           <option value="simple">Simple</option>
           <option value="branch">Branch</option>
           <option value="shuttle_line5">Shuttle Line (5 Stage)</option>
@@ -197,6 +197,12 @@
           <option value="sample_line1">Sample Line1</option>
           <option value="sample_line2">Sample Line2</option>
         </select>
+        <div class="fieldHint">Start with a sample model if this is your first time.</div>
+        <div class="btn-row exampleSaveActions">
+          <button id="btnLinkExampleFolder" type="button">Link Sample Folder</button>
+          <button id="btnOverwriteExample" type="button">Overwrite Example</button>
+        </div>
+        <div id="exampleSaveHint" class="fieldHint">Save the current graph back into the selected example files.</div>
       </div>
       <div id="simStatusCard" class="simStatusCard" aria-live="polite">
         <div class="simStatusHead">
@@ -223,10 +229,14 @@
         </div>
       </div>
       <div class="sidebarMetaFooter">
-        <div id="overviewQuickTip" class="panel-help panel-help-compact">Load an example, then press Start.</div>
-        <div id="accessCounter" class="accessCounter" title="Public access counter (CounterAPI)">
-          <span class="accessCounterLabel">Visits</span>
-          <span id="accessCounterValue">...</span>
+        <div class="quickStartCard" aria-live="polite">
+          <div class="quickStartTitle">Getting Started</div>
+          <ol class="quickStartSteps">
+            <li>Choose an example.</li>
+            <li>Press <strong>Start</strong>.</li>
+            <li>Read <strong>Timeline</strong> or <strong>Details</strong>.</li>
+          </ol>
+          <div id="overviewQuickTip" class="quickStartHint">Choose an example, then press Start.</div>
         </div>
       </div>
     </div>
@@ -311,7 +321,7 @@
         <summary>Node Settings</summary>
         <div id="addNodeProps" class="propFields"></div>
       </details>
-      <button id="btnAddNode">Place Node</button>
+      <button id="btnAddNode">Place on Canvas</button>
     </div>
     <div id="addGroupPanel">
       <div class="panelHeader">Add Stop Group</div>
@@ -325,7 +335,7 @@
         <summary>Pattern Settings</summary>
         <div id="addGroupProps" class="propFields"></div>
       </details>
-      <button id="btnAddGroup">Place Group</button>
+      <button id="btnAddGroup">Draw on Canvas</button>
     </div>
     <div id="advancedPanel">
       <div class="panelHeader">Performance</div>
@@ -352,11 +362,16 @@
           <option value="event">event (heap)</option>
           <option value="event-fast">event-fast (compiled)</option>
         </select>
+        <div class="fieldHint">If unsure, keep <strong>dt</strong>. It is the easiest baseline to understand.</div>
       </div>
-      <div class="performanceActionsRow">
-        <button id="btnBenchmark">Benchmark</button>
-        <button id="btnEngineTest" class="button-secondary">Engine Test</button>
-      </div>
+      <details id="performanceDiagnosticsDetails" class="panelDetails">
+        <summary>Diagnostics</summary>
+        <div class="performanceActionsRow">
+          <button id="btnBenchmark">Speed Test</button>
+          <button id="btnEngineTest" class="button-secondary">Validate Engines</button>
+        </div>
+        <div class="fieldHint">Use these when comparing engine speed or checking parity.</div>
+      </details>
       </div>
       <div id="shortcutPanel">
         <div class="panelHeader">Canvas Tools</div>
@@ -468,26 +483,26 @@
         <span class="timelineTitle">Workspace</span>
         <div class="timelineTabs" role="tablist" aria-label="Timeline dock tabs">
           <button id="timelineTabChart" class="timelineTab is-active" role="tab" aria-selected="true">Timeline</button>
-          <button id="timelineTabProps" class="timelineTab" role="tab" aria-selected="false">Table</button>
-          <button id="timelineTabInspector" class="timelineTab" role="tab" aria-selected="false">Inspector</button>
+          <button id="timelineTabProps" class="timelineTab" role="tab" aria-selected="false">Nodes</button>
+          <button id="timelineTabInspector" class="timelineTab" role="tab" aria-selected="false">Details</button>
         </div>
       </div>
-      <span id="timelineSelection" class="timelineSelection">Selection: -</span>
+      <span id="timelineSelection" class="timelineSelection">Nothing selected</span>
       <span id="timelinePropsMeta" class="timelinePropsMeta" aria-live="polite"></span>
       <div id="timelineChartActions" class="timelineActions">
-        <button id="timelineAutoOrderBtn" class="timelineBtn">Reset Order</button>
+        <button id="timelineAutoOrderBtn" class="timelineBtn">Reset Rows</button>
         <button id="timelineExportBtn" class="timelineBtn">Export CSV</button>
-        <button id="timelineFollowBtn" class="timelineBtn">Auto Follow: ON</button>
-        <button id="timelineChartPopoutBtn" class="timelineBtn">Open Window</button>
+        <button id="timelineFollowBtn" class="timelineBtn">Follow: ON</button>
+        <button id="timelineChartPopoutBtn" class="timelineBtn">Pop Out</button>
       </div>
       <div id="timelinePropsActions" class="timelineActions">
         <button id="nodePropsRefreshBtn" class="timelineBtn">Refresh</button>
-        <button id="timelinePropsPopoutBtn" class="timelineBtn">Open Window</button>
+        <button id="timelinePropsPopoutBtn" class="timelineBtn">Pop Out</button>
       </div>
       <div id="timelineInspectorActions" class="timelineActions">
         <button id="selectionInspectorRefreshBtn" class="timelineBtn">Refresh</button>
         <button id="selectionInspectorClearBtn" class="timelineBtn">Clear</button>
-        <button id="timelineInspectorPopoutBtn" class="timelineBtn">Open Window</button>
+        <button id="timelineInspectorPopoutBtn" class="timelineBtn">Pop Out</button>
       </div>
     </div>
     <div id="timelineBody" class="view-chart">
@@ -759,7 +774,7 @@ SOFTWARE.
   </div>
 
   <script src="js/app/landing.js?v=20260313a"></script>
-  <script src="js/core.js?v=20260313k"></script>
+  <script src="js/core.js?v=20260313l"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js?v=20260309a"></script>
@@ -771,7 +786,7 @@ SOFTWARE.
   <script src="js/nodes/equipment.js?v=20260307c"></script>
   <script src="js/nodes/note.js?v=20260305a"></script>
   <script src="js/nodes/signal.js?v=20260307c"></script>
-  <script src="js/nodes/shuttle_stage.js?v=20260307a"></script>
+  <script src="js/nodes/shuttle_stage.js?v=20260314a"></script>
   <script src="js/nodes/source.js?v=20260307c"></script>
   <script src="js/nodes/split.js?v=20260307b"></script>
   <script src="js/nodes/branch.js?v=20260307b"></script>
@@ -793,7 +808,7 @@ SOFTWARE.
   <script src="sample/pallet_station_demo.js?v=20260226a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
   <script src="sample/sample_line2.js?v=20260313a"></script>
-  <script src="js/timeline.js?v=20260313b"></script>
+  <script src="js/timeline.js?v=20260314a"></script>
   <script src="js/app/state.js?v=20260225b"></script>
   <script src="js/app/background-layout.js?v=20260313b"></script>
   <script src="js/app/graph-links.js?v=20260301a"></script>
@@ -808,22 +823,22 @@ SOFTWARE.
   <script src="js/app/engine-fast-worker-protocol.js?v=20260310b"></script>
 <script src="js/app/engine-fast-worker-host.js?v=20260313g"></script>
   <script src="js/app/engine-fast-par-protocol.js?v=20260311b"></script>
-  <script src="js/app/engine-fast-par-partitioner.js?v=20260311b"></script>
+  <script src="js/app/engine-fast-par-partitioner.js?v=20260314a"></script>
 <script src="js/app/engine-fast-par-host.js?v=20260313g"></script>
   <script src="js/app/sim.js?v=20260222a"></script>
 <script src="js/app/benchmark.js?v=20260311a"></script>
 <script src="js/app/engine-test.js?v=20260313j"></script>
   <script src="js/app/history.js?v=20260307a"></script>
-  <script src="js/app/selection.js?v=20260313a"></script>
+  <script src="js/app/selection.js?v=20260314b"></script>
   <script src="js/app/fit.js?v=20260306a"></script>
   <script src="js/app/node-props-panel.js?v=20260308c"></script>
-  <script src="js/app/selection-inspector.js?v=20260308e"></script>
-  <script src="js/app/timeline-init.js?v=20260313a"></script>
+  <script src="js/app/selection-inspector.js?v=20260313a"></script>
+  <script src="js/app/timeline-init.js?v=20260314a"></script>
   <script src="js/app/graph-init.js?v=20260313a"></script>
-  <script src="js/app/examples.js?v=20260313c"></script>
+  <script src="js/app/examples.js?v=20260314b"></script>
   <script src="js/app/file-io.js?v=20260313a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
-  <script src="js/app/ui.js?v=20260313a"></script>
+  <script src="js/app/ui.js?v=20260314a"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

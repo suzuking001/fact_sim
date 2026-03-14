@@ -356,6 +356,13 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
     ];
     drawStateBelow(ctx, this, lines, 8, 6);
   }
+
+  getEventUntil(now){
+    if(this._state === 'TRANSFER'){
+      return Number(now) || 0;
+    }
+    return NaN;
+  }
 }
 
 menuMixin(ShuttleStageNode);

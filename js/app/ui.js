@@ -1573,18 +1573,18 @@ window.beginGroupPlacement = beginGroupPlacement;
     const count = selectedMap ? Object.keys(selectedMap).length : 0;
     if(App.placement?.active){
       const label = _getPlacementItemLabel(App.placement.kind, App.placement.item);
-      overviewQuickTip.textContent = `Place ${label}. Right-click or Esc cancels.`;
+      overviewQuickTip.textContent = `Place ${label} on the canvas. Right-click or Esc cancels.`;
       return;
     }
     if(count > 0){
-      overviewQuickTip.textContent = `${count} node${count === 1 ? '' : 's'} selected. Edit in Inspector.`;
+      overviewQuickTip.textContent = `${count} node${count === 1 ? '' : 's'} selected. Open Details to edit them.`;
       return;
     }
     if(exampleSelect?.value){
-      overviewQuickTip.textContent = `${getSelectedOptionLabel(exampleSelect, 'Example')} is ready. Press Start to run.`;
+      overviewQuickTip.textContent = `${getSelectedOptionLabel(exampleSelect, 'Example')} is ready. Press Start to simulate it.`;
       return;
     }
-    overviewQuickTip.textContent = 'Load an example or open Add Node to begin.';
+    overviewQuickTip.textContent = 'Choose an example to learn the app, or open Add Node to build your own flow.';
   }
 
   function updateSidebarSummaries(){
@@ -1658,7 +1658,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     if(simStatusSelection){
       const selectedMap = App.canvas && App.canvas.selected_nodes ? App.canvas.selected_nodes : null;
       const count = selectedMap ? Object.keys(selectedMap).length : 0;
-      simStatusSelection.textContent = `${count} node${count === 1 ? '' : 's'}`;
+      simStatusSelection.textContent = count ? `${count} node${count === 1 ? '' : 's'}` : 'None';
     }
     updateOverviewQuickTip();
     updateSidebarSummaries();

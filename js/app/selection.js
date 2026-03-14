@@ -18,6 +18,26 @@ function findNodeAtCanvasPos(c, x, y){
   return null;
 }
 
+function clearSelectionRect(c){
+  if(!c) return;
+  c.dragging_rectangle = null;
+  c.__factBoxSelectRect = null;
+  c.__boxSelectActive = false;
+  c.__rectSelectForce = false;
+}
+
+function snapshotSelectionRect(c){
+  if(!c || !c.dragging_rectangle || !c.__boxSelectActive) return null;
+  const src = c.dragging_rectangle;
+  let rect = c.__factBoxSelectRect;
+  if(!rect || rect.length !== 4) rect = c.__factBoxSelectRect = new Float32Array(4);
+  rect[0] = src[0];
+  rect[1] = src[1];
+  rect[2] = src[2];
+  rect[3] = src[3];
+  return rect;
+}
+
 function installBoxSelect(c){
   if(!c || c.__boxSelectHooked) return;
   const el = c.canvas;
@@ -45,6 +65,7 @@ function installBoxSelect(c){
     selecting = true;
     c.__boxSelectActive = true;
     c.dragging_rectangle = new Float32Array([p[0], p[1], 1, 1]);
+    snapshotSelectionRect(c);
     c.setDirty(true, true);
     e.preventDefault();
     e.stopPropagation();
@@ -55,16 +76,16 @@ function installBoxSelect(c){
     const p = getCanvasPos(e);
     c.dragging_rectangle[2] = p[0] - c.dragging_rectangle[0];
     c.dragging_rectangle[3] = p[1] - c.dragging_rectangle[1];
+    snapshotSelectionRect(c);
     c.setDirty(true);
   }, opts);
 
   window.addEventListener('mouseup', (e)=>{
     if(!selecting) return;
     selecting = false;
-    c.__boxSelectActive = false;
-    c.__rectSelectForce = false;
-    const rect = c.dragging_rectangle;
-    c.dragging_rectangle = null;
+    const rectSource = snapshotSelectionRect(c) || c.dragging_rectangle;
+    const rect = rectSource ? [rectSource[0], rectSource[1], rectSource[2], rectSource[3]] : null;
+    clearSelectionRect(c);
     if(rect && c.graph){
       const x = rect[2] < 0 ? rect[0] + rect[2] : rect[0];
       const y = rect[3] < 0 ? rect[1] + rect[3] : rect[1];
@@ -86,23 +107,49 @@ function installBoxSelect(c){
 
   window.addEventListener('blur', ()=>{
     selecting = false;
-    c.__boxSelectActive = false;
-    c.dragging_rectangle = null;
+    clearSelectionRect(c);
     try{ c.setDirty(true, true); }catch(_e){}
   }, opts);
 
   c.__boxSelectHooked = true;
 }
 
+function installBoxSelectBuiltinSuppression(c){
+  if(!c || c.__boxSelectBuiltinSuppressionHooked) return;
+  const prev = c.drawFrontCanvas;
+  if(typeof prev !== 'function') return;
+  c.drawFrontCanvas = function(){
+    let suppressedRect = null;
+    try{
+      if(this.dragging_rectangle && this.__boxSelectActive){
+        snapshotSelectionRect(this);
+        suppressedRect = this.dragging_rectangle;
+        this.dragging_rectangle = null;
+      }else if(this.dragging_rectangle && !this.__boxSelectActive){
+        clearSelectionRect(this);
+      }else if(!this.__boxSelectActive && this.__factBoxSelectRect){
+        this.__factBoxSelectRect = null;
+      }
+      return prev.apply(this, arguments);
+    }finally{
+      if(suppressedRect && this.__boxSelectActive){
+        this.dragging_rectangle = suppressedRect;
+      }
+    }
+  };
+  c.__boxSelectBuiltinSuppressionHooked = true;
+}
+
 function installBoxSelectOverlay(c){
   if(!c || c.__boxSelectOverlayHooked) return;
+  installBoxSelectBuiltinSuppression(c);
   const prev = c.onDrawOverlay;
   c.onDrawOverlay = function(ctx){
     try{
       if(typeof prev === 'function') prev.call(this, ctx);
-      const rect = this.dragging_rectangle;
+      const rect = this.__factBoxSelectRect || this.dragging_rectangle;
       if(!rect || !this.__boxSelectActive){
-        if(rect && !this.__boxSelectActive) this.dragging_rectangle = null;
+        if(rect && !this.__boxSelectActive) clearSelectionRect(this);
         return;
       }
       const x = rect[2] < 0 ? rect[0] + rect[2] : rect[0];

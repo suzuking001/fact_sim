@@ -28,7 +28,7 @@ function initTimeline(){
   const propsPopoutBtn = document.getElementById('timelinePropsPopoutBtn');
   const inspectorPopoutBtn = document.getElementById('timelineInspectorPopoutBtn');
   const propsMeta = document.getElementById('timelinePropsMeta');
-  if(propsMeta) propsMeta.textContent = 'Browse nodes and open Inspector.';
+  if(propsMeta) propsMeta.textContent = 'Browse nodes and open Details.';
   const minH = 120;
   const hideSnapH = 72;
   const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
@@ -84,7 +84,7 @@ function initTimeline(){
       tabInspector.setAttribute('aria-selected', active ? 'true' : 'false');
     }
     if(propsMeta){
-      if(view === 'props') propsMeta.textContent = 'Browse nodes and open Inspector.';
+      if(view === 'props') propsMeta.textContent = 'Browse nodes and open Details.';
       else if(view === 'inspector') propsMeta.textContent = 'Edit the selected node or group with focused controls.';
     }
     if(view === 'chart'){
@@ -107,7 +107,7 @@ function initTimeline(){
   const followBtn = document.getElementById('timelineFollowBtn');
   if(followBtn){
     App.timelineChart.onFollowChange = (v)=>{
-      followBtn.textContent = v ? 'Auto Follow: ON' : 'Auto Follow: OFF';
+      followBtn.textContent = v ? 'Follow: ON' : 'Follow: OFF';
       if(typeof App.syncWorkspacePopouts === 'function') App.syncWorkspacePopouts();
     };
     followBtn.addEventListener('click', ()=>{
@@ -168,10 +168,10 @@ function initTimeline(){
       title: 'Timeline',
       panel: chartPanel,
       button: chartPopoutBtn,
-      metaText: ()=> (document.getElementById('timelineSelection')?.textContent || 'Selection: -'),
+      metaText: ()=> (document.getElementById('timelineSelection')?.textContent || 'Nothing selected'),
       createActions(doc, close){
         const actions = [];
-        actions.push(makePopupActionButton(doc, 'Reset Order', ()=>{
+        actions.push(makePopupActionButton(doc, 'Reset Rows', ()=>{
           if(App.timelineChart && typeof App.timelineChart.resetTimelineOrderToAuto === 'function'){
             App.timelineChart.resetTimelineOrderToAuto();
             if(typeof App.showToast === 'function') App.showToast('Timeline order reset to auto');
@@ -182,7 +182,7 @@ function initTimeline(){
             App.timelineChart.exportCsv();
           }
         }));
-        const followAction = makePopupActionButton(doc, App.timelineChart && App.timelineChart.follow ? 'Auto Follow: ON' : 'Auto Follow: OFF', ()=>{
+        const followAction = makePopupActionButton(doc, App.timelineChart && App.timelineChart.follow ? 'Follow: ON' : 'Follow: OFF', ()=>{
           if(App.timelineChart){
             App.timelineChart.setFollow(!App.timelineChart.follow);
             App.timelineChart.draw();
@@ -207,11 +207,11 @@ function initTimeline(){
       }
     },
     props: {
-      title: 'Table',
+      title: 'Nodes',
       panel: document.getElementById('nodePropsPanel'),
       button: propsPopoutBtn,
       metaText: ()=>{
-        const meta = document.getElementById('timelinePropsMeta')?.textContent || 'Browse nodes and open Inspector.';
+        const meta = document.getElementById('timelinePropsMeta')?.textContent || 'Browse nodes and open Details.';
         const summary = document.getElementById('nodePropsSummary')?.textContent || '';
         return summary ? `${meta} ${String(meta).endsWith('.') ? '' : '•'} ${summary}`.trim() : meta;
       },
@@ -230,7 +230,7 @@ function initTimeline(){
       }
     },
     inspector: {
-      title: 'Inspector',
+      title: 'Details',
       panel: document.getElementById('selectionInspectorPanel'),
       button: inspectorPopoutBtn,
       metaText: ()=> (document.getElementById('timelinePropsMeta')?.textContent || 'Edit the selected node or group with focused controls.'),
@@ -321,7 +321,7 @@ function initTimeline(){
       const btn = popupConfigs[view].button;
       if(!btn) return;
       const opened = !!(state && state.popup && !state.popup.closed);
-      btn.textContent = opened ? 'Return to Dock' : 'Open Window';
+      btn.textContent = opened ? 'Return to Dock' : 'Pop Out';
       btn.classList.toggle('is-active', opened);
     });
   }
@@ -338,7 +338,7 @@ function initTimeline(){
       try{
         if(state.metaEl) state.metaEl.textContent = popupConfigs[view].metaText();
         if(state.followButton && App.timelineChart){
-          state.followButton.textContent = App.timelineChart.follow ? 'Auto Follow: ON' : 'Auto Follow: OFF';
+          state.followButton.textContent = App.timelineChart.follow ? 'Follow: ON' : 'Follow: OFF';
         }
       }catch(_e){}
     });

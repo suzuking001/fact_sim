@@ -181,7 +181,7 @@ var App = window.App || (window.App = {});
 
     const sidebarRect = visibleDomRect(document.getElementById('sidebar'));
     if(sidebarRect && sidebarRect.left < safeRight && sidebarRect.right > safeLeft){
-      safeRight = Math.min(safeRight, sidebarRect.left - 14);
+      safeLeft = Math.max(safeLeft, sidebarRect.right + 14);
     }
 
     const dockRect = visibleDomRect(document.getElementById('timelineDock'));

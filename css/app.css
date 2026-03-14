@@ -652,11 +652,20 @@ html.skip-landing #landing{
   border-radius: 10px;
   border: 1px solid rgba(148,163,184,0.28);
   background: rgba(255,255,255,0.56);
+  transition: left .24s ease, transform .24s ease, opacity .24s ease;
   box-shadow: 0 4px 14px rgba(15,23,42,0.12);
   backdrop-filter: blur(8px);
   color: var(--muted);
   font-weight: 600;
   pointer-events: none;
+}
+
+body:not(.sidebar-hidden) #simTimeHud{
+  left: calc(var(--sidebar-width) + 12px);
+}
+
+body.sidebar-hidden #simTimeHud{
+  left: 12px;
 }
 #simTime{
   min-width: 86px;
@@ -736,13 +745,13 @@ html.skip-landing #landing{
 *::-webkit-scrollbar-thumb{background:#2a3242;border-radius:10px;border:3px solid transparent;background-clip:content-box}
 *::-webkit-scrollbar-track{background:transparent}
 
-/* === Sidebar & Toggle (right-side menu) === */
+/* === Sidebar & Toggle (left-side menu) === */
 #sidebar{
   position: fixed;
-  top: 0; right: 0; height: 100%; width: 340px;
+  top: 0; left: 0; height: 100%; width: 340px;
   background: var(--menu-shell-bg);
-  border-left: 1px solid var(--menu-shell-border);
-  box-shadow: -8px 0 24px rgba(0,0,0,0.08);
+  border-right: 1px solid var(--menu-shell-border);
+  box-shadow: 8px 0 24px rgba(0,0,0,0.08);
   display: flex; flex-direction: column; gap: 16px;
   padding: 64px 12px 12px; box-sizing: border-box; position: fixed;
   z-index: 1700; backdrop-filter: blur(8px);
@@ -767,11 +776,11 @@ body:not(.timeline-hidden) #sidebar{
   height: calc(100% - var(--timeline-height));
 }
 /* Fully hide the sidebar when collapsed */
-body.sidebar-hidden #sidebar{ transform: translateX(100%); }
+body.sidebar-hidden #sidebar{ transform: translateX(-100%); }
 
 /* Keep canvas interactive and visible with sidebar */
 #graph{ position: absolute; inset: 0; }
-body:not(.sidebar-hidden) #graph{ right: 340px; }
+body:not(.sidebar-hidden) #graph{ left: 340px; }
 body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 
 /* Controls inside sidebar use normal flow (override older absolute rules) */
@@ -888,8 +897,22 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
-#sidebar #controls .btn-row #btnReset{
+#sidebar #controls .simulationRunGrid #btnStart{
   grid-column: 1 / -1;
+  min-height: 42px;
+  font-weight: 700;
+}
+#sidebar #controls .simulationRunGrid #btnStop,
+#sidebar #controls .simulationRunGrid #btnReset{
+  min-height: 38px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,246,249,0.92));
+  color: #1d1d1f;
+  border-color: rgba(15,23,42,0.12);
+  box-shadow: 0 6px 12px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.75);
+}
+#sidebar #controls .simulationRunGrid #btnReset{
+  color: #9b1c1c;
+  border-color: rgba(180,35,24,0.18);
 }
 #sidebar #fileControls{
   margin-bottom: 10px;
@@ -928,7 +951,7 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 
 /* Hamburger toggle button (outside sidebar) */
 #menuToggle{
-  position: fixed; top: 10px; right: 10px;
+  position: fixed; top: 10px; left: 10px;
   z-index: 2000; width: 40px; height: 40px;
   border-radius: 10px;
   border: 1px solid rgba(15,23,42,0.2);
@@ -2367,6 +2390,26 @@ body:not(.sidebar-hidden) #graph{ right: 352px; }
   padding:7px 10px;
   font-size:11px;
   line-height:1.45;
+}
+
+.fieldHint{
+  margin-top: 6px;
+  color: rgba(29,29,31,0.62);
+  font: 500 12px/1.45 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.fieldHint strong{
+  color: #1d1d1f;
+  font-weight: 700;
+}
+
+.exampleSaveActions{
+  margin-top: 4px;
+}
+
+#sidebar .exampleSaveActions > button{
+  flex: 1 1 140px;
+  min-width: 0;
 }
 
 .simStatusCard{
@@ -3849,28 +3892,33 @@ body:not(.sidebar-hidden) #graph{
 
 .panelHeaderLabel{
   min-width: 0;
+  color: #1d1d1f;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .panelHeaderMeta{
   display: inline-flex;
   align-items: center;
-  max-width: 62%;
-  min-height: 24px;
+  justify-content: flex-end;
+  max-width: 68%;
+  min-height: 30px;
   margin-left: auto;
-  padding: 0 10px;
-  border-radius: 999px;
+  padding: 4px 10px;
+  border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.82);
   background: rgba(255,255,255,0.72);
   color: rgba(60,60,67,0.72);
   font-family: var(--ui-font);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.25;
   letter-spacing: 0;
   text-transform: none;
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: right;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.44);
 }
 
@@ -3978,7 +4026,7 @@ body:not(.landing-hidden) #toast{
 }
 
 body:not(.landing-hidden) #sidebar{
-  transform: translateX(28px);
+  transform: translateX(-28px);
 }
 
 body:not(.landing-hidden) #timelineDock{
@@ -4083,26 +4131,42 @@ body.landing-preview-live #graph canvas{
   gap: 8px;
 }
 
-#overviewQuickTip{
-  padding: 10px 12px;
-  border-radius: 16px;
-  border-color: rgba(10,132,255,0.10);
-  background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(246,249,253,0.72));
+.quickStartCard{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.82);
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(246,249,253,0.74));
+  box-shadow: 0 12px 26px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.52);
 }
 
-#sidebar .accessCounter{
-  align-self: flex-start;
-  min-height: 0;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.58);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42);
+.quickStartTitle{
+  color: #1d1d1f;
+  font: 700 13px/1.2 'Inter', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
-#sidebar .accessCounter .accessCounterLabel,
-#accessCounterValue{
-  font-size: 11px;
+.quickStartSteps{
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(29,29,31,0.74);
+  font: 500 12px/1.55 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.quickStartSteps strong{
+  color: #1d1d1f;
+  font-weight: 700;
+}
+
+.quickStartHint{
+  padding: 9px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(10,132,255,0.10);
+  background: rgba(255,255,255,0.66);
+  color: rgba(29,29,31,0.7);
+  font: 600 12px/1.45 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
 .panelDetails{
@@ -4196,7 +4260,7 @@ body.landing-preview-live #graph canvas{
 #sidebar{
   width: var(--sidebar-width);
   top: 0;
-  right: 0;
+  left: 0;
   bottom: 0;
   height: 100%;
   padding-bottom: 12px;
@@ -4208,11 +4272,13 @@ body:not(.timeline-hidden) #sidebar{
 }
 
 body:not(.sidebar-hidden) #graph{
-  right: var(--sidebar-width);
+  left: var(--sidebar-width);
+  right: 0;
   width: calc(100% - var(--sidebar-width));
 }
 
 body.sidebar-hidden #graph{
+  left: 0;
   right: 0;
   width: 100%;
 }
@@ -4227,31 +4293,37 @@ body.timeline-hidden #graph{
 
 #timelineDock{
   left: 0;
+  right: 0;
   width: auto;
 }
 
 body:not(.sidebar-hidden) #timelineDock{
-  right: var(--sidebar-width);
+  left: var(--sidebar-width);
+  right: 0;
 }
 
 body.sidebar-hidden #timelineDock{
+  left: 0;
   right: 0;
 }
 
 body:not(.sidebar-hidden) #timelineRevealHandle{
-  right: var(--sidebar-width);
+  left: var(--sidebar-width);
+  right: 0;
 }
 
 body.sidebar-hidden #timelineRevealHandle{
+  left: 0;
   right: 0;
 }
 
 #timelineHeader{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "left actions"
-    "meta meta";
+    "left"
+    "actions"
+    "meta";
   height: auto;
   min-height: var(--timeline-header);
   padding: 10px 12px 12px;
@@ -4285,18 +4357,19 @@ body.sidebar-hidden #timelineRevealHandle{
 
 #timelineHeader .timelineActions{
   grid-area: actions;
-  justify-self: end;
+  justify-self: start;
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
-  max-width: min(100%, 420px);
+  max-width: 100%;
 }
 
 #timelineHeader .timelineBtn{
-  min-height: 34px;
-  padding: 0 12px;
+  min-height: 32px;
+  padding: 0 11px;
   white-space: nowrap;
+  font-size: 12px;
 }
 
 .workspacePopoutPlaceholder{

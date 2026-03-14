@@ -4,10 +4,6 @@ var App = window.App || (window.App = {});
   const MAX_DEFAULT_PARTITIONS = 4;
   const MIN_PAR_NODE_COUNT = 8;
   const MAX_CUT_RATIO = 0.45;
-  const UNSAFE_EXECUTABLE_TYPES = new Set([
-    'factory/carrierroute',
-    'factory/shuttle_stage'
-  ]);
 
   function cloneJson(value){
     try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
@@ -263,13 +259,13 @@ var App = window.App || (window.App = {});
     const executableTypes = Array.isArray(fallbackProfile.executableTypes)
       ? fallbackProfile.executableTypes.map((row)=> String(row || '').trim().toLowerCase()).filter(Boolean)
       : [];
-    const hasUnsafeExecutableFallback = executableTypes.some((type)=> UNSAFE_EXECUTABLE_TYPES.has(type));
+    const hasExecutableFallback = executableTypes.length > 0 || (Number(fallbackProfile.executableCount) || 0) > 0;
 
-    if(hasUnsafeExecutableFallback){
+    if(hasExecutableFallback){
       return {
         canParallelize: false,
         fallbackMode: 'event-fast-worker',
-        reason: 'unsafe-executable-fallback',
+        reason: 'executable-fallback-present',
         graphData,
         compiledMeta: compiled.meta || {},
         fallbackProfile

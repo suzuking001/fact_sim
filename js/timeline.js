@@ -558,18 +558,18 @@
     _updateSelectionLabel(){
       if(!this._selectionEl) return;
       if(this.selectedNodeId !== null){
-        this._selectionEl.textContent = `Focus: Node #${this.selectedNodeId}`;
+        this._selectionEl.textContent = `Selected: Node #${this.selectedNodeId}`;
         return;
       }
       if(this.selectedWorkId !== null){
-        this._selectionEl.textContent = `Focus: Work ${this.selectedWorkId}`;
+        this._selectionEl.textContent = `Selected: Work ${this.selectedWorkId}`;
         return;
       }
       if(this.selectedAgvId !== null){
-        this._selectionEl.textContent = `Focus: AGV ${this.selectedAgvId}`;
+        this._selectionEl.textContent = `Selected: AGV ${this.selectedAgvId}`;
         return;
       }
-      this._selectionEl.textContent = 'Focus: none';
+      this._selectionEl.textContent = 'Nothing selected';
     }
 
     exportCsv(){

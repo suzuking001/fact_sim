@@ -11,7 +11,7 @@
       ],
       "size": [
         142.8000030517578,
-        26
+        66
       ],
       "inputs": [],
       "outputs": [],
@@ -30,7 +30,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 26,
       "inputs": [
@@ -68,7 +68,7 @@
       ],
       "size": [
         186.39999389648438,
-        86
+        145
       ],
       "order": 31,
       "inputs": [
@@ -203,7 +203,7 @@
       ],
       "size": [
         186.39999389648438,
-        106
+        156
       ],
       "order": 27,
       "inputs": [
@@ -293,7 +293,7 @@
       ],
       "size": [
         186.39999389648438,
-        86
+        145
       ],
       "order": 24,
       "inputs": [
@@ -428,7 +428,7 @@
       ],
       "size": [
         140,
-        26
+        66
       ],
       "order": 1,
       "inputs": [],
@@ -448,7 +448,7 @@
       ],
       "size": [
         140,
-        26
+        84
       ],
       "order": 36,
       "inputs": [
@@ -484,7 +484,7 @@
       ],
       "size": [
         140,
-        26
+        84
       ],
       "order": 37,
       "inputs": [
@@ -520,7 +520,7 @@
       ],
       "size": [
         140,
-        26
+        84
       ],
       "order": 38,
       "inputs": [
@@ -556,7 +556,7 @@
       ],
       "size": [
         140,
-        26
+        84
       ],
       "order": 39,
       "inputs": [
@@ -592,7 +592,7 @@
       ],
       "size": [
         140,
-        26
+        84
       ],
       "order": 40,
       "inputs": [
@@ -628,7 +628,7 @@
       ],
       "size": [
         181.71395874023438,
-        50
+        84
       ],
       "order": 42,
       "inputs": [
@@ -666,7 +666,7 @@
       ],
       "size": [
         210,
-        98
+        138
       ],
       "order": 43,
       "inputs": [
@@ -741,7 +741,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 44,
       "inputs": [
@@ -779,7 +779,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 45,
       "inputs": [
@@ -817,7 +817,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 46,
       "inputs": [
@@ -855,7 +855,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 47,
       "inputs": [
@@ -893,7 +893,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 48,
       "inputs": [
@@ -931,7 +931,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 49,
       "inputs": [
@@ -969,7 +969,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 50,
       "inputs": [
@@ -1007,7 +1007,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 51,
       "inputs": [
@@ -1045,7 +1045,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 52,
       "inputs": [
@@ -1077,6 +1077,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -1089,7 +1090,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 53,
       "inputs": [
@@ -1130,7 +1131,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 54,
       "inputs": [
@@ -1171,7 +1172,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 55,
       "inputs": [
@@ -1209,7 +1210,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 56,
       "inputs": [
@@ -1241,6 +1242,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -1253,7 +1255,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 57,
       "inputs": [
@@ -1291,7 +1293,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 58,
       "inputs": [
@@ -1329,7 +1331,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 59,
       "inputs": [
@@ -1367,7 +1369,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 60,
       "inputs": [
@@ -1405,7 +1407,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 61,
       "inputs": [
@@ -1437,6 +1439,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -1449,7 +1452,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 62,
       "inputs": [
@@ -1487,7 +1490,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 63,
       "inputs": [
@@ -1525,7 +1528,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 64,
       "inputs": [
@@ -1563,7 +1566,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 65,
       "inputs": [
@@ -1598,6 +1601,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -1610,7 +1614,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 67,
       "inputs": [
@@ -1648,7 +1652,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 68,
       "inputs": [
@@ -1686,7 +1690,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 70,
       "inputs": [
@@ -1718,6 +1722,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -1730,7 +1735,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 71,
       "inputs": [
@@ -1768,7 +1773,7 @@
       ],
       "size": [
         210,
-        82
+        120
       ],
       "order": 41,
       "inputs": [
@@ -1837,7 +1842,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 10,
       "inputs": [
@@ -1867,44 +1872,6 @@
       }
     },
     {
-      "id": 121,
-      "type": "factory/equip",
-      "pos": [
-        -614,
-        289
-      ],
-      "size": [
-        140,
-        50
-      ],
-      "order": 11,
-      "inputs": [
-        {
-          "name": "workIn",
-          "type": 0,
-          "link": 159
-        }
-      ],
-      "outputs": [
-        {
-          "name": "workOut",
-          "type": 0,
-          "links": [
-            161
-          ],
-          "slot_index": 0,
-          "__lastSet": null,
-          "__animToken": null
-        }
-      ],
-      "title": "Equipment",
-      "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "scriptDisabled": false
-      }
-    },
-    {
       "id": 127,
       "type": "factory/equip",
       "pos": [
@@ -1913,7 +1880,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 12,
       "inputs": [
@@ -1954,7 +1921,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 13,
       "inputs": [
@@ -1992,7 +1959,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 14,
       "inputs": [
@@ -2030,7 +1997,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 15,
       "inputs": [
@@ -2068,7 +2035,7 @@
       ],
       "size": [
         140,
-        26
+        66
       ],
       "order": 2,
       "inputs": [],
@@ -2088,7 +2055,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 76,
       "inputs": [
@@ -2154,7 +2121,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "flags": {
         "collapsed": false
@@ -2223,7 +2190,7 @@
       ],
       "size": [
         140,
-        26
+        66
       ],
       "order": 3,
       "inputs": [],
@@ -2243,7 +2210,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "flags": {
         "collapsed": false
@@ -2313,7 +2280,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "flags": {
         "collapsed": false
@@ -2382,7 +2349,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 72,
       "inputs": [
@@ -2448,7 +2415,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 74,
       "inputs": [
@@ -2514,7 +2481,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 66,
       "inputs": [
@@ -2552,7 +2519,7 @@
       ],
       "size": [
         210,
-        82
+        120
       ],
       "order": 78,
       "inputs": [
@@ -2621,7 +2588,7 @@
       ],
       "size": [
         181.71395874023438,
-        50
+        84
       ],
       "order": 79,
       "inputs": [
@@ -2659,7 +2626,7 @@
       ],
       "size": [
         210,
-        98
+        138
       ],
       "order": 80,
       "inputs": [
@@ -2734,7 +2701,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 81,
       "inputs": [
@@ -2772,7 +2739,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 82,
       "inputs": [
@@ -2810,7 +2777,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 83,
       "inputs": [
@@ -2848,7 +2815,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 84,
       "inputs": [
@@ -2886,7 +2853,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 85,
       "inputs": [
@@ -2924,7 +2891,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 86,
       "inputs": [
@@ -2962,7 +2929,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 87,
       "inputs": [
@@ -3000,7 +2967,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 88,
       "inputs": [
@@ -3038,7 +3005,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 89,
       "inputs": [
@@ -3070,6 +3037,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -3082,7 +3050,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 90,
       "inputs": [
@@ -3120,7 +3088,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 91,
       "inputs": [
@@ -3158,7 +3126,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 92,
       "inputs": [
@@ -3196,7 +3164,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 93,
       "inputs": [
@@ -3228,6 +3196,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -3240,7 +3209,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 94,
       "inputs": [
@@ -3278,7 +3247,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 95,
       "inputs": [
@@ -3316,7 +3285,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 96,
       "inputs": [
@@ -3354,7 +3323,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 97,
       "inputs": [
@@ -3392,7 +3361,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 98,
       "inputs": [
@@ -3424,6 +3393,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -3436,7 +3406,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 99,
       "inputs": [
@@ -3477,7 +3447,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 100,
       "inputs": [
@@ -3518,7 +3488,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 101,
       "inputs": [
@@ -3556,7 +3526,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 102,
       "inputs": [
@@ -3588,6 +3558,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -3600,7 +3571,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 103,
       "inputs": [
@@ -3638,7 +3609,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 104,
       "inputs": [
@@ -3676,7 +3647,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 105,
       "inputs": [
@@ -3714,7 +3685,7 @@
       ],
       "size": [
         210,
-        50
+        102
       ],
       "order": 107,
       "inputs": [
@@ -3746,6 +3717,7 @@
         "downTime": 3,
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "processTime2": 2,
+        "strictIdMatch": false,
         "scriptDisabled": false
       }
     },
@@ -3758,7 +3730,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "flags": {
         "collapsed": false
@@ -3827,7 +3799,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 16,
       "inputs": [
@@ -3865,7 +3837,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 17,
       "inputs": [
@@ -3903,7 +3875,7 @@
       ],
       "size": [
         140,
-        26
+        66
       ],
       "order": 4,
       "inputs": [],
@@ -3923,7 +3895,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 111,
       "inputs": [
@@ -3989,7 +3961,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "flags": {
         "collapsed": false
@@ -4059,7 +4031,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 113,
       "inputs": [
@@ -4125,7 +4097,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "flags": {
         "collapsed": false
@@ -4194,7 +4166,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 18,
       "inputs": [
@@ -4232,7 +4204,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 19,
       "inputs": [
@@ -4270,7 +4242,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 20,
       "inputs": [
@@ -4308,7 +4280,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 21,
       "inputs": [
@@ -4346,7 +4318,7 @@
       ],
       "size": [
         140,
-        26
+        66
       ],
       "order": 5,
       "inputs": [],
@@ -4366,7 +4338,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 108,
       "inputs": [
@@ -4404,7 +4376,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 109,
       "inputs": [
@@ -4470,7 +4442,7 @@
       ],
       "size": [
         140,
-        50
+        174
       ],
       "order": 9,
       "inputs": [
@@ -4558,7 +4530,7 @@
       ],
       "size": [
         140,
-        50
+        174
       ],
       "order": 8,
       "inputs": [
@@ -4638,36 +4610,6 @@
       }
     },
     {
-      "id": 116,
-      "type": "factory/source",
-      "pos": [
-        -2010.498779296875,
-        2193.717529296875
-      ],
-      "size": [
-        140,
-        26
-      ],
-      "order": 6,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "workOut",
-          "type": 0,
-          "links": [
-            245
-          ],
-          "__animToken": null,
-          "__lastSet": null,
-          "slot_index": 0
-        }
-      ],
-      "title": "Source",
-      "properties": {
-        "sequence": "A,B"
-      }
-    },
-    {
       "id": 181,
       "type": "factory/branch",
       "pos": [
@@ -4676,7 +4618,7 @@
       ],
       "size": [
         140,
-        50
+        102
       ],
       "order": 7,
       "inputs": [
@@ -4726,8 +4668,8 @@
         1679.890869140625
       ],
       "size": [
-        220,
-        170
+        244,
+        224
       ],
       "order": 23,
       "inputs": [
@@ -4749,7 +4691,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 106,
       "inputs": [
@@ -4787,7 +4729,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 25,
       "inputs": [
@@ -4825,7 +4767,7 @@
       ],
       "size": [
         210,
-        50
+        84
       ],
       "order": 69,
       "inputs": [
@@ -4863,7 +4805,7 @@
       ],
       "size": [
         140,
-        50
+        85
       ],
       "order": 35,
       "inputs": [
@@ -4916,7 +4858,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 34,
       "inputs": [
@@ -4954,7 +4896,7 @@
       ],
       "size": [
         140,
-        50
+        102
       ],
       "order": 32,
       "inputs": [
@@ -4997,7 +4939,7 @@
       ],
       "size": [
         186.39999389648438,
-        86
+        138
       ],
       "order": 29,
       "inputs": [
@@ -5075,7 +5017,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 115,
       "inputs": [
@@ -5141,7 +5083,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 117,
       "inputs": [
@@ -5207,7 +5149,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 118,
       "inputs": [
@@ -5273,7 +5215,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 119,
       "inputs": [
@@ -5339,7 +5281,7 @@
       ],
       "size": [
         186.39999389648438,
-        106
+        156
       ],
       "order": 22,
       "inputs": [
@@ -5434,7 +5376,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 120,
       "inputs": [
@@ -5500,7 +5442,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        120
       ],
       "order": 116,
       "inputs": [
@@ -5566,7 +5508,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        125
       ],
       "order": 124,
       "inputs": [
@@ -5675,7 +5617,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        125
       ],
       "order": 123,
       "inputs": [
@@ -5784,7 +5726,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        125
       ],
       "order": 125,
       "inputs": [
@@ -5893,7 +5835,7 @@
       ],
       "size": [
         140,
-        50
+        84
       ],
       "order": 30,
       "inputs": [
@@ -5932,7 +5874,7 @@
       ],
       "size": [
         140,
-        50
+        85
       ],
       "order": 33,
       "inputs": [
@@ -5988,7 +5930,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        125
       ],
       "order": 126,
       "inputs": [
@@ -6097,7 +6039,7 @@
       ],
       "size": [
         186.39999389648438,
-        86
+        145
       ],
       "order": 28,
       "inputs": [
@@ -6232,7 +6174,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        125
       ],
       "order": 121,
       "inputs": [
@@ -6341,7 +6283,7 @@
       ],
       "size": [
         186.39999389648438,
-        66
+        125
       ],
       "order": 122,
       "inputs": [
@@ -6439,6 +6381,74 @@
         "initialCarrier": "Carrier-1",
         "outSequence": "",
         "flipIO": true
+      }
+    },
+    {
+      "id": 121,
+      "type": "factory/equip",
+      "pos": [
+        -589,
+        396
+      ],
+      "size": [
+        140,
+        84
+      ],
+      "order": 11,
+      "inputs": [
+        {
+          "name": "workIn",
+          "type": 0,
+          "link": 159
+        }
+      ],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            161
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "processTime": 5,
+        "downTime": 3,
+        "scriptDisabled": false
+      }
+    },
+    {
+      "id": 116,
+      "type": "factory/source",
+      "pos": [
+        -2052,
+        2561
+      ],
+      "size": [
+        147,
+        84
+      ],
+      "order": 6,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "workOut",
+          "type": 0,
+          "links": [
+            245
+          ],
+          "__animToken": null,
+          "__lastSet": null,
+          "slot_index": 0
+        }
+      ],
+      "title": "Source",
+      "properties": {
+        "sequence": "A,B"
       }
     }
   ],
@@ -7781,5 +7791,21 @@
     ]
   ],
   "groups": [],
-  "version": 0.4
+  "version": 0.4,
+  "__factSimView": {
+    "version": 1,
+    "graph": {
+      "scale": 0.21762913579014873,
+      "offset": [
+        2503.5639370892554,
+        -999.1883305976157
+      ]
+    },
+    "ui": {
+      "sidebarHidden": false,
+      "timelineHidden": false,
+      "timelineView": "chart",
+      "timelineHeight": 220
+    }
+  }
 }
