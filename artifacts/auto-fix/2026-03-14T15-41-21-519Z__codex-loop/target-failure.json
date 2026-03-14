@@ -1,0 +1,9 @@
+{
+  "severity": "error",
+  "code": "LOOP_LIMIT_EXCEEDED",
+  "message": "Engine \"dt\" exceeded 100 update loops",
+  "engine": "dt",
+  "scenario": "simple",
+  "reportStatus": "FAIL",
+  "suite": "quick"
+}

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-14T15:39:56.888Z",
+  "finishedAt": "2026-03-14T15:39:59.558Z",
+  "status": "FAIL",
+  "suite": "quick",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event-fast"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "simple",
+    "branch"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": "codex-fail-quick"
+}

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-14T15:52:10.580Z",
+  "finishedAt": "2026-03-14T15:52:10.591Z",
+  "status": "blocked",
+  "sessionDir": "artifacts/auto-fix/2026-03-14T15-41-21-519Z__codex-loop",
+  "iteration": null,
+  "patchRequestPath": "artifacts/auto-fix/2026-03-14T15-41-21-519Z__codex-loop/patch-request.json",
+  "targetFailurePath": "artifacts/auto-fix/2026-03-14T15-41-21-519Z__codex-loop/target-failure.json",
+  "targetFailure": {
+    "severity": "error",
+    "code": "LOOP_LIMIT_EXCEEDED",
+    "message": "Engine \"dt\" exceeded 100 update loops",
+    "engine": "dt",
+    "scenario": "simple",
+    "reportStatus": "FAIL",
+    "suite": "quick"
+  },
+  "delegate": "codex",
+  "recommendedFiles": [],
+  "allowedPaths": [
+    "js/app/engine-fast-runtime.js",
+    "js/app/engine-fast-compat.js",
+    "js/app/engine-fast-kernels.js",
+    "js/app/engine-fast-worker.js",
+    "js/app/engine-fast-worker-host.js",
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-partitioner.js",
+    "js/app/engine-test.js"
+  ],
+  "protectedEngines": [
+    "dt",
+    "event"
+  ],
+  "changedPaths": [],
+  "forbiddenPaths": [],
+  "notes": [
+    "Target engine dt is protected and will not be auto-patched."
+  ]
+}

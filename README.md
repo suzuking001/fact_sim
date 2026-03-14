@@ -92,6 +92,32 @@ start_fact_sim_server.bat
 
 The batch file prefers launching `http://127.0.0.1:8123` in Chrome when Chrome is installed, so browser features such as local example overwrite are available.
 
+## Overnight Engine Optimization
+The MCP package includes a guarded overnight loop for `event-fast*` engines.
+
+```bash
+cd mcp
+npm run nightly
+```
+
+To let the loop automatically invoke Codex as the patch delegate for `event-fast*` fixes:
+
+```bash
+cd mcp
+npm run nightly:auto-patch
+```
+
+This flow keeps `dt` and `event (heap)` protected, saves `engine_test` artifacts, generates `patch-request.json`, and validates that any auto-applied patch only touches the allowed `event-fast*` files.
+
+For benchmark-driven overnight optimization of `event-fast*`, use:
+
+```bash
+cd mcp
+npm run nightly:optimize
+```
+
+This optimizer first requires a clean worktree, then runs `quick` and `standard` engine tests, captures a benchmark baseline, asks Codex to optimize the selected `event-fast*` engine, reruns the tests, reruns the benchmark, and only keeps the patch when the target engine speed improves beyond the configured threshold.
+
 ## Documentation
 - Research notes: `docs/research.md`
 - Third-party notices: `THIRD_PARTY_NOTICES.md`

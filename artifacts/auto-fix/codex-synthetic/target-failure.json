@@ -1,0 +1,8 @@
+﻿{
+  "severity": "error",
+  "code": "LIVE_WORKFLOW_DELTA",
+  "message": "Visible work-link flow differs from dt",
+  "engine": "event-fast-par",
+  "scenario": "sample_line1",
+  "suite": "quick"
+}

@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "sessionId": "2026-03-14T15-41-21-427Z__codex-smoke2",
+  "startedAt": "2026-03-14T15:41:21.435Z",
+  "finishedAt": "2026-03-14T15:41:28.130Z",
+  "status": "PASS",
+  "profile": "nightly",
+  "config": {
+    "engines": [
+      "dt",
+      "event-fast"
+    ],
+    "examples": [
+      "simple"
+    ],
+    "seeds": [
+      1
+    ],
+    "strict": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true,
+    "includeCurrentGraph": false,
+    "includeExamples": true,
+    "benchmarkWallMs": 300,
+    "includeSoak": false
+  },
+  "stages": [
+    {
+      "iteration": 1,
+      "name": "quick",
+      "startedAt": "2026-03-14T15:41:21.454Z",
+      "finishedAt": "2026-03-14T15:41:23.770Z",
+      "status": "PASS",
+      "artifactDir": "artifacts/engine-test/2026-03-14T15-41-22-734Z__codex-smoke2-quick",
+      "artifactFiles": {
+        "session": "artifacts/engine-test/2026-03-14T15-41-22-734Z__codex-smoke2-quick/session.json",
+        "summary": "artifacts/engine-test/2026-03-14T15-41-22-734Z__codex-smoke2-quick/summary.json",
+        "cases": "artifacts/engine-test/2026-03-14T15-41-22-734Z__codex-smoke2-quick/cases.json",
+        "failures": "artifacts/engine-test/2026-03-14T15-41-22-734Z__codex-smoke2-quick/failures.json"
+      },
+      "summary": {
+        "passed": 2,
+        "warned": 0,
+        "failed": 0,
+        "passedCases": 2,
+        "warnedCases": 0,
+        "failedCases": 0,
+        "caseCount": 2,
+        "failureCount": 0,
+        "warningCount": 0,
+        "engineCount": 2,
+        "suite": "quick",
+        "seedCount": 1,
+        "exampleCount": 1,
+        "includesCurrentGraph": false,
+        "stoppedEarly": false,
+        "reruns": 2,
+        "stopOnFirstFailure": true
+      }
+    },
+    {
+      "iteration": 1,
+      "name": "standard",
+      "startedAt": "2026-03-14T15:41:23.783Z",
+      "finishedAt": "2026-03-14T15:41:25.416Z",
+      "status": "PASS",
+      "artifactDir": "artifacts/engine-test/2026-03-14T15-41-24-061Z__codex-smoke2-standard",
+      "artifactFiles": {
+        "session": "artifacts/engine-test/2026-03-14T15-41-24-061Z__codex-smoke2-standard/session.json",
+        "summary": "artifacts/engine-test/2026-03-14T15-41-24-061Z__codex-smoke2-standard/summary.json",
+        "cases": "artifacts/engine-test/2026-03-14T15-41-24-061Z__codex-smoke2-standard/cases.json",
+        "failures": "artifacts/engine-test/2026-03-14T15-41-24-061Z__codex-smoke2-standard/failures.json"
+      },
+      "summary": {
+        "passed": 2,
+        "warned": 0,
+        "failed": 0,
+        "passedCases": 2,
+        "warnedCases": 0,
+        "failedCases": 0,
+        "caseCount": 2,
+        "failureCount": 0,
+        "warningCount": 0,
+        "engineCount": 2,
+        "suite": "standard",
+        "seedCount": 1,
+        "exampleCount": 1,
+        "includesCurrentGraph": false,
+        "stoppedEarly": false,
+        "reruns": 2,
+        "stopOnFirstFailure": true
+      }
+    }
+  ],
+  "targetFailure": null,
+  "benchmark": {
+    "summary": {
+      "wallMs": 300,
+      "realStepMs": 16,
+      "bestByMode": {
+        "dt": {
+          "renderCase": "headless",
+          "speed": 184.15841584158414,
+          "simSec": 55.8,
+          "wallMs": 303
+        },
+        "event": {
+          "renderCase": "headless",
+          "speed": 996.96,
+          "simSec": 299.088,
+          "wallMs": 300
+        },
+        "event-fast": {
+          "renderCase": "headless",
+          "speed": 1078.1333333333334,
+          "simSec": 323.44,
+          "wallMs": 300
+        },
+        "event-fast-worker": {
+          "renderCase": "headless",
+          "speed": 1369.5701434487826,
+          "simSec": 411.008,
+          "wallMs": 300.0999999642372
+        },
+        "event-fast-par": {
+          "renderCase": "headless",
+          "speed": 1166.72,
+          "simSec": 350.016,
+          "wallMs": 300
+        }
+      }
+    }
+  },
+  "iterations": []
+}
