@@ -37,6 +37,22 @@ UI や見た目そのものを確認する必要がある場合だけ、ブラ�
 
 夜間最適化の既定対象は **`event-fast-par`** です。
 
+## 自動最適化で触ってよい範囲
+
+自動修正・自動最適化では、原則として次の範囲だけを編集対象にします。
+
+- `js/app/engine-fast*`
+- `js/app/engine-test.js`
+- `mcp/scripts/auto-*`
+- `mcp/src/runtime/*` のうち、自動最適化や engine test に直接関係する部分
+
+次は原則として編集しません。
+
+- `js/app/engine.js`
+- `dt`
+- `event (heap)`
+- unrelated な UI / docs / sample データ
+
 ## 効率のよい使い方
 
 - 再現性が必要な確認では、`start` / `stop` ではなく `simulate` の `action="run_for"` を使う
@@ -72,6 +88,17 @@ UI や見た目そのものを確認する必要がある場合だけ、ブラ�
 artifact 保存先:
 
 - `artifacts/engine-test/<timestamp>__<label>/`
+
+## 最低限の検証
+
+変更後は、少なくとも次を確認します。
+
+1. 変更した JS / TS の `node --check`
+2. `cd mcp && npm run check`
+3. engine や parity に関わる変更なら `Engine Test quick`
+4. 夜間最適化や MCP 変更なら `cd mcp && npm run build`
+
+性能改善を主張する場合は、追加で benchmark を取り、改善率を明示します。
 
 ## 夜間ジョブ / 自動最適化
 
@@ -140,6 +167,17 @@ watch_event_fast_par_status.bat
 - latest iteration
 - recent files
 - stdout / stderr 末尾
+
+## runtime 再起動が必要なケース
+
+次のときは、browser runtime や MCP runtime を再読み込みしてから検証します。
+
+- `index.html` や script version を変更したとき
+- worker / `event-fast*` / `engine-test` のコードを変更したとき
+- UI の結果と MCP の結果が食い違うとき
+- `engine_test` や `benchmark` が古い page を掴んでいる疑いがあるとき
+
+この repo では、古い runtime が残って false failure や古い benchmark を返すことがあります。
 
 ## example の上書き保存
 
