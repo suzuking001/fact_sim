@@ -1,0 +1,480 @@
+{
+  "engine": "dt",
+  "seed": 1,
+  "scenario": "carrier",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 10100,
+    "wallMs": 896.9,
+    "loops": 625,
+    "nodeCount": 15,
+    "linkCount": 19,
+    "sinkCount": 1,
+    "totalCompleted": 0,
+    "liveProbeSimTimeMs": 3000,
+    "liveProbeWallMs": 872.5999999642372,
+    "liveProbeLoops": 188,
+    "liveTimelineEntries": 10,
+    "liveTimelineSegments": 25
+  },
+  "liveFlowProbe": {
+    "nonEmptySteps": 0,
+    "maxActiveLinks": 0,
+    "maxPayloadCount": 0,
+    "observedLinkKeys": [],
+    "observedWorkRefs": []
+  },
+  "liveStateProbe": {
+    "sampleStepMs": 250,
+    "sampleTimesSec": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1,
+      1.25,
+      1.5,
+      1.75,
+      2,
+      2.25,
+      2.5,
+      2.75,
+      3
+    ],
+    "sampleCount": 13,
+    "nodeCount": 10,
+    "changingNodeCount": 6,
+    "nodeStates": [
+      {
+        "key": "2:Route R1",
+        "nodeId": 2,
+        "label": "Route R1",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS"
+        ]
+      },
+      {
+        "key": "4:Route R2",
+        "nodeId": 4,
+        "label": "Route R2",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agvOut_wait|WAIT",
+          "agvOut_down|DOWN",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "6:Equipment",
+        "nodeId": 6,
+        "label": "Equipment",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS"
+        ]
+      },
+      {
+        "key": "7:Equipment",
+        "nodeId": 7,
+        "label": "Equipment",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "10:Carrier Route",
+        "nodeId": 10,
+        "label": "Carrier Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agvOut_down|DOWN",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agvOut_down|DOWN",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "11:Carrier Route",
+        "nodeId": 11,
+        "label": "Carrier Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "13:Carrier Route",
+        "nodeId": 13,
+        "label": "Carrier Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agvOut_down|DOWN",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS"
+        ]
+      },
+      {
+        "key": "14:Equipment",
+        "nodeId": 14,
+        "label": "Equipment",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS"
+        ]
+      },
+      {
+        "key": "16:Carrier Route",
+        "nodeId": 16,
+        "label": "Carrier Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "17:Join",
+        "nodeId": 17,
+        "label": "Join",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      }
+    ]
+  },
+  "liveTimelineSignature": {
+    "quantMs": 250,
+    "rowCount": 10,
+    "activeRowCount": 6,
+    "rows": [
+      {
+        "key": "2",
+        "label": "Route R1 #2",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "4",
+        "label": "Route R2 #4",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 4
+          },
+          {
+            "state": "wait",
+            "durationBins": 1
+          },
+          {
+            "state": "down",
+            "durationBins": 1
+          }
+        ]
+      },
+      {
+        "key": "6",
+        "label": "Equipment #6",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 12
+          }
+        ]
+      },
+      {
+        "key": "7",
+        "label": "Equipment #7",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "10",
+        "label": "Carrier Route #10",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 4
+          },
+          {
+            "state": "down",
+            "durationBins": 1
+          },
+          {
+            "state": "process",
+            "durationBins": 4
+          },
+          {
+            "state": "down",
+            "durationBins": 1
+          }
+        ]
+      },
+      {
+        "key": "11",
+        "label": "Carrier Route #11",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "13",
+        "label": "Carrier Route #13",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 4
+          },
+          {
+            "state": "down",
+            "durationBins": 1
+          },
+          {
+            "state": "process",
+            "durationBins": 2
+          }
+        ]
+      },
+      {
+        "key": "14",
+        "label": "Equipment #14",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 12
+          }
+        ]
+      },
+      {
+        "key": "16",
+        "label": "Carrier Route #16",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "17",
+        "label": "Join #17",
+        "meaningful": false,
+        "signature": []
+      }
+    ]
+  },
+  "sinks": [
+    {
+      "id": 3,
+      "title": "Sink",
+      "completedCount": 0,
+      "throughputPerHour": 0
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 10,
+    "rows": [
+      {
+        "key": "2:Route R1",
+        "nodeId": 2,
+        "label": "Route R1",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "4:Route R2",
+        "nodeId": 4,
+        "label": "Route R2",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "6:Equipment",
+        "nodeId": 6,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "7:Equipment",
+        "nodeId": 7,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "10:Carrier Route",
+        "nodeId": 10,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "11:Carrier Route",
+        "nodeId": 11,
+        "label": "Carrier Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "13:Carrier Route",
+        "nodeId": 13,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "14:Equipment",
+        "nodeId": 14,
+        "label": "Equipment",
+        "state": "PROCESS"
+      },
+      {
+        "key": "16:Carrier Route",
+        "nodeId": 16,
+        "label": "Carrier Route",
+        "state": "workIn_idle_2|IDLE"
+      },
+      {
+        "key": "17:Join",
+        "nodeId": 17,
+        "label": "Join",
+        "state": "IDLE"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 0,
+    "payloadCount": 0,
+    "observedLinkKeys": [],
+    "observedWorkRefs": []
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "3:Sink",
+      "id": 3,
+      "title": "Sink",
+      "completedCount": 0
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 2,
+    "refs": [
+      "1:A",
+      "2:B"
+    ],
+    "duplicateRefs": []
+  },
+  "attempts": 1,
+  "maxAttempts": 3,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}

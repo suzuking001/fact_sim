@@ -1,0 +1,11 @@
+Performance hypothesis: `event-fast-par` was paying avoidable host-side overhead in `_stepParallel` by flattening all emitted messages and preallocating/scanning every partition bucket on each substep/flush round. Cutting those transient arrays and empty buckets should reduce GC and dispatch overhead when cross-partition traffic is nontrivial.
+
+What changed: in [engine-fast-par-host.js#L288](C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773542745490-27356/js/app/engine-fast-par-host.js#L288) I replaced the generic `bucketMessages(messages, partitionCount)` path with `bucketMessagesFromResults(rows, partitionCount)`, which buckets directly from worker results and returns the touched partition list. In [engine-fast-par-host.js#L631](C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773542745490-27356/js/app/engine-fast-par-host.js#L631) `_stepParallel` now reuses that touched list directly instead of doing `flatMap(...)` plus a second scan over all buckets. Scope stayed inside the target engine host; protected engines and unrelated files were untouched.
+
+Focused verification I ran:
+- `node --check js/app/engine-fast-par-host.js`
+- `fact-sim-ai engine_test` `quick`, `engines=["event-fast-par"]`, `reruns=2`, `strictFinalParity=true`, `stopOnFirstFailure=true`: PASS, 18/18 cases, no warnings/failures
+- `fact-sim-ai engine_test` `standard`, same settings: PASS, 18/18 cases, no warnings/failures
+- Local hot-path microbenchmark of old vs new bucketing logic: `305.39ms -> 120.64ms` over `200000` iterations, about `60.5%` faster for the isolated helper path
+
+Residual risk: the exposed `fact-sim-ai` session/benchmark APIs in this environment reject `event-fast-par` as a selectable mode, so I could not take a true post-patch 500ms headless benchmark against the `9726.176x` baseline from the tool surface available here. The change is correctness-safe by parity testing, but the end-to-end speedup will depend on how often the benchmark spends time in cross-partition message bucketing; low-cut-edge graphs will benefit less.

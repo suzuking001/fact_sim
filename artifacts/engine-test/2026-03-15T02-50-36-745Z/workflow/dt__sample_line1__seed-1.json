@@ -1,0 +1,13 @@
+{
+  "nonEmptySteps": 117,
+  "maxActiveLinks": 3,
+  "maxPayloadCount": 3,
+  "observedLinkKeys": [
+    "13:workOut->14:workIn:1:A",
+    "25:workOut->24:workIn:1:A",
+    "2:workOut->4:workIn:1:A"
+  ],
+  "observedWorkRefs": [
+    "1:A"
+  ]
+}

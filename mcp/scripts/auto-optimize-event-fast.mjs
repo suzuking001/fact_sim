@@ -57,7 +57,7 @@ function parseArgs(argv) {
     reruns: 2,
     stopOnFirstFailure: true,
     benchmarkWallMs: 2000,
-    delegateTimeoutMs: 300000,
+    delegateTimeoutMs: 900000,
     minImprovementPct: 1,
     maxIterations: 999,
     minRuntimeHours: 0,
@@ -427,6 +427,7 @@ function targetSpeed(benchmark, targetEngine) {
 function buildOptimizationRequest(session, baselineBenchmark, targetEngine, iteration) {
   return {
     version: 1,
+    mode: "optimize",
     sessionId: session.sessionId,
     iteration,
     targetEngine,

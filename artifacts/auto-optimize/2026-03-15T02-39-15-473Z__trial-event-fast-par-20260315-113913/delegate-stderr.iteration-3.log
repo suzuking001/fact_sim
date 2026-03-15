@@ -1,0 +1,1357 @@
+2026-03-15T02:52:09.084066Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+OpenAI Codex v0.115.0-alpha.4 (research preview)
+--------
+workdir: C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\suzuk\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019cef68-7f43-7813-9d8c-71e8703c4cef
+--------
+user
+Use the existing AGENTS.md instructions in this repo.
+Optimize the target event-fast* engine for speed while preserving dt parity.
+This is an optimization request, not a failure-fix request.
+Only edit allowed paths. Do not modify protected engines, engine-test, benchmark harnesses, or unrelated files.
+
+Optimization request:
+```json
+{
+  "version": 1,
+  "mode": "optimize",
+  "sessionId": "2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913",
+  "iteration": 3,
+  "targetEngine": "event-fast-par",
+  "profile": "nightly",
+  "examples": null,
+  "benchmarkExample": "parallel_benchmark",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event",
+    "event-fast",
+    "event-fast-worker",
+    "event-fast-par"
+  ],
+  "constraints": {
+    "protectEngines": [
+      "dt",
+      "event"
+    ],
+    "allowedPaths": [
+      "js/app/engine-fast-par-worker.js",
+      "js/app/engine-fast-par-host.js",
+      "js/app/engine-fast-par-partitioner.js",
+      "js/app/engine-fast-worker.js",
+      "js/app/engine-fast-worker-host.js",
+      "js/app/engine-fast-runtime.js",
+      "js/app/engine-fast-compat.js",
+      "js/app/engine-fast-kernels.js"
+    ]
+  },
+  "recommendedFiles": [
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-partitioner.js"
+  ],
+  "benchmark": {
+    "wallMs": 500,
+    "baseline": {
+      "dt": {
+        "speed": 2643.6712656208156,
+        "simSec": 1322.1,
+        "wallMs": 500.10000002384186
+      },
+      "event": {
+        "speed": 4138.016,
+        "simSec": 2069.008,
+        "wallMs": 500
+      },
+      "event-fast": {
+        "speed": 5479.824069849464,
+        "simSec": 2741.008,
+        "wallMs": 500.2000000476837
+      },
+      "event-fast-worker": {
+        "speed": 9312.032,
+        "simSec": 4656.016,
+        "wallMs": 500
+      },
+      "event-fast-par": {
+        "speed": 9726.176,
+        "simSec": 4863.088,
+        "wallMs": 500
+      }
+    },
+    "targetSpeed": 9726.176,
+    "minImprovementPct": 1
+  },
+  "verification": {
+    "suites": [
+      "quick",
+      "standard"
+    ],
+    "strictFinalParity": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true
+  }
+}
+```
+
+Target engine: event-fast-par
+Protected engines: dt, event
+Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js, js/app/engine-fast-worker.js, js/app/engine-fast-worker-host.js, js/app/engine-fast-runtime.js, js/app/engine-fast-compat.js, js/app/engine-fast-kernels.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+
+Requirements:
+- Make one small, defensible performance improvement in the target engine implementation.
+- Preserve correctness relative to dt. Do not widen the patch scope.
+- Prefer changes that improve headless benchmark speed for the target engine.
+- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.
+- Do not browse external websites.
+- Keep dt and event behavior untouched.
+- Benchmark target speed is 9726.176x with minimum improvement 1%.
+- Verification guidance: suites=quick,standard, reruns=2, strictFinalParity=true.
+
+At the end, summarize:
+1. the performance hypothesis
+2. what changed
+3. which focused verification you ran
+4. any residual risk
+mcp: figma starting
+mcp: filesystem starting
+mcp: excel starting
+mcp: playwright starting
+mcp: linear starting
+mcp: git starting
+mcp: fact_sim_ai starting
+mcp: github starting
+2026-03-15T02:52:09.166353Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.linear.app/.well-known/oauth-protected-resource\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+mcp: linear failed: The linear MCP server is not logged in. Run `codex mcp login linear`.
+mcp: excel ready
+mcp: figma ready
+mcp: git failed: MCP client for `git` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: github ready
+mcp: filesystem failed: MCP client for `filesystem` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response
+mcp: playwright ready
+mcp: fact_sim_ai ready
+mcp startup: ready: excel, figma, github, playwright, fact_sim_ai; failed: linear, git, filesystem
+codex
+対象は `event-fast-par` の小さな高速化に限定し、許可された `engine-fast*` 実装だけを見ます。まず関連ファイルと現状の並列エンジン経路を読み、ベンチ向きの無駄を一箇所だけ特定します。
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Name' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "event-fast-par|engine-fast-par|parallel_benchmark|partition" js/app mcp -S' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028 succeeded in 356ms:
+js
+AGENTS.md
+ succeeded in 307ms:
+?? AGENTS.md
+?? js/
+ exited 1 in 521ms:
+js/app\engine-fast-par-host.js:4:  const PAR_MODE = 'event-fast-par';
+js/app\engine-fast-par-host.js:5:  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+js/app\engine-fast-par-host.js:288:  function bucketMessages(messages, partitionCount){
+js/app\engine-fast-par-host.js:289:    const buckets = new Array(Math.max(0, partitionCount));
+js/app\engine-fast-par-host.js:293:      const target = Number(message.toPartitionId);
+js/app\engine-fast-par-host.js:323:  class PartitionWorkerHost{
+js/app\engine-fast-par-host.js:324:    constructor(graphData, partition, options){
+js/app\engine-fast-par-host.js:325:      this.partition = cloneJson(partition);
+js/app\engine-fast-par-host.js:326:      this.graphData = cloneJson((partition && partition.localGraphData) ? partition.localGraphData : graphData);
+js/app\engine-fast-par-host.js:337:        partition: this.partition,
+js/app\engine-fast-par-host.js:353:        pending.reject(new Error(String(data.error || 'partition worker request failed')));
+js/app\engine-fast-par-host.js:360:      const message = String(event && (event.message || (event.error && event.error.message)) || 'partition worker error');
+js/app\engine-fast-par-host.js:368:      if(this._disposed) return Promise.reject(new Error('partition worker host disposed'));
+js/app\engine-fast-par-host.js:380:        partition: this.partition,
+js/app\engine-fast-par-host.js:401:        partition: this.partition,
+js/app\engine-fast-par-host.js:413:        partition: this.partition,
+js/app\engine-fast-par-host.js:483:        pending.reject(new Error('partition worker host disposed'));
+js/app\engine-fast-par-host.js:493:      this.options = Object.assign({ partitionSubsteps: 2 }, options || {});
+js/app\engine-fast-par-host.js:503:      this._independentPartitions = false;
+js/app\engine-fast-par-host.js:509:        const requestedPartitions = Math.max(2, Math.floor(Number(this.options.partitionCount) || 0) || 0);
+codex
+並列ホストとワーカーの実行ループを読んでいます。まず `runFor` 周辺とメッセージ集約の実装を見て、ワーカー間通信で毎サブステップ必ず払っているコストがないかを確認します。
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-host.js'; Get-Content "'$p | Select-Object -Skip 600 -First 180' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-host.js'; Get-Content "'$p | Select-Object -Skip 260 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-worker.js'; Get-Content "'$p | Select-Object -Skip 240 -First 220' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028 succeeded in 408ms:
+        this.runtimeMode = String(
+          (payload && payload.runtimeMode)
+          || (payload && payload.stats && payload.stats.runtimeMode)
+          || (this._runner && this._runner.runtimeMode)
+          || this.runtimeMode
+        );
+        return payload;
+      }
+      const payloads = await Promise.all(this._workers.map((worker)=> worker.resetAsync(this.options.seed)));
+      this._lastStats = this._aggregateStats(payloads.map((row)=> row && row.stats));
+      return { runtimeMode: this.runtimeMode, stats: this._lastStats };
+    }
+
+    async _stepParallel(simDeltaMs){
+      const partitionCount = this._workers.length;
+      if(!partitionCount) return { simTimeMs: this._lastSimTimeMs, stats: this._lastStats };
+      const substeps = Math.max(1, Math.min(16, Math.floor(Number(this.options.partitionSubsteps) || 4)));
+      const subDelta = Math.max(0.25, Number(simDeltaMs) / substeps);
+      let latestStats = null;
+      for(let stepIndex = 0; stepIndex < substeps; stepIndex += 1){
+ succeeded in 372ms:
+            }
+          }catch(_e){}
+        }
+      }
+      applyRuntimeNodeStates(graph, graphData);
+      applyRuntimeLinkStates(graph, graphData);
+      graph.status = LGraph.STATUS_RUNNING;
+      graph.last_update_time = LiteGraph.getTime();
+      if(App.timelineChart){
+        try{
+          if(typeof App.timelineChart.attachGraph === 'function'){
+            if(App.timelineChart.graph !== graph) App.timelineChart.attachGraph(graph);
+          }
+          else App.timelineChart.graph = graph;
+        }catch(_e){}
+      }
+      try{
+        if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+        else if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+      }catch(_e){}
+ succeeded in 418ms:
+  function collectOwnedSinkMetrics(targetGraph){
+    const nodes = Array.isArray(targetGraph && targetGraph._nodes) ? targetGraph._nodes : [];
+    const sinks = [];
+    let totalCompleted = 0;
+    for(const node of nodes){
+      if(!node || !ownedSinkIdSet.has(Number(node.id))) continue;
+      const completed = Array.isArray(node._recv) ? node._recv.length : 0;
+      totalCompleted += Math.max(0, completed);
+      sinks.push({
+        id: node.id,
+        title: node.title || `Sink #${node.id}`,
+        completedCount: Math.max(0, completed)
+      });
+    }
+    return { sinkCount: sinks.length, totalCompleted, sinks };
+  }
+
+  function collectOutgoingMessages(){
+    const messages = [];
+    const cutEdges = Array.isArray(partition && partition.outgoingCutEdges) ? partition.outgoingCutEdges : [];
+codex
+通信経路では `flatMap` とバケット再構築がサブステップごとに発生しています。ここがベンチのホットパスなので、まずホスト側だけで中間配列を減らせるかを詰めます。
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-host.js'; Get-Content "'$p | Select-Object -First 220' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-host.js'; Get-Content "'$p | Select-Object -Skip 220 -First 120' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-host.js'; Get-Content "'$p | Select-Object -Skip 480 -First 140' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028 succeeded in 395ms:
+    const canvas = App.canvas || null;
+    const inspector = App.selectionInspector || null;
+    const preservedNodeIds = [];
+    const inspectorNodeId = Number(inspector && inspector.target && inspector.target.kind === 'node' ? inspector.target.nodeId : NaN);
+    const hadGroupSelection = !!(canvas && canvas.selected_group);
+    if(canvas && canvas.selected_nodes && typeof canvas.selected_nodes === 'object'){
+      for(const key of Object.keys(canvas.selected_nodes)){
+        const node = canvas.selected_nodes[key];
+        const nodeId = Number(node && node.id);
+        if(Number.isFinite(nodeId) && preservedNodeIds.indexOf(nodeId) < 0) preservedNodeIds.push(nodeId);
+      }
+    }
+    try{
+      if(!graphStructureMatchesSnapshot(graph, data)){
+        graph.configure(data);
+        if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function'){
+          try{ App.repairGraphLinks(graph); }catch(_e){}
+        }
+        if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function'){
+          try{ App.stopGroups.restoreSerializedData(graph, data, false); }catch(_e){}
+ succeeded in 413ms:
+var App = window.App || (window.App = {});
+
+(function(){
+  const PAR_MODE = 'event-fast-par';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260315b';
+  const MAX_FLUSH_ROUNDS = 16;
+
+  function cloneJson(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
+  }
+
+  function normalizeParMode(mode){
+    const raw = String(mode || '').trim().toLowerCase();
+    if(raw === PAR_MODE || raw === 'event_fast_par' || raw === 'eventfastpar' || raw === 'fast-par' || raw === 'par'){
+      return PAR_MODE;
+    }
+    return null;
+  }
+
+  function canUseParWorker(){
+ succeeded in 380ms:
+      try{ this._worker.terminate(); }catch(_e){}
+      for(const pending of this._pending.values()){
+        pending.reject(new Error('partition worker host disposed'));
+      }
+      this._pending.clear();
+    }
+  }
+
+  class EventFastParHost{
+    constructor(graphOrData, options){
+      this.mode = PAR_MODE;
+      this.asyncOnly = true;
+      this.options = Object.assign({ partitionSubsteps: 2 }, options || {});
+      this.graphData = serializeGraphData(graphOrData);
+      this._precomputedPlan = this.options.__precomputedPlan || null;
+      this._workers = [];
+      this._runner = null;
+      this._lastStats = null;
+      this._lastSimTimeMs = 0;
+      this.runtimeMode = 'parallel-pending';
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-worker.js'; Get-Content "'$p | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-worker.js'; Get-Content "'$p | Select-Object -First 260' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028 succeeded in 388ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let partition = null;
+  let ownedNodeIdSet = new Set();
+  let ownedSinkIdSet = new Set();
+  let lastGraphData = null;
+  let lastSentByLinkId = new Map();
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+ succeeded in 403ms:
+(function(){
+  const root = self;
+  root.window = root;
+  root.globalThis = root;
+  root.App = root.App || {};
+
+  const SIM_DT_SEC = 0.1;
+  let simTimeMs = 0;
+  let graph = null;
+  let engine = null;
+  let lastGraphData = null;
+  let seededRandom = null;
+  const originalMathRandom = Math.random.bind(Math);
+
+  root.document = root.document || {
+    body: null,
+    documentElement: { style: { setProperty: function(){} } },
+    getElementById: function(){ return null; },
+    querySelector: function(){ return null; },
+    querySelectorAll: function(){ return []; },
+codex
+ホスト側だけのパッチで済む見込みです。`results.flatMap(...emittedMessages)` と全パーティション走査をやめ、ワーカー戻り値から直接 `touched` パーティションを組み立てる形に寄せます。
+Plan update
+Constrain the change to the parallel host hot path and verify parity/perf with focused checks.
+  → Measure current event-fast-par benchmark on parallel_benchmark for a local baseline
+  • Patch event-fast-par host message bucketing to reduce hot-path allocations
+  • Run syntax check, benchmark, and focused parity verification
+tool fact_sim_ai.prepare_session({"example":"parallel_benchmark","mode":"event-fast-par","reset":true,"seed":1})
+fact_sim_ai.prepare_session({"example":"parallel_benchmark","mode":"event-fast-par","reset":true,"seed":1}) failed in 3ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "MCP error -32602: Input validation error: Invalid arguments for tool prepare_session: [\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      \"dt\",\n      \"event\",\n      \"event-fast\"\n    ],\n    \"path\": [\n      \"mode\"\n    ],\n    \"message\": \"Invalid option: expected one of \\\"dt\\\"|\\\"event\\\"|\\\"event-fast\\\"\"\n  }\n]"
+    }
+  ],
+  "isError": true
+}
+codex
+`prepare_session` は `event-fast-par` を受け付けないので、並列エンジンは別経路で評価します。先にパッチを当て、その後 `run_report`/`simulate` か既存の engine test 側で `event-fast-par` を直接叩けるか確認します。
+codex
+これから `js/app/engine-fast-par-host.js` だけ編集します。変更点はメッセージ集約ヘルパーと `_stepParallel` の呼び出し側に限定し、挙動は維持したまま中間配列と空バケット生成を減らします。
+file update
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028\js\app\engine-fast-par-host.js
+@@ -287,12 +287,24 @@
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+@@ -623,13 +635,7 @@
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+@@ -642,6 +648,3 @@
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+apply_patch(auto_approved=true) exited 0 in 156ms:
+Success. Updated the following files:
+M C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028\js\app\engine-fast-par-host.js
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+codex
+パッチはホスト一ファイルに収まりました。次に構文確認と差分確認を行い、その後 `event-fast-par` のベンチ実行経路を探します。
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git diff -- js/app/engine-fast-par-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'node --check js/app/engine-fast-par-host.js' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"bucketWorkerMessages|flatMap\\(|bucketMessages\\(\" js/app/engine-fast-par-host.js -S" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028 succeeded in 330ms:
+
+ succeeded in 355ms:
+
+ succeeded in 297ms:
+288:  function bucketWorkerMessages(payloads, partitionCount){
+636:        let bucketed = bucketWorkerMessages(results, partitionCount);
+649:          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+tool fact_sim_ai.run_report({"example":"parallel_benchmark","mode":"event-fast-par","reset":true,"seed":1,"wallMs":500,"topN":3})
+fact_sim_ai.run_report({"example":"parallel_benchmark","mode":"event-fast-par","reset":true,"seed":1,"wallMs":500,"topN":3}) failed in 1ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "MCP error -32602: Input validation error: Invalid arguments for tool run_report: [\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      \"dt\",\n      \"event\",\n      \"event-fast\"\n    ],\n    \"path\": [\n      \"mode\"\n    ],\n    \"message\": \"Invalid option: expected one of \\\"dt\\\"|\\\"event\\\"|\\\"event-fast\\\"\"\n  }\n]"
+    }
+  ],
+  "isError": true
+}
+tool fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["dt","event-fast-par"],"seeds":[1],"strictFinalParity":true,"reruns":2,"stopOnFirstFailure":true,"saveArtifacts":true,"artifactLabel":"opt-iter3-event-fast-par"})
+fact_sim_ai.engine_test({"action":"run","suite":"quick","engines":["dt","event-fast-par"],"seeds":[1],"strictFinalParity":true,"reruns":2,"stopOnFirstFailure":true,"saveArtifacts":true,"artifactLabel":"opt-iter3-event-fast-par"}) success in 11.48s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-15T02:54:48.485Z\",\"finishedAt\":\"2026-03-15T02:54:57.999Z\",\"engines\":[\"dt\",\"event-fast-par\"],\"summary\":{\"passed\":18,\"warned\":0,\"failed\":0,\"passedCases\":18,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":18,\"failureCount\":0,\"warningCount\":0,\"engineCount\":2,\"suite\":\"quick\",\"seedCount\":1,\"exampleCount\":8,\"includesCurrentGraph\":true,\"stoppedEarly\":false,\"reruns\":2,\"stopOnFirstFailure\":true},\"comparisons\":[{\"scenario\":\"current_graph\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"simple\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"branch\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"shuttle_line5\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"carrier\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"pallet_station_demo\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line2\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"parallel_benchmark\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1060.5,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":128.4,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":874,\"loops\":1875,\"totalCompleted\":3,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":203.8,\"loops\":1882,\"totalCompleted\":3,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":849.9,\"loops\":1875,\"totalCompleted\":1,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":218.4,\"loops\":1882,\"totalCompleted\":1,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":856.6,\"loops\":1875,\"totalCompleted\":13,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":36.9,\"loops\":1882,\"totalCompleted\":13,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":916.3,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":48.7,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":904.6,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":37.3,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":951.2,\"loops\":1875,\"totalCompleted\":2,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":71.6,\"loops\":1882,\"totalCompleted\":2,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1080.6,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":124.5,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"parallel_benchmark\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":898.2,\"loops\":1875,\"totalCompleted\":24,\"sinkCount\":8,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"parallel_benchmark\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":244.2,\"loops\":3764,\"totalCompleted\":24,\"sinkCount\":8,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":\"artifacts/engine-test/2026-03-15T02-54-48-485Z__opt-iter3-event-fast-par\",\"artifactFiles\":{\"session\":\"artifacts/engine-test/2026-03-15T02-54-48-485Z__opt-iter3-event-fast-par/session.json\",\"summary\":\"artifacts/engine-test/2026-03-15T02-54-48-485Z__opt-iter3-event-fast-par/summary.json\",\"cases\":\"artifacts/engine-test/2026-03-15T02-54-48-485Z__opt-iter3-event-fast-par/cases.json\",\"graphCurrent\":\"artifacts/engine-test/2026-03-15T02-54-48-485Z__opt-iter3-event-fast-par/graph-current.json\",\"failures\":\"artifacts/engine-test/2026-03-15T02-54-48-485Z__opt-iter3-event-fast-par/failures.json\"},\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+codex
+`engine_test quick` は `dt` 対比で `event-fast-par` が通りました。次は並列モードを受け付ける低レベル経路があるかを試し、500ms ベンチの実測値を取ります。
+tool fact_sim_ai.examples({"action":"load","name":"parallel_benchmark"})
+fact_sim_ai.examples({"action":"load","name":"parallel_benchmark"}) success in 51ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"action\":\"load\",\"example\":\"parallel_benchmark\",\"nodeCount\":32,\"linkCount\":24}"
+    }
+  ]
+}
+tool fact_sim_ai.simulate({"action":"run_for","mode":"event-fast-par","wallMs":500,"includeBenchmark":true,"benchmarkWallMs":500})
+fact_sim_ai.simulate({"action":"run_for","mode":"event-fast-par","wallMs":500,"includeBenchmark":true,"benchmarkWallMs":500}) failed in 0ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "MCP error -32602: Input validation error: Invalid arguments for tool simulate: [\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      \"dt\",\n      \"event\",\n      \"event-fast\"\n    ],\n    \"path\": [\n      \"mode\"\n    ],\n    \"message\": \"Invalid option: expected one of \\\"dt\\\"|\\\"event\\\"|\\\"event-fast\\\"\"\n  }\n]"
+    }
+  ],
+  "isError": true
+}
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+tool fact_sim_ai.run_simulation_for({"mode":"event-fast-par","wallMs":500,"includeBenchmark":true,"benchmarkWallMs":500})
+fact_sim_ai.run_simulation_for({"mode":"event-fast-par","wallMs":500,"includeBenchmark":true,"benchmarkWallMs":500}) failed in 1ms:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "MCP error -32602: Input validation error: Invalid arguments for tool run_simulation_for: [\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      \"dt\",\n      \"event\",\n      \"event-fast\"\n    ],\n    \"path\": [\n      \"mode\"\n    ],\n    \"message\": \"Invalid option: expected one of \\\"dt\\\"|\\\"event\\\"|\\\"event-fast\\\"\"\n  }\n]"
+    }
+  ],
+  "isError": true
+}
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+codex
+`event-fast-par` の 500ms 専用ベンチ API はこの MCP では公開されていません。代わりに parity を `quick` と `standard` で固め、変更箇所そのものはローカルの小さなマイクロベンチで確認します。
+tool fact_sim_ai.engine_test({"action":"run","suite":"standard","engines":["dt","event-fast-par"],"seeds":[1],"strictFinalParity":true,"reruns":2,"stopOnFirstFailure":true,"saveArtifacts":true,"artifactLabel":"opt-iter3-event-fast-par-standard"})
+fact_sim_ai.engine_test({"action":"run","suite":"standard","engines":["dt","event-fast-par"],"seeds":[1],"strictFinalParity":true,"reruns":2,"stopOnFirstFailure":true,"saveArtifacts":true,"artifactLabel":"opt-iter3-event-fast-par-standard"}) success in 13.77s:
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"ok\":true,\"status\":\"PASS\",\"startedAt\":\"2026-03-15T02:55:55.626Z\",\"finishedAt\":\"2026-03-15T02:56:08.096Z\",\"engines\":[\"dt\",\"event-fast-par\"],\"summary\":{\"passed\":18,\"warned\":0,\"failed\":0,\"passedCases\":18,\"warnedCases\":0,\"failedCases\":0,\"caseCount\":18,\"failureCount\":0,\"warningCount\":0,\"engineCount\":2,\"suite\":\"standard\",\"seedCount\":1,\"exampleCount\":8,\"includesCurrentGraph\":true,\"stoppedEarly\":false,\"reruns\":2,\"stopOnFirstFailure\":true},\"comparisons\":[{\"scenario\":\"current_graph\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"simple\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"branch\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"shuttle_line5\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"carrier\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"pallet_station_demo\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line1\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"sample_line2\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0},{\"scenario\":\"parallel_benchmark\",\"seed\":1,\"baselineEngine\":\"dt\",\"candidateEngine\":\"event-fast-par\",\"completedDelta\":0}],\"results\":[{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1392.9,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"current_graph\",\"sourceKind\":\"current_graph\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":160.7,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1211.5,\"loops\":1875,\"totalCompleted\":3,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"simple\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":194,\"loops\":1882,\"totalCompleted\":3,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1211.9,\"loops\":1875,\"totalCompleted\":1,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"branch\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":212.1,\"loops\":1882,\"totalCompleted\":1,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1218.1,\"loops\":1875,\"totalCompleted\":13,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"shuttle_line5\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":31.9,\"loops\":1882,\"totalCompleted\":13,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1236.6,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"carrier\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":46.9,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1230.1,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"pallet_station_demo\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":40.7,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1265.6,\"loops\":1875,\"totalCompleted\":2,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line1\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":76.6,\"loops\":1882,\"totalCompleted\":2,\"sinkCount\":3,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1355,\"loops\":1875,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"sample_line2\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":116.4,\"loops\":1882,\"totalCompleted\":0,\"sinkCount\":1,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"dt\",\"seed\":1,\"scenario\":\"parallel_benchmark\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30100,\"wallMs\":1221.5,\"loops\":1875,\"totalCompleted\":24,\"sinkCount\":8,\"failureCount\":0,\"warningCount\":0},{\"engine\":\"event-fast-par\",\"seed\":1,\"scenario\":\"parallel_benchmark\",\"sourceKind\":\"example\",\"status\":\"PASS\",\"attempts\":1,\"flaky\":false,\"simTimeMs\":30112,\"wallMs\":241.3,\"loops\":3764,\"totalCompleted\":24,\"sinkCount\":8,\"failureCount\":0,\"warningCount\":0}],\"issues\":[],\"artifactDir\":\"artifacts/engine-test/2026-03-15T02-55-55-626Z__opt-iter3-event-fast-par-standard\",\"artifactFiles\":{\"session\":\"artifacts/engine-test/2026-03-15T02-55-55-626Z__opt-iter3-event-fast-par-standard/session.json\",\"summary\":\"artifacts/engine-test/2026-03-15T02-55-55-626Z__opt-iter3-event-fast-par-standard/summary.json\",\"cases\":\"artifacts/engine-test/2026-03-15T02-55-55-626Z__opt-iter3-event-fast-par-standard/cases.json\",\"graphCurrent\":\"artifacts/engine-test/2026-03-15T02-55-55-626Z__opt-iter3-event-fast-par-standard/graph-current.json\",\"failures\":\"artifacts/engine-test/2026-03-15T02-55-55-626Z__opt-iter3-event-fast-par-standard/failures.json\"},\"mcpHint\":{\"tool\":\"engine_test\",\"action\":\"latest\"}}"
+    }
+  ]
+}
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+const { performance } = require('perf_hooks');
+
+function oldBucketMessages(messages, partitionCount){
+  const buckets = new Array(Math.max(0, partitionCount));
+  for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+  for(const message of Array.isArray(messages) ? messages : []){
+    if("'!message) continue;
+    const target = Number(message.toPartitionId);
+    if(target < 0 || target >= buckets.length) continue;
+    buckets[target].push(message);
+  }
+  return buckets;
+}
+
+function newBucketWorkerMessages(payloads, partitionCount){
+  const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
+  const buckets = new Array(total);
+  const touched = [];
+  for(const payload of Array.isArray(payloads) ? payloads : []){
+    const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
+    if(!messages || !messages.length) continue;
+    for(let i = 0; i < messages.length; i += 1){
+      const message = messages[i];
+      if(!message) continue;
+      const target = Number(message.toPartitionId);
+      if(target < 0 || target >= total) continue;
+      let bucket = buckets[target];
+      if(!bucket){
+        bucket = [];
+        buckets[target] = bucket;
+        touched.push(target);
+      }
+      bucket.push(message);
+    }
+  }
+  return { buckets, touched };
+}
+
+const partitionCount = 4;
+const payloads = new Array(partitionCount);
+for(let p = 0; p < partitionCount; p += 1){
+  const emittedMessages = [];
+  for(let i = 0; i < 48; i += 1){
+    emittedMessages.push({
+      toPartitionId: (i + p) % partitionCount,
+      value: { i, p, q: i % 7 }
+    });
+  }
+  payloads[p] = { emittedMessages };
+}
+const iterations = 250000;
+
+let sink = 0;
+let t0 = performance.now();
+for(let i = 0; i < iterations; i += 1){
+  const flat = payloads.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []);
+  const buckets = oldBucketMessages(flat, partitionCount);
+  sink += buckets[0] ? buckets[0].length : 0;
+}
+let t1 = performance.now();
+for(let i = 0; i < iterations; i += 1){
+  const bucketed = newBucketWorkerMessages(payloads, partitionCount);
+  sink += bucketed.buckets[0] ? bucketed.buckets[0].length : 0;
+}
+let t2 = performance.now();
+
+console.log(JSON.stringify({
+  iterations,
+  oldMs: Number((t1 - t0).toFixed(3)),
+  newMs: Number((t2 - t1).toFixed(3)),
+  improvementPct: Number((((t1 - t0) / (t2 - t1) - 1) * 100).toFixed(2)),
+  sink
+}, null, 2));
+'"'@ | node -" in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028 succeeded in 1.85s:
+{
+  "iterations": 250000,
+  "oldMs": 1065.541,
+  "newMs": 410.485,
+  "improvementPct": 159.58,
+  "sink": 24000000
+}
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+codex
+構文確認、`quick`/`standard` parity、変更箇所のマイクロベンチまでは終わっています。最後に参照用の行番号を拾って、結果を簡潔にまとめます。
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'js/app/engine-fast-par-host.js'; "'$i=0; Get-Content $p | ForEach-Object { $i++; if(($i -ge 288 -and $i -le 309) -or ($i -ge 631 -and $i -le 651)){ '"'{0}:{1}' -f "'$i, $_ } }' in C:\Users\suzuk\AppData\Local\Temp\fact-sim-auto-patch\1773543128708-28028 succeeded in 371ms:
+288:  function bucketWorkerMessages(payloads, partitionCount){
+289:    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
+290:    const buckets = new Array(total);
+291:    const touched = [];
+292:    for(const payload of Array.isArray(payloads) ? payloads : []){
+293:      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
+294:      if(!messages || !messages.length) continue;
+295:      for(let i = 0; i < messages.length; i += 1){
+296:        const message = messages[i];
+297:        if(!message) continue;
+298:        const target = Number(message.toPartitionId);
+299:        if(target < 0 || target >= total) continue;
+300:        let bucket = buckets[target];
+301:        if(!bucket){
+302:          bucket = [];
+303:          buckets[target] = bucket;
+304:          touched.push(target);
+305:        }
+306:        bucket.push(message);
+307:      }
+Plan update
+Single-file host-side hot-path optimization completed and verified with syntax check, parity suites, and a focused microbenchmark.
+  ✓ Measure current event-fast-par benchmark on parallel_benchmark for a local baseline
+  ✓ Patch event-fast-par host message bucketing to reduce hot-path allocations
+  ✓ Run syntax check, benchmark, and focused parity verification
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+codex
+1. Performance hypothesis
+
+The `event-fast-par` host was paying avoidable overhead in its hottest coordination path: every substep and flush round it flattened all worker `emittedMessages` into a temporary array, then rebuilt full bucket arrays just to discover which partitions were actually touched. On cross-partition workloads, reducing those allocations and scans should improve headless throughput.
+
+2. What changed
+
+I only edited [js/app/engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773543128708-28028/js/app/engine-fast-par-host.js#L288). The old `bucketMessages(messages, partitionCount)` helper was replaced with `bucketWorkerMessages(payloads, partitionCount)`, which buckets directly from worker payloads and returns a `touched` partition list without `flatMap` or preallocating empty buckets for every partition. `_stepParallel` now consumes that helper directly in the step and flush loop at [js/app/engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773543128708-28028/js/app/engine-fast-par-host.js#L636).
+
+3. Focused verification run
+
+I ran `node --check js/app/engine-fast-par-host.js`.
+
+I ran `engine_test` against `dt` vs `event-fast-par` with `strictFinalParity=true`, `reruns=2`, `stopOnFirstFailure=true` for both `quick` and `standard`. Both passed, including the `parallel_benchmark` scenario, with no failures or warnings.
+
+I also ran a local microbenchmark of the exact bucketing change on synthetic worker payloads. Result: old path `1065.541ms`, new path `410.485ms`, about `+159.58%` for that helper workload. I was not able to get the MCP benchmark API to accept `event-fast-par` mode directly, so I do not have a fresh 500ms end-to-end speed number against the `9726.176x` baseline.
+
+4. Residual risk
+
+The gain is most likely on workloads with frequent cross-partition message exchange; partition-independent graphs will see little or no benefit. End-to-end improvement against the nightly 500ms benchmark still needs confirmation in the full benchmark harness, since the available MCP benchmark entrypoints rejected `event-fast-par` mode even though parity testing worked.
+file update:
+diff --git a/js/app/engine-fast-par-host.js b/js/app/engine-fast-par-host.js
+index 77d71ab5749605d915d6ba749b7ff31db56e988b..50635eb53e44cfd1a3918c5922983e8b1cb14cf5
+--- a/js/app/engine-fast-par-host.js
++++ b/js/app/engine-fast-par-host.js
+@@ -285,16 +285,28 @@
+     }
+   }
+ 
+-  function bucketMessages(messages, partitionCount){
+-    const buckets = new Array(Math.max(0, partitionCount));
+-    for(let i = 0; i < buckets.length; i += 1) buckets[i] = [];
+-    for(const message of Array.isArray(messages) ? messages : []){
+-      if(!message) continue;
+-      const target = Number(message.toPartitionId);
+-      if(target < 0 || target >= buckets.length) continue;
+-      buckets[target].push(message);
++  function bucketWorkerMessages(payloads, partitionCount){
++    const total = Math.max(0, Math.floor(Number(partitionCount) || 0));
++    const buckets = new Array(total);
++    const touched = [];
++    for(const payload of Array.isArray(payloads) ? payloads : []){
++      const messages = Array.isArray(payload && payload.emittedMessages) ? payload.emittedMessages : null;
++      if(!messages || !messages.length) continue;
++      for(let i = 0; i < messages.length; i += 1){
++        const message = messages[i];
++        if(!message) continue;
++        const target = Number(message.toPartitionId);
++        if(target < 0 || target >= total) continue;
++        let bucket = buckets[target];
++        if(!bucket){
++          bucket = [];
++          buckets[target] = bucket;
++          touched.push(target);
++        }
++        bucket.push(message);
++      }
+     }
+-    return buckets;
++    return { buckets, touched };
+   }
+ 
+   function mergeOwnedNodeSnapshots(graphData, snapshots){
+@@ -621,17 +633,11 @@
+         const results = await Promise.all(this._workers.map((worker)=> worker.stepAsync(subDelta)));
+         this._lastSimTimeMs = reduceGlobalSimTime(this._lastSimTimeMs, results);
+         const statsByPartition = results.map((row)=> row && row.stats);
+-        let buckets = bucketMessages(
+-          results.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-          partitionCount
+-        );
++        let bucketed = bucketWorkerMessages(results, partitionCount);
+         for(let round = 0; round < MAX_FLUSH_ROUNDS; round += 1){
+-          const touched = [];
+-          for(let i = 0; i < buckets.length; i += 1){
+-            if(buckets[i] && buckets[i].length) touched.push(i);
+-          }
+-          const hasMessages = touched.length > 0;
+-          if(!hasMessages) break;
++          const touched = bucketed.touched;
++          if(!touched.length) break;
++          const buckets = bucketed.buckets;
+           const flushResults = await Promise.all(
+             touched.map((index)=> this._workers[index].applyAndFlushAsync(buckets[index]))
+           );
+@@ -640,10 +646,7 @@
+             const partitionIndex = touched[i];
+             statsByPartition[partitionIndex] = flushResults[i] && flushResults[i].stats;
+           }
+-          buckets = bucketMessages(
+-            flushResults.flatMap((row)=> Array.isArray(row && row.emittedMessages) ? row.emittedMessages : []),
+-            partitionCount
+-          );
++          bucketed = bucketWorkerMessages(flushResults, partitionCount);
+         }
+         latestStats = statsByPartition;
+       }
+
+tokens used
+54,954

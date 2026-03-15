@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "mode": "optimize",
+  "sessionId": "2026-03-15T09-44-16-538Z__generic-smoke",
+  "iteration": 1,
+  "targetEngine": "event-fast-par",
+  "profile": "nightly",
+  "examples": null,
+  "benchmarkExample": "parallel_benchmark",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event",
+    "event-fast",
+    "event-fast-worker",
+    "event-fast-par"
+  ],
+  "constraints": {
+    "protectEngines": [
+      "dt",
+      "event"
+    ],
+    "allowedPaths": [
+      "js/app/engine-fast-par-worker.js",
+      "js/app/engine-fast-par-host.js",
+      "js/app/engine-fast-par-partitioner.js",
+      "js/app/engine-fast-worker.js",
+      "js/app/engine-fast-worker-host.js",
+      "js/app/engine-fast-runtime.js",
+      "js/app/engine-fast-compat.js",
+      "js/app/engine-fast-kernels.js"
+    ]
+  },
+  "recommendedFiles": [
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-partitioner.js"
+  ],
+  "benchmark": {
+    "wallMs": 300,
+    "baseline": {
+      "dt": {
+        "speed": 2880,
+        "simSec": 864,
+        "wallMs": 300
+      },
+      "event": {
+        "speed": 3807.2,
+        "simSec": 1142.16,
+        "wallMs": 300
+      },
+      "event-fast": {
+        "speed": 5618.7733333333335,
+        "simSec": 1685.632,
+        "wallMs": 300
+      },
+      "event-fast-worker": {
+        "speed": 9120.053333333333,
+        "simSec": 2736.016,
+        "wallMs": 300
+      },
+      "event-fast-par": {
+        "speed": 9486.933333333332,
+        "simSec": 2846.08,
+        "wallMs": 300
+      }
+    },
+    "targetSpeed": 9486.933333333332,
+    "minImprovementPct": 1
+  },
+  "verification": {
+    "suites": [
+      "quick",
+      "standard"
+    ],
+    "strictFinalParity": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true
+  }
+}

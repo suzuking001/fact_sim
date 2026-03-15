@@ -1,0 +1,96 @@
+{
+  "quantMs": 250,
+  "rowCount": 8,
+  "activeRowCount": 5,
+  "rows": [
+    {
+      "key": "2",
+      "label": "Carrier Route IN #2",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 4
+        },
+        {
+          "state": "down",
+          "durationBins": 2
+        }
+      ]
+    },
+    {
+      "key": "3",
+      "label": "Carrier Route OUT #3",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 4
+        },
+        {
+          "state": "down",
+          "durationBins": 1
+        }
+      ]
+    },
+    {
+      "key": "6",
+      "label": "Station #6",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 4
+        },
+        {
+          "state": "down",
+          "durationBins": 4
+        },
+        {
+          "state": "process",
+          "durationBins": 4
+        }
+      ]
+    },
+    {
+      "key": "8",
+      "label": "Carrier Route #8",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 12
+        }
+      ]
+    },
+    {
+      "key": "9",
+      "label": "Carrier Route #9",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 11
+        }
+      ]
+    },
+    {
+      "key": "10",
+      "label": "Carrier Route #10",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "11",
+      "label": "Carrier Route #11",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "12",
+      "label": "Equipment #12",
+      "meaningful": false,
+      "signature": []
+    }
+  ]
+}

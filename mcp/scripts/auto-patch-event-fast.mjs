@@ -109,6 +109,12 @@ function normalizeFileList(values) {
   return out;
 }
 
+function isOptimizeRequest(patchRequest, targetFailure) {
+  if (String(patchRequest?.mode || "").trim().toLowerCase() === "optimize") return true;
+  if (!targetFailure && patchRequest?.benchmark && patchRequest?.targetEngine) return true;
+  return false;
+}
+
 function isArtifactPath(filePath) {
   return /^artifacts\//.test(filePath);
 }
@@ -213,7 +219,7 @@ async function hasCodexCli() {
   return probe.code === 0;
 }
 
-function buildPrompt(patchRequest, targetFailure) {
+function buildFixPrompt(patchRequest, targetFailure) {
   const allowedPaths = normalizeFileList(patchRequest?.constraints?.allowedPaths);
   const recommendedFiles = normalizeFileList(patchRequest?.recommendedFiles);
   const protectEngines = normalizeFileList(patchRequest?.constraints?.protectEngines);
@@ -248,6 +254,54 @@ function buildPrompt(patchRequest, targetFailure) {
   lines.push("2. which verification you ran");
   lines.push("3. any residual risk");
   return lines.join("\n");
+}
+
+function buildOptimizePrompt(patchRequest) {
+  const allowedPaths = normalizeFileList(patchRequest?.constraints?.allowedPaths);
+  const recommendedFiles = normalizeFileList(patchRequest?.recommendedFiles);
+  const protectEngines = normalizeFileList(patchRequest?.constraints?.protectEngines);
+  const benchmark = patchRequest?.benchmark || {};
+  const verification = patchRequest?.verification || {};
+  const targetEngine = String(patchRequest?.targetEngine || "").trim();
+  const lines = [];
+  lines.push("Use the existing AGENTS.md instructions in this repo.");
+  lines.push("Optimize the target event-fast* engine for speed while preserving dt parity.");
+  lines.push("This is an optimization request, not a failure-fix request.");
+  lines.push("Only edit allowed paths. Do not modify protected engines, engine-test, benchmark harnesses, or unrelated files.");
+  lines.push("");
+  lines.push("Optimization request:");
+  lines.push("```json");
+  lines.push(JSON.stringify(patchRequest, null, 2));
+  lines.push("```");
+  lines.push("");
+  lines.push(`Target engine: ${targetEngine || "(unknown)"}`);
+  lines.push(`Protected engines: ${protectEngines.join(", ") || "(none)"}`);
+  lines.push(`Allowed paths: ${allowedPaths.join(", ") || "(none)"}`);
+  if (recommendedFiles.length) lines.push(`Recommended files: ${recommendedFiles.join(", ")}`);
+  lines.push("");
+  lines.push("Requirements:");
+  lines.push("- Make one small, defensible performance improvement in the target engine implementation.");
+  lines.push("- Preserve correctness relative to dt. Do not widen the patch scope.");
+  lines.push("- Prefer changes that improve headless benchmark speed for the target engine.");
+  lines.push("- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.");
+  lines.push("- Do not browse external websites.");
+  lines.push("- Keep dt and event behavior untouched.");
+  lines.push(`- Benchmark target speed is ${Number(benchmark.targetSpeed || 0).toFixed(3)}x with minimum improvement ${Number(benchmark.minImprovementPct || 0)}%.`);
+  lines.push(`- Verification guidance: suites=${Array.isArray(verification.suites) ? verification.suites.join(",") : ""}, reruns=${Number(verification.reruns || 0)}, strictFinalParity=${verification.strictFinalParity ? "true" : "false"}.`);
+  lines.push("");
+  lines.push("At the end, summarize:");
+  lines.push("1. the performance hypothesis");
+  lines.push("2. what changed");
+  lines.push("3. which focused verification you ran");
+  lines.push("4. any residual risk");
+  return lines.join("\n");
+}
+
+function buildPrompt(patchRequest, targetFailure) {
+  if (isOptimizeRequest(patchRequest, targetFailure)) {
+    return buildOptimizePrompt(patchRequest);
+  }
+  return buildFixPrompt(patchRequest, targetFailure);
 }
 
 async function seedWorkspace(workspaceDir, seedPaths) {
@@ -301,6 +355,16 @@ async function runCodexDelegate(prompt, outputPath, workspaceDir) {
   });
 }
 
+async function safeRm(dirPath) {
+  if (!dirPath) return;
+  try {
+    await rm(dirPath, { recursive: true, force: true });
+  } catch (error) {
+    if (error && (error.code === "EBUSY" || error.code === "ENOTEMPTY" || error.code === "EPERM")) return;
+    throw error;
+  }
+}
+
 async function runShellDelegate(command, env) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, {
@@ -329,10 +393,11 @@ async function main() {
   await ensureDir(sessionDir);
   const patchRequest = await readJson(patchRequestPath);
   const targetFailure = targetFailurePath ? await readJson(targetFailurePath) : (patchRequest.targetFailure || null);
+  const optimizeRequest = isOptimizeRequest(patchRequest, targetFailure);
 
   const allowedPaths = normalizeFileList(patchRequest?.constraints?.allowedPaths);
   const protectedEngines = normalizeFileList(patchRequest?.constraints?.protectEngines);
-  const targetEngine = String(targetFailure?.engine || "").trim();
+  const targetEngine = String(targetFailure?.engine || patchRequest?.targetEngine || "").trim();
 
   const result = {
     version: 1,
@@ -428,13 +493,13 @@ async function main() {
         if (nextContent === beforeFiles.get(relativePath)) continue;
         await ensureDir(path.dirname(sourcePath));
         if (nextContent == null) {
-          await rm(sourcePath, { force: true });
+      await rm(sourcePath, { force: true });
         } else {
           await writeFile(sourcePath, nextContent, "utf8");
         }
       }
     }
-    await rm(workspaceRoot, { recursive: true, force: true });
+    await safeRm(workspaceRoot);
   } else {
     result.status = "blocked";
     result.notes.push("No delegate command was provided and codex CLI was not available.");
@@ -448,6 +513,9 @@ async function main() {
   if (delegateExit !== 0) {
     result.status = delegateExit === 124 ? "delegate-timeout" : "delegate-failed";
     if (delegateExit === 124) result.notes.push(`Delegate timed out after ${Math.round(getCodexTimeoutMs() / 60000)} minutes.`);
+    if (optimizeRequest && !targetFailure) {
+      result.notes.push("Optimization delegate failed before producing a usable patch.");
+    }
     result.finishedAt = nowIso();
     await writeJson(resultPath, result);
     process.exitCode = delegateExit || 1;

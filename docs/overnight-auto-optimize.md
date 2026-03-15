@@ -137,7 +137,7 @@ npm run watch:auto-optimize
 Windows shortcut:
 
 ```bat
-watch_event_fast_par_status.bat
+scripts/watch_event_fast_par_status.bat
 ```
 
 The monitor shows:
@@ -245,5 +245,5 @@ npm run watch:auto-optimize
 Windows watch shortcut:
 
 ```bat
-watch_event_fast_par_status.bat
+scripts/watch_event_fast_par_status.bat
 ```

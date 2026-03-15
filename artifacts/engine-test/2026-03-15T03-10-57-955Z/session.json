@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-15T03:10:57.955Z",
+  "finishedAt": "2026-03-15T03:10:59.403Z",
+  "status": "PASS",
+  "suite": "quick",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event",
+    "event-fast",
+    "event-fast-worker",
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": true,
+  "includeExamples": false,
+  "examples": [
+    "simple",
+    "branch",
+    "shuttle_line5",
+    "carrier",
+    "pallet_station_demo",
+    "sample_line1",
+    "sample_line2",
+    "parallel_benchmark"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": ""
+}

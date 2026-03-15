@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "kind": "engine-optimize",
+  "name": "event-fast-par optimize",
+  "key": "event-fast-par-optimize",
+  "goal": "Maximize event-fast-par speed while preserving dt parity.",
+  "target": {
+    "engine": "event-fast-par",
+    "protectedEngines": ["dt", "event"]
+  },
+  "delegate": {
+    "type": "auto-patch-event-fast",
+    "command": "node scripts/auto-patch-event-fast.mjs"
+  },
+  "defaults": {
+    "profile": "nightly",
+    "engines": ["dt", "event", "event-fast", "event-fast-worker", "event-fast-par"],
+    "optimizeEngines": ["event-fast-par"],
+    "examples": null,
+    "seeds": [1],
+    "includeCurrentGraph": false,
+    "strict": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true
+  },
+  "runtime": {
+    "benchmarkExample": "parallel_benchmark",
+    "benchmarkWallMs": 2000,
+    "delegateTimeoutMs": 900000,
+    "minImprovementPct": 1,
+    "maxIterations": 9999,
+    "minRuntimeHours": 5,
+    "maxNoImprovementIterations": 60
+  },
+  "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json"
+}

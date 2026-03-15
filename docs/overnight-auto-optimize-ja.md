@@ -148,7 +148,7 @@ npm run watch:auto-optimize
 Windows では次のバッチでも開けます。
 
 ```bat
-watch_event_fast_par_status.bat
+scripts/watch_event_fast_par_status.bat
 ```
 
 監視画面で見られるもの:
@@ -260,5 +260,5 @@ npm run watch:auto-optimize
 Windows 監視バッチ:
 
 ```bat
-watch_event_fast_par_status.bat
+scripts/watch_event_fast_par_status.bat
 ```

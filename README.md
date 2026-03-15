@@ -87,7 +87,7 @@ Open `http://127.0.0.1:8123`
 Windows users can also start the local server with:
 
 ```bat
-start_fact_sim_server.bat
+scripts/start_fact_sim_server.bat
 ```
 
 The batch file prefers launching `http://127.0.0.1:8123` in Chrome when Chrome is installed, so browser features such as local example overwrite are available.

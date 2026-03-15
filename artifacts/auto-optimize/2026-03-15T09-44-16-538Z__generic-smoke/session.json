@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "sessionId": "2026-03-15T09-44-16-538Z__generic-smoke",
+  "startedAt": "2026-03-15T09:44:16.544Z",
+  "finishedAt": "2026-03-15T09:44:47.120Z",
+  "status": "DRY-RUN",
+  "profile": "nightly",
+  "config": {
+    "engines": [
+      "dt",
+      "event",
+      "event-fast",
+      "event-fast-worker",
+      "event-fast-par"
+    ],
+    "optimizeEngines": [
+      "event-fast-par"
+    ],
+    "targetEngine": "event-fast-par",
+    "examples": null,
+    "benchmarkExample": "parallel_benchmark",
+    "seeds": [
+      1
+    ],
+    "includeCurrentGraph": false,
+    "includeExamples": true,
+    "strict": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true,
+    "benchmarkWallMs": 300,
+    "delegateTimeoutMs": 900000,
+    "minImprovementPct": 1,
+    "maxIterations": 1,
+    "minRuntimeHours": 0,
+    "maxNoImprovementIterations": 60,
+    "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json"
+  },
+  "baselineBenchmark": {
+    "dt": {
+      "speed": 2880,
+      "simSec": 864,
+      "wallMs": 300
+    },
+    "event": {
+      "speed": 3807.2,
+      "simSec": 1142.16,
+      "wallMs": 300
+    },
+    "event-fast": {
+      "speed": 5618.7733333333335,
+      "simSec": 1685.632,
+      "wallMs": 300
+    },
+    "event-fast-worker": {
+      "speed": 9120.053333333333,
+      "simSec": 2736.016,
+      "wallMs": 300
+    },
+    "event-fast-par": {
+      "speed": 9486.933333333332,
+      "simSec": 2846.08,
+      "wallMs": 300
+    }
+  },
+  "bestBenchmark": {
+    "dt": {
+      "speed": 2880,
+      "simSec": 864,
+      "wallMs": 300
+    },
+    "event": {
+      "speed": 3807.2,
+      "simSec": 1142.16,
+      "wallMs": 300
+    },
+    "event-fast": {
+      "speed": 5618.7733333333335,
+      "simSec": 1685.632,
+      "wallMs": 300
+    },
+    "event-fast-worker": {
+      "speed": 9120.053333333333,
+      "simSec": 2736.016,
+      "wallMs": 300
+    },
+    "event-fast-par": {
+      "speed": 9486.933333333332,
+      "simSec": 2846.08,
+      "wallMs": 300
+    }
+  },
+  "initialTargetSpeed": 9486.933333333332,
+  "bestTargetSpeed": 9486.933333333332,
+  "currentImprovementPct": 0,
+  "consecutiveNoImprovement": 0,
+  "iterations": [
+    {
+      "index": 1,
+      "status": "dry-run",
+      "baselineSpeed": 9486.933333333332,
+      "requestPath": "artifacts/auto-optimize/2026-03-15T09-44-16-538Z__generic-smoke/optimization-request.iteration-1.json",
+      "note": "Dry run only. No delegate executed."
+    }
+  ]
+}

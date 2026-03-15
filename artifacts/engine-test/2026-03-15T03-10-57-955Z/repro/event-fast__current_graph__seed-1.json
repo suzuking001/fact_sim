@@ -1,0 +1,20 @@
+{
+  "action": "run",
+  "suite": "quick",
+  "engines": [
+    "event-fast"
+  ],
+  "includeCurrentGraph": true,
+  "includeExamples": false,
+  "examples": [],
+  "seeds": [
+    1
+  ],
+  "strictFinalParity": true,
+  "targetSimMs": 30000,
+  "maxWallMs": 2500,
+  "realStepMs": 16,
+  "maxLoops": 25000,
+  "saveArtifacts": true,
+  "artifactLabel": "repro-event-fast__current_graph__seed-1"
+}

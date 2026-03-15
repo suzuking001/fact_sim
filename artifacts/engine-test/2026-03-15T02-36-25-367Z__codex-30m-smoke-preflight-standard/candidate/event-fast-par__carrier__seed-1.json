@@ -1,0 +1,128 @@
+{
+  "engine": "event-fast-par",
+  "seed": 1,
+  "scenario": "carrier",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 30112,
+    "wallMs": 40.3,
+    "loops": 1882,
+    "nodeCount": 15,
+    "linkCount": 19,
+    "sinkCount": 1,
+    "totalCompleted": 0,
+    "liveProbeSimTimeMs": 0,
+    "liveProbeWallMs": 0,
+    "liveProbeLoops": 0,
+    "liveTimelineEntries": 0,
+    "liveTimelineSegments": 0
+  },
+  "liveFlowProbe": null,
+  "liveStateProbe": null,
+  "liveTimelineSignature": null,
+  "sinks": [
+    {
+      "id": 3,
+      "title": "Sink",
+      "completedCount": 0
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 10,
+    "rows": [
+      {
+        "key": "2:Route R1",
+        "nodeId": 2,
+        "label": "Route R1",
+        "state": "workOut_wait_2|WAIT"
+      },
+      {
+        "key": "4:Route R2",
+        "nodeId": 4,
+        "label": "Route R2",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "6:Equipment",
+        "nodeId": 6,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "7:Equipment",
+        "nodeId": 7,
+        "label": "Equipment",
+        "state": "PROCESS"
+      },
+      {
+        "key": "10:Carrier Route",
+        "nodeId": 10,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "11:Carrier Route",
+        "nodeId": 11,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "13:Carrier Route",
+        "nodeId": 13,
+        "label": "Carrier Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "14:Equipment",
+        "nodeId": 14,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "16:Carrier Route",
+        "nodeId": 16,
+        "label": "Carrier Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "17:Join",
+        "nodeId": 17,
+        "label": "Join",
+        "state": "DOWN"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 1,
+    "payloadCount": 1,
+    "observedLinkKeys": [
+      "17:workOut->7:workIn:1:A"
+    ],
+    "observedWorkRefs": [
+      "1:A"
+    ]
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "3:Sink",
+      "id": 3,
+      "title": "Sink",
+      "completedCount": 0
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": []
+  },
+  "attempts": 1,
+  "maxAttempts": 3,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}

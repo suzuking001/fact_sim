@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "sessionId": "2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913",
+  "startedAt": "2026-03-15T02:39:15.479Z",
+  "finishedAt": "2026-03-15T03:13:24.321Z",
+  "status": "WARN",
+  "profile": "nightly",
+  "config": {
+    "engines": [
+      "dt",
+      "event",
+      "event-fast",
+      "event-fast-worker",
+      "event-fast-par"
+    ],
+    "optimizeEngines": [
+      "event-fast-par"
+    ],
+    "targetEngine": "event-fast-par",
+    "examples": null,
+    "benchmarkExample": "parallel_benchmark",
+    "seeds": [
+      1
+    ],
+    "includeCurrentGraph": false,
+    "includeExamples": true,
+    "strict": true,
+    "reruns": 2,
+    "stopOnFirstFailure": true,
+    "benchmarkWallMs": 500,
+    "delegateTimeoutMs": 900000,
+    "minImprovementPct": 1,
+    "maxIterations": 9999,
+    "minRuntimeHours": 0.5,
+    "maxNoImprovementIterations": 1,
+    "statusFile": ""
+  },
+  "baselineBenchmark": {
+    "dt": {
+      "speed": 2643.6712656208156,
+      "simSec": 1322.1,
+      "wallMs": 500.10000002384186
+    },
+    "event": {
+      "speed": 4138.016,
+      "simSec": 2069.008,
+      "wallMs": 500
+    },
+    "event-fast": {
+      "speed": 5479.824069849464,
+      "simSec": 2741.008,
+      "wallMs": 500.2000000476837
+    },
+    "event-fast-worker": {
+      "speed": 9312.032,
+      "simSec": 4656.016,
+      "wallMs": 500
+    },
+    "event-fast-par": {
+      "speed": 9726.176,
+      "simSec": 4863.088,
+      "wallMs": 500
+    }
+  },
+  "bestBenchmark": {
+    "dt": {
+      "speed": 2643.6712656208156,
+      "simSec": 1322.1,
+      "wallMs": 500.10000002384186
+    },
+    "event": {
+      "speed": 4138.016,
+      "simSec": 2069.008,
+      "wallMs": 500
+    },
+    "event-fast": {
+      "speed": 5479.824069849464,
+      "simSec": 2741.008,
+      "wallMs": 500.2000000476837
+    },
+    "event-fast-worker": {
+      "speed": 9312.032,
+      "simSec": 4656.016,
+      "wallMs": 500
+    },
+    "event-fast-par": {
+      "speed": 9726.176,
+      "simSec": 4863.088,
+      "wallMs": 500
+    }
+  },
+  "initialTargetSpeed": 9726.176,
+  "bestTargetSpeed": 9726.176,
+  "currentImprovementPct": 0,
+  "consecutiveNoImprovement": 5,
+  "iterations": [
+    {
+      "index": 1,
+      "status": "delegate-failed",
+      "baselineSpeed": 9726.176,
+      "requestPath": "artifacts/auto-optimize/2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913/optimization-request.iteration-1.json",
+      "patchStartedAt": "2026-03-15T02:39:45.543Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "changedPaths": []
+    },
+    {
+      "index": 2,
+      "status": "delegate-failed",
+      "baselineSpeed": 9726.176,
+      "requestPath": "artifacts/auto-optimize/2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913/optimization-request.iteration-2.json",
+      "patchStartedAt": "2026-03-15T02:45:44.719Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "changedPaths": []
+    },
+    {
+      "index": 3,
+      "status": "delegate-failed",
+      "baselineSpeed": 9726.176,
+      "requestPath": "artifacts/auto-optimize/2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913/optimization-request.iteration-3.json",
+      "patchStartedAt": "2026-03-15T02:52:07.989Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "changedPaths": []
+    },
+    {
+      "index": 4,
+      "status": "delegate-failed",
+      "baselineSpeed": 9726.176,
+      "requestPath": "artifacts/auto-optimize/2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913/optimization-request.iteration-4.json",
+      "patchStartedAt": "2026-03-15T02:56:44.199Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "changedPaths": []
+    },
+    {
+      "index": 5,
+      "status": "delegate-failed",
+      "baselineSpeed": 9726.176,
+      "requestPath": "artifacts/auto-optimize/2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913/optimization-request.iteration-5.json",
+      "patchStartedAt": "2026-03-15T03:05:53.022Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "changedPaths": []
+    }
+  ]
+}

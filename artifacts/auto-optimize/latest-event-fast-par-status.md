@@ -1,14 +1,15 @@
 # Auto Optimize Status
 
-- Session: `2026-03-14T18-04-55-900Z__overnight-event-fast-par-restart-20260315-030453`
+- Session: `2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913`
 - Status: `WARN`
 - Target: `event-fast-par`
 - Benchmark example: `parallel_benchmark`
-- Elapsed: `5.000 h`
-- Initial speed: `7920.032x`
-- Best speed: `7920.032x`
+- Elapsed: `0.569 h`
+- Initial speed: `9726.176x`
+- Best speed: `9726.176x`
 - Improvement: `0.00%`
-- Consecutive no-improvement iterations: `672/60`
+- Consecutive no-improvement iterations: `5/1`
 
 ## Latest Iteration
-- #672: `delegate-failed`
+- #5: `delegate-failed`
+- Note: Optimization delegate failed before producing a usable patch.

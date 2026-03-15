@@ -1,0 +1,76 @@
+{
+  "engine": "event-fast-worker",
+  "seed": 1,
+  "scenario": "simple",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 30112,
+    "wallMs": 158.4,
+    "loops": 1882,
+    "nodeCount": 4,
+    "linkCount": 3,
+    "sinkCount": 1,
+    "totalCompleted": 3,
+    "liveProbeSimTimeMs": 0,
+    "liveProbeWallMs": 0,
+    "liveProbeLoops": 0,
+    "liveTimelineEntries": 0,
+    "liveTimelineSegments": 0
+  },
+  "liveFlowProbe": null,
+  "liveStateProbe": null,
+  "liveTimelineSignature": null,
+  "sinks": [
+    {
+      "id": 4,
+      "title": "Sink",
+      "completedCount": 3
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 2,
+    "rows": [
+      {
+        "key": "2:Equipment",
+        "nodeId": 2,
+        "label": "Equipment",
+        "state": "PROCESS"
+      },
+      {
+        "key": "3:Equipment",
+        "nodeId": 3,
+        "label": "Equipment",
+        "state": "PROCESS"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 0,
+    "payloadCount": 0,
+    "observedLinkKeys": [],
+    "observedWorkRefs": []
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "4:Sink",
+      "id": 4,
+      "title": "Sink",
+      "completedCount": 3
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": []
+  },
+  "attempts": 1,
+  "maxAttempts": 3,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}

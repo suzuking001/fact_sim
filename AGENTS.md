@@ -156,7 +156,7 @@ npm run watch:auto-optimize
 Windows では root のバッチも使えます。
 
 ```bat
-watch_event_fast_par_status.bat
+scripts/watch_event_fast_par_status.bat
 ```
 
 監視画面には次が出ます。
@@ -185,7 +185,7 @@ watch_event_fast_par_status.bat
 
 条件:
 
-- `start_fact_sim_server.bat` などで `http://127.0.0.1:8123/` から開く
+- `scripts/start_fact_sim_server.bat` などで `http://127.0.0.1:8123/` から開く
 - Chrome / Edge を使う
 - 初回に `Link Sample Folder` で `sample` フォルダへの権限を与える
 

@@ -1,0 +1,53 @@
+{
+  "finalStateSnapshot": {
+    "nodeCount": 2,
+    "rows": [
+      {
+        "key": "2:Equipment",
+        "nodeId": 2,
+        "label": "Equipment",
+        "state": "PROCESS"
+      },
+      {
+        "key": "3:Equipment",
+        "nodeId": 3,
+        "label": "Equipment",
+        "state": "DOWN"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 1,
+    "payloadCount": 1,
+    "observedLinkKeys": [
+      "3:workOut->4:workIn:1:A"
+    ],
+    "observedWorkRefs": [
+      "1:A"
+    ]
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "4:Sink",
+      "id": 4,
+      "title": "Sink",
+      "completedCount": 1
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 2,
+    "refs": [
+      "1:A",
+      "2:B"
+    ],
+    "duplicateRefs": [
+      {
+        "ref": "1:A",
+        "locations": [
+          "node:3",
+          "node:4"
+        ]
+      }
+    ]
+  }
+}

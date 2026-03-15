@@ -1,0 +1,22 @@
+{
+  "action": "run",
+  "suite": "standard",
+  "engines": [
+    "event"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "sample_line1"
+  ],
+  "seeds": [
+    1
+  ],
+  "strictFinalParity": true,
+  "targetSimMs": 30000,
+  "maxWallMs": 2500,
+  "realStepMs": 16,
+  "maxLoops": 25000,
+  "saveArtifacts": true,
+  "artifactLabel": "repro-event__sample_line1__seed-1"
+}

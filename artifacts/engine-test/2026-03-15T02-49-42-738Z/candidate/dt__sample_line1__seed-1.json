@@ -1,0 +1,1808 @@
+{
+  "engine": "dt",
+  "seed": 1,
+  "scenario": "sample_line1",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 30100,
+    "wallMs": 950.7,
+    "loops": 1875,
+    "nodeCount": 58,
+    "linkCount": 59,
+    "sinkCount": 3,
+    "totalCompleted": 2,
+    "liveProbeSimTimeMs": 3000,
+    "liveProbeWallMs": 890,
+    "liveProbeLoops": 188,
+    "liveTimelineEntries": 47,
+    "liveTimelineSegments": 66
+  },
+  "liveFlowProbe": {
+    "nonEmptySteps": 57,
+    "maxActiveLinks": 3,
+    "maxPayloadCount": 3,
+    "observedLinkKeys": [
+      "13:workOut->14:workIn:1:A",
+      "25:workOut->24:workIn:1:A",
+      "2:workOut->4:workIn:1:A"
+    ],
+    "observedWorkRefs": [
+      "1:A"
+    ]
+  },
+  "liveStateProbe": {
+    "sampleStepMs": 250,
+    "sampleTimesSec": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1,
+      1.25,
+      1.5,
+      1.75,
+      2,
+      2.25,
+      2.5,
+      2.75,
+      3
+    ],
+    "sampleCount": 13,
+    "nodeCount": 47,
+    "changingNodeCount": 13,
+    "nodeStates": [
+      {
+        "key": "2:EquipmentNode",
+        "nodeId": 2,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "DOWN",
+          "DOWN",
+          "DOWN",
+          "DOWN"
+        ]
+      },
+      {
+        "key": "3:EquipmentNode",
+        "nodeId": 3,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "4:EquipmentNode",
+        "nodeId": 4,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS"
+        ]
+      },
+      {
+        "key": "5:EquipmentNode",
+        "nodeId": 5,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "6:EquipmentNode",
+        "nodeId": 6,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "8:EquipmentNode",
+        "nodeId": 8,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "9:EquipmentNode",
+        "nodeId": 9,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "10:EquipmentNode",
+        "nodeId": 10,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "13:EquipmentNode",
+        "nodeId": 13,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "DOWN",
+          "DOWN",
+          "DOWN",
+          "DOWN"
+        ]
+      },
+      {
+        "key": "14:EquipmentNode",
+        "nodeId": 14,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS"
+        ]
+      },
+      {
+        "key": "15:EquipmentNode",
+        "nodeId": 15,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "17:Merge",
+        "nodeId": 17,
+        "label": "Merge",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "23:EquipmentNode",
+        "nodeId": 23,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "24:EquipmentNode",
+        "nodeId": 24,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS"
+        ]
+      },
+      {
+        "key": "25:EquipmentNode",
+        "nodeId": 25,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "DOWN",
+          "DOWN",
+          "DOWN",
+          "DOWN"
+        ]
+      },
+      {
+        "key": "26:Merge",
+        "nodeId": 26,
+        "label": "Merge",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "27:EquipmentNode",
+        "nodeId": 27,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "WAIT",
+          "WAIT",
+          "WAIT",
+          "WAIT"
+        ]
+      },
+      {
+        "key": "28:EquipmentNode",
+        "nodeId": 28,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "WAIT",
+          "WAIT",
+          "WAIT",
+          "WAIT"
+        ]
+      },
+      {
+        "key": "30:EquipmentNode",
+        "nodeId": 30,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "31:EquipmentNode",
+        "nodeId": 31,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "32:Merge",
+        "nodeId": 32,
+        "label": "Merge",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "33:EquipmentNode",
+        "nodeId": 33,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "34:EquipmentNode",
+        "nodeId": 34,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "35:EquipmentNode",
+        "nodeId": 35,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "36:Merge",
+        "nodeId": 36,
+        "label": "Merge",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "37:EquipmentNode",
+        "nodeId": 37,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "38:EquipmentNode",
+        "nodeId": 38,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "39:EquipmentNode",
+        "nodeId": 39,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "40:EquipmentNode",
+        "nodeId": 40,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "42:Merge",
+        "nodeId": 42,
+        "label": "Merge",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "44:EquipmentNode",
+        "nodeId": 44,
+        "label": "EquipmentNode",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "WAIT",
+          "WAIT",
+          "WAIT",
+          "WAIT"
+        ]
+      },
+      {
+        "key": "46:AGV Route",
+        "nodeId": 46,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "47:AGV Route",
+        "nodeId": 47,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "48:AGV Route",
+        "nodeId": 48,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS"
+        ]
+      },
+      {
+        "key": "49:AGV Route",
+        "nodeId": 49,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "50:AGV Route",
+        "nodeId": 50,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "51:AGV Route",
+        "nodeId": 51,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "52:Equipment",
+        "nodeId": 52,
+        "label": "Equipment",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS"
+        ]
+      },
+      {
+        "key": "53:Equipment",
+        "nodeId": 53,
+        "label": "Equipment",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "56:AGV Route",
+        "nodeId": 56,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "57:AGV Route",
+        "nodeId": 57,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "59:AGV Route",
+        "nodeId": 59,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "60:AGV Route",
+        "nodeId": 60,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS",
+          "agv_process|PROCESS"
+        ]
+      },
+      {
+        "key": "61:AGV Route",
+        "nodeId": 61,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "62:AGV Route",
+        "nodeId": 62,
+        "label": "AGV Route",
+        "sequence": [
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE",
+          "agvIn_idle|IDLE"
+        ]
+      },
+      {
+        "key": "63:Equipment",
+        "nodeId": 63,
+        "label": "Equipment",
+        "sequence": [
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE",
+          "IDLE"
+        ]
+      },
+      {
+        "key": "64:Equipment",
+        "nodeId": 64,
+        "label": "Equipment",
+        "sequence": [
+          "IDLE",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS",
+          "PROCESS"
+        ]
+      }
+    ]
+  },
+  "liveTimelineSignature": {
+    "quantMs": 250,
+    "rowCount": 47,
+    "activeRowCount": 13,
+    "rows": [
+      {
+        "key": "2",
+        "label": "EquipmentNode #2",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 8
+          },
+          {
+            "state": "down",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "3",
+        "label": "EquipmentNode #3",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "4",
+        "label": "EquipmentNode #4",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "5",
+        "label": "EquipmentNode #5",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "6",
+        "label": "EquipmentNode #6",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "8",
+        "label": "EquipmentNode #8",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "9",
+        "label": "EquipmentNode #9",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "10",
+        "label": "EquipmentNode #10",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "13",
+        "label": "EquipmentNode #13",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 8
+          },
+          {
+            "state": "down",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "14",
+        "label": "EquipmentNode #14",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "15",
+        "label": "EquipmentNode #15",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "17",
+        "label": "Merge #17",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "23",
+        "label": "EquipmentNode #23",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "24",
+        "label": "EquipmentNode #24",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "25",
+        "label": "EquipmentNode #25",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 8
+          },
+          {
+            "state": "down",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "26",
+        "label": "Merge #26",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "27",
+        "label": "EquipmentNode #27",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 8
+          },
+          {
+            "state": "wait",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "28",
+        "label": "EquipmentNode #28",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 8
+          },
+          {
+            "state": "wait",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "30",
+        "label": "EquipmentNode #30",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "31",
+        "label": "EquipmentNode #31",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "32",
+        "label": "Merge #32",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "33",
+        "label": "EquipmentNode #33",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "34",
+        "label": "EquipmentNode #34",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "35",
+        "label": "EquipmentNode #35",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "36",
+        "label": "Merge #36",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "37",
+        "label": "EquipmentNode #37",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "38",
+        "label": "EquipmentNode #38",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "39",
+        "label": "EquipmentNode #39",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "40",
+        "label": "EquipmentNode #40",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "42",
+        "label": "Merge #42",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "44",
+        "label": "EquipmentNode #44",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 8
+          },
+          {
+            "state": "wait",
+            "durationBins": 4
+          }
+        ]
+      },
+      {
+        "key": "46",
+        "label": "AGV Route #46",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "47",
+        "label": "AGV Route #47",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "48",
+        "label": "AGV Route #48",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 12
+          }
+        ]
+      },
+      {
+        "key": "49",
+        "label": "AGV Route #49",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "50",
+        "label": "AGV Route #50",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "51",
+        "label": "AGV Route #51",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "52",
+        "label": "Equipment #52",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 12
+          }
+        ]
+      },
+      {
+        "key": "53",
+        "label": "Equipment #53",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "56",
+        "label": "AGV Route #56",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "57",
+        "label": "AGV Route #57",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "59",
+        "label": "AGV Route #59",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "60",
+        "label": "AGV Route #60",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 12
+          }
+        ]
+      },
+      {
+        "key": "61",
+        "label": "AGV Route #61",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "62",
+        "label": "AGV Route #62",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "63",
+        "label": "Equipment #63",
+        "meaningful": false,
+        "signature": []
+      },
+      {
+        "key": "64",
+        "label": "Equipment #64",
+        "meaningful": true,
+        "signature": [
+          {
+            "state": "process",
+            "durationBins": 12
+          }
+        ]
+      }
+    ]
+  },
+  "sinks": [
+    {
+      "id": 45,
+      "title": "Sink",
+      "completedCount": 0,
+      "throughputPerHour": 0
+    },
+    {
+      "id": 55,
+      "title": "Sink",
+      "completedCount": 1,
+      "throughputPerHour": 119.601
+    },
+    {
+      "id": 66,
+      "title": "Sink",
+      "completedCount": 1,
+      "throughputPerHour": 119.601
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 47,
+    "rows": [
+      {
+        "key": "2:EquipmentNode",
+        "nodeId": 2,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "3:EquipmentNode",
+        "nodeId": 3,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "4:EquipmentNode",
+        "nodeId": 4,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "5:EquipmentNode",
+        "nodeId": 5,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "6:EquipmentNode",
+        "nodeId": 6,
+        "label": "EquipmentNode",
+        "state": "WAIT"
+      },
+      {
+        "key": "8:EquipmentNode",
+        "nodeId": 8,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "9:EquipmentNode",
+        "nodeId": 9,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "10:EquipmentNode",
+        "nodeId": 10,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "13:EquipmentNode",
+        "nodeId": 13,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "14:EquipmentNode",
+        "nodeId": 14,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "15:EquipmentNode",
+        "nodeId": 15,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "17:Merge",
+        "nodeId": 17,
+        "label": "Merge",
+        "state": "PROCESS"
+      },
+      {
+        "key": "23:EquipmentNode",
+        "nodeId": 23,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "24:EquipmentNode",
+        "nodeId": 24,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "25:EquipmentNode",
+        "nodeId": 25,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "26:Merge",
+        "nodeId": 26,
+        "label": "Merge",
+        "state": "PROCESS"
+      },
+      {
+        "key": "27:EquipmentNode",
+        "nodeId": 27,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "28:EquipmentNode",
+        "nodeId": 28,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "30:EquipmentNode",
+        "nodeId": 30,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "31:EquipmentNode",
+        "nodeId": 31,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "32:Merge",
+        "nodeId": 32,
+        "label": "Merge",
+        "state": "DOWN"
+      },
+      {
+        "key": "33:EquipmentNode",
+        "nodeId": 33,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "34:EquipmentNode",
+        "nodeId": 34,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "35:EquipmentNode",
+        "nodeId": 35,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "36:Merge",
+        "nodeId": 36,
+        "label": "Merge",
+        "state": "PROCESS"
+      },
+      {
+        "key": "37:EquipmentNode",
+        "nodeId": 37,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "38:EquipmentNode",
+        "nodeId": 38,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "39:EquipmentNode",
+        "nodeId": 39,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "40:EquipmentNode",
+        "nodeId": 40,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "42:Merge",
+        "nodeId": 42,
+        "label": "Merge",
+        "state": "DOWN"
+      },
+      {
+        "key": "44:EquipmentNode",
+        "nodeId": 44,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "46:AGV Route",
+        "nodeId": 46,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "47:AGV Route",
+        "nodeId": 47,
+        "label": "AGV Route",
+        "state": "workOut_wait_2|WAIT"
+      },
+      {
+        "key": "48:AGV Route",
+        "nodeId": 48,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "49:AGV Route",
+        "nodeId": 49,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "50:AGV Route",
+        "nodeId": 50,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "51:AGV Route",
+        "nodeId": 51,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "52:Equipment",
+        "nodeId": 52,
+        "label": "Equipment",
+        "state": "WAIT"
+      },
+      {
+        "key": "53:Equipment",
+        "nodeId": 53,
+        "label": "Equipment",
+        "state": "DOWN"
+      },
+      {
+        "key": "56:AGV Route",
+        "nodeId": 56,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "57:AGV Route",
+        "nodeId": 57,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "59:AGV Route",
+        "nodeId": 59,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "60:AGV Route",
+        "nodeId": 60,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "61:AGV Route",
+        "nodeId": 61,
+        "label": "AGV Route",
+        "state": "agv_process|PROCESS"
+      },
+      {
+        "key": "62:AGV Route",
+        "nodeId": 62,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "63:Equipment",
+        "nodeId": 63,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "64:Equipment",
+        "nodeId": 64,
+        "label": "Equipment",
+        "state": "WAIT"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 11,
+    "payloadCount": 11,
+    "observedLinkKeys": [
+      "14:workOut->15:workIn:5:A",
+      "24:workOut->23:workIn:5:A",
+      "27:workOut->17:workIn2:4:B",
+      "28:workOut->26:workIn2:4:B",
+      "31:workOut->32:workIn2:3:A",
+      "32:workOut->34:workIn:3:A",
+      "35:workOut->36:workIn2:2:B",
+      "3:workOut->5:workIn:5:A",
+      "42:workOut->8:workIn:3:A",
+      "53:workOut->55:workIn:1:A",
+      "8:workOut->9:workIn:3:A"
+    ],
+    "observedWorkRefs": [
+      "1:A",
+      "2:B",
+      "3:A",
+      "4:B",
+      "5:A"
+    ]
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "45:Sink",
+      "id": 45,
+      "title": "Sink",
+      "completedCount": 0
+    },
+    {
+      "key": "55:Sink",
+      "id": 55,
+      "title": "Sink",
+      "completedCount": 1
+    },
+    {
+      "key": "66:Sink",
+      "id": 66,
+      "title": "Sink",
+      "completedCount": 1
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 7,
+    "refs": [
+      "1:A",
+      "2:B",
+      "3:A",
+      "4:B",
+      "5:A",
+      "6:B",
+      "7:A"
+    ],
+    "duplicateRefs": [
+      {
+        "ref": "1:A",
+        "locations": [
+          "node:37",
+          "node:53",
+          "node:55",
+          "node:66"
+        ]
+      },
+      {
+        "ref": "2:B",
+        "locations": [
+          "node:35",
+          "node:36",
+          "node:64"
+        ]
+      },
+      {
+        "ref": "3:A",
+        "locations": [
+          "node:8",
+          "node:9",
+          "node:31",
+          "node:32",
+          "node:34",
+          "node:42",
+          "node:52"
+        ]
+      },
+      {
+        "ref": "4:B",
+        "locations": [
+          "node:27",
+          "node:28",
+          "node:26",
+          "node:6",
+          "node:44",
+          "node:17"
+        ]
+      },
+      {
+        "ref": "5:A",
+        "locations": [
+          "node:14",
+          "node:15",
+          "node:24",
+          "node:23",
+          "node:5",
+          "node:3"
+        ]
+      },
+      {
+        "ref": "6:B",
+        "locations": [
+          "node:13",
+          "node:25",
+          "node:4"
+        ]
+      }
+    ]
+  },
+  "attempts": 1,
+  "maxAttempts": 3,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}
