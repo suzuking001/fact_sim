@@ -120,6 +120,7 @@ This optimizer first requires a clean worktree, then runs `quick` and `standard`
 
 ## Documentation
 - Research notes: `docs/research.md`
+- Overnight optimizer guide: `docs/overnight-auto-optimize.md`
 - Third-party notices: `THIRD_PARTY_NOTICES.md`
 
 ## Contributing
