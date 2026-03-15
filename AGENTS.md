@@ -158,6 +158,16 @@ watch_event_fast_par_status.bat
 
 `file://` 直開きでは保存できません。
 
+## 一時ファイルの置き場所
+
+検証用スクリーンショットや一時的な確認用画像は `tmp/` に置きます。root 直下には置きません。
+
+恒久的に残す出力は `artifacts/` に保存します。対象は次です。
+
+- engine test artifact
+- auto optimize artifact
+- benchmark / report / export の保存物
+
 ## 推奨プロンプト例
 
 - `Use fact-sim-ai MCP to load sample_line1, run 3000ms in dt mode, and return KPI + bottleneck summary.`

@@ -92,6 +92,8 @@ start_fact_sim_server.bat
 
 The batch file prefers launching `http://127.0.0.1:8123` in Chrome when Chrome is installed, so browser features such as local example overwrite are available.
 
+Temporary verification screenshots should be saved under `tmp/`. Permanent exported artifacts such as reports, JSON, CSV, and optimizer outputs continue to live under `artifacts/`.
+
 ## Overnight Engine Optimization
 The MCP package includes a guarded overnight loop for `event-fast*` engines.
 

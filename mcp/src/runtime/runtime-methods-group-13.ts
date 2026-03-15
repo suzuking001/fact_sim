@@ -276,7 +276,7 @@ export function registerRuntimeMethodsGroup13(
   (FactSimRuntimeClass.prototype as any).resolveSnapshotPath = function (this: any, fileName?: string): string {
       const trimmed = String(fileName ?? "").trim();
       if (!trimmed) {
-        return path.resolve(process.cwd(), "artifacts", "fact-sim-snapshot-" + Date.now() + ".png");
+        return path.resolve(process.cwd(), "tmp", "fact-sim-snapshot-" + Date.now() + ".png");
       }
   
       const normalized = trimmed.replace(/\\/g, "/");
