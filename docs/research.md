@@ -65,10 +65,10 @@ $$
 ワークや搬送対象の個体を
 
 $$
-w_k=\bigl(\operatorname{id}_k,\ \operatorname{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k\bigr)
+w_k=\bigl(\mathrm{id}_k,\ \mathrm{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k\bigr)
 $$
 
-と表す。ここで $\operatorname{id}_k$ は個体識別子、$\operatorname{type}_k$ は分岐条件や routing に用いる属性、$t_k^{\mathrm{birth}}$ は生成時刻、$\theta_k$ は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
+と表す。ここで $\mathrm{id}_k$ は個体識別子、$\mathrm{type}_k$ は分岐条件や routing に用いる属性、$t_k^{\mathrm{birth}}$ は生成時刻、$\theta_k$ は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
 
 ---
 
@@ -232,15 +232,15 @@ $$
 `Sink` は到着ワーク総数 $N(t)$ を記録し、サイクルタイムと throughput を観測する。到着時刻列を $\{\,t_k^{\mathrm{sink}}\,\}$ とすると、ワーク単位のサイクルタイムは
 
 $$
-\operatorname{CT}_k=t_k^{\mathrm{sink}}-t_{k-1}^{\mathrm{sink}}
+\mathrm{CT}_k=t_k^{\mathrm{sink}}-t_{k-1}^{\mathrm{sink}}
 $$
 
 である。
 
-1 時間窓 throughput を $\operatorname{TPH}(t)$ とすると、概念的には
+1 時間窓 throughput を $\mathrm{TPH}(t)$ とすると、概念的には
 
 $$
-\operatorname{TPH}(t)=
+\mathrm{TPH}(t)=
 \begin{cases}
 \dfrac{N(t)}{t/3600}, & 0<t<3600\\[4pt]
 N(t)-N(t-3600), & t\ge 3600
@@ -264,19 +264,19 @@ $$
 `Branch` はワーク属性に応じて出力先を選ぶ。出力候補 $m\in\Gamma_i^{+}$ に対して routeType 条件を用いるなら、
 
 $$
-j=\operatorname*{arg\,max}_{m\in \Gamma_i^{+}}
-\mathbf{1}\bigl\{\operatorname{routeType}_m=\operatorname{type}(w)\bigr\}
+j=\arg\max_{m\in \Gamma_i^{+}}
+\mathbf{1}\bigl\{\mathrm{routeType}_m=\mathrm{type}(w)\bigr\}
 $$
 
 のように書ける。
 
 ### 5.5 Merge
 
-`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を $\Gamma_i^{-}$ とすると、ある ID $\widehat{\operatorname{id}}$ に対し
+`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を $\Gamma_i^{-}$ とすると、ある ID $\widehat{\mathrm{id}}$ に対し
 
 $$
 \forall \ell\in \Gamma_i^{-},\ \exists w_\ell:\ 
-\operatorname{id}(w_\ell)=\widehat{\operatorname{id}}
+\mathrm{id}(w_\ell)=\widehat{\mathrm{id}}
 $$
 
 が成立した時に発火する。
@@ -395,10 +395,10 @@ $$
 \bar{C}_i=\mathbb{E}[C_i(w)]
 $$
 
-とする。直列ラインの粗い近似としてライン throughput $\operatorname{TP}$ は
+とする。直列ラインの粗い近似としてライン throughput $\mathrm{TP}$ は
 
 $$
-\operatorname{TP}\lesssim \frac{1}{\max_i \bar{C}_i}
+\mathrm{TP}\lesssim \frac{1}{\max_i \bar{C}_i}
 $$
 
 で上から抑えられる。
