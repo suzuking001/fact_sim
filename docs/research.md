@@ -43,20 +43,20 @@ FACT SIM はこの問題に対し、工程を状態遷移として扱いつつ�
 
 シミュレーション対象を有向グラフ
 
-\[
+$$
 \mathcal{G}=(\mathcal{V},\mathcal{E})
-\]
+$$
 
 で表す。
 
-- \(\mathcal{V}\): ノード集合。`Source`, `Equipment`, `Split`, `Branch`, `Merge`, `Join`, `Station`, `Sink`, `Carrier Route`, `Shuttle Stage` などを含む。
-- \(\mathcal{E}\): ノード間リンク集合。work ポート、carrier ポートなどの接続を表す。
+- $\mathcal{V}$: ノード集合。`Source`, `Equipment`, `Split`, `Branch`, `Merge`, `Join`, `Station`, `Sink`, `Carrier Route`, `Shuttle Stage` などを含む。
+- $\mathcal{E}$: ノード間リンク集合。work ポート、carrier ポートなどの接続を表す。
 
-時刻 \(t\) におけるノード \(i \in \mathcal{V}\) の状態を
+時刻 $t$ におけるノード $i \in \mathcal{V}$ の状態を
 
-\[
+$$
 x_i(t)\in \mathcal{S}_i
-\]
+$$
 
 とする。各ノードは内部状態、保有エンティティ、次状態遷移時刻 `_until`、上下流リンク状態を持つ。
 
@@ -64,11 +64,11 @@ x_i(t)\in \mathcal{S}_i
 
 ワークや搬送対象の個体を
 
-\[
+$$
 w_k=\bigl(\operatorname{id}_k,\ \operatorname{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k\bigr)
-\]
+$$
 
-と表す。ここで \(\operatorname{id}_k\) は個体識別子、\(\operatorname{type}_k\) は分岐条件や routing に用いる属性、\(t_k^{\mathrm{birth}}\) は生成時刻、\(\theta_k\) は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
+と表す。ここで $\operatorname{id}_k$ は個体識別子、$\operatorname{type}_k$ は分岐条件や routing に用いる属性、$t_k^{\mathrm{birth}}$ は生成時刻、$\theta_k$ は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
 
 ---
 
@@ -78,10 +78,10 @@ w_k=\bigl(\operatorname{id}_k,\ \operatorname{type}_k,\ t_k^{\mathrm{birth}},\ \
 
 Equipment 系ノードの基本状態集合を
 
-\[
+$$
 \mathcal{S}_{\mathrm{equip}}
 =\bigl\{\mathsf{IDLE},\mathsf{PROCESS},\mathsf{WAIT},\mathsf{DOWN}\bigr\}
-\]
+$$
 
 とする。
 
@@ -104,70 +104,70 @@ stateDiagram-v2
 
 ### 3.2 時間発展
 
-ノード \(i\) が時刻 \(t_a\) にワーク \(w\) を受理したとする。`processTime` を \(p_i(w)\)、`downTime` を \(d_i\) とおく。
+ノード $i$ が時刻 $t_a$ にワーク $w$ を受理したとする。`processTime` を $p_i(w)$、`downTime` を $d_i$ とおく。
 
 `PROCESS` 区間は
 
-\[
+$$
 \begin{aligned}
 x_i(t)&=\mathsf{PROCESS},\\
 t&\in [\,t_a,\ t_a+p_i(w)\,)
 \end{aligned}
-\]
+$$
 
 と書ける。
 
-加工終了後、下流ノード \(j\) が受入可能になる最初の時刻を
+加工終了後、下流ノード $j$ が受入可能になる最初の時刻を
 
-\[
+$$
 t_h=\inf\bigl\{\,t\ge t_a+p_i(w)\mid \mathcal{A}_j(t)=1\,\bigr\}
-\]
+$$
 
 とすると、`WAIT` 区間は
 
-\[
+$$
 \begin{aligned}
 x_i(t)&=\mathsf{WAIT},\\
 t&\in [\,t_a+p_i(w),\ t_h\,)
 \end{aligned}
-\]
+$$
 
-である。ここで \(\mathcal{A}_j(t)\in\{0,1\}\) は下流ノード \(j\) の受入可能性である。
+である。ここで $\mathcal{A}_j(t)\in\{0,1\}$ は下流ノード $j$ の受入可能性である。
 
 排出後の `DOWN` 区間は
 
-\[
+$$
 \begin{aligned}
 x_i(t)&=\mathsf{DOWN},\\
 t&\in [\,t_h,\ t_h+d_i\,)
 \end{aligned}
-\]
+$$
 
 となり、その後
 
-\[
+$$
 x_i(t)=\mathsf{IDLE},\qquad t\ge t_h+d_i
-\]
+$$
 
 へ復帰する。
 
 ### 3.3 実効サイクル時間
 
-ワーク \(w\) に対するノード \(i\) の実効サイクル時間を
+ワーク $w$ に対するノード $i$ の実効サイクル時間を
 
-\[
+$$
 C_i(w)=p_i(w)+b_i(w)+d_i
-\]
+$$
 
 と定義する。ここで
 
-\[
+$$
 b_i(w)=t_h-\bigl(t_a+p_i(w)\bigr)
-\]
+$$
 
 は blocking に起因する待ち時間である。
 
-この式により、装置固有の時間は \(p_i\) と \(d_i\) の 2 つで表され、詰まりや同期ずれは \(b_i\) としてネットワークから自然に発生する。
+この式により、装置固有の時間は $p_i$ と $d_i$ の 2 つで表され、詰まりや同期ずれは $b_i$ としてネットワークから自然に発生する。
 
 ---
 
@@ -195,21 +195,21 @@ FACT SIM の Equipment は 4 状態で動作するが、ユーザが主に与え
 
 主処理区間:
 
-\[
+$$
 P_i(w)=p_i(w)
-\]
+$$
 
 排出・復帰区間:
 
-\[
+$$
 T_i(w)=b_i(w)+d_i
-\]
+$$
 
 したがって
 
-\[
+$$
 C_i(w)=P_i(w)+T_i(w)
-\]
+$$
 
 となる。ここで `WAIT` は外生パラメータではなく、系の混雑と同期から出る量である点が重要である。
 
@@ -221,63 +221,63 @@ C_i(w)=P_i(w)+T_i(w)
 
 `Source` はワーク列
 
-\[
+$$
 \mathcal{W}=\bigl(w_1,w_2,\dots\bigr)
-\]
+$$
 
 を生成し、下流受入可能時に投入する。生成間隔、初期時刻、タイプ列は投入計画に対応する。
 
 ### 5.2 Sink
 
-`Sink` は到着ワーク総数 \(N(t)\) を記録し、サイクルタイムと throughput を観測する。到着時刻列を \(\{\,t_k^{\mathrm{sink}}\,\}\) とすると、ワーク単位のサイクルタイムは
+`Sink` は到着ワーク総数 $N(t)$ を記録し、サイクルタイムと throughput を観測する。到着時刻列を $\{\,t_k^{\mathrm{sink}}\,\}$ とすると、ワーク単位のサイクルタイムは
 
-\[
+$$
 \operatorname{CT}_k=t_k^{\mathrm{sink}}-t_{k-1}^{\mathrm{sink}}
-\]
+$$
 
 である。
 
-1 時間窓 throughput を \(\operatorname{TPH}(t)\) とすると、概念的には
+1 時間窓 throughput を $\operatorname{TPH}(t)$ とすると、概念的には
 
-\[
+$$
 \operatorname{TPH}(t)=
 \begin{cases}
 \dfrac{N(t)}{t/3600}, & 0<t<3600\\[4pt]
 N(t)-N(t-3600), & t\ge 3600
 \end{cases}
-\]
+$$
 
 で表せる。現行実装の `Sink` は履歴配列からこれに対応する指標を計算し、ノード内表示とタイムラインへ反映する。
 
 ### 5.3 Split
 
-`Split` は下流全てが受入可能なときにワークを複製し、複数出力へ同時送出する。出力先集合を \(\Gamma_i^{+}\) とすると、発火条件は
+`Split` は下流全てが受入可能なときにワークを複製し、複数出力へ同時送出する。出力先集合を $\Gamma_i^{+}$ とすると、発火条件は
 
-\[
+$$
 \forall j\in \Gamma_i^{+},\ \mathcal{A}_j(t)=1
-\]
+$$
 
 である。
 
 ### 5.4 Branch
 
-`Branch` はワーク属性に応じて出力先を選ぶ。出力候補 \(m\in\Gamma_i^{+}\) に対して routeType 条件を用いるなら、
+`Branch` はワーク属性に応じて出力先を選ぶ。出力候補 $m\in\Gamma_i^{+}$ に対して routeType 条件を用いるなら、
 
-\[
+$$
 j=\operatorname*{arg\,max}_{m\in \Gamma_i^{+}}
 \mathbf{1}\bigl\{\operatorname{routeType}_m=\operatorname{type}(w)\bigr\}
-\]
+$$
 
 のように書ける。
 
 ### 5.5 Merge
 
-`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を \(\Gamma_i^{-}\) とすると、ある ID \(\widehat{\operatorname{id}}\) に対し
+`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を $\Gamma_i^{-}$ とすると、ある ID $\widehat{\operatorname{id}}$ に対し
 
-\[
+$$
 \forall \ell\in \Gamma_i^{-},\ \exists w_\ell:\ 
 \operatorname{id}(w_\ell)=\widehat{\operatorname{id}}
-\]
+$$
 
 が成立した時に発火する。
 
@@ -316,31 +316,31 @@ FACT SIM には複数の実行エンジンがある。
 
 `dt` は固定刻み幅
 
-\[
+$$
 \Delta t=0.1\ \mathrm{s}
-\]
+$$
 
 で時刻を進める。
 
-\[
+$$
 t_{k+1}=t_k+\Delta t
-\]
+$$
 
 各刻みで全ノードの状態更新を行うため、意味論が直感的で追いやすい。一方、長時間・大規模モデルでは、状態が変わらない区間でも更新が走る。
 
 ### 7.2 event エンジン
 
-`event` は各ノードが持つ次状態遷移時刻 `_until` に基づき、最も近いイベント時刻へジャンプする。時刻 \(t\) における有効な次イベント時刻集合を
+`event` は各ノードが持つ次状態遷移時刻 `_until` に基づき、最も近いイベント時刻へジャンプする。時刻 $t$ における有効な次イベント時刻集合を
 
-\[
+$$
 \mathcal{T}(t)=\bigl\{\,u_i(t)\mid i\in \mathcal{V},\ u_i(t)>t\,\bigr\}
-\]
+$$
 
 とすると、次時刻は
 
-\[
+$$
 t_{k+1}=\min \mathcal{T}(t_k)
-\]
+$$
 
 で与えられる。実装上は heap を用い、dirty queue や same-time batch を伴って処理する。
 
@@ -371,17 +371,17 @@ t_{k+1}=\min \mathcal{T}(t_k)
 
 固定刻み幅法では、おおむね
 
-\[
+$$
 O\!\left(\frac{H}{\Delta t}\cdot |V|\right)
-\]
+$$
 
-の更新が必要になる。ここで \(H\) はシミュレーション時間である。
+の更新が必要になる。ここで $H$ はシミュレーション時間である。
 
-一方、イベント駆動法ではイベント数を \(K\) として
+一方、イベント駆動法ではイベント数を $K$ として
 
-\[
+$$
 O(K\log K)
-\]
+$$
 
 型の振る舞いを期待できる。実際の定数因子は heap、dirty queue、compat fallback、snapshot 同期などの実装要因に依存するが、「変化のない時間を刻まない」ことが本質的な利点である。
 
@@ -389,21 +389,21 @@ O(K\log K)
 
 ## 8. ボトルネックと blocking
 
-ノード \(i\) の平均実効サイクル時間を
+ノード $i$ の平均実効サイクル時間を
 
-\[
+$$
 \bar{C}_i=\mathbb{E}[C_i(w)]
-\]
+$$
 
-とする。直列ラインの粗い近似としてライン throughput \(\operatorname{TP}\) は
+とする。直列ラインの粗い近似としてライン throughput $\operatorname{TP}$ は
 
-\[
+$$
 \operatorname{TP}\lesssim \frac{1}{\max_i \bar{C}_i}
-\]
+$$
 
 で上から抑えられる。
 
-ただし FACT SIM では \(\bar{C}_i\) の中に blocking 起因の \(b_i\) が含まれるため、単純な `processTime` の最大値だけではボトルネックを説明できない。すなわち、ボトルネックは
+ただし FACT SIM では $\bar{C}_i$ の中に blocking 起因の $b_i$ が含まれるため、単純な `processTime` の最大値だけではボトルネックを説明できない。すなわち、ボトルネックは
 
 - 処理そのものが遅い工程
 
@@ -430,7 +430,7 @@ FACT SIM が実務向きである理由は次の 3 点に整理できる。
    下流が詰まれば `WAIT` が自然に伸びる。
 
 3. 図と数理が対応しやすい  
-   LiteGraph 上のノード接続を、そのまま有向グラフ \(\mathcal{G}=(\mathcal{V},\mathcal{E})\) と読める。
+   LiteGraph 上のノード接続を、そのまま有向グラフ $\mathcal{G}=(\mathcal{V},\mathcal{E})$ と読める。
 
 ### 9.2 説明可能性
 
@@ -483,8 +483,8 @@ FACT SIM は、ブラウザ上で動作する実用的なノードベース離�
 | `Merge` | 同期合流ノード |
 | `Join` | FCFS 合流ノード |
 | `Sink` | 観測終端・性能計測点 |
-| `processTime` | \(p_i(w)\) |
-| `downTime` | \(d_i\) |
+| `processTime` | $p_i(w)$ |
+| `downTime` | $d_i$ |
 | `WAIT` | blocking の顕在化状態 |
 | `_until` | 次状態遷移時刻 |
 
