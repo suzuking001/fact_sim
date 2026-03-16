@@ -237,14 +237,16 @@ $$
 
 である。
 
-1 時間窓 throughput を $\mathrm{TPH}(t)$ とすると、概念的には
+1 時間窓 throughput を $\mathrm{TPH}(t)$ とすると、開始 1 時間未満では
 
 $$
-\mathrm{TPH}(t)=
-\begin{cases}
-\dfrac{N(t)}{t/3600}, & 0<t<3600\\[4pt]
-N(t)-N(t-3600), & t\ge 3600
-\end{cases}
+\mathrm{TPH}(t)=\dfrac{N(t)}{t/3600}, \qquad 0<t<3600
+$$
+
+と表せる。1 時間以降は直近 1 時間の完了数として
+
+$$
+\mathrm{TPH}(t)=N(t)-N(t-3600), \qquad t\ge 3600
 $$
 
 で表せる。現行実装の `Sink` は履歴配列からこれに対応する指標を計算し、ノード内表示とタイムラインへ反映する。
