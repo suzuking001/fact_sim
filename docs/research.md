@@ -1,59 +1,95 @@
-﻿# fact sim mini 実装README
+# FACT SIM における状態遷移ベース離散事象シミュレーション
+## ブラウザ実装と最小時間パラメータ化の数理的整理
 
-この README は **現在の実装** に合わせた仕様説明です。
+## 要旨
 
-## 概要
-`fact sim mini` は LiteGraph.js ベースのブラウザ向け生産ラインシミュレータです。  
-ノードを接続してワーク搬送をモデル化し、`dt` / `event` エンジンでシミュレーションできます。
+FACT SIM は、ブラウザ上で動作するノードベースの汎用離散事象シミュレータである。対象は生産ライン、搬送、物流、サービス工程など、エンティティが工程間を移動しながら状態遷移とイベントによって振る舞う系全般である。本資料では、FACT SIM の現行実装を、UI の説明ではなく、状態機械、有向グラフ、時間発展則として数理的に整理する。
 
-- 対応エンジン: `dt`（固定刻み） / `event`（イベント駆動）
-- 対応ノード: Source / Equipment / Split / Branch / Merge / Join / AGV Route / Sink
-- タイムライン表示、CSVエクスポート、Share URL 共有に対応
+本実装の中心的な特徴は、Equipment 系ノードを 4 状態
 
-![fact_sim UI](../スクリーンショット%202026-02-07%20095035.png)
+- `IDLE`
+- `PROCESS`
+- `WAIT`
+- `DOWN`
 
-## 記号統一（論文向け）
-論文原稿では、以下の記号に固定して記述すると読み手に伝わりやすくなります。
+で表現しながら、現場で同定すべき主要時間パラメータを
 
-| 記号 | 意味 |
-|---|---|
-| `n` | ノード（工程） |
-| `w` | ワーク |
-| `s_n(t)` | 時刻 `t` におけるノード `n` の状態 |
-| `S = {IDLE, PROCESS, WAIT, DOWN}` | ノード状態集合 |
-| `T_p(n)` | ノード `n` の `processTime` |
-| `T_d(n)` | ノード `n` の `downTime` |
-| `TP` | スループット（単位時間あたり完了数） |
-| `WIP` | 仕掛在庫数（Work In Process） |
+- `processTime`
+- `downTime`
 
-## 全体像（Mermaid）
-Figure 1. システム全体像（UI・グラフ・エンジン・可視化・共有の関係）
+の 2 つへ集中させている点にある。`WAIT` や `IDLE` は独立の時間パラメータを持つのではなく、上下流の接続関係、滞留、受入可否から内生的に決まる。これにより、詳細作業を過剰に分解せずに、詰まり、待ち、同期、搬送制約を含む系全体の挙動を比較的少数のパラメータで再現できる。
 
-```mermaid
-flowchart LR
-  UI[UI<br/>index.html] --> G[LiteGraph Graph]
-  G --> N[Nodes<br/>Source/Equip/...]
-  G --> E[Engine<br/>dt or event]
-  E -->|simNow/update| N
-  N --> T[Timeline]
-  N --> B[Benchmark]
-  G --> S[Share URL]
-```
+さらに FACT SIM は、固定刻み時間で進む `dt` エンジン、次イベント時刻へジャンプする `event` エンジン、compiled 実行系である `event-fast`、その worker 分離版 `event-fast-worker`、並列 worker 実行版 `event-fast-par` を備える。現行実装では `dt` が比較基準の意味論を与え、`event` および `event-fast*` はその意味論を保ちながら実行効率を高める方向で設計されている。
 
-## 理論モデルとの関係（重要）
-本実装は、理論上の「2状態最小モデル（P/T）」を実運用向けに拡張した形です。  
-各工程ノード（Equipment系）は `IDLE / PROCESS / WAIT / DOWN` の4状態で動きますが、
-**主要な実測パラメータは `PROCESS` と `DOWN` の2つ**に集約されています。
+---
 
-- `PROCESS` / `DOWN`:
-  実機で時間計測しやすい主要区間（モデル同定の中心）
-- `IDLE` / `WAIT`:
-  上下流の受入条件から決まるゲート状態（追加の時間パラメータを基本要求しない）
+## 1. 背景
 
-このため、理論の狙いである「状態・計測・計算の簡素化」は、現実装でも維持されています。
-状態遷移の定義は Figure 2 の通りです。
+現実の生産ラインや搬送系では、装置単体の処理時間だけでなく、下流待ち、合流待ち、経路分岐、故障停止、搬送資源制約などが全体性能を支配する。そのため、平均サイクルタイムの一覧表だけでは不十分であり、状態遷移に基づく離散事象シミュレーションが必要になる。
 
-Figure 2. Equipment系ノードの状態遷移（4状態）
+一方で、各工程を細かな作業要素に分解しすぎると、次の問題が生じやすい。
+
+1. 状態数が増え、モデルが複雑化する。
+2. 計測すべき時間パラメータが増え、同定コストが高くなる。
+3. 微小な時間誤差が累積し、長時間シミュレーションの再現性を下げる。
+
+FACT SIM はこの問題に対し、工程を状態遷移として扱いつつ、主要な時間パラメータを最小限に保つ実装を採る。特に Equipment 系では、実務上測りやすい `processTime` と `downTime` を核に据え、待ちはネットワークから自然に発生する量として表現する。
+
+---
+
+## 2. システム表現
+
+### 2.1 有向グラフとしてのモデル
+
+シミュレーション対象を有向グラフ
+
+\[
+G=(V,E)
+\]
+
+で表す。
+
+- \(V\): ノード集合。`Source`, `Equipment`, `Split`, `Branch`, `Merge`, `Join`, `Station`, `Sink`, `Carrier Route`, `Shuttle Stage` などを含む。
+- \(E\): ノード間リンク集合。work ポート、carrier ポートなどの接続を表す。
+
+時刻 \(t\) におけるノード \(i \in V\) の状態を
+
+\[
+x_i(t)\in S_i
+\]
+
+とする。各ノードは内部状態、保有エンティティ、次状態遷移時刻 `_until`、上下流リンク状態を持つ。
+
+### 2.2 エンティティ
+
+ワークや搬送対象の個体を
+
+\[
+w_k=(\mathrm{id}_k,\ \mathrm{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k)
+\]
+
+と表す。ここで \(\mathrm{id}_k\) は個体識別子、\(\mathrm{type}_k\) は分岐条件や routing に用いる属性、\(t_k^{\mathrm{birth}}\) は生成時刻、\(\theta_k\) は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
+
+---
+
+## 3. Equipment ノードの状態機械
+
+### 3.1 状態集合
+
+Equipment 系ノードの基本状態集合を
+
+\[
+S_{\mathrm{equip}}=\{\mathrm{IDLE},\mathrm{PROCESS},\mathrm{WAIT},\mathrm{DOWN}\}
+\]
+
+とする。
+
+- `IDLE`: 入力待ち
+- `PROCESS`: 加工中
+- `WAIT`: 加工完了後、下流受入待ち
+- `DOWN`: 排出後のダウンまたは復帰待ち
+
+概念的な遷移図は次のようになる。
 
 ```mermaid
 stateDiagram-v2
@@ -63,206 +99,389 @@ stateDiagram-v2
   PROCESS --> WAIT: processTime経過
   WAIT --> DOWN: 下流受入可
   DOWN --> IDLE: downTime経過
-
-  note right of PROCESS
-    実測中心パラメータ
-    processTime
-  end note
-  note right of DOWN
-    実測中心パラメータ
-    downTime
-  end note
 ```
 
-## この実装のメリット（理論意図の継承）
-- **状態空間の抑制**  
-  細分化タスクモデルに比べ、工程ごとの状態定義を小さく保てます。
-- **実機測定工数の削減**  
-  各工程で主に `processTime` と `downTime` を取ればモデル化可能です。
-- **計測誤差の積み重ね抑制**  
-  `WAIT/IDLE` 境界で事象を同期するため、細かい作業分解より誤差が累積しにくい設計です。
-- **計算負荷の低減**  
-  特に `event` エンジンでは `_until` を使った時間ジャンプで、不要な刻み更新を減らせます。
+### 3.2 時間発展
 
-## ノード仕様
-### Source (`factory/source`)
-- `sequence`（例: `A,B`）に基づいて Work を生成
-- 下流が受入可能なときのみ `workOut` へ出力
+ノード \(i\) が時刻 \(t_a\) にワーク \(w\) を受理したとする。`processTime` を \(p_i(w)\)、`downTime` を \(d_i\) とおく。
 
-### Equipment (`factory/equip`)
-- 入力: `workIn`
-- 出力: `workOut`
-- 主要プロパティ: `processTime`, `downTime`, `script`, `sigExtra`, `sigEnabled`
-- 状態遷移: `IDLE -> PROCESS -> WAIT -> DOWN -> IDLE`
+`PROCESS` 区間は
 
-### Split (`factory/split`)
-- `workOut` を2本以上持てる（右クリックで add/remove）
-- 分岐先すべてが受入可能なとき、同一IDの Work を複製して同時出力
+\[
+x_i(t)=\mathrm{PROCESS},\quad t\in[t_a,\ t_a+p_i(w))
+\]
 
-### Branch (`factory/branch`)
-- `workOut` を2本以上持てる（右クリックで add/remove）
-- `work.type` と出力ポートの `routeType` 一致で経路選択
-- 出力ラベル（`workOut A` など）クリックで `routeType` 編集
+と書ける。
 
-### Merge (`factory/merge`)
-- `workIn` を2本以上持てる（右クリックで add/remove）
-- 接続入力を順に受理し、同一IDで揃ったら下流へ1つ出力
-- ID不一致時はエラー扱い
+加工終了後、下流ノード \(j\) が受入可能になる最初の時刻を
 
-### Join (`factory/join`)
-- `workIn` を2本以上持てる（右クリックで add/remove）
-- 複数入力から到着順（first-come-first-served）で通過
+\[
+t_h=\inf\{t\ge t_a+p_i(w)\mid A_j(t)=1\}
+\]
 
-### AGV Route (`factory/agvroute`)
-- `workIn/agvIn -> workOut/agvOut`
-- AGV容量、積み込み・払い出し、待ち/ダウン状態を扱う
+とすると、`WAIT` 区間は
 
-### Sink (`factory/sink`)
-- 受信Workをカウント
-- サイクル履歴の簡易グラフ表示
+\[
+x_i(t)=\mathrm{WAIT},\quad t\in[t_a+p_i(w),\ t_h)
+\]
 
-## ノード連結イメージ（Mermaid）
-Figure 3. 代表的なライン接続例（分岐・合流・シンク）
+である。ここで \(A_j(t)\in\{0,1\}\) は下流ノード \(j\) の受入可能性である。
 
-```mermaid
-flowchart LR
-  SRC[Source] --> EQ1[Equipment]
-  EQ1 --> SPL[Split]
-  SPL --> A[Line A]
-  SPL --> B[Line B]
-  A --> MER[Merge]
-  B --> MER
-  MER --> JN[Join]
-  JN --> SNK[Sink]
+排出後の `DOWN` 区間は
 
-  BR[Branch] --> P1[workOut A]
-  BR --> P2[workOut B]
-  AGV[AGV Route] --> EQ1
-```
+\[
+x_i(t)=\mathrm{DOWN},\quad t\in[t_h,\ t_h+d_i)
+\]
 
-## シミュレーションエンジン
-### `dt` エンジン
-- 固定刻み（`0.1s`）で進行
+となり、その後
 
-### `event` エンジン
-- ヒープベースのイベント駆動
-- `_until` を持つ状態遷移を時間ジャンプで処理
+\[
+x_i(t)=\mathrm{IDLE},\quad t\ge t_h+d_i
+\]
 
-Figure 4. `dt` と `event` の処理フロー比較
+へ復帰する。
 
-```mermaid
-flowchart TD
-  START[update(simDelta)] --> M{mode}
-  M -->|dt| DT[固定刻みでrunStep]
-  M -->|event| EV[次イベント時刻へジャンプ]
-  DT --> CAP[状態キャプチャ]
-  EV --> CAP
-  CAP --> TL[Timeline更新]
-```
+### 3.3 実効サイクル時間
 
-## 実行時UI
-### 速度
-- Speedスライダー倍率:  
-`0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024`
+ワーク \(w\) に対するノード \(i\) の実効サイクル時間を
 
-### 描画FPS
-- `15 / 30 / 60` を選択可能（デフォルト `60`）
-- 計算負荷ではなく描画負荷を抑えたいときに有効
+\[
+C_i(w)=p_i(w)+b_i(w)+d_i
+\]
 
-### タイムライン
-- ノード状態の時系列表示
-- Work/AGV/Node選択ハイライト
-- CSVエクスポート
+と定義する。ここで
 
-### ベンチマーク
-- `Compare Speed` で `dt` と `event` を比較
-- `render:off`（描画なし）と `render:on`（描画あり）を両方測定
-- 進捗バー、結果テーブル、棒グラフを表示
+\[
+b_i(w)=t_h-(t_a+p_i(w))
+\]
 
-## 共有機能
-### Share URL
-- グラフJSONを圧縮して `#g=...` に埋め込み
+は blocking に起因する待ち時間である。
 
-Figure 5. Share URL の生成シーケンス
+この式により、装置固有の時間は \(p_i\) と \(d_i\) の 2 つで表され、詰まりや同期ずれは \(b_i\) としてネットワークから自然に発生する。
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant A as App
+---
 
-  U->>A: Share URL
-  A->>A: グラフJSON圧縮
-  A-->>U: #g=... をコピー
-```
+## 4. 最小時間パラメータ化
 
-## 制約・既定値
-- ノード数上限: `5000`（`js/nodes-config.js` の `limits.maxNodes`）
-- シミュレーション時間表示: 画面左上HUD
-- デフォルトエンジン: `dt`
-- デフォルトRender FPS: `60`
+### 4.1 4 状態と 2 パラメータ
 
-## 起動方法
-### 1) ローカルサーバーで起動（推奨）
-```bash
-python -m http.server 8123
-```
-ブラウザで `http://127.0.0.1:8123/index.html` を開きます。
+FACT SIM の Equipment は 4 状態で動作するが、ユーザが主に与える時間パラメータは
 
-### 2) 直接起動
-`index.html` を開いても動作しますが、ブラウザ制約で一部機能が不安定になることがあります。
+- `processTime`
+- `downTime`
 
-## 主なファイル構成
-```text
-.
-├─ index.html
-├─ css/
-│  └─ app.css
-├─ js/
-│  ├─ core.js
-│  ├─ app.js
-│  ├─ nodes-config.js
-│  ├─ timeline.js
-│  ├─ link-anim.js
-│  ├─ work-highlight.js
-│  ├─ app/
-│  │  ├─ engine.js
-│  │  ├─ sim.js
-│  │  ├─ ui.js
-│  │  ├─ benchmark.js
-│  │  ├─ file-io.js
-│  │  └─ ...
-│  └─ nodes/
-│     ├─ equipment.js
-│     ├─ source.js
-│     ├─ split.js
-│     ├─ branch.js
-│     ├─ merge2.js
-│     ├─ join.js
-│     ├─ agv_route.js
-│     ├─ sink.js
-│     └─ ...
-├─ sample/
-│  ├─ sample_line1.js
-│  └─ sample_line1.json
-├─ LICENSE
-└─ THIRD_PARTY_NOTICES.md
-```
+の 2 つである。`WAIT` と `IDLE` は追加の独立時間パラメータを持たず、ネットワーク構造とその時点の滞留状況から決まる内生状態である。
 
-## 論文化に向けた主張整理（ドラフト）
-- **主張1: 準2パラメータ化**  
-  4状態遷移（Figure 2）を持ちながら、同定の中心を `T_p/T_d` に集約できる。
-- **主張2: 実務導入性**  
-  現場で計測しやすい時間パラメータでモデル構築できる。
-- **主張3: 計算効率**  
-  `event` エンジンで高負荷ケースでも高速に回せる（Figure 4、`render:off` 比較）。
+したがって FACT SIM は、
 
-再現実験では、同一ラインに対して
-1. 細分化モデルとの同定工数比較
-2. 予測誤差（スループット・滞留時間）の比較
-3. 実行時間（`dt` vs `event`、描画あり/なし）の比較
-をセットで示すと、主張が通りやすくなります。
+- 表現上は 4 状態
+- 同定上は 2 主要時間パラメータ
 
-## ライセンス
-本体コードは **Research / Non-Commercial License**（研究・非商用）です。  
-商用利用は許可されません。  
-サードパーティライセンスは `THIRD_PARTY_NOTICES.md` を参照してください。
+という構造を持つ。これは、状態数と計測項目を抑えつつ、工程間相互作用を保持する粗視化モデルとみなせる。
+
+### 4.2 粗視化した 2 区間表現
+
+1 ワークの通過時間を次の 2 区間へ粗視化して見てもよい。
+
+主処理区間:
+
+\[
+P_i(w)=p_i(w)
+\]
+
+排出・復帰区間:
+
+\[
+T_i(w)=b_i(w)+d_i
+\]
+
+したがって
+
+\[
+C_i(w)=P_i(w)+T_i(w)
+\]
+
+となる。ここで `WAIT` は外生パラメータではなく、系の混雑と同期から出る量である点が重要である。
+
+---
+
+## 5. 分岐・合流・同期ノード
+
+### 5.1 Source
+
+`Source` はワーク列
+
+\[
+W=(w_1,w_2,\dots)
+\]
+
+を生成し、下流受入可能時に投入する。生成間隔、初期時刻、タイプ列は投入計画に対応する。
+
+### 5.2 Sink
+
+`Sink` は到着ワーク総数 \(N(t)\) を記録し、サイクルタイムと throughput を観測する。到着時刻列を \(\{t_k^{\mathrm{sink}}\}\) とすると、ワーク単位のサイクルタイムは
+
+\[
+CT_k=t_k^{\mathrm{sink}}-t_{k-1}^{\mathrm{sink}}
+\]
+
+である。
+
+1 時間窓 throughput を \(TPH(t)\) とすると、概念的には
+
+\[
+TPH(t)=
+\begin{cases}
+\dfrac{N(t)}{t/3600}, & 0<t<3600\\[4pt]
+N(t)-N(t-3600), & t\ge 3600
+\end{cases}
+\]
+
+で表せる。現行実装の `Sink` は履歴配列からこれに対応する指標を計算し、ノード内表示とタイムラインへ反映する。
+
+### 5.3 Split
+
+`Split` は下流全てが受入可能なときにワークを複製し、複数出力へ同時送出する。出力先集合を \(\Gamma^+(i)\) とすると、発火条件は
+
+\[
+\forall j\in\Gamma^+(i),\ A_j(t)=1
+\]
+
+である。
+
+### 5.4 Branch
+
+`Branch` はワーク属性に応じて出力先を選ぶ。出力候補 \(m\in\Gamma^+(i)\) に対して routeType 条件を用いるなら、
+
+\[
+j=\arg\max_{m\in\Gamma^+(i)} \mathbf{1}\{\mathrm{routeType}_m=\mathrm{type}(w)\}
+\]
+
+のように書ける。
+
+### 5.5 Merge
+
+`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を \(\Gamma^-(i)\) とすると、ある ID \(\hat{\mathrm{id}}\) に対し
+
+\[
+\forall \ell\in\Gamma^-(i),\ \exists w_\ell:\ \mathrm{id}(w_\ell)=\hat{\mathrm{id}}
+\]
+
+が成立した時に発火する。
+
+### 5.6 Join
+
+`Join` は同期条件を持たない多入力 1 出力の FCFS 合流に相当する。
+
+---
+
+## 6. 搬送系ノード
+
+FACT SIM の現行実装には `Carrier Route`、`Shuttle Stage`、`Station` など、Equipment より複雑なノードが含まれる。これらは work に加えて carrier や pallet を明示的に扱うため、状態空間は Equipment より大きい。
+
+数理的には、これらは
+
+- 搬送資源状態
+- 積載状態
+- route 選択
+- 受渡し同期
+
+を含む複合状態機械として扱うべきである。現状の実装では script 条件やノード固有ロジックで柔軟に表現されているが、厳密な定式化は今後の課題として残る。
+
+---
+
+## 7. エンジンの時間発展則
+
+FACT SIM には複数の実行エンジンがある。
+
+- `dt`
+- `event`
+- `event-fast`
+- `event-fast-worker`
+- `event-fast-par`
+
+### 7.1 dt エンジン
+
+`dt` は固定刻み幅
+
+\[
+\Delta t=0.1\ \mathrm{s}
+\]
+
+で時刻を進める。
+
+\[
+t_{k+1}=t_k+\Delta t
+\]
+
+各刻みで全ノードの状態更新を行うため、意味論が直感的で追いやすい。一方、長時間・大規模モデルでは、状態が変わらない区間でも更新が走る。
+
+### 7.2 event エンジン
+
+`event` は各ノードが持つ次状態遷移時刻 `_until` に基づき、最も近いイベント時刻へジャンプする。時刻 \(t\) における有効な次イベント時刻集合を
+
+\[
+T(t)=\{u_i(t)\mid i\in V,\ u_i(t)>t\}
+\]
+
+とすると、次時刻は
+
+\[
+t_{k+1}=\min T(t_k)
+\]
+
+で与えられる。実装上は heap を用い、dirty queue や same-time batch を伴って処理する。
+
+### 7.3 event-fast
+
+`event-fast` は `event` の意味論を保ちながら、compiled graph、typed array 寄りの実行状態、軽量 kernel、compat fallback を用いてオーバーヘッドを削減する高速化バリアントである。意味論的には `event` 系の一種であり、`dt` との parity を `Engine Test` で確認する前提になっている。
+
+### 7.4 event-fast-worker
+
+`event-fast-worker` は `event-fast` を Web Worker 側へ移して UI thread と分離する構成である。主目的は UI の応答性改善であり、graph が worker 実行に不向きな場合は安全側へ fallback する。
+
+### 7.5 event-fast-par
+
+`event-fast-par` は graph partition と multi-worker 実行を用いる並列版である。概念的には partition ごとに局所イベント列を持ち、境界イベントを coordinator が同期する構成である。ただし現行実装では、graph 構造や fallback ノード種別によっては parallel 実行を避け、安全な `event-fast-worker` または `event-fast` 相当へ落とす。
+
+したがって `event-fast-par` は
+
+- 常に並列で動くエンジン
+
+ではなく、
+
+- 並列化可能な graph では multi-worker 実行
+- そうでない graph では parity 優先で fallback
+
+する実装と捉えるのが正確である。
+
+### 7.6 計算量の見方
+
+固定刻み幅法では、おおむね
+
+\[
+O\!\left(\frac{H}{\Delta t}\cdot |V|\right)
+\]
+
+の更新が必要になる。ここで \(H\) はシミュレーション時間である。
+
+一方、イベント駆動法ではイベント数を \(K\) として
+
+\[
+O(K\log K)
+\]
+
+型の振る舞いを期待できる。実際の定数因子は heap、dirty queue、compat fallback、snapshot 同期などの実装要因に依存するが、「変化のない時間を刻まない」ことが本質的な利点である。
+
+---
+
+## 8. ボトルネックと blocking
+
+ノード \(i\) の平均実効サイクル時間を
+
+\[
+\bar{C}_i=\mathbb{E}[C_i(w)]
+\]
+
+とする。直列ラインの粗い近似としてライン throughput \(TP\) は
+
+\[
+TP\lesssim \frac{1}{\max_i \bar{C}_i}
+\]
+
+で上から抑えられる。
+
+ただし FACT SIM では \(\bar{C}_i\) の中に blocking 起因の \(b_i\) が含まれるため、単純な `processTime` の最大値だけではボトルネックを説明できない。すなわち、ボトルネックは
+
+- 処理そのものが遅い工程
+
+だけではなく、
+
+- 下流待ちを上流へ伝播させる構造点
+
+でもある。
+
+このため、タイムライン、node 状態表示、Sink 指標、engine test における parity 比較は、単なる速度比較ではなく、blocking 構造の説明可能性を支える。
+
+---
+
+## 9. 実装上の意味
+
+### 9.1 現場導入しやすい理由
+
+FACT SIM が実務向きである理由は次の 3 点に整理できる。
+
+1. 時間パラメータが少ない  
+   まず `processTime` と `downTime` を与えれば Equipment 系の多くを動かせる。
+
+2. 待ちはモデルの外ではなく中で発生する  
+   下流が詰まれば `WAIT` が自然に伸びる。
+
+3. 図と数理が対応しやすい  
+   LiteGraph 上のノード接続を、そのまま有向グラフ \(G=(V,E)\) と読める。
+
+### 9.2 説明可能性
+
+FACT SIM は単なるアニメーションではなく、
+
+- timeline
+- node state
+- sink KPI
+- CSV / snapshot / report
+
+を通じて「なぜその throughput になったか」を説明しやすい。現行実装では `Engine Test` が `dt` を基準に各エンジンの parity を確認するため、速度改善と意味論維持を分離して議論できる。
+
+---
+
+## 10. 制約と今後の課題
+
+本モデルと実装には、以下の制約がある。
+
+1. `WAIT` や `IDLE` はネットワーク依存の内生状態であり、解析的閉形式を得にくい。
+2. script による条件分岐は柔軟だが、形式検証を難しくする。
+3. `event-fast` の compiled kernel と compat fallback の境界は、理論モデルとしてさらに整理の余地がある。
+4. `Carrier Route` や `Shuttle Stage` は Equipment より複雑であり、別節での詳細定式化が望ましい。
+5. `event-fast-worker` と `event-fast-par` は意味論優先で fallback を含むため、常に同一の実行戦略で動くわけではない。
+
+---
+
+## 11. 結論
+
+FACT SIM は、ブラウザ上で動作する実用的なノードベース離散事象シミュレータであり、状態遷移ベースの時間発展とグラフベースのモデル記述を統合している。その中核は、Equipment を 4 状態で表しながら、時間同定の中心を `processTime` と `downTime` の 2 つへ集約する点にある。
+
+この設計により、
+
+- モデル化のしやすさ
+- 実行速度
+- 説明可能性
+- 現場導入性
+
+のバランスが取られている。したがって FACT SIM は、単なる可視化ツールではなく、状態遷移を基礎とした実務向け離散事象シミュレーション基盤として位置づけられる。
+
+---
+
+## 付録 A. 実装用語と数理対応
+
+| 実装用語 | 数理的対応 |
+| --- | --- |
+| `Source` | ワーク発生過程 |
+| `Equipment` | 4 状態サービスノード |
+| `Split` | 同期複製ノード |
+| `Branch` | 属性ベース分岐ノード |
+| `Merge` | 同期合流ノード |
+| `Join` | FCFS 合流ノード |
+| `Sink` | 観測終端・性能計測点 |
+| `processTime` | \(p_i(w)\) |
+| `downTime` | \(d_i\) |
+| `WAIT` | blocking の顕在化状態 |
+| `_until` | 次状態遷移時刻 |
+
+## 付録 B. 現行実装におけるエンジン位置づけ
+
+| エンジン | 役割 | 備考 |
+| --- | --- | --- |
+| `dt` | 基準意味論 | parity 比較のベースライン |
+| `event` | 単一スレッド event heap | `_until` に基づくジャンプ |
+| `event-fast` | compiled event 実行 | kernel + compat fallback |
+| `event-fast-worker` | worker 分離 | UI thread と simulation 分離 |
+| `event-fast-par` | 並列 worker 実行 | graph 条件により fallback あり |
