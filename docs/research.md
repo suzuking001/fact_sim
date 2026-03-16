@@ -44,18 +44,18 @@ FACT SIM はこの問題に対し、工程を状態遷移として扱いつつ�
 シミュレーション対象を有向グラフ
 
 \[
-G=(V,E)
+\mathcal{G}=(\mathcal{V},\mathcal{E})
 \]
 
 で表す。
 
-- \(V\): ノード集合。`Source`, `Equipment`, `Split`, `Branch`, `Merge`, `Join`, `Station`, `Sink`, `Carrier Route`, `Shuttle Stage` などを含む。
-- \(E\): ノード間リンク集合。work ポート、carrier ポートなどの接続を表す。
+- \(\mathcal{V}\): ノード集合。`Source`, `Equipment`, `Split`, `Branch`, `Merge`, `Join`, `Station`, `Sink`, `Carrier Route`, `Shuttle Stage` などを含む。
+- \(\mathcal{E}\): ノード間リンク集合。work ポート、carrier ポートなどの接続を表す。
 
-時刻 \(t\) におけるノード \(i \in V\) の状態を
+時刻 \(t\) におけるノード \(i \in \mathcal{V}\) の状態を
 
 \[
-x_i(t)\in S_i
+x_i(t)\in \mathcal{S}_i
 \]
 
 とする。各ノードは内部状態、保有エンティティ、次状態遷移時刻 `_until`、上下流リンク状態を持つ。
@@ -65,10 +65,10 @@ x_i(t)\in S_i
 ワークや搬送対象の個体を
 
 \[
-w_k=(\mathrm{id}_k,\ \mathrm{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k)
+w_k=\bigl(\operatorname{id}_k,\ \operatorname{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k\bigr)
 \]
 
-と表す。ここで \(\mathrm{id}_k\) は個体識別子、\(\mathrm{type}_k\) は分岐条件や routing に用いる属性、\(t_k^{\mathrm{birth}}\) は生成時刻、\(\theta_k\) は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
+と表す。ここで \(\operatorname{id}_k\) は個体識別子、\(\operatorname{type}_k\) は分岐条件や routing に用いる属性、\(t_k^{\mathrm{birth}}\) は生成時刻、\(\theta_k\) は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
 
 ---
 
@@ -79,7 +79,8 @@ w_k=(\mathrm{id}_k,\ \mathrm{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k)
 Equipment 系ノードの基本状態集合を
 
 \[
-S_{\mathrm{equip}}=\{\mathrm{IDLE},\mathrm{PROCESS},\mathrm{WAIT},\mathrm{DOWN}\}
+\mathcal{S}_{\mathrm{equip}}
+=\bigl\{\mathsf{IDLE},\mathsf{PROCESS},\mathsf{WAIT},\mathsf{DOWN}\bigr\}
 \]
 
 とする。
@@ -108,7 +109,10 @@ stateDiagram-v2
 `PROCESS` 区間は
 
 \[
-x_i(t)=\mathrm{PROCESS},\quad t\in[t_a,\ t_a+p_i(w))
+\begin{aligned}
+x_i(t)&=\mathsf{PROCESS},\\
+t&\in [\,t_a,\ t_a+p_i(w)\,)
+\end{aligned}
 \]
 
 と書ける。
@@ -116,27 +120,33 @@ x_i(t)=\mathrm{PROCESS},\quad t\in[t_a,\ t_a+p_i(w))
 加工終了後、下流ノード \(j\) が受入可能になる最初の時刻を
 
 \[
-t_h=\inf\{t\ge t_a+p_i(w)\mid A_j(t)=1\}
+t_h=\inf\bigl\{\,t\ge t_a+p_i(w)\mid \mathcal{A}_j(t)=1\,\bigr\}
 \]
 
 とすると、`WAIT` 区間は
 
 \[
-x_i(t)=\mathrm{WAIT},\quad t\in[t_a+p_i(w),\ t_h)
+\begin{aligned}
+x_i(t)&=\mathsf{WAIT},\\
+t&\in [\,t_a+p_i(w),\ t_h\,)
+\end{aligned}
 \]
 
-である。ここで \(A_j(t)\in\{0,1\}\) は下流ノード \(j\) の受入可能性である。
+である。ここで \(\mathcal{A}_j(t)\in\{0,1\}\) は下流ノード \(j\) の受入可能性である。
 
 排出後の `DOWN` 区間は
 
 \[
-x_i(t)=\mathrm{DOWN},\quad t\in[t_h,\ t_h+d_i)
+\begin{aligned}
+x_i(t)&=\mathsf{DOWN},\\
+t&\in [\,t_h,\ t_h+d_i\,)
+\end{aligned}
 \]
 
 となり、その後
 
 \[
-x_i(t)=\mathrm{IDLE},\quad t\ge t_h+d_i
+x_i(t)=\mathsf{IDLE},\qquad t\ge t_h+d_i
 \]
 
 へ復帰する。
@@ -152,7 +162,7 @@ C_i(w)=p_i(w)+b_i(w)+d_i
 と定義する。ここで
 
 \[
-b_i(w)=t_h-(t_a+p_i(w))
+b_i(w)=t_h-\bigl(t_a+p_i(w)\bigr)
 \]
 
 は blocking に起因する待ち時間である。
@@ -212,25 +222,25 @@ C_i(w)=P_i(w)+T_i(w)
 `Source` はワーク列
 
 \[
-W=(w_1,w_2,\dots)
+\mathcal{W}=\bigl(w_1,w_2,\dots\bigr)
 \]
 
 を生成し、下流受入可能時に投入する。生成間隔、初期時刻、タイプ列は投入計画に対応する。
 
 ### 5.2 Sink
 
-`Sink` は到着ワーク総数 \(N(t)\) を記録し、サイクルタイムと throughput を観測する。到着時刻列を \(\{t_k^{\mathrm{sink}}\}\) とすると、ワーク単位のサイクルタイムは
+`Sink` は到着ワーク総数 \(N(t)\) を記録し、サイクルタイムと throughput を観測する。到着時刻列を \(\{\,t_k^{\mathrm{sink}}\,\}\) とすると、ワーク単位のサイクルタイムは
 
 \[
-CT_k=t_k^{\mathrm{sink}}-t_{k-1}^{\mathrm{sink}}
+\operatorname{CT}_k=t_k^{\mathrm{sink}}-t_{k-1}^{\mathrm{sink}}
 \]
 
 である。
 
-1 時間窓 throughput を \(TPH(t)\) とすると、概念的には
+1 時間窓 throughput を \(\operatorname{TPH}(t)\) とすると、概念的には
 
 \[
-TPH(t)=
+\operatorname{TPH}(t)=
 \begin{cases}
 \dfrac{N(t)}{t/3600}, & 0<t<3600\\[4pt]
 N(t)-N(t-3600), & t\ge 3600
@@ -241,30 +251,32 @@ N(t)-N(t-3600), & t\ge 3600
 
 ### 5.3 Split
 
-`Split` は下流全てが受入可能なときにワークを複製し、複数出力へ同時送出する。出力先集合を \(\Gamma^+(i)\) とすると、発火条件は
+`Split` は下流全てが受入可能なときにワークを複製し、複数出力へ同時送出する。出力先集合を \(\Gamma_i^{+}\) とすると、発火条件は
 
 \[
-\forall j\in\Gamma^+(i),\ A_j(t)=1
+\forall j\in \Gamma_i^{+},\ \mathcal{A}_j(t)=1
 \]
 
 である。
 
 ### 5.4 Branch
 
-`Branch` はワーク属性に応じて出力先を選ぶ。出力候補 \(m\in\Gamma^+(i)\) に対して routeType 条件を用いるなら、
+`Branch` はワーク属性に応じて出力先を選ぶ。出力候補 \(m\in\Gamma_i^{+}\) に対して routeType 条件を用いるなら、
 
 \[
-j=\arg\max_{m\in\Gamma^+(i)} \mathbf{1}\{\mathrm{routeType}_m=\mathrm{type}(w)\}
+j=\operatorname*{arg\,max}_{m\in \Gamma_i^{+}}
+\mathbf{1}\bigl\{\operatorname{routeType}_m=\operatorname{type}(w)\bigr\}
 \]
 
 のように書ける。
 
 ### 5.5 Merge
 
-`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を \(\Gamma^-(i)\) とすると、ある ID \(\hat{\mathrm{id}}\) に対し
+`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を \(\Gamma_i^{-}\) とすると、ある ID \(\widehat{\operatorname{id}}\) に対し
 
 \[
-\forall \ell\in\Gamma^-(i),\ \exists w_\ell:\ \mathrm{id}(w_\ell)=\hat{\mathrm{id}}
+\forall \ell\in \Gamma_i^{-},\ \exists w_\ell:\ 
+\operatorname{id}(w_\ell)=\widehat{\operatorname{id}}
 \]
 
 が成立した時に発火する。
@@ -321,13 +333,13 @@ t_{k+1}=t_k+\Delta t
 `event` は各ノードが持つ次状態遷移時刻 `_until` に基づき、最も近いイベント時刻へジャンプする。時刻 \(t\) における有効な次イベント時刻集合を
 
 \[
-T(t)=\{u_i(t)\mid i\in V,\ u_i(t)>t\}
+\mathcal{T}(t)=\bigl\{\,u_i(t)\mid i\in \mathcal{V},\ u_i(t)>t\,\bigr\}
 \]
 
 とすると、次時刻は
 
 \[
-t_{k+1}=\min T(t_k)
+t_{k+1}=\min \mathcal{T}(t_k)
 \]
 
 で与えられる。実装上は heap を用い、dirty queue や same-time batch を伴って処理する。
@@ -383,10 +395,10 @@ O(K\log K)
 \bar{C}_i=\mathbb{E}[C_i(w)]
 \]
 
-とする。直列ラインの粗い近似としてライン throughput \(TP\) は
+とする。直列ラインの粗い近似としてライン throughput \(\operatorname{TP}\) は
 
 \[
-TP\lesssim \frac{1}{\max_i \bar{C}_i}
+\operatorname{TP}\lesssim \frac{1}{\max_i \bar{C}_i}
 \]
 
 で上から抑えられる。
@@ -418,7 +430,7 @@ FACT SIM が実務向きである理由は次の 3 点に整理できる。
    下流が詰まれば `WAIT` が自然に伸びる。
 
 3. 図と数理が対応しやすい  
-   LiteGraph 上のノード接続を、そのまま有向グラフ \(G=(V,E)\) と読める。
+   LiteGraph 上のノード接続を、そのまま有向グラフ \(\mathcal{G}=(\mathcal{V},\mathcal{E})\) と読める。
 
 ### 9.2 説明可能性
 
