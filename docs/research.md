@@ -1,112 +1,112 @@
-# FACT SIM における状態遷移ベース離散事象シミュレーション
-## ブラウザ実装と最小時間パラメータ化の数理的整理
+# State-Transition-Based Discrete-Event Simulation in FACT SIM
+## A Mathematical Interpretation of the Browser Implementation and Minimal Time Parameterization
 
-## 要旨
+## Abstract
 
-FACT SIM は、ブラウザ上で動作するノードベースの汎用離散事象シミュレータである。対象は生産ライン、搬送、物流、サービス工程など、エンティティが工程間を移動しながら状態遷移とイベントによって振る舞う系全般である。本資料では、FACT SIM の現行実装を、UI の説明ではなく、状態機械、有向グラフ、時間発展則として数理的に整理する。
+FACT SIM is a browser-based, node-oriented general-purpose discrete-event simulator. Its target systems include manufacturing lines, transport systems, logistics, and service processes, that is, systems in which entities move through a network by means of events and state transitions. This document explains the current implementation of FACT SIM not as a UI guide but as a mathematical model based on state machines, directed graphs, and time-evolution rules.
 
-本実装の中心的な特徴は、Equipment 系ノードを 4 状態
+A central feature of the implementation is that Equipment-like nodes are represented by four states
 
 - `IDLE`
 - `PROCESS`
 - `WAIT`
 - `DOWN`
 
-で表現しながら、現場で同定すべき主要時間パラメータを
+while the main measurable time parameters are concentrated into only two quantities:
 
 - `processTime`
 - `downTime`
 
-の 2 つへ集中させている点にある。`WAIT` や `IDLE` は独立の時間パラメータを持つのではなく、上下流の接続関係、滞留、受入可否から内生的に決まる。これにより、詳細作業を過剰に分解せずに、詰まり、待ち、同期、搬送制約を含む系全体の挙動を比較的少数のパラメータで再現できる。
+`WAIT` and `IDLE` do not normally require independent duration parameters. Instead, they emerge endogenously from upstream/downstream connectivity, congestion, and acceptance conditions. This design allows FACT SIM to reproduce blocking, waiting, synchronization, and transport constraints without excessively decomposing each operation into fine-grained substeps.
 
-さらに FACT SIM は、固定刻み時間で進む `dt` エンジン、次イベント時刻へジャンプする `event` エンジン、compiled 実行系である `event-fast`、その worker 分離版 `event-fast-worker`、並列 worker 実行版 `event-fast-par` を備える。現行実装では `dt` が比較基準の意味論を与え、`event` および `event-fast*` はその意味論を保ちながら実行効率を高める方向で設計されている。
-
----
-
-## 1. 背景
-
-現実の生産ラインや搬送系では、装置単体の処理時間だけでなく、下流待ち、合流待ち、経路分岐、故障停止、搬送資源制約などが全体性能を支配する。そのため、平均サイクルタイムの一覧表だけでは不十分であり、状態遷移に基づく離散事象シミュレーションが必要になる。
-
-一方で、各工程を細かな作業要素に分解しすぎると、次の問題が生じやすい。
-
-1. 状態数が増え、モデルが複雑化する。
-2. 計測すべき時間パラメータが増え、同定コストが高くなる。
-3. 微小な時間誤差が累積し、長時間シミュレーションの再現性を下げる。
-
-FACT SIM はこの問題に対し、工程を状態遷移として扱いつつ、主要な時間パラメータを最小限に保つ実装を採る。特に Equipment 系では、実務上測りやすい `processTime` と `downTime` を核に据え、待ちはネットワークから自然に発生する量として表現する。
+FACT SIM also provides multiple execution engines: the fixed-step `dt` engine, the event-driven `event` engine, the compiled execution variant `event-fast`, its worker-isolated form `event-fast-worker`, and the multi-worker parallel engine `event-fast-par`. In the current implementation, `dt` acts as the semantic baseline, while `event` and `event-fast*` aim to preserve the same observable behavior with lower execution overhead.
 
 ---
 
-## 2. システム表現
+## 1. Background
 
-### 2.1 有向グラフとしてのモデル
+In real production and transport systems, overall performance is governed not only by nominal processing times but also by downstream blocking, merge waits, route decisions, failure stops, and transport-resource constraints. Therefore, a simple list of average cycle times is insufficient; discrete-event simulation based on explicit state transitions is required.
 
-シミュレーション対象を有向グラフ
+At the same time, over-decomposing each process into many micro-activities introduces several problems:
+
+1. The number of states grows and the model becomes difficult to maintain.
+2. The number of time parameters to measure increases, raising calibration cost.
+3. Small timing errors accumulate, reducing long-run reproducibility.
+
+FACT SIM addresses this tradeoff by representing each process as a state-transition system while keeping the main time parameters minimal. In particular, Equipment-like nodes are centered on `processTime` and `downTime`, while waiting is generated naturally by network interactions rather than imposed as an external parameter.
+
+---
+
+## 2. System Representation
+
+### 2.1 Directed-Graph Model
+
+The simulated system is represented as a directed graph
 
 $$
 \mathcal{G}=(\mathcal{V},\mathcal{E})
 $$
 
-で表す。
+where:
 
-- $\mathcal{V}$: ノード集合。`Source`, `Equipment`, `Split`, `Branch`, `Merge`, `Join`, `Station`, `Sink`, `Carrier Route`, `Shuttle Stage` などを含む。
-- $\mathcal{E}$: ノード間リンク集合。work ポート、carrier ポートなどの接続を表す。
+- $\mathcal{V}$ is the set of nodes, including `Source`, `Equipment`, `Split`, `Branch`, `Merge`, `Join`, `Station`, `Sink`, `Carrier Route`, and `Shuttle Stage`.
+- $\mathcal{E}$ is the set of directed links, including work ports and carrier ports.
 
-時刻 $t$ におけるノード $i \in \mathcal{V}$ の状態を
+The state of node $i \in \mathcal{V}$ at time $t$ is written as
 
 $$
 x_i(t)\in \mathcal{S}_i
 $$
 
-とする。各ノードは内部状態、保有エンティティ、次状態遷移時刻 `_until`、上下流リンク状態を持つ。
+Each node maintains an internal state, resident entities, link-related conditions, and a next-transition timestamp `_until`.
 
-### 2.2 エンティティ
+### 2.2 Entities
 
-ワークや搬送対象の個体を
+A work item or transportable entity is represented as
 
 $$
 w_k=(\mathrm{id}_k,\ \mathrm{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k)
 $$
 
-と表す。ここで $\mathrm{id}_k$ は個体識別子、$\mathrm{type}_k$ は分岐条件や routing に用いる属性、$t_k^{\mathrm{birth}}$ は生成時刻、$\theta_k$ は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
+where $\mathrm{id}_k$ is the unique identifier, $\mathrm{type}_k$ is an attribute used for routing or branching, $t_k^{\mathrm{birth}}$ is the birth time, and $\theta_k$ denotes optional additional attributes. In the current implementation, these attributes are used by branch conditions and scripted node logic.
 
 ---
 
-## 3. Equipment ノードの状態機械
+## 3. State Machine of Equipment Nodes
 
-### 3.1 状態集合
+### 3.1 State Set
 
-Equipment 系ノードの基本状態集合を
+The basic state set of Equipment-like nodes is
 
 $$
 \mathcal{S}_{\mathrm{equip}}
 =\{\mathsf{IDLE},\mathsf{PROCESS},\mathsf{WAIT},\mathsf{DOWN}\}
 $$
 
-とする。
+with the following meanings:
 
-- `IDLE`: 入力待ち
-- `PROCESS`: 加工中
-- `WAIT`: 加工完了後、下流受入待ち
-- `DOWN`: 排出後のダウンまたは復帰待ち
+- `IDLE`: waiting for an input entity
+- `PROCESS`: actively processing
+- `WAIT`: processing is complete, but downstream cannot yet accept the item
+- `DOWN`: post-discharge downtime or recovery period
 
-概念的な遷移図は次のようになる。
+The conceptual transition diagram is:
 
 ```mermaid
 stateDiagram-v2
   direction LR
   [*] --> IDLE
-  IDLE --> PROCESS: work受入
-  PROCESS --> WAIT: processTime経過
-  WAIT --> DOWN: 下流受入可
-  DOWN --> IDLE: downTime経過
+  IDLE --> PROCESS: work accepted
+  PROCESS --> WAIT: processTime elapsed
+  WAIT --> DOWN: downstream accepts
+  DOWN --> IDLE: downTime elapsed
 ```
 
-### 3.2 時間発展
+### 3.2 Time Evolution
 
-ノード $i$ が時刻 $t_a$ にワーク $w$ を受理したとする。`processTime` を $p_i(w)$、`downTime` を $d_i$ とおく。
+Assume that node $i$ accepts work $w$ at time $t_a$. Let $p_i(w)$ denote `processTime` and $d_i$ denote `downTime`.
 
-`PROCESS` 区間は
+The `PROCESS` interval is
 
 $$
 \begin{aligned}
@@ -115,15 +115,13 @@ t&\in [\,t_a,\ t_a+p_i(w)\,)
 \end{aligned}
 $$
 
-と書ける。
-
-加工終了後、下流ノード $j$ が受入可能になる最初の時刻を
+Let the earliest time at which downstream node $j$ becomes able to accept the item be
 
 $$
 t_h=\inf\{\,t\ge t_a+p_i(w)\mid \mathcal{A}_j(t)=1\,\}
 $$
 
-とすると、`WAIT` 区間は
+Then the `WAIT` interval is
 
 $$
 \begin{aligned}
@@ -132,9 +130,9 @@ t&\in [\,t_a+p_i(w),\ t_h\,)
 \end{aligned}
 $$
 
-である。ここで $\mathcal{A}_j(t)\in\{0,1\}$ は下流ノード $j$ の受入可能性である。
+where $\mathcal{A}_j(t)\in\{0,1\}$ is the downstream acceptance indicator.
 
-排出後の `DOWN` 区間は
+After handoff, the `DOWN` interval is
 
 $$
 \begin{aligned}
@@ -143,170 +141,160 @@ t&\in [\,t_h,\ t_h+d_i\,)
 \end{aligned}
 $$
 
-となり、その後
+and the node returns to
 
 $$
 x_i(t)=\mathsf{IDLE},\qquad t\ge t_h+d_i
 $$
 
-へ復帰する。
+### 3.3 Effective Cycle Time
 
-### 3.3 実効サイクル時間
-
-ワーク $w$ に対するノード $i$ の実効サイクル時間を
+The effective cycle time of node $i$ for work $w$ is defined as
 
 $$
 C_i(w)=p_i(w)+b_i(w)+d_i
 $$
 
-と定義する。ここで
+where
 
 $$
 b_i(w)=t_h-(t_a+p_i(w))
 $$
 
-は blocking に起因する待ち時間である。
+is the blocking-induced waiting time.
 
-この式により、装置固有の時間は $p_i$ と $d_i$ の 2 つで表され、詰まりや同期ずれは $b_i$ としてネットワークから自然に発生する。
+This makes it explicit that the intrinsic node-specific time is captured by $p_i$ and $d_i$, while blocking and synchronization delays arise from network interactions through $b_i$.
 
 ---
 
-## 4. 最小時間パラメータ化
+## 4. Minimal Time Parameterization
 
-### 4.1 4 状態と 2 パラメータ
+### 4.1 Four States, Two Main Parameters
 
-FACT SIM の Equipment は 4 状態で動作するが、ユーザが主に与える時間パラメータは
+Although FACT SIM uses four operational states, the main user-specified time parameters are only:
 
 - `processTime`
 - `downTime`
 
-の 2 つである。`WAIT` と `IDLE` は追加の独立時間パラメータを持たず、ネットワーク構造とその時点の滞留状況から決まる内生状態である。
+`WAIT` and `IDLE` do not normally require separate calibrated durations; they are endogenous states determined by the network configuration and instantaneous congestion.
 
-したがって FACT SIM は、
+Therefore, FACT SIM has the following structure:
 
-- 表現上は 4 状態
-- 同定上は 2 主要時間パラメータ
+- four explicit operational states at the representation level
+- two principal time parameters at the calibration level
 
-という構造を持つ。これは、状態数と計測項目を抑えつつ、工程間相互作用を保持する粗視化モデルとみなせる。
+This can be interpreted as a coarse-grained model that preserves process interaction while reducing the number of parameters that must be measured in practice.
 
-### 4.2 粗視化した 2 区間表現
+### 4.2 Coarse Two-Segment View
 
-1 ワークの通過時間を次の 2 区間へ粗視化して見てもよい。
+The traversal time of a work item through a node can be viewed in terms of two segments.
 
-主処理区間:
+Primary processing segment:
 
 $$
 P_i(w)=p_i(w)
 $$
 
-排出・復帰区間:
+Discharge and recovery segment:
 
 $$
 T_i(w)=b_i(w)+d_i
 $$
 
-したがって
+Hence
 
 $$
 C_i(w)=P_i(w)+T_i(w)
 $$
 
-となる。ここで `WAIT` は外生パラメータではなく、系の混雑と同期から出る量である点が重要である。
+The key point is that `WAIT` is not an exogenous timing parameter; it emerges from congestion and synchronization in the network.
 
 ---
 
-## 5. 分岐・合流・同期ノード
+## 5. Branching, Merging, and Synchronization Nodes
 
 ### 5.1 Source
 
-`Source` はワーク列
+A `Source` generates a sequence
 
 $$
 \mathcal{W}=(w_1,w_2,\dots)
 $$
 
-を生成し、下流受入可能時に投入する。生成間隔、初期時刻、タイプ列は投入計画に対応する。
+and injects work when downstream acceptance conditions are satisfied. Inter-arrival intervals, start time, and type sequence correspond to the release plan.
 
 ### 5.2 Sink
 
-`Sink` は到着ワーク総数 $N(t)$ を記録し、サイクルタイムと throughput を観測する。到着時刻列を $\{\,t_k^{\mathrm{sink}}\,\}$ とすると、ワーク単位のサイクルタイムは
+A `Sink` records the cumulative number of completed works $N(t)$ and derives cycle-time and throughput measures. If $\{\,t_k^{\mathrm{sink}}\,\}$ is the arrival-time sequence at the sink, then the per-item cycle time is
 
 $$
 \mathrm{CT}_k=t_k^{\mathrm{sink}}-t_{k-1}^{\mathrm{sink}}
 $$
 
-である。
-
-1 時間窓 throughput を $\mathrm{TPH}(t)$ とすると、開始 1 時間未満では
+The one-hour throughput measure $\mathrm{TPH}(t)$ can be written as follows. Before one hour of simulated time has elapsed:
 
 $$
 \mathrm{TPH}(t)=\dfrac{N(t)}{t/3600}, \qquad 0<t<3600
 $$
 
-と表せる。1 時間以降は直近 1 時間の完了数として
+After one hour, it becomes the number of completions observed in the most recent one-hour window:
 
 $$
 \mathrm{TPH}(t)=N(t)-N(t-3600), \qquad t\ge 3600
 $$
 
-で表せる。現行実装の `Sink` は履歴配列からこれに対応する指標を計算し、ノード内表示とタイムラインへ反映する。
+The current implementation computes corresponding indicators from completion histories and displays them inside the sink node and on the timeline.
 
 ### 5.3 Split
 
-`Split` は下流全てが受入可能なときにワークを複製し、複数出力へ同時送出する。出力先集合を $\Gamma_i^{+}$ とすると、発火条件は
+A `Split` duplicates a work item and emits copies simultaneously to multiple outputs when all downstream targets can accept. Let $\Gamma_i^{+}$ be the output set of node $i$. Then the firing condition is
 
 $$
 \forall j\in \Gamma_i^{+},\ \mathcal{A}_j(t)=1
 $$
 
-である。
-
 ### 5.4 Branch
 
-`Branch` はワーク属性に応じて出力先を選ぶ。出力候補 $m\in\Gamma_i^{+}$ に対して routeType 条件を用いるなら、
+A `Branch` selects an output according to work attributes. If route selection is determined by an output-specific route type, a stylized expression is
 
 $$
 j=\arg\max_{m\in \Gamma_i^{+}}
 \mathbf{1}\{\mathrm{routeType}_m=\mathrm{type}(w)\}
 $$
 
-のように書ける。
-
 ### 5.5 Merge
 
-`Merge` は複数入力から同一 ID のワークが揃ったときに 1 つのワークとして流す同期合流である。必要入力集合を $\Gamma_i^{-}$ とすると、ある ID $\widehat{\mathrm{id}}$ に対し
+A `Merge` is a synchronized merge node: it emits one work item when inputs carrying the same identifier have arrived at all required inputs. Let $\Gamma_i^{-}$ be the required input set. For a target identifier $\widehat{\mathrm{id}}$, the firing condition is
 
 $$
 \forall \ell\in \Gamma_i^{-},\ \exists w_\ell:\ 
 \mathrm{id}(w_\ell)=\widehat{\mathrm{id}}
 $$
 
-が成立した時に発火する。
-
 ### 5.6 Join
 
-`Join` は同期条件を持たない多入力 1 出力の FCFS 合流に相当する。
+A `Join` is a multi-input, single-output merge without an explicit synchronization constraint, and is well approximated as a first-come-first-served merge node.
 
 ---
 
-## 6. 搬送系ノード
+## 6. Transport-Oriented Nodes
 
-FACT SIM の現行実装には `Carrier Route`、`Shuttle Stage`、`Station` など、Equipment より複雑なノードが含まれる。これらは work に加えて carrier や pallet を明示的に扱うため、状態空間は Equipment より大きい。
+The current FACT SIM implementation also contains more complex nodes such as `Carrier Route`, `Shuttle Stage`, and `Station`. These nodes explicitly handle carriers, pallets, and transfer synchronization, so their state spaces are larger than those of Equipment nodes.
 
-数理的には、これらは
+Mathematically, these nodes should be treated as composite state machines including:
 
-- 搬送資源状態
-- 積載状態
-- route 選択
-- 受渡し同期
+- transport-resource state
+- loading state
+- route selection
+- handoff synchronization
 
-を含む複合状態機械として扱うべきである。現状の実装では script 条件やノード固有ロジックで柔軟に表現されているが、厳密な定式化は今後の課題として残る。
+In the present implementation, such logic is expressed via node-specific code and optional scripting. A stricter formalization remains future work.
 
 ---
 
-## 7. エンジンの時間発展則
+## 7. Time Evolution Rules of the Engines
 
-FACT SIM には複数の実行エンジンがある。
+FACT SIM currently provides multiple simulation engines:
 
 - `dt`
 - `event`
@@ -314,188 +302,172 @@ FACT SIM には複数の実行エンジンがある。
 - `event-fast-worker`
 - `event-fast-par`
 
-### 7.1 dt エンジン
+### 7.1 The dt Engine
 
-`dt` は固定刻み幅
+The `dt` engine advances time by a fixed step
 
 $$
 \Delta t=0.1\ \mathrm{s}
 $$
 
-で時刻を進める。
+so that
 
 $$
 t_{k+1}=t_k+\Delta t
 $$
 
-各刻みで全ノードの状態更新を行うため、意味論が直感的で追いやすい。一方、長時間・大規模モデルでは、状態が変わらない区間でも更新が走る。
+All nodes are updated at every step. This makes the semantics easy to follow, but it also means that unchanged intervals are still visited explicitly.
 
-### 7.2 event エンジン
+### 7.2 The event Engine
 
-`event` は各ノードが持つ次状態遷移時刻 `_until` に基づき、最も近いイベント時刻へジャンプする。時刻 $t$ における有効な次イベント時刻集合を
+The `event` engine advances directly to the nearest future event time using each node's `_until` timestamp. Let the set of valid future event times at time $t$ be
 
 $$
 \mathcal{T}(t)=\{\,u_i(t)\mid i\in \mathcal{V},\ u_i(t)>t\,\}
 $$
 
-とすると、次時刻は
+Then the next simulation time is
 
 $$
 t_{k+1}=\min \mathcal{T}(t_k)
 $$
 
-で与えられる。実装上は heap を用い、dirty queue や same-time batch を伴って処理する。
+In the implementation, this is supported by a heap together with dirty queues and same-time batching.
 
 ### 7.3 event-fast
 
-`event-fast` は `event` の意味論を保ちながら、compiled graph、typed array 寄りの実行状態、軽量 kernel、compat fallback を用いてオーバーヘッドを削減する高速化バリアントである。意味論的には `event` 系の一種であり、`dt` との parity を `Engine Test` で確認する前提になっている。
+`event-fast` is a performance-oriented variant that preserves the semantics of `event` while reducing overhead using a compiled graph representation, typed-array-oriented runtime data, lightweight kernels, and compatibility fallback logic. Semantically, it remains an event-driven engine and is validated against `dt` through engine parity testing.
 
 ### 7.4 event-fast-worker
 
-`event-fast-worker` は `event-fast` を Web Worker 側へ移して UI thread と分離する構成である。主目的は UI の応答性改善であり、graph が worker 実行に不向きな場合は安全側へ fallback する。
+`event-fast-worker` moves `event-fast` execution into a Web Worker, separating simulation from the UI thread. Its primary purpose is responsiveness rather than a change of semantics. When a graph is unsuitable for worker execution, the implementation falls back to a safer runtime path.
 
 ### 7.5 event-fast-par
 
-`event-fast-par` は graph partition と multi-worker 実行を用いる並列版である。概念的には partition ごとに局所イベント列を持ち、境界イベントを coordinator が同期する構成である。ただし現行実装では、graph 構造や fallback ノード種別によっては parallel 実行を避け、安全な `event-fast-worker` または `event-fast` 相当へ落とす。
+`event-fast-par` is the parallel multi-worker variant based on graph partitioning. Conceptually, each partition maintains a local event sequence while a coordinator synchronizes boundary events across partitions. In the current implementation, however, not all graphs are executed in fully parallel form. Depending on graph structure and fallback node types, the runtime may downgrade to `event-fast-worker` or `event-fast` in order to preserve parity.
 
-したがって `event-fast-par` は
+Thus, `event-fast-par` should be understood not as "always parallel," but rather as:
 
-- 常に並列で動くエンジン
+- multi-worker execution when the graph is parallelizable
+- parity-first fallback when it is not
 
-ではなく、
+### 7.6 Computational Viewpoint
 
-- 並列化可能な graph では multi-worker 実行
-- そうでない graph では parity 優先で fallback
-
-する実装と捉えるのが正確である。
-
-### 7.6 計算量の見方
-
-固定刻み幅法では、おおむね
+Under fixed-step simulation, the number of updates is on the order of
 
 $$
 O((H/\Delta t)\cdot |V|)
 $$
 
-の更新が必要になる。ここで $H$ はシミュレーション時間である。
+where $H$ is the simulated horizon.
 
-一方、イベント駆動法ではイベント数を $K$ として
+Under event-driven execution, if the total number of events is $K$, one expects behavior of the form
 
 $$
 O(K\log K)
 $$
 
-型の振る舞いを期待できる。実際の定数因子は heap、dirty queue、compat fallback、snapshot 同期などの実装要因に依存するが、「変化のない時間を刻まない」ことが本質的な利点である。
+up to implementation-dependent constants. In practice, those constants depend on the heap, dirty queues, fallback paths, and snapshot synchronization. The essential advantage is that intervals with no state changes are skipped.
 
 ---
 
-## 8. ボトルネックと blocking
+## 8. Blocking and Bottlenecks
 
-ノード $i$ の平均実効サイクル時間を
+Let the mean effective cycle time of node $i$ be
 
 $$
 \bar{C}_i=\mathbb{E}[C_i(w)]
 $$
 
-とする。直列ラインの粗い近似としてライン throughput $\mathrm{TP}$ は
+Then, as a rough upper bound for a serial line, line throughput $\mathrm{TP}$ satisfies
 
 $$
 \mathrm{TP}\lesssim \frac{1}{\max_i \bar{C}_i}
 $$
 
-で上から抑えられる。
+However, in FACT SIM, $\bar{C}_i$ already includes the blocking term $b_i$. Therefore, the bottleneck is not necessarily the node with the largest nominal `processTime`; it may instead be the structural point that propagates downstream blocking upstream.
 
-ただし FACT SIM では $\bar{C}_i$ の中に blocking 起因の $b_i$ が含まれるため、単純な `processTime` の最大値だけではボトルネックを説明できない。すなわち、ボトルネックは
-
-- 処理そのものが遅い工程
-
-だけではなく、
-
-- 下流待ちを上流へ伝播させる構造点
-
-でもある。
-
-このため、タイムライン、node 状態表示、Sink 指標、engine test における parity 比較は、単なる速度比較ではなく、blocking 構造の説明可能性を支える。
+This is why the timeline, node-state views, sink metrics, and engine parity tests are useful not only for speed comparison but also for explaining why throughput is limited.
 
 ---
 
-## 9. 実装上の意味
+## 9. Practical Meaning of the Implementation
 
-### 9.1 現場導入しやすい理由
+### 9.1 Why It Is Practical for Real Sites
 
-FACT SIM が実務向きである理由は次の 3 点に整理できる。
+FACT SIM is practical in real settings for three reasons.
 
-1. 時間パラメータが少ない  
-   まず `processTime` と `downTime` を与えれば Equipment 系の多くを動かせる。
+1. Few time parameters are required.  
+   In many cases, giving `processTime` and `downTime` is enough to obtain useful behavior.
 
-2. 待ちはモデルの外ではなく中で発生する  
-   下流が詰まれば `WAIT` が自然に伸びる。
+2. Waiting is generated inside the model.  
+   If downstream nodes are blocked, `WAIT` automatically grows.
 
-3. 図と数理が対応しやすい  
-   LiteGraph 上のノード接続を、そのまま有向グラフ $\mathcal{G}=(\mathcal{V},\mathcal{E})$ と読める。
+3. The diagram aligns naturally with the mathematics.  
+   A LiteGraph node-link diagram can be interpreted directly as the directed graph $\mathcal{G}=(\mathcal{V},\mathcal{E})$.
 
-### 9.2 説明可能性
+### 9.2 Explainability
 
-FACT SIM は単なるアニメーションではなく、
+FACT SIM is not merely an animation tool. Through
 
-- timeline
-- node state
-- sink KPI
-- CSV / snapshot / report
+- timelines
+- node-state displays
+- sink KPIs
+- CSV, snapshot, and report outputs
 
-を通じて「なぜその throughput になったか」を説明しやすい。現行実装では `Engine Test` が `dt` を基準に各エンジンの parity を確認するため、速度改善と意味論維持を分離して議論できる。
-
----
-
-## 10. 制約と今後の課題
-
-本モデルと実装には、以下の制約がある。
-
-1. `WAIT` や `IDLE` はネットワーク依存の内生状態であり、解析的閉形式を得にくい。
-2. script による条件分岐は柔軟だが、形式検証を難しくする。
-3. `event-fast` の compiled kernel と compat fallback の境界は、理論モデルとしてさらに整理の余地がある。
-4. `Carrier Route` や `Shuttle Stage` は Equipment より複雑であり、別節での詳細定式化が望ましい。
-5. `event-fast-worker` と `event-fast-par` は意味論優先で fallback を含むため、常に同一の実行戦略で動くわけではない。
+it helps explain why a given throughput is observed. In the current implementation, `Engine Test` uses `dt` as the baseline and checks parity of the alternative engines, making it possible to separate semantic correctness from execution-speed improvement.
 
 ---
 
-## 11. 結論
+## 10. Limitations and Future Work
 
-FACT SIM は、ブラウザ上で動作する実用的なノードベース離散事象シミュレータであり、状態遷移ベースの時間発展とグラフベースのモデル記述を統合している。その中核は、Equipment を 4 状態で表しながら、時間同定の中心を `processTime` と `downTime` の 2 つへ集約する点にある。
+The current model and implementation still have several limitations.
 
-この設計により、
-
-- モデル化のしやすさ
-- 実行速度
-- 説明可能性
-- 現場導入性
-
-のバランスが取られている。したがって FACT SIM は、単なる可視化ツールではなく、状態遷移を基礎とした実務向け離散事象シミュレーション基盤として位置づけられる。
+1. `WAIT` and `IDLE` are endogenous network-dependent states, making closed-form analysis difficult.
+2. Script-based branching is flexible, but it also makes formal verification harder.
+3. The theoretical boundary between compiled kernels and compatibility fallback in `event-fast` can be further clarified.
+4. `Carrier Route` and `Shuttle Stage` are more complex than Equipment nodes and deserve dedicated formal treatment.
+5. `event-fast-worker` and `event-fast-par` include fallback paths, so a single graph does not always execute under one uniform runtime strategy.
 
 ---
 
-## 付録 A. 実装用語と数理対応
+## 11. Conclusion
 
-| 実装用語 | 数理的対応 |
+FACT SIM is a practical browser-based node-oriented discrete-event simulation platform that integrates state-transition-based time evolution with graph-based model construction. Its core design choice is to represent Equipment nodes with four states while concentrating time identification around only two main parameters: `processTime` and `downTime`.
+
+This design provides a workable balance among
+
+- ease of modeling
+- execution speed
+- explainability
+- practical deployability
+
+Accordingly, FACT SIM should be understood not merely as a visualization tool, but as a practical state-transition-based discrete-event simulation foundation.
+
+---
+
+## Appendix A. Implementation Terms and Their Mathematical Counterparts
+
+| Implementation term | Mathematical interpretation |
 | --- | --- |
-| `Source` | ワーク発生過程 |
-| `Equipment` | 4 状態サービスノード |
-| `Split` | 同期複製ノード |
-| `Branch` | 属性ベース分岐ノード |
-| `Merge` | 同期合流ノード |
-| `Join` | FCFS 合流ノード |
-| `Sink` | 観測終端・性能計測点 |
+| `Source` | work-generation process |
+| `Equipment` | four-state service node |
+| `Split` | synchronized replication node |
+| `Branch` | attribute-based branching node |
+| `Merge` | synchronized merge node |
+| `Join` | FCFS merge node |
+| `Sink` | observation sink and performance measurement point |
 | `processTime` | $p_i(w)$ |
 | `downTime` | $d_i$ |
-| `WAIT` | blocking の顕在化状態 |
-| `_until` | 次状態遷移時刻 |
+| `WAIT` | explicit blocking state |
+| `_until` | next state-transition time |
 
-## 付録 B. 現行実装におけるエンジン位置づけ
+## Appendix B. Engine Roles in the Current Implementation
 
-| エンジン | 役割 | 備考 |
+| Engine | Role | Notes |
 | --- | --- | --- |
-| `dt` | 基準意味論 | parity 比較のベースライン |
-| `event` | 単一スレッド event heap | `_until` に基づくジャンプ |
-| `event-fast` | compiled event 実行 | kernel + compat fallback |
-| `event-fast-worker` | worker 分離 | UI thread と simulation 分離 |
-| `event-fast-par` | 並列 worker 実行 | graph 条件により fallback あり |
+| `dt` | baseline semantics | reference for parity comparison |
+| `event` | single-thread event heap | jumps according to `_until` |
+| `event-fast` | compiled event execution | kernels plus compatibility fallback |
+| `event-fast-worker` | worker-isolated execution | separates UI thread and simulation |
+| `event-fast-par` | parallel multi-worker execution | may fall back depending on graph conditions |
