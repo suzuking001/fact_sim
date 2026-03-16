@@ -65,7 +65,7 @@ $$
 ワークや搬送対象の個体を
 
 $$
-w_k=\bigl(\mathrm{id}_k,\ \mathrm{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k\bigr)
+w_k=(\mathrm{id}_k,\ \mathrm{type}_k,\ t_k^{\mathrm{birth}},\ \theta_k)
 $$
 
 と表す。ここで $\mathrm{id}_k$ は個体識別子、$\mathrm{type}_k$ は分岐条件や routing に用いる属性、$t_k^{\mathrm{birth}}$ は生成時刻、$\theta_k$ は任意の付加属性である。FACT SIM の実装では、この属性は branch 条件や script 判定に利用される。
@@ -80,7 +80,7 @@ Equipment 系ノードの基本状態集合を
 
 $$
 \mathcal{S}_{\mathrm{equip}}
-=\bigl\{\mathsf{IDLE},\mathsf{PROCESS},\mathsf{WAIT},\mathsf{DOWN}\bigr\}
+=\{\mathsf{IDLE},\mathsf{PROCESS},\mathsf{WAIT},\mathsf{DOWN}\}
 $$
 
 とする。
@@ -120,7 +120,7 @@ $$
 加工終了後、下流ノード $j$ が受入可能になる最初の時刻を
 
 $$
-t_h=\inf\bigl\{\,t\ge t_a+p_i(w)\mid \mathcal{A}_j(t)=1\,\bigr\}
+t_h=\inf\{\,t\ge t_a+p_i(w)\mid \mathcal{A}_j(t)=1\,\}
 $$
 
 とすると、`WAIT` 区間は
@@ -162,7 +162,7 @@ $$
 と定義する。ここで
 
 $$
-b_i(w)=t_h-\bigl(t_a+p_i(w)\bigr)
+b_i(w)=t_h-(t_a+p_i(w))
 $$
 
 は blocking に起因する待ち時間である。
@@ -222,7 +222,7 @@ $$
 `Source` はワーク列
 
 $$
-\mathcal{W}=\bigl(w_1,w_2,\dots\bigr)
+\mathcal{W}=(w_1,w_2,\dots)
 $$
 
 を生成し、下流受入可能時に投入する。生成間隔、初期時刻、タイプ列は投入計画に対応する。
@@ -265,7 +265,7 @@ $$
 
 $$
 j=\arg\max_{m\in \Gamma_i^{+}}
-\mathbf{1}\bigl\{\mathrm{routeType}_m=\mathrm{type}(w)\bigr\}
+\mathbf{1}\{\mathrm{routeType}_m=\mathrm{type}(w)\}
 $$
 
 のように書ける。
@@ -333,7 +333,7 @@ $$
 `event` は各ノードが持つ次状態遷移時刻 `_until` に基づき、最も近いイベント時刻へジャンプする。時刻 $t$ における有効な次イベント時刻集合を
 
 $$
-\mathcal{T}(t)=\bigl\{\,u_i(t)\mid i\in \mathcal{V},\ u_i(t)>t\,\bigr\}
+\mathcal{T}(t)=\{\,u_i(t)\mid i\in \mathcal{V},\ u_i(t)>t\,\}
 $$
 
 とすると、次時刻は
@@ -372,7 +372,7 @@ $$
 固定刻み幅法では、おおむね
 
 $$
-O\!\left(\frac{H}{\Delta t}\cdot |V|\right)
+O((H/\Delta t)\cdot |V|)
 $$
 
 の更新が必要になる。ここで $H$ はシミュレーション時間である。
