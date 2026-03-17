@@ -239,6 +239,7 @@ scripts/watch_event_fast_par_status.bat
 
 ## 関連ドキュメント
 
+- `docs/quick-reference-ja.md`
 - `docs/ai-mcp.md`
 - `docs/research.md`
 - `docs/overnight-auto-optimize.md`

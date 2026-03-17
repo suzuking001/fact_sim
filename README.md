@@ -121,6 +121,7 @@ npm run nightly:optimize
 This optimizer first requires a clean worktree, then runs `quick` and `standard` engine tests, captures a benchmark baseline, asks Codex to optimize the selected `event-fast*` engine, reruns the tests, reruns the benchmark, and only keeps the patch when the target engine speed improves beyond the configured threshold.
 
 ## Documentation
+- Quick reference (Japanese): `docs/quick-reference-ja.md`
 - Research notes: `docs/research.md`
 - Overnight optimizer guide: `docs/overnight-auto-optimize.md`
 - Third-party notices: `THIRD_PARTY_NOTICES.md`
