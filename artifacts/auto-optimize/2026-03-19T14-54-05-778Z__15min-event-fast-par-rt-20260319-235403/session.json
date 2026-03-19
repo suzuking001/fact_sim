@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "sessionId": "2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403",
+  "startedAt": "2026-03-19T14:54:05.785Z",
+  "finishedAt": null,
+  "status": "running",
+  "profile": "cheap",
+  "config": {
+    "engines": [
+      "dt",
+      "event-fast-par"
+    ],
+    "optimizeEngines": [
+      "event-fast-par"
+    ],
+    "targetEngine": "event-fast-par",
+    "examples": [
+      "parallel_benchmark"
+    ],
+    "benchmarkExample": "parallel_benchmark",
+    "seeds": [
+      1
+    ],
+    "includeCurrentGraph": false,
+    "includeExamples": true,
+    "strict": true,
+    "reruns": 0,
+    "stopOnFirstFailure": true,
+    "benchmarkWallMs": 500,
+    "delegateTimeoutMs": 900000,
+    "promptMode": "compact",
+    "scopeMode": "focused",
+    "minImprovementPct": 1,
+    "maxIterations": 9999,
+    "minRuntimeHours": 0.25,
+    "maxNoImprovementIterations": 12,
+    "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json"
+  },
+  "baselineBenchmark": {
+    "dt": {
+      "speed": 2089.782043491653,
+      "simSec": 1045.1,
+      "wallMs": 500.10000002384186
+    },
+    "event": {
+      "speed": 2673.8648383937316,
+      "simSec": 1365.008,
+      "wallMs": 510.5
+    },
+    "event-fast": {
+      "speed": 4270.752,
+      "simSec": 2135.376,
+      "wallMs": 500
+    },
+    "event-fast-worker": {
+      "speed": 8367.04,
+      "simSec": 4183.52,
+      "wallMs": 500
+    },
+    "event-fast-par": {
+      "speed": 6504.704,
+      "simSec": 3252.352,
+      "wallMs": 500
+    }
+  },
+  "bestBenchmark": {
+    "dt": {
+      "speed": 2089.782043491653,
+      "simSec": 1045.1,
+      "wallMs": 500.10000002384186
+    },
+    "event": {
+      "speed": 2673.8648383937316,
+      "simSec": 1365.008,
+      "wallMs": 510.5
+    },
+    "event-fast": {
+      "speed": 4270.752,
+      "simSec": 2135.376,
+      "wallMs": 500
+    },
+    "event-fast-worker": {
+      "speed": 8367.04,
+      "simSec": 4183.52,
+      "wallMs": 500
+    },
+    "event-fast-par": {
+      "speed": 6504.704,
+      "simSec": 3252.352,
+      "wallMs": 500
+    }
+  },
+  "initialTargetSpeed": 6504.704,
+  "bestTargetSpeed": 6504.704,
+  "currentImprovementPct": 0,
+  "consecutiveNoImprovement": 3,
+  "monitor": {
+    "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json",
+    "statusMarkdownFile": "artifacts/auto-optimize/latest-event-fast-par-status.md",
+    "statusHtmlFile": "artifacts/auto-optimize/latest-event-fast-par-status.html",
+    "stopAllUrl": "http://127.0.0.1:61844/stop-all",
+    "autoStart": {
+      "started": true,
+      "mode": "browser-dashboard"
+    }
+  },
+  "iterations": [
+    {
+      "index": 1,
+      "status": "delegate-failed",
+      "baselineSpeed": 6504.704,
+      "requestPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimization-request.iteration-1.json",
+      "optimizePromptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimize-prompt.iteration-1.md",
+      "patchResultPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/patch-result.iteration-1.json",
+      "patchStartedAt": "2026-03-19T14:54:18.118Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "delegatePromptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/codex-prompt.iteration-1.md",
+      "delegateMessagePath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-last-message.iteration-1.txt",
+      "delegateStdoutPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stdout.iteration-1.log",
+      "delegateStderrPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stderr.iteration-1.log",
+      "changedPaths": []
+    },
+    {
+      "index": 2,
+      "status": "delegate-failed",
+      "baselineSpeed": 6504.704,
+      "requestPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimization-request.iteration-2.json",
+      "optimizePromptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimize-prompt.iteration-2.md",
+      "patchResultPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/patch-result.iteration-2.json",
+      "patchStartedAt": "2026-03-19T14:57:59.502Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "delegatePromptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/codex-prompt.iteration-2.md",
+      "delegateMessagePath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-last-message.iteration-2.txt",
+      "delegateStdoutPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stdout.iteration-2.log",
+      "delegateStderrPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stderr.iteration-2.log",
+      "changedPaths": []
+    },
+    {
+      "index": 3,
+      "status": "delegate-failed",
+      "baselineSpeed": 6504.704,
+      "requestPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimization-request.iteration-3.json",
+      "optimizePromptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimize-prompt.iteration-3.md",
+      "patchResultPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/patch-result.iteration-3.json",
+      "patchStartedAt": "2026-03-19T15:01:15.659Z",
+      "note": "Optimization delegate failed before producing a usable patch.",
+      "delegateExitCode": 1,
+      "delegatePromptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/codex-prompt.iteration-3.md",
+      "delegateMessagePath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-last-message.iteration-3.txt",
+      "delegateStdoutPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stdout.iteration-3.log",
+      "delegateStderrPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stderr.iteration-3.log",
+      "changedPaths": []
+    },
+    {
+      "index": 4,
+      "status": "patching",
+      "baselineSpeed": 6504.704,
+      "requestPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimization-request.iteration-4.json",
+      "optimizePromptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimize-prompt.iteration-4.md",
+      "patchResultPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/patch-result.iteration-4.json",
+      "patchStartedAt": "2026-03-19T15:05:38.128Z",
+      "note": "Delegate running for 30s."
+    }
+  ]
+}

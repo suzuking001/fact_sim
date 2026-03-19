@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-19T14:54:18.267Z",
+  "finishedAt": "2026-03-19T14:57:58.680Z",
+  "status": "delegate-failed",
+  "sessionDir": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403",
+  "iteration": "1",
+  "patchRequestPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/optimization-request.json",
+  "targetFailurePath": null,
+  "targetFailure": null,
+  "delegate": "codex",
+  "recommendedFiles": [
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-partitioner.js"
+  ],
+  "allowedPaths": [
+    "js/app/engine-fast-par-worker.js",
+    "js/app/engine-fast-par-host.js",
+    "js/app/engine-fast-par-partitioner.js"
+  ],
+  "protectedEngines": [
+    "dt",
+    "event"
+  ],
+  "changedPaths": [],
+  "forbiddenPaths": [],
+  "workspaceExtraPaths": [
+    "delegate-last-message.txt"
+  ],
+  "notes": [
+    "Optimization delegate failed before producing a usable patch."
+  ],
+  "promptPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/codex-prompt.iteration-1.md",
+  "delegateMessagePath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-last-message.iteration-1.txt",
+  "delegateStdoutPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stdout.iteration-1.log",
+  "delegateStderrPath": "artifacts/auto-optimize/2026-03-19T14-54-05-778Z__15min-event-fast-par-rt-20260319-235403/delegate-stderr.iteration-1.log",
+  "workspaceRoot": "C:\\Users\\suzuk\\AppData\\Local\\Temp\\fact-sim-auto-patch\\1773932058956-11796",
+  "delegateExitCode": 1
+}

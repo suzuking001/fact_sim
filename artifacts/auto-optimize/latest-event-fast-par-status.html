@@ -22,37 +22,39 @@
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6ebf5; vertical-align: top; }
     th { width: 140px; color: #5d6b85; font-weight: 600; }
-    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: #0f1728; color: #e9eefc; border-radius: 12px; padding: 14px; max-height: 300px; overflow: auto; }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: #0f1728; color: #e9eefc; border-radius: 12px; padding: 14px; max-height: 420px; overflow: auto; }
     .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .path { font-size: 12px; color: #73819c; margin: 0 0 8px; word-break: break-all; }
     @media (max-width: 920px) { .row { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <main>
     <h1>FACT SIM Auto Optimize</h1>
-    <div class="meta">Session: <span class="mono">2026-03-19T14-37-43-568Z__stop-button-smoke</span> | Updated: 2026/3/19 23:37:51</div>
+    <div class="meta">Session: <span class="mono">2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643</span> | Updated: 2026/3/20 0:08:28</div>
     <div class="toolbar">
       <button id="stop-all-button" class="primary" >Stop All Auto-Optimize Jobs</button>
       <div id="stop-all-status" class="meta">Use this button to stop all old and current auto-optimize jobs.</div>
     </div>
     <section class="grid">
-      <div class="card"><div class="label">Status</div><div class="value">WARN</div></div>
+      <div class="card"><div class="label">Status</div><div class="value">running</div></div>
       <div class="card"><div class="label">Target</div><div class="value">event-fast-par</div></div>
       <div class="card"><div class="label">Improvement</div><div class="value">0.00%</div></div>
-      <div class="card"><div class="label">Initial</div><div class="value">6490.560x</div></div>
-      <div class="card"><div class="label">Best</div><div class="value">6490.560x</div></div>
-      <div class="card"><div class="label">Iterations</div><div class="value">1 / 1</div></div>
+      <div class="card"><div class="label">Initial</div><div class="value">9934.880x</div></div>
+      <div class="card"><div class="label">Best</div><div class="value">9934.880x</div></div>
+      <div class="card"><div class="label">Iterations</div><div class="value">1 / 9999</div></div>
     </section>
     <section class="row">
       <div class="card">
         <h2>Latest Iteration</h2>
         <table>
     <tr><th>Index</th><td>1</td></tr>
-    <tr><th>Status</th><td>delegate-failed</td></tr>
-    <tr><th>Baseline</th><td>6490.560x</td></tr>
+    <tr><th>Status</th><td>patching</td></tr>
+    <tr><th>Baseline</th><td>9934.880x</td></tr>
     <tr><th>After</th><td>-</td></tr>
     <tr><th>Delta</th><td>-</td></tr>
-    <tr><th>Note</th><td>Delegate exited with code 1.</td></tr>
+    <tr><th>Note</th><td>Delegate running for 90s.</td></tr>
+    <tr><th>Changed Files</th><td><pre style="max-height:140px;">(not available yet)</pre></td></tr>
   </table>
       </div>
       <div class="card">
@@ -62,9 +64,9 @@
           <tbody>
     <tr>
       <td>1</td>
-      <td>delegate-failed</td>
+      <td>patching</td>
       <td>-</td>
-      <td>Delegate exited with code 1.</td>
+      <td>Delegate running for 90s.</td>
     </tr>
   </tbody>
         </table>
@@ -72,7 +74,8 @@
     </section>
     <section class="row">
       <div class="card">
-        <h2>AI Prompt Preview</h2>
+        <h2>Runner Prompt</h2>
+        <div class="path mono">artifacts/auto-optimize/2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643/optimize-prompt.iteration-1.md</div>
         <pre>Use the existing AGENTS.md instructions in this repo.
 Optimize the target event-fast* engine for speed while preserving dt parity.
 Only edit allowed paths. Do not modify dt or event (heap).
@@ -83,27 +86,80 @@ Scope mode: focused
 Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js
 Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
 Benchmark example: parallel_benchmark
-Target speed: 6490.560x
+Target speed: 9934.880x
 Minimum improvement: 1%
 Verification after patch: suites=quick,standard, reruns=0, strictFinalParity=true
 Requirements:
 - Make one small, defensible performance improvement.
 - Preserve correctness relative to dt.
 - Prefer changes that improve headless benchmark speed for the target engine.
-- Do not broaden the patch beyond the allowed paths.</pre>
+- Do not broaden the patch beyond the allowed paths.
+- After editing, summarize the expected performance hypothesis.</pre>
       </div>
       <div class="card">
-        <h2>AI Response Preview</h2>
+        <h2>Delegate Prompt</h2>
+        <div class="path mono">artifacts/auto-optimize/2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643/codex-prompt.iteration-1.md</div>
+        <pre>Use the existing AGENTS.md instructions in this repo.
+Optimize the target event-fast* engine for speed while preserving dt parity.
+This is an optimization request, not a failure-fix request.
+Only edit allowed paths. Do not modify protected engines, engine-test, benchmark harnesses, or unrelated files.
+Target engine: event-fast-par
+Prompt mode: compact
+Scope mode: focused
+Protected engines: dt, event
+Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+Compact optimization context:
+- Benchmark example: parallel_benchmark
+- Baseline speed for event-fast-par: 9934.880x
+- Minimum improvement to keep patch: 1%
+- Verification after patch will be handled by the runner: suites=quick,standard, reruns=0, strictFinalParity=true.
+- Favor the smallest change that plausibly improves the benchmarked hot path.
+- Avoid broad refactors. If no small improvement is clear, make no change.
+Requirements:
+- Make one small, defensible performance improvement in the target engine implementation.
+- Preserve correctness relative to dt. Do not widen the patch scope.
+- Prefer changes that improve headless benchmark speed for the target engine.
+- Do not ask questions. Do not call request_user_input. Make reasonable assumptions and continue.
+- Do not browse external websites.
+- Keep dt and event behavior untouched.
+- Benchmark target speed is 9934.880x with minimum improvement 1%.
+- Verification guidance: suites=quick,standard, reruns=0, strictFinalParity=true.
+At the end, summarize:
+1. the performance hypothesis
+2. what changed
+3. which focused verification you ran
+4. any residual risk</pre>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>AI Response</h2>
+        <div class="path mono">artifacts/auto-optimize/2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643/delegate-last-message.iteration-1.txt</div>
+        <pre>(not available yet)</pre>
+      </div>
+      <div class="card">
+        <h2>Patch Diff Preview</h2>
+        <div class="path mono">artifacts/auto-optimize/2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643/patch.iteration-1.diff</div>
         <pre>(not available yet)</pre>
       </div>
     </section>
     <section class="row">
       <div class="card">
         <h2>Delegate Stdout</h2>
+        <div class="path mono">artifacts/auto-optimize/2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643/delegate-stdout.iteration-1.log</div>
         <pre>(not available yet)</pre>
       </div>
       <div class="card">
         <h2>Delegate Stderr</h2>
+        <div class="path mono">artifacts/auto-optimize/2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643/delegate-stderr.iteration-1.log</div>
+        <pre>(not available yet)</pre>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>Patch Result JSON</h2>
+        <div class="path mono">artifacts/auto-optimize/2026-03-19T15-06-45-769Z__5min-event-fast-par-20260320-000643/patch-result.iteration-1.json</div>
         <pre>(not available yet)</pre>
       </div>
     </section>
@@ -114,57 +170,63 @@ Requirements:
         <tbody>
     <tr>
       <td>summary.md</td>
-      <td>23:37:51</td>
-      <td>754 B</td>
+      <td>0:08:28</td>
+      <td>749 B</td>
     </tr>
   
     <tr>
       <td>session.json</td>
-      <td>23:37:51</td>
-      <td>3120 B</td>
+      <td>0:08:28</td>
+      <td>3250 B</td>
+    </tr>
+  
+    <tr>
+      <td>codex-prompt.iteration-1.md</td>
+      <td>0:06:58</td>
+      <td>1774 B</td>
     </tr>
   
     <tr>
       <td>optimize-prompt.iteration-1.md</td>
-      <td>23:37:50</td>
+      <td>0:06:58</td>
       <td>1062 B</td>
     </tr>
   
     <tr>
       <td>optimization-request.json</td>
-      <td>23:37:50</td>
-      <td>1591 B</td>
+      <td>0:06:57</td>
+      <td>1661 B</td>
     </tr>
   
     <tr>
       <td>optimization-request.iteration-1.json</td>
-      <td>23:37:50</td>
-      <td>1591 B</td>
+      <td>0:06:57</td>
+      <td>1661 B</td>
     </tr>
   
     <tr>
       <td>benchmark-baseline.json</td>
-      <td>23:37:50</td>
-      <td>2140 B</td>
+      <td>0:06:57</td>
+      <td>2199 B</td>
     </tr>
   
     <tr>
       <td>preflight-standard.json</td>
-      <td>23:37:47</td>
-      <td>26168 B</td>
+      <td>0:06:52</td>
+      <td>28623 B</td>
     </tr>
   
     <tr>
       <td>preflight-quick.json</td>
-      <td>23:37:45</td>
-      <td>25917 B</td>
+      <td>0:06:50</td>
+      <td>26023 B</td>
     </tr>
   </tbody>
       </table>
     </section>
   </main>
   <script>
-    const stopAllUrl = "http://127.0.0.1:54925/stop-all";
+    const stopAllUrl = "http://127.0.0.1:51503/stop-all";
     const stopButton = document.getElementById("stop-all-button");
     const stopStatus = document.getElementById("stop-all-status");
     if (stopButton) {

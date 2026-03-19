@@ -1,0 +1,7 @@
+1. Performance hypothesis: `event-fast-par` was doing a redundant host-side `resetAsync()` before the worker-specific `runBenchmarkCaseAsync()` / `runUntilSimTimeAsync()` paths that already reinitialize each partition. On `parallel-independent` workloads such as `parallel_benchmark`, that extra full init pass adds pure overhead without changing results.
+
+2. What changed: in [engine-fast-par-host.js](C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773932280355-17004/js/app/engine-fast-par-host.js#L654) I changed `runBenchmarkCaseAsync()` and `runUntilSimTimeAsync()` to call `_ensureRunner()` first, skip the extra reset for the independent-partition path, and explicitly zero `_lastSimTimeMs` before aggregating results. Fallback runner behavior and the non-independent parallel path still reset as before.
+
+3. Focused verification I ran: `node --check` on `js/app/engine-fast-par-host.js`, `js/app/engine-fast-par-worker.js`, and `js/app/engine-fast-par-partitioner.js`. I did not run benchmark or parity suites locally because this trimmed workspace only contains the three engine files, not the full sample / MCP / harness setup.
+
+4. Residual risk: the speedup should mainly affect `parallel-independent` runs; message-crossing parallel cases are intentionally untouched. Correctness should be preserved because each worker benchmark/long-run entry point still initializes from the same graph/partition/seed, but dt parity still needs the runner’s `quick` / `standard` verification to confirm end-to-end behavior.

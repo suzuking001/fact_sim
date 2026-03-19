@@ -260,6 +260,18 @@ async function ensureDir(dir) {
   await mkdir(dir, { recursive: true });
 }
 
+async function waitForFile(filePath, timeoutMs = 5000) {
+  const deadline = Date.now() + Math.max(250, timeoutMs);
+  while (Date.now() <= deadline) {
+    try {
+      await stat(filePath);
+      return true;
+    } catch (_error) {}
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return false;
+}
+
 async function writeJson(filePath, value) {
   await ensureDir(path.dirname(filePath));
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -678,6 +690,7 @@ async function runShellDelegate(command, env) {
 async function autoStartMonitor(statusHtmlFile) {
   if (process.env.FACT_SIM_DISABLE_AUTO_WATCH === "1") return { started: false, reason: "disabled" };
   if (process.env.FACT_SIM_AUTO_WATCH_STARTED === "1") return { started: false, reason: "already-started" };
+  await waitForFile(statusHtmlFile, 5000);
   const env = { ...process.env, FACT_SIM_AUTO_WATCH_STARTED: "1" };
   if (process.platform === "win32") {
     const ps = `Start-Process -FilePath '${statusHtmlFile.replace(/'/g, "''")}'`;
@@ -764,6 +777,7 @@ async function startControlServer() {
     server.once("error", reject);
     server.listen(0, "127.0.0.1", () => resolve());
   });
+  server.unref?.();
   const address = server.address();
   const port = address && typeof address === "object" ? address.port : 0;
   currentControlServer = {
@@ -773,6 +787,19 @@ async function startControlServer() {
     stopAllUrl: `http://127.0.0.1:${port}/stop-all`
   };
   return currentControlServer;
+}
+
+async function closeControlServer() {
+  if (!currentControlServer?.server) return;
+  const { server } = currentControlServer;
+  currentControlServer = null;
+  await new Promise((resolve) => {
+    try {
+      server.close(() => resolve());
+    } catch (_error) {
+      resolve();
+    }
+  });
 }
 
 async function revertForbiddenChanges(paths) {
@@ -975,16 +1002,38 @@ async function recentSessionFiles(sessionDir, limit = 10) {
 async function buildStatusHtml(session, sessionDir) {
   const status = buildStatusPayload(session);
   const latest = status.latestIteration || null;
-  const promptPath = resolveStatusArtifactPath(latest?.delegatePromptPath || latest?.optimizePromptPath, sessionDir);
-  const responsePath = resolveStatusArtifactPath(latest?.delegateMessagePath, sessionDir);
-  const stdoutPath = resolveStatusArtifactPath(latest?.delegateStdoutPath, sessionDir);
-  const stderrPath = resolveStatusArtifactPath(latest?.delegateStderrPath, sessionDir);
-  const promptPreview = await readPreviewText(promptPath, 18);
-  const responsePreview = await readPreviewText(responsePath, 18);
+  const iterationIndex = Number.isFinite(Number(latest?.index)) ? Number(latest.index) : null;
+  const runnerPromptPath = resolveStatusArtifactPath(latest?.optimizePromptPath, sessionDir);
+  const delegatePromptPath = latest?.delegatePromptPath
+    ? resolveStatusArtifactPath(latest.delegatePromptPath, sessionDir)
+    : (iterationIndex != null ? path.join(sessionDir, `codex-prompt.iteration-${iterationIndex}.md`) : "");
+  const responsePath = latest?.delegateMessagePath
+    ? resolveStatusArtifactPath(latest.delegateMessagePath, sessionDir)
+    : (iterationIndex != null ? path.join(sessionDir, `delegate-last-message.iteration-${iterationIndex}.txt`) : "");
+  const stdoutPath = latest?.delegateStdoutPath
+    ? resolveStatusArtifactPath(latest.delegateStdoutPath, sessionDir)
+    : (iterationIndex != null ? path.join(sessionDir, `delegate-stdout.iteration-${iterationIndex}.log`) : "");
+  const stderrPath = latest?.delegateStderrPath
+    ? resolveStatusArtifactPath(latest.delegateStderrPath, sessionDir)
+    : (iterationIndex != null ? path.join(sessionDir, `delegate-stderr.iteration-${iterationIndex}.log`) : "");
+  const patchDiffPath = latest?.patchDiffPath
+    ? resolveStatusArtifactPath(latest.patchDiffPath, sessionDir)
+    : (iterationIndex != null ? path.join(sessionDir, `patch.iteration-${iterationIndex}.diff`) : "");
+  const patchResultPath = latest?.patchResultPath
+    ? resolveStatusArtifactPath(latest.patchResultPath, sessionDir)
+    : (iterationIndex != null ? path.join(sessionDir, `patch-result.iteration-${iterationIndex}.json`) : "");
+  const runnerPromptPreview = await readPreviewText(runnerPromptPath, 36);
+  const delegatePromptPreview = await readPreviewText(delegatePromptPath, 36);
+  const responsePreview = await readPreviewText(responsePath, 36);
   const stdoutPreview = await readPreviewText(stdoutPath, 12);
   const stderrPreview = await readPreviewText(stderrPath, 12);
+  const patchDiffPreview = await readPreviewText(patchDiffPath, 60);
+  const patchResultPreview = await readPreviewText(patchResultPath, 36);
   const files = await recentSessionFiles(sessionDir, 12);
   const stopAllUrl = session.monitor?.stopAllUrl || "";
+  const changedPathsText = Array.isArray(latest?.changedPaths) && latest.changedPaths.length
+    ? latest.changedPaths.join("\n")
+    : "(not available yet)";
   const latestRows = latest ? `
     <tr><th>Index</th><td>${escapeHtml(latest.index)}</td></tr>
     <tr><th>Status</th><td>${escapeHtml(latest.status || "-")}</td></tr>
@@ -992,6 +1041,7 @@ async function buildStatusHtml(session, sessionDir) {
     <tr><th>After</th><td>${Number.isFinite(latest.afterSpeed) ? `${latest.afterSpeed.toFixed(3)}x` : "-"}</td></tr>
     <tr><th>Delta</th><td>${Number.isFinite(latest.deltaPct) ? `${latest.deltaPct.toFixed(2)}%` : "-"}</td></tr>
     <tr><th>Note</th><td>${escapeHtml(latest.note || "-")}</td></tr>
+    <tr><th>Changed Files</th><td><pre style="max-height:140px;">${escapeHtml(changedPathsText)}</pre></td></tr>
   ` : `<tr><td colspan="2">No iteration yet.</td></tr>`;
   const recentRows = (status.recentIterations || []).slice().reverse().map((iteration) => `
     <tr>
@@ -1032,8 +1082,9 @@ async function buildStatusHtml(session, sessionDir) {
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6ebf5; vertical-align: top; }
     th { width: 140px; color: #5d6b85; font-weight: 600; }
-    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: #0f1728; color: #e9eefc; border-radius: 12px; padding: 14px; max-height: 300px; overflow: auto; }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: #0f1728; color: #e9eefc; border-radius: 12px; padding: 14px; max-height: 420px; overflow: auto; }
     .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .path { font-size: 12px; color: #73819c; margin: 0 0 8px; word-break: break-all; }
     @media (max-width: 920px) { .row { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -1068,22 +1119,45 @@ async function buildStatusHtml(session, sessionDir) {
     </section>
     <section class="row">
       <div class="card">
-        <h2>AI Prompt Preview</h2>
-        <pre>${escapeHtml(promptPreview || "(not available yet)")}</pre>
+        <h2>Runner Prompt</h2>
+        <div class="path mono">${escapeHtml(toRelative(runnerPromptPath || ""))}</div>
+        <pre>${escapeHtml(runnerPromptPreview || "(not available yet)")}</pre>
       </div>
       <div class="card">
-        <h2>AI Response Preview</h2>
+        <h2>Delegate Prompt</h2>
+        <div class="path mono">${escapeHtml(delegatePromptPath ? toRelative(delegatePromptPath) : "")}</div>
+        <pre>${escapeHtml(delegatePromptPreview || "(not available yet)")}</pre>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>AI Response</h2>
+        <div class="path mono">${escapeHtml(responsePath ? toRelative(responsePath) : "")}</div>
         <pre>${escapeHtml(responsePreview || "(not available yet)")}</pre>
+      </div>
+      <div class="card">
+        <h2>Patch Diff Preview</h2>
+        <div class="path mono">${escapeHtml(patchDiffPath ? toRelative(patchDiffPath) : "")}</div>
+        <pre>${escapeHtml(patchDiffPreview || "(not available yet)")}</pre>
       </div>
     </section>
     <section class="row">
       <div class="card">
         <h2>Delegate Stdout</h2>
+        <div class="path mono">${escapeHtml(stdoutPath ? toRelative(stdoutPath) : "")}</div>
         <pre>${escapeHtml(stdoutPreview || "(not available yet)")}</pre>
       </div>
       <div class="card">
         <h2>Delegate Stderr</h2>
+        <div class="path mono">${escapeHtml(stderrPath ? toRelative(stderrPath) : "")}</div>
         <pre>${escapeHtml(stderrPreview || "(not available yet)")}</pre>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>Patch Result JSON</h2>
+        <div class="path mono">${escapeHtml(patchResultPath ? toRelative(patchResultPath) : "")}</div>
+        <pre>${escapeHtml(patchResultPreview || "(not available yet)")}</pre>
       </div>
     </section>
     <section class="card" style="margin-top:16px;">
@@ -1191,7 +1265,7 @@ async function main() {
         statusMarkdownFile: toRelative(statusMarkdownFile),
         statusHtmlFile: toRelative(statusHtmlFile),
         stopAllUrl: control.stopAllUrl,
-        autoStart: await autoStartMonitor(statusHtmlFile)
+        autoStart: null
       };
     } catch (error) {
       session.monitor = {
@@ -1206,6 +1280,10 @@ async function main() {
     }
   }
   await persistSession();
+  if (!cli.dryRun && session.monitor && !session.monitor.autoStart) {
+    session.monitor.autoStart = await autoStartMonitor(statusHtmlFile);
+    await persistSession();
+  }
 
   const runtime = new FactSimRuntime({ repoRoot, preferredPort: 8123, logger: () => {} });
   try {
@@ -1450,6 +1528,7 @@ async function main() {
     await persistSession();
   } finally {
     await runtime.close();
+    await closeControlServer();
   }
 }
 
