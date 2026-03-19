@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-19T14:33:36.109Z",
+  "finishedAt": "2026-03-19T14:33:44.111Z",
+  "status": "PASS",
+  "suite": "quick",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "simple",
+    "branch",
+    "shuttle_line5",
+    "carrier",
+    "pallet_station_demo",
+    "sample_line1",
+    "sample_line2",
+    "parallel_benchmark"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": "15min-event-fast-par-visible-preflight-quick"
+}

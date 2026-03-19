@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-19T14:37:46.261Z",
+  "finishedAt": "2026-03-19T14:37:47.752Z",
+  "status": "PASS",
+  "suite": "standard",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "parallel_benchmark"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": "stop-button-smoke-preflight-standard"
+}

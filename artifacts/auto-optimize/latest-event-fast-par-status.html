@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="3">
+  <title>FACT SIM Auto Optimize Status</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f5f7fb; color: #172033; }
+    main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 40px; }
+    h1, h2 { margin: 0 0 12px; }
+    .meta { color: #58657e; margin-bottom: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .card { background: #fff; border: 1px solid #d8e0ee; border-radius: 14px; padding: 14px 16px; box-shadow: 0 8px 20px rgba(32, 55, 98, 0.06); }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin: 0 0 18px; flex-wrap: wrap; }
+    button { appearance: none; border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; font-weight: 700; cursor: pointer; }
+    button.primary { background: #d94a4a; color: #fff; }
+    button.primary:disabled { background: #c4cad8; cursor: not-allowed; }
+    .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #73819c; }
+    .value { font-size: 24px; font-weight: 700; margin-top: 6px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6ebf5; vertical-align: top; }
+    th { width: 140px; color: #5d6b85; font-weight: 600; }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: #0f1728; color: #e9eefc; border-radius: 12px; padding: 14px; max-height: 300px; overflow: auto; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    @media (max-width: 920px) { .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>FACT SIM Auto Optimize</h1>
+    <div class="meta">Session: <span class="mono">2026-03-19T14-37-43-568Z__stop-button-smoke</span> | Updated: 2026/3/19 23:37:51</div>
+    <div class="toolbar">
+      <button id="stop-all-button" class="primary" >Stop All Auto-Optimize Jobs</button>
+      <div id="stop-all-status" class="meta">Use this button to stop all old and current auto-optimize jobs.</div>
+    </div>
+    <section class="grid">
+      <div class="card"><div class="label">Status</div><div class="value">WARN</div></div>
+      <div class="card"><div class="label">Target</div><div class="value">event-fast-par</div></div>
+      <div class="card"><div class="label">Improvement</div><div class="value">0.00%</div></div>
+      <div class="card"><div class="label">Initial</div><div class="value">6490.560x</div></div>
+      <div class="card"><div class="label">Best</div><div class="value">6490.560x</div></div>
+      <div class="card"><div class="label">Iterations</div><div class="value">1 / 1</div></div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>Latest Iteration</h2>
+        <table>
+    <tr><th>Index</th><td>1</td></tr>
+    <tr><th>Status</th><td>delegate-failed</td></tr>
+    <tr><th>Baseline</th><td>6490.560x</td></tr>
+    <tr><th>After</th><td>-</td></tr>
+    <tr><th>Delta</th><td>-</td></tr>
+    <tr><th>Note</th><td>Delegate exited with code 1.</td></tr>
+  </table>
+      </div>
+      <div class="card">
+        <h2>Recent Iterations</h2>
+        <table>
+          <thead><tr><th>#</th><th>Status</th><th>Delta</th><th>Note</th></tr></thead>
+          <tbody>
+    <tr>
+      <td>1</td>
+      <td>delegate-failed</td>
+      <td>-</td>
+      <td>Delegate exited with code 1.</td>
+    </tr>
+  </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>AI Prompt Preview</h2>
+        <pre>Use the existing AGENTS.md instructions in this repo.
+Optimize the target event-fast* engine for speed while preserving dt parity.
+Only edit allowed paths. Do not modify dt or event (heap).
+Do not edit engine-test or other test-only helpers as part of performance optimization.
+Target engine: event-fast-par
+Prompt mode: compact
+Scope mode: focused
+Allowed paths: js/app/engine-fast-par-worker.js, js/app/engine-fast-par-host.js, js/app/engine-fast-par-partitioner.js
+Recommended files: js/app/engine-fast-par-host.js, js/app/engine-fast-par-worker.js, js/app/engine-fast-par-partitioner.js
+Benchmark example: parallel_benchmark
+Target speed: 6490.560x
+Minimum improvement: 1%
+Verification after patch: suites=quick,standard, reruns=0, strictFinalParity=true
+Requirements:
+- Make one small, defensible performance improvement.
+- Preserve correctness relative to dt.
+- Prefer changes that improve headless benchmark speed for the target engine.
+- Do not broaden the patch beyond the allowed paths.</pre>
+      </div>
+      <div class="card">
+        <h2>AI Response Preview</h2>
+        <pre>(not available yet)</pre>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>Delegate Stdout</h2>
+        <pre>(not available yet)</pre>
+      </div>
+      <div class="card">
+        <h2>Delegate Stderr</h2>
+        <pre>(not available yet)</pre>
+      </div>
+    </section>
+    <section class="card" style="margin-top:16px;">
+      <h2>Recent Session Files</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Updated</th><th>Size</th></tr></thead>
+        <tbody>
+    <tr>
+      <td>summary.md</td>
+      <td>23:37:51</td>
+      <td>754 B</td>
+    </tr>
+  
+    <tr>
+      <td>session.json</td>
+      <td>23:37:51</td>
+      <td>3120 B</td>
+    </tr>
+  
+    <tr>
+      <td>optimize-prompt.iteration-1.md</td>
+      <td>23:37:50</td>
+      <td>1062 B</td>
+    </tr>
+  
+    <tr>
+      <td>optimization-request.json</td>
+      <td>23:37:50</td>
+      <td>1591 B</td>
+    </tr>
+  
+    <tr>
+      <td>optimization-request.iteration-1.json</td>
+      <td>23:37:50</td>
+      <td>1591 B</td>
+    </tr>
+  
+    <tr>
+      <td>benchmark-baseline.json</td>
+      <td>23:37:50</td>
+      <td>2140 B</td>
+    </tr>
+  
+    <tr>
+      <td>preflight-standard.json</td>
+      <td>23:37:47</td>
+      <td>26168 B</td>
+    </tr>
+  
+    <tr>
+      <td>preflight-quick.json</td>
+      <td>23:37:45</td>
+      <td>25917 B</td>
+    </tr>
+  </tbody>
+      </table>
+    </section>
+  </main>
+  <script>
+    const stopAllUrl = "http://127.0.0.1:54925/stop-all";
+    const stopButton = document.getElementById("stop-all-button");
+    const stopStatus = document.getElementById("stop-all-status");
+    if (stopButton) {
+      stopButton.addEventListener("click", async () => {
+        if (!stopAllUrl) {
+          stopStatus.textContent = "Stop endpoint unavailable. Run scripts/stop_auto_optimize.bat.";
+          return;
+        }
+        if (!window.confirm("Stop all running auto-optimize jobs?")) return;
+        stopButton.disabled = true;
+        stopStatus.textContent = "Stopping jobs...";
+        try {
+          const response = await fetch(stopAllUrl, { method: "POST", mode: "cors" });
+          if (!response.ok) throw new Error("stop request failed");
+          stopStatus.textContent = "Stop request sent. The page will stop updating shortly.";
+        } catch (error) {
+          stopButton.disabled = false;
+          stopStatus.textContent = "Failed to send stop request. Use scripts/stop_auto_optimize.bat.";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

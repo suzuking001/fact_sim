@@ -1,15 +1,18 @@
 import path from "node:path";
 import process from "node:process";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 
 import { FactSimRuntime } from "../dist/fact-sim-runtime.js";
 
-const cwd = process.cwd();
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(scriptDir, "..", "..");
+const mcpRoot = path.resolve(scriptDir, "..");
+const repoRoot = path.resolve(mcpRoot, "..");
+const cwd = mcpRoot;
 let currentSessionDir = null;
+let currentControlServer = null;
 
 function nowIso() {
   return new Date().toISOString();
@@ -672,28 +675,20 @@ async function runShellDelegate(command, env) {
   });
 }
 
-async function autoStartMonitor(statusFile) {
+async function autoStartMonitor(statusHtmlFile) {
   if (process.env.FACT_SIM_DISABLE_AUTO_WATCH === "1") return { started: false, reason: "disabled" };
   if (process.env.FACT_SIM_AUTO_WATCH_STARTED === "1") return { started: false, reason: "already-started" };
-  const watcherScript = path.join("scripts", "watch-auto-improve-status.mjs");
-  const watcherArgs = [watcherScript, "--status-file", statusFile];
   const env = { ...process.env, FACT_SIM_AUTO_WATCH_STARTED: "1" };
   if (process.platform === "win32") {
-    const commandLine = [
-      `"${process.execPath}"`,
-      `"${watcherScript}"`,
-      "--status-file",
-      `"${statusFile}"`
-    ].join(" ");
-    const child = spawn("cmd.exe", [
-      "/c",
-      "start",
-      "\"fact_sim auto improve monitor\"",
-      "cmd",
-      "/k",
-      commandLine
+    const ps = `Start-Process -FilePath '${statusHtmlFile.replace(/'/g, "''")}'`;
+    const child = spawn("powershell.exe", [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      ps
     ], {
-      cwd,
+      cwd: repoRoot,
       env,
       detached: true,
       stdio: "ignore",
@@ -701,17 +696,83 @@ async function autoStartMonitor(statusFile) {
       shell: false
     });
     child.unref();
-    return { started: true, mode: "windows-terminal" };
+    return { started: true, mode: "browser-dashboard" };
   }
-  const child = spawn(process.execPath, watcherArgs, {
-    cwd,
+  const opener = process.platform === "darwin" ? "open" : "xdg-open";
+  const child = spawn(opener, [statusHtmlFile], {
+    cwd: repoRoot,
     env,
     detached: true,
     stdio: "ignore",
     shell: false
   });
   child.unref();
-  return { started: true, mode: "detached" };
+  return { started: true, mode: "browser-dashboard" };
+}
+
+function spawnStopHelper() {
+  if (process.platform === "win32") {
+    const child = spawn("cmd.exe", ["/c", path.join(repoRoot, "scripts", "stop_auto_optimize.bat")], {
+      cwd: repoRoot,
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+      shell: false
+    });
+    child.unref();
+    return;
+  }
+  const child = spawn("sh", ["-lc", "pkill -f 'auto-improve.mjs|auto-optimize-event-fast.mjs|auto-patch-event-fast.mjs|watch-auto-improve-status.mjs|watch-auto-optimize-status.mjs' || true"], {
+    cwd: repoRoot,
+    detached: true,
+    stdio: "ignore",
+    shell: false
+  });
+  child.unref();
+}
+
+async function startControlServer() {
+  if (currentControlServer) return currentControlServer;
+  const server = createServer((req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+    if (req.method === "GET" && req.url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ ok: true, status: "running" }));
+      return;
+    }
+    if (req.method === "POST" && req.url === "/stop-all") {
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ ok: true, message: "Stopping all auto-optimize jobs." }));
+      setTimeout(() => {
+        try {
+          spawnStopHelper();
+        } catch (_error) {}
+      }, 250);
+      return;
+    }
+    res.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({ ok: false, error: "not-found" }));
+  });
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => resolve());
+  });
+  const address = server.address();
+  const port = address && typeof address === "object" ? address.port : 0;
+  currentControlServer = {
+    server,
+    port,
+    url: `http://127.0.0.1:${port}`,
+    stopAllUrl: `http://127.0.0.1:${port}/stop-all`
+  };
+  return currentControlServer;
 }
 
 async function revertForbiddenChanges(paths) {
@@ -743,6 +804,8 @@ function buildSummaryMarkdown(session) {
   if (Number.isFinite(session.bestTargetSpeed)) lines.push(`- Best target speed: \`${session.bestTargetSpeed.toFixed(3)}x\``);
   if (Number.isFinite(session.currentImprovementPct)) lines.push(`- Current improvement: \`${session.currentImprovementPct.toFixed(2)}%\``);
   if (session.monitor?.statusFile) lines.push(`- Status file: \`${session.monitor.statusFile}\``);
+  if (session.monitor?.statusHtmlFile) lines.push(`- Status dashboard: \`${session.monitor.statusHtmlFile}\``);
+  if (session.monitor?.stopAllUrl) lines.push(`- Stop endpoint: \`${session.monitor.stopAllUrl}\``);
   if (session.monitor?.autoStart?.started) lines.push(`- Monitor: \`auto-started (${session.monitor.autoStart.mode || "unknown"})\``);
   lines.push("");
   lines.push("## Iterations");
@@ -800,6 +863,8 @@ function buildStatusPayload(session) {
     promptMode: session.config?.promptMode || null,
     scopeMode: session.config?.scopeMode || null,
     statusFile: session.monitor?.statusFile || null,
+    statusHtmlFile: session.monitor?.statusHtmlFile || null,
+    stopAllUrl: session.monitor?.stopAllUrl || null,
     monitor: session.monitor || null,
     latestIteration: latest ? {
       index: latest.index,
@@ -833,6 +898,8 @@ function buildStatusMarkdown(session) {
   lines.push(`- Profile: \`${status.profile || "-"}\``);
   lines.push(`- Prompt / Scope: \`${status.promptMode || "-"} / ${status.scopeMode || "-"}\``);
   lines.push(`- Benchmark example: \`${status.benchmarkExample}\``);
+  if (status.statusHtmlFile) lines.push(`- Status dashboard: \`${status.statusHtmlFile}\``);
+  if (status.stopAllUrl) lines.push(`- Stop endpoint: \`${status.stopAllUrl}\``);
   lines.push(`- Elapsed: \`${status.elapsedHours.toFixed(3)} h\``);
   if (Number.isFinite(status.initialTargetSpeed)) lines.push(`- Initial speed: \`${status.initialTargetSpeed.toFixed(3)}x\``);
   if (Number.isFinite(status.bestTargetSpeed)) lines.push(`- Best speed: \`${status.bestTargetSpeed.toFixed(3)}x\``);
@@ -850,6 +917,209 @@ function buildStatusMarkdown(session) {
     if (status.latestIteration.patchDiffPath) lines.push(`- Patch diff: \`${status.latestIteration.patchDiffPath}\``);
   }
   return lines.join("\n");
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;");
+}
+
+function resolveStatusArtifactPath(filePath, sessionDir) {
+  if (!filePath) return "";
+  if (path.isAbsolute(filePath)) return filePath;
+  const normalized = String(filePath).replace(/\\/g, "/");
+  if (normalized.startsWith("artifacts/") || normalized.startsWith("tmp/")) {
+    return path.resolve(repoRoot, filePath);
+  }
+  return path.resolve(sessionDir, filePath);
+}
+
+async function readPreviewText(filePath, lineCount = 20) {
+  if (!filePath) return "";
+  try {
+    const text = await readFile(filePath, "utf8");
+    return String(text || "")
+      .replace(/^\uFEFF/, "")
+      .split(/\r?\n/)
+      .filter((line) => line.length > 0)
+      .slice(0, lineCount)
+      .join("\n");
+  } catch (_error) {
+    return "";
+  }
+}
+
+async function recentSessionFiles(sessionDir, limit = 10) {
+  try {
+    const entries = await readdir(sessionDir, { withFileTypes: true });
+    const files = [];
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      const fullPath = path.join(sessionDir, entry.name);
+      const info = await stat(fullPath);
+      files.push({
+        name: entry.name,
+        size: info.size,
+        mtimeMs: info.mtimeMs
+      });
+    }
+    return files.sort((a, b) => b.mtimeMs - a.mtimeMs).slice(0, limit);
+  } catch (_error) {
+    return [];
+  }
+}
+
+async function buildStatusHtml(session, sessionDir) {
+  const status = buildStatusPayload(session);
+  const latest = status.latestIteration || null;
+  const promptPath = resolveStatusArtifactPath(latest?.delegatePromptPath || latest?.optimizePromptPath, sessionDir);
+  const responsePath = resolveStatusArtifactPath(latest?.delegateMessagePath, sessionDir);
+  const stdoutPath = resolveStatusArtifactPath(latest?.delegateStdoutPath, sessionDir);
+  const stderrPath = resolveStatusArtifactPath(latest?.delegateStderrPath, sessionDir);
+  const promptPreview = await readPreviewText(promptPath, 18);
+  const responsePreview = await readPreviewText(responsePath, 18);
+  const stdoutPreview = await readPreviewText(stdoutPath, 12);
+  const stderrPreview = await readPreviewText(stderrPath, 12);
+  const files = await recentSessionFiles(sessionDir, 12);
+  const stopAllUrl = session.monitor?.stopAllUrl || "";
+  const latestRows = latest ? `
+    <tr><th>Index</th><td>${escapeHtml(latest.index)}</td></tr>
+    <tr><th>Status</th><td>${escapeHtml(latest.status || "-")}</td></tr>
+    <tr><th>Baseline</th><td>${Number.isFinite(latest.baselineSpeed) ? `${latest.baselineSpeed.toFixed(3)}x` : "-"}</td></tr>
+    <tr><th>After</th><td>${Number.isFinite(latest.afterSpeed) ? `${latest.afterSpeed.toFixed(3)}x` : "-"}</td></tr>
+    <tr><th>Delta</th><td>${Number.isFinite(latest.deltaPct) ? `${latest.deltaPct.toFixed(2)}%` : "-"}</td></tr>
+    <tr><th>Note</th><td>${escapeHtml(latest.note || "-")}</td></tr>
+  ` : `<tr><td colspan="2">No iteration yet.</td></tr>`;
+  const recentRows = (status.recentIterations || []).slice().reverse().map((iteration) => `
+    <tr>
+      <td>${escapeHtml(iteration.index)}</td>
+      <td>${escapeHtml(iteration.status || "-")}</td>
+      <td>${Number.isFinite(iteration.deltaPct) ? `${iteration.deltaPct.toFixed(2)}%` : "-"}</td>
+      <td>${escapeHtml(iteration.note || "-")}</td>
+    </tr>
+  `).join("");
+  const fileRows = files.map((file) => `
+    <tr>
+      <td>${escapeHtml(file.name)}</td>
+      <td>${new Date(file.mtimeMs).toLocaleTimeString("ja-JP", { hour12: false })}</td>
+      <td>${escapeHtml(file.size)} B</td>
+    </tr>
+  `).join("");
+  return `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="3">
+  <title>FACT SIM Auto Optimize Status</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f5f7fb; color: #172033; }
+    main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 40px; }
+    h1, h2 { margin: 0 0 12px; }
+    .meta { color: #58657e; margin-bottom: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .card { background: #fff; border: 1px solid #d8e0ee; border-radius: 14px; padding: 14px 16px; box-shadow: 0 8px 20px rgba(32, 55, 98, 0.06); }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin: 0 0 18px; flex-wrap: wrap; }
+    button { appearance: none; border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; font-weight: 700; cursor: pointer; }
+    button.primary { background: #d94a4a; color: #fff; }
+    button.primary:disabled { background: #c4cad8; cursor: not-allowed; }
+    .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #73819c; }
+    .value { font-size: 24px; font-weight: 700; margin-top: 6px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6ebf5; vertical-align: top; }
+    th { width: 140px; color: #5d6b85; font-weight: 600; }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: #0f1728; color: #e9eefc; border-radius: 12px; padding: 14px; max-height: 300px; overflow: auto; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    @media (max-width: 920px) { .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>FACT SIM Auto Optimize</h1>
+    <div class="meta">Session: <span class="mono">${escapeHtml(status.sessionId || "-")}</span> | Updated: ${escapeHtml(new Date().toLocaleString("ja-JP", { hour12: false }))}</div>
+    <div class="toolbar">
+      <button id="stop-all-button" class="primary" ${stopAllUrl ? "" : "disabled"}>Stop All Auto-Optimize Jobs</button>
+      <div id="stop-all-status" class="meta">${escapeHtml(stopAllUrl ? "Use this button to stop all old and current auto-optimize jobs." : "Stop endpoint unavailable. Use scripts/stop_auto_optimize.bat.")}</div>
+    </div>
+    <section class="grid">
+      <div class="card"><div class="label">Status</div><div class="value">${escapeHtml(status.status || "-")}</div></div>
+      <div class="card"><div class="label">Target</div><div class="value">${escapeHtml(status.targetEngine || "-")}</div></div>
+      <div class="card"><div class="label">Improvement</div><div class="value">${Number.isFinite(status.currentImprovementPct) ? `${status.currentImprovementPct.toFixed(2)}%` : "-"}</div></div>
+      <div class="card"><div class="label">Initial</div><div class="value">${Number.isFinite(status.initialTargetSpeed) ? `${status.initialTargetSpeed.toFixed(3)}x` : "-"}</div></div>
+      <div class="card"><div class="label">Best</div><div class="value">${Number.isFinite(status.bestTargetSpeed) ? `${status.bestTargetSpeed.toFixed(3)}x` : "-"}</div></div>
+      <div class="card"><div class="label">Iterations</div><div class="value">${escapeHtml(status.iterationCount)} / ${escapeHtml(status.maxIterations)}</div></div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>Latest Iteration</h2>
+        <table>${latestRows}</table>
+      </div>
+      <div class="card">
+        <h2>Recent Iterations</h2>
+        <table>
+          <thead><tr><th>#</th><th>Status</th><th>Delta</th><th>Note</th></tr></thead>
+          <tbody>${recentRows || '<tr><td colspan="4">No iterations yet.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>AI Prompt Preview</h2>
+        <pre>${escapeHtml(promptPreview || "(not available yet)")}</pre>
+      </div>
+      <div class="card">
+        <h2>AI Response Preview</h2>
+        <pre>${escapeHtml(responsePreview || "(not available yet)")}</pre>
+      </div>
+    </section>
+    <section class="row">
+      <div class="card">
+        <h2>Delegate Stdout</h2>
+        <pre>${escapeHtml(stdoutPreview || "(not available yet)")}</pre>
+      </div>
+      <div class="card">
+        <h2>Delegate Stderr</h2>
+        <pre>${escapeHtml(stderrPreview || "(not available yet)")}</pre>
+      </div>
+    </section>
+    <section class="card" style="margin-top:16px;">
+      <h2>Recent Session Files</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Updated</th><th>Size</th></tr></thead>
+        <tbody>${fileRows || '<tr><td colspan="3">No files yet.</td></tr>'}</tbody>
+      </table>
+    </section>
+  </main>
+  <script>
+    const stopAllUrl = ${JSON.stringify(stopAllUrl)};
+    const stopButton = document.getElementById("stop-all-button");
+    const stopStatus = document.getElementById("stop-all-status");
+    if (stopButton) {
+      stopButton.addEventListener("click", async () => {
+        if (!stopAllUrl) {
+          stopStatus.textContent = "Stop endpoint unavailable. Run scripts/stop_auto_optimize.bat.";
+          return;
+        }
+        if (!window.confirm("Stop all running auto-optimize jobs?")) return;
+        stopButton.disabled = true;
+        stopStatus.textContent = "Stopping jobs...";
+        try {
+          const response = await fetch(stopAllUrl, { method: "POST", mode: "cors" });
+          if (!response.ok) throw new Error("stop request failed");
+          stopStatus.textContent = "Stop request sent. The page will stop updating shortly.";
+        } catch (error) {
+          stopButton.disabled = false;
+          stopStatus.textContent = "Failed to send stop request. Use scripts/stop_auto_optimize.bat.";
+        }
+      });
+    }
+  </script>
+</body>
+</html>`;
 }
 
 async function main() {
@@ -905,23 +1175,29 @@ async function main() {
     ? (path.isAbsolute(cli.statusFile) ? cli.statusFile : path.resolve(repoRoot, cli.statusFile))
     : path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-par-status.json");
   const statusMarkdownFile = statusFile.replace(/\.json$/i, ".md");
+  const statusHtmlFile = statusFile.replace(/\.json$/i, ".html");
   const persistSession = async () => {
     await writeJson(path.join(sessionDir, "session.json"), session);
     await writeText(path.join(sessionDir, "summary.md"), buildSummaryMarkdown(session));
     await writeJson(statusFile, buildStatusPayload(session));
     await writeText(statusMarkdownFile, buildStatusMarkdown(session));
+    await writeText(statusHtmlFile, await buildStatusHtml(session, sessionDir));
   };
   if (!cli.dryRun) {
     try {
+      const control = await startControlServer();
       session.monitor = {
         statusFile: toRelative(statusFile),
         statusMarkdownFile: toRelative(statusMarkdownFile),
-        autoStart: await autoStartMonitor(statusFile)
+        statusHtmlFile: toRelative(statusHtmlFile),
+        stopAllUrl: control.stopAllUrl,
+        autoStart: await autoStartMonitor(statusHtmlFile)
       };
     } catch (error) {
       session.monitor = {
         statusFile: toRelative(statusFile),
         statusMarkdownFile: toRelative(statusMarkdownFile),
+        statusHtmlFile: toRelative(statusHtmlFile),
         autoStart: {
           started: false,
           reason: error instanceof Error ? error.message : String(error)

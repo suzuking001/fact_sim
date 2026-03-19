@@ -1,0 +1,94 @@
+{
+  "wallMs": 200,
+  "realStepMs": 16,
+  "results": [
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 200.20000004768372,
+      "simMs": 570100,
+      "loops": 35632,
+      "simSec": 570.1,
+      "speed": 2847.652346974093
+    },
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 202.19999992847443,
+      "simMs": 302400,
+      "loops": 18900,
+      "simSec": 302.4,
+      "speed": 1495.548961953363
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 201.19999992847443,
+      "simMs": 709008,
+      "loops": 44313,
+      "simSec": 709.008,
+      "speed": 3523.8966215310575
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 200.5,
+      "simMs": 451456,
+      "loops": 28216,
+      "simSec": 451.456,
+      "speed": 2251.650872817955
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 200.10000002384186,
+      "simMs": 866016,
+      "loops": 54126,
+      "simSec": 866.016,
+      "speed": 4327.916041463341
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 202.60000002384186,
+      "simMs": 587120,
+      "loops": 36695,
+      "simSec": 587.12,
+      "speed": 2897.9269493134652
+    },
+    {
+      "mode": "event-fast-worker",
+      "modeLabel": "event-fast-worker",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 200,
+      "simMs": 1726576,
+      "loops": 107911,
+      "simSec": 1726.576,
+      "speed": 8632.88
+    },
+    {
+      "mode": "event-fast-par",
+      "modeLabel": "event-fast-par (multi worker)",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 200,
+      "simMs": 1837248,
+      "loops": 231447,
+      "simSec": 1837.248,
+      "speed": 9186.24
+    }
+  ]
+}

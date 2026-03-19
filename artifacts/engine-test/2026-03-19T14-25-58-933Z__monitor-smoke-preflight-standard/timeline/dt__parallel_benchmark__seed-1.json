@@ -1,0 +1,143 @@
+{
+  "quantMs": 250,
+  "rowCount": 16,
+  "activeRowCount": 8,
+  "rows": [
+    {
+      "key": "2",
+      "label": "Equip 1A #2",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "3",
+      "label": "Equip 1B #3",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "6",
+      "label": "Equip 2A #6",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "7",
+      "label": "Equip 2B #7",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "10",
+      "label": "Equip 3A #10",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "11",
+      "label": "Equip 3B #11",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "14",
+      "label": "Equip 4A #14",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "15",
+      "label": "Equip 4B #15",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "18",
+      "label": "Equip 5A #18",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "19",
+      "label": "Equip 5B #19",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "22",
+      "label": "Equip 6A #22",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "23",
+      "label": "Equip 6B #23",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "26",
+      "label": "Equip 7A #26",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "27",
+      "label": "Equip 7B #27",
+      "meaningful": false,
+      "signature": []
+    },
+    {
+      "key": "30",
+      "label": "Equip 8A #30",
+      "meaningful": true,
+      "signature": [
+        {
+          "state": "process",
+          "durationBins": 8
+        }
+      ]
+    },
+    {
+      "key": "31",
+      "label": "Equip 8B #31",
+      "meaningful": false,
+      "signature": []
+    }
+  ]
+}

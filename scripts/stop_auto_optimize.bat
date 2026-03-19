@@ -8,7 +8,7 @@ echo Root: %CD%
 echo.
 
 powershell -NoProfile -Command ^
-  "$patterns = @('auto-optimize-event-fast.mjs','auto-patch-event-fast.mjs','watch-auto-optimize-status.mjs','watch-auto-improve-status.mjs');" ^
+  "$patterns = @('auto-improve.mjs','auto-optimize-event-fast.mjs','auto-patch-event-fast.mjs','auto-fix-runner.mjs','watch-auto-optimize-status.mjs','watch-auto-improve-status.mjs');" ^
   "$found = $false;" ^
   "$procs = Get-CimInstance Win32_Process;" ^
   "foreach($pattern in $patterns) {" ^

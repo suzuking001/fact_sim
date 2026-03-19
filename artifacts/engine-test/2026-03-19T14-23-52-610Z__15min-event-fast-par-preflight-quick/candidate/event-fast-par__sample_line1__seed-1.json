@@ -1,0 +1,383 @@
+{
+  "engine": "event-fast-par",
+  "seed": 1,
+  "scenario": "sample_line1",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 10112,
+    "wallMs": 93.9,
+    "loops": 632,
+    "nodeCount": 58,
+    "linkCount": 59,
+    "sinkCount": 3,
+    "totalCompleted": 0,
+    "liveProbeSimTimeMs": 0,
+    "liveProbeWallMs": 0,
+    "liveProbeLoops": 0,
+    "liveTimelineEntries": 0,
+    "liveTimelineSegments": 0
+  },
+  "liveFlowProbe": null,
+  "liveStateProbe": null,
+  "liveTimelineSignature": null,
+  "sinks": [
+    {
+      "id": 45,
+      "title": "Sink",
+      "completedCount": 0
+    },
+    {
+      "id": 55,
+      "title": "Sink",
+      "completedCount": 0
+    },
+    {
+      "id": 66,
+      "title": "Sink",
+      "completedCount": 0
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 47,
+    "rows": [
+      {
+        "key": "2:EquipmentNode",
+        "nodeId": 2,
+        "label": "EquipmentNode",
+        "state": "WAIT"
+      },
+      {
+        "key": "3:EquipmentNode",
+        "nodeId": 3,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "4:EquipmentNode",
+        "nodeId": 4,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "5:EquipmentNode",
+        "nodeId": 5,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "6:EquipmentNode",
+        "nodeId": 6,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "8:EquipmentNode",
+        "nodeId": 8,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "9:EquipmentNode",
+        "nodeId": 9,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "10:EquipmentNode",
+        "nodeId": 10,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "13:EquipmentNode",
+        "nodeId": 13,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "14:EquipmentNode",
+        "nodeId": 14,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "15:EquipmentNode",
+        "nodeId": 15,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "17:Merge",
+        "nodeId": 17,
+        "label": "Merge",
+        "state": "DOWN"
+      },
+      {
+        "key": "23:EquipmentNode",
+        "nodeId": 23,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "24:EquipmentNode",
+        "nodeId": 24,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "25:EquipmentNode",
+        "nodeId": 25,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "26:Merge",
+        "nodeId": 26,
+        "label": "Merge",
+        "state": "DOWN"
+      },
+      {
+        "key": "27:EquipmentNode",
+        "nodeId": 27,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "28:EquipmentNode",
+        "nodeId": 28,
+        "label": "EquipmentNode",
+        "state": "DOWN"
+      },
+      {
+        "key": "30:EquipmentNode",
+        "nodeId": 30,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "31:EquipmentNode",
+        "nodeId": 31,
+        "label": "EquipmentNode",
+        "state": "PROCESS"
+      },
+      {
+        "key": "32:Merge",
+        "nodeId": 32,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "33:EquipmentNode",
+        "nodeId": 33,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "34:EquipmentNode",
+        "nodeId": 34,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "35:EquipmentNode",
+        "nodeId": 35,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "36:Merge",
+        "nodeId": 36,
+        "label": "Merge",
+        "state": "IDLE"
+      },
+      {
+        "key": "37:EquipmentNode",
+        "nodeId": 37,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "38:EquipmentNode",
+        "nodeId": 38,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "39:EquipmentNode",
+        "nodeId": 39,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "40:EquipmentNode",
+        "nodeId": 40,
+        "label": "EquipmentNode",
+        "state": "IDLE"
+      },
+      {
+        "key": "42:Merge",
+        "nodeId": 42,
+        "label": "Merge",
+        "state": "PROCESS"
+      },
+      {
+        "key": "44:EquipmentNode",
+        "nodeId": 44,
+        "label": "EquipmentNode",
+        "state": "WAIT"
+      },
+      {
+        "key": "46:AGV Route",
+        "nodeId": 46,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "47:AGV Route",
+        "nodeId": 47,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "48:AGV Route",
+        "nodeId": 48,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "49:AGV Route",
+        "nodeId": 49,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "50:AGV Route",
+        "nodeId": 50,
+        "label": "AGV Route",
+        "state": "workIn_process_1|PROCESS"
+      },
+      {
+        "key": "51:AGV Route",
+        "nodeId": 51,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "52:Equipment",
+        "nodeId": 52,
+        "label": "Equipment",
+        "state": "DOWN"
+      },
+      {
+        "key": "53:Equipment",
+        "nodeId": 53,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "56:AGV Route",
+        "nodeId": 56,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "57:AGV Route",
+        "nodeId": 57,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "59:AGV Route",
+        "nodeId": 59,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "60:AGV Route",
+        "nodeId": 60,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "61:AGV Route",
+        "nodeId": 61,
+        "label": "AGV Route",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "62:AGV Route",
+        "nodeId": 62,
+        "label": "AGV Route",
+        "state": "workIn_process_1|PROCESS"
+      },
+      {
+        "key": "63:Equipment",
+        "nodeId": 63,
+        "label": "Equipment",
+        "state": "IDLE"
+      },
+      {
+        "key": "64:Equipment",
+        "nodeId": 64,
+        "label": "Equipment",
+        "state": "DOWN"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 11,
+    "payloadCount": 11,
+    "observedLinkKeys": [
+      "14:workOut->15:workIn:2:B",
+      "17:workOut->30:workIn:1:A",
+      "24:workOut->23:workIn:2:B",
+      "26:workOut->31:workIn:1:A",
+      "27:workOut->17:workIn2:1:A",
+      "28:workOut->26:workIn2:1:A",
+      "4:workOut->3:workIn:2:B",
+      "52:workOut->50:workIn:1:A",
+      "5:workOut->6:workIn:1:A",
+      "64:workOut->62:workIn:1:A",
+      "6:workOut->42:workIn1:1:A"
+    ],
+    "observedWorkRefs": [
+      "1:A",
+      "2:B"
+    ]
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "45:Sink",
+      "id": 45,
+      "title": "Sink",
+      "completedCount": 0
+    },
+    {
+      "key": "55:Sink",
+      "id": 55,
+      "title": "Sink",
+      "completedCount": 0
+    },
+    {
+      "key": "66:Sink",
+      "id": 66,
+      "title": "Sink",
+      "completedCount": 0
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": []
+  },
+  "attempts": 1,
+  "maxAttempts": 1,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}

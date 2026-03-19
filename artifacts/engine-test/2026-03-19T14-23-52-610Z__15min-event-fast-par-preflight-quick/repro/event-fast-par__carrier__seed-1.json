@@ -1,0 +1,22 @@
+{
+  "action": "run",
+  "suite": "quick",
+  "engines": [
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "carrier"
+  ],
+  "seeds": [
+    1
+  ],
+  "strictFinalParity": true,
+  "targetSimMs": 10000,
+  "maxWallMs": 1800,
+  "realStepMs": 16,
+  "maxLoops": 25000,
+  "saveArtifacts": true,
+  "artifactLabel": "repro-event-fast-par__carrier__seed-1"
+}
