@@ -1,0 +1,14 @@
+﻿{
+    "promptPath":  "codex-prompt.iteration-1.md",
+    "delegateStdoutPath":  null,
+    "status":  "delegate-failed",
+    "delegateMessagePath":  "delegate-last-message.iteration-1.txt",
+    "delegateStderrPath":  null,
+    "notes":  [
+                  "mock delegate response"
+              ],
+    "patchDiffPath":  null,
+    "changedPaths":  [
+
+                     ]
+}

@@ -2,9 +2,11 @@ import path from "node:path";
 import process from "node:process";
 import { readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const cwd = process.cwd();
-const repoRoot = path.resolve(cwd, "..");
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const mcpRoot = path.resolve(scriptDir, "..");
+const repoRoot = path.resolve(mcpRoot, "..");
 
 function parseList(value) {
   return String(value ?? "")
@@ -37,6 +39,8 @@ function parseArgs(argv) {
     maxIterations: null,
     minRuntimeHours: null,
     maxNoImprovementIterations: null,
+    promptMode: "",
+    scopeMode: "",
     statusFile: "",
     patchCommand: "",
     includeCurrentGraph: null,
@@ -100,6 +104,12 @@ function parseArgs(argv) {
         break;
       case "max-no-improvement-iterations":
         out.maxNoImprovementIterations = Math.max(1, Math.floor(Number(takeValue()) || 0));
+        break;
+      case "prompt-mode":
+        out.promptMode = String(takeValue() || "").trim().toLowerCase();
+        break;
+      case "scope-mode":
+        out.scopeMode = String(takeValue() || "").trim().toLowerCase();
         break;
       case "status-file":
         out.statusFile = String(takeValue() || "").trim();
@@ -180,24 +190,43 @@ function buildOptimizeArgs(job, cli) {
   const args = [path.join("scripts", "auto-optimize-event-fast.mjs")];
 
   const profile = pick(cli.profile, defaults.profile, "nightly");
+  const profileChanged = Boolean(cli.profile) && String(cli.profile).trim() !== String(defaults.profile || "").trim();
   const label = cli.label || job.key || job.name || "";
   const targetEngine = pick(cli.targetEngine, target.engine, "event-fast-par");
-  const optimizeEngines = pick(cli.optimizeEngines, defaults.optimizeEngines, [targetEngine]);
-  const engines = pick(cli.engines, defaults.engines, ["dt", "event", targetEngine]);
+  const optimizeEngines = cli.optimizeEngines !== null
+    ? cli.optimizeEngines
+    : (profileChanged ? null : (defaults.optimizeEngines ?? [targetEngine]));
+  const engines = cli.engines !== null
+    ? cli.engines
+    : (profileChanged ? null : (defaults.engines ?? ["dt", "event", targetEngine]));
   const examples = cli.examples !== null ? cli.examples : defaults.examples;
   const seeds = pick(cli.seeds, defaults.seeds, [1]);
   const benchmarkExample = pick(cli.benchmarkExample, runtime.benchmarkExample, "");
-  const benchmarkWallMs = pick(cli.benchmarkWallMs, runtime.benchmarkWallMs, 2000);
-  const delegateTimeoutMs = pick(cli.delegateTimeoutMs, runtime.delegateTimeoutMs, 900000);
+  const benchmarkWallMs = cli.benchmarkWallMs !== null
+    ? cli.benchmarkWallMs
+    : (profileChanged ? null : (runtime.benchmarkWallMs ?? 2000));
+  const delegateTimeoutMs = cli.delegateTimeoutMs !== null
+    ? cli.delegateTimeoutMs
+    : (profileChanged ? null : (runtime.delegateTimeoutMs ?? 900000));
   const minImprovementPct = pick(cli.minImprovementPct, runtime.minImprovementPct, 1);
   const maxIterations = pick(cli.maxIterations, runtime.maxIterations, 9999);
   const minRuntimeHours = pick(cli.minRuntimeHours, runtime.minRuntimeHours, 0);
-  const maxNoImprovementIterations = pick(cli.maxNoImprovementIterations, runtime.maxNoImprovementIterations, 60);
+  const maxNoImprovementIterations = cli.maxNoImprovementIterations !== null
+    ? cli.maxNoImprovementIterations
+    : (profileChanged ? null : (runtime.maxNoImprovementIterations ?? 60));
+  const promptMode = pick(cli.promptMode, runtime.promptMode, "");
+  const scopeMode = pick(cli.scopeMode, runtime.scopeMode, "");
   const statusFile = pick(cli.statusFile, job.statusFile, "");
   const includeCurrentGraph = pick(cli.includeCurrentGraph, defaults.includeCurrentGraph, false);
-  const strict = pick(cli.strict, defaults.strict, true);
-  const reruns = pick(cli.reruns, defaults.reruns, 2);
-  const stopOnFirstFailure = pick(cli.stopOnFirstFailure, defaults.stopOnFirstFailure, true);
+  const strict = cli.strict !== null
+    ? cli.strict
+    : (profileChanged ? null : (defaults.strict ?? true));
+  const reruns = cli.reruns !== null
+    ? cli.reruns
+    : (profileChanged ? null : (defaults.reruns ?? 2));
+  const stopOnFirstFailure = cli.stopOnFirstFailure !== null
+    ? cli.stopOnFirstFailure
+    : (profileChanged ? null : (defaults.stopOnFirstFailure ?? true));
 
   pushValueArg(args, "--profile", profile);
   pushValueArg(args, "--label", label);
@@ -213,6 +242,8 @@ function buildOptimizeArgs(job, cli) {
   pushValueArg(args, "--max-iterations", maxIterations);
   pushValueArg(args, "--min-runtime-hours", minRuntimeHours);
   pushValueArg(args, "--max-no-improvement-iterations", maxNoImprovementIterations);
+  pushValueArg(args, "--prompt-mode", promptMode);
+  pushValueArg(args, "--scope-mode", scopeMode);
   pushValueArg(args, "--status-file", statusFile);
   pushValueArg(args, "--patch-command", cli.patchCommand || job.delegate?.command || "");
   pushValueArg(args, "--reruns", reruns);
@@ -234,7 +265,7 @@ async function run() {
 
   const args = buildOptimizeArgs(job, cli);
   const child = spawn(process.execPath, args, {
-    cwd,
+    cwd: mcpRoot,
     env: process.env,
     stdio: "inherit",
     shell: false

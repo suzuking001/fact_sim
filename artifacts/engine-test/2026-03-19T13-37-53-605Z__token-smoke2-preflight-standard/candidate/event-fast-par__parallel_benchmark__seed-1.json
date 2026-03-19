@@ -1,0 +1,248 @@
+{
+  "engine": "event-fast-par",
+  "seed": 1,
+  "scenario": "parallel_benchmark",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 30112,
+    "wallMs": 273.9,
+    "loops": 3764,
+    "nodeCount": 32,
+    "linkCount": 24,
+    "sinkCount": 8,
+    "totalCompleted": 24,
+    "liveProbeSimTimeMs": 0,
+    "liveProbeWallMs": 0,
+    "liveProbeLoops": 0,
+    "liveTimelineEntries": 0,
+    "liveTimelineSegments": 0
+  },
+  "liveFlowProbe": null,
+  "liveStateProbe": null,
+  "liveTimelineSignature": null,
+  "sinks": [
+    {
+      "id": 4,
+      "title": "Sink 1",
+      "completedCount": 3
+    },
+    {
+      "id": 12,
+      "title": "Sink 3",
+      "completedCount": 3
+    },
+    {
+      "id": 20,
+      "title": "Sink 5",
+      "completedCount": 3
+    },
+    {
+      "id": 28,
+      "title": "Sink 7",
+      "completedCount": 3
+    },
+    {
+      "id": 8,
+      "title": "Sink 2",
+      "completedCount": 3
+    },
+    {
+      "id": 16,
+      "title": "Sink 4",
+      "completedCount": 3
+    },
+    {
+      "id": 24,
+      "title": "Sink 6",
+      "completedCount": 3
+    },
+    {
+      "id": 32,
+      "title": "Sink 8",
+      "completedCount": 3
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 16,
+    "rows": [
+      {
+        "key": "2:Equip 1A",
+        "nodeId": 2,
+        "label": "Equip 1A",
+        "state": "DOWN"
+      },
+      {
+        "key": "3:Equip 1B",
+        "nodeId": 3,
+        "label": "Equip 1B",
+        "state": "PROCESS"
+      },
+      {
+        "key": "6:Equip 2A",
+        "nodeId": 6,
+        "label": "Equip 2A",
+        "state": "DOWN"
+      },
+      {
+        "key": "7:Equip 2B",
+        "nodeId": 7,
+        "label": "Equip 2B",
+        "state": "PROCESS"
+      },
+      {
+        "key": "10:Equip 3A",
+        "nodeId": 10,
+        "label": "Equip 3A",
+        "state": "DOWN"
+      },
+      {
+        "key": "11:Equip 3B",
+        "nodeId": 11,
+        "label": "Equip 3B",
+        "state": "PROCESS"
+      },
+      {
+        "key": "14:Equip 4A",
+        "nodeId": 14,
+        "label": "Equip 4A",
+        "state": "DOWN"
+      },
+      {
+        "key": "15:Equip 4B",
+        "nodeId": 15,
+        "label": "Equip 4B",
+        "state": "PROCESS"
+      },
+      {
+        "key": "18:Equip 5A",
+        "nodeId": 18,
+        "label": "Equip 5A",
+        "state": "DOWN"
+      },
+      {
+        "key": "19:Equip 5B",
+        "nodeId": 19,
+        "label": "Equip 5B",
+        "state": "PROCESS"
+      },
+      {
+        "key": "22:Equip 6A",
+        "nodeId": 22,
+        "label": "Equip 6A",
+        "state": "DOWN"
+      },
+      {
+        "key": "23:Equip 6B",
+        "nodeId": 23,
+        "label": "Equip 6B",
+        "state": "PROCESS"
+      },
+      {
+        "key": "26:Equip 7A",
+        "nodeId": 26,
+        "label": "Equip 7A",
+        "state": "DOWN"
+      },
+      {
+        "key": "27:Equip 7B",
+        "nodeId": 27,
+        "label": "Equip 7B",
+        "state": "PROCESS"
+      },
+      {
+        "key": "30:Equip 8A",
+        "nodeId": 30,
+        "label": "Equip 8A",
+        "state": "DOWN"
+      },
+      {
+        "key": "31:Equip 8B",
+        "nodeId": 31,
+        "label": "Equip 8B",
+        "state": "PROCESS"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 8,
+    "payloadCount": 8,
+    "observedLinkKeys": [
+      "10:workOut->11:workIn:4:A",
+      "14:workOut->15:workIn:4:A",
+      "18:workOut->19:workIn:4:A",
+      "22:workOut->23:workIn:4:A",
+      "26:workOut->27:workIn:4:A",
+      "2:workOut->3:workIn:4:A",
+      "30:workOut->31:workIn:4:A",
+      "6:workOut->7:workIn:4:A"
+    ],
+    "observedWorkRefs": [
+      "4:A"
+    ]
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "4:Sink 1",
+      "id": 4,
+      "title": "Sink 1",
+      "completedCount": 3
+    },
+    {
+      "key": "8:Sink 2",
+      "id": 8,
+      "title": "Sink 2",
+      "completedCount": 3
+    },
+    {
+      "key": "12:Sink 3",
+      "id": 12,
+      "title": "Sink 3",
+      "completedCount": 3
+    },
+    {
+      "key": "16:Sink 4",
+      "id": 16,
+      "title": "Sink 4",
+      "completedCount": 3
+    },
+    {
+      "key": "20:Sink 5",
+      "id": 20,
+      "title": "Sink 5",
+      "completedCount": 3
+    },
+    {
+      "key": "24:Sink 6",
+      "id": 24,
+      "title": "Sink 6",
+      "completedCount": 3
+    },
+    {
+      "key": "28:Sink 7",
+      "id": 28,
+      "title": "Sink 7",
+      "completedCount": 3
+    },
+    {
+      "key": "32:Sink 8",
+      "id": 32,
+      "title": "Sink 8",
+      "completedCount": 3
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": []
+  },
+  "attempts": 1,
+  "maxAttempts": 3,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}

@@ -2,11 +2,13 @@ import path from "node:path";
 import process from "node:process";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 import { FactSimRuntime } from "../dist/fact-sim-runtime.js";
 
 const cwd = process.cwd();
-const repoRoot = path.resolve(cwd, "..");
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(scriptDir, "..", "..");
 let currentSessionDir = null;
 
 function nowIso() {
@@ -62,10 +64,13 @@ function parseArgs(argv) {
     maxIterations: 999,
     minRuntimeHours: 0,
     maxNoImprovementIterations: 24,
+    promptMode: "",
+    scopeMode: "",
     statusFile: "",
     patchCommand: "",
     dryRun: false,
-    allowDirty: false
+    allowDirty: false,
+    _explicit: new Set()
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -78,73 +83,104 @@ function parseArgs(argv) {
     };
     switch (key) {
       case "label":
+        out._explicit.add("label");
         out.label = String(takeValue() || "").trim();
         break;
       case "profile":
+        out._explicit.add("profile");
         out.profile = String(takeValue() || out.profile).trim() || out.profile;
         break;
       case "engines":
+        out._explicit.add("engines");
         out.engines = parseList(takeValue());
         break;
       case "optimize-engines":
+        out._explicit.add("optimizeEngines");
         out.optimizeEngines = parseList(takeValue());
         break;
       case "target-engine":
+        out._explicit.add("targetEngine");
         out.targetEngine = String(takeValue() || out.targetEngine).trim() || out.targetEngine;
         break;
       case "examples":
+        out._explicit.add("examples");
         out.examples = parseList(takeValue());
         break;
       case "benchmark-example":
+        out._explicit.add("benchmarkExample");
         out.benchmarkExample = String(takeValue() || "").trim();
         break;
       case "seeds":
+        out._explicit.add("seeds");
         out.seeds = parseIntList(takeValue());
         break;
       case "benchmark-wall-ms":
+        out._explicit.add("benchmarkWallMs");
         out.benchmarkWallMs = Math.max(100, Number(takeValue()) || out.benchmarkWallMs);
         break;
       case "delegate-timeout-ms":
+        out._explicit.add("delegateTimeoutMs");
         out.delegateTimeoutMs = Math.max(30000, Number(takeValue()) || out.delegateTimeoutMs);
         break;
       case "min-improvement-pct":
+        out._explicit.add("minImprovementPct");
         out.minImprovementPct = Number(takeValue());
         if (!Number.isFinite(out.minImprovementPct)) out.minImprovementPct = 1;
         break;
       case "max-iterations":
+        out._explicit.add("maxIterations");
         out.maxIterations = Math.max(1, Math.floor(Number(takeValue()) || out.maxIterations));
         break;
       case "min-runtime-hours":
+        out._explicit.add("minRuntimeHours");
         out.minRuntimeHours = Math.max(0, Number(takeValue()) || 0);
         break;
       case "max-no-improvement-iterations":
+        out._explicit.add("maxNoImprovementIterations");
         out.maxNoImprovementIterations = Math.max(1, Math.floor(Number(takeValue()) || out.maxNoImprovementIterations));
         break;
+      case "prompt-mode":
+        out._explicit.add("promptMode");
+        out.promptMode = String(takeValue() || "").trim().toLowerCase();
+        break;
+      case "scope-mode":
+        out._explicit.add("scopeMode");
+        out.scopeMode = String(takeValue() || "").trim().toLowerCase();
+        break;
       case "status-file":
+        out._explicit.add("statusFile");
         out.statusFile = String(takeValue() || "").trim();
         break;
       case "patch-command":
+        out._explicit.add("patchCommand");
         out.patchCommand = String(takeValue() || "").trim();
         break;
       case "reruns":
+        out._explicit.add("reruns");
         out.reruns = Math.max(0, Math.floor(Number(takeValue()) || out.reruns));
         break;
       case "strict":
+        out._explicit.add("strict");
         out.strict = true;
         break;
       case "no-strict":
+        out._explicit.add("strict");
         out.strict = false;
         break;
       case "stop-on-first-failure":
+        out._explicit.add("stopOnFirstFailure");
         out.stopOnFirstFailure = true;
         break;
       case "no-stop-on-first-failure":
+        out._explicit.add("stopOnFirstFailure");
         out.stopOnFirstFailure = false;
         break;
       case "include-current-graph":
+        out._explicit.add("includeCurrentGraph");
         out.includeCurrentGraph = true;
         break;
       case "no-current-graph":
+        out._explicit.add("includeCurrentGraph");
         out.includeCurrentGraph = false;
         break;
       case "dry-run":
@@ -165,7 +201,50 @@ function parseArgs(argv) {
   if (!out.benchmarkExample) {
     out.benchmarkExample = out.targetEngine === "event-fast-par" ? "parallel_benchmark" : "";
   }
-  return out;
+  return applyProfileDefaults(out);
+}
+
+function applyProfileDefaults(cli) {
+  const explicit = cli._explicit || new Set();
+  const targetEngine = String(cli.targetEngine || "").trim() || "event-fast-par";
+  const focusedEngines = Array.from(new Set(["dt", targetEngine]));
+  const presets = {
+    cheap: {
+      promptMode: "compact",
+      scopeMode: "focused",
+      benchmarkWallMs: 500,
+      reruns: 0,
+      maxNoImprovementIterations: 12,
+      delegateTimeoutMs: 8 * 60 * 1000,
+      engines: focusedEngines
+    },
+    balanced: {
+      promptMode: "compact",
+      scopeMode: "focused",
+      benchmarkWallMs: 1000,
+      reruns: 1,
+      delegateTimeoutMs: 12 * 60 * 1000
+    },
+    nightly: {
+      promptMode: "compact",
+      scopeMode: "focused"
+    },
+    deep: {
+      promptMode: "full",
+      scopeMode: "broad",
+      benchmarkWallMs: 2000,
+      reruns: 2,
+      delegateTimeoutMs: 15 * 60 * 1000
+    }
+  };
+  const preset = presets[String(cli.profile || "").trim().toLowerCase()] || presets.nightly;
+  for (const [key, value] of Object.entries(preset)) {
+    if (explicit.has(key)) continue;
+    cli[key] = Array.isArray(value) ? [...value] : value;
+  }
+  if (!cli.promptMode) cli.promptMode = "compact";
+  if (!cli.scopeMode) cli.scopeMode = "focused";
+  return cli;
 }
 
 function elapsedMsSince(isoStart) {
@@ -209,9 +288,10 @@ function normalizeFileList(values) {
   return out;
 }
 
-function allowedPathsForEngine(engine) {
+function allowedPathsForEngine(engine, scopeMode = "broad") {
   const base = new Set();
   const value = String(engine || "").trim();
+  const focused = String(scopeMode || "").trim().toLowerCase() === "focused";
   if (value === "event-fast") {
     base.add("js/app/engine-fast-runtime.js");
     base.add("js/app/engine-fast-compat.js");
@@ -219,18 +299,22 @@ function allowedPathsForEngine(engine) {
   } else if (value === "event-fast-worker") {
     base.add("js/app/engine-fast-worker.js");
     base.add("js/app/engine-fast-worker-host.js");
-    base.add("js/app/engine-fast-runtime.js");
-    base.add("js/app/engine-fast-compat.js");
-    base.add("js/app/engine-fast-kernels.js");
+    if (!focused) {
+      base.add("js/app/engine-fast-runtime.js");
+      base.add("js/app/engine-fast-compat.js");
+      base.add("js/app/engine-fast-kernels.js");
+    }
   } else if (value === "event-fast-par") {
     base.add("js/app/engine-fast-par-worker.js");
     base.add("js/app/engine-fast-par-host.js");
     base.add("js/app/engine-fast-par-partitioner.js");
-    base.add("js/app/engine-fast-worker.js");
-    base.add("js/app/engine-fast-worker-host.js");
-    base.add("js/app/engine-fast-runtime.js");
-    base.add("js/app/engine-fast-compat.js");
-    base.add("js/app/engine-fast-kernels.js");
+    if (!focused) {
+      base.add("js/app/engine-fast-worker.js");
+      base.add("js/app/engine-fast-worker-host.js");
+      base.add("js/app/engine-fast-runtime.js");
+      base.add("js/app/engine-fast-compat.js");
+      base.add("js/app/engine-fast-kernels.js");
+    }
   }
   return Array.from(base);
 }
@@ -438,9 +522,11 @@ function buildOptimizationRequest(session, baselineBenchmark, targetEngine, iter
     engines: session.config.engines,
     constraints: {
       protectEngines: ["dt", "event"],
-      allowedPaths: allowedPathsForEngine(targetEngine)
+      allowedPaths: allowedPathsForEngine(targetEngine, session.config.scopeMode)
     },
     recommendedFiles: recommendedFilesForEngine(targetEngine),
+    promptMode: session.config.promptMode,
+    scopeMode: session.config.scopeMode,
     benchmark: {
       wallMs: session.config.benchmarkWallMs,
       baseline: benchmarkByMode(baselineBenchmark),
@@ -457,17 +543,31 @@ function buildOptimizationRequest(session, baselineBenchmark, targetEngine, iter
 }
 
 function buildOptimizePrompt(request) {
+  const promptMode = String(request?.promptMode || "compact").trim().toLowerCase();
   const lines = [];
   lines.push("Use the existing AGENTS.md instructions in this repo.");
   lines.push("Optimize the target event-fast* engine for speed while preserving dt parity.");
   lines.push("Only edit allowed paths. Do not modify dt or event (heap).");
   lines.push("Do not edit engine-test or other test-only helpers as part of performance optimization.");
   lines.push("");
-  lines.push("Optimization request:");
-  lines.push("```json");
-  lines.push(JSON.stringify(request, null, 2));
-  lines.push("```");
-  lines.push("");
+  if (promptMode === "full") {
+    lines.push("Optimization request:");
+    lines.push("```json");
+    lines.push(JSON.stringify(request, null, 2));
+    lines.push("```");
+    lines.push("");
+  } else {
+    lines.push(`Target engine: ${request.targetEngine}`);
+    lines.push(`Prompt mode: ${promptMode}`);
+    lines.push(`Scope mode: ${request.scopeMode || "focused"}`);
+    lines.push(`Allowed paths: ${normalizeFileList(request?.constraints?.allowedPaths).join(", ") || "(none)"}`);
+    lines.push(`Recommended files: ${normalizeFileList(request?.recommendedFiles).join(", ") || "(none)"}`);
+    lines.push(`Benchmark example: ${request.benchmarkExample || "(default)"}`);
+    lines.push(`Target speed: ${Number(request?.benchmark?.targetSpeed || 0).toFixed(3)}x`);
+    lines.push(`Minimum improvement: ${Number(request?.benchmark?.minImprovementPct || 0)}%`);
+    lines.push(`Verification after patch: suites=${Array.isArray(request?.verification?.suites) ? request.verification.suites.join(",") : "(default)"}, reruns=${Number(request?.verification?.reruns || 0)}, strictFinalParity=${request?.verification?.strictFinalParity ? "true" : "false"}`);
+    lines.push("");
+  }
   lines.push("Requirements:");
   lines.push("- Make one small, defensible performance improvement.");
   lines.push("- Preserve correctness relative to dt.");
@@ -572,6 +672,48 @@ async function runShellDelegate(command, env) {
   });
 }
 
+async function autoStartMonitor(statusFile) {
+  if (process.env.FACT_SIM_DISABLE_AUTO_WATCH === "1") return { started: false, reason: "disabled" };
+  if (process.env.FACT_SIM_AUTO_WATCH_STARTED === "1") return { started: false, reason: "already-started" };
+  const watcherScript = path.join("scripts", "watch-auto-improve-status.mjs");
+  const watcherArgs = [watcherScript, "--status-file", statusFile];
+  const env = { ...process.env, FACT_SIM_AUTO_WATCH_STARTED: "1" };
+  if (process.platform === "win32") {
+    const commandLine = [
+      `"${process.execPath}"`,
+      `"${watcherScript}"`,
+      "--status-file",
+      `"${statusFile}"`
+    ].join(" ");
+    const child = spawn("cmd.exe", [
+      "/c",
+      "start",
+      "\"fact_sim auto improve monitor\"",
+      "cmd",
+      "/k",
+      commandLine
+    ], {
+      cwd,
+      env,
+      detached: true,
+      stdio: "ignore",
+      windowsHide: false,
+      shell: false
+    });
+    child.unref();
+    return { started: true, mode: "windows-terminal" };
+  }
+  const child = spawn(process.execPath, watcherArgs, {
+    cwd,
+    env,
+    detached: true,
+    stdio: "ignore",
+    shell: false
+  });
+  child.unref();
+  return { started: true, mode: "detached" };
+}
+
 async function revertForbiddenChanges(paths) {
   const tracked = [];
   const untracked = [];
@@ -600,6 +742,8 @@ function buildSummaryMarkdown(session) {
   if (Number.isFinite(session.initialTargetSpeed)) lines.push(`- Initial target speed: \`${session.initialTargetSpeed.toFixed(3)}x\``);
   if (Number.isFinite(session.bestTargetSpeed)) lines.push(`- Best target speed: \`${session.bestTargetSpeed.toFixed(3)}x\``);
   if (Number.isFinite(session.currentImprovementPct)) lines.push(`- Current improvement: \`${session.currentImprovementPct.toFixed(2)}%\``);
+  if (session.monitor?.statusFile) lines.push(`- Status file: \`${session.monitor.statusFile}\``);
+  if (session.monitor?.autoStart?.started) lines.push(`- Monitor: \`auto-started (${session.monitor.autoStart.mode || "unknown"})\``);
   lines.push("");
   lines.push("## Iterations");
   lines.push("");
@@ -609,6 +753,8 @@ function buildSummaryMarkdown(session) {
     if (Number.isFinite(iteration.afterSpeed)) lines.push(`  After speed: ${iteration.afterSpeed}`);
     if (Number.isFinite(iteration.deltaPct)) lines.push(`  Delta: ${iteration.deltaPct.toFixed(2)}%`);
     if (iteration.note) lines.push(`  Note: ${iteration.note}`);
+    if (iteration.delegatePromptPath) lines.push(`  Prompt: ${iteration.delegatePromptPath}`);
+    if (iteration.delegateMessagePath) lines.push(`  Response: ${iteration.delegateMessagePath}`);
   }
   return lines.join("\n");
 }
@@ -617,6 +763,22 @@ function buildStatusPayload(session) {
   const latest = Array.isArray(session.iterations) && session.iterations.length
     ? session.iterations[session.iterations.length - 1]
     : null;
+  const recentIterations = Array.isArray(session.iterations)
+    ? session.iterations.slice(-8).map((iteration) => ({
+      index: iteration.index,
+      status: iteration.status,
+      deltaPct: Number.isFinite(iteration.deltaPct) ? Number(iteration.deltaPct.toFixed(4)) : null,
+      note: iteration.note || "",
+      changedPaths: normalizeFileList(iteration.changedPaths).slice(0, 8),
+      requestPath: iteration.requestPath || null,
+      optimizePromptPath: iteration.optimizePromptPath || null,
+      delegatePromptPath: iteration.delegatePromptPath || null,
+      delegateMessagePath: iteration.delegateMessagePath || null,
+      delegateStdoutPath: iteration.delegateStdoutPath || null,
+      delegateStderrPath: iteration.delegateStderrPath || null,
+      patchDiffPath: iteration.patchDiffPath || null
+    }))
+    : [];
   return {
     version: 1,
     sessionId: session.sessionId,
@@ -634,14 +796,29 @@ function buildStatusPayload(session) {
     initialTargetSpeed: Number.isFinite(session.initialTargetSpeed) ? Number(session.initialTargetSpeed.toFixed(6)) : null,
     bestTargetSpeed: Number.isFinite(session.bestTargetSpeed) ? Number(session.bestTargetSpeed.toFixed(6)) : null,
     currentImprovementPct: Number.isFinite(session.currentImprovementPct) ? Number(session.currentImprovementPct.toFixed(4)) : null,
+    profile: session.profile || null,
+    promptMode: session.config?.promptMode || null,
+    scopeMode: session.config?.scopeMode || null,
+    statusFile: session.monitor?.statusFile || null,
+    monitor: session.monitor || null,
     latestIteration: latest ? {
       index: latest.index,
       status: latest.status,
       baselineSpeed: Number.isFinite(latest.baselineSpeed) ? Number(latest.baselineSpeed.toFixed(6)) : null,
       afterSpeed: Number.isFinite(latest.afterSpeed) ? Number(latest.afterSpeed.toFixed(6)) : null,
       deltaPct: Number.isFinite(latest.deltaPct) ? Number(latest.deltaPct.toFixed(4)) : null,
-      note: latest.note || ""
-    } : null
+      note: latest.note || "",
+      changedPaths: normalizeFileList(latest.changedPaths),
+      requestPath: latest.requestPath || null,
+      optimizePromptPath: latest.optimizePromptPath || null,
+      patchResultPath: latest.patchResultPath || null,
+      delegatePromptPath: latest.delegatePromptPath || null,
+      delegateMessagePath: latest.delegateMessagePath || null,
+      delegateStdoutPath: latest.delegateStdoutPath || null,
+      delegateStderrPath: latest.delegateStderrPath || null,
+      patchDiffPath: latest.patchDiffPath || null
+    } : null,
+    recentIterations
   };
 }
 
@@ -653,6 +830,8 @@ function buildStatusMarkdown(session) {
   lines.push(`- Session: \`${status.sessionId}\``);
   lines.push(`- Status: \`${status.status}\``);
   lines.push(`- Target: \`${status.targetEngine}\``);
+  lines.push(`- Profile: \`${status.profile || "-"}\``);
+  lines.push(`- Prompt / Scope: \`${status.promptMode || "-"} / ${status.scopeMode || "-"}\``);
   lines.push(`- Benchmark example: \`${status.benchmarkExample}\``);
   lines.push(`- Elapsed: \`${status.elapsedHours.toFixed(3)} h\``);
   if (Number.isFinite(status.initialTargetSpeed)) lines.push(`- Initial speed: \`${status.initialTargetSpeed.toFixed(3)}x\``);
@@ -665,6 +844,10 @@ function buildStatusMarkdown(session) {
     lines.push(`- #${status.latestIteration.index}: \`${status.latestIteration.status}\``);
     if (Number.isFinite(status.latestIteration.deltaPct)) lines.push(`- Delta: \`${status.latestIteration.deltaPct.toFixed(2)}%\``);
     if (status.latestIteration.note) lines.push(`- Note: ${status.latestIteration.note}`);
+    if (status.latestIteration.optimizePromptPath) lines.push(`- Runner prompt: \`${status.latestIteration.optimizePromptPath}\``);
+    if (status.latestIteration.delegatePromptPath) lines.push(`- Delegate prompt: \`${status.latestIteration.delegatePromptPath}\``);
+    if (status.latestIteration.delegateMessagePath) lines.push(`- Delegate response: \`${status.latestIteration.delegateMessagePath}\``);
+    if (status.latestIteration.patchDiffPath) lines.push(`- Patch diff: \`${status.latestIteration.patchDiffPath}\``);
   }
   return lines.join("\n");
 }
@@ -700,6 +883,8 @@ async function main() {
       stopOnFirstFailure: cli.stopOnFirstFailure,
       benchmarkWallMs: cli.benchmarkWallMs,
       delegateTimeoutMs: cli.delegateTimeoutMs,
+      promptMode: cli.promptMode,
+      scopeMode: cli.scopeMode,
       minImprovementPct: cli.minImprovementPct,
       maxIterations: cli.maxIterations,
       minRuntimeHours: cli.minRuntimeHours,
@@ -712,12 +897,13 @@ async function main() {
     bestTargetSpeed: null,
     currentImprovementPct: 0,
     consecutiveNoImprovement: 0,
+    monitor: null,
     iterations: []
   };
 
-  const statusFile = path.resolve(
-    cli.statusFile || path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-par-status.json")
-  );
+  const statusFile = cli.statusFile
+    ? (path.isAbsolute(cli.statusFile) ? cli.statusFile : path.resolve(repoRoot, cli.statusFile))
+    : path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-par-status.json");
   const statusMarkdownFile = statusFile.replace(/\.json$/i, ".md");
   const persistSession = async () => {
     await writeJson(path.join(sessionDir, "session.json"), session);
@@ -725,6 +911,24 @@ async function main() {
     await writeJson(statusFile, buildStatusPayload(session));
     await writeText(statusMarkdownFile, buildStatusMarkdown(session));
   };
+  if (!cli.dryRun) {
+    try {
+      session.monitor = {
+        statusFile: toRelative(statusFile),
+        statusMarkdownFile: toRelative(statusMarkdownFile),
+        autoStart: await autoStartMonitor(statusFile)
+      };
+    } catch (error) {
+      session.monitor = {
+        statusFile: toRelative(statusFile),
+        statusMarkdownFile: toRelative(statusMarkdownFile),
+        autoStart: {
+          started: false,
+          reason: error instanceof Error ? error.message : String(error)
+        }
+      };
+    }
+  }
   await persistSession();
 
   const runtime = new FactSimRuntime({ repoRoot, preferredPort: 8123, logger: () => {} });
@@ -797,6 +1001,8 @@ async function main() {
       const patchDiffPath = path.join(sessionDir, `patch.iteration-${iterationIndex}.diff`);
       const patchResultPath = path.join(sessionDir, `patch-result.iteration-${iterationIndex}.json`);
       await writeText(promptPath, buildOptimizePrompt(request));
+      iterationRecord.optimizePromptPath = toRelative(promptPath);
+      iterationRecord.patchResultPath = toRelative(patchResultPath);
       iterationRecord.status = "patching";
       iterationRecord.patchStartedAt = nowIso();
       iterationRecord.note = "Delegate running.";
@@ -835,11 +1041,18 @@ async function main() {
       }
 
       iterationRecord.delegateExitCode = delegateExit;
+      let patchResult = null;
+      try {
+        patchResult = await readJson(patchResultPath);
+      } catch (_error) {}
+      if (patchResult && typeof patchResult === "object") {
+        iterationRecord.delegatePromptPath = patchResult.promptPath || null;
+        iterationRecord.delegateMessagePath = patchResult.delegateMessagePath || null;
+        iterationRecord.delegateStdoutPath = patchResult.delegateStdoutPath || null;
+        iterationRecord.delegateStderrPath = patchResult.delegateStderrPath || null;
+        iterationRecord.patchDiffPath = patchResult.patchDiffPath || iterationRecord.patchDiffPath || null;
+      }
       if (delegateExit !== 0) {
-        let patchResult = null;
-        try {
-          patchResult = await readJson(patchResultPath);
-        } catch (_error) {}
         if (patchResult && typeof patchResult.status === "string") {
           iterationRecord.status = patchResult.status;
           iterationRecord.note = Array.isArray(patchResult.notes) ? patchResult.notes.join(" ") : "";

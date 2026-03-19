@@ -3,9 +3,10 @@ import process from "node:process";
 import os from "node:os";
 import { spawn } from "node:child_process";
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
-const cwd = process.cwd();
-const repoRoot = path.resolve(cwd, "..");
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(scriptDir, "..", "..");
 const DEFAULT_CODEX_TIMEOUT_MS = 15 * 60 * 1000;
 
 function getCodexTimeoutMs() {
@@ -107,6 +108,13 @@ function normalizeFileList(values) {
     out.push(normalized);
   }
   return out;
+}
+
+function summarizeTextList(values, limit = 6) {
+  const normalized = normalizeFileList(values);
+  if (!normalized.length) return "(none)";
+  if (normalized.length <= limit) return normalized.join(", ");
+  return `${normalized.slice(0, limit).join(", ")}, ... (+${normalized.length - limit})`;
 }
 
 function isOptimizeRequest(patchRequest, targetFailure) {
@@ -257,28 +265,44 @@ function buildFixPrompt(patchRequest, targetFailure) {
 }
 
 function buildOptimizePrompt(patchRequest) {
+  const promptMode = String(patchRequest?.promptMode || "compact").trim().toLowerCase();
   const allowedPaths = normalizeFileList(patchRequest?.constraints?.allowedPaths);
   const recommendedFiles = normalizeFileList(patchRequest?.recommendedFiles);
   const protectEngines = normalizeFileList(patchRequest?.constraints?.protectEngines);
   const benchmark = patchRequest?.benchmark || {};
   const verification = patchRequest?.verification || {};
   const targetEngine = String(patchRequest?.targetEngine || "").trim();
+  const benchmarkBaseline = benchmark?.baseline?.[targetEngine] || {};
+  const scopeMode = String(patchRequest?.scopeMode || "").trim() || "focused";
   const lines = [];
   lines.push("Use the existing AGENTS.md instructions in this repo.");
   lines.push("Optimize the target event-fast* engine for speed while preserving dt parity.");
   lines.push("This is an optimization request, not a failure-fix request.");
   lines.push("Only edit allowed paths. Do not modify protected engines, engine-test, benchmark harnesses, or unrelated files.");
   lines.push("");
-  lines.push("Optimization request:");
-  lines.push("```json");
-  lines.push(JSON.stringify(patchRequest, null, 2));
-  lines.push("```");
-  lines.push("");
   lines.push(`Target engine: ${targetEngine || "(unknown)"}`);
+  lines.push(`Prompt mode: ${promptMode}`);
+  lines.push(`Scope mode: ${scopeMode}`);
   lines.push(`Protected engines: ${protectEngines.join(", ") || "(none)"}`);
-  lines.push(`Allowed paths: ${allowedPaths.join(", ") || "(none)"}`);
-  if (recommendedFiles.length) lines.push(`Recommended files: ${recommendedFiles.join(", ")}`);
+  lines.push(`Allowed paths: ${summarizeTextList(allowedPaths, 4)}`);
+  if (recommendedFiles.length) lines.push(`Recommended files: ${summarizeTextList(recommendedFiles, 4)}`);
   lines.push("");
+  if (promptMode === "full") {
+    lines.push("Optimization request:");
+    lines.push("```json");
+    lines.push(JSON.stringify(patchRequest, null, 2));
+    lines.push("```");
+    lines.push("");
+  } else {
+    lines.push("Compact optimization context:");
+    lines.push(`- Benchmark example: ${String(patchRequest?.benchmarkExample || "(default)")}`);
+    lines.push(`- Baseline speed for ${targetEngine || "target"}: ${Number(benchmark.targetSpeed || benchmarkBaseline.speed || 0).toFixed(3)}x`);
+    lines.push(`- Minimum improvement to keep patch: ${Number(benchmark.minImprovementPct || 0)}%`);
+    lines.push(`- Verification after patch will be handled by the runner: suites=${Array.isArray(verification.suites) ? verification.suites.join(",") : "(default)"}, reruns=${Number(verification.reruns || 0)}, strictFinalParity=${verification.strictFinalParity ? "true" : "false"}.`);
+    lines.push("- Favor the smallest change that plausibly improves the benchmarked hot path.");
+    lines.push("- Avoid broad refactors. If no small improvement is clear, make no change.");
+    lines.push("");
+  }
   lines.push("Requirements:");
   lines.push("- Make one small, defensible performance improvement in the target engine implementation.");
   lines.push("- Preserve correctness relative to dt. Do not widen the patch scope.");
@@ -426,6 +450,10 @@ async function main() {
   const delegateStderrPath = path.join(sessionDir, iteration ? `delegate-stderr.iteration-${iteration}.log` : "delegate-stderr.log");
   const patchDiffPath = path.join(sessionDir, iteration ? `patch.iteration-${iteration}.diff` : "patch.diff");
   const resultPath = path.join(sessionDir, iteration ? `patch-result.iteration-${iteration}.json` : "patch-result.json");
+  result.promptPath = toRelative(promptPath);
+  result.delegateMessagePath = toRelative(delegateMessagePath);
+  result.delegateStdoutPath = toRelative(delegateStdoutPath);
+  result.delegateStderrPath = toRelative(delegateStderrPath);
   await writeText(promptPath, prompt);
 
   if (protectedEngines.includes(targetEngine)) {

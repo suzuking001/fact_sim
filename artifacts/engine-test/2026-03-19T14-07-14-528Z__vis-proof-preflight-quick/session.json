@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-19T14:07:14.528Z",
+  "finishedAt": "2026-03-19T14:07:15.768Z",
+  "status": "PASS",
+  "suite": "quick",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "parallel_benchmark"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": "vis-proof-preflight-quick"
+}

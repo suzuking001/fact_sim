@@ -104,6 +104,52 @@ function applyGraphVisualTheme(){
   }
 }
 
+function drawEditorGrid(ctx, visibleArea, canvas){
+  if(!ctx || !visibleArea || !canvas || !canvas.ds) return;
+  const bgMeta = (App.backgroundLayout && typeof App.backgroundLayout.getMeta === 'function')
+    ? App.backgroundLayout.getMeta()
+    : null;
+  if(bgMeta && bgMeta.enabled && bgMeta.hasImage) return;
+
+  const scale = Math.max(0.0001, Number(canvas.ds.scale) || 1);
+  const left = Number(visibleArea[0]) || 0;
+  const top = Number(visibleArea[1]) || 0;
+  const width = Number(visibleArea[2]) || 0;
+  const height = Number(visibleArea[3]) || 0;
+  if(width <= 0 || height <= 0) return;
+
+  const baseMinor = 24;
+  const baseMajor = 120;
+  const minorScreenStep = baseMinor * scale;
+  const majorScreenStep = baseMajor * scale;
+  const lineWidth = Math.min(1.5, Math.max(0.5, 1 / scale));
+
+  const drawLines = (step, color)=>{
+    if(step * scale < 14) return;
+    const right = left + width;
+    const bottom = top + height;
+    const startX = Math.floor(left / step) * step;
+    const startY = Math.floor(top / step) * step;
+    ctx.beginPath();
+    for(let x = startX; x <= right + step; x += step){
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+    }
+    for(let y = startY; y <= bottom + step; y += step){
+      ctx.moveTo(left, y);
+      ctx.lineTo(right, y);
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+  };
+
+  ctx.save();
+  drawLines(baseMinor, minorScreenStep >= 20 ? 'rgba(17,17,17,0.045)' : 'rgba(17,17,17,0.03)');
+  drawLines(baseMajor, majorScreenStep >= 20 ? 'rgba(10,132,255,0.08)' : 'rgba(10,132,255,0.055)');
+  ctx.restore();
+}
+
 function initGraph(){
   applyGraphVisualTheme();
   if(App.graph) stopSimulation();
@@ -124,6 +170,9 @@ function initGraph(){
   };
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
+  App.canvas.onDrawBackground = function(ctx, visibleArea){
+    drawEditorGrid(ctx, visibleArea, this);
+  };
   if(typeof window.installContextMenuPointerTracking === 'function'){
     window.installContextMenuPointerTracking(App.canvas);
   }

@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-19T14:02:38.699Z",
+  "finishedAt": "2026-03-19T14:02:38.699Z",
+  "status": "error",
+  "message": "Error: git status failed: fatal: not a git repository (or any of the parent directories): .git\n\n    at gitStatus (file:///G:/%E3%83%9E%E3%82%A4%E3%83%89%E3%83%A9%E3%82%A4%E3%83%96/%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/github/fact_sim/mcp/scripts/auto-patch-event-fast.mjs:211:32)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async main (file:///G:/%E3%83%9E%E3%82%A4%E3%83%89%E3%83%A9%E3%82%A4%E3%83%96/%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/github/fact_sim/mcp/scripts/auto-patch-event-fast.mjs:475:24)"
+}

@@ -27,6 +27,8 @@
     "benchmarkExample": "parallel_benchmark",
     "benchmarkWallMs": 2000,
     "delegateTimeoutMs": 900000,
+    "promptMode": "compact",
+    "scopeMode": "focused",
     "minImprovementPct": 1,
     "maxIterations": 9999,
     "minRuntimeHours": 5,

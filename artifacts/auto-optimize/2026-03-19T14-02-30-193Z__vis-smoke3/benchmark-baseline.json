@@ -1,0 +1,94 @@
+{
+  "wallMs": 300,
+  "realStepMs": 16,
+  "results": [
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 300,
+      "simMs": 565900,
+      "loops": 35369,
+      "simSec": 565.9,
+      "speed": 1886.3333333333333
+    },
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 300,
+      "simMs": 278800,
+      "loops": 17425,
+      "simSec": 278.8,
+      "speed": 929.3333333333334
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 300,
+      "simMs": 701008,
+      "loops": 43813,
+      "simSec": 701.008,
+      "speed": 2336.693333333333
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 300.1999999284744,
+      "simMs": 436880,
+      "loops": 27305,
+      "simSec": 436.88,
+      "speed": 1455.2964693673914
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 300.5,
+      "simMs": 957008,
+      "loops": 59813,
+      "simSec": 957.008,
+      "speed": 3184.718801996672
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 300,
+      "simMs": 647808,
+      "loops": 40488,
+      "simSec": 647.808,
+      "speed": 2159.36
+    },
+    {
+      "mode": "event-fast-worker",
+      "modeLabel": "event-fast-worker",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 300,
+      "simMs": 2021008,
+      "loops": 126313,
+      "simSec": 2021.008,
+      "speed": 6736.693333333334
+    },
+    {
+      "mode": "event-fast-par",
+      "modeLabel": "event-fast-par (multi worker)",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 300,
+      "simMs": 1748272,
+      "loops": 242761,
+      "simSec": 1748.272,
+      "speed": 5827.573333333334
+    }
+  ]
+}

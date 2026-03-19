@@ -90,7 +90,7 @@ Windows users can also start the local server with:
 scripts/start_fact_sim_server.bat
 ```
 
-The batch file prefers launching `http://127.0.0.1:8123` in Chrome when Chrome is installed, so browser features such as local example overwrite are available.
+The batch file prefers launching `http://127.0.0.1:8123` in Chrome when Chrome is installed, opens it in app mode with a fixed scale factor, and keeps browser features such as local example overwrite available.
 
 Temporary verification screenshots should be saved under `tmp/`. Permanent exported artifacts such as reports, JSON, CSV, and optimizer outputs continue to live under `artifacts/`.
 
@@ -116,6 +116,13 @@ For benchmark-driven overnight optimization of `event-fast*`, use:
 ```bash
 cd mcp
 npm run nightly:optimize
+```
+
+If you are token-constrained on ChatGPT Plus / Codex, use the lighter profile:
+
+```bash
+cd mcp
+npm run nightly:optimize-lite
 ```
 
 This optimizer first requires a clean worktree, then runs `quick` and `standard` engine tests, captures a benchmark baseline, asks Codex to optimize the selected `event-fast*` engine, reruns the tests, reruns the benchmark, and only keeps the patch when the target engine speed improves beyond the configured threshold.

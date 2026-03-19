@@ -1,26 +1,63 @@
 {
   "version": 1,
-  "sessionId": "2026-03-15T02-39-15-473Z__trial-event-fast-par-20260315-113913",
+  "sessionId": "2026-03-19T14-07-13-029Z__vis-proof",
   "status": "WARN",
-  "startedAt": "2026-03-15T02:39:15.479Z",
-  "finishedAt": "2026-03-15T03:13:24.321Z",
-  "elapsedHours": 0.569,
+  "startedAt": "2026-03-19T14:07:13.039Z",
+  "finishedAt": "2026-03-19T14:07:22.516Z",
+  "elapsedHours": 0.003,
   "targetEngine": "event-fast-par",
   "benchmarkExample": "parallel_benchmark",
-  "iterationCount": 5,
-  "maxIterations": 9999,
-  "minRuntimeHours": 0.5,
-  "maxNoImprovementIterations": 1,
-  "consecutiveNoImprovement": 5,
-  "initialTargetSpeed": 9726.176,
-  "bestTargetSpeed": 9726.176,
+  "iterationCount": 1,
+  "maxIterations": 1,
+  "minRuntimeHours": 0,
+  "maxNoImprovementIterations": 12,
+  "consecutiveNoImprovement": 1,
+  "initialTargetSpeed": 6469.76,
+  "bestTargetSpeed": 6469.76,
   "currentImprovementPct": 0,
+  "profile": "cheap",
+  "promptMode": "compact",
+  "scopeMode": "focused",
+  "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json",
+  "monitor": {
+    "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json",
+    "statusMarkdownFile": "artifacts/auto-optimize/latest-event-fast-par-status.md",
+    "autoStart": {
+      "started": true,
+      "mode": "windows-terminal"
+    }
+  },
   "latestIteration": {
-    "index": 5,
+    "index": 1,
     "status": "delegate-failed",
-    "baselineSpeed": 9726.176,
+    "baselineSpeed": 6469.76,
     "afterSpeed": null,
     "deltaPct": null,
-    "note": "Optimization delegate failed before producing a usable patch."
-  }
+    "note": "mock delegate response",
+    "changedPaths": [],
+    "requestPath": "artifacts/auto-optimize/2026-03-19T14-07-13-029Z__vis-proof/optimization-request.iteration-1.json",
+    "optimizePromptPath": "artifacts/auto-optimize/2026-03-19T14-07-13-029Z__vis-proof/optimize-prompt.iteration-1.md",
+    "patchResultPath": "artifacts/auto-optimize/2026-03-19T14-07-13-029Z__vis-proof/patch-result.iteration-1.json",
+    "delegatePromptPath": "codex-prompt.iteration-1.md",
+    "delegateMessagePath": "delegate-last-message.iteration-1.txt",
+    "delegateStdoutPath": null,
+    "delegateStderrPath": null,
+    "patchDiffPath": null
+  },
+  "recentIterations": [
+    {
+      "index": 1,
+      "status": "delegate-failed",
+      "deltaPct": null,
+      "note": "mock delegate response",
+      "changedPaths": [],
+      "requestPath": "artifacts/auto-optimize/2026-03-19T14-07-13-029Z__vis-proof/optimization-request.iteration-1.json",
+      "optimizePromptPath": "artifacts/auto-optimize/2026-03-19T14-07-13-029Z__vis-proof/optimize-prompt.iteration-1.md",
+      "delegatePromptPath": "codex-prompt.iteration-1.md",
+      "delegateMessagePath": "delegate-last-message.iteration-1.txt",
+      "delegateStdoutPath": null,
+      "delegateStderrPath": null,
+      "patchDiffPath": null
+    }
+  ]
 }

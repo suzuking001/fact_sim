@@ -18,7 +18,8 @@
     "watch:auto-optimize": "node scripts/watch-auto-optimize-status.mjs",
     "nightly": "node scripts/auto-fix-runner.mjs --profile nightly",
     "nightly:auto-patch": "node scripts/auto-fix-runner.mjs --profile nightly --patch-command \"node scripts/auto-patch-event-fast.mjs\"",
-    "nightly:optimize": "node scripts/auto-improve.mjs --job automation/jobs/event-fast-par.optimize.json --profile nightly"
+    "nightly:optimize": "node scripts/auto-improve.mjs --job automation/jobs/event-fast-par.optimize.json --profile nightly",
+    "nightly:optimize-lite": "node scripts/auto-improve.mjs --job automation/jobs/event-fast-par.optimize.json --profile cheap"
   },
   "repository": {
     "type": "git",

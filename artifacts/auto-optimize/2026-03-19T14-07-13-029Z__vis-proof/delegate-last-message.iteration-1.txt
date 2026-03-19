@@ -1,0 +1,3 @@
+﻿Mock AI response for iteration 1
+- Focus on event-fast-par
+- No patch applied
