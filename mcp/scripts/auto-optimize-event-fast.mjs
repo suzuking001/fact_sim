@@ -693,6 +693,42 @@ async function autoStartMonitor(statusHtmlFile) {
   await waitForFile(statusHtmlFile, 5000);
   const env = { ...process.env, FACT_SIM_AUTO_WATCH_STARTED: "1" };
   if (process.platform === "win32") {
+    const chromeCandidates = [
+      path.join(process.env.ProgramFiles || "", "Google", "Chrome", "Application", "chrome.exe"),
+      path.join(process.env["ProgramFiles(x86)"] || "", "Google", "Chrome", "Application", "chrome.exe"),
+      path.join(process.env.LocalAppData || "", "Google", "Chrome", "Application", "chrome.exe")
+    ].filter(Boolean);
+    let chromeExe = "";
+    for (const candidate of chromeCandidates) {
+      if (!candidate) continue;
+      if (await waitForFile(candidate, 50)) {
+        chromeExe = candidate;
+        break;
+      }
+    }
+    if (!chromeExe) {
+      const probe = await runCommand("where", ["chrome"], {
+        cwd: repoRoot,
+        env,
+        stdio: ["ignore", "pipe", "pipe"],
+        shell: false
+      }).catch(() => ({ code: 1, stdout: "" }));
+      if (probe.code === 0) {
+        chromeExe = String(probe.stdout || "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "";
+      }
+    }
+    if (chromeExe) {
+      const child = spawn(chromeExe, ["--new-window", statusHtmlFile], {
+        cwd: repoRoot,
+        env,
+        detached: true,
+        stdio: "ignore",
+        windowsHide: false,
+        shell: false
+      });
+      child.unref();
+      return { started: true, mode: "browser-dashboard-chrome" };
+    }
     const ps = `Start-Process -FilePath '${statusHtmlFile.replace(/'/g, "''")}'`;
     const child = spawn("powershell.exe", [
       "-NoProfile",
@@ -709,7 +745,7 @@ async function autoStartMonitor(statusHtmlFile) {
       shell: false
     });
     child.unref();
-    return { started: true, mode: "browser-dashboard" };
+    return { started: true, mode: "browser-dashboard-default" };
   }
   const opener = process.platform === "darwin" ? "open" : "xdg-open";
   const child = spawn(opener, [statusHtmlFile], {
@@ -1034,6 +1070,29 @@ async function buildStatusHtml(session, sessionDir) {
   const changedPathsText = Array.isArray(latest?.changedPaths) && latest.changedPaths.length
     ? latest.changedPaths.join("\n")
     : "(not available yet)";
+  const refreshSeconds = 3;
+  const progressPct = Math.max(0, Math.min(100, status.minRuntimeHours > 0 ? (status.elapsedHours / status.minRuntimeHours) * 100 : 0));
+  const noImprovePct = Math.max(0, Math.min(100, status.maxNoImprovementIterations > 0 ? (status.consecutiveNoImprovement / status.maxNoImprovementIterations) * 100 : 0));
+  const latestStatusText = String(latest?.status || "").toLowerCase();
+  const stageItems = [
+    { key: "patching", label: "Patch" },
+    { key: "verify", label: "Verify" },
+    { key: "benchmark", label: "Benchmark" },
+    { key: "accepted", label: "Accept" }
+  ];
+  const stageIndex = latestStatusText.includes("accepted")
+    ? 3
+    : (latestStatusText.includes("benchmark")
+        ? 2
+        : ((latestStatusText.includes("standard") || latestStatusText.includes("quick") || latestStatusText.includes("verify") || latestStatusText.includes("reverted"))
+            ? 1
+            : (latestStatusText.includes("patch") || latestStatusText.includes("delegate") || latestStatusText.includes("no-op") || latestStatusText.includes("forbidden")
+                ? 0
+                : -1)));
+  const stageMarkup = stageItems.map((stage, index) => {
+    const state = index < stageIndex ? "done" : (index === stageIndex ? "active" : "idle");
+    return `<div class="stage ${state}">${escapeHtml(stage.label)}</div>`;
+  }).join("");
   const latestRows = latest ? `
     <tr><th>Index</th><td>${escapeHtml(latest.index)}</td></tr>
     <tr><th>Status</th><td>${escapeHtml(latest.status || "-")}</td></tr>
@@ -1070,6 +1129,13 @@ async function buildStatusHtml(session, sessionDir) {
     main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 40px; }
     h1, h2 { margin: 0 0 12px; }
     .meta { color: #58657e; margin-bottom: 18px; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+    .live { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px; background: #e8fff0; color: #0b6e3a; font-weight: 700; }
+    .live.warn { background: #fff4e6; color: #ad6500; }
+    .live.fail { background: #ffeaea; color: #b42318; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 rgba(11,110,58,.45); animation: pulse 1.4s infinite; }
+    .live.fail .dot { animation: none; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(11,110,58,.45); } 70% { box-shadow: 0 0 0 10px rgba(11,110,58,0); } 100% { box-shadow: 0 0 0 0 rgba(11,110,58,0); } }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
     .card { background: #fff; border: 1px solid #d8e0ee; border-radius: 14px; padding: 14px 16px; box-shadow: 0 8px 20px rgba(32, 55, 98, 0.06); }
     .toolbar { display: flex; gap: 12px; align-items: center; margin: 0 0 18px; flex-wrap: wrap; }
@@ -1079,19 +1145,37 @@ async function buildStatusHtml(session, sessionDir) {
     .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #73819c; }
     .value { font-size: 24px; font-weight: 700; margin-top: 6px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .progress-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0 0; }
+    .progress-card { background: #fff; border: 1px solid #d8e0ee; border-radius: 14px; padding: 14px 16px; box-shadow: 0 8px 20px rgba(32, 55, 98, 0.06); }
+    .bar { height: 10px; background: #e8edf7; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+    .bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #24a148, #7bd88f); }
+    .bar.warn > span { background: linear-gradient(90deg, #d97706, #f0b44c); }
+    .stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .stage { text-align: center; padding: 10px 8px; border-radius: 10px; font-weight: 700; background: #eef2f8; color: #66758f; }
+    .stage.done { background: #e7f7ee; color: #1f7a45; }
+    .stage.active { background: #e7f0ff; color: #2459b7; }
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e6ebf5; vertical-align: top; }
     th { width: 140px; color: #5d6b85; font-weight: 600; }
     pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: #0f1728; color: #e9eefc; border-radius: 12px; padding: 14px; max-height: 420px; overflow: auto; }
     .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
     .path { font-size: 12px; color: #73819c; margin: 0 0 8px; word-break: break-all; }
-    @media (max-width: 920px) { .row { grid-template-columns: 1fr; } }
+    @media (max-width: 920px) { .row, .progress-wrap { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <main>
-    <h1>FACT SIM Auto Optimize</h1>
-    <div class="meta">Session: <span class="mono">${escapeHtml(status.sessionId || "-")}</span> | Updated: ${escapeHtml(new Date().toLocaleString("ja-JP", { hour12: false }))}</div>
+    <div class="topline">
+      <div>
+        <h1>FACT SIM Auto Optimize</h1>
+        <div class="meta">Session: <span class="mono">${escapeHtml(status.sessionId || "-")}</span> | Updated: <span id="updated-at">${escapeHtml(new Date().toLocaleString("ja-JP", { hour12: false }))}</span></div>
+      </div>
+      <div class="live ${status.status === "FAIL" ? "fail" : (status.status === "WARN" ? "warn" : "")}">
+        <span class="dot"></span>
+        <span id="live-text">${escapeHtml(status.status === "running" ? "Running" : status.status || "-")}</span>
+        <span class="mono" id="refresh-countdown">refresh 3.0s</span>
+      </div>
+    </div>
     <div class="toolbar">
       <button id="stop-all-button" class="primary" ${stopAllUrl ? "" : "disabled"}>Stop All Auto-Optimize Jobs</button>
       <div id="stop-all-status" class="meta">${escapeHtml(stopAllUrl ? "Use this button to stop all old and current auto-optimize jobs." : "Stop endpoint unavailable. Use scripts/stop_auto_optimize.bat.")}</div>
@@ -1103,6 +1187,22 @@ async function buildStatusHtml(session, sessionDir) {
       <div class="card"><div class="label">Initial</div><div class="value">${Number.isFinite(status.initialTargetSpeed) ? `${status.initialTargetSpeed.toFixed(3)}x` : "-"}</div></div>
       <div class="card"><div class="label">Best</div><div class="value">${Number.isFinite(status.bestTargetSpeed) ? `${status.bestTargetSpeed.toFixed(3)}x` : "-"}</div></div>
       <div class="card"><div class="label">Iterations</div><div class="value">${escapeHtml(status.iterationCount)} / ${escapeHtml(status.maxIterations)}</div></div>
+    </section>
+    <section class="progress-wrap">
+      <div class="progress-card">
+        <div class="label">Elapsed Vs Minimum Runtime</div>
+        <div class="value mono">${status.elapsedHours.toFixed(3)}h / ${Number(status.minRuntimeHours || 0).toFixed(3)}h</div>
+        <div class="bar"><span style="width:${progressPct.toFixed(1)}%"></span></div>
+      </div>
+      <div class="progress-card">
+        <div class="label">No-Improvement Counter</div>
+        <div class="value mono">${escapeHtml(status.consecutiveNoImprovement)} / ${escapeHtml(status.maxNoImprovementIterations)}</div>
+        <div class="bar warn"><span style="width:${noImprovePct.toFixed(1)}%"></span></div>
+      </div>
+    </section>
+    <section class="progress-card" style="margin-top:16px;">
+      <div class="label">Current Phase</div>
+      <div class="stages">${stageMarkup}</div>
     </section>
     <section class="row">
       <div class="card">
@@ -1169,9 +1269,26 @@ async function buildStatusHtml(session, sessionDir) {
     </section>
   </main>
   <script>
+    const refreshEverySec = ${JSON.stringify(refreshSeconds)};
     const stopAllUrl = ${JSON.stringify(stopAllUrl)};
     const stopButton = document.getElementById("stop-all-button");
     const stopStatus = document.getElementById("stop-all-status");
+    const refreshCountdown = document.getElementById("refresh-countdown");
+    const updatedAt = document.getElementById("updated-at");
+    const bootAt = Date.now();
+    if (refreshCountdown) {
+      setInterval(() => {
+        const elapsed = (Date.now() - bootAt) / 1000;
+        const remaining = Math.max(0, refreshEverySec - (elapsed % refreshEverySec));
+        refreshCountdown.textContent = 'refresh ' + remaining.toFixed(1) + 's';
+      }, 100);
+    }
+    if (updatedAt) {
+      setInterval(() => {
+        const now = new Date();
+        updatedAt.textContent = now.toLocaleString('ja-JP', { hour12: false });
+      }, 1000);
+    }
     if (stopButton) {
       stopButton.addEventListener("click", async () => {
         if (!stopAllUrl) {

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "startedAt": "2026-03-19T15:54:18.220Z",
+  "finishedAt": "2026-03-19T15:54:19.301Z",
+  "status": "PASS",
+  "suite": "quick",
+  "seeds": [
+    1
+  ],
+  "engines": [
+    "dt",
+    "event-fast-par"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "parallel_benchmark"
+  ],
+  "strictFinalParity": true,
+  "saveArtifacts": true,
+  "artifactLabel": "10min-event-fast-par-20260320-005414-preflight-quick"
+}

@@ -673,23 +673,45 @@ if(btnBenchmark){
   const sidebar = document.getElementById('sidebar');
   const body = document.body;
   if(!btn) return;
+  const readSavedState = ()=>{
+    try{
+      return localStorage.getItem('sidebar-hidden') === '1';
+    }catch(_e){
+      return false;
+    }
+  };
   // initial state from localStorage
   try{
-    const saved = localStorage.getItem('sidebar-hidden');
-    if(saved === '1') body.classList.add('sidebar-hidden');
+    if(readSavedState()) body.classList.add('sidebar-hidden');
   }catch(e){}
   const updateAria = () => {
     const hidden = body.classList.contains('sidebar-hidden');
     btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
-    btn.title = hidden ? 'Open menu' : 'Close menu';
+    const isMobile = body.classList.contains('mobile-ui');
+    btn.title = isMobile
+      ? (hidden ? 'Open run controls' : 'Close run controls')
+      : (hidden ? 'Open menu' : 'Close menu');
   };
-  updateAria();
-  btn.addEventListener('click',()=>{
-    body.classList.toggle('sidebar-hidden');
-    try{ localStorage.setItem('sidebar-hidden', body.classList.contains('sidebar-hidden') ? '1' : '0'); }catch(e){}
+  const setSidebarHidden = (hidden, options)=>{
+    const opt = options || {};
+    const next = !!hidden;
+    body.classList.toggle('sidebar-hidden', next);
+    if(opt.persist !== false && !body.classList.contains('mobile-ui')){
+      try{ localStorage.setItem('sidebar-hidden', next ? '1' : '0'); }catch(_e){}
+    }
     updateAria();
-    try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(e){}
-  });
+    try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
+    try{
+      if(opt.syncMobileUi === false) return;
+      if(typeof App.syncMobileUiState === 'function') App.syncMobileUiState();
+    }catch(_e){}
+  };
+  App.isSidebarHidden = ()=> body.classList.contains('sidebar-hidden');
+  App.setSidebarHidden = setSidebarHidden;
+  App.toggleSidebarHidden = ()=> setSidebarHidden(!body.classList.contains('sidebar-hidden'));
+  App.getSavedSidebarHidden = readSavedState;
+  updateAria();
+  btn.addEventListener('click', ()=> App.toggleSidebarHidden());
 
   // Sidebar should always be wheel-scrollable even if graph handlers consume wheel events.
   if(sidebar && !sidebar.__wheelScrollHooked){
@@ -707,6 +729,259 @@ if(btnBenchmark){
     }, { passive: false });
     sidebar.__wheelScrollHooked = true;
   }
+})();
+
+// Phone viewer layout and bottom navigation
+(function(){
+  const body = document.body;
+  const nav = document.getElementById('mobileNav');
+  const dock = document.getElementById('timelineDock');
+  if(!nav || !dock) return;
+  const buttons = Array.from(nav.querySelectorAll('.mobileNavBtn[data-mobile-panel]'));
+  const query = window.matchMedia('(max-width: 760px)');
+  let activePanel = 'graph';
+  let desktopSidebarHidden = !!(typeof App.getSavedSidebarHidden === 'function'
+    ? App.getSavedSidebarHidden()
+    : body.classList.contains('sidebar-hidden'));
+  let desktopTimelineHidden = body.classList.contains('timeline-hidden');
+
+  const panelToDockView = (panel)=>{
+    if(panel === 'nodes') return 'props';
+    if(panel === 'details') return 'inspector';
+    return 'chart';
+  };
+
+  const detectActivePanel = ()=>{
+    if(!body.classList.contains('mobile-ui')) return activePanel;
+    if(!body.classList.contains('sidebar-hidden')) return 'run';
+    if(!body.classList.contains('timeline-hidden')){
+      const view = dock.dataset.view || 'chart';
+      if(view === 'props') return 'nodes';
+      if(view === 'inspector') return 'details';
+      return 'timeline';
+    }
+    return 'graph';
+  };
+
+  const syncButtons = ()=>{
+    const panel = detectActivePanel();
+    activePanel = panel;
+    nav.dataset.activePanel = panel;
+    buttons.forEach((button)=>{
+      const isActive = button.dataset.mobilePanel === panel;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  };
+
+  const schedulePanelEnforcement = (panel)=>{
+    window.requestAnimationFrame(()=>{
+      if(!body.classList.contains('mobile-ui')) return;
+      if(activePanel !== panel) return;
+      if(panel === 'run'){
+        if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
+        if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(false, { persist:false, syncMobileUi:false });
+      }else if(panel === 'graph'){
+        if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
+        if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
+      }else{
+        const dockView = panelToDockView(panel);
+        if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
+        if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView(dockView);
+        if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(false, { toast:false });
+      }
+      syncButtons();
+    });
+  };
+
+  const applyMobilePanel = (panel)=>{
+    const requestedPanel = String(panel || 'graph');
+    activePanel = requestedPanel;
+    if(!body.classList.contains('mobile-ui')){
+      syncButtons();
+      return;
+    }
+    if(requestedPanel === 'run'){
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(false, { persist:false, syncMobileUi:false });
+    }else if(requestedPanel === 'graph'){
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
+    }else{
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
+      if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView(panelToDockView(requestedPanel));
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(false, { toast:false });
+    }
+    activePanel = requestedPanel;
+    syncButtons();
+    schedulePanelEnforcement(requestedPanel);
+    window.dispatchEvent(new Event('resize'));
+  };
+
+  App.setMobileUiPanel = applyMobilePanel;
+  App.syncMobileUiState = syncButtons;
+
+  buttons.forEach((button)=>{
+    button.addEventListener('click', ()=> applyMobilePanel(button.dataset.mobilePanel));
+  });
+
+  ['timelineTabChart', 'timelineTabProps', 'timelineTabInspector'].forEach((id)=>{
+    const button = document.getElementById(id);
+    if(!button) return;
+    button.addEventListener('click', ()=>{
+      if(!body.classList.contains('mobile-ui')) return;
+      syncButtons();
+    });
+  });
+
+  const updateMode = ()=>{
+    const mobile = query.matches;
+    body.classList.toggle('mobile-ui', mobile);
+    if(mobile){
+      desktopSidebarHidden = body.classList.contains('sidebar-hidden');
+      desktopTimelineHidden = body.classList.contains('timeline-hidden');
+      applyMobilePanel('graph');
+    }else{
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(desktopSidebarHidden, { persist:false });
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(desktopTimelineHidden, { toast:false });
+      syncButtons();
+    }
+    window.dispatchEvent(new Event('resize'));
+  };
+
+  const syncFromMutations = ()=>{
+    if(!body.classList.contains('mobile-ui')) return;
+    syncButtons();
+  };
+
+  const bodyObserver = new MutationObserver(syncFromMutations);
+  bodyObserver.observe(body, { attributes:true, attributeFilter:['class'] });
+  const dockObserver = new MutationObserver(syncFromMutations);
+  dockObserver.observe(dock, { attributes:true, attributeFilter:['data-view'] });
+
+  if(typeof query.addEventListener === 'function'){
+    query.addEventListener('change', updateMode);
+  }else if(typeof query.addListener === 'function'){
+    query.addListener(updateMode);
+  }
+
+  window.addEventListener('resize', syncFromMutations);
+  window.addEventListener('load', ()=>{
+    if(!body.classList.contains('mobile-ui')) return;
+    window.setTimeout(()=> applyMobilePanel('graph'), 0);
+    window.setTimeout(()=> applyMobilePanel('graph'), 240);
+  });
+  updateMode();
+})();
+
+// Tablet light editor action bar
+(function(){
+  const body = document.body;
+  const bar = document.getElementById('tabletActionBar');
+  if(!bar) return;
+  const buttons = Array.from(bar.querySelectorAll('.tabletActionBtn[data-tablet-action]'));
+  const query = window.matchMedia('(min-width: 761px) and (max-width: 1180px)');
+  let activeAction = 'run';
+  let desktopSidebarHidden = !!(typeof App.getSavedSidebarHidden === 'function'
+    ? App.getSavedSidebarHidden()
+    : body.classList.contains('sidebar-hidden'));
+  let desktopTimelineHidden = body.classList.contains('timeline-hidden');
+
+  const syncButtons = ()=>{
+    buttons.forEach((button)=>{
+      const isActive = button.dataset.tabletAction === activeAction;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    bar.dataset.activeAction = activeAction;
+  };
+
+  const removeSelectedNodes = ()=>{
+    if(!App.graph || !App.canvas) return 0;
+    const selected = Object.values(App.canvas.selected_nodes || {}).filter(Boolean);
+    if(!selected.length) return 0;
+    try{
+      if(typeof App.graph.beforeChange === 'function') App.graph.beforeChange();
+      selected.forEach((node)=>{
+        try{ App.graph.remove(node); }catch(_e){}
+      });
+      if(typeof App.graph.afterChange === 'function') App.graph.afterChange();
+    }catch(_e){}
+    try{
+      if(typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+    }catch(_e){}
+    return selected.length;
+  };
+
+  const applyAction = (action)=>{
+    activeAction = String(action || 'run');
+    if(!body.classList.contains('tablet-ui')){
+      syncButtons();
+      return;
+    }
+    if(activeAction === 'run'){
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(false, { persist:false, syncMobileUi:false });
+    }else if(activeAction === 'add-node'){
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(false, { persist:false, syncMobileUi:false });
+      if(typeof App.focusSidebarPanel === 'function') App.focusSidebarPanel('addNodePanel');
+      if(typeof App.showToast === 'function') App.showToast('Add Node is ready');
+    }else if(activeAction === 'timeline'){
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
+      if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView('chart');
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(false, { toast:false });
+    }else if(activeAction === 'details'){
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
+      if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(false, { toast:false });
+    }else if(activeAction === 'delete'){
+      const removed = removeSelectedNodes();
+      if(typeof App.showToast === 'function'){
+        App.showToast(removed ? `Deleted ${removed} node${removed === 1 ? '' : 's'}` : 'No selected nodes');
+      }
+    }
+    syncButtons();
+    window.dispatchEvent(new Event('resize'));
+  };
+
+  App.setTabletUiAction = applyAction;
+
+  buttons.forEach((button)=>{
+    button.addEventListener('click', ()=> applyAction(button.dataset.tabletAction));
+  });
+
+  const updateMode = ()=>{
+    const tablet = query.matches;
+    body.classList.toggle('tablet-ui', tablet);
+    if(tablet){
+      desktopSidebarHidden = body.classList.contains('sidebar-hidden');
+      desktopTimelineHidden = body.classList.contains('timeline-hidden');
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
+      activeAction = 'run';
+      syncButtons();
+    }else{
+      if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(desktopSidebarHidden, { persist:false, syncMobileUi:false });
+      if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(desktopTimelineHidden, { toast:false });
+      syncButtons();
+    }
+    window.dispatchEvent(new Event('resize'));
+  };
+
+  if(typeof query.addEventListener === 'function'){
+    query.addEventListener('change', updateMode);
+  }else if(typeof query.addListener === 'function'){
+    query.addListener(updateMode);
+  }
+
+  window.addEventListener('load', ()=>{
+    if(!body.classList.contains('tablet-ui')) return;
+    window.setTimeout(()=> applyAction('run'), 0);
+    window.setTimeout(()=> applyAction('run'), 240);
+  });
+
+  updateMode();
 })();
 
 // Placement mode (node/group follows cursor, left click to place)

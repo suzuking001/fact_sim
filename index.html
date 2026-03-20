@@ -24,7 +24,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260314b" />
+  <link rel="stylesheet" href="css/app.css?v=20260320b" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -531,6 +531,20 @@
     </div>
   </div>
   <div id="timelineRevealHandle" aria-label="Drag up to show bottom panel"></div>
+  <nav id="mobileNav" aria-label="Mobile workspace navigation">
+    <button class="mobileNavBtn is-active" data-mobile-panel="graph" aria-pressed="true">Graph</button>
+    <button class="mobileNavBtn" data-mobile-panel="run" aria-pressed="false">Run</button>
+    <button class="mobileNavBtn" data-mobile-panel="timeline" aria-pressed="false">Timeline</button>
+    <button class="mobileNavBtn" data-mobile-panel="nodes" aria-pressed="false">Nodes</button>
+    <button class="mobileNavBtn" data-mobile-panel="details" aria-pressed="false">Details</button>
+  </nav>
+  <nav id="tabletActionBar" aria-label="Tablet workspace actions">
+    <button class="tabletActionBtn is-active" data-tablet-action="run" aria-pressed="true">Run</button>
+    <button class="tabletActionBtn" data-tablet-action="add-node" aria-pressed="false">Add Node</button>
+    <button class="tabletActionBtn" data-tablet-action="timeline" aria-pressed="false">Timeline</button>
+    <button class="tabletActionBtn" data-tablet-action="details" aria-pressed="false">Details</button>
+    <button class="tabletActionBtn" data-tablet-action="delete" aria-pressed="false">Delete</button>
+  </nav>
   <!-- Script Editor Modal -->
   <div id="scriptEditorModal">
     <div id="scriptEditorContainer">
@@ -847,7 +861,7 @@ SOFTWARE.
   <script src="js/app/examples.js?v=20260315a"></script>
   <script src="js/app/file-io.js?v=20260313a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
-  <script src="js/app/ui.js?v=20260314a"></script>
+  <script src="js/app/ui.js?v=20260320b"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>
