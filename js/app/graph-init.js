@@ -7,6 +7,14 @@ function applyGraphVisualTheme(){
   if(App.__graphVisualThemeApplied) return;
   App.__graphVisualThemeApplied = true;
 
+  // LiteGraph defaults to mouse-only listeners. Prefer pointer events so
+  // touch devices can pan and interact with the graph canvas.
+  if(window.PointerEvent){
+    LiteGraph.pointerevents_method = 'pointer';
+  }else if(('ontouchstart' in window) || (navigator && navigator.maxTouchPoints > 0)){
+    LiteGraph.pointerevents_method = 'touch';
+  }
+
   const clamp01 = (v)=> Math.max(0, Math.min(1, Number(v) || 0));
   const parseColor = (value)=>{
     const s = String(value || '').trim();
@@ -150,6 +158,106 @@ function drawEditorGrid(ctx, visibleArea, canvas){
   ctx.restore();
 }
 
+function installTouchPanZoom(canvas){
+  if(!canvas || canvas.__factTouchPanZoomHooked) return;
+  const el = canvas.canvas;
+  if(!el || typeof window.PointerEvent === 'undefined') return;
+  const hasTouch = ('ontouchstart' in window) || ((navigator && navigator.maxTouchPoints) ? navigator.maxTouchPoints > 0 : false);
+  if(!hasTouch) return;
+
+  const activePointers = new Map();
+  let pinch = null;
+
+  const isTouchPointer = (event)=> !!event && (event.pointerType === 'touch' || event.pointerType === 'pen');
+  const readPoints = ()=>{
+    const values = Array.from(activePointers.values());
+    if(values.length < 2) return null;
+    return [values[0], values[1]];
+  };
+  const centerOf = (a, b)=> ({ x: (a.x + b.x) * 0.5, y: (a.y + b.y) * 0.5 });
+  const distanceOf = (a, b)=> Math.hypot(a.x - b.x, a.y - b.y);
+  const cancelCanvasDrag = ()=>{
+    try{ canvas.dragging_canvas = false; }catch(_e){}
+    try{ canvas.dragging_rectangle = null; }catch(_e){}
+    try{ canvas.node_dragged = null; }catch(_e){}
+    try{ canvas.last_mouse_dragging = false; }catch(_e){}
+    try{ canvas.pointer_is_down = false; }catch(_e){}
+  };
+  const beginPinch = ()=>{
+    const points = readPoints();
+    if(!points) return;
+    const [a, b] = points;
+    pinch = {
+      startScale: Number(canvas.ds && canvas.ds.scale) || 1,
+      startDistance: Math.max(1, distanceOf(a, b)),
+      lastCenter: centerOf(a, b)
+    };
+    cancelCanvasDrag();
+  };
+  const updatePinch = ()=>{
+    if(!pinch) return;
+    const points = readPoints();
+    if(!points){
+      pinch = null;
+      return;
+    }
+    const [a, b] = points;
+    const distance = Math.max(1, distanceOf(a, b));
+    const center = centerOf(a, b);
+    const nextScale = pinch.startScale * (distance / pinch.startDistance);
+    if(canvas.ds && typeof canvas.ds.changeScale === 'function'){
+      canvas.ds.changeScale(nextScale, [center.x, center.y]);
+      const currentScale = Number(canvas.ds.scale) || 1;
+      const dx = center.x - pinch.lastCenter.x;
+      const dy = center.y - pinch.lastCenter.y;
+      canvas.ds.offset[0] += dx / currentScale;
+      canvas.ds.offset[1] += dy / currentScale;
+      pinch.lastCenter = center;
+    }
+    try{
+      if(typeof canvas.setDirty === 'function') canvas.setDirty(true, true);
+      if(canvas.graph && typeof canvas.graph.change === 'function') canvas.graph.change();
+    }catch(_e){}
+  };
+
+  const onPointerDown = (event)=>{
+    if(!isTouchPointer(event)) return;
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if(activePointers.size === 2){
+      beginPinch();
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  const onPointerMove = (event)=>{
+    if(!isTouchPointer(event) || !activePointers.has(event.pointerId)) return;
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if(!pinch || activePointers.size < 2) return;
+    updatePinch();
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const onPointerEnd = (event)=>{
+    if(!isTouchPointer(event)) return;
+    if(activePointers.has(event.pointerId)) activePointers.delete(event.pointerId);
+    if(activePointers.size < 2) pinch = null;
+    if(canvas && typeof canvas.setDirty === 'function') canvas.setDirty(true, true);
+    if(pinch){
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  el.addEventListener('pointerdown', onPointerDown, { capture: true, passive: false });
+  el.addEventListener('pointermove', onPointerMove, { capture: true, passive: false });
+  el.addEventListener('pointerup', onPointerEnd, { capture: true, passive: false });
+  el.addEventListener('pointercancel', onPointerEnd, { capture: true, passive: false });
+  el.addEventListener('pointerleave', onPointerEnd, { capture: true, passive: false });
+  canvas.__factTouchPanZoomHooked = true;
+}
+
 function initGraph(){
   applyGraphVisualTheme();
   if(App.graph) stopSimulation();
@@ -170,6 +278,9 @@ function initGraph(){
   };
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
+  if(graphElement && graphElement.style){
+    graphElement.style.touchAction = 'none';
+  }
   App.canvas.onDrawBackground = function(ctx, visibleArea){
     drawEditorGrid(ctx, visibleArea, this);
   };
@@ -180,6 +291,7 @@ function initGraph(){
     App.installCanvasRenderThrottle(App.canvas);
   }
   App.canvas.multi_select = true;
+  installTouchPanZoom(App.canvas);
   installBoxSelect(App.canvas);
   installBoxSelectOverlay(App.canvas);
   installClipboardHandlers(App.canvas);
