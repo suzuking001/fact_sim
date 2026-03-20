@@ -167,8 +167,27 @@ function installTouchPanZoom(canvas){
 
   const activePointers = new Map();
   let pinch = null;
+  let suppressContextMenuUntil = 0;
 
   const isTouchPointer = (event)=> !!event && (event.pointerType === 'touch' || event.pointerType === 'pen');
+  const nowMs = ()=> (window.performance && typeof window.performance.now === 'function')
+    ? window.performance.now()
+    : Date.now();
+  const bumpContextMenuSuppression = (ms = 900)=>{
+    suppressContextMenuUntil = Math.max(suppressContextMenuUntil, nowMs() + Math.max(0, Number(ms) || 0));
+  };
+  const closeContextMenus = ()=>{
+    try{
+      if(window.LiteGraph && typeof window.LiteGraph.closeAllContextMenus === 'function'){
+        window.LiteGraph.closeAllContextMenus(window);
+        return;
+      }
+    }catch(_e){}
+    try{
+      document.querySelectorAll('.litegraph.litecontextmenu').forEach((menu)=> menu.remove());
+    }catch(_e){}
+  };
+  const shouldSuppressContextMenu = ()=> !!pinch || activePointers.size > 0 || nowMs() < suppressContextMenuUntil;
   const readPoints = ()=>{
     const values = Array.from(activePointers.values());
     if(values.length < 2) return null;
@@ -192,6 +211,8 @@ function installTouchPanZoom(canvas){
       startDistance: Math.max(1, distanceOf(a, b)),
       lastCenter: centerOf(a, b)
     };
+    bumpContextMenuSuppression(1200);
+    closeContextMenus();
     cancelCanvasDrag();
   };
   const updatePinch = ()=>{
@@ -223,6 +244,7 @@ function installTouchPanZoom(canvas){
   const onPointerDown = (event)=>{
     if(!isTouchPointer(event)) return;
     activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    bumpContextMenuSuppression();
     if(activePointers.size === 2){
       beginPinch();
       event.preventDefault();
@@ -233,6 +255,7 @@ function installTouchPanZoom(canvas){
   const onPointerMove = (event)=>{
     if(!isTouchPointer(event) || !activePointers.has(event.pointerId)) return;
     activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    bumpContextMenuSuppression();
     if(!pinch || activePointers.size < 2) return;
     updatePinch();
     event.preventDefault();
@@ -241,13 +264,24 @@ function installTouchPanZoom(canvas){
 
   const onPointerEnd = (event)=>{
     if(!isTouchPointer(event)) return;
+    bumpContextMenuSuppression();
     if(activePointers.has(event.pointerId)) activePointers.delete(event.pointerId);
-    if(activePointers.size < 2) pinch = null;
+    if(activePointers.size < 2){
+      pinch = null;
+      closeContextMenus();
+    }
     if(canvas && typeof canvas.setDirty === 'function') canvas.setDirty(true, true);
-    if(pinch){
+    if(shouldSuppressContextMenu()){
       event.preventDefault();
       event.stopPropagation();
     }
+  };
+
+  const onContextMenu = (event)=>{
+    if(!shouldSuppressContextMenu()) return;
+    closeContextMenus();
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   el.addEventListener('pointerdown', onPointerDown, { capture: true, passive: false });
@@ -255,6 +289,7 @@ function installTouchPanZoom(canvas){
   el.addEventListener('pointerup', onPointerEnd, { capture: true, passive: false });
   el.addEventListener('pointercancel', onPointerEnd, { capture: true, passive: false });
   el.addEventListener('pointerleave', onPointerEnd, { capture: true, passive: false });
+  el.addEventListener('contextmenu', onContextMenu, { capture: true, passive: false });
   canvas.__factTouchPanZoomHooked = true;
 }
 
