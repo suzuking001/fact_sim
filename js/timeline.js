@@ -1,12 +1,77 @@
 // Timeline chart for node states (process/wait/down/idle)
 (function(){
-  const STATE_COLORS = {
-    process: '#2ecc71',
-    wait: '#f39c12',
-    down: '#3498db',
-    idle: '#f1c40f',
-    other: '#9ca3af'
-  };
+  function getResolvedUiTheme(){
+    try{
+      if(window.App && typeof window.App.getResolvedTheme === 'function'){
+        return window.App.getResolvedTheme();
+      }
+    }catch(_e){}
+    const theme = document && document.documentElement ? document.documentElement.dataset.theme : '';
+    return theme === 'dark' ? 'dark' : 'light';
+  }
+
+  function getTimelinePalette(){
+    if(getResolvedUiTheme() === 'dark'){
+      return {
+        stateColors: {
+          process: '#34d399',
+          wait: '#fbbf24',
+          down: '#60a5fa',
+          idle: '#fcd34d',
+          other: '#9ca3af'
+        },
+        background: '#0f1115',
+        gutterBg: '#151922',
+        grid: '#2a3342',
+        axisText: '#94a3b8',
+        rowEven: '#131821',
+        rowOdd: '#10151d',
+        rowDragFill: 'rgba(96,165,250,0.16)',
+        rowSelectedFill: '#241a3b',
+        rowSelectedBorder: '#a78bfa',
+        labelDragFill: '#1b2433',
+        labelDropFill: '#182235',
+        labelSelectedFill: '#2a1d4a',
+        labelSelectedText: '#ddd6fe',
+        labelText: '#e5e7eb',
+        utilMutedText: '#64748b',
+        utilText: '#cbd5e1',
+        matchStroke: '#e5e7eb',
+        dropLine: '#60a5fa',
+        nowLine: '#f87171',
+        border: '#273142'
+      };
+    }
+    return {
+      stateColors: {
+        process: '#2ecc71',
+        wait: '#f39c12',
+        down: '#3498db',
+        idle: '#f1c40f',
+        other: '#9ca3af'
+      },
+      background: '#ffffff',
+      gutterBg: '#f3f4f6',
+      grid: '#e5e7eb',
+      axisText: '#6b7280',
+      rowEven: '#ffffff',
+      rowOdd: '#fafafa',
+      rowDragFill: 'rgba(37,99,235,0.08)',
+      rowSelectedFill: '#f5f3ff',
+      rowSelectedBorder: '#7c3aed',
+      labelDragFill: '#dbeafe',
+      labelDropFill: '#eff6ff',
+      labelSelectedFill: '#ede9fe',
+      labelSelectedText: '#5b21b6',
+      labelText: '#111827',
+      utilMutedText: '#9ca3af',
+      utilText: '#1f2937',
+      matchStroke: '#111827',
+      dropLine: '#2563eb',
+      nowLine: '#ef4444',
+      border: '#e5e7eb'
+    };
+  }
 
   function niceStep(target){
     if(!isFinite(target) || target <= 0) return 1;
@@ -1008,6 +1073,7 @@
       const ctx = this.ctx;
       if(!ctx || this.width <= 0 || this.height <= 0) return;
       ctx.clearRect(0, 0, this.width, this.height);
+      const palette = getTimelinePalette();
 
       const now = this._lastNow || this._nowSec();
       const chartW = Math.max(1, this.width - this.leftGutter - 8);
@@ -1025,20 +1091,20 @@
       const labelColW = Math.max(60, utilColX - 6);
 
       // background
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = palette.background;
       ctx.fillRect(0, 0, this.width, this.height);
 
       // label gutter background
-      ctx.fillStyle = '#f3f4f6';
+      ctx.fillStyle = palette.gutterBg;
       ctx.fillRect(0, 0, this.leftGutter, this.height);
 
       // vertical grid
       const gridSec = niceStep(this.windowSec / 10);
       const startSec = Math.floor(this.offsetSec / gridSec) * gridSec;
-      ctx.strokeStyle = '#e5e7eb';
+      ctx.strokeStyle = palette.grid;
       ctx.lineWidth = 1;
       ctx.font = '10px sans-serif';
-      ctx.fillStyle = '#6b7280';
+      ctx.fillStyle = palette.axisText;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
       ctx.fillText('Node', 8, 10);
@@ -1070,17 +1136,17 @@
         const label = entry ? entry.label : this._nodeLabel(node);
         const util = this._utilizationStats(entry, now, cutoff);
 
-        ctx.fillStyle = (i % 2 === 0) ? '#ffffff' : '#fafafa';
+        ctx.fillStyle = (i % 2 === 0) ? palette.rowEven : palette.rowOdd;
         ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
         if(isDragSource){
-          ctx.fillStyle = 'rgba(37,99,235,0.08)';
+          ctx.fillStyle = palette.rowDragFill;
           ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
         }
 
         if(isNodeSelected){
-          ctx.fillStyle = '#f5f3ff';
+          ctx.fillStyle = palette.rowSelectedFill;
           ctx.fillRect(this.leftGutter, y, chartW, this.rowHeight);
-          ctx.strokeStyle = '#7c3aed';
+          ctx.strokeStyle = palette.rowSelectedBorder;
           ctx.lineWidth = 1;
           ctx.strokeRect(this.leftGutter + 0.5, y + 0.5, Math.max(1, chartW - 1), Math.max(1, this.rowHeight - 1));
         }
@@ -1091,20 +1157,20 @@
         ctx.rect(0, y, labelColW, this.rowHeight);
         ctx.clip();
         if(isDragSource){
-          ctx.fillStyle = '#dbeafe';
+          ctx.fillStyle = palette.labelDragFill;
           ctx.fillRect(0, y, labelColW, this.rowHeight);
         }else if(isDragTarget){
-          ctx.fillStyle = '#eff6ff';
+          ctx.fillStyle = palette.labelDropFill;
           ctx.fillRect(0, y, labelColW, this.rowHeight);
         }
         if(isNodeSelected){
-          ctx.fillStyle = '#ede9fe';
+          ctx.fillStyle = palette.labelSelectedFill;
           ctx.fillRect(0, y, labelColW, this.rowHeight);
-          ctx.strokeStyle = '#7c3aed';
+          ctx.strokeStyle = palette.rowSelectedBorder;
           ctx.lineWidth = 2;
           ctx.strokeRect(1, y + 1, Math.max(1, labelColW - 2), this.rowHeight - 2);
         }
-        ctx.fillStyle = isNodeSelected ? '#5b21b6' : '#111827';
+        ctx.fillStyle = isNodeSelected ? palette.labelSelectedText : palette.labelText;
         ctx.font = '12px sans-serif';
         ctx.textBaseline = 'middle';
         ctx.fillText(label, 8, y + this.rowHeight / 2);
@@ -1116,20 +1182,22 @@
         ctx.rect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
         ctx.clip();
         if(isDragSource){
-          ctx.fillStyle = '#dbeafe';
+          ctx.fillStyle = palette.labelDragFill;
           ctx.fillRect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
         }else if(isDragTarget){
-          ctx.fillStyle = '#eff6ff';
+          ctx.fillStyle = palette.labelDropFill;
           ctx.fillRect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
         }
         if(isNodeSelected){
-          ctx.fillStyle = '#ede9fe';
+          ctx.fillStyle = palette.labelSelectedFill;
           ctx.fillRect(utilColX, y, this.leftGutter - utilColX - 2, this.rowHeight);
         }
         ctx.font = '12px sans-serif';
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'right';
-        ctx.fillStyle = (util.pct === null) ? '#9ca3af' : (isNodeSelected ? '#5b21b6' : '#1f2937');
+        ctx.fillStyle = (util.pct === null)
+          ? palette.utilMutedText
+          : (isNodeSelected ? palette.labelSelectedText : palette.utilText);
         ctx.fillText(util.text, this.leftGutter - 8, y + this.rowHeight / 2);
         ctx.textAlign = 'left';
         ctx.restore();
@@ -1149,12 +1217,12 @@
               (this.selectedWorkId !== null && seg.workId === this.selectedWorkId) ||
               (this.selectedAgvId !== null && seg.agvId === this.selectedAgvId);
             const dim = (hasSel && !match);
-            ctx.fillStyle = STATE_COLORS[seg.state] || STATE_COLORS.other;
+            ctx.fillStyle = palette.stateColors[seg.state] || palette.stateColors.other;
             ctx.globalAlpha = dim ? 0.2 : 1;
             ctx.fillRect(x1, y + 2, x2 - x1, this.rowHeight - 4);
             if(match){
               ctx.globalAlpha = 1;
-              ctx.strokeStyle = '#111827';
+              ctx.strokeStyle = palette.matchStroke;
               ctx.lineWidth = 2;
               ctx.strokeRect(x1 + 0.5, y + 2.5, x2 - x1 - 1, this.rowHeight - 5);
             }
@@ -1167,7 +1235,7 @@
         const idx = Math.max(0, Math.min(nodes.length - 1, this._rowDrag.targetRow));
         const lineY = this.topPadding + idx * rowStep - this.scrollY + this.rowHeight + this.rowGap * 0.5;
         if(lineY >= this.topPadding - rowStep && lineY <= this.height + rowStep){
-          ctx.strokeStyle = '#2563eb';
+          ctx.strokeStyle = palette.dropLine;
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.moveTo(0, lineY);
@@ -1179,7 +1247,7 @@
       // now line
       const xNow = this.leftGutter + (now - this.offsetSec) * scale;
       if(xNow >= this.leftGutter && xNow <= this.leftGutter + chartW){
-        ctx.strokeStyle = '#ef4444';
+        ctx.strokeStyle = palette.nowLine;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(xNow, this.topPadding);
@@ -1188,7 +1256,7 @@
       }
 
       // borders
-      ctx.strokeStyle = '#e5e7eb';
+      ctx.strokeStyle = palette.border;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(utilColX, 0);

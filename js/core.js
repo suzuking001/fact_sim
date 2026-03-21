@@ -650,7 +650,7 @@ function _wrapOverlayText(ctx, text, maxWidth){
   return out.length ? out : [''];
 }
 
-const NODE_STATE_THEME = Object.freeze({
+const NODE_STATE_THEME_LIGHT = Object.freeze({
   IDLE:    { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f' },
   PROCESS: { title: '#d6f5e3', body: '#f4fcf8', accent: '#2ecc71' },
   WAIT:    { title: '#fee8c7', body: '#fff8ee', accent: '#f39c12' },
@@ -658,9 +658,53 @@ const NODE_STATE_THEME = Object.freeze({
   ERROR:   { title: '#ffd9df', body: '#fff4f6', accent: '#dc4c64' }
 });
 
+const NODE_STATE_THEME_DARK = Object.freeze({
+  IDLE:    { title: '#413713', body: '#2c2610', accent: '#f2cd52' },
+  PROCESS: { title: '#143223', body: '#0f2419', accent: '#4dd08a' },
+  WAIT:    { title: '#402a12', body: '#2b1d0c', accent: '#f6b454' },
+  DOWN:    { title: '#122e42', body: '#0d1f2e', accent: '#68b4ff' },
+  ERROR:   { title: '#42191d', body: '#2d1215', accent: '#ff7c8e' }
+});
+
+function _getResolvedUiTheme(){
+  try{
+    if(window.App && typeof App.getResolvedTheme === 'function'){
+      return App.getResolvedTheme() === 'dark' ? 'dark' : 'light';
+    }
+  }catch(_e){}
+  try{
+    return document && document.documentElement && document.documentElement.dataset && document.documentElement.dataset.theme === 'dark'
+      ? 'dark'
+      : 'light';
+  }catch(_e){}
+  return 'light';
+}
+
+function _getOverlayPalette(){
+  if(_getResolvedUiTheme() === 'dark'){
+    return {
+      shadow: 'rgba(0,0,0,0.28)',
+      cardFill: 'rgba(16,20,28,0.84)',
+      cardStroke: 'rgba(255,255,255,0.12)',
+      text: 'rgba(229,237,247,0.88)',
+      buttonFill: '#4ea1ff',
+      buttonText: '#ffffff'
+    };
+  }
+  return {
+    shadow: 'rgba(15,23,42,0.12)',
+    cardFill: 'rgba(255,255,255,0.78)',
+    cardStroke: 'rgba(17,17,17,0.08)',
+    text: 'rgba(17,17,17,0.82)',
+    buttonFill: '#0a84ff',
+    buttonText: '#ffffff'
+  };
+}
+
 function _getNodeStateTheme(state){
   const key = String(state || 'IDLE').toUpperCase();
-  return NODE_STATE_THEME[key] || NODE_STATE_THEME.IDLE;
+  const palette = _getResolvedUiTheme() === 'dark' ? NODE_STATE_THEME_DARK : NODE_STATE_THEME_LIGHT;
+  return palette[key] || palette.IDLE;
 }
 
 function _drawCanvasCard(ctx, x, y, width, height, radius){
@@ -860,26 +904,27 @@ function _drawCompactLinesInsideNode(ctx, node, lines){
   const layout = _getCompactOverlayLayout(ctx, node, lines);
   if(!layout) return;
   const theme = _getNodeStateTheme(node && node._state);
+  const overlay = _getOverlayPalette();
   const scale = _getCurrentCanvasScale();
   const lowScale = scale < 0.78;
   ctx.save();
   try{
     ctx.font = '10.5px Inter, ui-sans-serif, system-ui, sans-serif';
-    ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.06)';
+    ctx.shadowColor = lowScale ? 'transparent' : overlay.shadow;
     ctx.shadowBlur = lowScale ? 0 : 8;
     ctx.shadowOffsetY = lowScale ? 0 : 2;
-    ctx.fillStyle = lowScale ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.88)';
+    ctx.fillStyle = lowScale ? overlay.cardFill : overlay.cardFill;
     _drawCanvasCard(ctx, layout.boxX, layout.boxY, layout.boxWidth, layout.boxHeight, 8);
     ctx.fill();
     ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = lowScale ? 'rgba(17,17,17,0.16)' : 'rgba(17,17,17,0.08)';
+    ctx.strokeStyle = lowScale ? overlay.cardStroke : overlay.cardStroke;
     ctx.lineWidth = lowScale ? Math.min(2.2, 1 / Math.max(scale, 0.45)) : 1;
     _drawCanvasCard(ctx, layout.boxX + 0.5, layout.boxY + 0.5, layout.boxWidth - 1, layout.boxHeight - 1, 8);
     ctx.stroke();
     ctx.fillStyle = theme.accent;
     _drawCanvasCard(ctx, layout.boxX + 1.5, layout.boxY + 1.5, 3, Math.max(10, layout.boxHeight - 3), 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(17,17,17,0.74)';
+    ctx.fillStyle = overlay.text;
     ctx.textBaseline = 'top';
     let yy = layout.boxY + layout.padY;
     for(const raw of layout.lines){
@@ -911,6 +956,7 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
   const anchorMarginY = (Number(margin) || 6) * unit;
   const outerWidth = 5 * unit;
   const theme = _getNodeStateTheme(node && node._state);
+  const overlay = _getOverlayPalette();
   const lowScale = scale < 0.78;
   ctx.save();
   try{
@@ -931,10 +977,10 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     const boxX = resolved.x - (Number(node.pos?.[0]) || 0);
     const yTop = resolved.y - (Number(node.pos?.[1]) || 0);
     const textX = boxX + (4 * unit);
-    ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.12)';
+    ctx.shadowColor = lowScale ? 'transparent' : overlay.shadow;
     ctx.shadowBlur = lowScale ? 0 : 22;
     ctx.shadowOffsetY = lowScale ? 0 : 8;
-    ctx.fillStyle = 'rgba(255,255,255,0.78)';
+    ctx.fillStyle = overlay.cardFill;
     _drawCanvasCard(ctx, boxX, yTop, boxWidth + outerWidth, boxHeight, 9 * unit);
     ctx.fill();
     if(node){
@@ -946,7 +992,7 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
       };
     }
     ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = lowScale ? 'rgba(17,17,17,0.16)' : 'rgba(17,17,17,0.08)';
+    ctx.strokeStyle = lowScale ? overlay.cardStroke : overlay.cardStroke;
     ctx.lineWidth = 1 * unit;
     _drawCanvasCard(ctx, boxX + (0.5 * unit), yTop + (0.5 * unit), boxWidth + outerWidth - (1 * unit), boxHeight - (1 * unit), 9 * unit);
     ctx.stroke();
@@ -959,10 +1005,10 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     const chipHeight = 14 * unit;
     const chipX = boxX + boxWidth - chipWidth + (2 * unit);
     const chipY = yTop + (5 * unit);
-    ctx.fillStyle = '#0a84ff';
+    ctx.fillStyle = overlay.buttonFill;
     _drawCanvasCard(ctx, chipX, chipY, chipWidth, chipHeight, 999 * unit);
     ctx.fill();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = overlay.buttonText;
     ctx.textBaseline = 'middle';
     ctx.fillText(chipLabel, chipX + (7 * unit), chipY + chipHeight * 0.5);
     if(node){
@@ -973,7 +1019,7 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
         h: chipHeight
       };
     }
-    ctx.fillStyle = 'rgba(17,17,17,0.82)';
+    ctx.fillStyle = overlay.text;
     ctx.font = `${10 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
     ctx.textBaseline = 'top';
     let yy = yTop + pad + headerPad - (2 * unit);

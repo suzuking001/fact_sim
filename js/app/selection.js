@@ -320,6 +320,7 @@ function installTimelineNodeSelection(c){
   if(!el) return;
   const controller = App.resetListenerController('__timelineNodeSelectController');
   const opts = App.listenerOptions(true, controller);
+  const downEventName = (typeof window !== 'undefined' && typeof window.PointerEvent === 'function') ? 'pointerdown' : 'mousedown';
 
   const getCanvasPos = (e)=>{
     try{
@@ -329,7 +330,7 @@ function installTimelineNodeSelection(c){
     return [e.offsetX || 0, e.offsetY || 0];
   };
 
-  el.addEventListener('mousedown', (e)=>{
+  el.addEventListener(downEventName, (e)=>{
     if(e.button !== 0) return;
     if(e.ctrlKey || e.metaKey) return;
     if(App.placement && App.placement.active) return;
@@ -354,9 +355,7 @@ function installTimelineNodeSelection(c){
       if(canProps){
         props.selectNodeFromGraph(node, { ensureVisible: true, syncTimeline: false });
       }
-      if(canInspectorNode){
-        inspector.setNode(node);
-      }
+      if(canInspectorNode) inspector.setNode(node);
       return;
     }
     const group = (typeof App.getGroupAtCanvasPos === 'function') ? App.getGroupAtCanvasPos(p[0], p[1]) : null;
@@ -366,9 +365,7 @@ function installTimelineNodeSelection(c){
         if(typeof c.deselectAllNodes === 'function') c.deselectAllNodes();
         c.setDirty(true, true);
       }catch(_e){}
-      if(canInspectorGroup){
-        inspector.setGroup(group);
-      }
+      if(canInspectorGroup) inspector.setGroup(group);
       return;
     }
     if(c.selected_group){

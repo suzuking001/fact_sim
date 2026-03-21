@@ -2,15 +2,50 @@
 
 const SINK_THROUGHPUT_WINDOW_MS = 60 * 60 * 1000;
 
+function getSinkThemePalette(){
+  const dark = !!(window.App && typeof App.getResolvedTheme === 'function'
+    ? App.getResolvedTheme() === 'dark'
+    : (document && document.documentElement && document.documentElement.dataset && document.documentElement.dataset.theme === 'dark'));
+  if(dark){
+    return {
+      node: { title: '#413713', body: '#2c2610', accent: '#f2cd52' },
+      metricFill: 'rgba(26,30,38,0.90)',
+      metricStroke: 'rgba(242,205,82,0.22)',
+      metricLabel: 'rgba(242,228,176,0.78)',
+      metricValue: '#f7e39b',
+      chartFill: 'rgba(24,20,12,0.46)',
+      chartStroke: 'rgba(242,205,82,0.18)',
+      chartGrid: 'rgba(242,205,82,0.10)',
+      chartAxisText: 'rgba(242,228,176,0.68)',
+      chartEmptyText: 'rgba(242,228,176,0.48)',
+      cycleColor: '#f6b454',
+      throughputColor: '#59cf92'
+    };
+  }
+  return {
+    node: { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f' },
+    metricFill: 'rgba(255,255,255,0.78)',
+    metricStroke: 'rgba(166, 142, 29, 0.22)',
+    metricLabel: 'rgba(93, 80, 16, 0.82)',
+    metricValue: '#594f14',
+    chartFill: 'rgba(82,72,14,0.06)',
+    chartStroke: 'rgba(166, 142, 29, 0.18)',
+    chartGrid: 'rgba(82,72,14,0.10)',
+    chartAxisText: 'rgba(93, 80, 16, 0.68)',
+    chartEmptyText: 'rgba(93, 80, 16, 0.45)',
+    cycleColor: '#f39c12',
+    throughputColor: '#2d8f6f'
+  };
+}
+
 class SinkNode extends LiteGraph.LGraphNode{
   constructor(){
     super();
     this.title = 'Sink';
     this.addInput('workIn', 0);
     this.size = [244,224];
-    this.color = '#fbefbe';
-    this.bgcolor = '#fffdf3';
-    this.boxcolor = '#f1c40f';
+    this._themeMode = '';
+    this._applyTheme();
     this.__disableCompactOverlay = true;
     this._recv = [];
     this._history = [];
@@ -21,6 +56,16 @@ class SinkNode extends LiteGraph.LGraphNode{
     this._throughputPerHour = 0;
     this.properties = this.properties || {};
     if(window.enableFlipIO) window.enableFlipIO(this);
+  }
+
+  _applyTheme(){
+    const mode = window.App && typeof App.getResolvedTheme === 'function' ? App.getResolvedTheme() : 'light';
+    if(this._themeMode === mode) return;
+    this._themeMode = mode;
+    const palette = getSinkThemePalette();
+    this.color = palette.node.title;
+    this.bgcolor = palette.node.body;
+    this.boxcolor = palette.node.accent;
   }
 
   _recordSample(ts, tph){
@@ -95,6 +140,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   onDrawForeground(ctx){
+    this._applyTheme();
     if(this._ensureMinimumSize()) return;
     const tph = this._formatThroughputPerHour(this._calcThroughputPerHour(simNow()));
     const lastCycleSec = this._history.length ? (Math.max(0, Number(this._history[this._history.length - 1].cycle) || 0) / 1000) : 0;
@@ -125,6 +171,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   _drawMetrics(ctx, tphText, lastCycleSec){
+    const palette = getSinkThemePalette();
     const top = 30;
     const left = 10;
     const gap = 6;
@@ -139,17 +186,17 @@ class SinkNode extends LiteGraph.LGraphNode{
     try{
       specs.forEach((spec, idx)=>{
         const x = left + idx * (cardWidth + gap);
-        ctx.fillStyle = 'rgba(255,255,255,0.78)';
-        ctx.strokeStyle = 'rgba(166, 142, 29, 0.22)';
+        ctx.fillStyle = palette.metricFill;
+        ctx.strokeStyle = palette.metricStroke;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.roundRect(x, top, cardWidth, cardHeight, 8);
         ctx.fill();
         ctx.stroke();
-        ctx.fillStyle = 'rgba(93, 80, 16, 0.82)';
+        ctx.fillStyle = palette.metricLabel;
         ctx.font = '10px sans-serif';
         ctx.fillText(spec.label, x + 8, top + 11);
-        ctx.fillStyle = '#594f14';
+        ctx.fillStyle = palette.metricValue;
         ctx.font = 'bold 11px sans-serif';
         ctx.fillText(spec.value, x + 8, top + 23);
       });
@@ -159,6 +206,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   _drawHistory(ctx){
+    const palette = getSinkThemePalette();
     const pad = 12;
     const topOffset = 68;
     const axisWidth = 34;
@@ -179,7 +227,7 @@ class SinkNode extends LiteGraph.LGraphNode{
       width,
       height: chartHeight,
       label: 'Cycle Time',
-      color: '#f39c12',
+      color: palette.cycleColor,
       samples,
       span,
       minT,
@@ -194,7 +242,7 @@ class SinkNode extends LiteGraph.LGraphNode{
       width,
       height: chartHeight,
       label: 'Throughput',
-      color: '#2d8f6f',
+      color: palette.throughputColor,
       samples,
       span,
       minT,
@@ -205,6 +253,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   _drawSeriesChart(ctx, config){
+    const palette = getSinkThemePalette();
     const x = Number(config.x) || 0;
     const y = Number(config.y) || 0;
     const width = Math.max(40, Number(config.width) || 0);
@@ -224,19 +273,19 @@ class SinkNode extends LiteGraph.LGraphNode{
 
     ctx.save();
     ctx.translate(x, y);
-    ctx.fillStyle = 'rgba(82,72,14,0.06)';
-    ctx.strokeStyle = 'rgba(166, 142, 29, 0.18)';
+    ctx.fillStyle = palette.chartFill;
+    ctx.strokeStyle = palette.chartStroke;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.roundRect(0, 0, width, height, 8);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#594f14';
+    ctx.fillStyle = palette.metricValue;
     ctx.font = 'bold 10px sans-serif';
     ctx.fillText(label, 8, 12);
 
-    ctx.strokeStyle = 'rgba(82,72,14,0.10)';
+    ctx.strokeStyle = palette.chartGrid;
     ctx.lineWidth = 1;
     for(let i = 0; i <= divisions; i++){
       const yy = plotInsetTop + (i / divisions) * plotHeight;
@@ -245,7 +294,7 @@ class SinkNode extends LiteGraph.LGraphNode{
       ctx.lineTo(width, yy);
       ctx.stroke();
       const labelValue = maxValue * (1 - i / divisions);
-      ctx.fillStyle = 'rgba(93, 80, 16, 0.68)';
+      ctx.fillStyle = palette.chartAxisText;
       ctx.font = '10px sans-serif';
       ctx.fillText(valueFormatter(labelValue), width + 6, Math.max(10, yy + 3));
     }
@@ -263,7 +312,7 @@ class SinkNode extends LiteGraph.LGraphNode{
       });
       ctx.stroke();
     }else{
-      ctx.fillStyle = 'rgba(93, 80, 16, 0.45)';
+      ctx.fillStyle = palette.chartEmptyText;
       ctx.font = '10px sans-serif';
       ctx.fillText('No samples yet', 8, plotInsetTop + 16);
     }

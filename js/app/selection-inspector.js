@@ -478,30 +478,36 @@ var App = window.App || (window.App = {});
 
     attachCanvas(canvas){
       this.canvas = canvas || null;
-      if(!canvas || canvas.__factInspectorHooked) return;
-      const prevDrawOverlay = canvas.onDrawOverlay;
-      canvas.onDrawOverlay = function(ctx){
-        const prevGroupCard = this.__factGroupInspectorCard || null;
-        try{
-          if(typeof prevDrawOverlay === 'function') prevDrawOverlay.call(this, ctx);
-        }catch(_e){}
-        this.__factGroupInspectorAction = null;
-        this.__factGroupInspectorCard = null;
-        try{
-          let hover = findGroupAt(this.graph, this.graph_mouse?.[0], this.graph_mouse?.[1]);
-          if(!hover && prevGroupCard && pointInRect(this.graph_mouse, prevGroupCard.rect)){
-            hover = prevGroupCard.group;
-          }
-          const group = this.selected_group || hover;
-          if(group) drawGroupCard(this, ctx, group);
-        }catch(_e){}
-      };
+      if(!canvas) return;
+      if(!canvas.__factInspectorOverlayHooked){
+        const prevDrawOverlay = canvas.onDrawOverlay;
+        canvas.onDrawOverlay = function(ctx){
+          const prevGroupCard = this.__factGroupInspectorCard || null;
+          try{
+            if(typeof prevDrawOverlay === 'function') prevDrawOverlay.call(this, ctx);
+          }catch(_e){}
+          this.__factGroupInspectorAction = null;
+          this.__factGroupInspectorCard = null;
+          try{
+            let hover = findGroupAt(this.graph, this.graph_mouse?.[0], this.graph_mouse?.[1]);
+            if(!hover && prevGroupCard && pointInRect(this.graph_mouse, prevGroupCard.rect)){
+              hover = prevGroupCard.group;
+            }
+            const group = this.selected_group || hover;
+            if(group) drawGroupCard(this, ctx, group);
+          }catch(_e){}
+        };
+        canvas.__factInspectorOverlayHooked = true;
+      }
 
       const el = canvas.canvas;
       if(!el) return;
+      const controller = App.resetListenerController('__selectionInspectorCanvasController');
+      const opts = App.listenerOptions(true, controller);
+      const downEventName = (typeof window !== 'undefined' && typeof window.PointerEvent === 'function') ? 'pointerdown' : 'mousedown';
 
-      el.addEventListener('mousedown', (e)=>{
-        if(e.button !== 0) return;
+      el.addEventListener('dblclick', (e)=>{
+        if(typeof e.button === 'number' && e.button !== 0) return;
         const point = canvasPos(canvas, e);
         if(!point) return;
         const node = findNodeOverlayAction(canvas, point);
@@ -522,9 +528,9 @@ var App = window.App || (window.App = {});
           canvas.selected_group = groupAction.group;
           this.openGroup(groupAction.group, true);
         }
-      }, true);
+      }, opts);
 
-      el.addEventListener('mousedown', (e)=>{
+      el.addEventListener(downEventName, (e)=>{
         if(e.button !== 0) return;
         if(e.ctrlKey || e.metaKey) return;
         if(App.placement && App.placement.active) return;
@@ -553,13 +559,11 @@ var App = window.App || (window.App = {});
           canvas.setDirty(true, true);
         }
         if(this.target.kind === 'group') this.clear(true);
-      });
-
-      canvas.__factInspectorHooked = true;
+      }, opts);
     }
 
     renderEmpty(){
-      this.root.innerHTML = '<div class="selectionInspectorEmpty"><h3>Inspector</h3><p>Select a node or group to edit it in one consistent place.</p><p>Right click or click the hover card action to jump here directly.</p></div>';
+      this.root.innerHTML = '<div class="selectionInspectorEmpty"><h3>Details</h3><p>Select a node or group to edit it in one consistent place.</p><p>Right click, use Open Details, or double click the hover card action to jump here directly.</p></div>';
     }
 
     renderNodeProp(container, node, key, value){
@@ -678,7 +682,7 @@ var App = window.App || (window.App = {});
     renderNode(node){
       const props = isObjectLike(node.properties) ? node.properties : {};
       const propKeys = Object.keys(props).sort((a, b)=> a.localeCompare(b));
-      this.setMeta(`Inspector: ${node.title || node.type || 'Node'} #${node.id}`);
+      this.setMeta(`Details: ${node.title || node.type || 'Node'} #${node.id}`);
       const layout = document.createElement('div');
       layout.className = 'selectionInspectorLayout';
       this.root.appendChild(layout);
@@ -693,7 +697,7 @@ var App = window.App || (window.App = {});
         '<section class="selectionInspectorCard">',
         '<div class="selectionInspectorHeader">',
         '<div>',
-        '<div class="selectionInspectorEyebrow">Node Inspector</div>',
+        '<div class="selectionInspectorEyebrow">Node Details</div>',
         `<h2 class="selectionInspectorTitle">${escapeHtml(node.title || node.type || 'Node')}</h2>`,
         `<p class="selectionInspectorSubtitle">${escapeHtml(node.type || 'Unknown type')}</p>`,
         '</div>',
@@ -744,7 +748,7 @@ var App = window.App || (window.App = {});
           });
         }
         if(titleEl) titleEl.textContent = nextTitle;
-        this.setMeta(`Inspector: ${nextTitle} #${node.id}`);
+        this.setMeta(`Details: ${nextTitle} #${node.id}`);
         return true;
       };
       titleInput.addEventListener('input', applyTitle);
@@ -766,7 +770,7 @@ var App = window.App || (window.App = {});
       const meta = getGroupMeta(group);
       const bounds = getGroupBounds(group);
       const rate = groupRate(group);
-      this.setMeta(`Inspector: ${group.title || meta?.title || 'Group'}`);
+      this.setMeta(`Details: ${group.title || meta?.title || 'Group'}`);
       const layout = document.createElement('div');
       layout.className = 'selectionInspectorLayout';
       this.root.appendChild(layout);
@@ -781,7 +785,7 @@ var App = window.App || (window.App = {});
         '<section class="selectionInspectorCard">',
         '<div class="selectionInspectorHeader">',
         '<div>',
-        `<div class="selectionInspectorEyebrow">${meta ? 'Stop Group Inspector' : 'Group Inspector'}</div>`,
+        `<div class="selectionInspectorEyebrow">${meta ? 'Stop Group Details' : 'Group Details'}</div>`,
         `<h2 class="selectionInspectorTitle">${escapeHtml(group.title || meta?.title || 'Group')}</h2>`,
         `<p class="selectionInspectorSubtitle">${escapeHtml(groupDescription(group))}</p>`,
         '</div>',

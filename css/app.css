@@ -3123,6 +3123,7 @@ body:not(.sidebar-hidden) #graph{
 :root{
   --ui-font: "SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
   --ui-mono: "SF Mono","JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --theme-color: #f5f5f7;
   --bg: #f5f5f7;
   --panel-bg: rgba(255,255,255,0.78);
   --panel-border: rgba(15,23,42,0.08);
@@ -3144,6 +3145,19 @@ body:not(.sidebar-hidden) #graph{
   --radius-sm: 14px;
   --shadow: 0 20px 50px rgba(15,23,42,0.10), 0 4px 12px rgba(15,23,42,0.05);
   --menu-shadow: 0 24px 60px rgba(15,23,42,0.16);
+  --graph-canvas-clear: #f6f8fb;
+  --graph-canvas-bg: rgba(248,250,253,0.9);
+  --graph-grid-minor: rgba(17,17,17,0.045);
+  --graph-grid-minor-dense: rgba(17,17,17,0.03);
+  --graph-grid-major: rgba(10,132,255,0.08);
+  --graph-grid-major-dense: rgba(10,132,255,0.055);
+  --graph-node-title: #111111;
+  --graph-node-title-fill: #e8f2ff;
+  --graph-node-bg: #ffffff;
+  --graph-node-accent: #0a84ff;
+  --graph-node-outline: #d4dde9;
+  --graph-link: #b9bec8;
+  --graph-event-link: #0a84ff;
 }
 
 html,
@@ -4802,6 +4816,712 @@ body.tablet-ui:not(.landing-hidden) #tabletActionBar{
 
 body.tablet-ui #toast{
   bottom: calc(var(--tablet-bar-height) + 30px);
+}
+
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --theme-color: #0f1115;
+  --bg: #0f1115;
+  --panel-bg: rgba(17,20,27,0.82);
+  --panel-border: rgba(255,255,255,0.08);
+  --text: #e5edf7;
+  --muted: rgba(208,219,235,0.74);
+  --accent: #7cb8ff;
+  --accent-2: #4ea1ff;
+  --input-bg: rgba(20,24,32,0.92);
+  --input-border: rgba(255,255,255,0.14);
+  --menu-shell-bg: rgba(18,22,30,0.92);
+  --menu-shell-border: rgba(255,255,255,0.12);
+  --menu-card-bg: rgba(20,24,32,0.94);
+  --menu-card-border: rgba(255,255,255,0.10);
+  --menu-text: #e5edf7;
+  --menu-muted: rgba(208,219,235,0.68);
+  --menu-input-bg: rgba(20,24,32,0.92);
+  --menu-input-border: rgba(255,255,255,0.14);
+  --shadow: 0 24px 60px rgba(0,0,0,0.32), 0 8px 22px rgba(0,0,0,0.18);
+  --menu-shadow: 0 28px 72px rgba(0,0,0,0.42);
+  --graph-canvas-clear: #0f141c;
+  --graph-canvas-bg: rgba(15,20,28,0.96);
+  --graph-grid-minor: rgba(255,255,255,0.05);
+  --graph-grid-minor-dense: rgba(255,255,255,0.035);
+  --graph-grid-major: rgba(124,184,255,0.12);
+  --graph-grid-major-dense: rgba(124,184,255,0.08);
+  --graph-node-title: #edf3fb;
+  --graph-node-title-fill: #162338;
+  --graph-node-bg: #171d26;
+  --graph-node-accent: #69b1ff;
+  --graph-node-outline: rgba(255,255,255,0.12);
+  --graph-link: rgba(170,184,204,0.68);
+  --graph-event-link: #7cb8ff;
+}
+
+:root[data-theme="dark"],
+:root[data-theme="dark"] body{
+  background:
+    radial-gradient(960px 560px at 12% -12%, rgba(69,131,255,0.16), transparent 72%),
+    radial-gradient(920px 520px at 88% -8%, rgba(20,24,32,0.76), transparent 74%),
+    linear-gradient(180deg, #0f1115 0%, #12161d 46%, #161b23 100%);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] body::before{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 24%, rgba(255,255,255,0.00) 76%, rgba(255,255,255,0.04) 100%),
+    radial-gradient(720px 320px at 50% 0%, rgba(255,255,255,0.05), transparent 74%);
+}
+
+:root[data-theme="dark"] #landing{
+  background:
+    radial-gradient(980px 460px at 18% -10%, rgba(69,131,255,0.16), transparent 70%),
+    radial-gradient(820px 440px at 100% 0%, rgba(20,24,32,0.88), transparent 74%),
+    #0e1218;
+}
+
+:root[data-theme="dark"] #landing::before{
+  opacity: 0.14;
+  filter: grayscale(0.4) contrast(1.02);
+}
+
+:root[data-theme="dark"] #landing::after{
+  background: linear-gradient(180deg, rgba(9,12,16,0.14) 0%, rgba(13,16,21,0.68) 40%, rgba(14,18,24,0.92) 100%);
+}
+
+:root[data-theme="dark"] .landingTopbar,
+:root[data-theme="dark"] .landingHero,
+:root[data-theme="dark"] .landingMetricCard,
+:root[data-theme="dark"] .landingCardMini,
+:root[data-theme="dark"] .landingSection,
+:root[data-theme="dark"] .landingProgressWrap{
+  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(20,24,32,0.92), rgba(16,20,27,0.78));
+  box-shadow: 0 22px 50px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+:root[data-theme="dark"] .landingWordmark,
+:root[data-theme="dark"] .landingSectionTitle,
+:root[data-theme="dark"] #landingTitle,
+:root[data-theme="dark"] .landingSubtitle,
+:root[data-theme="dark"] .landingMetricList strong{
+  color: #eef4fb;
+}
+
+:root[data-theme="dark"] .landingBody,
+:root[data-theme="dark"] .landingSectionText,
+:root[data-theme="dark"] .landingCardMini p,
+:root[data-theme="dark"] .landingMetricList li span,
+:root[data-theme="dark"] .landingEyebrow,
+:root[data-theme="dark"] .landingMetricEyebrow,
+:root[data-theme="dark"] .landingSectionKicker,
+:root[data-theme="dark"] .landingLegal,
+:root[data-theme="dark"] .landingNav a,
+:root[data-theme="dark"] .landingFooterLinks a{
+  color: rgba(208,219,235,0.74);
+}
+
+:root[data-theme="dark"] .landingNav a:hover,
+:root[data-theme="dark"] .landingFooterLinks a:hover,
+:root[data-theme="dark"] .landingInlineLink,
+:root[data-theme="dark"] .landingInlineLink:hover{
+  color: #8ac2ff;
+}
+
+:root[data-theme="dark"] .landingBtn{
+  border-color: rgba(255,255,255,0.10);
+  background: rgba(20,24,32,0.92);
+  color: #eaf1fa;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+:root[data-theme="dark"] .landingBtn:hover{
+  border-color: rgba(124,184,255,0.28);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.24), 0 0 0 4px rgba(124,184,255,0.10);
+}
+
+:root[data-theme="dark"] .landingBtnPrimary{
+  background: linear-gradient(180deg, #4a9cff, #1f78e7);
+  color: #ffffff;
+  border-color: rgba(74,156,255,0.92);
+}
+
+:root[data-theme="dark"] .landingProgressBar{
+  background: rgba(255,255,255,0.08);
+}
+
+:root[data-theme="dark"] .landingProgressState,
+:root[data-theme="dark"] .landingPills span{
+  background: rgba(124,184,255,0.12);
+  color: #8ec6ff;
+  border-color: rgba(124,184,255,0.22);
+}
+
+:root[data-theme="dark"] #graph{
+  background:
+    radial-gradient(980px 520px at 18% -12%, rgba(69,131,255,0.13), transparent 72%),
+    radial-gradient(760px 420px at 100% 0%, rgba(18,22,30,0.84), transparent 74%),
+    linear-gradient(180deg, #0f131a 0%, #131821 100%);
+}
+
+:root[data-theme="dark"] #sidebar{
+  background:
+    linear-gradient(180deg, rgba(17,20,27,0.88), rgba(13,17,24,0.82)),
+    linear-gradient(180deg, rgba(69,131,255,0.08), rgba(255,255,255,0));
+  border-left: 1px solid rgba(255,255,255,0.08);
+  box-shadow: -20px 0 54px rgba(0,0,0,0.24);
+}
+
+:root[data-theme="dark"] #sidebar::before{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.00)),
+    linear-gradient(180deg, rgba(69,131,255,0.12), transparent 32%);
+}
+
+:root[data-theme="dark"] #sidebarHeader,
+:root[data-theme="dark"] #sidebar #controls,
+:root[data-theme="dark"] #sidebar #fileControls,
+:root[data-theme="dark"] #addNodePanel,
+:root[data-theme="dark"] #addGroupPanel,
+:root[data-theme="dark"] #advancedPanel,
+:root[data-theme="dark"] #shortcutPanel,
+:root[data-theme="dark"] #backgroundPanel,
+:root[data-theme="dark"] .quickStartCard,
+:root[data-theme="dark"] .simStatusCard,
+:root[data-theme="dark"] #timelineDock,
+:root[data-theme="dark"] .nodePropsTableWrap,
+:root[data-theme="dark"] .selectionInspectorEmpty,
+:root[data-theme="dark"] .selectionInspectorCard,
+:root[data-theme="dark"] .accessCounter,
+:root[data-theme="dark"] #menuToggle,
+:root[data-theme="dark"] #simTimeHud,
+:root[data-theme="dark"] #mobileNav,
+:root[data-theme="dark"] #tabletActionBar{
+  border-color: rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(20,24,32,0.94), rgba(14,18,24,0.82));
+  box-shadow: 0 18px 42px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+:root[data-theme="dark"] #sidebarHeader::after,
+:root[data-theme="dark"] #sidebar #controls::after,
+:root[data-theme="dark"] #sidebar #fileControls::after,
+:root[data-theme="dark"] #addNodePanel::after,
+:root[data-theme="dark"] #addGroupPanel::after,
+:root[data-theme="dark"] #advancedPanel::after,
+:root[data-theme="dark"] #shortcutPanel::after,
+:root[data-theme="dark"] #backgroundPanel::after{
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+}
+
+:root[data-theme="dark"] #sidebarHeader .appBrandText,
+:root[data-theme="dark"] #timelineHeader .timelineTitle,
+:root[data-theme="dark"] #timelineHeader .timelineSelection,
+:root[data-theme="dark"] #timelineHeader .timelinePropsMeta,
+:root[data-theme="dark"] .selectionInspectorTitle,
+:root[data-theme="dark"] .selectionInspectorStatValue{
+  color: #eef4fb;
+}
+
+:root[data-theme="dark"] #controls .panelHeader,
+:root[data-theme="dark"] #fileControls .panelHeader,
+:root[data-theme="dark"] #addNodePanel .panelHeader,
+:root[data-theme="dark"] #addGroupPanel .panelHeader,
+:root[data-theme="dark"] #advancedPanel .panelHeader,
+:root[data-theme="dark"] #shortcutPanel .panelHeader,
+:root[data-theme="dark"] #backgroundPanel .panelHeader,
+:root[data-theme="dark"] #sidebar label,
+:root[data-theme="dark"] #sidebar .control-group label,
+:root[data-theme="dark"] .stopGroupFieldLabel,
+:root[data-theme="dark"] .fieldHint,
+:root[data-theme="dark"] .panel-help,
+:root[data-theme="dark"] .selectionInspectorEyebrow,
+:root[data-theme="dark"] .selectionInspectorFieldLabel,
+:root[data-theme="dark"] .selectionInspectorStatLabel,
+:root[data-theme="dark"] .selectionInspectorSubtitle,
+:root[data-theme="dark"] .selectionInspectorHint,
+:root[data-theme="dark"] .selectionInspectorNotice,
+:root[data-theme="dark"] .simStatusLabel,
+:root[data-theme="dark"] .quickStartHint,
+:root[data-theme="dark"] .quickStartSteps,
+:root[data-theme="dark"] .timelineTab{
+  color: rgba(208,219,235,0.74);
+}
+
+:root[data-theme="dark"] #sidebar input,
+:root[data-theme="dark"] #sidebar select,
+:root[data-theme="dark"] #sidebar textarea,
+:root[data-theme="dark"] #nodePropsFilter,
+:root[data-theme="dark"] #nodePropsTable td.col-node input,
+:root[data-theme="dark"] #nodePropsTable td.col-props textarea,
+:root[data-theme="dark"] .selectionInspectorInput,
+:root[data-theme="dark"] .selectionInspectorSelect,
+:root[data-theme="dark"] .selectionInspectorTextarea,
+:root[data-theme="dark"] .stopGroupField input,
+:root[data-theme="dark"] .stopGroupField select,
+:root[data-theme="dark"] .stopGroupField textarea{
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(11,15,22,0.92);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  color: #eef4fb;
+}
+
+:root[data-theme="dark"] #sidebar input::placeholder,
+:root[data-theme="dark"] #sidebar textarea::placeholder,
+:root[data-theme="dark"] .selectionInspectorTextarea::placeholder{
+  color: rgba(208,219,235,0.42);
+}
+
+:root[data-theme="dark"] #sidebar input:focus,
+:root[data-theme="dark"] #sidebar select:focus,
+:root[data-theme="dark"] #sidebar textarea:focus,
+:root[data-theme="dark"] #nodePropsFilter:focus,
+:root[data-theme="dark"] #nodePropsTable td.col-node input:focus,
+:root[data-theme="dark"] #nodePropsTable td.col-props textarea:focus,
+:root[data-theme="dark"] .selectionInspectorInput:focus,
+:root[data-theme="dark"] .selectionInspectorSelect:focus,
+:root[data-theme="dark"] .selectionInspectorTextarea:focus,
+:root[data-theme="dark"] .stopGroupField input:focus,
+:root[data-theme="dark"] .stopGroupField select:focus,
+:root[data-theme="dark"] .stopGroupField textarea:focus{
+  border-color: rgba(124,184,255,0.32) !important;
+  box-shadow: 0 0 0 4px rgba(124,184,255,0.12), inset 0 1px 0 rgba(255,255,255,0.02) !important;
+}
+
+:root[data-theme="dark"] #controls button,
+:root[data-theme="dark"] #fileControls button,
+:root[data-theme="dark"] #scriptEditorControls button,
+:root[data-theme="dark"] #addNodePanel button,
+:root[data-theme="dark"] #addGroupPanel button,
+:root[data-theme="dark"] #advancedPanel button,
+:root[data-theme="dark"] #sidebar button,
+:root[data-theme="dark"] .timelineBtn,
+:root[data-theme="dark"] .selectionInspectorBtn,
+:root[data-theme="dark"] #benchmarkContainer button,
+:root[data-theme="dark"] #shareUrlContainer button,
+:root[data-theme="dark"] #stopGroupContainer button,
+:root[data-theme="dark"] #aboutContainer button,
+:root[data-theme="dark"] .mobileNavBtn,
+:root[data-theme="dark"] .tabletActionBtn{
+  border-color: rgba(255,255,255,0.10) !important;
+  background: rgba(20,24,32,0.88) !important;
+  color: #e7eef8 !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.03) !important;
+}
+
+:root[data-theme="dark"] #controls button:hover,
+:root[data-theme="dark"] #fileControls button:hover,
+:root[data-theme="dark"] #scriptEditorControls button:hover,
+:root[data-theme="dark"] #addNodePanel button:hover,
+:root[data-theme="dark"] #addGroupPanel button:hover,
+:root[data-theme="dark"] #advancedPanel button:hover,
+:root[data-theme="dark"] #sidebar button:hover,
+:root[data-theme="dark"] .timelineBtn:hover,
+:root[data-theme="dark"] .selectionInspectorBtn:hover,
+:root[data-theme="dark"] #benchmarkContainer button:hover,
+:root[data-theme="dark"] #shareUrlContainer button:hover,
+:root[data-theme="dark"] #stopGroupContainer button:hover,
+:root[data-theme="dark"] #aboutContainer button:hover,
+:root[data-theme="dark"] .mobileNavBtn:hover,
+:root[data-theme="dark"] .tabletActionBtn:hover{
+  border-color: rgba(124,184,255,0.24) !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.24), 0 0 0 4px rgba(124,184,255,0.10) !important;
+}
+
+:root[data-theme="dark"] #btnStart,
+:root[data-theme="dark"] #btnAddNode,
+:root[data-theme="dark"] #btnAddGroup,
+:root[data-theme="dark"] #btnSave,
+:root[data-theme="dark"] #btnShareUrl,
+:root[data-theme="dark"] #btnExportHtml,
+:root[data-theme="dark"] #landingOpenBtn,
+:root[data-theme="dark"] #scriptEditorSave,
+:root[data-theme="dark"] #shareUrlCopyBtn,
+:root[data-theme="dark"] #benchmarkClose,
+:root[data-theme="dark"] #stopGroupSave,
+:root[data-theme="dark"] #shareUrlClose,
+:root[data-theme="dark"] #aboutClose,
+:root[data-theme="dark"] .selectionInspectorBtn.is-primary{
+  background: linear-gradient(180deg, #5aa9ff, #247de8) !important;
+  color: #ffffff !important;
+  border-color: rgba(90,169,255,0.92) !important;
+  box-shadow: 0 16px 34px rgba(36,125,232,0.24), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+:root[data-theme="dark"] .selectionInspectorBtn.is-danger,
+:root[data-theme="dark"] #stopGroupDelete.danger{
+  color: #ff9e96 !important;
+  border-color: rgba(255,111,97,0.18) !important;
+  background: rgba(22,18,20,0.88) !important;
+}
+
+:root[data-theme="dark"] .simStatusBadge,
+:root[data-theme="dark"] #timelineHeader .timelineTabs{
+  border-color: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(208,219,235,0.72);
+}
+
+:root[data-theme="dark"] .simStatusBadge.is-running,
+:root[data-theme="dark"] #timelineHeader .timelineTab.is-active,
+:root[data-theme="dark"] .mobileNavBtn.is-active,
+:root[data-theme="dark"] .tabletActionBtn.is-active{
+  background: rgba(124,184,255,0.14) !important;
+  color: #8fc7ff !important;
+  border-color: rgba(124,184,255,0.24) !important;
+  box-shadow: 0 10px 20px rgba(36,125,232,0.16) !important;
+}
+
+:root[data-theme="dark"] #timelineHeader{
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+:root[data-theme="dark"] #nodePropsPanel,
+:root[data-theme="dark"] #selectionInspectorPanel{
+  background: linear-gradient(180deg, rgba(18,22,30,0.92), rgba(14,18,24,0.82));
+}
+
+:root[data-theme="dark"] #nodePropsTable,
+:root[data-theme="dark"] #nodePropsTable th,
+:root[data-theme="dark"] #nodePropsTable td{
+  color: #e7eef8;
+  border-color: rgba(255,255,255,0.08);
+}
+
+:root[data-theme="dark"] #nodePropsTable tbody tr.is-node-selected td{
+  background: rgba(124,184,255,0.12);
+}
+
+:root[data-theme="dark"] #toast{
+  background: rgba(18,22,30,0.94);
+  color: #eef4fb;
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.28);
+}
+
+/* ===== Dark mode readability polish ===== */
+:root[data-theme="dark"]{
+  --theme-color: #10151d;
+  --text: #f4f7fb;
+  --muted: rgba(222,230,240,0.82);
+  --panel-bg: rgba(22,28,38,0.95);
+  --panel-border: rgba(148,163,184,0.16);
+  --input-bg: rgba(10,14,20,0.96);
+  --input-border: rgba(148,163,184,0.22);
+  --graph-canvas-clear: #111722;
+  --graph-canvas-bg: rgba(17,23,34,0.96);
+  --graph-grid-minor: rgba(148,163,184,0.08);
+  --graph-grid-minor-dense: rgba(148,163,184,0.055);
+  --graph-grid-major: rgba(96,165,250,0.15);
+  --graph-grid-major-dense: rgba(96,165,250,0.11);
+  --graph-node-title: #f8fafc;
+  --graph-node-title-fill: #1d2737;
+  --graph-node-bg: #171e29;
+  --graph-node-accent: #69adff;
+  --graph-node-outline: #3a475c;
+  --graph-link: #8090a5;
+  --graph-event-link: #7ec4ff;
+}
+
+:root[data-theme="dark"] html,
+:root[data-theme="dark"] body{
+  color: var(--text);
+  background:
+    radial-gradient(1080px 560px at 14% -12%, rgba(76,132,255,0.16), transparent 72%),
+    radial-gradient(860px 520px at 96% -2%, rgba(23,31,44,0.88), transparent 74%),
+    linear-gradient(180deg, #0d1219 0%, #10151d 44%, #121925 100%);
+}
+
+:root[data-theme="dark"] body::before{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.01) 28%, rgba(255,255,255,0.00) 74%, rgba(255,255,255,0.04) 100%),
+    radial-gradient(900px 320px at 50% 0%, rgba(90,150,255,0.10), transparent 76%);
+}
+
+:root[data-theme="dark"] #sidebarHeader,
+:root[data-theme="dark"] #sidebar #controls,
+:root[data-theme="dark"] #sidebar #fileControls,
+:root[data-theme="dark"] #addNodePanel,
+:root[data-theme="dark"] #addGroupPanel,
+:root[data-theme="dark"] #advancedPanel,
+:root[data-theme="dark"] #shortcutPanel,
+:root[data-theme="dark"] #backgroundPanel,
+:root[data-theme="dark"] .quickStartCard,
+:root[data-theme="dark"] .simStatusCard,
+:root[data-theme="dark"] .accessCounter,
+:root[data-theme="dark"] #timelineDock,
+:root[data-theme="dark"] #menuToggle,
+:root[data-theme="dark"] #simTimeHud,
+:root[data-theme="dark"] #mobileNav,
+:root[data-theme="dark"] #tabletActionBar{
+  background:
+    linear-gradient(180deg, rgba(30,38,50,0.96), rgba(18,24,33,0.92)),
+    linear-gradient(180deg, rgba(108,166,255,0.05), rgba(255,255,255,0));
+  border-color: rgba(148,163,184,0.16);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+:root[data-theme="dark"] #sidebarHeader .appBrandText,
+:root[data-theme="dark"] #timelineHeader .timelineTitle,
+:root[data-theme="dark"] #timelineHeader .timelineSelection,
+:root[data-theme="dark"] #timelineHeader .timelinePropsMeta,
+:root[data-theme="dark"] .selectionInspectorTitle,
+:root[data-theme="dark"] .selectionInspectorStatValue,
+:root[data-theme="dark"] .simStatusItem strong,
+:root[data-theme="dark"] .quickStartCard,
+:root[data-theme="dark"] .accessCounter{
+  color: #f5f8fd;
+}
+
+:root[data-theme="dark"] #controls .panelHeader,
+:root[data-theme="dark"] #fileControls .panelHeader,
+:root[data-theme="dark"] #addNodePanel .panelHeader,
+:root[data-theme="dark"] #addGroupPanel .panelHeader,
+:root[data-theme="dark"] #advancedPanel .panelHeader,
+:root[data-theme="dark"] #shortcutPanel .panelHeader,
+:root[data-theme="dark"] #backgroundPanel .panelHeader,
+:root[data-theme="dark"] #sidebar label,
+:root[data-theme="dark"] #sidebar .control-group label,
+:root[data-theme="dark"] .stopGroupFieldLabel,
+:root[data-theme="dark"] .fieldHint,
+:root[data-theme="dark"] .panel-help,
+:root[data-theme="dark"] .selectionInspectorEyebrow,
+:root[data-theme="dark"] .selectionInspectorFieldLabel,
+:root[data-theme="dark"] .selectionInspectorStatLabel,
+:root[data-theme="dark"] .selectionInspectorSubtitle,
+:root[data-theme="dark"] .selectionInspectorHint,
+:root[data-theme="dark"] .selectionInspectorNotice,
+:root[data-theme="dark"] .simStatusLabel,
+:root[data-theme="dark"] .quickStartHint,
+:root[data-theme="dark"] .quickStartSteps,
+:root[data-theme="dark"] .simStatusEngine,
+:root[data-theme="dark"] .timelineTab,
+:root[data-theme="dark"] .panel-help-compact{
+  color: rgba(222,230,240,0.82);
+}
+
+:root[data-theme="dark"] .fieldHint strong,
+:root[data-theme="dark"] .panel-help strong,
+:root[data-theme="dark"] .quickStartCard strong{
+  color: #f8fbff;
+}
+
+:root[data-theme="dark"] #sidebar input,
+:root[data-theme="dark"] #sidebar select,
+:root[data-theme="dark"] #sidebar textarea,
+:root[data-theme="dark"] #nodePropsFilter,
+:root[data-theme="dark"] #nodePropsTable td.col-node input,
+:root[data-theme="dark"] #nodePropsTable td.col-props textarea,
+:root[data-theme="dark"] .selectionInspectorInput,
+:root[data-theme="dark"] .selectionInspectorSelect,
+:root[data-theme="dark"] .selectionInspectorTextarea,
+:root[data-theme="dark"] .stopGroupField input,
+:root[data-theme="dark"] .stopGroupField select,
+:root[data-theme="dark"] .stopGroupField textarea{
+  background: rgba(8,11,16,0.94);
+  border-color: rgba(148,163,184,0.24);
+  color: #f4f7fb;
+}
+
+:root[data-theme="dark"] #sidebar input::placeholder,
+:root[data-theme="dark"] #sidebar textarea::placeholder,
+:root[data-theme="dark"] .selectionInspectorTextarea::placeholder{
+  color: rgba(203,213,225,0.52);
+}
+
+:root[data-theme="dark"] #controls button,
+:root[data-theme="dark"] #fileControls button,
+:root[data-theme="dark"] #scriptEditorControls button,
+:root[data-theme="dark"] #addNodePanel button,
+:root[data-theme="dark"] #addGroupPanel button,
+:root[data-theme="dark"] #advancedPanel button,
+:root[data-theme="dark"] #sidebar button,
+:root[data-theme="dark"] .timelineBtn,
+:root[data-theme="dark"] .selectionInspectorBtn,
+:root[data-theme="dark"] #benchmarkContainer button,
+:root[data-theme="dark"] #shareUrlContainer button,
+:root[data-theme="dark"] #stopGroupContainer button,
+:root[data-theme="dark"] #aboutContainer button,
+:root[data-theme="dark"] .mobileNavBtn,
+:root[data-theme="dark"] .tabletActionBtn{
+  background: linear-gradient(180deg, rgba(39,47,60,0.98), rgba(28,35,46,0.96)) !important;
+  border-color: rgba(148,163,184,0.18) !important;
+  color: #eef4fb !important;
+}
+
+:root[data-theme="dark"] #controls button:hover,
+:root[data-theme="dark"] #fileControls button:hover,
+:root[data-theme="dark"] #scriptEditorControls button:hover,
+:root[data-theme="dark"] #addNodePanel button:hover,
+:root[data-theme="dark"] #addGroupPanel button:hover,
+:root[data-theme="dark"] #advancedPanel button:hover,
+:root[data-theme="dark"] #sidebar button:hover,
+:root[data-theme="dark"] .timelineBtn:hover,
+:root[data-theme="dark"] .selectionInspectorBtn:hover,
+:root[data-theme="dark"] #benchmarkContainer button:hover,
+:root[data-theme="dark"] #shareUrlContainer button:hover,
+:root[data-theme="dark"] #stopGroupContainer button:hover,
+:root[data-theme="dark"] #aboutContainer button:hover,
+:root[data-theme="dark"] .mobileNavBtn:hover,
+:root[data-theme="dark"] .tabletActionBtn:hover{
+  border-color: rgba(124,184,255,0.32) !important;
+  background: linear-gradient(180deg, rgba(47,57,72,1), rgba(33,41,53,0.98)) !important;
+}
+
+:root[data-theme="dark"] #timelineDock{
+  background:
+    linear-gradient(180deg, rgba(27,34,45,0.98), rgba(17,22,30,0.96)),
+    linear-gradient(180deg, rgba(96,165,250,0.05), rgba(255,255,255,0));
+}
+
+:root[data-theme="dark"] #timelineHeader{
+  background: rgba(255,255,255,0.04);
+  border-bottom-color: rgba(148,163,184,0.18);
+}
+
+:root[data-theme="dark"] #timelineHeader .timelineTabs{
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(148,163,184,0.16);
+}
+
+:root[data-theme="dark"] #timelineHeader .timelineTab{
+  color: rgba(226,232,240,0.76);
+}
+
+:root[data-theme="dark"] #timelineHeader .timelineTab.is-active,
+:root[data-theme="dark"] .mobileNavBtn.is-active,
+:root[data-theme="dark"] .tabletActionBtn.is-active{
+  background: rgba(113,176,255,0.18) !important;
+  color: #d7ebff !important;
+  border-color: rgba(124,184,255,0.28) !important;
+}
+
+:root[data-theme="dark"] #timelineBody,
+:root[data-theme="dark"] #timelineChartPanel,
+:root[data-theme="dark"] #nodePropsPanel,
+:root[data-theme="dark"] #selectionInspectorPanel,
+:root[data-theme="dark"] .workspacePopoutContent > #timelineChartPanel,
+:root[data-theme="dark"] .workspacePopoutContent > #nodePropsPanel,
+:root[data-theme="dark"] .workspacePopoutContent > #selectionInspectorPanel{
+  background: linear-gradient(180deg, rgba(18,23,31,0.98), rgba(14,19,27,0.96));
+}
+
+:root[data-theme="dark"] #nodePropsTable,
+:root[data-theme="dark"] #nodePropsTable th,
+:root[data-theme="dark"] #nodePropsTable td{
+  color: #eaf2fb;
+  border-color: rgba(148,163,184,0.14);
+}
+
+:root[data-theme="dark"] #nodePropsTable thead th{
+  background: rgba(255,255,255,0.04);
+}
+
+:root[data-theme="dark"] #nodePropsTable tbody tr:nth-child(odd) td{
+  background: rgba(255,255,255,0.02);
+}
+
+:root[data-theme="dark"] #nodePropsTable tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,0.035);
+}
+
+:root[data-theme="dark"] #simTimeHud{
+  border-color: rgba(124,184,255,0.22);
+  background: rgba(16,21,29,0.92);
+}
+
+:root[data-theme="dark"] #simTime{
+  color: #f7fbff;
+}
+
+/* ===== Glass transparency restore ===== */
+:root[data-theme="light"] #sidebar{
+  background:
+    linear-gradient(180deg, rgba(251,253,255,0.58), rgba(242,246,251,0.38)),
+    linear-gradient(180deg, rgba(10,132,255,0.06), rgba(255,255,255,0));
+  backdrop-filter: blur(34px) saturate(1.45);
+}
+
+:root[data-theme="light"] #timelineDock{
+  background:
+    linear-gradient(180deg, rgba(252,253,255,0.52), rgba(241,245,250,0.34)),
+    linear-gradient(180deg, rgba(10,132,255,0.045), rgba(255,255,255,0));
+  backdrop-filter: blur(30px) saturate(1.38);
+}
+
+:root[data-theme="light"] #timelineBody,
+:root[data-theme="light"] #timelineChartPanel,
+:root[data-theme="light"] #nodePropsPanel,
+:root[data-theme="light"] #selectionInspectorPanel,
+:root[data-theme="light"] .workspacePopoutContent > #timelineChartPanel,
+:root[data-theme="light"] .workspacePopoutContent > #nodePropsPanel,
+:root[data-theme="light"] .workspacePopoutContent > #selectionInspectorPanel{
+  background: linear-gradient(180deg, rgba(255,255,255,0.48), rgba(246,248,252,0.30));
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+:root[data-theme="light"] #sidebarHeader,
+:root[data-theme="light"] #sidebar #controls,
+:root[data-theme="light"] #sidebar #fileControls,
+:root[data-theme="light"] #addNodePanel,
+:root[data-theme="light"] #addGroupPanel,
+:root[data-theme="light"] #advancedPanel,
+:root[data-theme="light"] #shortcutPanel,
+:root[data-theme="light"] #backgroundPanel,
+:root[data-theme="light"] .quickStartCard,
+:root[data-theme="light"] .simStatusCard,
+:root[data-theme="light"] .accessCounter,
+:root[data-theme="light"] #menuToggle,
+:root[data-theme="light"] #simTimeHud,
+:root[data-theme="light"] #mobileNav,
+:root[data-theme="light"] #tabletActionBar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(246,249,253,0.52)),
+    linear-gradient(180deg, rgba(10,132,255,0.03), rgba(255,255,255,0));
+  backdrop-filter: blur(26px) saturate(1.32);
+}
+
+:root[data-theme="dark"] #sidebar{
+  background:
+    linear-gradient(180deg, rgba(18,23,31,0.54), rgba(12,17,24,0.34)),
+    linear-gradient(180deg, rgba(108,166,255,0.08), rgba(255,255,255,0));
+  backdrop-filter: blur(34px) saturate(1.38);
+}
+
+:root[data-theme="dark"] #timelineDock{
+  background:
+    linear-gradient(180deg, rgba(22,29,39,0.48), rgba(15,20,28,0.30)),
+    linear-gradient(180deg, rgba(96,165,250,0.06), rgba(255,255,255,0));
+  backdrop-filter: blur(30px) saturate(1.34);
+}
+
+:root[data-theme="dark"] #timelineBody,
+:root[data-theme="dark"] #timelineChartPanel,
+:root[data-theme="dark"] #nodePropsPanel,
+:root[data-theme="dark"] #selectionInspectorPanel,
+:root[data-theme="dark"] .workspacePopoutContent > #timelineChartPanel,
+:root[data-theme="dark"] .workspacePopoutContent > #nodePropsPanel,
+:root[data-theme="dark"] .workspacePopoutContent > #selectionInspectorPanel{
+  background: linear-gradient(180deg, rgba(17,22,30,0.42), rgba(12,17,24,0.26));
+  backdrop-filter: blur(20px) saturate(1.16);
+}
+
+:root[data-theme="dark"] #sidebarHeader,
+:root[data-theme="dark"] #sidebar #controls,
+:root[data-theme="dark"] #sidebar #fileControls,
+:root[data-theme="dark"] #addNodePanel,
+:root[data-theme="dark"] #addGroupPanel,
+:root[data-theme="dark"] #advancedPanel,
+:root[data-theme="dark"] #shortcutPanel,
+:root[data-theme="dark"] #backgroundPanel,
+:root[data-theme="dark"] .quickStartCard,
+:root[data-theme="dark"] .simStatusCard,
+:root[data-theme="dark"] .accessCounter,
+:root[data-theme="dark"] #menuToggle,
+:root[data-theme="dark"] #simTimeHud,
+:root[data-theme="dark"] #mobileNav,
+:root[data-theme="dark"] #tabletActionBar{
+  background:
+    linear-gradient(180deg, rgba(29,37,49,0.76), rgba(18,24,33,0.62)),
+    linear-gradient(180deg, rgba(108,166,255,0.05), rgba(255,255,255,0));
+  backdrop-filter: blur(26px) saturate(1.24);
 }
 
 

@@ -9,10 +9,46 @@ function initLiteContextMenuStyler(){
   const DANGER_RE = /^(delete|clear|reset memo style)/i;
   const MUTED_RE = /^(rename|resize|fit view|fit to screen|auto layout|center view|select nodes|duplicate)/i;
   const UI_FONT = '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-  const ACCENT_BG = 'rgba(10,132,255,0.12)';
-  const ACCENT_BORDER = 'rgba(10,132,255,0.22)';
-  const ACCENT_TEXT = '#005ecb';
   const shouldSuppressContextMenu = ()=> Number(App.__suppressContextMenusUntil || 0) > Date.now();
+  const getMenuTheme = ()=>{
+    const resolved = ((App.getResolvedTheme && App.getResolvedTheme()) || document.documentElement.dataset.theme || 'light');
+    if(resolved === 'dark'){
+      return {
+        baseText: '#e5edf7',
+        disabledText: 'rgba(229,237,247,0.42)',
+        mutedText: 'rgba(208,219,235,0.68)',
+        dangerText: '#ff8f86',
+        separatorBorder: '1px solid rgba(255,255,255,0.08)',
+        hoverBg: 'rgba(124,184,255,0.16)',
+        hoverBorder: 'rgba(124,184,255,0.28)',
+        hoverText: '#d9ecff',
+        dangerHoverBg: 'rgba(255,111,97,0.14)',
+        dangerHoverBorder: 'rgba(255,111,97,0.24)',
+        dangerHoverText: '#ffd8d3',
+        menuBorder: '1px solid rgba(255,255,255,0.12)',
+        menuBg: 'rgba(18,22,30,0.94)',
+        menuShadow: '0 28px 72px rgba(0,0,0,0.46)',
+        menuText: '#e5edf7'
+      };
+    }
+    return {
+      baseText: '#1d1d1f',
+      disabledText: 'rgba(29,29,31,0.42)',
+      mutedText: 'rgba(60,60,67,0.68)',
+      dangerText: '#b42318',
+      separatorBorder: '1px solid rgba(17,17,17,0.08)',
+      hoverBg: 'rgba(10,132,255,0.12)',
+      hoverBorder: 'rgba(10,132,255,0.22)',
+      hoverText: '#005ecb',
+      dangerHoverBg: 'rgba(180,35,24,0.08)',
+      dangerHoverBorder: 'rgba(180,35,24,0.16)',
+      dangerHoverText: '#7a1d16',
+      menuBorder: '1px solid rgba(255,255,255,0.88)',
+      menuBg: 'rgba(255,255,255,0.82)',
+      menuShadow: '0 28px 72px rgba(15,23,42,0.18)',
+      menuText: '#1d1d1f'
+    };
+  };
 
   const clampMenuToViewport = (menu)=>{
     if(!(menu instanceof HTMLElement)) return;
@@ -64,13 +100,13 @@ function initLiteContextMenuStyler(){
   };
 
   const applyEntryStyles = (entry)=>{
-    if(!(entry instanceof HTMLElement) || entry.__factStyledEntry) return;
-    entry.__factStyledEntry = true;
+    if(!(entry instanceof HTMLElement)) return;
     const text = String(entry.textContent || '').trim();
+    const theme = getMenuTheme();
     entry.style.setProperty('background', 'transparent', 'important');
     entry.style.setProperty('background-color', 'transparent', 'important');
     entry.style.setProperty('background-image', 'none', 'important');
-    entry.style.setProperty('color', '#1d1d1f', 'important');
+    entry.style.setProperty('color', theme.baseText, 'important');
     entry.style.setProperty('border-radius', '13px', 'important');
     entry.style.setProperty('border', '1px solid transparent', 'important');
     entry.style.setProperty('font-family', UI_FONT, 'important');
@@ -81,36 +117,41 @@ function initLiteContextMenuStyler(){
       entry.style.setProperty('margin', '6px 2px', 'important');
       entry.style.setProperty('border-radius', '0', 'important');
       entry.style.setProperty('border', '0', 'important');
-      entry.style.setProperty('border-bottom', '1px solid rgba(17,17,17,0.08)', 'important');
+      entry.style.setProperty('border-bottom', theme.separatorBorder, 'important');
       return;
     }
 
     if(DANGER_RE.test(text)) entry.classList.add('fact-menu-danger');
     else if(MUTED_RE.test(text)) entry.classList.add('fact-menu-muted');
 
-    entry.addEventListener('mouseenter', ()=>{
-      if(entry.classList.contains('fact-menu-danger')){
-        entry.style.setProperty('background', 'rgba(180,35,24,0.08)', 'important');
-        entry.style.setProperty('background-color', 'rgba(180,35,24,0.08)', 'important');
-        entry.style.setProperty('border-color', 'rgba(180,35,24,0.16)', 'important');
-        entry.style.setProperty('color', '#7a1d16', 'important');
-      }else{
-        entry.style.setProperty('background', ACCENT_BG, 'important');
-        entry.style.setProperty('background-color', ACCENT_BG, 'important');
-        entry.style.setProperty('border-color', ACCENT_BORDER, 'important');
-        entry.style.setProperty('color', ACCENT_TEXT, 'important');
-      }
-    });
-    entry.addEventListener('mouseleave', ()=>{
-      entry.style.setProperty('background', 'transparent', 'important');
-      entry.style.setProperty('background-color', 'transparent', 'important');
-      entry.style.setProperty('border-color', 'transparent', 'important');
-      let color = '#111111';
-      if(entry.classList.contains('disabled')) color = 'rgba(29,29,31,0.42)';
-      else if(entry.classList.contains('fact-menu-danger')) color = '#b42318';
-      else if(entry.classList.contains('fact-menu-muted')) color = 'rgba(60,60,67,0.68)';
-      entry.style.setProperty('color', color, 'important');
-    });
+    if(!entry.__factStyledEntry){
+      entry.__factStyledEntry = true;
+      entry.addEventListener('mouseenter', ()=>{
+        const hoverTheme = getMenuTheme();
+        if(entry.classList.contains('fact-menu-danger')){
+          entry.style.setProperty('background', hoverTheme.dangerHoverBg, 'important');
+          entry.style.setProperty('background-color', hoverTheme.dangerHoverBg, 'important');
+          entry.style.setProperty('border-color', hoverTheme.dangerHoverBorder, 'important');
+          entry.style.setProperty('color', hoverTheme.dangerHoverText, 'important');
+        }else{
+          entry.style.setProperty('background', hoverTheme.hoverBg, 'important');
+          entry.style.setProperty('background-color', hoverTheme.hoverBg, 'important');
+          entry.style.setProperty('border-color', hoverTheme.hoverBorder, 'important');
+          entry.style.setProperty('color', hoverTheme.hoverText, 'important');
+        }
+      });
+      entry.addEventListener('mouseleave', ()=> applyEntryStyles(entry));
+    }
+
+    if(entry.matches(':hover')) return;
+    entry.style.setProperty('background', 'transparent', 'important');
+    entry.style.setProperty('background-color', 'transparent', 'important');
+    entry.style.setProperty('border-color', 'transparent', 'important');
+    let color = theme.baseText;
+    if(entry.classList.contains('disabled')) color = theme.disabledText;
+    else if(entry.classList.contains('fact-menu-danger')) color = theme.dangerText;
+    else if(entry.classList.contains('fact-menu-muted')) color = theme.mutedText;
+    entry.style.setProperty('color', color, 'important');
   };
 
   const applyMenuStyles = (menu)=>{
@@ -119,21 +160,19 @@ function initLiteContextMenuStyler(){
       menu.remove();
       return;
     }
+    const theme = getMenuTheme();
     pruneRedundantEntries(menu);
-    if(!menu.__factStyledMenu){
-      menu.__factStyledMenu = true;
-      Object.assign(menu.style, {
-        border: '1px solid rgba(255,255,255,0.88)',
-        borderRadius: '20px',
-        background: 'rgba(255,255,255,0.82)',
-        boxShadow: '0 28px 72px rgba(15,23,42,0.18)',
-        backdropFilter: 'blur(22px) saturate(1.35)',
-        padding: '8px',
-        minWidth: '236px',
-        color: '#1d1d1f',
-        fontFamily: UI_FONT
-      });
-    }
+    Object.assign(menu.style, {
+      border: theme.menuBorder,
+      borderRadius: '20px',
+      background: theme.menuBg,
+      boxShadow: theme.menuShadow,
+      backdropFilter: 'blur(22px) saturate(1.35)',
+      padding: '8px',
+      minWidth: '236px',
+      color: theme.menuText,
+      fontFamily: UI_FONT
+    });
     clampMenuToViewport(menu);
     menu.querySelectorAll('.litemenu-entry').forEach(applyEntryStyles);
   };
@@ -144,10 +183,105 @@ function initLiteContextMenuStyler(){
 
   const observer = new MutationObserver(scan);
   observer.observe(document.body, { childList: true, subtree: true });
+  App.refreshLiteContextMenuStyles = scan;
   scan();
 }
 
 initLiteContextMenuStyler();
+
+(function initThemeModeController(){
+  const STORAGE_KEY = 'fact-sim-theme-mode';
+  const root = document.documentElement;
+  const select = document.getElementById('themeModeSelect');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const media = (window.matchMedia && typeof window.matchMedia === 'function')
+    ? window.matchMedia('(prefers-color-scheme: dark)')
+    : null;
+
+  const normalizeThemeMode = (value)=>{
+    const mode = String(value || '').toLowerCase();
+    if(mode === 'light' || mode === 'dark' || mode === 'system') return mode;
+    return 'system';
+  };
+  const resolveTheme = (mode)=>{
+    const safe = normalizeThemeMode(mode);
+    if(safe === 'light' || safe === 'dark') return safe;
+    return (media && media.matches) ? 'dark' : 'light';
+  };
+  const readStoredThemeMode = ()=>{
+    try{
+      return normalizeThemeMode(window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : 'system');
+    }catch(_e){
+      return 'system';
+    }
+  };
+  const updateThemeMeta = ()=>{
+    if(!meta) return;
+    let next = '';
+    try{
+      next = String(getComputedStyle(root).getPropertyValue('--theme-color') || '').trim();
+    }catch(_e){}
+    if(!next) next = resolveTheme(root.dataset.themeMode || 'system') === 'dark' ? '#0f1115' : '#f5f5f7';
+    meta.setAttribute('content', next);
+  };
+  const applyThemeMode = (mode, options)=>{
+    const opts = options || {};
+    const nextMode = normalizeThemeMode(mode);
+    const resolvedTheme = resolveTheme(nextMode);
+    root.dataset.themeMode = nextMode;
+    root.dataset.theme = resolvedTheme;
+    if(select && select.value !== nextMode) select.value = nextMode;
+    if(opts.persist !== false){
+      try{ if(window.localStorage) window.localStorage.setItem(STORAGE_KEY, nextMode); }catch(_e){}
+    }
+    updateThemeMeta();
+    if(typeof App.refreshGraphTheme === 'function') App.refreshGraphTheme();
+    try{
+      const refreshTimeline = ()=>{
+        if(!App.timelineChart) return;
+        if(typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
+        if(typeof App.timelineChart.resize === 'function') App.timelineChart.resize();
+      };
+      if(typeof window.requestAnimationFrame === 'function'){
+        window.requestAnimationFrame(()=> refreshTimeline());
+      }else{
+        refreshTimeline();
+      }
+    }catch(_e){}
+    if(typeof App.refreshLiteContextMenuStyles === 'function') App.refreshLiteContextMenuStyles();
+    try{
+      document.dispatchEvent(new CustomEvent('factsim:themechange', {
+        detail: { mode: nextMode, resolved: resolvedTheme }
+      }));
+    }catch(_e){}
+  };
+
+  App.getThemeMode = ()=> normalizeThemeMode(root.dataset.themeMode || readStoredThemeMode());
+  App.getResolvedTheme = ()=> resolveTheme(App.getThemeMode());
+  App.setThemeMode = (mode, options)=> applyThemeMode(mode, options);
+
+  if(select){
+    select.value = App.getThemeMode();
+    select.addEventListener('change', (event)=>{
+      applyThemeMode(event && event.target ? event.target.value : 'system');
+      if(typeof App.showToast === 'function'){
+        App.showToast(`Theme: ${App.getResolvedTheme()}`);
+      }
+    });
+  }
+
+  const onSystemThemeChange = ()=>{
+    if(App.getThemeMode() !== 'system') return;
+    applyThemeMode('system', { persist:false });
+  };
+  if(media && typeof media.addEventListener === 'function'){
+    media.addEventListener('change', onSystemThemeChange);
+  }else if(media && typeof media.addListener === 'function'){
+    media.addListener(onSystemThemeChange);
+  }
+
+  applyThemeMode(readStoredThemeMode(), { persist:false });
+})();
 
 // Controls
 const btnStart = document.getElementById('btnStart');

@@ -5,6 +5,51 @@
   const cfg = window.NODES_CONFIG?.animations || {};
   const defaultDuration = (cfg.linkMs || 800);
   const iconRadius = cfg.radius || 22.5;
+  const isDarkTheme = ()=>{
+    try{
+      if(window.App && typeof App.getResolvedTheme === 'function'){
+        return App.getResolvedTheme() === 'dark';
+      }
+    }catch(_e){}
+    try{
+      return document && document.documentElement && document.documentElement.dataset && document.documentElement.dataset.theme === 'dark';
+    }catch(_e){}
+    return false;
+  };
+  const getLinkAnimPalette = ()=>{
+    if(isDarkTheme()){
+      return {
+        defaultTypeAccent: '#b5bfd0',
+        defaultBubbleFill: '#202734',
+        defaultBubbleStroke: 'rgba(255,255,255,0.18)',
+        agvLabelFill: 'rgba(57,133,255,0.94)',
+        agvLabelStroke: 'rgba(255,255,255,0.22)',
+        agvLabelText: '#f8fbff',
+        palletLabelFill: 'rgba(34,176,98,0.94)',
+        palletLabelStroke: 'rgba(255,255,255,0.22)',
+        palletLabelText: '#f7fff9',
+        workLabelFill: 'rgba(24,30,40,0.96)',
+        workLabelStroke: 'rgba(255,255,255,0.16)',
+        workLabelText: '#edf3fb',
+        labelShadow: 'rgba(0,0,0,0.26)'
+      };
+    }
+    return {
+      defaultTypeAccent: '#8e8e93',
+      defaultBubbleFill: '#d5d8dc',
+      defaultBubbleStroke: 'rgba(15,23,42,0.22)',
+      agvLabelFill: 'rgba(0,113,227,0.92)',
+      agvLabelStroke: 'rgba(255,255,255,0.28)',
+      agvLabelText: '#f8fbff',
+      palletLabelFill: 'rgba(22,163,74,0.92)',
+      palletLabelStroke: 'rgba(255,255,255,0.28)',
+      palletLabelText: '#f7fff9',
+      workLabelFill: 'rgba(15,23,42,0.88)',
+      workLabelStroke: 'rgba(255,255,255,0.22)',
+      workLabelText: '#f8fafc',
+      labelShadow: 'rgba(15,23,42,0.16)'
+    };
+  };
   const WORK_TYPE_ACCENTS = {
     A: '#0a84ff',
     B: '#ff9f0a',
@@ -28,14 +73,18 @@
   }
 
   function getWorkTypeAccent(typeValue){
+    const palette = getLinkAnimPalette();
     const key = normalizeWorkType(typeValue);
-    if(!key) return '#8e8e93';
+    if(!key) return palette.defaultTypeAccent;
     if(WORK_TYPE_ACCENTS[key]) return WORK_TYPE_ACCENTS[key];
     const hue = hashText(key) % 360;
-    return `hsl(${hue}, 74%, 46%)`;
+    return isDarkTheme()
+      ? `hsl(${hue}, 78%, 62%)`
+      : `hsl(${hue}, 74%, 46%)`;
   }
 
   function getAnimatedIconTheme(type, info){
+    const palette = getLinkAnimPalette();
     switch(String(type || '').toLowerCase()){
       case 'agv':
         return {
@@ -59,8 +108,8 @@
       }
       default:
         return {
-          fill: '#d5d8dc',
-          stroke: 'rgba(15,23,42,0.22)',
+          fill: palette.defaultBubbleFill,
+          stroke: palette.defaultBubbleStroke,
           lineWidth: 1.5
         };
     }
@@ -93,30 +142,32 @@
   }
 
   function getAnimatedLabelTheme(type){
+    const palette = getLinkAnimPalette();
     switch(String(type || '').toLowerCase()){
       case 'agv':
         return {
-          fill: 'rgba(0,113,227,0.92)',
-          stroke: 'rgba(255,255,255,0.28)',
-          text: '#f8fbff'
+          fill: palette.agvLabelFill,
+          stroke: palette.agvLabelStroke,
+          text: palette.agvLabelText
         };
       case 'pallet':
         return {
-          fill: 'rgba(22,163,74,0.92)',
-          stroke: 'rgba(255,255,255,0.28)',
-          text: '#f7fff9'
+          fill: palette.palletLabelFill,
+          stroke: palette.palletLabelStroke,
+          text: palette.palletLabelText
         };
       default:
         return {
-          fill: 'rgba(15,23,42,0.88)',
-          stroke: 'rgba(255,255,255,0.22)',
-          text: '#f8fafc'
+          fill: palette.workLabelFill,
+          stroke: palette.workLabelStroke,
+          text: palette.workLabelText
         };
     }
   }
 
   function drawAnimatedLabel(ctx, x, y, text, type){
     const theme = getAnimatedLabelTheme(type);
+    const palette = getLinkAnimPalette();
     ctx.save();
     ctx.font = '600 11px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
     const label = trimAnimatedLabel(ctx, text, 180);
@@ -125,7 +176,7 @@
     const width = Math.ceil(ctx.measureText(label).width) + padX * 2;
     const left = Math.round(x - width * 0.5);
     const top = Math.round(y - height);
-    ctx.shadowColor = 'rgba(15,23,42,0.16)';
+    ctx.shadowColor = palette.labelShadow;
     ctx.shadowBlur = 12;
     ctx.shadowOffsetY = 4;
     ctx.fillStyle = theme.fill;

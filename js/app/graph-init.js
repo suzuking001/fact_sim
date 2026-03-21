@@ -4,8 +4,15 @@ var App = window.App || (window.App = {});
 
 function applyGraphVisualTheme(){
   if(!window.LiteGraph || !window.LGraphCanvas) return;
-  if(App.__graphVisualThemeApplied) return;
-  App.__graphVisualThemeApplied = true;
+
+  const readThemeValue = (name, fallback)=>{
+    try{
+      const value = String(getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim();
+      return value || fallback;
+    }catch(_e){
+      return fallback;
+    }
+  };
 
   // LiteGraph defaults to mouse-only listeners. Prefer pointer events so
   // touch devices can pan and interact with the graph canvas.
@@ -43,7 +50,7 @@ function applyGraphVisualTheme(){
       if(parts.length >= 3 && parts.every(v => isFinite(v))){
         return parts.slice(0, 3).map(v => Math.max(0, Math.min(255, Math.round(v))));
       }
-    }
+      }
     return null;
   };
   const mixColor = (from, to, amount)=>{
@@ -55,25 +62,34 @@ function applyGraphVisualTheme(){
     return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
   };
 
+  App.__graphThemeCache = {
+    gridMinor: readThemeValue('--graph-grid-minor', 'rgba(17,17,17,0.045)'),
+    gridMinorDense: readThemeValue('--graph-grid-minor-dense', 'rgba(17,17,17,0.03)'),
+    gridMajor: readThemeValue('--graph-grid-major', 'rgba(10,132,255,0.08)'),
+    gridMajorDense: readThemeValue('--graph-grid-major-dense', 'rgba(10,132,255,0.055)'),
+    canvasClear: readThemeValue('--graph-canvas-clear', '#f6f8fb'),
+    canvasBg: readThemeValue('--graph-canvas-bg', 'rgba(248,250,253,0.9)')
+  };
+
   LiteGraph.NODE_TEXT_SIZE = 12;
   LiteGraph.NODE_TITLE_HEIGHT = 26;
   LiteGraph.NODE_SLOT_HEIGHT = 18;
-  LiteGraph.NODE_TITLE_COLOR = '#111111';
-  LiteGraph.NODE_SELECTED_TITLE_COLOR = '#111111';
-  LiteGraph.NODE_DEFAULT_COLOR = '#e8f2ff';
-  LiteGraph.NODE_DEFAULT_BGCOLOR = '#ffffff';
-  LiteGraph.NODE_DEFAULT_BOXCOLOR = '#0a84ff';
-  LiteGraph.NODE_BOX_OUTLINE_COLOR = '#d4dde9';
-  LiteGraph.LINK_COLOR = '#b9bec8';
-  LiteGraph.EVENT_LINK_COLOR = '#0a84ff';
+  LiteGraph.NODE_TITLE_COLOR = readThemeValue('--graph-node-title', '#111111');
+  LiteGraph.NODE_SELECTED_TITLE_COLOR = readThemeValue('--graph-node-title', '#111111');
+  LiteGraph.NODE_DEFAULT_COLOR = readThemeValue('--graph-node-title-fill', '#e8f2ff');
+  LiteGraph.NODE_DEFAULT_BGCOLOR = readThemeValue('--graph-node-bg', '#ffffff');
+  LiteGraph.NODE_DEFAULT_BOXCOLOR = readThemeValue('--graph-node-accent', '#0a84ff');
+  LiteGraph.NODE_BOX_OUTLINE_COLOR = readThemeValue('--graph-node-outline', '#d4dde9');
+  LiteGraph.LINK_COLOR = readThemeValue('--graph-link', '#b9bec8');
+  LiteGraph.EVENT_LINK_COLOR = readThemeValue('--graph-event-link', '#0a84ff');
 
   LGraphCanvas.link_type_colors = Object.assign({}, LGraphCanvas.link_type_colors || {}, {
-    '-1': '#b9bec8',
-    number: '#b9bec8',
-    string: '#b9bec8',
-    boolean: '#0a84ff',
-    event: '#0a84ff',
-    action: '#0a84ff'
+    '-1': readThemeValue('--graph-link', '#b9bec8'),
+    number: readThemeValue('--graph-link', '#b9bec8'),
+    string: readThemeValue('--graph-link', '#b9bec8'),
+    boolean: readThemeValue('--graph-event-link', '#0a84ff'),
+    event: readThemeValue('--graph-event-link', '#0a84ff'),
+    action: readThemeValue('--graph-event-link', '#0a84ff')
   });
 
   if(!LGraphCanvas.prototype.__factZoomContrastPatched){
@@ -110,6 +126,28 @@ function applyGraphVisualTheme(){
     };
     LGraphCanvas.prototype.__factZoomContrastPatched = true;
   }
+
+  App.refreshGraphTheme = function(){
+    applyGraphVisualTheme();
+    if(App.graph && Array.isArray(App.graph._nodes)){
+      for(const node of App.graph._nodes){
+        if(node && typeof node._applyTheme === 'function'){
+          try{ node._applyTheme(); }catch(_e){}
+        }else if(node && typeof node.onThemeChanged === 'function'){
+          try{ node.onThemeChanged(document.documentElement.dataset.theme || 'light'); }catch(_e){}
+        }
+      }
+    }
+    if(!App.canvas) return;
+    App.canvas.background_image = null;
+    App.canvas.pattern = null;
+    App.canvas.clear_background_color = App.__graphThemeCache.canvasClear;
+    App.canvas.bgcolor = App.__graphThemeCache.canvasBg;
+    try{
+      if(typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+      if(typeof App.canvas.draw === 'function') App.canvas.draw(true);
+    }catch(_e){}
+  };
 }
 
 function drawEditorGrid(ctx, visibleArea, canvas){
@@ -132,6 +170,8 @@ function drawEditorGrid(ctx, visibleArea, canvas){
   const majorScreenStep = baseMajor * scale;
   const lineWidth = Math.min(1.5, Math.max(0.5, 1 / scale));
 
+  const theme = App.__graphThemeCache || {};
+
   const drawLines = (step, color)=>{
     if(step * scale < 14) return;
     const right = left + width;
@@ -153,8 +193,12 @@ function drawEditorGrid(ctx, visibleArea, canvas){
   };
 
   ctx.save();
-  drawLines(baseMinor, minorScreenStep >= 20 ? 'rgba(17,17,17,0.045)' : 'rgba(17,17,17,0.03)');
-  drawLines(baseMajor, majorScreenStep >= 20 ? 'rgba(10,132,255,0.08)' : 'rgba(10,132,255,0.055)');
+  drawLines(baseMinor, minorScreenStep >= 20
+    ? (theme.gridMinor || 'rgba(17,17,17,0.045)')
+    : (theme.gridMinorDense || 'rgba(17,17,17,0.03)'));
+  drawLines(baseMajor, majorScreenStep >= 20
+    ? (theme.gridMajor || 'rgba(10,132,255,0.08)')
+    : (theme.gridMajorDense || 'rgba(10,132,255,0.055)'));
   ctx.restore();
 }
 
@@ -316,6 +360,20 @@ function initGraph(){
   if(graphElement && graphElement.style){
     graphElement.style.touchAction = 'none';
   }
+  if(App.timelineChart && typeof App.timelineChart.attachGraph === 'function'){
+    App.timelineChart.attachGraph(App.graph);
+  }
+  if(App.nodePropsPanel && typeof App.nodePropsPanel.attachGraph === 'function'){
+    App.nodePropsPanel.attachGraph(App.graph);
+  }
+  if(App.selectionInspector){
+    if(typeof App.selectionInspector.attachGraph === 'function'){
+      App.selectionInspector.attachGraph(App.graph);
+    }
+    if(typeof App.selectionInspector.attachCanvas === 'function'){
+      App.selectionInspector.attachCanvas(App.canvas);
+    }
+  }
   App.canvas.onDrawBackground = function(ctx, visibleArea){
     drawEditorGrid(ctx, visibleArea, this);
   };
@@ -342,8 +400,8 @@ function initGraph(){
   // Let the CSS workspace background show through; do not use LiteGraph's bitmap pattern.
   App.canvas.background_image = null;
   App.canvas.pattern = null;
-  App.canvas.clear_background_color = '#f6f8fb';
-  App.canvas.bgcolor = 'rgba(248,250,253,0.9)';
+  App.canvas.clear_background_color = (App.__graphThemeCache && App.__graphThemeCache.canvasClear) || '#f6f8fb';
+  App.canvas.bgcolor = (App.__graphThemeCache && App.__graphThemeCache.canvasBg) || 'rgba(248,250,253,0.9)';
   function resize(){
     const r = App.canvas.canvas.getBoundingClientRect(), d = window.devicePixelRatio||1;
     App.canvas.canvas.width = r.width*d; App.canvas.canvas.height = r.height*d;

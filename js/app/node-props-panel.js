@@ -295,8 +295,8 @@ var App = window.App || (window.App = {});
         const editBtn = document.createElement('button');
         editBtn.type = 'button';
         editBtn.className = 'nodePropsInspectBtn';
-        editBtn.textContent = 'Open Inspector';
-        editBtn.title = 'Edit this node in Inspector';
+        editBtn.textContent = 'Open Details';
+        editBtn.title = 'Edit this node in Details';
         editBtn.addEventListener('click', (e)=>{
           e.preventDefault();
           e.stopPropagation();

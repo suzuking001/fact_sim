@@ -148,7 +148,7 @@ function initTimeline(){
     inspectorRefreshBtn.addEventListener('click', ()=>{
       if(App.selectionInspector && typeof App.selectionInspector.refresh === 'function'){
         App.selectionInspector.refresh();
-        if(typeof App.showToast === 'function') App.showToast('Inspector refreshed');
+        if(typeof App.showToast === 'function') App.showToast('Details refreshed');
       }
     });
   }
@@ -157,7 +157,7 @@ function initTimeline(){
     inspectorClearBtn.addEventListener('click', ()=>{
       if(App.selectionInspector && typeof App.selectionInspector.clear === 'function'){
         App.selectionInspector.clear(true);
-        if(typeof App.showToast === 'function') App.showToast('Inspector cleared');
+        if(typeof App.showToast === 'function') App.showToast('Details cleared');
       }
     });
   }
