@@ -1,47 +1,6 @@
 // Timeline chart for node states (process/wait/down/idle)
 (function(){
-  function getResolvedUiTheme(){
-    try{
-      if(window.App && typeof window.App.getResolvedTheme === 'function'){
-        return window.App.getResolvedTheme();
-      }
-    }catch(_e){}
-    const theme = document && document.documentElement ? document.documentElement.dataset.theme : '';
-    return theme === 'dark' ? 'dark' : 'light';
-  }
-
   function getTimelinePalette(){
-    if(getResolvedUiTheme() === 'dark'){
-      return {
-        stateColors: {
-          process: '#34d399',
-          wait: '#fbbf24',
-          down: '#60a5fa',
-          idle: '#fcd34d',
-          other: '#9ca3af'
-        },
-        background: '#0f1115',
-        gutterBg: '#151922',
-        grid: '#2a3342',
-        axisText: '#94a3b8',
-        rowEven: '#131821',
-        rowOdd: '#10151d',
-        rowDragFill: 'rgba(96,165,250,0.16)',
-        rowSelectedFill: '#241a3b',
-        rowSelectedBorder: '#a78bfa',
-        labelDragFill: '#1b2433',
-        labelDropFill: '#182235',
-        labelSelectedFill: '#2a1d4a',
-        labelSelectedText: '#ddd6fe',
-        labelText: '#e5e7eb',
-        utilMutedText: '#64748b',
-        utilText: '#cbd5e1',
-        matchStroke: '#e5e7eb',
-        dropLine: '#60a5fa',
-        nowLine: '#f87171',
-        border: '#273142'
-      };
-    }
     return {
       stateColors: {
         process: '#2ecc71',
@@ -50,18 +9,18 @@
         idle: '#f1c40f',
         other: '#9ca3af'
       },
-      background: '#ffffff',
-      gutterBg: '#f3f4f6',
-      grid: '#e5e7eb',
-      axisText: '#6b7280',
-      rowEven: '#ffffff',
-      rowOdd: '#fafafa',
+      background: 'rgba(255,255,255,0.08)',
+      gutterBg: 'rgba(243,244,246,0.18)',
+      grid: 'rgba(148,163,184,0.2)',
+      axisText: 'rgba(75,85,99,0.78)',
+      rowEven: 'rgba(255,255,255,0.1)',
+      rowOdd: 'rgba(248,250,252,0.06)',
       rowDragFill: 'rgba(37,99,235,0.08)',
-      rowSelectedFill: '#f5f3ff',
-      rowSelectedBorder: '#7c3aed',
-      labelDragFill: '#dbeafe',
-      labelDropFill: '#eff6ff',
-      labelSelectedFill: '#ede9fe',
+      rowSelectedFill: 'rgba(124,58,237,0.1)',
+      rowSelectedBorder: 'rgba(124,58,237,0.72)',
+      labelDragFill: 'rgba(219,234,254,0.48)',
+      labelDropFill: 'rgba(239,246,255,0.42)',
+      labelSelectedFill: 'rgba(237,233,254,0.48)',
       labelSelectedText: '#5b21b6',
       labelText: '#111827',
       utilMutedText: '#9ca3af',
@@ -69,7 +28,7 @@
       matchStroke: '#111827',
       dropLine: '#2563eb',
       nowLine: '#ef4444',
-      border: '#e5e7eb'
+      border: 'rgba(229,231,235,0.34)'
     };
   }
 

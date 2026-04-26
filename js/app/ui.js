@@ -10,45 +10,23 @@ function initLiteContextMenuStyler(){
   const MUTED_RE = /^(rename|resize|fit view|fit to screen|auto layout|center view|select nodes|duplicate)/i;
   const UI_FONT = '"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
   const shouldSuppressContextMenu = ()=> Number(App.__suppressContextMenusUntil || 0) > Date.now();
-  const getMenuTheme = ()=>{
-    const resolved = ((App.getResolvedTheme && App.getResolvedTheme()) || document.documentElement.dataset.theme || 'light');
-    if(resolved === 'dark'){
-      return {
-        baseText: '#e5edf7',
-        disabledText: 'rgba(229,237,247,0.42)',
-        mutedText: 'rgba(208,219,235,0.68)',
-        dangerText: '#ff8f86',
-        separatorBorder: '1px solid rgba(255,255,255,0.08)',
-        hoverBg: 'rgba(124,184,255,0.16)',
-        hoverBorder: 'rgba(124,184,255,0.28)',
-        hoverText: '#d9ecff',
-        dangerHoverBg: 'rgba(255,111,97,0.14)',
-        dangerHoverBorder: 'rgba(255,111,97,0.24)',
-        dangerHoverText: '#ffd8d3',
-        menuBorder: '1px solid rgba(255,255,255,0.12)',
-        menuBg: 'rgba(18,22,30,0.94)',
-        menuShadow: '0 28px 72px rgba(0,0,0,0.46)',
-        menuText: '#e5edf7'
-      };
-    }
-    return {
-      baseText: '#1d1d1f',
-      disabledText: 'rgba(29,29,31,0.42)',
-      mutedText: 'rgba(60,60,67,0.68)',
-      dangerText: '#b42318',
-      separatorBorder: '1px solid rgba(17,17,17,0.08)',
-      hoverBg: 'rgba(10,132,255,0.12)',
-      hoverBorder: 'rgba(10,132,255,0.22)',
-      hoverText: '#005ecb',
-      dangerHoverBg: 'rgba(180,35,24,0.08)',
-      dangerHoverBorder: 'rgba(180,35,24,0.16)',
-      dangerHoverText: '#7a1d16',
-      menuBorder: '1px solid rgba(255,255,255,0.88)',
-      menuBg: 'rgba(255,255,255,0.82)',
-      menuShadow: '0 28px 72px rgba(15,23,42,0.18)',
-      menuText: '#1d1d1f'
-    };
-  };
+  const MENU_PALETTE = Object.freeze({
+    baseText: '#1d1d1f',
+    disabledText: 'rgba(29,29,31,0.42)',
+    mutedText: 'rgba(60,60,67,0.68)',
+    dangerText: '#b42318',
+    separatorBorder: '1px solid rgba(17,17,17,0.08)',
+    hoverBg: 'rgba(10,132,255,0.12)',
+    hoverBorder: 'rgba(10,132,255,0.22)',
+    hoverText: '#005ecb',
+    dangerHoverBg: 'rgba(180,35,24,0.08)',
+    dangerHoverBorder: 'rgba(180,35,24,0.16)',
+    dangerHoverText: '#7a1d16',
+    menuBorder: '1px solid rgba(255,255,255,0.88)',
+    menuBg: 'rgba(255,255,255,0.82)',
+    menuShadow: '0 28px 72px rgba(15,23,42,0.18)',
+    menuText: '#1d1d1f'
+  });
 
   const clampMenuToViewport = (menu)=>{
     if(!(menu instanceof HTMLElement)) return;
@@ -102,7 +80,7 @@ function initLiteContextMenuStyler(){
   const applyEntryStyles = (entry)=>{
     if(!(entry instanceof HTMLElement)) return;
     const text = String(entry.textContent || '').trim();
-    const theme = getMenuTheme();
+    const theme = MENU_PALETTE;
     entry.style.setProperty('background', 'transparent', 'important');
     entry.style.setProperty('background-color', 'transparent', 'important');
     entry.style.setProperty('background-image', 'none', 'important');
@@ -127,7 +105,7 @@ function initLiteContextMenuStyler(){
     if(!entry.__factStyledEntry){
       entry.__factStyledEntry = true;
       entry.addEventListener('mouseenter', ()=>{
-        const hoverTheme = getMenuTheme();
+        const hoverTheme = MENU_PALETTE;
         if(entry.classList.contains('fact-menu-danger')){
           entry.style.setProperty('background', hoverTheme.dangerHoverBg, 'important');
           entry.style.setProperty('background-color', hoverTheme.dangerHoverBg, 'important');
@@ -160,7 +138,7 @@ function initLiteContextMenuStyler(){
       menu.remove();
       return;
     }
-    const theme = getMenuTheme();
+    const theme = MENU_PALETTE;
     pruneRedundantEntries(menu);
     Object.assign(menu.style, {
       border: theme.menuBorder,
@@ -189,106 +167,34 @@ function initLiteContextMenuStyler(){
 
 initLiteContextMenuStyler();
 
-(function initThemeModeController(){
-  const STORAGE_KEY = 'fact-sim-theme-mode';
-  const root = document.documentElement;
-  const select = document.getElementById('themeModeSelect');
+(function initUiAppearance(){
   const meta = document.querySelector('meta[name="theme-color"]');
-  const media = (window.matchMedia && typeof window.matchMedia === 'function')
-    ? window.matchMedia('(prefers-color-scheme: dark)')
-    : null;
-
-  const normalizeThemeMode = (value)=>{
-    const mode = String(value || '').toLowerCase();
-    if(mode === 'light' || mode === 'dark' || mode === 'system') return mode;
-    return 'system';
-  };
-  const resolveTheme = (mode)=>{
-    const safe = normalizeThemeMode(mode);
-    if(safe === 'light' || safe === 'dark') return safe;
-    return (media && media.matches) ? 'dark' : 'light';
-  };
-  const readStoredThemeMode = ()=>{
-    try{
-      return normalizeThemeMode(window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : 'system');
-    }catch(_e){
-      return 'system';
+  if(meta) meta.setAttribute('content', '#f5f5f7');
+  if(typeof App.refreshGraphTheme === 'function') App.refreshGraphTheme();
+  try{
+    const refreshTimeline = ()=>{
+      if(!App.timelineChart) return;
+      if(typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
+      if(typeof App.timelineChart.resize === 'function') App.timelineChart.resize();
+    };
+    if(typeof window.requestAnimationFrame === 'function'){
+      window.requestAnimationFrame(()=> refreshTimeline());
+    }else{
+      refreshTimeline();
     }
-  };
-  const updateThemeMeta = ()=>{
-    if(!meta) return;
-    let next = '';
-    try{
-      next = String(getComputedStyle(root).getPropertyValue('--theme-color') || '').trim();
-    }catch(_e){}
-    if(!next) next = resolveTheme(root.dataset.themeMode || 'system') === 'dark' ? '#0f1115' : '#f5f5f7';
-    meta.setAttribute('content', next);
-  };
-  const applyThemeMode = (mode, options)=>{
-    const opts = options || {};
-    const nextMode = normalizeThemeMode(mode);
-    const resolvedTheme = resolveTheme(nextMode);
-    root.dataset.themeMode = nextMode;
-    root.dataset.theme = resolvedTheme;
-    if(select && select.value !== nextMode) select.value = nextMode;
-    if(opts.persist !== false){
-      try{ if(window.localStorage) window.localStorage.setItem(STORAGE_KEY, nextMode); }catch(_e){}
-    }
-    updateThemeMeta();
-    if(typeof App.refreshGraphTheme === 'function') App.refreshGraphTheme();
-    try{
-      const refreshTimeline = ()=>{
-        if(!App.timelineChart) return;
-        if(typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
-        if(typeof App.timelineChart.resize === 'function') App.timelineChart.resize();
-      };
-      if(typeof window.requestAnimationFrame === 'function'){
-        window.requestAnimationFrame(()=> refreshTimeline());
-      }else{
-        refreshTimeline();
-      }
-    }catch(_e){}
-    if(typeof App.refreshLiteContextMenuStyles === 'function') App.refreshLiteContextMenuStyles();
-    try{
-      document.dispatchEvent(new CustomEvent('factsim:themechange', {
-        detail: { mode: nextMode, resolved: resolvedTheme }
-      }));
-    }catch(_e){}
-  };
-
-  App.getThemeMode = ()=> normalizeThemeMode(root.dataset.themeMode || readStoredThemeMode());
-  App.getResolvedTheme = ()=> resolveTheme(App.getThemeMode());
-  App.setThemeMode = (mode, options)=> applyThemeMode(mode, options);
-
-  if(select){
-    select.value = App.getThemeMode();
-    select.addEventListener('change', (event)=>{
-      applyThemeMode(event && event.target ? event.target.value : 'system');
-      if(typeof App.showToast === 'function'){
-        App.showToast(`Theme: ${App.getResolvedTheme()}`);
-      }
-    });
-  }
-
-  const onSystemThemeChange = ()=>{
-    if(App.getThemeMode() !== 'system') return;
-    applyThemeMode('system', { persist:false });
-  };
-  if(media && typeof media.addEventListener === 'function'){
-    media.addEventListener('change', onSystemThemeChange);
-  }else if(media && typeof media.addListener === 'function'){
-    media.addListener(onSystemThemeChange);
-  }
-
-  applyThemeMode(readStoredThemeMode(), { persist:false });
+  }catch(_e){}
+  if(typeof App.refreshLiteContextMenuStyles === 'function') App.refreshLiteContextMenuStyles();
 })();
 
 // Controls
 const btnStart = document.getElementById('btnStart');
-if(btnStart) btnStart.onclick = ()=>{ startSimulation(); };
-
-const btnStop = document.getElementById('btnStop');
-if(btnStop) btnStop.onclick = ()=>{ stopSimulation(); };
+if(btnStart) btnStart.onclick = ()=>{
+  if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
+    stopSimulation();
+  }else{
+    startSimulation();
+  }
+};
 
 const btnReset = document.getElementById('btnReset');
 if(btnReset) btnReset.onclick = ()=>{
@@ -801,12 +707,17 @@ if(btnBenchmark){
   window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
 })();
 
-// Sidebar toggle (hamburger)
+// Sidebar drawer (drag rail)
 (function(){
-  const btn = document.getElementById('menuToggle');
+  const rail = document.getElementById('sidebarDragRail');
   const sidebar = document.getElementById('sidebar');
   const body = document.body;
-  if(!btn) return;
+  if(!rail || !sidebar || !body) return;
+
+  const hideSnapW = 72;
+  let mode = '';
+  let sidebarWidth = 0;
+  let currentVisibleWidth = 0;
   const readSavedState = ()=>{
     try{
       return localStorage.getItem('sidebar-hidden') === '1';
@@ -814,26 +725,65 @@ if(btnBenchmark){
       return false;
     }
   };
+  const getSidebarWidth = ()=>{
+    const rect = sidebar.getBoundingClientRect();
+    if(rect && rect.width > 0) return rect.width;
+    try{
+      const raw = String(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') || '').trim();
+      const parsed = parseFloat(raw);
+      if(isFinite(parsed) && parsed > 0) return parsed;
+    }catch(_e){}
+    return 340;
+  };
+  const canUseDesktopDrag = ()=> !body.classList.contains('mobile-ui') && !body.classList.contains('tablet-ui');
+  const setCursor = (value)=>{
+    const next = value || '';
+    try{ document.documentElement.style.cursor = next; }catch(_e){}
+    body.style.cursor = next;
+  };
+  const clearDragStyles = ()=>{
+    body.classList.remove('sidebar-dragging');
+    sidebar.style.removeProperty('transform');
+    rail.style.removeProperty('left');
+    setCursor('');
+  };
+  const clampVisibleWidth = (value)=>{
+    const width = sidebarWidth || getSidebarWidth();
+    const next = Number(value);
+    if(!isFinite(next)) return width;
+    return Math.max(0, Math.min(width, next));
+  };
+  const positionRail = (visibleWidth)=>{
+    const left = Math.max(0, Math.round(clampVisibleWidth(visibleWidth) - 8));
+    rail.style.left = `${left}px`;
+  };
+  const applySidebarPreview = (visibleWidth)=>{
+    const desired = clampVisibleWidth(visibleWidth);
+    currentVisibleWidth = desired;
+    const width = sidebarWidth || getSidebarWidth();
+    sidebar.style.transform = `translateX(${Math.round(desired - width)}px)`;
+    positionRail(desired);
+  };
   // initial state from localStorage
   try{
     if(readSavedState()) body.classList.add('sidebar-hidden');
   }catch(e){}
-  const updateAria = () => {
+  const updateRailState = ()=>{
     const hidden = body.classList.contains('sidebar-hidden');
-    btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
-    const isMobile = body.classList.contains('mobile-ui');
-    btn.title = isMobile
-      ? (hidden ? 'Open run controls' : 'Close run controls')
-      : (hidden ? 'Open menu' : 'Close menu');
+    rail.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+    const label = hidden ? 'Drag right to show side panel' : 'Drag left on edge to hide side panel';
+    rail.setAttribute('aria-label', label);
+    rail.title = label;
   };
   const setSidebarHidden = (hidden, options)=>{
     const opt = options || {};
     const next = !!hidden;
+    clearDragStyles();
     body.classList.toggle('sidebar-hidden', next);
     if(opt.persist !== false && !body.classList.contains('mobile-ui')){
       try{ localStorage.setItem('sidebar-hidden', next ? '1' : '0'); }catch(_e){}
     }
-    updateAria();
+    updateRailState();
     try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
     try{
       if(opt.syncMobileUi === false) return;
@@ -844,8 +794,65 @@ if(btnBenchmark){
   App.setSidebarHidden = setSidebarHidden;
   App.toggleSidebarHidden = ()=> setSidebarHidden(!body.classList.contains('sidebar-hidden'));
   App.getSavedSidebarHidden = readSavedState;
-  updateAria();
-  btn.addEventListener('click', ()=> App.toggleSidebarHidden());
+  updateRailState();
+
+  rail.addEventListener('mousedown', (event)=>{
+    if(!canUseDesktopDrag() || event.button !== 0) return;
+    sidebarWidth = getSidebarWidth();
+    currentVisibleWidth = body.classList.contains('sidebar-hidden') ? 0 : sidebarWidth;
+    mode = body.classList.contains('sidebar-hidden') ? 'reveal' : 'dock';
+    body.classList.add('sidebar-dragging');
+    setCursor('ew-resize');
+    if(mode === 'reveal'){
+      setSidebarHidden(false, { persist:false, syncMobileUi:false });
+      body.classList.add('sidebar-dragging');
+      setCursor('ew-resize');
+      applySidebarPreview(sidebarWidth);
+    }
+    event.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (event)=>{
+    if(!mode) return;
+    const desired = clampVisibleWidth(event.clientX);
+    if(desired <= hideSnapW){
+      currentVisibleWidth = 0;
+      setSidebarHidden(true, { persist:false, syncMobileUi:false });
+      body.classList.add('sidebar-dragging');
+      setCursor('ew-resize');
+      positionRail(0);
+      return;
+    }
+    if(body.classList.contains('sidebar-hidden')){
+      setSidebarHidden(false, { persist:false, syncMobileUi:false });
+      body.classList.add('sidebar-dragging');
+      setCursor('ew-resize');
+    }
+    applySidebarPreview(desired);
+  });
+
+  rail.addEventListener('keydown', (event)=>{
+    if(event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    App.toggleSidebarHidden();
+  });
+
+  window.addEventListener('mouseup', ()=>{
+    if(!mode) return;
+    const wasMode = mode;
+    const shouldHide = currentVisibleWidth <= hideSnapW;
+    mode = '';
+    setSidebarHidden(shouldHide);
+    if(typeof App.showToast === 'function' && (wasMode === 'dock' || wasMode === 'reveal')){
+      App.showToast(shouldHide ? 'Menu hidden' : 'Menu shown');
+    }
+  });
+
+  window.addEventListener('resize', ()=>{
+    mode = '';
+    clearDragStyles();
+    updateRailState();
+  });
 
   // Sidebar should always be wheel-scrollable even if graph handlers consume wheel events.
   if(sidebar && !sidebar.__wheelScrollHooked){
@@ -2046,12 +2053,11 @@ window.beginGroupPlacement = beginGroupPlacement;
   function updateSimulationSummary(){
     const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
     if(btnStart){
-      btnStart.disabled = running;
+      btnStart.textContent = running ? '■ Stop' : '▶ Start';
+      btnStart.dataset.runState = running ? 'stop' : 'start';
       btnStart.setAttribute('aria-pressed', running ? 'true' : 'false');
-    }
-    if(btnStop){
-      btnStop.disabled = !running;
-      btnStop.setAttribute('aria-pressed', running ? 'true' : 'false');
+      btnStart.setAttribute('aria-label', running ? 'Stop simulation' : 'Start simulation');
+      btnStart.title = running ? 'Stop simulation' : 'Start simulation';
     }
     if(simStatusBadge){
       simStatusBadge.textContent = running ? 'Running' : 'Stopped';

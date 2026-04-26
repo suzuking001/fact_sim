@@ -2,40 +2,23 @@
 
 const SINK_THROUGHPUT_WINDOW_MS = 60 * 60 * 1000;
 
-function getSinkThemePalette(){
-  const dark = !!(window.App && typeof App.getResolvedTheme === 'function'
-    ? App.getResolvedTheme() === 'dark'
-    : (document && document.documentElement && document.documentElement.dataset && document.documentElement.dataset.theme === 'dark'));
-  if(dark){
-    return {
-      node: { title: '#413713', body: '#2c2610', accent: '#f2cd52' },
-      metricFill: 'rgba(26,30,38,0.90)',
-      metricStroke: 'rgba(242,205,82,0.22)',
-      metricLabel: 'rgba(242,228,176,0.78)',
-      metricValue: '#f7e39b',
-      chartFill: 'rgba(24,20,12,0.46)',
-      chartStroke: 'rgba(242,205,82,0.18)',
-      chartGrid: 'rgba(242,205,82,0.10)',
-      chartAxisText: 'rgba(242,228,176,0.68)',
-      chartEmptyText: 'rgba(242,228,176,0.48)',
-      cycleColor: '#f6b454',
-      throughputColor: '#59cf92'
-    };
-  }
-  return {
-    node: { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f' },
-    metricFill: 'rgba(255,255,255,0.78)',
-    metricStroke: 'rgba(166, 142, 29, 0.22)',
-    metricLabel: 'rgba(93, 80, 16, 0.82)',
-    metricValue: '#594f14',
-    chartFill: 'rgba(82,72,14,0.06)',
-    chartStroke: 'rgba(166, 142, 29, 0.18)',
-    chartGrid: 'rgba(82,72,14,0.10)',
-    chartAxisText: 'rgba(93, 80, 16, 0.68)',
-    chartEmptyText: 'rgba(93, 80, 16, 0.45)',
-    cycleColor: '#f39c12',
-    throughputColor: '#2d8f6f'
-  };
+const SINK_PALETTE = Object.freeze({
+  node: { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f' },
+  metricFill: 'rgba(255,255,255,0.78)',
+  metricStroke: 'rgba(166, 142, 29, 0.22)',
+  metricLabel: 'rgba(93, 80, 16, 0.82)',
+  metricValue: '#594f14',
+  chartFill: 'rgba(82,72,14,0.06)',
+  chartStroke: 'rgba(166, 142, 29, 0.18)',
+  chartGrid: 'rgba(82,72,14,0.10)',
+  chartAxisText: 'rgba(93, 80, 16, 0.68)',
+  chartEmptyText: 'rgba(93, 80, 16, 0.45)',
+  cycleColor: '#f39c12',
+  throughputColor: '#2d8f6f'
+});
+
+function getSinkPalette(){
+  return SINK_PALETTE;
 }
 
 class SinkNode extends LiteGraph.LGraphNode{
@@ -44,7 +27,6 @@ class SinkNode extends LiteGraph.LGraphNode{
     this.title = 'Sink';
     this.addInput('workIn', 0);
     this.size = [244,224];
-    this._themeMode = '';
     this._applyTheme();
     this.__disableCompactOverlay = true;
     this._recv = [];
@@ -59,10 +41,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   _applyTheme(){
-    const mode = window.App && typeof App.getResolvedTheme === 'function' ? App.getResolvedTheme() : 'light';
-    if(this._themeMode === mode) return;
-    this._themeMode = mode;
-    const palette = getSinkThemePalette();
+    const palette = getSinkPalette();
     this.color = palette.node.title;
     this.bgcolor = palette.node.body;
     this.boxcolor = palette.node.accent;
@@ -171,7 +150,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   _drawMetrics(ctx, tphText, lastCycleSec){
-    const palette = getSinkThemePalette();
+    const palette = getSinkPalette();
     const top = 30;
     const left = 10;
     const gap = 6;
@@ -206,7 +185,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   _drawHistory(ctx){
-    const palette = getSinkThemePalette();
+    const palette = getSinkPalette();
     const pad = 12;
     const topOffset = 68;
     const axisWidth = 34;
@@ -253,7 +232,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   _drawSeriesChart(ctx, config){
-    const palette = getSinkThemePalette();
+    const palette = getSinkPalette();
     const x = Number(config.x) || 0;
     const y = Number(config.y) || 0;
     const width = Math.max(40, Number(config.width) || 0);

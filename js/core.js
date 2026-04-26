@@ -650,7 +650,7 @@ function _wrapOverlayText(ctx, text, maxWidth){
   return out.length ? out : [''];
 }
 
-const NODE_STATE_THEME_LIGHT = Object.freeze({
+const NODE_STATE_PALETTE = Object.freeze({
   IDLE:    { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f' },
   PROCESS: { title: '#d6f5e3', body: '#f4fcf8', accent: '#2ecc71' },
   WAIT:    { title: '#fee8c7', body: '#fff8ee', accent: '#f39c12' },
@@ -658,53 +658,22 @@ const NODE_STATE_THEME_LIGHT = Object.freeze({
   ERROR:   { title: '#ffd9df', body: '#fff4f6', accent: '#dc4c64' }
 });
 
-const NODE_STATE_THEME_DARK = Object.freeze({
-  IDLE:    { title: '#413713', body: '#2c2610', accent: '#f2cd52' },
-  PROCESS: { title: '#143223', body: '#0f2419', accent: '#4dd08a' },
-  WAIT:    { title: '#402a12', body: '#2b1d0c', accent: '#f6b454' },
-  DOWN:    { title: '#122e42', body: '#0d1f2e', accent: '#68b4ff' },
-  ERROR:   { title: '#42191d', body: '#2d1215', accent: '#ff7c8e' }
+const OVERLAY_PALETTE = Object.freeze({
+  shadow: 'rgba(15,23,42,0.12)',
+  cardFill: 'rgba(255,255,255,0.78)',
+  cardStroke: 'rgba(17,17,17,0.08)',
+  text: 'rgba(17,17,17,0.82)',
+  buttonFill: '#0a84ff',
+  buttonText: '#ffffff'
 });
 
-function _getResolvedUiTheme(){
-  try{
-    if(window.App && typeof App.getResolvedTheme === 'function'){
-      return App.getResolvedTheme() === 'dark' ? 'dark' : 'light';
-    }
-  }catch(_e){}
-  try{
-    return document && document.documentElement && document.documentElement.dataset && document.documentElement.dataset.theme === 'dark'
-      ? 'dark'
-      : 'light';
-  }catch(_e){}
-  return 'light';
-}
-
 function _getOverlayPalette(){
-  if(_getResolvedUiTheme() === 'dark'){
-    return {
-      shadow: 'rgba(0,0,0,0.28)',
-      cardFill: 'rgba(16,20,28,0.84)',
-      cardStroke: 'rgba(255,255,255,0.12)',
-      text: 'rgba(229,237,247,0.88)',
-      buttonFill: '#4ea1ff',
-      buttonText: '#ffffff'
-    };
-  }
-  return {
-    shadow: 'rgba(15,23,42,0.12)',
-    cardFill: 'rgba(255,255,255,0.78)',
-    cardStroke: 'rgba(17,17,17,0.08)',
-    text: 'rgba(17,17,17,0.82)',
-    buttonFill: '#0a84ff',
-    buttonText: '#ffffff'
-  };
+  return OVERLAY_PALETTE;
 }
 
-function _getNodeStateTheme(state){
+function _getNodeStatePalette(state){
   const key = String(state || 'IDLE').toUpperCase();
-  const palette = _getResolvedUiTheme() === 'dark' ? NODE_STATE_THEME_DARK : NODE_STATE_THEME_LIGHT;
-  return palette[key] || palette.IDLE;
+  return NODE_STATE_PALETTE[key] || NODE_STATE_PALETTE.IDLE;
 }
 
 function _drawCanvasCard(ctx, x, y, width, height, radius){
@@ -737,8 +706,8 @@ function _getCurrentCanvasScale(){
 
 function applyNodeStateTheme(node, state){
   if(!node) return;
-  const theme = _getNodeStateTheme(state);
-  node.boxcolor = theme.accent;
+  const palette = _getNodeStatePalette(state);
+  node.boxcolor = palette.accent;
 }
 
 function _scoreCompactOverlayLine(text){
@@ -903,7 +872,7 @@ function _getCompactOverlayLayout(ctx, node, lines){
 function _drawCompactLinesInsideNode(ctx, node, lines){
   const layout = _getCompactOverlayLayout(ctx, node, lines);
   if(!layout) return;
-  const theme = _getNodeStateTheme(node && node._state);
+  const palette = _getNodeStatePalette(node && node._state);
   const overlay = _getOverlayPalette();
   const scale = _getCurrentCanvasScale();
   const lowScale = scale < 0.78;
@@ -921,7 +890,7 @@ function _drawCompactLinesInsideNode(ctx, node, lines){
     ctx.lineWidth = lowScale ? Math.min(2.2, 1 / Math.max(scale, 0.45)) : 1;
     _drawCanvasCard(ctx, layout.boxX + 0.5, layout.boxY + 0.5, layout.boxWidth - 1, layout.boxHeight - 1, 8);
     ctx.stroke();
-    ctx.fillStyle = theme.accent;
+    ctx.fillStyle = palette.accent;
     _drawCanvasCard(ctx, layout.boxX + 1.5, layout.boxY + 1.5, 3, Math.max(10, layout.boxHeight - 3), 2);
     ctx.fill();
     ctx.fillStyle = overlay.text;
@@ -955,7 +924,7 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
   const anchorOffsetX = (Number(x) || 8) * unit;
   const anchorMarginY = (Number(margin) || 6) * unit;
   const outerWidth = 5 * unit;
-  const theme = _getNodeStateTheme(node && node._state);
+  const palette = _getNodeStatePalette(node && node._state);
   const overlay = _getOverlayPalette();
   const lowScale = scale < 0.78;
   ctx.save();
@@ -996,7 +965,7 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     ctx.lineWidth = 1 * unit;
     _drawCanvasCard(ctx, boxX + (0.5 * unit), yTop + (0.5 * unit), boxWidth + outerWidth - (1 * unit), boxHeight - (1 * unit), 9 * unit);
     ctx.stroke();
-    ctx.fillStyle = theme.accent;
+    ctx.fillStyle = palette.accent;
     _drawCanvasCard(ctx, boxX + (2 * unit), yTop + (2 * unit), 3 * unit, Math.max(10 * unit, boxHeight - (4 * unit)), 3 * unit);
     ctx.fill();
     ctx.font = `600 ${9 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
@@ -1029,6 +998,49 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
     }
   }finally{
     ctx.restore();
+  }
+}
+
+function _queueHoverDetailBox(node, lines, x, margin){
+  const canvas = _nodeOverlayCanvas();
+  if(!canvas || !node || !Array.isArray(lines) || !lines.length) return false;
+  const queue = Array.isArray(canvas.__factNodeDetailOverlayQueue)
+    ? canvas.__factNodeDetailOverlayQueue
+    : (canvas.__factNodeDetailOverlayQueue = []);
+  let priority = 0;
+  if(_isNodeSelected(node)) priority += 1;
+  if(_isNodeHovered(node)) priority += 10;
+  if(_isNodeInspectorDetailHovered(node)) priority += 20;
+  queue.push({
+    node,
+    lines: lines.slice(),
+    x: Number(x) || 8,
+    margin: Number(margin) || 6,
+    priority,
+    order: queue.length
+  });
+  return true;
+}
+
+function _flushQueuedHoverDetailBoxes(ctx, canvas){
+  const queue = Array.isArray(canvas && canvas.__factNodeDetailOverlayQueue)
+    ? canvas.__factNodeDetailOverlayQueue
+    : null;
+  if(!ctx || !queue || !queue.length) return;
+  const items = queue.splice(0, queue.length);
+  items.sort((a, b)=> (Number(a.priority) || 0) - (Number(b.priority) || 0) || (Number(a.order) || 0) - (Number(b.order) || 0));
+  for(const item of items){
+    const node = item && item.node;
+    if(!node) continue;
+    const nodeX = Number(node.pos?.[0]) || 0;
+    const nodeY = Number(node.pos?.[1]) || 0;
+    ctx.save();
+    try{
+      ctx.translate(nodeX, nodeY);
+      _drawHoverDetailBox(ctx, node, item.lines, item.x, item.margin);
+    }finally{
+      ctx.restore();
+    }
   }
 }
 
@@ -1065,8 +1077,35 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
       if(detailLines.length) detailLines.push('');
       detailLines.push(...propLines);
     }
-    _drawHoverDetailBox(ctx, node, detailLines, x, margin);
+    if(!_queueHoverDetailBox(node, detailLines, x, margin)){
+      _drawHoverDetailBox(ctx, node, detailLines, x, margin);
+    }
   }catch(_e){}
+}
+
+function installNodeDetailOverlayLayer(canvas){
+  if(!canvas || canvas.__factNodeDetailOverlayLayerInstalled) return;
+
+  const prevFront = canvas.drawFrontCanvas;
+  if(typeof prevFront === 'function'){
+    canvas.drawFrontCanvas = function(){
+      if(Array.isArray(this.__factNodeDetailOverlayQueue)) this.__factNodeDetailOverlayQueue.length = 0;
+      else this.__factNodeDetailOverlayQueue = [];
+      return prevFront.apply(this, arguments);
+    };
+  }else{
+    canvas.__factNodeDetailOverlayQueue = [];
+  }
+
+  const prevForeground = canvas.onDrawForeground;
+  canvas.onDrawForeground = function(ctx){
+    if(typeof prevForeground === 'function'){
+      try{ prevForeground.call(this, ctx); }catch(_e){}
+    }
+    _flushQueuedHoverDetailBoxes(ctx, this);
+  };
+
+  canvas.__factNodeDetailOverlayLayerInstalled = true;
 }
 
 function getNodeOverlayMinimumSize(node, lines){
@@ -1139,3 +1178,4 @@ window.getNodeOverlayMinimumSize = getNodeOverlayMinimumSize;
 window.enforceNodeOverlayMinSize = enforceNodeOverlayMinSize;
 window.normalizeGraphOverlaySizes = normalizeGraphOverlaySizes;
 window.applyNodeStateTheme = applyNodeStateTheme;
+window.installNodeDetailOverlayLayer = installNodeDetailOverlayLayer;

@@ -5,51 +5,22 @@
   const cfg = window.NODES_CONFIG?.animations || {};
   const defaultDuration = (cfg.linkMs || 800);
   const iconRadius = cfg.radius || 22.5;
-  const isDarkTheme = ()=>{
-    try{
-      if(window.App && typeof App.getResolvedTheme === 'function'){
-        return App.getResolvedTheme() === 'dark';
-      }
-    }catch(_e){}
-    try{
-      return document && document.documentElement && document.documentElement.dataset && document.documentElement.dataset.theme === 'dark';
-    }catch(_e){}
-    return false;
-  };
-  const getLinkAnimPalette = ()=>{
-    if(isDarkTheme()){
-      return {
-        defaultTypeAccent: '#b5bfd0',
-        defaultBubbleFill: '#202734',
-        defaultBubbleStroke: 'rgba(255,255,255,0.18)',
-        agvLabelFill: 'rgba(57,133,255,0.94)',
-        agvLabelStroke: 'rgba(255,255,255,0.22)',
-        agvLabelText: '#f8fbff',
-        palletLabelFill: 'rgba(34,176,98,0.94)',
-        palletLabelStroke: 'rgba(255,255,255,0.22)',
-        palletLabelText: '#f7fff9',
-        workLabelFill: 'rgba(24,30,40,0.96)',
-        workLabelStroke: 'rgba(255,255,255,0.16)',
-        workLabelText: '#edf3fb',
-        labelShadow: 'rgba(0,0,0,0.26)'
-      };
-    }
-    return {
-      defaultTypeAccent: '#8e8e93',
-      defaultBubbleFill: '#d5d8dc',
-      defaultBubbleStroke: 'rgba(15,23,42,0.22)',
-      agvLabelFill: 'rgba(0,113,227,0.92)',
-      agvLabelStroke: 'rgba(255,255,255,0.28)',
-      agvLabelText: '#f8fbff',
-      palletLabelFill: 'rgba(22,163,74,0.92)',
-      palletLabelStroke: 'rgba(255,255,255,0.28)',
-      palletLabelText: '#f7fff9',
-      workLabelFill: 'rgba(15,23,42,0.88)',
-      workLabelStroke: 'rgba(255,255,255,0.22)',
-      workLabelText: '#f8fafc',
-      labelShadow: 'rgba(15,23,42,0.16)'
-    };
-  };
+  const LINK_ANIM_PALETTE = Object.freeze({
+    defaultTypeAccent: '#8e8e93',
+    defaultBubbleFill: '#d5d8dc',
+    defaultBubbleStroke: 'rgba(15,23,42,0.22)',
+    agvLabelFill: 'rgba(0,113,227,0.92)',
+    agvLabelStroke: 'rgba(255,255,255,0.28)',
+    agvLabelText: '#f8fbff',
+    palletLabelFill: 'rgba(22,163,74,0.92)',
+    palletLabelStroke: 'rgba(255,255,255,0.28)',
+    palletLabelText: '#f7fff9',
+    workLabelFill: 'rgba(15,23,42,0.88)',
+    workLabelStroke: 'rgba(255,255,255,0.22)',
+    workLabelText: '#f8fafc',
+    labelShadow: 'rgba(15,23,42,0.16)'
+  });
+  const getLinkAnimPalette = ()=> LINK_ANIM_PALETTE;
   const WORK_TYPE_ACCENTS = {
     A: '#0a84ff',
     B: '#ff9f0a',
@@ -78,9 +49,7 @@
     if(!key) return palette.defaultTypeAccent;
     if(WORK_TYPE_ACCENTS[key]) return WORK_TYPE_ACCENTS[key];
     const hue = hashText(key) % 360;
-    return isDarkTheme()
-      ? `hsl(${hue}, 78%, 62%)`
-      : `hsl(${hue}, 74%, 46%)`;
+    return `hsl(${hue}, 74%, 46%)`;
   }
 
   function getAnimatedIconTheme(type, info){

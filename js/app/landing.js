@@ -133,7 +133,7 @@
   }
 
   function focusEditorChrome(){
-    const firstFocus = document.getElementById('menuToggle') || document.getElementById('btnStart');
+    const firstFocus = document.getElementById('sidebarDragRail') || document.getElementById('btnStart');
     if(firstFocus && typeof firstFocus.focus === 'function'){
       try{ firstFocus.focus({ preventScroll:true }); }catch(_e){ firstFocus.focus(); }
     }

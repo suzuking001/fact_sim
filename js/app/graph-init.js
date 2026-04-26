@@ -134,7 +134,7 @@ function applyGraphVisualTheme(){
         if(node && typeof node._applyTheme === 'function'){
           try{ node._applyTheme(); }catch(_e){}
         }else if(node && typeof node.onThemeChanged === 'function'){
-          try{ node.onThemeChanged(document.documentElement.dataset.theme || 'light'); }catch(_e){}
+          try{ node.onThemeChanged('light'); }catch(_e){}
         }
       }
     }
@@ -394,6 +394,9 @@ function initGraph(){
   if(typeof installPlacementHandlers === 'function') installPlacementHandlers(App.canvas);
   if(App.backgroundLayout && typeof App.backgroundLayout.attachCanvas === 'function'){
     App.backgroundLayout.attachCanvas(App.canvas);
+  }
+  if(typeof window.installNodeDetailOverlayLayer === 'function'){
+    window.installNodeDetailOverlayLayer(App.canvas);
   }
   // expose for other helpers that hook into canvas
   window.canvas = App.canvas;

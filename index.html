@@ -14,20 +14,9 @@
         if(qs.get('skipLanding') === '1'){
           root.classList.add('skip-landing');
         }
-        var storedThemeMode = window.localStorage ? window.localStorage.getItem('fact-sim-theme-mode') : null;
-        var themeMode = (storedThemeMode === 'light' || storedThemeMode === 'dark' || storedThemeMode === 'system')
-          ? storedThemeMode
-          : 'system';
-        var resolvedTheme = themeMode === 'dark'
-          ? 'dark'
-          : (themeMode === 'light'
-            ? 'light'
-            : ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'));
-        root.dataset.themeMode = themeMode;
-        root.dataset.theme = resolvedTheme;
         var themeMeta = document.querySelector('meta[name="theme-color"]');
         if(themeMeta){
-          themeMeta.setAttribute('content', resolvedTheme === 'dark' ? '#0f1115' : '#f5f5f7');
+          themeMeta.setAttribute('content', '#f5f5f7');
         }
       }catch(_e){}
     })();
@@ -40,7 +29,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260321e" />
+  <link rel="stylesheet" href="css/app.css?v=20260426k" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -182,7 +171,19 @@
   </div>
 </main>
 <div id="appRoot" aria-hidden="true">
-<button id="menuToggle" aria-label="Toggle menu">&#9776;</button>
+<div id="editorTopHud" aria-label="Simulation quick controls">
+  <div id="simTimeHud">Time: <span id="simTime">0.00 s</span></div>
+  <div id="editorRunHud">
+    <button id="btnStart" type="button" data-run-state="start" aria-pressed="false">▶ Start</button>
+    <button id="btnReset" type="button">↺ Reset</button>
+    <div class="editorRunSpeed">
+      <span class="editorRunSpeedLabel">Speed</span>
+      <input type="range" id="speedRange" value="2" min="0" max="12" step="1" aria-label="Simulation speed">
+      <span id="speedFactor">1.0x</span>
+    </div>
+  </div>
+</div>
+<button id="sidebarDragRail" type="button" aria-label="Drag or toggle sidebar" aria-controls="sidebar" aria-expanded="true"></button>
 <div id="sidebar">
     <div id="sidebarHeader">
       <div class="appBrandRow">
@@ -192,15 +193,6 @@
     </div>
     <div id="controls">
       <div class="panelHeader">Simulation</div>
-      <div class="btn-row simulationRunGrid">
-        <button id="btnStart">Start</button>
-        <button id="btnStop">Stop</button>
-        <button id="btnReset">Reset</button>
-      </div>
-      <div class="control-group">
-        <label for="speedRange">Speed <span id="speedFactor">1.0x</span></label>
-        <input type="range" id="speedRange" value="2" min="0" max="12" step="1">
-      </div>
       <div class="control-group">
         <label for="exampleSelect">Example</label>
         <select id="exampleSelect" title="Examples">
@@ -219,15 +211,6 @@
           <button id="btnOverwriteExample" type="button">Overwrite Example</button>
         </div>
         <div id="exampleSaveHint" class="fieldHint">Save the current graph back into the selected example files.</div>
-      </div>
-      <div class="control-group">
-        <label for="themeModeSelect">Appearance</label>
-        <select id="themeModeSelect">
-          <option value="system" selected>System</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-        <div class="fieldHint">Change the app theme here. <strong>System</strong> follows your OS setting.</div>
       </div>
       <div id="simStatusCard" class="simStatusCard" aria-live="polite">
         <div class="simStatusHead">
@@ -495,7 +478,6 @@
       <button id="btnAbout" class="button-secondary">About</button>
     </div>
   </div>
-  <div id="simTimeHud">Time: <span id="simTime">0.00 s</span></div>
   <div id="fastestModeOverlay" aria-hidden="true"></div>
   <div id="fastestModeNotice" aria-live="polite" role="status">FASTEST mode: Rendering disabled for maximum simulation speed.</div>
   <canvas id="graph"></canvas>
@@ -820,15 +802,15 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260313a"></script>
-  <script src="js/core.js?v=20260321b"></script>
+  <script src="js/app/landing.js?v=20260426b"></script>
+  <script src="js/core.js?v=20260426d"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js?v=20260309a"></script>
     <script src="js/nodes/ioflip.js?v=20260306a"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js?v=20260321b"></script>
+    <script src="js/link-anim.js?v=20260426a"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js?v=20260307c"></script>
   <script src="js/nodes/note.js?v=20260305a"></script>
@@ -846,7 +828,7 @@ SOFTWARE.
     <script src="js/nodes/carrier_route.js?v=20260309e"></script>
   <script src="js/nodes/carrier_route_ui.js?v=20260226a"></script>
   <script src="js/nodes/station.js?v=20260313b"></script>
-  <script src="js/nodes/sink.js?v=20260321b"></script>
+  <script src="js/nodes/sink.js?v=20260426a"></script>
   <script src="js/nodes/register.js?v=20260226a"></script>
   <script src="sample/simple.js?v=20260221b"></script>
   <script src="sample/branch.js?v=20260221b"></script>
@@ -856,7 +838,7 @@ SOFTWARE.
   <script src="sample/pallet_station_demo.js?v=20260226a"></script>
   <script src="sample/sample_line1.js?v=20260221b"></script>
   <script src="sample/sample_line2.js?v=20260313a"></script>
-  <script src="js/timeline.js?v=20260321b"></script>
+  <script src="js/timeline.js?v=20260426b"></script>
   <script src="js/app/state.js?v=20260225b"></script>
   <script src="js/app/background-layout.js?v=20260313b"></script>
   <script src="js/app/graph-links.js?v=20260301a"></script>
@@ -882,11 +864,11 @@ SOFTWARE.
   <script src="js/app/node-props-panel.js?v=20260321a"></script>
   <script src="js/app/selection-inspector.js?v=20260321f"></script>
   <script src="js/app/timeline-init.js?v=20260321a"></script>
-  <script src="js/app/graph-init.js?v=20260321f"></script>
+  <script src="js/app/graph-init.js?v=20260426d"></script>
   <script src="js/app/examples.js?v=20260315a"></script>
   <script src="js/app/file-io.js?v=20260313a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
-  <script src="js/app/ui.js?v=20260321c"></script>
+  <script src="js/app/ui.js?v=20260426f"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>
