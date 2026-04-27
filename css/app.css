@@ -4317,9 +4317,9 @@ body:not(.timeline-hidden) #sidebar{
 }
 
 body:not(.sidebar-hidden) #graph{
-  left: var(--sidebar-width);
+  left: 0;
   right: 0;
-  width: calc(100% - var(--sidebar-width));
+  width: 100%;
 }
 
 body.sidebar-hidden #graph{
@@ -4869,9 +4869,15 @@ body.tablet-ui #toast{
 /* ===== Glass transparency restore ===== */
 #sidebar{
   background:
-    linear-gradient(180deg, rgba(251,253,255,0.58), rgba(242,246,251,0.38)),
-    linear-gradient(180deg, rgba(10,132,255,0.06), rgba(255,255,255,0));
-  backdrop-filter: blur(34px) saturate(1.45);
+    linear-gradient(180deg, rgba(251,253,255,0.16), rgba(242,246,251,0.04)),
+    linear-gradient(180deg, rgba(10,132,255,0.055), rgba(255,255,255,0));
+  border-right: 1px solid rgba(255,255,255,0.38);
+  box-shadow: 20px 0 52px rgba(15,23,42,0.05);
+  backdrop-filter: blur(30px) saturate(1.42);
+}
+
+#sidebar::before{
+  opacity: 0.18;
 }
 
 #timelineDock{
@@ -4925,9 +4931,20 @@ body.tablet-ui #toast{
 .accessCounter,
 #simTimeHud{
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(246,249,253,0.52)),
+    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(246,249,253,0.08)),
     linear-gradient(180deg, rgba(10,132,255,0.03), rgba(255,255,255,0));
   backdrop-filter: blur(26px) saturate(1.32);
+}
+
+#sidebarHeader::after,
+#sidebar #controls::after,
+#sidebar #fileControls::after,
+#addNodePanel::after,
+#addGroupPanel::after,
+#advancedPanel::after,
+#shortcutPanel::after,
+#backgroundPanel::after{
+  opacity: 0.24;
 }
 
 #mobileNav,

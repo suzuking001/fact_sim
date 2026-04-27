@@ -357,6 +357,7 @@ function initGraph(){
   };
   configureGraphClock(App.graph);
   App.canvas = new LGraphCanvas(graphElement, App.graph);
+  App.canvas.render_canvas_border = false;
   if(graphElement && graphElement.style){
     graphElement.style.touchAction = 'none';
   }
