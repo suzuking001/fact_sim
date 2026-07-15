@@ -193,8 +193,16 @@ export function registerRuntimeMethodsGroup13(
   (FactSimRuntimeClass.prototype as any).waitForAppGraph = async function (this: any, page: Page): Promise<void> {
       await page.waitForFunction(() => {
         const w = window as unknown as Record<string, unknown>;
-        const app = w.App as { graph?: unknown } | undefined;
-        return !!app?.graph;
+        const app = w.App as {
+          graph?: unknown;
+          getGraphApplyRevision?: () => number;
+          _graphApplyRevision?: number;
+        } | undefined;
+        if (!app?.graph) return false;
+        const applied = typeof app.getGraphApplyRevision === "function"
+          ? Number(app.getGraphApplyRevision())
+          : Number(app._graphApplyRevision ?? 0);
+        return Number.isFinite(applied) && applied > 0;
       }, undefined, { timeout: 30000 });
     };
 

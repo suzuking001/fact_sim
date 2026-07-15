@@ -332,8 +332,11 @@ var App = window.App || (window.App = {});
       centerY: 0,
       startAngle: 0
     };
+    const inputEvents = (typeof App.getCanvasInputEvents === 'function')
+      ? App.getCanvasInputEvents()
+      : { down:'mousedown', move:'mousemove', up:'mouseup', leave:'mouseleave' };
 
-    el.addEventListener('mousedown', (e)=>{
+    el.addEventListener(inputEvents.down, (e)=>{
       if(e.button !== 0) return;
       if(!state.mouseEdit || !state.src || !state.enabled) return;
       const p = _getGraphPos(canvas, e);
@@ -364,7 +367,7 @@ var App = window.App || (window.App = {});
       e.stopPropagation();
     }, true);
 
-    window.addEventListener('mousemove', (e)=>{
+    window.addEventListener(inputEvents.move, (e)=>{
       if(!mouseState || !mouseState.active) return;
       if(!state.mouseEdit || !state.src || !state.enabled){
         mouseState.active = false;
@@ -402,7 +405,7 @@ var App = window.App || (window.App = {});
       e.stopPropagation();
     }, true);
 
-    el.addEventListener('mousemove', (e)=>{
+    el.addEventListener(inputEvents.move, (e)=>{
       if(!state.mouseEdit || !state.src || !state.enabled){
         _setHoverMode('');
         _applyCursor(canvas, '');
@@ -417,13 +420,13 @@ var App = window.App || (window.App = {});
       _applyCursor(canvas, mode);
     }, true);
 
-    el.addEventListener('mouseleave', ()=>{
+    el.addEventListener(inputEvents.leave, ()=>{
       if(mouseState && mouseState.active) return;
       _setHoverMode('');
       _applyCursor(canvas, '');
     }, true);
 
-    window.addEventListener('mouseup', ()=>{
+    window.addEventListener(inputEvents.up, ()=>{
       if(!mouseState || !mouseState.active) return;
       mouseState.active = false;
       mouseState.mode = '';

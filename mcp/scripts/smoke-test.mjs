@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -67,6 +68,19 @@ async function main() {
     }));
     if (!Array.isArray(examples?.examples) || examples.examples.length === 0) {
       throw new Error("examples list returned no items");
+    }
+
+    const initialOverview = parseTextResult(await client.callTool({
+      name: "graph",
+      arguments: { action: "overview" }
+    }));
+    const defaultExample = JSON.parse(fs.readFileSync(path.resolve(repoRoot, "sample", "sample_line2.json"), "utf8"));
+    if (initialOverview?.nodeCount !== defaultExample.nodes?.length
+      || initialOverview?.linkCount !== defaultExample.links?.length) {
+      throw new Error(
+        `initial graph is not sample_line2: expected ${defaultExample.nodes?.length}/${defaultExample.links?.length}, `
+        + `got ${initialOverview?.nodeCount}/${initialOverview?.linkCount}`
+      );
     }
 
     const loaded = parseTextResult(await client.callTool({
@@ -162,6 +176,7 @@ async function main() {
     console.log(JSON.stringify({
       ok: true,
       tools: toolNames,
+      initialOverview,
       loaded,
       run,
       kpi,

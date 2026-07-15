@@ -144,9 +144,9 @@
     if(!window.App || !App.graph || !App.canvas) return false;
     if(typeof App.serializeGraphData !== 'function' || typeof App.applyGraphData !== 'function') return false;
     if(typeof window.startSimulation !== 'function' || typeof window.stopSimulation !== 'function') return false;
-    const revision = (typeof App.getGraphLoadRevision === 'function')
-      ? App.getGraphLoadRevision()
-      : (Number(App._graphLoadRevision) || 0);
+    const revision = (typeof App.getGraphApplyRevision === 'function')
+      ? App.getGraphApplyRevision()
+      : (Number(App._graphApplyRevision) || 0);
     if(revision <= 0) return false;
     if(!Array.isArray(App.graph._nodes) || !App.graph._nodes.length) return false;
     return true;

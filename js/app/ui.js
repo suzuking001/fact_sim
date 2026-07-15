@@ -1223,6 +1223,9 @@ function installPlacementHandlers(c){
   const el = c.canvas;
   if(!el) return;
   const targets = [c.canvas, c.bgcanvas, c.top_canvas].filter(Boolean);
+  const inputEvents = (typeof App.getCanvasInputEvents === 'function')
+    ? App.getCanvasInputEvents()
+    : { down:'mousedown', move:'mousemove' };
 
   const getCanvasPos = (e)=>{
     try{
@@ -1284,8 +1287,8 @@ function installPlacementHandlers(c){
   };
 
   targets.forEach((target)=>{
-    target.addEventListener('mousemove', handleMouseMove, opts);
-    target.addEventListener('mousedown', handleMouseDown, opts);
+    target.addEventListener(inputEvents.move, handleMouseMove, opts);
+    target.addEventListener(inputEvents.down, handleMouseDown, opts);
     target.addEventListener('contextmenu', handleContextMenu, opts);
   });
 

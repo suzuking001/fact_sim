@@ -266,10 +266,14 @@ function _applyGraphData(data, options){
     _scheduleFitViewport();
   }
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
+  const applyRevision = (typeof App.markGraphApplied === 'function')
+    ? App.markGraphApplied()
+    : ((App._graphApplyRevision = (Number(App._graphApplyRevision) || 0) + 1));
   try{
     window.dispatchEvent(new CustomEvent('factsim:graph-applied', {
       detail: {
-        source: String(opts.source || 'unknown').toLowerCase()
+        source: String(opts.source || 'unknown').toLowerCase(),
+        applyRevision
       }
     }));
   }catch(_e){}

@@ -41,12 +41,33 @@ App.history = {
 
 // Monotonic token for any async graph load/apply path.
 App._graphLoadRevision = Number(App._graphLoadRevision) || 0;
+// Separate counter for graph payloads that were actually applied. A load token is
+// allocated before fetch/decompression starts, so it must not be used as a
+// readiness signal by the landing preview.
+App._graphApplyRevision = Number(App._graphApplyRevision) || 0;
 App.bumpGraphLoadRevision = function(){
   App._graphLoadRevision = (Number(App._graphLoadRevision) || 0) + 1;
   return App._graphLoadRevision;
 };
 App.getGraphLoadRevision = function(){
   return Number(App._graphLoadRevision) || 0;
+};
+App.markGraphApplied = function(){
+  App._graphApplyRevision = (Number(App._graphApplyRevision) || 0) + 1;
+  return App._graphApplyRevision;
+};
+App.getGraphApplyRevision = function(){
+  return Number(App._graphApplyRevision) || 0;
+};
+
+// LiteGraph is configured for Pointer Events on modern browsers. Custom canvas
+// interactions must use the same event family; preventing a pointer event can
+// suppress the compatibility mouse event entirely.
+App.getCanvasInputEvents = function(){
+  const usePointer = (typeof window !== 'undefined') && (typeof window.PointerEvent === 'function');
+  return usePointer
+    ? { down:'pointerdown', move:'pointermove', up:'pointerup', leave:'pointerleave' }
+    : { down:'mousedown', move:'mousemove', up:'mouseup', leave:'mouseleave' };
 };
 
 App.resetListenerController = function(key){

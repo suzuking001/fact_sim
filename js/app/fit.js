@@ -709,7 +709,10 @@ function installFitHandlers(c){
   let lastMid = 0;
   const controller = App.resetListenerController('__fitController');
   const opts = App.listenerOptions(true, controller);
-  el.addEventListener('mousedown', (e)=>{
+  const inputEvents = (typeof App.getCanvasInputEvents === 'function')
+    ? App.getCanvasInputEvents()
+    : { down:'mousedown' };
+  el.addEventListener(inputEvents.down, (e)=>{
     if(e.button !== 1) return;
     const now = performance.now();
     if(now - lastMid < 350){

@@ -45,6 +45,9 @@ function installBoxSelect(c){
   let selecting = false;
   const controller = App.resetListenerController('__boxSelectController');
   const opts = App.listenerOptions(true, controller);
+  const inputEvents = (typeof App.getCanvasInputEvents === 'function')
+    ? App.getCanvasInputEvents()
+    : { down:'mousedown', move:'mousemove', up:'mouseup' };
 
   const getCanvasPos = (e)=>{
     try{
@@ -55,7 +58,7 @@ function installBoxSelect(c){
     }
   };
 
-  el.addEventListener('mousedown', (e)=>{
+  el.addEventListener(inputEvents.down, (e)=>{
     if(e.button !== 0) return;
     const useCtrl = e.ctrlKey || e.metaKey;
     if(!useCtrl) return;
@@ -71,7 +74,7 @@ function installBoxSelect(c){
     e.stopPropagation();
   }, opts);
 
-  el.addEventListener('mousemove', (e)=>{
+  el.addEventListener(inputEvents.move, (e)=>{
     if(!selecting || !c.dragging_rectangle) return;
     const p = getCanvasPos(e);
     c.dragging_rectangle[2] = p[0] - c.dragging_rectangle[0];
@@ -80,7 +83,7 @@ function installBoxSelect(c){
     c.setDirty(true);
   }, opts);
 
-  window.addEventListener('mouseup', (e)=>{
+  window.addEventListener(inputEvents.up, (e)=>{
     if(!selecting) return;
     selecting = false;
     const rectSource = snapshotSelectionRect(c) || c.dragging_rectangle;
@@ -252,6 +255,9 @@ function installClipboardHandlers(c){
   if(!el) return;
   const controller = App.resetListenerController('__clipboardController');
   const opts = App.listenerOptions(true, controller);
+  const inputEvents = (typeof App.getCanvasInputEvents === 'function')
+    ? App.getCanvasInputEvents()
+    : { move:'mousemove' };
 
   const updateMouse = (e)=>{
     try{
@@ -267,7 +273,7 @@ function installClipboardHandlers(c){
       c.__last_mouse = p;
     }catch(_e){}
   };
-  el.addEventListener('mousemove', updateMouse, opts);
+  el.addEventListener(inputEvents.move, updateMouse, opts);
 
   const isTextInputTarget = (target)=>{
     if(!target) return false;

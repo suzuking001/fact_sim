@@ -206,8 +206,11 @@ function installContextMenuPointerTracking(canvas){
   const el = canvas.canvas;
   if(!el) return;
   const update = (e)=>{ syncCanvasMouse(canvas, e); };
-  el.addEventListener('mousemove', update, true);
-  el.addEventListener('mousedown', update, true);
+  const inputEvents = (window.App && typeof window.App.getCanvasInputEvents === 'function')
+    ? window.App.getCanvasInputEvents()
+    : { down:'mousedown', move:'mousemove' };
+  el.addEventListener(inputEvents.move, update, true);
+  el.addEventListener(inputEvents.down, update, true);
   el.addEventListener('contextmenu', update, true);
   canvas.__factMenuPointerTrackingInstalled = true;
 }
