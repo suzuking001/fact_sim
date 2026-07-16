@@ -13,6 +13,14 @@ function configureGraphClock(g){
   g.status = LGraph.STATUS_STOPPED;
 }
 
+function setStateLegendVisible(visible){
+  const next = !!visible;
+  if(document.body) document.body.classList.toggle('simulation-running', next);
+  const legend = document.getElementById('stateLegend');
+  if(legend) legend.setAttribute('aria-hidden', next ? 'false' : 'true');
+}
+App.setStateLegendVisible = setStateLegendVisible;
+
 function startSimulation(){
   if(!App.graph) return;
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;
@@ -34,9 +42,11 @@ function startSimulation(){
       App.engine.update(simDeltaMs);
     }
   });
+  setStateLegendVisible(true);
 }
 
 function stopSimulation(){
+  setStateLegendVisible(false);
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
     window.stopSimLoop();
   }

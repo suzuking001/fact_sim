@@ -191,6 +191,14 @@ function _clearRuntimeVisualState(graph){
   }catch(_e){}
 }
 
+function _cloneGraphPayload(data){
+  try{
+    return JSON.parse(JSON.stringify(data));
+  }catch(_e){
+    return null;
+  }
+}
+
 function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
@@ -266,6 +274,10 @@ function _applyGraphData(data, options){
     _scheduleFitViewport();
   }
   try{ if(App.canvas && App.canvas.draw) App.canvas.draw(true,true); }catch(_e){}
+  if(opts.captureInitialState !== false && ['example', 'file', 'share', 'embedded', 'starter'].includes(source)){
+    const initialState = _cloneGraphPayload(_serializeGraph());
+    if(initialState) App._initialGraphData = initialState;
+  }
   const applyRevision = (typeof App.markGraphApplied === 'function')
     ? App.markGraphApplied()
     : ((App._graphApplyRevision = (Number(App._graphApplyRevision) || 0) + 1));
@@ -396,6 +408,19 @@ App.compactGraphData = function(graph){
 
 App.applyGraphData = function(data, options){
   return _applyGraphData(data, options);
+};
+
+App.captureInitialGraphState = function(data){
+  const snapshot = _cloneGraphPayload(data || _serializeGraph());
+  if(!snapshot) return false;
+  App._initialGraphData = snapshot;
+  return true;
+};
+
+App.restoreInitialGraphState = function(){
+  const snapshot = _cloneGraphPayload(App._initialGraphData);
+  if(!snapshot) return false;
+  return _applyGraphData(snapshot, { source: 'reset', captureInitialState: false });
 };
 
 App.clearRuntimeVisualState = function(graph){
@@ -869,6 +894,11 @@ if(fileInput){
       }catch(err){
         alert('Failed to load JSON');
         console.error(err);
+        try{
+          window.dispatchEvent(new CustomEvent('factsim:file-load-failed', {
+            detail: { message: (err && err.message) ? err.message : 'Failed to load JSON' }
+          }));
+        }catch(_e){}
       }finally{
         e.target.value = '';
       }

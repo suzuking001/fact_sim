@@ -580,6 +580,10 @@ App.resetToInitialState = function(){
   if(typeof window.stopSimulation === 'function'){
     try{ window.stopSimulation(); }catch(_e){}
   }
+  if(typeof App.restoreInitialGraphState === 'function'){
+    const restored = App.restoreInitialGraphState();
+    if(restored) return Promise.resolve(true);
+  }
   if(typeof App.loadDefaultExample === 'function'){
     return App.loadDefaultExample();
   }

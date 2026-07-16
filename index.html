@@ -46,11 +46,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260426n" />
+  <link rel="stylesheet" href="css/app.css?v=20260715b" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
-  <a class="landingSkip" href="#landingOpenBtn">Skip to simulator</a>
+  <a class="landingSkip" href="#landingChoiceTitle">Skip to start options</a>
   <div class="landingShell">
     <header class="landingTopbar">
       <a class="landingWordmark" href="#landingTitle" aria-label="FACT SIM landing top">
@@ -74,9 +74,6 @@
             Model factories, production lines, AGVs, logistics, hospitals, and other real-world
             systems as discrete events with second-level precision.
           </p>
-          <div class="landingActions">
-            <button id="landingOpenBtn" class="landingBtn landingBtnPrimary" type="button" data-landing-open disabled aria-disabled="true">Open Simulator</button>
-          </div>
           <div class="landingProgressWrap">
             <div class="landingProgressHead">
               <span id="landingProgressLabel" class="landingProgressStatus">Loading simulator assets...</span>
@@ -91,15 +88,27 @@
             </div>
           </div>
         </div>
-        <aside class="landingHeroAside" aria-label="What FACT SIM helps answer">
-          <div class="landingMetricCard">
-            <p class="landingMetricEyebrow">What you can validate</p>
-            <ul class="landingMetricList">
-              <li><strong>Takt feasibility</strong><span>Will the line actually meet target cycle time?</span></li>
-              <li><strong>Throughput</strong><span>How much output can the system sustain per hour?</span></li>
-              <li><strong>Bottlenecks</strong><span>Which station, carrier, or buffer is constraining flow?</span></li>
-              <li><strong>Resource sizing</strong><span>How many machines, AGVs, carriers, or pallets are enough?</span></li>
-            </ul>
+        <aside class="landingHeroAside" aria-labelledby="landingChoiceTitle">
+          <div class="landingChoicePanel">
+            <p class="landingMetricEyebrow">Get Started</p>
+            <h2 id="landingChoiceTitle">何をしますか？</h2>
+            <div class="landingChoiceList">
+              <button id="landingSampleBtn" class="landingChoiceBtn landingChoiceBtnPrimary" type="button" data-landing-action="sample" disabled aria-disabled="true">
+                <span class="landingChoiceNumber">01</span>
+                <span class="landingChoiceCopy"><strong>サンプルを試す</strong><small>Sample Line2を開く</small></span>
+                <span class="landingChoiceArrow" aria-hidden="true">→</span>
+              </button>
+              <button id="landingNewBtn" class="landingChoiceBtn" type="button" data-landing-action="new" disabled aria-disabled="true">
+                <span class="landingChoiceNumber">02</span>
+                <span class="landingChoiceCopy"><strong>新しく作る</strong><small>Source → Equipment → Sinkから開始</small></span>
+                <span class="landingChoiceArrow" aria-hidden="true">→</span>
+              </button>
+              <button id="landingFileBtn" class="landingChoiceBtn" type="button" data-landing-action="file" disabled aria-disabled="true">
+                <span class="landingChoiceNumber">03</span>
+                <span class="landingChoiceCopy"><strong>ファイルを開く</strong><small>保存したJSONグラフを読み込む</small></span>
+                <span class="landingChoiceArrow" aria-hidden="true">→</span>
+              </button>
+            </div>
           </div>
         </aside>
       </div>
@@ -498,6 +507,12 @@
   <div id="fastestModeOverlay" aria-hidden="true"></div>
   <div id="fastestModeNotice" aria-live="polite" role="status">FASTEST mode: Rendering disabled for maximum simulation speed.</div>
   <canvas id="graph"></canvas>
+  <div id="stateLegend" aria-label="Simulation state colors" aria-hidden="true">
+    <span class="stateLegendItem"><span class="stateLegendDot is-idle" aria-hidden="true"></span>IDLE</span>
+    <span class="stateLegendItem"><span class="stateLegendDot is-process" aria-hidden="true"></span>PROCESS</span>
+    <span class="stateLegendItem"><span class="stateLegendDot is-wait" aria-hidden="true"></span>WAIT</span>
+    <span class="stateLegendItem"><span class="stateLegendDot is-down" aria-hidden="true"></span>DOWN</span>
+  </div>
   <div id="toast" role="status" aria-live="polite"></div>
   <!-- Timing Chart Dock -->
   <div id="timelineDock" data-view="chart">
@@ -819,7 +834,7 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260715a"></script>
+  <script src="js/app/landing.js?v=20260715b"></script>
   <script src="js/core.js?v=20260426d"></script>
     <script src="js/nodes/work.js"></script>
   <script src="js/nodes/sigports.js"></script>
@@ -872,7 +887,7 @@ SOFTWARE.
   <script src="js/app/engine-fast-par-protocol.js?v=20260311b"></script>
   <script src="js/app/engine-fast-par-partitioner.js?v=20260315b"></script>
 <script src="js/app/engine-fast-par-host.js?v=20260315b"></script>
-  <script src="js/app/sim.js?v=20260222a"></script>
+  <script src="js/app/sim.js?v=20260715a"></script>
 <script src="js/app/benchmark.js?v=20260311a"></script>
 <script src="js/app/engine-test.js?v=20260315a"></script>
   <script src="js/app/history.js?v=20260307a"></script>
@@ -882,8 +897,8 @@ SOFTWARE.
   <script src="js/app/selection-inspector.js?v=20260321f"></script>
   <script src="js/app/timeline-init.js?v=20260321a"></script>
   <script src="js/app/graph-init.js?v=20260426h"></script>
-  <script src="js/app/examples.js?v=20260315a"></script>
-  <script src="js/app/file-io.js?v=20260715a"></script>
+  <script src="js/app/examples.js?v=20260715a"></script>
+  <script src="js/app/file-io.js?v=20260715b"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
   <script src="js/app/ui.js?v=20260715a"></script>
   <script src="js/app.js?v=20260213"></script>
