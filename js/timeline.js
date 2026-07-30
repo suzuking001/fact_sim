@@ -76,6 +76,7 @@
       this._interactionWindow = null;
       this._windowMouseMoveHandler = null;
       this._windowMouseUpHandler = null;
+      this._lastActualDrawMs = 0;
       this.width = 0;
       this.height = 0;
       this._installEvents();
@@ -1031,6 +1032,32 @@
     draw(){
       const ctx = this.ctx;
       if(!ctx || this.width <= 0 || this.height <= 0) return;
+      const canvas = this.canvas;
+      let visible = !!(canvas && canvas.isConnected);
+      if(visible){
+        const rect = canvas.getBoundingClientRect();
+        visible = rect.width > 0 && rect.height > 0;
+      }
+      if(visible){
+        const dock = canvas.closest ? canvas.closest('#timelineDock') : null;
+        if(dock){
+          visible = !document.body.classList.contains('timeline-hidden') && String(dock.dataset.view || 'chart') === 'chart';
+        }
+      }
+      if(!visible){
+        if(window.App && App.render) App.render.timelineDrawSkipCount = (Number(App.render.timelineDrawSkipCount) || 0) + 1;
+        return;
+      }
+      const drawNow = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+        ? performance.now()
+        : Date.now();
+      const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
+      if(running && this._lastActualDrawMs > 0 && (drawNow - this._lastActualDrawMs) < 4){
+        if(window.App && App.render) App.render.timelineDrawSkipCount = (Number(App.render.timelineDrawSkipCount) || 0) + 1;
+        return;
+      }
+      this._lastActualDrawMs = drawNow;
+      if(window.App && App.render) App.render.timelineDrawCount = (Number(App.render.timelineDrawCount) || 0) + 1;
       ctx.clearRect(0, 0, this.width, this.height);
       const palette = getTimelinePalette();
 

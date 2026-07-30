@@ -168,6 +168,10 @@ function updateSimTime(){
 }
 
 function updateRealtimeFps(){
+  const app = window.App;
+  if(app && typeof app.updateAdaptiveRenderMode === 'function'){
+    app.updateAdaptiveRenderMode();
+  }
   const el = document.getElementById('realtimeFpsValue');
   if(!el) return;
   if(!simRunning){
@@ -178,7 +182,6 @@ function updateRealtimeFps(){
     el.textContent = 'N/A (FASTEST)';
     return;
   }
-  const app = window.App;
   const fps = (app && typeof app.getRealtimeRenderFps === 'function') ? app.getRealtimeRenderFps() : 0;
   if(!isFinite(fps) || fps <= 0){
     el.textContent = 'measuring...';
@@ -275,6 +278,7 @@ function startSimLoop(stepFn){
   try{
     const app = window.App;
     if(app && typeof app.resetRenderFpsStats === 'function') app.resetRenderFpsStats();
+    if(app && typeof app.updateAdaptiveRenderMode === 'function') app.updateAdaptiveRenderMode();
   }catch(_e){}
   applyRenderSuppression(fastMode);
   updateFastestModeNotice();
@@ -312,6 +316,10 @@ function stopSimLoop(){
   simRunning = false;
   if(simRafId){ window.cancelAnimationFrame(simRafId); simRafId = null; }
   applyRenderSuppression(false);
+  try{
+    const app = window.App;
+    if(app && typeof app.updateAdaptiveRenderMode === 'function') app.updateAdaptiveRenderMode();
+  }catch(_e){}
   updateFastestModeNotice();
   updateRealtimeFps();
   updateSimTime();

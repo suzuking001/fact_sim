@@ -5290,3 +5290,71 @@ body.tablet-ui #editorRunHud #speedRange{
 body.mobile-ui .editorRunSpeedLabel{
   display: none;
 }
+
+/* Runtime performance tier: preserve layout while avoiding expensive nested glass compositing. */
+body.sim-running #sidebar,
+body.sim-running #timelineDock,
+body.sim-running #timelineBody,
+body.sim-running #timelineChartPanel,
+body.sim-running #nodePropsPanel,
+body.sim-running #selectionInspectorPanel,
+body.sim-running #sidebarHeader,
+body.sim-running #sidebar #controls,
+body.sim-running #sidebar #fileControls,
+body.sim-running #addNodePanel,
+body.sim-running #addGroupPanel,
+body.sim-running #advancedPanel,
+body.sim-running #shortcutPanel,
+body.sim-running #backgroundPanel,
+body.sim-running .quickStartCard,
+body.sim-running .simStatusCard,
+body.sim-running .accessCounter,
+body.sim-running #simTimeHud,
+body.sim-running #editorRunHud,
+body.sim-running #mobileNav,
+body.sim-running #tabletActionBar,
+body.sim-running .mobileNavBtn,
+body.sim-running .tabletActionBtn{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body.sim-running #sidebar{
+  background: rgba(247,250,254,0.96) !important;
+  box-shadow: 10px 0 24px rgba(15,23,42,0.045) !important;
+}
+
+body.sim-running #timelineDock{
+  background: rgba(247,250,254,0.96) !important;
+  box-shadow: 0 -8px 20px rgba(15,23,42,0.05) !important;
+}
+
+body.sim-running #timelineBody,
+body.sim-running #timelineChartPanel,
+body.sim-running #nodePropsPanel,
+body.sim-running #selectionInspectorPanel{
+  background: rgba(250,252,255,0.94) !important;
+}
+
+body.sim-running #sidebarHeader,
+body.sim-running #sidebar #controls,
+body.sim-running #sidebar #fileControls,
+body.sim-running #addNodePanel,
+body.sim-running #addGroupPanel,
+body.sim-running #advancedPanel,
+body.sim-running #shortcutPanel,
+body.sim-running #backgroundPanel,
+body.sim-running .quickStartCard,
+body.sim-running .simStatusCard,
+body.sim-running .accessCounter,
+body.sim-running #simTimeHud,
+body.sim-running #editorRunHud{
+  background: rgba(255,255,255,0.9) !important;
+  box-shadow: 0 6px 16px rgba(15,23,42,0.045) !important;
+}
+
+body.sim-running.performance-adaptive #timelineHeader,
+body.sim-running.performance-adaptive #mobileNav,
+body.sim-running.performance-adaptive #tabletActionBar{
+  background: rgba(248,250,253,0.98) !important;
+}

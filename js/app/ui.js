@@ -318,7 +318,7 @@ if(renderFpsSelect){
       if(App.timelineChart && typeof App.timelineChart.draw === 'function') App.timelineChart.draw();
       if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
     }catch(_e){}
-    App.showToast(`Render FPS: ${next}`);
+    App.showToast(`Render FPS target: ${next}`);
   });
 }
 
@@ -2036,7 +2036,13 @@ window.beginGroupPlacement = beginGroupPlacement;
       setPanelMeta('addGroupPanel', rateText && rateText !== '-' ? `${groupLabel} · ${rateText} down` : groupLabel);
     }
 
-    setPanelMeta('advancedPanel', `${getSelectedOptionLabel(simModeSelect, 'dt')} · ${renderFpsSelect?.value || '60'} fps`);
+    const configuredFps = (typeof App.getRenderFps === 'function') ? App.getRenderFps() : (Number(renderFpsSelect?.value) || 60);
+    const effectiveFps = (typeof App.getEffectiveRenderFps === 'function') ? App.getEffectiveRenderFps() : configuredFps;
+    const visualMode = (typeof App.getVisualPerformanceMode === 'function') ? App.getVisualPerformanceMode() : 'normal';
+    const renderMeta = effectiveFps < configuredFps
+      ? `${configuredFps}/${effectiveFps} fps · ${visualMode}`
+      : `${configuredFps} fps${visualMode !== 'normal' ? ` · ${visualMode}` : ''}`;
+    setPanelMeta('advancedPanel', `${getSelectedOptionLabel(simModeSelect, 'dt')} · ${renderMeta}`);
     setPanelMeta('shortcutPanel', 'Undo · Layout');
     setPanelMeta('fileControls', 'Save · Load · Share');
   }
@@ -2055,6 +2061,7 @@ window.beginGroupPlacement = beginGroupPlacement;
 
   function updateSimulationSummary(){
     const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
+    if(typeof App.updateAdaptiveRenderMode === 'function') App.updateAdaptiveRenderMode();
     if(btnStart){
       btnStart.textContent = running ? '■ Stop' : '▶ Start';
       btnStart.dataset.runState = running ? 'stop' : 'start';
@@ -2071,7 +2078,14 @@ window.beginGroupPlacement = beginGroupPlacement;
       simStatusEngine.textContent = label;
     }
     if(simStatusSpeed) simStatusSpeed.textContent = (speedFactor?.textContent || '--').replace(/^0?\.?/, (m)=> m);
-    if(simStatusRender) simStatusRender.textContent = renderFpsSelect ? `${renderFpsSelect.value} FPS` : '--';
+    if(simStatusRender){
+      const configuredFps = (typeof App.getRenderFps === 'function') ? App.getRenderFps() : (Number(renderFpsSelect?.value) || 60);
+      const effectiveFps = (typeof App.getEffectiveRenderFps === 'function') ? App.getEffectiveRenderFps() : configuredFps;
+      const visualMode = (typeof App.getVisualPerformanceMode === 'function') ? App.getVisualPerformanceMode() : 'normal';
+      simStatusRender.textContent = effectiveFps < configuredFps
+        ? `${configuredFps}/${effectiveFps} FPS · ${visualMode}`
+        : `${configuredFps} FPS${visualMode !== 'normal' ? ` · ${visualMode}` : ''}`;
+    }
     if(simStatusRealtime) simStatusRealtime.textContent = realtimeFactor?.textContent || '--';
     if(simStatusSelection){
       const selectedMap = App.canvas && App.canvas.selected_nodes ? App.canvas.selected_nodes : null;
