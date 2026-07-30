@@ -1,7 +1,7 @@
 ﻿# fact_sim
 
 [![Demo](https://img.shields.io/badge/demo-live-2ea44f)](https://suzuking001.github.io/fact_sim/)
-[![License](https://img.shields.io/badge/license-Research%20%2F%20Non--Commercial-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/suzuking001/fact_sim?style=social)](https://github.com/suzuking001/fact_sim)
 
 **A general-purpose browser-based discrete-event simulator.**
@@ -137,13 +137,10 @@ This optimizer first requires a clean worktree, then runs `quick` and `standard`
 Issues and pull requests are welcome:
 https://github.com/suzuking001/fact_sim/issues
 
-## Commercial Use
-Commercial use is not permitted under the default Research / Non-Commercial License.
-
-If you want to use `fact_sim` for commercial purposes, contact us for a separate commercial license:
-- Email: suzukiuser01@gmail.com
-- GitHub Issues: https://github.com/suzuking001/fact_sim/issues
-- Recommended issue title: `Commercial License Inquiry`
-
 ## License
-Research / Non-Commercial License (`LICENSE`)
+`fact_sim` is licensed under the [Apache License 2.0](LICENSE). Commercial use,
+modification, and redistribution are permitted subject to the license terms.
+Required attribution information is provided in [NOTICE](NOTICE).
+
+Third-party components remain under their respective licenses. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.
