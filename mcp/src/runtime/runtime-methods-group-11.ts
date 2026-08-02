@@ -131,10 +131,10 @@ export function registerRuntimeMethodsGroup11(
 
   (FactSimRuntimeClass.prototype as any).normalizePortKind = function (this: any, portKind: PortKind): PortKind {
       const value = String(portKind ?? "").trim().toLowerCase();
-      if (value === "work" || value === "signal" || value === "carrier" || value === "pallet") {
+      if (value === "work" || value === "signal" || value === "carrier" || value === "pallet" || value === "entity") {
         return value;
       }
-      throw new Error('portKind must be one of: "work", "signal", "carrier", "pallet"');
+      throw new Error('portKind must be one of: "work", "signal", "carrier", "pallet", "entity"');
     };
 
   (FactSimRuntimeClass.prototype as any).isPortSlotOfKind = function (this: any, slot: { name: string; type: string | null }, portKind: PortKind): boolean {
@@ -143,22 +143,30 @@ export function registerRuntimeMethodsGroup11(
       const isSignal = name.includes("signal") || name.startsWith("sig") || type.includes("signal") || type === "string";
       const isCarrier = name.includes("carrier") || type.includes("carrier") || type.includes("agv");
       const isPallet = name.includes("pallet") || type.includes("pallet");
+      const isGenericEntity =
+        type.includes("entity") ||
+        name.startsWith("sourcein") || name.startsWith("sourceout") ||
+        name.startsWith("targetin") || name.startsWith("targetout") ||
+        name.startsWith("itemin") || name.startsWith("itemout");
   
       if (portKind === "signal") {
         return isSignal;
       }
       if (portKind === "carrier") {
-        return isCarrier;
+        return isCarrier || isGenericEntity;
       }
       if (portKind === "pallet") {
-        return isPallet;
+        return isPallet || isGenericEntity;
+      }
+      if (portKind === "entity") {
+        return !isSignal && (isGenericEntity || isCarrier || isPallet || type === "0" || type === "work" || name.includes("work"));
       }
   
       // work ports are usually typed as "0" or "work" and should exclude other special channels.
       if (isSignal || isCarrier || isPallet) {
         return false;
       }
-      return type === "0" || type === "work" || name.includes("work");
+      return isGenericEntity || type === "0" || type === "work" || name.includes("work");
     };
 
   (FactSimRuntimeClass.prototype as any).selectPortSlot = function (this: any, slots: PortKindSlot[], explicitSlot: number | undefined, argName: string): PortKindSlot {

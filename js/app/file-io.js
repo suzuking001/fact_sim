@@ -243,6 +243,7 @@ function _applyGraphData(data, options){
   App.history.lock = true;
   try{
     App.graph.clear();
+    if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
     App.graph.configure(data);
     if(typeof window.normalizeGraphOverlaySizes === 'function'){
       window.normalizeGraphOverlaySizes(App.graph);

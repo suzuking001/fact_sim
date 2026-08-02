@@ -488,6 +488,10 @@ class StationNode extends LiteGraph.LGraphNode{
     if(this._pallet) this._pallet = this._normalizePallet(this._pallet);
   }
 
+  getEntityRoots(){
+    return [this._pallet, this._payload].filter((entity, index, rows)=> entity && rows.indexOf(entity) === index);
+  }
+
   onDrawForeground(ctx){
     const now = simNow();
     const rem = Math.max(0, (this._until || 0) - now);

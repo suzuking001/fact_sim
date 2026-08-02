@@ -401,6 +401,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(t._currentAgv === agv) return true;
       if(t._pendingAgv === agv) return true;
+      if(t._sourceHost === agv || t._targetHost === agv) return true;
     }
     return false;
   }
@@ -547,6 +548,11 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
 
   onConfigure(){
     this._syncSignalOutputs();
+  }
+
+  getEntityRoots(){
+    return [this._currentAgv, this._departingAgv, this._workOffer]
+      .filter((entity, index, rows)=> entity && rows.indexOf(entity) === index);
   }
 
   onPropertyChanged(name){

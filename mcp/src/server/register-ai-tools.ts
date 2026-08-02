@@ -5,7 +5,7 @@ import { FactSimRuntime } from "../fact-sim-runtime.js";
 import { errorMessage, failure, log, success } from "./tool-helpers.js";
 
 const nodeIdSchema = z.union([z.string().min(1), z.number()]);
-const portKindSchema = z.enum(["work", "signal", "carrier", "pallet"]);
+const portKindSchema = z.enum(["work", "signal", "carrier", "pallet", "entity"]);
 const jsonRecordSchema = z.record(z.string(), z.unknown());
 const unknownArraySchema = z.array(z.record(z.string(), z.unknown()));
 type BatchRefs = Map<string, string | number>;
@@ -312,7 +312,7 @@ async function applyEditOperation(
     toNodeId?: string | number;
     fromSlot?: number;
     toSlot?: number;
-    portKind?: "work" | "signal" | "carrier" | "pallet";
+    portKind?: "work" | "signal" | "carrier" | "pallet" | "entity";
     allowDuplicate?: boolean;
     linkId?: number;
     removeAllMatches?: boolean;
@@ -913,7 +913,8 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
                 current.portKind === "work" ||
                 current.portKind === "signal" ||
                 current.portKind === "carrier" ||
-                current.portKind === "pallet"
+                current.portKind === "pallet" ||
+                current.portKind === "entity"
                   ? current.portKind
                   : undefined,
               allowDuplicate: typeof current.allowDuplicate === "boolean" ? current.allowDuplicate : undefined,

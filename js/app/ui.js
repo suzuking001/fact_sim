@@ -1431,6 +1431,17 @@ window.beginGroupPlacement = beginGroupPlacement;
         { key:'sequence', label:'Sequence (comma separated)', type:'textarea', default:'A,B' }
       ]
     },
+    entitysource:{
+      type:'factory/entitysource',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Entity Source', target:'title' },
+        { key:'rootKind', label:'Root Kind', type:'select', default:'container', options:['pallet', 'carrier', 'container', 'ship'] },
+        { key:'rootId', label:'Root ID', type:'text', default:'Container-1' },
+        { key:'capacity', label:'Child Capacity', type:'number', min:0, step:1, default:20 },
+        { key:'accepts', label:'Accepted Kinds', type:'text', default:'pallet' },
+        { key:'initialContents', label:'Initial Hierarchy Paths', type:'textarea', rows:5, default:'pallet:P-1[6]/work:W-1\npallet:P-1[6]/work:W-2' }
+      ]
+    },
     sink:{
       type:'factory/sink',
       props:[
@@ -1500,6 +1511,26 @@ window.beginGroupPlacement = beginGroupPlacement;
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'palletWorkCapacity', label:'Pallet Work Capacity', type:'number', min:1, step:1, default:6 }
       ]
+    },
+    transferstation:{
+      type:'factory/transferstation',
+      props:[
+        { key:'title', label:'Title', type:'text', default:'Transfer Station', target:'title' },
+        { key:'preset', label:'Preset', type:'select', default:'work_to_pallet', options:[
+          { value:'work_to_pallet', label:'Work → Pallet' },
+          { value:'work_to_carrier', label:'Work → Carrier' },
+          { value:'pallet_to_agv', label:'Pallet → AGV' },
+          { value:'pallet_to_container', label:'Pallet → Container' },
+          { value:'container_to_ship', label:'Container → Ship' },
+          { value:'unload_one', label:'Unload one' },
+          { value:'unload_all', label:'Unload all' },
+          { value:'transfer_one', label:'Transfer one' },
+          { value:'custom', label:'Custom' }
+        ]},
+        { key:'processTime', label:'Handling Time (s)', type:'number', min:0, step:0.1, default:1 },
+        { key:'downTime', label:'Handoff Time (s)', type:'number', min:0, step:0.1, default:0.2 },
+        { key:'quantity', label:'Quantity', type:'number', min:1, step:1, default:1 }
+      ]
     }
   };
 
@@ -1511,6 +1542,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     merge:{ label:'Merge', description:'Merge matching work IDs from multiple inputs into one output.' },
     join:{ label:'Join', description:'Pass through the first-arriving work from multiple upstream nodes.' },
     source:{ label:'Source', description:'Generate work items from a configured sequence.' },
+    entitysource:{ label:'Entity Source', description:'Create one pallet, carrier, container, or ship with an arbitrary initial cargo hierarchy.' },
     sink:{ label:'Sink', description:'Collect completed work and monitor throughput.' },
     split:{ label:'Split', description:'Duplicate one work ID into multiple synchronized downstream branches.' },
     branch:{ label:'Branch', description:'Route work by work type to different output ports.' },
@@ -1518,9 +1550,10 @@ window.beginGroupPlacement = beginGroupPlacement;
     palletcarrierconfig:{ label:'Pallet Carrier Config', description:'Define pallet carrier IDs, pallet capacity, and initial pallets.' },
     agvroute:{ label:'AGV Route', description:'Legacy AGV route node with travel time and dispatch behavior.' },
     carrierroute:{ label:'Carrier Route', description:'Transport carriers, work, and pallets along a timed route.' },
-    station:{ label:'Station', description:'Store one pallet, feed work in/out, and hand pallets to carriers.' }
+    station:{ label:'Station', description:'Store one pallet, feed work in/out, and hand pallets to carriers.' },
+    transferstation:{ label:'Transfer Station', description:'Load, unload, or transfer any nested entity using intuitive presets.' }
   };
-  const QUICK_PICK_KINDS = ['equip', 'source', 'sink', 'signal', 'carrierroute', 'station'];
+  const QUICK_PICK_KINDS = ['equip', 'source', 'entitysource', 'sink', 'signal', 'carrierroute', 'station', 'transferstation'];
   const CATEGORY_TABS = [
     { key: 'all', label: 'All' },
     { key: 'core', label: 'Core' },
@@ -1531,6 +1564,7 @@ window.beginGroupPlacement = beginGroupPlacement;
   const NODE_CATEGORY = {
     equip: 'core',
     source: 'core',
+    entitysource: 'carrier',
     sink: 'core',
     split: 'flow',
     branch: 'flow',
@@ -1541,6 +1575,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     palletcarrierconfig: 'carrier',
     carrierroute: 'carrier',
     station: 'carrier',
+    transferstation: 'carrier',
     agvroute: 'carrier',
     signal: 'utility',
     note: 'utility'
@@ -1565,6 +1600,21 @@ window.beginGroupPlacement = beginGroupPlacement;
       if(typeof def.min !== 'undefined') input.min = String(def.min);
       if(typeof def.max !== 'undefined') input.max = String(def.max);
       input.value = def.default ?? 0;
+    }else if(def.type === 'select'){
+      input = document.createElement('select');
+      const options = Array.isArray(def.options) ? def.options : [];
+      options.forEach((entry)=>{
+        const option = document.createElement('option');
+        if(entry && typeof entry === 'object'){
+          option.value = String(entry.value ?? entry.label ?? '');
+          option.textContent = String(entry.label ?? entry.value ?? '');
+        }else{
+          option.value = String(entry ?? '');
+          option.textContent = String(entry ?? '');
+        }
+        input.appendChild(option);
+      });
+      input.value = String(def.default ?? '');
     }else if(def.type === 'checkbox'){
       input = document.createElement('input');
       input.type = 'checkbox';

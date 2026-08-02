@@ -1648,6 +1648,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
       const t = this.graph.getNodeById(link.target_id); if(!t) continue;
       if(t._currentAgv === agv) return true;
       if(t._pendingAgv === agv) return true;
+      if(t._sourceHost === agv || t._targetHost === agv) return true;
       if(Array.isArray(t._queue) && t._queue.includes(agv)) return true;
       if(t._offerAgv === agv) return true;
     }
@@ -1890,6 +1891,11 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(name === 'sigExtra') this._syncSignalOutputs();
     if(name === 'processTime') this.properties.processTime = clamp(this.properties.processTime);
     if(name === 'downTime') this.properties.downTime = clamp(this.properties.downTime);
+  }
+
+  getEntityRoots(){
+    return [this._currentAgv, this._departingAgv, this._palletOffer, this._workOffer]
+      .filter((entity, index, rows)=> entity && rows.indexOf(entity) === index);
   }
 
   onConfigure(){

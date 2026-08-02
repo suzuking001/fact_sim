@@ -567,10 +567,15 @@ var App = window.App || (window.App = {});
     }
 
     renderNodeProp(container, node, key, value){
+      let schema = null;
+      try{
+        const allSchemas = typeof node.getInspectorSchema === 'function' ? node.getInspectorSchema() : null;
+        schema = allSchemas && allSchemas[key] ? allSchemas[key] : null;
+      }catch(_e){}
       const isScript = key === 'script' && typeof value === 'string';
       const isComplex = Array.isArray(value) || isObjectLike(value);
       const isLongText = typeof value === 'string' && (value.length > 80 || value.indexOf('\n') >= 0 || key === 'text');
-      const wrap = this.field(key, isScript || isComplex || isLongText);
+      const wrap = this.field(schema?.label || key, isScript || isComplex || isLongText);
 
       const commit = (next)=>{
         if(next === value) return true;
@@ -615,6 +620,34 @@ var App = window.App || (window.App = {});
         hint.className = 'selectionInspectorHint';
         hint.textContent = 'Complex values are shown for reference. Everyday edits stay focused on the common scalar fields above.';
         wrap.appendChild(hint);
+        container.appendChild(wrap);
+        return;
+      }
+
+      if(schema?.type === 'select'){
+        const select = document.createElement('select');
+        select.className = 'selectionInspectorSelect';
+        const options = Array.isArray(schema.options) ? schema.options : [];
+        options.forEach((entry)=>{
+          const option = document.createElement('option');
+          if(Array.isArray(entry)){
+            option.value = String(entry[0] ?? '');
+            option.textContent = String(entry[1] ?? entry[0] ?? '');
+          }else if(entry && typeof entry === 'object'){
+            option.value = String(entry.value ?? entry.label ?? '');
+            option.textContent = String(entry.label ?? entry.value ?? '');
+          }else{
+            option.value = String(entry ?? '');
+            option.textContent = String(entry ?? '');
+          }
+          select.appendChild(option);
+        });
+        select.value = String(value == null ? '' : value);
+        select.addEventListener('change', ()=>{
+          commit(select.value);
+          window.setTimeout(()=> this.refresh(), 0);
+        });
+        wrap.appendChild(select);
         container.appendChild(wrap);
         return;
       }
@@ -677,6 +710,96 @@ var App = window.App || (window.App = {});
       }
 
       container.appendChild(wrap);
+    }
+
+    renderEntityTreeCard(container, node){
+      if(!container || !node || typeof App.entityStoreForGraph !== 'function') return;
+      const store = App.entityStoreForGraph(this.graph || node.graph);
+      if(!store) return;
+      let roots = [];
+      try{
+        if(typeof node.getEntityRoots === 'function') roots = node.getEntityRoots() || [];
+      }catch(_e){}
+      if(!Array.isArray(roots) || !roots.length){
+        roots = [node._currentAgv, node._departingAgv, node._pallet, node._sourceHost, node._targetHost]
+          .filter((entity, index, rows)=> entity && rows.indexOf(entity) === index);
+      }
+      roots = roots.filter((entity)=> entity && typeof entity === 'object');
+      if(!roots.length) return;
+      roots.forEach((entity)=> store.syncLegacyTree(entity));
+
+      const card = document.createElement('section');
+      card.className = 'selectionInspectorCard entityTreeCard';
+      card.innerHTML = '<div class="selectionInspectorSection"><h3 class="selectionInspectorSectionTitle">Cargo Tree</h3><p class="selectionInspectorHint">Nested contents move with their parent. While stopped, drag an entity onto another compatible entity to change its holder.</p><div class="entityTreeRoots"></div></div>';
+      const host = card.querySelector('.entityTreeRoots');
+      const running = document.body?.classList?.contains('sim-running');
+      let draggedId = '';
+
+      const renderRow = (tree, depth)=>{
+        if(!tree) return null;
+        const group = document.createElement('div');
+        group.className = 'entityTreeGroup';
+        const row = document.createElement('div');
+        row.className = 'entityTreeRow';
+        row.style.setProperty('--entity-tree-depth', String(depth));
+        row.dataset.entityId = tree.internalId;
+        row.draggable = !running && tree.mode !== 'root';
+        row.innerHTML = `<span class="entityTreeBranch">${depth ? '↳' : '●'}</span><span class="entityTreeKind">${escapeHtml(tree.kind)}</span><span class="entityTreeId">${escapeHtml(tree.id)}</span><span class="entityTreeMode">${escapeHtml(tree.mode)}</span><span class="entityTreeCount">${tree.children.length}</span>`;
+        if(row.draggable){
+          row.title = 'Drag onto another entity to transfer it';
+          row.addEventListener('dragstart', (event)=>{
+            draggedId = tree.internalId;
+            row.classList.add('is-dragging');
+            try{ event.dataTransfer.setData('text/plain', draggedId); }catch(_e){}
+          });
+          row.addEventListener('dragend', ()=> row.classList.remove('is-dragging'));
+        }
+        row.addEventListener('dragover', (event)=>{
+          if(running || !draggedId || draggedId === tree.internalId) return;
+          event.preventDefault();
+          row.classList.add('is-drop-target');
+        });
+        row.addEventListener('dragleave', ()=> row.classList.remove('is-drop-target'));
+        row.addEventListener('drop', (event)=>{
+          row.classList.remove('is-drop-target');
+          if(running) return;
+          event.preventDefault();
+          const childId = draggedId || event.dataTransfer?.getData('text/plain');
+          if(!childId || childId === tree.internalId) return;
+          const result = store.transfer(childId, null, tree.internalId, { mode: 'inside' });
+          if(!result.ok){
+            if(App.showToast) App.showToast(`Cannot move entity: ${result.reason}`);
+            return;
+          }
+          if(App.showToast) App.showToast('Cargo hierarchy updated');
+          if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
+          this.refresh();
+        });
+        group.appendChild(row);
+        if(tree.children.length){
+          const children = document.createElement('div');
+          children.className = 'entityTreeChildren';
+          tree.children.forEach((child)=>{
+            const childRow = renderRow(child, depth + 1);
+            if(childRow) children.appendChild(childRow);
+          });
+          group.appendChild(children);
+        }
+        return group;
+      };
+
+      roots.forEach((entity)=>{
+        const tree = store.tree(entity, { maxDepth: 16 });
+        const row = renderRow(tree, 0);
+        if(row) host.appendChild(row);
+      });
+      if(running){
+        const note = document.createElement('div');
+        note.className = 'selectionInspectorNotice';
+        note.textContent = 'Cargo editing is locked while the simulation is running.';
+        host.appendChild(note);
+      }
+      container.appendChild(card);
     }
 
     renderNode(node){
@@ -764,6 +887,7 @@ var App = window.App || (window.App = {});
       if(propKeys.length) propKeys.forEach((key)=> this.renderNodeProp(propFields, node, key, props[key]));
       else propFields.innerHTML = '<div class="selectionInspectorNotice">This node has no custom properties yet.</div>';
       main.appendChild(propsCard);
+      this.renderEntityTreeCard(main, node);
     }
 
     renderGroup(group){

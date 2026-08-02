@@ -452,6 +452,7 @@ function applyExampleData(data){
     App.history.lock = true;
     try{
       App.graph.clear();
+      if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
       App.graph.configure(payload);
       if(typeof window.normalizeGraphOverlaySizes === 'function'){
         window.normalizeGraphOverlaySizes(App.graph);

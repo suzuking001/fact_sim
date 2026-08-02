@@ -2,6 +2,7 @@
 
 function afterRegister(){
   LiteGraph.registerNodeType('factory/source', SourceNode);
+  LiteGraph.registerNodeType('factory/entitysource', EntitySourceNode);
   LiteGraph.registerNodeType('factory/note',   NoteNode);
   LiteGraph.registerNodeType('factory/equip',  EquipmentNode);
   LiteGraph.registerNodeType('factory/signal', SignalNode);
@@ -15,6 +16,7 @@ function afterRegister(){
   LiteGraph.registerNodeType('factory/palletcarrier', PalletCarrierConfigNode);
   LiteGraph.registerNodeType('factory/carrierroute', CarrierRouteNode);
   LiteGraph.registerNodeType('factory/station', StationNode);
+  LiteGraph.registerNodeType('factory/transferstation', TransferStationNode);
   LiteGraph.registerNodeType('factory/sink',   SinkNode);
   LiteGraph.registerNodeType('factory/merge',  MergeNode);
   LiteGraph.registerNodeType('factory/merge2', MergeNode);

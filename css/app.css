@@ -1891,6 +1891,65 @@ body.timeline-hidden #timelineRevealHandle{
   text-transform: uppercase;
 }
 
+.entityTreeRoots{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.entityTreeGroup{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.entityTreeRow{
+  display: grid;
+  grid-template-columns: 18px minmax(62px, auto) minmax(90px, 1fr) auto 28px;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  margin-left: calc(var(--entity-tree-depth, 0) * 18px);
+  padding: 5px 8px;
+  border: 1px solid rgba(15,23,42,0.09);
+  border-radius: 10px;
+  background: rgba(248,250,252,0.9);
+  font-size: 12px;
+}
+.entityTreeRow[draggable="true"]{ cursor: grab; }
+.entityTreeRow.is-dragging{ opacity: 0.45; }
+.entityTreeRow.is-drop-target{
+  border-color: #7c3aed;
+  background: rgba(124,58,237,0.08);
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.12);
+}
+.entityTreeBranch{ color: #7c3aed; font-weight: 800; }
+.entityTreeKind{
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.entityTreeId{ color: #111827; font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
+.entityTreeMode{
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: rgba(15,23,42,0.06);
+  color: #475569;
+  font-size: 10px;
+}
+.entityTreeCount{
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 10px;
+  font-weight: 800;
+}
+
 @media (max-width: 1100px){
   .selectionInspectorLayout{
     grid-template-columns: 1fr;
