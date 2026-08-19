@@ -279,6 +279,9 @@
         mode: String(options?.mode || current?.mode || 'inside').trim().toLowerCase() || 'inside',
         slot: options?.slot == null ? null : String(options.slot)
       };
+      // Keep the compatibility tree and the canonical relation in agreement.
+      // syncLegacyTree reads this field when legacy arrays are reconciled.
+      check.child.relationMode = relation.mode;
       this.relations.set(check.childId, relation);
       const rows = this.childrenByParent.get(check.parentId) || [];
       if(!rows.includes(check.childId)) rows.push(check.childId);

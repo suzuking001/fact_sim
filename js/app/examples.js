@@ -19,6 +19,7 @@ const EXAMPLE_FILES = {
   shuttle_line5: 'sample/shuttle_line5.json',
   carrier: 'sample/graph (3).json',
   pallet_station_demo: 'sample/pallet_station_demo.json',
+  nested_transport_demo: 'sample/nested_transport_demo.json?v=20260803a',
   sample_line1: 'sample/sample_line1.json',
   sample_line2: 'sample/sample_line2.json?v=20260313a'
 };

@@ -540,12 +540,20 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     if(name === 'quantity') this.properties.quantity = this._normalizeQuantity(this.properties.quantity);
   }
 
-  onConfigure(){
+  onConfigure(serializedNode){
+    const serializedPreset = String(
+      serializedNode?.properties?.preset ?? this.properties?.preset ?? 'custom'
+    );
     this.properties = { ...TRANSFER_STATION_DEFAULTS, ...(this.properties || {}) };
     this.properties.processTime = this._normalizeTime(this.properties.processTime, 1);
     this.properties.downTime = this._normalizeTime(this.properties.downTime, 0.2);
     this.properties.quantity = this._normalizeQuantity(this.properties.quantity);
-    this._syncPortLabels();
+    if(serializedPreset !== 'custom' && Object.prototype.hasOwnProperty.call(TRANSFER_STATION_PRESETS, serializedPreset)){
+      this._applyPreset(serializedPreset, false);
+    }else{
+      this.properties.preset = 'custom';
+      this._syncPortLabels();
+    }
   }
 
   onDrawForeground(ctx){
