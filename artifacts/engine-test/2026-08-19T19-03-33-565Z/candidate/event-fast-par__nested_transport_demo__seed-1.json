@@ -1,0 +1,114 @@
+{
+  "engine": "event-fast-par",
+  "seed": 1,
+  "scenario": "nested_transport_demo",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "WARN",
+  "failures": [],
+  "warnings": [
+    {
+      "severity": "warn",
+      "code": "NO_SINKS_DETECTED",
+      "message": "No sink nodes were detected in the tested graph",
+      "engine": "event-fast-par",
+      "scenario": "nested_transport_demo"
+    }
+  ],
+  "metrics": {
+    "simTimeMs": 30112,
+    "wallMs": 21.4,
+    "loops": 1882,
+    "nodeCount": 9,
+    "linkCount": 8,
+    "sinkCount": 0,
+    "totalCompleted": 0,
+    "liveProbeSimTimeMs": 0,
+    "liveProbeWallMs": 0,
+    "liveProbeLoops": 0,
+    "liveTimelineEntries": 0,
+    "liveTimelineSegments": 0
+  },
+  "liveFlowProbe": null,
+  "liveStateProbe": null,
+  "liveTimelineSignature": null,
+  "sinks": [],
+  "finalStateSnapshot": {
+    "nodeCount": 9,
+    "rows": [
+      {
+        "key": "1:① ワーク入りパレット P-1",
+        "nodeId": 1,
+        "label": "① ワーク入りパレット P-1",
+        "state": "sent|IDLE"
+      },
+      {
+        "key": "2:空AGV AGV-1",
+        "nodeId": 2,
+        "label": "空AGV AGV-1",
+        "state": "sent|IDLE"
+      },
+      {
+        "key": "3:② パレットをAGVへ積載",
+        "nodeId": 3,
+        "label": "② パレットをAGVへ積載",
+        "state": "collect|IDLE"
+      },
+      {
+        "key": "4:③ AGV搬送区間（4秒）",
+        "nodeId": 4,
+        "label": "③ AGV搬送区間（4秒）",
+        "state": "agvIn_idle|IDLE"
+      },
+      {
+        "key": "5:④ AGVからパレットを荷降ろし",
+        "nodeId": 5,
+        "label": "④ AGVからパレットを荷降ろし",
+        "state": "collect|IDLE"
+      },
+      {
+        "key": "6:空コンテナ C-1",
+        "nodeId": 6,
+        "label": "空コンテナ C-1",
+        "state": "sent|IDLE"
+      },
+      {
+        "key": "7:⑤ パレットをコンテナへ格納",
+        "nodeId": 7,
+        "label": "⑤ パレットをコンテナへ格納",
+        "state": "collect|IDLE"
+      },
+      {
+        "key": "8:空の船 Ship-1",
+        "nodeId": 8,
+        "label": "空の船 Ship-1",
+        "state": "sent|IDLE"
+      },
+      {
+        "key": "9:⑥ コンテナを船へ積載（最終状態）",
+        "nodeId": 9,
+        "label": "⑥ コンテナを船へ積載（最終状態）",
+        "state": "manual_release|WAIT"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 0,
+    "payloadCount": 0,
+    "observedLinkKeys": [],
+    "observedWorkRefs": []
+  },
+  "finalSinkSnapshot": [],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": [],
+    "canonicalInstances": []
+  },
+  "attempts": 1,
+  "maxAttempts": 1,
+  "attemptStatuses": [
+    "WARN"
+  ],
+  "flaky": false
+}

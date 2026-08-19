@@ -311,10 +311,22 @@ async function overwriteSelectedExample(){
   if(typeof App.serializeGraphData !== 'function'){
     throw new Error('Graph serialization is not available.');
   }
-  const confirmed = window.confirm(`Overwrite "${key}" with the current graph? This updates both the JSON file and the bundled JS fallback.`);
+  let preview = null;
+  if(typeof App.previewBasicNodeMigration === 'function'){
+    preview = App.previewBasicNodeMigration(App.serializeGraphData());
+    if(preview.blocked){
+      throw new Error(`Migration blocked: ${preview.warnings.map((row)=>row.type || row.code).join(', ')}`);
+    }
+  }
+  const migrationText = preview && (preview.convertedNodeCount || preview.removedConfigNodeCount)
+    ? `\n\nMigration: ${preview.convertedNodeCount} node(s) to Basic Node, ${preview.removedConfigNodeCount} config node(s) absorbed, ${preview.generatedTypeCount} Entity Type(s).`
+    : '';
+  const confirmed = window.confirm(`Overwrite "${key}" with the current graph? This updates both the JSON file and the bundled JS fallback.${migrationText}`);
   if(!confirmed) return false;
   const context = await linkExampleFolder(false);
-  const payload = cloneExampleData(App.serializeGraphData());
+  const payload = cloneExampleData(typeof App.serializeGraphDataForSave === 'function'
+    ? App.serializeGraphDataForSave()
+    : App.serializeGraphData());
   const jsonPath = getExampleJsonPath(key);
   const jsPath = getExampleJsPath(key);
   const jsonText = JSON.stringify(payload, null, 2) + '\n';
@@ -446,6 +458,9 @@ function applyExampleData(data){
   }catch(_e){
     payload = data;
   }
+  if(!payload.__factSimEntityModel && typeof App.inferLegacyEntityModel === 'function'){
+    payload.__factSimEntityModel = App.inferLegacyEntityModel(payload);
+  }
   if(typeof App.applyGraphData === 'function'){
     App.applyGraphData(payload, { source: 'example' });
   }else{
@@ -455,6 +470,9 @@ function applyExampleData(data){
       App.graph.clear();
       if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
       App.graph.configure(payload);
+      if(typeof App.restoreEntityModel === 'function'){
+        App.restoreEntityModel(App.graph, payload, true);
+      }
       if(typeof window.normalizeGraphOverlaySizes === 'function'){
         window.normalizeGraphOverlaySizes(App.graph);
       }
@@ -582,8 +600,11 @@ App.resetToInitialState = function(){
   if(typeof window.stopSimulation === 'function'){
     try{ window.stopSimulation(); }catch(_e){}
   }
-  if(typeof App.restoreInitialGraphState === 'function'){
-    const restored = App.restoreInitialGraphState();
+  // Runtime state lives outside serialized model data. Reconfigure from the
+  // current model so edits to Types, Rules, and Initial Contents survive Reset.
+  if(typeof App.serializeGraphData === 'function' && typeof App.applyGraphData === 'function'){
+    const currentModel = App.serializeGraphData();
+    const restored = App.applyGraphData(currentModel, { source: 'reset', captureInitialState: false, fitViewport: false });
     if(restored) return Promise.resolve(true);
   }
   if(typeof App.loadDefaultExample === 'function'){

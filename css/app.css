@@ -1950,6 +1950,40 @@ body.timeline-hidden #timelineRevealHandle{
   font-weight: 800;
 }
 
+/* Entity Types / Basic Node inspector */
+.entityTypesPanelBody{ display:grid; gap:10px; padding:10px 12px 14px; }
+.entityTypeList{ display:grid; gap:7px; }
+.entityTypeRow{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px; border:1px solid rgba(100,116,139,.18); border-radius:9px; background:rgba(255,255,255,.72); }
+.entityTypeSummary{ display:grid; min-width:0; }
+.entityTypeSummary strong{ overflow:hidden; text-overflow:ellipsis; }
+.entityTypeSummary small{ color:#64748b; }
+.entityTypeActions,.entityRuleControls,.entityContentsToggle{ display:flex; gap:6px; align-items:center; }
+.entityModalBackdrop{ position:fixed; inset:0; z-index:10030; display:grid; place-items:center; padding:24px; background:rgba(15,23,42,.48); }
+.entityModal{ width:min(620px,100%); max-height:calc(100vh - 48px); overflow:auto; background:#fff; border-radius:16px; box-shadow:0 24px 70px rgba(15,23,42,.3); padding:20px; }
+.entityModal h2{ margin:0 0 14px; }
+.entityModalFields{ display:grid; gap:10px; }
+.entityModalField{ display:grid; gap:5px; color:#334155; font-size:12px; font-weight:700; }
+.entityModalField input,.entityModalField select,.entityModalField textarea{ width:100%; box-sizing:border-box; border:1px solid rgba(100,116,139,.3); border-radius:8px; padding:8px; background:#fff; color:#0f172a; }
+.entityModalField textarea{ min-height:100px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+.entityInspectorTabs{ display:flex; gap:5px; flex-wrap:wrap; position:sticky; top:0; z-index:2; padding:6px; margin-bottom:10px; border:1px solid rgba(100,116,139,.16); border-radius:11px; background:rgba(248,250,252,.96); backdrop-filter:blur(8px); }
+.entityInspectorTab{ border:0; border-radius:8px; padding:7px 11px; background:transparent; color:#475569; font-weight:750; cursor:pointer; }
+.entityInspectorTab.is-active{ background:#ede9fe; color:#6d28d9; }
+.entityInspectorTabPanel{ display:grid; gap:10px; }
+.entityInspectorTabPanel[hidden],.entityCurrentSummary[hidden],.entityCurrentInstances[hidden]{ display:none !important; }
+.entityRuleList,.entityRecipeList{ display:grid; gap:8px; margin-bottom:10px; }
+.entityRuleRow,.entityRecipeRow{ display:grid; grid-template-columns:minmax(130px,1.2fr) minmax(120px,1fr) minmax(100px,1fr) auto; gap:7px; align-items:center; padding:8px; border:1px solid rgba(100,116,139,.16); border-radius:9px; background:#f8fafc; }
+.entityRecipeRow{ margin-left:calc(var(--recipe-depth,0) * 20px); }
+.entityRecipeRow input,.entityRecipeRow select,.entityRuleRow select{ min-width:0; width:100%; box-sizing:border-box; }
+.entityCurrentSummary{ display:grid; gap:5px; margin-top:9px; }
+.entityCurrentSummary>div{ display:flex; justify-content:space-between; gap:12px; padding:6px 8px; border-bottom:1px solid rgba(100,116,139,.12); }
+.entityCurrentInstances{ display:grid; gap:5px; margin-top:9px; }
+.entityCurrentTree{ margin-left:8px; border-left:2px solid rgba(124,58,237,.16); padding-left:8px; }
+.entityCurrentTree>summary{ cursor:pointer; padding:4px; font-weight:700; color:#334155; }
+.entityCurrentChildren{ display:grid; gap:3px; }
+.entityAdvancedPreview{ margin:0; padding:10px; overflow:auto; border-radius:8px; background:#0f172a; color:#e2e8f0; font-size:11px; }
+.selectionInspectorNotice.is-error{ color:#b91c1c; }
+@media(max-width:760px){ .entityRuleRow,.entityRecipeRow{ grid-template-columns:1fr; } }
+
 @media (max-width: 1100px){
   .selectionInspectorLayout{
     grid-template-columns: 1fr;

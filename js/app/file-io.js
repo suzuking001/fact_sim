@@ -136,6 +136,9 @@ function _applyViewState(view){
 function _serializeGraph(){
   if(!App.graph) throw new Error('graph is not initialized');
   const serialized = App.graph.serialize();
+  if(typeof App.injectEntityModel === 'function'){
+    App.injectEntityModel(serialized, App.graph);
+  }
   if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
     App.stopGroups.injectSerializedData(serialized, App.graph);
   }
@@ -219,6 +222,9 @@ function _applyGraphData(data, options){
     }
   }
   const source = String(opts.source || '').toLowerCase();
+  if(!data.__factSimEntityModel && typeof App.inferLegacyEntityModel === 'function'){
+    data.__factSimEntityModel = App.inferLegacyEntityModel(data);
+  }
   if(source === 'share'){
     const scriptedNodes = _findScriptedNodes(data);
     if(scriptedNodes.length){
@@ -245,6 +251,9 @@ function _applyGraphData(data, options){
     App.graph.clear();
     if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
     App.graph.configure(data);
+    if(typeof App.restoreEntityModel === 'function'){
+      App.restoreEntityModel(App.graph, data, true);
+    }
     if(typeof window.normalizeGraphOverlaySizes === 'function'){
       window.normalizeGraphOverlaySizes(App.graph);
     }
@@ -258,6 +267,7 @@ function _applyGraphData(data, options){
     App.history.lock = false;
   }
   configureGraphClock(App.graph);
+  try{ if(typeof workCounter !== 'undefined') workCounter = 0; }catch(_e){}
   _clearRuntimeVisualState(App.graph);
   if(typeof window.resetSimClock === 'function') window.resetSimClock();
   if(typeof updateSimTime === 'function') updateSimTime();
@@ -401,6 +411,17 @@ function _compactGraphData(graph){
 
 App.serializeGraphData = function(){
   return _serializeGraph();
+};
+
+App.serializeGraphDataForSave = function(){
+  const raw = _serializeGraph();
+  if(typeof App.prepareSerializedGraphForSave !== 'function') return raw;
+  const result = App.prepareSerializedGraphForSave(raw);
+  if(result?.preview?.blocked){
+    const first = result.preview.warnings?.[0];
+    throw new Error(`Basic Node migration is blocked${first?.type ? ` by ${first.type}` : ''}`);
+  }
+  return result?.data || raw;
 };
 
 App.compactGraphData = function(graph){
@@ -721,7 +742,7 @@ async function _copyText(text){
 }
 
 App.buildEmbeddedShareUrl = async function(){
-  const envelope = _shareEnvelope(_serializeGraph());
+  const envelope = _shareEnvelope(App.serializeGraphDataForSave());
   const token = await _packEnvelopeForUrl(envelope);
   const u = _baseAppUrl();
   u.hash = `g=${token}`;
@@ -729,7 +750,7 @@ App.buildEmbeddedShareUrl = async function(){
 };
 
 App.buildEmbeddedExportHtml = async function(){
-  const envelope = _shareEnvelope(_serializeGraph());
+  const envelope = _shareEnvelope(App.serializeGraphDataForSave());
   const token = _packEnvelopeForEmbeddedHtml(envelope);
   const template = await _loadExportHtmlTemplate();
   return _injectEmbeddedTokenIntoHtml(template, token);
@@ -827,7 +848,7 @@ App.loadSharedGraphFromUrl = async function(){
 const btnSave = document.getElementById('btnSave');
 if(btnSave){
   btnSave.onclick = ()=>{
-    const blob = new Blob([JSON.stringify(_serializeGraph(), null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(App.serializeGraphDataForSave(), null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

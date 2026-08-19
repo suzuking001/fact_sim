@@ -1,0 +1,45 @@
+{
+  "finalStateSnapshot": {
+    "nodeCount": 3,
+    "rows": [
+      {
+        "key": "2:Split",
+        "nodeId": 2,
+        "label": "Split",
+        "state": "WAIT"
+      },
+      {
+        "key": "3:Line A",
+        "nodeId": 3,
+        "label": "Line A",
+        "state": "IDLE"
+      },
+      {
+        "key": "4:Line B",
+        "nodeId": 4,
+        "label": "Line B",
+        "state": "WAIT"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 0,
+    "payloadCount": 0,
+    "observedLinkKeys": [],
+    "observedWorkRefs": []
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "5:Sink",
+      "id": 5,
+      "title": "Sink",
+      "completedCount": 1
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": [],
+    "canonicalInstances": []
+  }
+}

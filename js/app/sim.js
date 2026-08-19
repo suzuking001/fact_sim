@@ -24,6 +24,9 @@ App.setStateLegendVisible = setStateLegendVisible;
 function startSimulation(){
   if(!App.graph) return;
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;
+  if(typeof App.runtimeInstancesForGraph === 'function' && !App.graph.__factSimRuntimeInstances){
+    App.initializeEntityRuntime(App.graph);
+  }
   if(typeof App.resetRenderBudget === 'function') App.resetRenderBudget();
 
   const mode = (App.getSimMode ? App.getSimMode() : (App.simMode || 'dt'));

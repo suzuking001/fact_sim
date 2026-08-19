@@ -123,6 +123,7 @@ return true;`;
     importScripts(
       '../nodes-config.js',
       '../nodes/work.js',
+      '../nodes/entity_model.js',
       '../nodes/entity_store.js',
       '../nodes/sigports.js',
       '../nodes/equipment.js',
@@ -142,6 +143,7 @@ return true;`;
       '../nodes/station.js',
       '../nodes/transfer_station.js',
       '../nodes/sink.js',
+      '../nodes/basic_node.js',
       '../nodes/register.js',
       'graph-links.js',
       'stop-groups.js',
@@ -163,6 +165,7 @@ return true;`;
     const payload = cloneJson(data);
     const nextGraph = new LGraph();
     nextGraph.configure(payload);
+    if(root.App.restoreEntityModel) root.App.restoreEntityModel(nextGraph, payload, true);
     if(root.App.repairGraphLinks && typeof root.App.repairGraphLinks === 'function'){
       root.App.repairGraphLinks(nextGraph);
     }

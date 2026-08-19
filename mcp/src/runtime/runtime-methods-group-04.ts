@@ -207,13 +207,15 @@ export function registerRuntimeMethodsGroup04(
       const page = await this.ensureReady();
       return page.evaluate((requestedPretty: any) => {
         const w = window as unknown as Record<string, unknown>;
-        const app = w.App as { graph?: { serialize?: () => unknown } } | undefined;
+        const app = w.App as { graph?: { serialize?: () => unknown }; serializeGraphDataForSave?: () => unknown } | undefined;
         const graph = app?.graph as { serialize?: () => unknown } | undefined;
         if (!graph || typeof graph.serialize !== "function") {
           throw new Error("App.graph.serialize is not available");
         }
   
-        const data = graph.serialize();
+        const data = typeof app?.serializeGraphDataForSave === "function"
+          ? app.serializeGraphDataForSave()
+          : graph.serialize();
         const nodeCount = Array.isArray((data as { nodes?: unknown[] } | null)?.nodes)
           ? ((data as { nodes?: unknown[] }).nodes?.length ?? 0)
           : 0;
@@ -249,6 +251,8 @@ export function registerRuntimeMethodsGroup04(
               };
               timelineChart?: { attachGraph?: (graph: unknown) => void };
               canvas?: { draw?: (a?: boolean, b?: boolean) => void };
+              restoreEntityModel?: (graph: unknown, data: unknown, initialize?: boolean) => unknown;
+              inferLegacyEntityModel?: (data: unknown) => unknown;
             }
           | undefined;
   
@@ -279,6 +283,13 @@ export function registerRuntimeMethodsGroup04(
   
         graph.clear();
         graph.configure(parsed);
+        if (typeof app.restoreEntityModel === "function") {
+          const payload = parsed as Record<string, unknown>;
+          const entityData = payload && payload.__factSimEntityModel
+            ? payload
+            : { __factSimEntityModel: typeof app.inferLegacyEntityModel === "function" ? app.inferLegacyEntityModel(payload) : { schemaVersion: 1, types: [] } };
+          app.restoreEntityModel(graph, entityData, true);
+        }
   
         const dtSec = typeof getSimDtSec === "function" ? Number(getSimDtSec()) : 0.1;
         graph.fixedtime_lapse = Number.isFinite(dtSec) && dtSec > 0 ? dtSec : 0.1;

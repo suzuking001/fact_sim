@@ -1,6 +1,7 @@
 ﻿// Register node types to LiteGraph
 
 function afterRegister(){
+  LiteGraph.registerNodeType('factory/basic', BasicNode);
   LiteGraph.registerNodeType('factory/source', SourceNode);
   LiteGraph.registerNodeType('factory/entitysource', EntitySourceNode);
   LiteGraph.registerNodeType('factory/note',   NoteNode);

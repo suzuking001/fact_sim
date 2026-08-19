@@ -1,0 +1,10 @@
+{
+  "scenario": "simple",
+  "seed": 1,
+  "baselineEngine": "dt",
+  "candidateEngine": "event-fast-par",
+  "completedDelta": 0,
+  "sinkCompletedDelta": [],
+  "finalStateDeltaCount": 0,
+  "workflowDeltaCount": 0
+}
