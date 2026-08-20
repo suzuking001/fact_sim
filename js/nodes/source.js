@@ -76,6 +76,20 @@ class SourceNode extends LiteGraph.LGraphNode{
     }
     return { ready: true, status: 'READY' };
   }
+  _animateWorkOutput(work){
+    const out = this.outputs && this.outputs[0];
+    if(!work || !out || !Array.isArray(out.links) || !window.WorkLinkAnimator || !this.graph) return;
+    const info = { id: work.id, t: work.type };
+    for(const lid of out.links){
+      const link = this.graph.links && this.graph.links[lid];
+      if(!link) continue;
+      const target = typeof this.graph.getNodeById === 'function'
+        ? this.graph.getNodeById(link.target_id)
+        : null;
+      const processMs = Math.max(0, Number(target?.properties?.processTime) || 0) * 1000;
+      window.WorkLinkAnimator.spawn(this.graph, lid, 'work', processMs || undefined, info);
+    }
+  }
   onExecute(){
     const extra = this.properties.sigExtra || 0;
     const sigCount = Math.max(0, extra);
@@ -88,6 +102,7 @@ class SourceNode extends LiteGraph.LGraphNode{
       const e = this._seq[this._cursor] || {type:'A'};
       const w = new Work(nextId, e.type);
       this.setOutputData(0, w);
+      this._animateWorkOutput(w);
       this._counter = nextId;
       this._cursor = (this._cursor + 1) % this._seq.length;
       for(let i=0;i<sigCount;i++) this._emit(i, 'SEND');

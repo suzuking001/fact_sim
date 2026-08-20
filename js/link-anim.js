@@ -229,13 +229,31 @@ class LinkAnimator{
   spawn(graph, linkId, type, durationMs, info){
     if(!graph || !linkId) return;
     const now = getNow();
+    const duration = durationMs || defaultDuration;
+    const entityId = info && info.id != null ? String(info.id) : '';
+    const entityType = info ? String(info.t ?? info.type ?? '') : '';
+    if(entityId && String(type).toLowerCase() === 'work'){
+      const existing = this.animations.find((anim)=>{
+        if(!anim || anim.tail || anim.graph !== graph || anim.linkId !== linkId || anim.type !== type) return false;
+        const activeDuration = anim.duration || defaultDuration;
+        if((now - anim.start) >= activeDuration) return false;
+        const activeInfo = anim.info || {};
+        return String(activeInfo.id ?? '') === entityId &&
+          String(activeInfo.t ?? activeInfo.type ?? '') === entityType;
+      });
+      if(existing){
+        existing.duration = Math.max(existing.duration || defaultDuration, duration);
+        existing.info = info || existing.info || null;
+        return;
+      }
+    }
     this.animations.push({
       graph,
       linkId,
       type,
       info: info || null,
       start: now,
-      duration: durationMs || defaultDuration,
+      duration,
       tail: false
     });
     this._trimTransient();

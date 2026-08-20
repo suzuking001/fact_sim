@@ -283,6 +283,7 @@ var App = window.App || (window.App = {});
           const WorkCtor = window.Work || function(id, type){ this.id = id; this.type = type; };
           const work = new WorkCtor(nextId, entry.type);
           if(typeof node.setOutputData === 'function') node.setOutputData(0, work);
+          if(typeof node._animateWorkOutput === 'function') node._animateWorkOutput(work);
           node._counter = nextId;
           node._cursor = node._seq && node._seq.length ? ((node._cursor + 1) % node._seq.length) : 0;
           for(let i = 0; i < sigCount; i += 1){
