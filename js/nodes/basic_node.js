@@ -57,6 +57,30 @@
   function text(value){ return String(value == null ? '' : value).trim(); }
   function nowMs(){ return typeof root.simNow === 'function' ? Number(root.simNow()) || 0 : 0; }
 
+  function normalizeSerializedVector(value){
+    if(Array.isArray(value)) return value;
+    if(value && typeof value === 'object'){
+      const x = Number(value[0]);
+      const y = Number(value[1]);
+      if(Number.isFinite(x) && Number.isFinite(y)) return [x, y];
+    }
+    return value;
+  }
+
+  function restoreSerializedGeometry(node, serializedNode){
+    if(!node || !serializedNode) return;
+    const pos = normalizeSerializedVector(serializedNode.pos);
+    const size = normalizeSerializedVector(serializedNode.size);
+    if(Array.isArray(pos)){
+      if(node.pos && typeof node.pos.set === 'function') node.pos.set(pos.slice(0, 2));
+      else node.pos = pos.slice(0, 2);
+    }
+    if(Array.isArray(size)){
+      if(node.size && typeof node.size.set === 'function') node.size.set(size.slice(0, 2));
+      else node.size = size.slice(0, 2);
+    }
+  }
+
   function ensurePortIds(node){
     const assign = (rows, prefix)=>{
       (Array.isArray(rows) ? rows : []).forEach((port, index)=>{
@@ -143,9 +167,16 @@
     hasEntityContents(){ return this._preset().entity !== false; }
 
     configure(serializedNode){
+      const normalizedNode = serializedNode && typeof serializedNode === 'object'
+        ? {
+            ...serializedNode,
+            pos: normalizeSerializedVector(serializedNode.pos),
+            size: normalizeSerializedVector(serializedNode.size)
+          }
+        : serializedNode;
       this._isConfiguring = true;
       try{
-        return super.configure(serializedNode);
+        return super.configure(normalizedNode);
       }finally{
         this._isConfiguring = false;
       }
@@ -204,10 +235,14 @@
     onConfigure(serializedNode){
       this.properties = { ...(this.properties || {}), basicNodeVersion: 1 };
       if(!this.properties.presetId) this.properties.presetId = 'basic';
-      if(this._configureLegacy(serializedNode)) return;
+      if(this._configureLegacy(serializedNode)){
+        restoreSerializedGeometry(this, serializedNode);
+        return;
+      }
       this.applyPreset(this.properties.presetId, true);
       this._state = this.properties?.stateMachine?.initialState || 'IDLE';
       this._stateName = String(this._state).toLowerCase();
+      restoreSerializedGeometry(this, serializedNode);
     }
 
     onSerialize(serialized){
@@ -559,6 +594,8 @@
     const kept = [];
     for(const node of nodes){
       if(!node || !node.type) continue;
+      node.pos = normalizeSerializedVector(node.pos);
+      node.size = normalizeSerializedVector(node.size);
       if(CONFIG_TYPES.has(node.type)){
         removedNodeIds.push(node.id);
         continue;
