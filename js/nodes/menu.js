@@ -212,6 +212,11 @@ function installContextMenuPointerTracking(canvas){
   el.addEventListener(inputEvents.move, update, true);
   el.addEventListener(inputEvents.down, update, true);
   el.addEventListener('contextmenu', update, true);
+  canvas.__factMenuPointerTrackingCleanup = ()=>{
+    el.removeEventListener(inputEvents.move, update, true);
+    el.removeEventListener(inputEvents.down, update, true);
+    el.removeEventListener('contextmenu', update, true);
+  };
   canvas.__factMenuPointerTrackingInstalled = true;
 }
 

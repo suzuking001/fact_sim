@@ -334,8 +334,42 @@ function installTouchPanZoom(canvas){
   el.addEventListener('pointercancel', onPointerEnd, { capture: true, passive: false });
   el.addEventListener('pointerleave', onPointerEnd, { capture: true, passive: false });
   el.addEventListener('contextmenu', onContextMenu, { capture: true, passive: false });
+  canvas.__factTouchPanZoomCleanup = ()=>{
+    el.removeEventListener('pointerdown', onPointerDown, true);
+    el.removeEventListener('pointermove', onPointerMove, true);
+    el.removeEventListener('pointerup', onPointerEnd, true);
+    el.removeEventListener('pointercancel', onPointerEnd, true);
+    el.removeEventListener('pointerleave', onPointerEnd, true);
+    el.removeEventListener('contextmenu', onContextMenu, true);
+    activePointers.clear();
+    pinch = null;
+  };
   canvas.__factTouchPanZoomHooked = true;
 }
+
+function disposeGraphCanvas(canvas){
+  if(!canvas) return;
+  try{
+    if(typeof canvas.__factTouchPanZoomCleanup === 'function') canvas.__factTouchPanZoomCleanup();
+  }catch(_e){}
+  try{
+    if(typeof canvas.__factMenuPointerTrackingCleanup === 'function') canvas.__factMenuPointerTrackingCleanup();
+  }catch(_e){}
+  try{
+    if(typeof canvas.stopRendering === 'function') canvas.stopRendering();
+  }catch(_e){}
+  try{
+    if(typeof canvas.setGraph === 'function') canvas.setGraph(null);
+  }catch(_e){}
+  try{
+    // setCanvas(null) invokes LiteGraph's unbindEvents() for the shared HTML
+    // canvas. Without this, every initGraph() leaves another renderer and
+    // pointer-listener set painting the previous graph into the same element.
+    if(typeof canvas.setCanvas === 'function') canvas.setCanvas(null);
+    else if(typeof canvas.unbindEvents === 'function') canvas.unbindEvents();
+  }catch(_e){}
+}
+App.disposeGraphCanvas = disposeGraphCanvas;
 
 function initGraph(){
   applyGraphVisualTheme();
@@ -348,6 +382,9 @@ function initGraph(){
   if(App.stopGroups && typeof App.stopGroups.clearRuntimeState === 'function'){
     App.stopGroups.clearRuntimeState();
   }
+  const previousCanvas = App.canvas;
+  App.canvas = null;
+  disposeGraphCanvas(previousCanvas);
   App.graph = new LGraph();
   if(typeof App.restoreEntityModel === 'function'){
     App.restoreEntityModel(App.graph, { __factSimEntityModel: { schemaVersion: 1, types: [] } }, true);
