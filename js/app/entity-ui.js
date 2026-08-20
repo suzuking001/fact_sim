@@ -365,7 +365,10 @@
       names.forEach((name)=>{ const panel = document.createElement('div'); panel.className = 'entityInspectorTabPanel'; panel.dataset.tab = name.toLowerCase(); panels[name] = panel; });
       if(existingCards[0]) panels.Basic.appendChild(existingCards[0]);
       if(existingCards[1]){
-        const hiddenPropertyLabels = new Set(['basicNodeVersion','initialContents','inputRules','outputRules','selection','stateMachine']);
+        const hiddenPropertyLabels = new Set([
+          'basicNodeVersion', 'initialContents', 'inputRules', 'outputRules', 'selection', 'stateMachine',
+          'legacySourceType', 'migratedCarrierConfigs'
+        ]);
         for(const field of existingCards[1].querySelectorAll('.selectionInspectorField')){
           const label = field.querySelector('.selectionInspectorFieldLabel')?.textContent?.trim();
           if(hiddenPropertyLabels.has(label)) field.remove();

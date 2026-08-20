@@ -10,8 +10,8 @@ var App = window.App || (window.App = {});
     shuttle_line5: 'sample/shuttle_line5.json',
     carrier: 'sample/graph (3).json',
     pallet_station_demo: 'sample/pallet_station_demo.json',
-    sample_line1: 'sample/sample_line1.json',
-    sample_line2: 'sample/sample_line2.json'
+    sample_line1: 'sample/sample_line1.json?v=20260821a',
+    sample_line2: 'sample/sample_line2.json?v=20260821a'
   };
   const DEFAULTS = {
     suite: 'standard',

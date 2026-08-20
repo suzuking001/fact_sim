@@ -4,7 +4,7 @@
   "nodes": [
     {
       "id": 8,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 2229,
         "1": 430,
@@ -28,7 +28,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 42
+          "link": 42,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -39,7 +40,8 @@
             8
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -48,14 +50,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 9,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 2559,
         "1": 429,
@@ -79,7 +111,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 8
+          "link": 8,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -90,7 +123,8 @@
             9
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -99,14 +133,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 11,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 42,
         "1": 756,
@@ -135,7 +199,8 @@
             10
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -143,14 +208,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 13,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 304,
         "1": 752,
@@ -174,7 +257,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 10
+          "link": 10,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -185,7 +269,8 @@
             11
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -194,14 +279,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 14,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 619,
         "1": 749,
@@ -225,7 +340,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 11
+          "link": 11,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -236,7 +352,8 @@
             12
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -245,14 +362,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 15,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 934,
         "1": 745,
@@ -276,7 +423,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 12
+          "link": 12,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -287,7 +435,8 @@
             14
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -296,14 +445,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 22,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 56,
         "1": 1585,
@@ -332,7 +511,8 @@
             17
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -340,14 +520,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 25,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 285,
         "1": 1584,
@@ -371,7 +569,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 17
+          "link": 17,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -382,7 +581,8 @@
             18
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -391,14 +591,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 24,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 586,
         "1": 1573,
@@ -422,7 +652,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 18
+          "link": 18,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -433,7 +664,8 @@
             19
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -442,14 +674,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 23,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 918,
         "1": 1576,
@@ -473,7 +735,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 19
+          "link": 19,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -484,7 +747,8 @@
             20
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -493,14 +757,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 27,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 938,
         "1": 1127,
@@ -524,7 +818,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 21
+          "link": 21,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -535,7 +830,8 @@
             22
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -544,14 +840,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 12,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 706,
         "1": 1130,
@@ -580,7 +906,8 @@
             21
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -588,14 +915,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 28,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 927,
         "1": 1964,
@@ -619,7 +964,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 24
+          "link": 24,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -630,7 +976,8 @@
             23
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -639,14 +986,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 29,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 669,
         "1": 1964,
@@ -675,7 +1052,8 @@
             24
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -683,14 +1061,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 26,
-      "type": "factory/merge2",
+      "type": "factory/basic",
       "pos": {
         "0": 1268,
         "1": 1783,
@@ -714,12 +1110,14 @@
         {
           "name": "workIn1",
           "type": 0,
-          "link": 20
+          "link": 20,
+          "portId": "in-1"
         },
         {
           "name": "workIn2",
           "type": 0,
-          "link": 23
+          "link": 23,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -730,7 +1128,8 @@
             25
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -740,14 +1139,55 @@
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
-        "processTime2": 2
+        "processTime2": 2,
+        "basicNodeVersion": 1,
+        "presetId": "merge",
+        "legacySourceType": "factory/merge2",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 30,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 1588,
         "1": 956,
@@ -771,7 +1211,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 26
+          "link": 26,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -782,7 +1223,8 @@
             27
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -791,14 +1233,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 31,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 1583,
         "1": 1766,
@@ -822,7 +1294,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 25
+          "link": 25,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -833,7 +1306,8 @@
             28
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -842,14 +1316,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 32,
-      "type": "factory/merge2",
+      "type": "factory/basic",
       "pos": {
         "0": 1925,
         "1": 1320,
@@ -873,12 +1377,14 @@
         {
           "name": "workIn1",
           "type": 0,
-          "link": 27
+          "link": 27,
+          "portId": "in-1"
         },
         {
           "name": "workIn2",
           "type": 0,
-          "link": 28
+          "link": 28,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -889,7 +1395,8 @@
             29
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -899,14 +1406,55 @@
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
-        "processTime2": 2
+        "processTime2": 2,
+        "basicNodeVersion": 1,
+        "presetId": "merge",
+        "legacySourceType": "factory/merge2",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 34,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 2269,
         "1": 1319,
@@ -930,7 +1478,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 29
+          "link": 29,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -941,7 +1490,8 @@
             30
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -950,14 +1500,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 33,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 2598,
         "1": 1317,
@@ -981,7 +1561,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 30
+          "link": 30,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -992,7 +1573,8 @@
             31
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1001,14 +1583,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 10,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 2942,
         "1": 423,
@@ -1032,7 +1644,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 9
+          "link": 9,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1043,7 +1656,8 @@
             32
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1052,14 +1666,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 35,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 2906,
         "1": 1320,
@@ -1083,7 +1727,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 31
+          "link": 31,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1094,7 +1739,8 @@
             33
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1103,14 +1749,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 36,
-      "type": "factory/merge2",
+      "type": "factory/basic",
       "pos": {
         "0": 3406,
         "1": 897,
@@ -1134,12 +1810,14 @@
         {
           "name": "workIn1",
           "type": 0,
-          "link": 32
+          "link": 32,
+          "portId": "in-1"
         },
         {
           "name": "workIn2",
           "type": 0,
-          "link": 33
+          "link": 33,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -1150,7 +1828,8 @@
             34
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1160,14 +1839,55 @@
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
-        "processTime2": 2
+        "processTime2": 2,
+        "basicNodeVersion": 1,
+        "presetId": "merge",
+        "legacySourceType": "factory/merge2",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 39,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 3734,
         "1": 893,
@@ -1191,7 +1911,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 34
+          "link": 34,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1202,7 +1923,8 @@
             35
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1211,14 +1933,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 37,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 4024,
         "1": 889,
@@ -1242,7 +1994,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 35
+          "link": 35,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1253,7 +2006,8 @@
             36
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1262,14 +2016,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 38,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 4322,
         "1": 886,
@@ -1293,7 +2077,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 36
+          "link": 36,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1304,7 +2089,8 @@
             37
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1313,14 +2099,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 4,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 716.6039428710938,
         "1": 36.83048629760742,
@@ -1344,22 +2160,26 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 2
+          "link": 2,
+          "portId": "in-1"
         },
         {
           "name": "sigIn0",
           "type": "string",
-          "link": 43
+          "link": 43,
+          "portId": "in-2"
         },
         {
           "name": "sigIn1",
           "type": "string",
-          "link": 44
+          "link": 44,
+          "portId": "in-3"
         },
         {
           "name": "sigIn2",
           "type": "string",
-          "link": null
+          "link": null,
+          "portId": "in-4"
         }
       ],
       "outputs": [
@@ -1370,25 +2190,29 @@
             3
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "sigOut0",
           "type": "string",
           "links": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         },
         {
           "name": "sigOut1",
           "type": "string",
           "links": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-3"
         },
         {
           "name": "sigOut2",
           "type": "string",
           "links": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-4"
         }
       ],
       "properties": {
@@ -1397,14 +2221,110 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 3,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          },
+          {
+            "ruleId": "migrated-input-3",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-3"
+          },
+          {
+            "ruleId": "migrated-input-4",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-4"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          },
+          {
+            "ruleId": "migrated-output-3",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-3"
+          },
+          {
+            "ruleId": "migrated-output-4",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-4"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 5,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 1246,
         "1": 70,
@@ -1428,7 +2348,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 4
+          "link": 4,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1439,7 +2360,8 @@
             5
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1448,14 +2370,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 6,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 1557,
         "1": 70,
@@ -1479,7 +2431,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 5
+          "link": 5,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1490,7 +2443,8 @@
             39
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1499,14 +2453,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 43,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 1259,
         "1": 472,
@@ -1535,7 +2519,8 @@
             40
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -1543,14 +2528,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 44,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 1517,
         "1": 466,
@@ -1574,7 +2577,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 40
+          "link": 40,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1585,7 +2589,8 @@
             41
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1594,14 +2599,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 42,
-      "type": "factory/merge2",
+      "type": "factory/basic",
       "pos": {
         "0": 1914,
         "1": 265,
@@ -1625,12 +2660,14 @@
         {
           "name": "workIn1",
           "type": 0,
-          "link": 39
+          "link": 39,
+          "portId": "in-1"
         },
         {
           "name": "workIn2",
           "type": 0,
-          "link": 41
+          "link": 41,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -1641,7 +2678,8 @@
             42
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1651,14 +2689,55 @@
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
-        "processTime2": 2
+        "processTime2": 2,
+        "basicNodeVersion": 1,
+        "presetId": "merge",
+        "legacySourceType": "factory/merge2",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 40,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 4672,
         "1": 890,
@@ -1682,7 +2761,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 37
+          "link": 37,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1693,7 +2773,8 @@
             45
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1702,14 +2783,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 2,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 383.6045227050781,
         "1": 31.830482482910156,
@@ -1733,17 +2844,20 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 1
+          "link": 1,
+          "portId": "in-1"
         },
         {
           "name": "sigIn0",
           "type": "string",
-          "link": null
+          "link": null,
+          "portId": "in-2"
         },
         {
           "name": "sigIn1",
           "type": "string",
-          "link": null
+          "link": null,
+          "portId": "in-3"
         }
       ],
       "outputs": [
@@ -1754,7 +2868,8 @@
             2
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "sigOut0",
@@ -1763,7 +2878,8 @@
             43
           ],
           "slot_index": 1,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         },
         {
           "name": "sigOut1",
@@ -1772,7 +2888,8 @@
             44
           ],
           "slot_index": 2,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-3"
         }
       ],
       "properties": {
@@ -1781,14 +2898,88 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\n\n\n// work: Work object (work.id, work.type など)\n// signalArr: sigIn の配列\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // デフォルト\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// true を返すとこのワークを受け入れて PROCESS に入る\nreturn true;\n",
         "sigExtra": 2,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          },
+          {
+            "ruleId": "migrated-input-3",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-3"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          },
+          {
+            "ruleId": "migrated-output-3",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-3"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 3,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 958,
         "1": 74,
@@ -1812,7 +3003,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 3
+          "link": 3,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1823,7 +3015,8 @@
             4
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -1832,14 +3025,44 @@
         "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 45,
-      "type": "factory/sink",
+      "type": "factory/basic",
       "pos": {
         "0": 4992,
         "1": 894,
@@ -1863,20 +3086,39 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 45
+          "link": 45,
+          "portId": "in-1"
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "sink",
+        "legacySourceType": "factory/sink",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "always"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": []
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 54,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 97.52685546875,
         "1": -1671.826171875,
@@ -1905,7 +3147,8 @@
             55
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -1913,14 +3156,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 52,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 378.9729309082031,
         "1": -1700.261962890625,
@@ -1944,7 +3205,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 55
+          "link": 55,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -1955,7 +3217,8 @@
             52
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Equipment",
@@ -1965,14 +3228,44 @@
         "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 53,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 1424.9732666015625,
         "1": -1716.261962890625,
@@ -1996,7 +3289,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 53
+          "link": 53,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -2007,7 +3301,8 @@
             54
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Equipment",
@@ -2017,14 +3312,44 @@
         "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 55,
-      "type": "factory/sink",
+      "type": "factory/basic",
       "pos": {
         "0": 1657.9732666015625,
         "1": -1729.261962890625,
@@ -2048,20 +3373,39 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 54
+          "link": 54,
+          "portId": "in-1"
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "sink",
+        "legacySourceType": "factory/sink",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "always"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": []
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 51,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 1166.97314453125,
         "1": -1436.26171875,
@@ -2092,7 +3436,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
@@ -2104,7 +3449,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2118,7 +3464,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2134,7 +3481,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2146,14 +3494,66 @@
         "sigEnabled": true,
         "flipIO": true,
         "agvCapacity": 2,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 48,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 948.9732055664062,
         "1": -1407.26171875,
@@ -2184,7 +3584,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
@@ -2196,7 +3597,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2211,7 +3613,8 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2227,7 +3630,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2239,14 +3643,66 @@
         "sigEnabled": true,
         "flipIO": true,
         "agvCapacity": 2,
-        "agvIds": "AGV-1"
+        "agvIds": "AGV-1",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 1,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 193,
         "1": 40,
@@ -2274,7 +3730,8 @@
           "links": [
             1
           ],
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -2282,14 +3739,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 50,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 667.8871459960938,
         "1": -1714.907958984375,
@@ -2313,12 +3788,14 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 52
+          "link": 52,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
           "type": "AGV",
-          "link": 51
+          "link": 51,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2326,7 +3803,8 @@
           "name": "workOut",
           "type": 0,
           "links": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2335,7 +3813,8 @@
             48
           ],
           "slot_index": 1,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2347,14 +3826,66 @@
         "sigEnabled": true,
         "flipIO": false,
         "agvCapacity": 2,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 46,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 678.974365234375,
         "1": -1431.2000732421875,
@@ -2385,7 +3916,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
@@ -2397,7 +3929,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2412,7 +3945,8 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2428,7 +3962,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2440,14 +3975,66 @@
         "sigEnabled": true,
         "flipIO": true,
         "agvCapacity": 2,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 66,
-      "type": "factory/sink",
+      "type": "factory/basic",
       "pos": {
         "0": 1536.1170654296875,
         "1": -815.11181640625,
@@ -2471,20 +4058,39 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 56
+          "link": 56,
+          "portId": "in-1"
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "sink",
+        "legacySourceType": "factory/sink",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "always"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": []
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 63,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 1290.1170654296875,
         "1": -820.11181640625,
@@ -2508,7 +4114,8 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": 57
+          "link": 57,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -2519,7 +4126,8 @@
             56
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Equipment",
@@ -2529,14 +4137,44 @@
         "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 61,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 594.1168823242188,
         "1": -584.11181640625,
@@ -2567,7 +4205,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
@@ -2579,7 +4218,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2594,7 +4234,8 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2610,7 +4251,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2622,14 +4264,66 @@
         "sigEnabled": true,
         "flipIO": true,
         "agvCapacity": 1,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 64,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": {
         "0": 318.1170654296875,
         "1": -824.11181640625,
@@ -2654,7 +4348,8 @@
           "name": "workIn",
           "type": 0,
           "link": 63,
-          "slot_index": 0
+          "slot_index": 0,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -2664,7 +4359,8 @@
           "links": [
             62
           ],
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Equipment",
@@ -2674,14 +4370,44 @@
         "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "legacySourceType": "factory/equip",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 57,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 814.1168823242188,
         "1": -835.11181640625,
@@ -2705,12 +4431,14 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": null
+          "link": null,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
           "type": "AGV",
-          "link": 64
+          "link": 64,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2718,7 +4446,8 @@
           "name": "workOut",
           "type": 0,
           "links": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2727,7 +4456,8 @@
             65
           ],
           "slot_index": 1,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2739,14 +4469,66 @@
         "sigEnabled": true,
         "flipIO": false,
         "agvCapacity": 1,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 56,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 1078.1170654296875,
         "1": -552.11181640625,
@@ -2778,7 +4560,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
@@ -2790,7 +4573,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2805,7 +4589,8 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2821,7 +4606,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2833,14 +4619,66 @@
         "sigEnabled": true,
         "flipIO": true,
         "agvCapacity": 1,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 60,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 850.1168823242188,
         "1": -560.11181640625,
@@ -2871,7 +4709,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
@@ -2883,7 +4722,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -2898,7 +4738,8 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -2914,7 +4755,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -2926,14 +4768,66 @@
         "sigEnabled": true,
         "flipIO": true,
         "agvCapacity": 1,
-        "agvIds": "AGV-2"
+        "agvIds": "AGV-2",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 65,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": {
         "0": 132.11709594726562,
         "1": -828.11181640625,
@@ -2961,7 +4855,8 @@
           "links": [
             63
           ],
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
@@ -2969,14 +4864,32 @@
         "sequence": "A,B",
         "sigExtra": 0,
         "sigEnabled": true,
-        "flipIO": false
+        "flipIO": false,
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "legacySourceType": "factory/source",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
     },
     {
       "id": 59,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 1079,
         "1": -821,
@@ -3000,12 +4913,14 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": null
+          "link": null,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
           "type": "AGV",
-          "link": 65
+          "link": 65,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -3016,7 +4931,8 @@
             57
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -3025,7 +4941,8 @@
             58
           ],
           "slot_index": 1,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -3037,14 +4954,66 @@
         "sigEnabled": true,
         "flipIO": false,
         "agvCapacity": 1,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
     },
     {
       "id": 47,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 1142,
         "1": -1714,
@@ -3068,12 +5037,14 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": null
+          "link": null,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
           "type": "AGV",
-          "link": 47
+          "link": 47,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -3084,7 +5055,8 @@
             53
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -3093,7 +5065,8 @@
             46
           ],
           "slot_index": 1,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -3105,14 +5078,66 @@
         "sigEnabled": true,
         "flipIO": false,
         "agvCapacity": 2,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
     },
     {
       "id": 62,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 581,
         "1": -826,
@@ -3137,12 +5162,14 @@
           "name": "workIn",
           "type": 0,
           "link": 62,
-          "slot_index": 0
+          "slot_index": 0,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
           "type": "AGV",
-          "link": 61
+          "link": 61,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -3151,7 +5178,8 @@
           "type": 0,
           "links": null,
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -3160,7 +5188,8 @@
             64
           ],
           "slot_index": 1,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -3172,14 +5201,66 @@
         "sigEnabled": true,
         "flipIO": false,
         "agvCapacity": 1,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 17,
-      "type": "factory/merge2",
+      "type": "factory/basic",
       "pos": {
         "0": 1294,
         "1": 966,
@@ -3203,12 +5284,14 @@
         {
           "name": "workIn1",
           "type": 0,
-          "link": 14
+          "link": 14,
+          "portId": "in-1"
         },
         {
           "name": "workIn2",
           "type": 0,
-          "link": 22
+          "link": 22,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -3219,7 +5302,8 @@
             26
           ],
           "slot_index": 0,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "properties": {
@@ -3229,14 +5313,55 @@
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
-        "processTime2": 2
+        "processTime2": 2,
+        "basicNodeVersion": 1,
+        "presetId": "merge",
+        "legacySourceType": "factory/merge2",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
     },
     {
       "id": 49,
-      "type": "factory/agvroute",
+      "type": "factory/basic",
       "pos": {
         "0": 930,
         "1": -1704,
@@ -3260,12 +5385,14 @@
         {
           "name": "workIn",
           "type": 0,
-          "link": null
+          "link": null,
+          "portId": "in-1"
         },
         {
           "name": "agvIn",
           "type": "AGV",
-          "link": 48
+          "link": 48,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -3273,7 +5400,8 @@
           "name": "workOut",
           "type": 0,
           "links": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "agvOut",
@@ -3282,7 +5410,8 @@
             47
           ],
           "slot_index": 1,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "AGV Route",
@@ -3294,7 +5423,59 @@
         "sigEnabled": true,
         "flipIO": false,
         "agvCapacity": 2,
-        "agvIds": ""
+        "agvIds": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "legacySourceType": "factory/agvroute",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortId": "out-2"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3798,5 +5979,34 @@
   ],
   "config": {},
   "extra": {},
-  "version": 0.4
+  "version": 0.4,
+  "__factSimEntityModel": {
+    "schemaVersion": 1,
+    "types": [
+      {
+        "typeId": "type-a",
+        "name": "A",
+        "category": "work",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-b",
+        "name": "B",
+        "category": "work",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      }
+    ]
+  }
 }

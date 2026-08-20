@@ -142,6 +142,15 @@
     _preset(){ return PRESETS[this.properties?.presetId] || PRESETS.basic; }
     hasEntityContents(){ return this._preset().entity !== false; }
 
+    configure(serializedNode){
+      this._isConfiguring = true;
+      try{
+        return super.configure(serializedNode);
+      }finally{
+        this._isConfiguring = false;
+      }
+    }
+
     applyPreset(presetId, preserveTitle){
       const id = Object.prototype.hasOwnProperty.call(PRESETS, presetId) ? presetId : 'basic';
       const preset = PRESETS[id];
@@ -184,7 +193,6 @@
       }
       installLegacyMethods(this, ctor);
       this._legacyPrototype = ctor.prototype;
-      this.type = type;
       if(typeof ctor.prototype.onConfigure === 'function'){
         try{ ctor.prototype.onConfigure.call(this, serializedNode); }catch(err){ console.error(err); }
       }
@@ -211,6 +219,7 @@
     }
 
     onPropertyChanged(name){
+      if(this._isConfiguring) return;
       if(this._legacyPrototype && typeof this._legacyPrototype.onPropertyChanged === 'function'){
         return this._legacyPrototype.onPropertyChanged.call(this, name);
       }
@@ -490,6 +499,50 @@
     return model;
   }
 
+  function categoryForPort(port){
+    const signature = `${text(port?.type)} ${text(port?.name)}`.toLowerCase();
+    if(/agv|carrier/.test(signature)) return 'carrier';
+    if(/pallet|container|box|tray/.test(signature)) return 'container';
+    return 'work';
+  }
+
+  function typeIdForLegacyName(model, name){
+    const wanted = text(name).toLowerCase();
+    if(!wanted) return '';
+    const row = (Array.isArray(model?.types) ? model.types : []).find((entry)=>text(entry?.name).toLowerCase() === wanted);
+    return text(row?.typeId);
+  }
+
+  function migratedInputRules(node, originalType){
+    if(originalType === 'factory/source' || originalType === 'factory/entitysource') return [];
+    return (Array.isArray(node?.inputs) ? node.inputs : []).map((port, index)=>({
+      ruleId: `migrated-input-${index + 1}`,
+      target: { mode: 'category', category: categoryForPort(port) },
+      acceptWhen: { kind: originalType === 'factory/sink' ? 'always' : 'space-available' },
+      fromPortId: port.portId || `in-${index + 1}`
+    }));
+  }
+
+  function migratedOutputRules(node, originalType, model){
+    if(originalType === 'factory/sink') return [];
+    const releaseKind = (originalType === 'factory/source' || originalType === 'factory/entitysource')
+      ? 'available'
+      : 'process-complete';
+    return (Array.isArray(node?.outputs) ? node.outputs : []).map((port, index)=>{
+      const routeTypeId = originalType === 'factory/branch'
+        ? typeIdForLegacyName(model, port?.routeType)
+        : '';
+      return {
+        ruleId: `migrated-output-${index + 1}`,
+        target: routeTypeId
+          ? { mode: 'type', typeId: routeTypeId }
+          : { mode: 'category', category: categoryForPort(port) },
+        releaseWhen: { kind: releaseKind },
+        toPortId: port.portId || `out-${index + 1}`
+      };
+    });
+  }
+
   function migrateGraphDataToBasic(source, options){
     const data = clone(source, null);
     if(!data) throw new Error('Graph data is not serializable');
@@ -527,16 +580,12 @@
           node.properties.migratedCarrierConfigs = clone(carrierConfigs, []);
         }
         if(!Array.isArray(node.properties.initialContents)) node.properties.initialContents = [];
-        if(!Array.isArray(node.properties.inputRules)) node.properties.inputRules = [];
-        if(!Array.isArray(node.properties.outputRules)){
-          node.properties.outputRules = originalType === 'factory/branch'
-            ? (Array.isArray(node.outputs) ? node.outputs : []).filter((port)=>port?.__branchWorkOut).map((port, index)=>({
-                ruleId: `migrated-route-${index + 1}`,
-                target: { mode: 'type', typeId: text(port.routeType) },
-                releaseWhen: { kind: 'available' },
-                toPortId: port.portId || `out-${index + 1}`
-              }))
-            : [];
+        ensurePortIds(node);
+        if(!Array.isArray(node.properties.inputRules) || !node.properties.inputRules.length){
+          node.properties.inputRules = migratedInputRules(node, originalType);
+        }
+        if(!Array.isArray(node.properties.outputRules) || !node.properties.outputRules.length){
+          node.properties.outputRules = migratedOutputRules(node, originalType, data.__factSimEntityModel);
         }
         convertedNodeCount += 1;
       }
