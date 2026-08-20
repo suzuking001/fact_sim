@@ -326,9 +326,25 @@
       return !!App.selectEntityRule(store, this, rules, { incomingRoot: instance, nowMs: nowMs() }, 'input');
     }
 
-    canAcceptWorkInput(slotIndex, work){ return this.canAcceptEntityInput(slotIndex, work); }
-    canAcceptPalletInput(slotIndex, pallet){ return this.canAcceptEntityInput(slotIndex, pallet); }
-    canAcceptAgv(slotIndex, carrier){ return this.canAcceptEntityInput(slotIndex, carrier); }
+    _canAcceptLegacyPayload(){
+      if(!this._legacyPrototype) return null;
+      return typeof this._state === 'undefined' || this._state === 'IDLE';
+    }
+
+    canAcceptWorkInput(slotIndex, work){
+      const legacy = this._canAcceptLegacyPayload();
+      return legacy === null ? this.canAcceptEntityInput(slotIndex, work) : legacy;
+    }
+
+    canAcceptPalletInput(slotIndex, pallet){
+      const legacy = this._canAcceptLegacyPayload();
+      return legacy === null ? this.canAcceptEntityInput(slotIndex, pallet) : legacy;
+    }
+
+    canAcceptAgv(slotIndex, carrier){
+      const legacy = this._canAcceptLegacyPayload();
+      return legacy === null ? this.canAcceptEntityInput(slotIndex, carrier) : legacy;
+    }
 
     _downstreamReady(slot, instance){
       const output = this.outputs?.[slot];
