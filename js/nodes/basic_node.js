@@ -394,6 +394,53 @@
       this.graph.__outputDirty = true;
     }
 
+    _shuttleGroupCycleMs(){
+      let cycleMs = 0;
+      for(const node of this._shuttleGroupNodes()){
+        cycleMs = Math.max(cycleMs, Math.max(0, Number(node?.properties?.processTime) || 0) * 1000);
+      }
+      return cycleMs;
+    }
+
+    _shuttleGroupTiming(now){
+      const graph = this.graph;
+      if(!graph) return { nextTransferAt: NaN, lastObservedAt: Number(now) || 0 };
+      if(!(graph.__factSimShuttleGroupTiming instanceof Map)){
+        graph.__factSimShuttleGroupTiming = new Map();
+      }
+      const groupId = this._shuttleGroupId() || `node-${this.id}`;
+      let timing = graph.__factSimShuttleGroupTiming.get(groupId);
+      const current = Number(now) || 0;
+      if(!timing || (Number.isFinite(timing.lastObservedAt) && current + 0.001 < timing.lastObservedAt)){
+        timing = { nextTransferAt: NaN, lastTransferAt: NaN, lastObservedAt: current };
+        graph.__factSimShuttleGroupTiming.set(groupId, timing);
+      }
+      timing.lastObservedAt = current;
+      return timing;
+    }
+
+    _shuttleGroupIsEmpty(){
+      return this._shuttleGroupNodes().every((node)=> node
+        && !node._payload
+        && !node._pendingTransfer
+        && !node._incomingPayload);
+    }
+
+    _openShuttleGroupCycle(now){
+      const timing = this._shuttleGroupTiming(now);
+      if(!Number.isFinite(timing.nextTransferAt) || this._shuttleGroupIsEmpty()){
+        timing.nextTransferAt = (Number(now) || 0) + this._shuttleGroupCycleMs();
+      }
+      return timing;
+    }
+
+    _closeShuttleGroupCycleIfEmpty(now){
+      if(!this._shuttleGroupIsEmpty()) return;
+      const timing = this._shuttleGroupTiming(now);
+      timing.nextTransferAt = NaN;
+      timing.lastTransferAt = NaN;
+    }
+
     _applyShuttleStateColor(){
       switch(this._state){
         case 'PROCESS': this.color = '#2ecc71'; this.bgcolor = '#e8f8f2'; break;
@@ -518,6 +565,12 @@
         && node._state === 'WAIT'
         && node._hasShuttleDownstreamLinks());
       if(!transferNodes.length) return false;
+      const now = nowMs();
+      const timing = this._shuttleGroupTiming(now);
+      if(!Number.isFinite(timing.nextTransferAt)){
+        timing.nextTransferAt = now + this._shuttleGroupCycleMs();
+      }
+      if(now + 0.001 < timing.nextTransferAt) return false;
       const vacatingNodeIds = new Set(transferNodes.map((node)=>node.id));
       for(const node of transferNodes){
         if(!node._shuttleDownstreamReady(vacatingNodeIds)) return false;
@@ -526,12 +579,17 @@
       for(const node of transferNodes){
         if(node._beginShuttleTransfer()) moved = true;
       }
-      if(moved) this._markShuttleGroupDirty();
+      if(moved){
+        timing.lastTransferAt = now;
+        timing.nextTransferAt = now + this._shuttleGroupCycleMs();
+        this._markShuttleGroupDirty();
+      }
       return moved;
     }
 
     _startShuttleProcess(work, now){
       if(!work || typeof work !== 'object') return false;
+      this._openShuttleGroupCycle(now);
       this._payload = work;
       this._currentWork = work;
       const processMs = Math.max(0, Number(this.properties?.processTime || 0) * 1000);
@@ -601,6 +659,7 @@
             this.setOutputData(0, null);
             this._pendingTransfer = null;
             this._setShuttleState('IDLE');
+            this._closeShuttleGroupCycleIfEmpty(now);
           }
           break;
         case 'IDLE':
@@ -800,8 +859,12 @@
     }
 
     getEventUntil(now){
-      if(this.properties?.presetId === 'shuttle' && this._state === 'TRANSFER'){
-        return Number(now) || 0;
+      if(this.properties?.presetId === 'shuttle'){
+        if(this._state === 'TRANSFER') return Number(now) || 0;
+        if(this._state === 'WAIT'){
+          const nextTransferAt = Number(this._shuttleGroupTiming(now).nextTransferAt);
+          if(Number.isFinite(nextTransferAt)) return nextTransferAt;
+        }
       }
       return NaN;
     }
