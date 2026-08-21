@@ -37,7 +37,8 @@ var App = window.App || (window.App = {});
   function inferKindId(node){
     const type = normalizeText(node && node.type);
     const title = normalizeText(node && node.title);
-    const src = `${type} ${title}`;
+    const preset = normalizeText(node && node.properties && node.properties.presetId);
+    const src = `${type} ${title} ${preset}`;
     if(src.indexOf('source') >= 0) return KINDS.Source;
     if(src.indexOf('branch') >= 0) return KINDS.Branch;
     if(src.indexOf('merge') >= 0 || src.indexOf('join') >= 0) return KINDS.Merge;

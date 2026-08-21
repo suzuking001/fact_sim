@@ -953,10 +953,9 @@
       ],
       "properties": {
         "processTime": 5,
-        "groupId": "shuttle-1",
+        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
-        "legacySourceType": "factory/shuttle_stage",
         "initialContents": [],
         "inputRules": [
           {
@@ -1021,10 +1020,9 @@
       ],
       "properties": {
         "processTime": 5,
-        "groupId": "shuttle-1",
+        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
-        "legacySourceType": "factory/shuttle_stage",
         "initialContents": [],
         "inputRules": [
           {
@@ -1089,10 +1087,9 @@
       ],
       "properties": {
         "processTime": 20,
-        "groupId": "shuttle-1",
+        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
-        "legacySourceType": "factory/shuttle_stage",
         "initialContents": [],
         "inputRules": [
           {
@@ -1157,10 +1154,9 @@
       ],
       "properties": {
         "processTime": 5,
-        "groupId": "shuttle-1",
+        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
-        "legacySourceType": "factory/shuttle_stage",
         "initialContents": [],
         "inputRules": [
           {
@@ -1225,10 +1221,9 @@
       ],
       "properties": {
         "processTime": 5,
-        "groupId": "shuttle-1",
+        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
-        "legacySourceType": "factory/shuttle_stage",
         "initialContents": [],
         "inputRules": [
           {

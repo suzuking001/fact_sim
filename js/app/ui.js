@@ -1441,10 +1441,11 @@ window.beginGroupPlacement = beginGroupPlacement;
       ]
     },
     shuttle:{
-      type:'factory/shuttle_stage',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Shuttle Stage', target:'title' },
-        { key:'groupId', label:'Group ID', type:'text', default:'shuttle-1' },
+        { key:'presetId', label:'Preset', type:'select', default:'shuttle', options:['shuttle'] },
+        { key:'shuttleGroupId', label:'Shuttle Group ID', type:'text', default:'shuttle-1' },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 }
       ]
     },

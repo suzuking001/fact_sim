@@ -20,7 +20,7 @@
     split:       { title: 'Split', category: 'Compatibility', entity: true, processTime: 0, contentCapacity: 1 },
     merge:       { title: 'Merge', category: 'Compatibility', entity: true, processTime: 0, contentCapacity: 2 },
     join:        { title: 'Join', category: 'Compatibility', entity: true, processTime: 0, contentCapacity: 2 },
-    shuttle:     { title: 'Shuttle Stage', category: 'Compatibility', entity: true, processTime: 1, contentCapacity: 1 },
+    shuttle:     { title: 'Shuttle Stage', category: 'Handling', entity: true, processTime: 1, contentCapacity: 1 },
     carrier_route:{ title: 'Carrier Route', category: 'Compatibility', entity: true, processTime: 1, contentCapacity: 1 },
     station:     { title: 'Station', category: 'Compatibility', entity: true, processTime: 1, contentCapacity: 2 },
     transfer:    { title: 'Transfer', category: 'Compatibility', entity: true, processTime: 1, contentCapacity: 2 },
@@ -157,6 +157,12 @@
       this._lastInputRefs = [];
       this._offer = null;
       this._processComplete = false;
+      this._payload = null;
+      this._currentWork = null;
+      this._pendingTransfer = null;
+      this._incomingPayload = null;
+      this._transferHold = false;
+      this._lastInRef = null;
       this._legacyPrototype = null;
       this._legacyConfigured = false;
       if(root.enableFlipIO) root.enableFlipIO(this);
@@ -191,8 +197,12 @@
       if(!Array.isArray(this.properties.initialContents)) this.properties.initialContents = [];
       if(!Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
       if(!Array.isArray(this.properties.outputRules)) this.properties.outputRules = [];
+      if(id === 'shuttle' && !text(this.properties.shuttleGroupId)){
+        this.properties.shuttleGroupId = 'shuttle-1';
+      }
       if(!preserveTitle) this.title = preset.title;
       this._ensurePresetPorts();
+      if(id === 'shuttle') this._applyShuttleStateColor();
       return this;
     }
 
@@ -267,17 +277,25 @@
       if(name === 'presetId') this.applyPreset(this.properties.presetId, false);
       if(name === 'processTime') this.properties.processTime = Math.max(0, Number(this.properties.processTime) || 0);
       if(name === 'contentCapacity') this.properties.contentCapacity = Math.max(0, Math.round(Number(this.properties.contentCapacity) || 0));
+      if(name === 'shuttleGroupId'){
+        this.properties.shuttleGroupId = text(this.properties.shuttleGroupId) || 'shuttle-1';
+        this._markShuttleGroupDirty();
+      }
     }
 
     getInspectorSchema(){
       if(this._legacyPrototype && typeof this._legacyPrototype.getInspectorSchema === 'function'){
         return this._legacyPrototype.getInspectorSchema.call(this);
       }
-      return {
+      const schema = {
         presetId: { type: 'select', label: 'Preset', options: Object.entries(PRESETS).map(([value, row])=>[value, row.title]) },
         processTime: { type: 'number', label: 'Process time (s)' },
         contentCapacity: { type: 'number', label: 'Node capacity' }
       };
+      if(this.properties?.presetId === 'shuttle'){
+        schema.shuttleGroupId = { type: 'text', label: 'Shuttle Group ID' };
+      }
+      return schema;
     }
 
     getEntityRoots(){
@@ -341,8 +359,259 @@
     }
 
     canAcceptWorkInput(slotIndex, work){
+      if(this.properties?.presetId === 'shuttle'){
+        if(!this.inputs || slotIndex < 0 || slotIndex >= this.inputs.length) return false;
+        return this._state === 'IDLE'
+          && !this._payload
+          && !this._pendingTransfer
+          && !this._incomingPayload;
+      }
       const legacy = this._canAcceptLegacyPayload(slotIndex, work);
       return legacy === null ? this.canAcceptEntityInput(slotIndex, work) : legacy;
+    }
+
+    _shuttleGroupId(){
+      return text(this.properties?.shuttleGroupId);
+    }
+
+    _shuttleGroupNodes(){
+      const graph = this.graph;
+      if(!graph || !Array.isArray(graph._nodes)) return [this];
+      const groupId = this._shuttleGroupId();
+      if(!groupId) return [this];
+      const peers = graph._nodes.filter((node)=> node instanceof BasicNode
+        && text(node.properties?.presetId).toLowerCase() === 'shuttle'
+        && text(node.properties?.shuttleGroupId) === groupId);
+      return peers.length ? peers : [this];
+    }
+
+    _markShuttleGroupDirty(){
+      if(!this.graph) return;
+      if(!this.graph.__dirtyNodeIds) this.graph.__dirtyNodeIds = new Set();
+      for(const node of this._shuttleGroupNodes()){
+        if(node && typeof node.id !== 'undefined') this.graph.__dirtyNodeIds.add(node.id);
+      }
+      this.graph.__outputDirty = true;
+    }
+
+    _applyShuttleStateColor(){
+      switch(this._state){
+        case 'PROCESS': this.color = '#2ecc71'; this.bgcolor = '#e8f8f2'; break;
+        case 'WAIT': this.color = '#f39c12'; this.bgcolor = '#fff6e6'; break;
+        case 'TRANSFER': this.color = '#3498db'; this.bgcolor = '#e8f1fb'; break;
+        default: this.color = '#f1c40f'; this.bgcolor = '#fff9db'; break;
+      }
+      if(typeof root.applyNodeStateTheme === 'function'){
+        root.applyNodeStateTheme(this, this._state === 'TRANSFER' ? 'DOWN' : this._state);
+      }
+    }
+
+    _setShuttleWaitIcon(active){
+      try{
+        if(!root.WorkLinkAnimator || !this.graph) return;
+        const output = this.outputs?.[0];
+        if(!output || !Array.isArray(output.links) || !output.links.length){
+          if(!active) this._waitIconLinks = null;
+          return;
+        }
+        const payload = this._payload || this._currentWork || this._pendingTransfer || null;
+        const info = payload ? { id: payload.id, t: payload.type } : null;
+        if(active){
+          if(this._waitIconLinks) return;
+          this._waitIconLinks = output.links.slice();
+          this._waitIconLinks.forEach((linkId)=> root.WorkLinkAnimator.showPortIcon(this.graph, linkId, 'work', info));
+        }else if(this._waitIconLinks){
+          this._waitIconLinks.forEach((linkId)=> root.WorkLinkAnimator.hidePortIcon(this.graph, linkId));
+          this._waitIconLinks = null;
+        }
+      }catch(_e){}
+    }
+
+    _setShuttleState(next){
+      if(this._state === next) return;
+      const previous = this._state;
+      this._state = next;
+      this._stateName = next === 'TRANSFER' ? 'down' : String(next).toLowerCase();
+      if(previous !== 'WAIT' && next === 'WAIT') this._setShuttleWaitIcon(true);
+      if(previous === 'WAIT' && next !== 'WAIT') this._setShuttleWaitIcon(false);
+      this._applyShuttleStateColor();
+      this._markShuttleGroupDirty();
+    }
+
+    _hasShuttleDownstreamLinks(){
+      const output = this.outputs?.[0];
+      return !!(output && Array.isArray(output.links) && output.links.length);
+    }
+
+    _isSameShuttleGroup(node){
+      return !!node
+        && node instanceof BasicNode
+        && text(node.properties?.presetId).toLowerCase() === 'shuttle'
+        && text(node.properties?.shuttleGroupId) === this._shuttleGroupId();
+    }
+
+    _shuttleDownstreamReady(vacatingNodeIds){
+      if(!this._payload) return false;
+      const output = this.outputs?.[0];
+      if(!output || !Array.isArray(output.links) || !output.links.length) return false;
+      let found = false;
+      for(const linkId of output.links){
+        const link = this.graph?.links?.[linkId];
+        const target = link && this.graph?.getNodeById?.(link.target_id);
+        if(!target) continue;
+        found = true;
+        if(this._isSameShuttleGroup(target) && vacatingNodeIds?.has(target.id)) continue;
+        if(typeof target.canAcceptWorkInput === 'function'){
+          if(!target.canAcceptWorkInput(link.target_slot, this._payload)) return false;
+        }else if(typeof target._state !== 'undefined' && target._state !== 'IDLE'){
+          return false;
+        }
+      }
+      return found;
+    }
+
+    _spawnShuttleProcessAnimation(durationMs, work){
+      if(!(durationMs > 0)) return;
+      try{
+        const input = this.inputs?.[0];
+        if(!root.WorkLinkAnimator || !this.graph || !input || input.link == null) return;
+        const info = work && typeof work === 'object' ? { id: work.id, t: work.type } : null;
+        root.WorkLinkAnimator.spawn(this.graph, input.link, 'work', durationMs, info);
+      }catch(_e){}
+    }
+
+    _spawnShuttleSinkAnimation(work){
+      try{
+        const output = this.outputs?.[0];
+        if(!root.WorkLinkAnimator || !this.graph || !output || !Array.isArray(output.links)) return;
+        const info = work && typeof work === 'object' ? { id: work.id, t: work.type } : null;
+        const durationMs = Math.max(120, Number(this.properties?.processTime || 0) * 1000);
+        for(const linkId of output.links){
+          const link = this.graph.links?.[linkId];
+          const target = link && this.graph.getNodeById?.(link.target_id);
+          const isSink = text(target?.properties?.presetId).toLowerCase() === 'sink'
+            || text(target?.properties?.legacySourceType).toLowerCase() === 'factory/sink'
+            || (root.SinkNode && target instanceof root.SinkNode);
+          if(isSink) root.WorkLinkAnimator.spawn(this.graph, linkId, 'work', durationMs, info);
+        }
+      }catch(_e){}
+    }
+
+    _beginShuttleTransfer(){
+      if(!this._payload || !this._hasShuttleDownstreamLinks()) return false;
+      this._spawnShuttleSinkAnimation(this._payload);
+      this._pendingTransfer = this._payload;
+      this._payload = null;
+      this._currentWork = null;
+      this._transferHold = true;
+      this.setOutputData(0, this._pendingTransfer);
+      this._setShuttleState('TRANSFER');
+      return true;
+    }
+
+    _tryCommitShuttleGroupTransfer(){
+      const peers = this._shuttleGroupNodes();
+      for(const node of peers){
+        if(node?._payload && node._state === 'PROCESS') return false;
+      }
+      const transferNodes = peers.filter((node)=> node?._payload
+        && node._state === 'WAIT'
+        && node._hasShuttleDownstreamLinks());
+      if(!transferNodes.length) return false;
+      const vacatingNodeIds = new Set(transferNodes.map((node)=>node.id));
+      for(const node of transferNodes){
+        if(!node._shuttleDownstreamReady(vacatingNodeIds)) return false;
+      }
+      let moved = false;
+      for(const node of transferNodes){
+        if(node._beginShuttleTransfer()) moved = true;
+      }
+      if(moved) this._markShuttleGroupDirty();
+      return moved;
+    }
+
+    _startShuttleProcess(work, now){
+      if(!work || typeof work !== 'object') return false;
+      this._payload = work;
+      this._currentWork = work;
+      const processMs = Math.max(0, Number(this.properties?.processTime || 0) * 1000);
+      this._until = now + processMs;
+      this._setShuttleState('PROCESS');
+      this._spawnShuttleProcessAnimation(processMs, work);
+      return true;
+    }
+
+    _shuttleGroupIsTransferring(){
+      return this._shuttleGroupNodes().some((node)=>node && node._state === 'TRANSFER');
+    }
+
+    _acceptShuttleInput(now){
+      if(this._incomingPayload){
+        if(this._shuttleGroupIsTransferring()) return false;
+        const buffered = this._incomingPayload;
+        this._incomingPayload = null;
+        return this._startShuttleProcess(buffered, now);
+      }
+      const input = this.inputs?.[0];
+      if(!input || input.link == null){
+        this._lastInRef = null;
+        return false;
+      }
+      const work = this.getInputData(0);
+      if(!work){
+        this._lastInRef = null;
+        return false;
+      }
+      if(typeof work !== 'object' || this._lastInRef === work) return false;
+      this._lastInRef = work;
+      if(this._shuttleGroupIsTransferring()){
+        this._incomingPayload = work;
+        this._markShuttleGroupDirty();
+        return true;
+      }
+      return this._startShuttleProcess(work, now);
+    }
+
+    _captureShuttleInputDuringTransfer(){
+      if(this._incomingPayload) return;
+      const input = this.inputs?.[0];
+      if(!input || input.link == null) return;
+      const work = this.getInputData(0);
+      if(!work || typeof work !== 'object' || this._lastInRef === work) return;
+      this._lastInRef = work;
+      this._incomingPayload = work;
+    }
+
+    _executeShuttle(){
+      const now = nowMs();
+      this.setOutputData(0, null);
+      switch(this._state){
+        case 'PROCESS':
+          if(now >= this._until) this._setShuttleState('WAIT');
+          break;
+        case 'WAIT':
+          this._tryCommitShuttleGroupTransfer();
+          break;
+        case 'TRANSFER':
+          this.setOutputData(0, this._pendingTransfer);
+          this._captureShuttleInputDuringTransfer();
+          if(this._transferHold){
+            this._transferHold = false;
+          }else{
+            this.setOutputData(0, null);
+            this._pendingTransfer = null;
+            this._setShuttleState('IDLE');
+          }
+          break;
+        case 'IDLE':
+        default:
+          this._currentWork = null;
+          this._acceptShuttleInput(now);
+          break;
+      }
+      if(this._state !== 'IDLE' || this._payload || this._pendingTransfer || this._incomingPayload){
+        this.setDirtyCanvas(true, true);
+      }
     }
 
     canAcceptPalletInput(slotIndex, pallet){
@@ -491,6 +760,9 @@
     }
 
     onExecute(){
+      if(this.properties?.presetId === 'shuttle'){
+        return this._executeShuttle();
+      }
       if(this._legacyPrototype && typeof this._legacyPrototype.onExecute === 'function'){
         return this._legacyPrototype.onExecute.call(this);
       }
@@ -498,6 +770,19 @@
     }
 
     onDrawForeground(ctx){
+      if(this.properties?.presetId === 'shuttle'){
+        const remaining = Math.max(0, this._until - nowMs());
+        if(typeof root.drawStateBelow === 'function'){
+          root.drawStateBelow(ctx, this, [
+            `State: ${this._state}`,
+            `Shuttle group: ${this._shuttleGroupId() || '-'}`,
+            this._currentWork ? `Work: ID=${this._currentWork.id} Type=${this._currentWork.type}` : 'Work: (none)',
+            `Remain(s): ${(remaining / 1000).toFixed(1)}`,
+            `Process(s): ${this.properties.processTime}`
+          ], 8, 6);
+        }
+        return;
+      }
       if(this._legacyPrototype && typeof this._legacyPrototype.onDrawForeground === 'function'){
         return this._legacyPrototype.onDrawForeground.call(this, ctx);
       }
@@ -512,6 +797,13 @@
           `Output rules: ${this.properties.outputRules?.length || 0}`
         ], 8, 6);
       }
+    }
+
+    getEventUntil(now){
+      if(this.properties?.presetId === 'shuttle' && this._state === 'TRANSFER'){
+        return Number(now) || 0;
+      }
+      return NaN;
     }
   }
 
@@ -642,7 +934,13 @@
         node.properties = isObject(node.properties) ? node.properties : {};
         node.properties.basicNodeVersion = 1;
         node.properties.presetId = presetId;
-        node.properties.legacySourceType = originalType;
+        if(originalType === 'factory/shuttle_stage'){
+          node.properties.shuttleGroupId = text(node.properties.shuttleGroupId || node.properties.groupId) || 'shuttle-1';
+          delete node.properties.groupId;
+          delete node.properties.legacySourceType;
+        }else{
+          node.properties.legacySourceType = originalType;
+        }
         if((originalType === 'factory/carrierroute' || originalType === 'factory/agvroute') && carrierConfigs.length){
           node.properties.migratedCarrierConfigs = clone(carrierConfigs, []);
         }
