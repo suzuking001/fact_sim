@@ -216,6 +216,12 @@
       let temp = null;
       try{ temp = new ctor(); }catch(_e){ temp = null; }
       if(temp){
+        if(isObject(temp.properties)){
+          this.properties = {
+            ...clone(temp.properties, {}),
+            ...(this.properties || {})
+          };
+        }
         for(const key of Object.keys(temp)){
           if(['id', 'pos', 'size', 'inputs', 'outputs', 'properties', 'graph', 'title', 'type'].includes(key)) continue;
           if(typeof temp[key] === 'function') continue;
@@ -326,23 +332,26 @@
       return !!App.selectEntityRule(store, this, rules, { incomingRoot: instance, nowMs: nowMs() }, 'input');
     }
 
-    _canAcceptLegacyPayload(){
+    _canAcceptLegacyPayload(slotIndex, payload){
       if(!this._legacyPrototype) return null;
-      return typeof this._state === 'undefined' || this._state === 'IDLE';
+      if(typeof this._state !== 'undefined' && this._state !== 'IDLE') return false;
+      if(this._payload || this._activeRoot || this._offer) return false;
+      const currentInput = typeof this.getInputData === 'function' ? this.getInputData(slotIndex) : null;
+      return !currentInput || currentInput === payload;
     }
 
     canAcceptWorkInput(slotIndex, work){
-      const legacy = this._canAcceptLegacyPayload();
+      const legacy = this._canAcceptLegacyPayload(slotIndex, work);
       return legacy === null ? this.canAcceptEntityInput(slotIndex, work) : legacy;
     }
 
     canAcceptPalletInput(slotIndex, pallet){
-      const legacy = this._canAcceptLegacyPayload();
+      const legacy = this._canAcceptLegacyPayload(slotIndex, pallet);
       return legacy === null ? this.canAcceptEntityInput(slotIndex, pallet) : legacy;
     }
 
     canAcceptAgv(slotIndex, carrier){
-      const legacy = this._canAcceptLegacyPayload();
+      const legacy = this._canAcceptLegacyPayload(slotIndex, carrier);
       return legacy === null ? this.canAcceptEntityInput(slotIndex, carrier) : legacy;
     }
 
@@ -369,15 +378,20 @@
     _finishOffer(){
       if(!this._offer) return;
       const { instance, slot } = this._offer;
-      this.setOutputData(slot, null);
       const store = this._store();
-      if(store?.get(instance)?.locationNodeId === this.id) store.moveRoot(instance, null);
+      const current = store?.get(instance) || null;
+      if(current && current.locationNodeId === this.id){
+        this.setOutputData(slot, instance);
+        return false;
+      }
+      this.setOutputData(slot, null);
       this._offer = null;
       this._activeRoot = null;
       this._activeTarget = null;
       this._processComplete = false;
       this._state = 'IDLE';
       this._stateName = 'idle';
+      return true;
     }
 
     _selectOutput(){

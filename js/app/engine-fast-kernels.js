@@ -273,8 +273,17 @@ var App = window.App || (window.App = {});
         const node = getNode(ctx, nodeIndex);
         if(!node) return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
         const before = captureState(node);
-        const ready = downstreamReady(ctx, nodeIndex, 0, null);
         const sigCount = Math.max(0, Number(node.properties && node.properties.sigExtra) || 0);
+
+        if(typeof node._holdPendingWork === 'function' && node._holdPendingWork()){
+          for(let i = 0; i < sigCount; i += 1){
+            if(typeof node._emit === 'function') node._emit(i, 'SEND');
+          }
+          const held = captureState(node);
+          return buildResult(before, held, NaN);
+        }
+
+        const ready = downstreamReady(ctx, nodeIndex, 0, null);
 
         if(ready){
           if((!node._seq || !node._seq.length) && typeof node._parseSeq === 'function') node._parseSeq();
@@ -283,6 +292,7 @@ var App = window.App || (window.App = {});
           const WorkCtor = window.Work || function(id, type){ this.id = id; this.type = type; };
           const work = new WorkCtor(nextId, entry.type);
           if(typeof node.setOutputData === 'function') node.setOutputData(0, work);
+          node._pendingWork = work;
           if(typeof node._animateWorkOutput === 'function') node._animateWorkOutput(work);
           node._counter = nextId;
           node._cursor = node._seq && node._seq.length ? ((node._cursor + 1) % node._seq.length) : 0;

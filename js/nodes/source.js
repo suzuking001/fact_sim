@@ -25,6 +25,7 @@ class SourceNode extends LiteGraph.LGraphNode{
     this._outLast = [];
     this._readyPrev = false;
     this._counter = 0;
+    this._pendingWork = null;
     this._parseSeq();
     if(window.enableFlipIO) window.enableFlipIO(this);
   }
@@ -83,16 +84,55 @@ class SourceNode extends LiteGraph.LGraphNode{
     for(const lid of out.links){
       const link = this.graph.links && this.graph.links[lid];
       if(!link) continue;
-      const target = typeof this.graph.getNodeById === 'function'
+      window.WorkLinkAnimator.spawn(this.graph, lid, 'work', undefined, info);
+    }
+  }
+  _targetAcceptedWork(target, slotIndex, work){
+    if(!target || !work) return false;
+    if(target._lastInRef === work || target._payload === work || target._currentWork === work ||
+       target._activeRoot === work || target._activeTarget === work || target._lastWork === work){
+      return true;
+    }
+    if(Array.isArray(target._lastInputRefs) && target._lastInputRefs[slotIndex] === work) return true;
+    if(Array.isArray(target._worksBySlot) && target._worksBySlot.includes(work)) return true;
+    if(Array.isArray(target._recv) && target._recv.includes(work)) return true;
+    return Array.isArray(target.outputs) && target.outputs.some((_output, index)=>{
+      try{ return target.getOutputData(index) === work; }catch(_e){ return false; }
+    });
+  }
+  _pendingWorkAccepted(work){
+    const out = this.outputs && this.outputs[0];
+    if(!work || !out || !Array.isArray(out.links) || !out.links.length || !this.graph) return false;
+    let targetCount = 0;
+    for(const lid of out.links){
+      const link = this.graph.links && this.graph.links[lid];
+      const target = link && typeof this.graph.getNodeById === 'function'
         ? this.graph.getNodeById(link.target_id)
         : null;
-      const processMs = Math.max(0, Number(target?.properties?.processTime) || 0) * 1000;
-      window.WorkLinkAnimator.spawn(this.graph, lid, 'work', processMs || undefined, info);
+      if(!target) continue;
+      targetCount++;
+      if(!this._targetAcceptedWork(target, link.target_slot, work)) return false;
     }
+    return targetCount > 0;
+  }
+  _holdPendingWork(){
+    const work = this._pendingWork;
+    if(!work) return false;
+    if(this._pendingWorkAccepted(work)){
+      this._pendingWork = null;
+      this.setOutputData(0, null);
+    }else{
+      this.setOutputData(0, work);
+    }
+    return true;
   }
   onExecute(){
     const extra = this.properties.sigExtra || 0;
     const sigCount = Math.max(0, extra);
+    if(this._holdPendingWork()){
+      for(let i=0;i<sigCount;i++) this._emit(i, 'SEND');
+      return;
+    }
     const downstream = this._downstreamStatus();
     const ready = !!downstream.ready;
 
@@ -102,6 +142,7 @@ class SourceNode extends LiteGraph.LGraphNode{
       const e = this._seq[this._cursor] || {type:'A'};
       const w = new Work(nextId, e.type);
       this.setOutputData(0, w);
+      this._pendingWork = w;
       this._animateWorkOutput(w);
       this._counter = nextId;
       this._cursor = (this._cursor + 1) % this._seq.length;
