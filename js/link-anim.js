@@ -522,6 +522,22 @@ class LinkAnimator{
 
   const animator = new LinkAnimator();
   window.WorkLinkAnimator = animator;
+  window.installWorkLinkAnimationLayer = function(canvas){
+    if(!canvas || canvas.__workLinkAnimationLayerInstalled) return;
+    const previousForeground = canvas.onDrawForeground;
+    canvas.onDrawForeground = function(ctx, visibleArea){
+      if(typeof previousForeground === 'function'){
+        try{ previousForeground.call(this, ctx, visibleArea); }catch(_e){}
+      }
+      animator.draw(this, ctx);
+      // Keep transient motion and the short arrival hold repainting. Static
+      // WAIT icons do not need to force continuous foreground redraws.
+      if(animator.animations.some((anim)=> anim && !anim.tail)){
+        this.dirty_canvas = true;
+      }
+    };
+    canvas.__workLinkAnimationLayerInstalled = true;
+  };
 
   function collectConnectionCullNodes(canvas){
     const graph = canvas && canvas.graph;
@@ -637,6 +653,5 @@ class LinkAnimator{
     }finally{
       if(replaced && this.graph) this.graph._nodes = originalNodes;
     }
-    animator.draw(this, ctx);
   };
 })();

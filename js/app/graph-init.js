@@ -436,6 +436,9 @@ function initGraph(){
   if(App.backgroundLayout && typeof App.backgroundLayout.attachCanvas === 'function'){
     App.backgroundLayout.attachCanvas(App.canvas);
   }
+  if(typeof window.installWorkLinkAnimationLayer === 'function'){
+    window.installWorkLinkAnimationLayer(App.canvas);
+  }
   if(typeof window.installNodeDetailOverlayLayer === 'function'){
     window.installNodeDetailOverlayLayer(App.canvas);
   }
