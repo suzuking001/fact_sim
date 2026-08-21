@@ -242,6 +242,8 @@ class LinkAnimator{
           String(activeInfo.t ?? activeInfo.type ?? '') === entityType;
       });
       if(existing){
+        const elapsed = Math.max(0, now - existing.start);
+        existing.duration = Math.max(existing.duration || defaultDuration, elapsed + duration);
         existing.info = info || existing.info || null;
         return;
       }
