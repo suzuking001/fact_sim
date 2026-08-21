@@ -198,6 +198,24 @@ class LinkAnimator{
     if(node.horizontal) return isInput ? LiteGraph.UP : LiteGraph.DOWN;
     return isInput ? LiteGraph.LEFT : LiteGraph.RIGHT;
   }
+  _outsideNode(node, point, dir, distance){
+    const out = [point[0], point[1]];
+    const rawLeft = Number(node?.pos?.[0]);
+    const rawTop = Number(node?.pos?.[1]);
+    const rawWidth = Number(node?.size?.[0]);
+    const rawHeight = Number(node?.size?.[1]);
+    const left = Number.isFinite(rawLeft) ? rawLeft : out[0];
+    const top = Number.isFinite(rawTop) ? rawTop : out[1];
+    const right = left + (Number.isFinite(rawWidth) ? rawWidth : 0);
+    const bottom = top + (Number.isFinite(rawHeight) ? rawHeight : 0);
+    switch(dir){
+      case LiteGraph.LEFT: out[0] = Math.min(out[0], left) - distance; break;
+      case LiteGraph.RIGHT: out[0] = Math.max(out[0], right) + distance; break;
+      case LiteGraph.UP: out[1] = Math.min(out[1], top) - distance; break;
+      case LiteGraph.DOWN: out[1] = Math.max(out[1], bottom) + distance; break;
+    }
+    return out;
+  }
   _bezierPoint(start, startDir, end, endDir, t){
     const dist = Math.hypot(end[0]-start[0], end[1]-start[1]);
     const quarter = dist * 0.25;
@@ -230,6 +248,7 @@ class LinkAnimator{
     if(!graph || !linkId) return;
     const now = getNow();
     const duration = durationMs || defaultDuration;
+    const processTimed = Number.isFinite(Number(durationMs)) && Number(durationMs) > 0;
     const entityId = info && info.id != null ? String(info.id) : '';
     const entityType = info ? String(info.t ?? info.type ?? '') : '';
     if(entityId && String(type).toLowerCase() === 'work'){
@@ -242,8 +261,17 @@ class LinkAnimator{
           String(activeInfo.t ?? activeInfo.type ?? '') === entityType;
       });
       if(existing){
-        const elapsed = Math.max(0, now - existing.start);
-        existing.duration = Math.max(existing.duration || defaultDuration, elapsed + duration);
+        if(processTimed && !existing.processTimed){
+          // Source may draw a short provisional hand-off before the receiver runs.
+          // Once the receiver starts processing, restart the same visual at that
+          // exact time so arrival coincides with PROCESS completion.
+          existing.start = now;
+          existing.duration = duration;
+          existing.processTimed = true;
+        }else{
+          const elapsed = Math.max(0, now - existing.start);
+          existing.duration = Math.max(existing.duration || defaultDuration, elapsed + duration);
+        }
         existing.info = info || existing.info || null;
         return;
       }
@@ -255,6 +283,7 @@ class LinkAnimator{
       info: info || null,
       start: now,
       duration,
+      processTimed,
       tail: false
     });
     this._trimTransient();
@@ -374,11 +403,18 @@ class LinkAnimator{
         if(!shouldDrawTransient){
           return true;
         }
-        const start = originNode.getConnectionPos(false, link.origin_slot);
+        let start = originNode.getConnectionPos(false, link.origin_slot);
         const startDir = this._getSlotDir(originNode, link.origin_slot, false);
         const eased = t * t * (3 - 2 * t);
-        const end = targetNode.getConnectionPos(true, link.target_slot);
+        let end = targetNode.getConnectionPos(true, link.target_slot);
         const endDir = this._getSlotDir(targetNode, link.target_slot, true);
+        if(String(anim.type).toLowerCase() === 'work'){
+          // Keep the whole Work bubble outside both nodes. At t=1 its outer
+          // edge reaches the target boundary for the first time; its centre no
+          // longer enters the target before processing has completed.
+          start = this._outsideNode(originNode, start, startDir, iconRadius);
+          end = this._outsideNode(targetNode, end, endDir, iconRadius);
+        }
         [x,y] = this._bezierPoint(start, startDir, end, endDir, eased);
       }
       const info = anim.info || {};
