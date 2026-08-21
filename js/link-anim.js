@@ -203,6 +203,12 @@ class LinkAnimator{
     if(node.horizontal) return isInput ? LiteGraph.UP : LiteGraph.DOWN;
     return isInput ? LiteGraph.LEFT : LiteGraph.RIGHT;
   }
+  _entityKey(type, info){
+    if(String(type || '').toLowerCase() !== 'work' || !info || info.id == null) return '';
+    const id = String(info.id);
+    const workType = String(info.t ?? info.type ?? '');
+    return `${id}\u0000${workType}`;
+  }
   _bezierPoint(start, startDir, end, endDir, t){
     const dist = Math.hypot(end[0]-start[0], end[1]-start[1]);
     const quarter = dist * 0.25;
@@ -239,6 +245,18 @@ class LinkAnimator{
     const entityId = info && info.id != null ? String(info.id) : '';
     const entityType = info ? String(info.t ?? info.type ?? '') : '';
     if(entityId && String(type).toLowerCase() === 'work'){
+      const entityKey = this._entityKey(type, info);
+      if(processTimed && entityKey){
+        // A later process leg owns the visual for this Work. Remove an older
+        // completed/incoming leg and any WAIT icon before starting the next
+        // link, otherwise the same Work is drawn at IN and OUT simultaneously.
+        this.animations = this.animations.filter((anim)=>{
+          if(!anim || anim.graph !== graph || this._entityKey(anim.type, anim.info) !== entityKey) return true;
+          if(anim.tail) return false;
+          if(anim.linkId === linkId) return true;
+          return !(Number(anim.start) < now);
+        });
+      }
       const existing = this.animations.find((anim)=>{
         if(!anim || anim.tail || anim.graph !== graph || anim.linkId !== linkId || anim.type !== type) return false;
         const activeDuration = anim.duration || defaultDuration;
@@ -346,6 +364,7 @@ class LinkAnimator{
   draw(canvas, ctx){
     if(!this.animations.length || !canvas || !ctx) return;
     const now = getNow();
+    const frameNow = getFrameNow();
     const policy = this._adaptiveRenderPolicy(canvas);
     const step = Math.max(1, Number(policy.step) || 1);
     const labelEvery = Math.max(1, Number(policy.labelEvery) || 1);
@@ -354,6 +373,26 @@ class LinkAnimator{
       : 0;
     let transientIdx = 0;
     let labelCounter = 0;
+    const latestVisibleWorkStart = new Map();
+    for(const anim of this.animations){
+      if(!anim || anim.tail || anim.pendingProcess || !anim.graph) continue;
+      const entityKey = this._entityKey(anim.type, anim.info);
+      if(!entityKey) continue;
+      const duration = anim.duration || defaultDuration;
+      const rawT = (now - anim.start) / duration;
+      const withinArrivalHold = rawT < 1 || anim.arrivalHoldStartedAt == null ||
+        (frameNow - anim.arrivalHoldStartedAt) < arrivalHoldMs;
+      if(!withinArrivalHold) continue;
+      let graphEntries = latestVisibleWorkStart.get(anim.graph);
+      if(!graphEntries){
+        graphEntries = new Map();
+        latestVisibleWorkStart.set(anim.graph, graphEntries);
+      }
+      const previousStart = graphEntries.get(entityKey);
+      if(previousStart == null || Number(anim.start) > previousStart){
+        graphEntries.set(entityKey, Number(anim.start));
+      }
+    }
     ctx.save();
     this.animations = this.animations.filter(anim=>{
       const graph = anim.graph;
@@ -363,8 +402,13 @@ class LinkAnimator{
       const originNode = graph.getNodeById(link.origin_id);
       const targetNode = graph.getNodeById(link.target_id);
       if(!originNode || !targetNode) return false;
+      const entityKey = this._entityKey(anim.type, anim.info);
+      const latestStart = entityKey ? latestVisibleWorkStart.get(graph)?.get(entityKey) : null;
       let x, y;
         if(anim.tail){
+          // Keep the WAIT icon queued, but do not draw it while the same Work
+          // is still visible on an incoming/process link.
+          if(latestStart != null) return true;
           const start = originNode.getConnectionPos(false, link.origin_slot);
           const allowAgvWait =
             anim.type === 'agv' &&
@@ -396,13 +440,13 @@ class LinkAnimator{
         }
         let t = Math.max(0, Math.min(rawT, 1));
         if(rawT >= 1){
-          const frameNow = getFrameNow();
           if(anim.arrivalHoldStartedAt == null) anim.arrivalHoldStartedAt = frameNow;
           if(frameNow - anim.arrivalHoldStartedAt >= arrivalHoldMs) return false;
           t = 1;
         }else{
           anim.arrivalHoldStartedAt = null;
         }
+        if(latestStart != null && Number(anim.start) < latestStart) return true;
         const shouldDrawTransient = rawT >= 1 || (step <= 1) || ((transientIdx % step) === drawTransientRemainder);
         transientIdx++;
         if(!shouldDrawTransient){
