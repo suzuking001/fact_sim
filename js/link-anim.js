@@ -5,6 +5,11 @@
   const cfg = window.NODES_CONFIG?.animations || {};
   const defaultDuration = (cfg.linkMs || 800);
   const iconRadius = cfg.radius || 22.5;
+  const configuredArrivalHoldMs = Number(cfg.arrivalHoldMs);
+  const arrivalHoldMs = Math.max(0, Number.isFinite(configuredArrivalHoldMs) ? configuredArrivalHoldMs : 120);
+  const getFrameNow = ()=> typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
   const LINK_ANIM_PALETTE = Object.freeze({
     defaultTypeAccent: '#8e8e93',
     defaultBubbleFill: '#d5d8dc',
@@ -198,24 +203,6 @@ class LinkAnimator{
     if(node.horizontal) return isInput ? LiteGraph.UP : LiteGraph.DOWN;
     return isInput ? LiteGraph.LEFT : LiteGraph.RIGHT;
   }
-  _outsideNode(node, point, dir, distance){
-    const out = [point[0], point[1]];
-    const rawLeft = Number(node?.pos?.[0]);
-    const rawTop = Number(node?.pos?.[1]);
-    const rawWidth = Number(node?.size?.[0]);
-    const rawHeight = Number(node?.size?.[1]);
-    const left = Number.isFinite(rawLeft) ? rawLeft : out[0];
-    const top = Number.isFinite(rawTop) ? rawTop : out[1];
-    const right = left + (Number.isFinite(rawWidth) ? rawWidth : 0);
-    const bottom = top + (Number.isFinite(rawHeight) ? rawHeight : 0);
-    switch(dir){
-      case LiteGraph.LEFT: out[0] = Math.min(out[0], left) - distance; break;
-      case LiteGraph.RIGHT: out[0] = Math.max(out[0], right) + distance; break;
-      case LiteGraph.UP: out[1] = Math.min(out[1], top) - distance; break;
-      case LiteGraph.DOWN: out[1] = Math.max(out[1], bottom) + distance; break;
-    }
-    return out;
-  }
   _bezierPoint(start, startDir, end, endDir, t){
     const dist = Math.hypot(end[0]-start[0], end[1]-start[1]);
     const quarter = dist * 0.25;
@@ -268,6 +255,8 @@ class LinkAnimator{
           existing.start = now;
           existing.duration = duration;
           existing.processTimed = true;
+          existing.pendingProcess = false;
+          existing.arrivalHoldStartedAt = null;
         }else{
           const elapsed = Math.max(0, now - existing.start);
           existing.duration = Math.max(existing.duration || defaultDuration, elapsed + duration);
@@ -284,6 +273,8 @@ class LinkAnimator{
       start: now,
       duration,
       processTimed,
+      pendingProcess: String(type).toLowerCase() === 'work' && !processTimed,
+      arrivalHoldStartedAt: null,
       tail: false
     });
     this._trimTransient();
@@ -396,26 +387,34 @@ class LinkAnimator{
           y = start[1];
       }else{
         const duration = anim.duration || defaultDuration;
-        const t = Math.min((now - anim.start) / duration, 1);
-        if(t >= 1) return false;
-        const shouldDrawTransient = (step <= 1) || ((transientIdx % step) === drawTransientRemainder);
+        const rawT = (now - anim.start) / duration;
+        if(anim.pendingProcess){
+          // Source publishes the payload before the receiver's execution pass.
+          // Keep that provisional record invisible so motion starts only when
+          // the receiver actually begins PROCESS.
+          return rawT < 1;
+        }
+        let t = Math.max(0, Math.min(rawT, 1));
+        if(rawT >= 1){
+          const frameNow = getFrameNow();
+          if(anim.arrivalHoldStartedAt == null) anim.arrivalHoldStartedAt = frameNow;
+          if(frameNow - anim.arrivalHoldStartedAt >= arrivalHoldMs) return false;
+          t = 1;
+        }else{
+          anim.arrivalHoldStartedAt = null;
+        }
+        const shouldDrawTransient = rawT >= 1 || (step <= 1) || ((transientIdx % step) === drawTransientRemainder);
         transientIdx++;
         if(!shouldDrawTransient){
           return true;
         }
-        let start = originNode.getConnectionPos(false, link.origin_slot);
+        const start = originNode.getConnectionPos(false, link.origin_slot);
         const startDir = this._getSlotDir(originNode, link.origin_slot, false);
-        const eased = t * t * (3 - 2 * t);
-        let end = targetNode.getConnectionPos(true, link.target_slot);
+        const end = targetNode.getConnectionPos(true, link.target_slot);
         const endDir = this._getSlotDir(targetNode, link.target_slot, true);
-        if(String(anim.type).toLowerCase() === 'work'){
-          // Keep the whole Work bubble outside both nodes. At t=1 its outer
-          // edge reaches the target boundary for the first time; its centre no
-          // longer enters the target before processing has completed.
-          start = this._outsideNode(originNode, start, startDir, iconRadius);
-          end = this._outsideNode(targetNode, end, endDir, iconRadius);
-        }
-        [x,y] = this._bezierPoint(start, startDir, end, endDir, eased);
+        [x,y] = (typeof canvas.computeConnectionPoint === 'function')
+          ? canvas.computeConnectionPoint(start, end, t, startDir, endDir)
+          : this._bezierPoint(start, startDir, end, endDir, t);
       }
       const info = anim.info || {};
       const iconTheme = getAnimatedIconTheme(anim.type, info);
