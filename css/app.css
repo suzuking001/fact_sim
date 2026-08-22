@@ -3489,6 +3489,8 @@ body:not(.sidebar-hidden) #graph{
   --graph-node-accent: #0a84ff;
   --graph-node-outline: #d4dde9;
   --graph-link: #b9bec8;
+  --graph-link-selected: #6d28d9;
+  --graph-link-selected-glow: rgba(109,40,217,0.34);
   --graph-event-link: #0a84ff;
 }
 

@@ -68,7 +68,9 @@ function applyGraphVisualTheme(){
     gridMajor: readThemeValue('--graph-grid-major', 'rgba(10,132,255,0.08)'),
     gridMajorDense: readThemeValue('--graph-grid-major-dense', 'rgba(10,132,255,0.055)'),
     canvasClear: readThemeValue('--graph-canvas-clear', '#f6f8fb'),
-    canvasBg: readThemeValue('--graph-canvas-bg', 'rgba(248,250,253,0.9)')
+    canvasBg: readThemeValue('--graph-canvas-bg', 'rgba(248,250,253,0.9)'),
+    selectedLink: readThemeValue('--graph-link-selected', '#6d28d9'),
+    selectedLinkGlow: readThemeValue('--graph-link-selected-glow', 'rgba(109,40,217,0.34)')
   };
 
   LiteGraph.NODE_TEXT_SIZE = 12;
@@ -91,6 +93,39 @@ function applyGraphVisualTheme(){
     event: readThemeValue('--graph-event-link', '#0a84ff'),
     action: readThemeValue('--graph-event-link', '#0a84ff')
   });
+
+  if(!LGraphCanvas.prototype.__factSelectedLinkContrastPatched){
+    const prevRenderLink = LGraphCanvas.prototype.renderLink;
+    LGraphCanvas.prototype.renderLink = function(ctx, start, end, link){
+      const linkId = link && link.id;
+      const highlighted = linkId != null && !!this.highlighted_links?.[linkId];
+      if(!highlighted) return prevRenderLink.apply(this, arguments);
+
+      const args = Array.from(arguments);
+      const theme = App.__graphThemeCache || {};
+      const selectedColor = theme.selectedLink || '#6d28d9';
+      const selectedGlow = theme.selectedLinkGlow || 'rgba(109,40,217,0.34)';
+      const scale = Math.max(0.0001, Number(this.ds?.scale) || 1);
+      const previousWidth = Number(this.connections_width) || 2;
+      const hadHighlight = Object.prototype.hasOwnProperty.call(this.highlighted_links, linkId);
+      const previousHighlight = this.highlighted_links[linkId];
+      args[6] = selectedColor;
+
+      try{
+        delete this.highlighted_links[linkId];
+        this.connections_width = Math.max(previousWidth, 2.8 / scale);
+        ctx.save();
+        ctx.shadowColor = selectedGlow;
+        ctx.shadowBlur = 8 / scale;
+        return prevRenderLink.apply(this, args);
+      }finally{
+        ctx.restore();
+        this.connections_width = previousWidth;
+        if(hadHighlight) this.highlighted_links[linkId] = previousHighlight;
+      }
+    };
+    LGraphCanvas.prototype.__factSelectedLinkContrastPatched = true;
+  }
 
   if(!LGraphCanvas.prototype.__factZoomContrastPatched){
     const prevDrawNodeShape = LGraphCanvas.prototype.drawNodeShape;
