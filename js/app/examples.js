@@ -21,7 +21,7 @@ const EXAMPLE_FILES = {
   pallet_station_demo: 'sample/pallet_station_demo.json',
   nested_transport_demo: 'sample/nested_transport_demo.json?v=20260803a',
   sample_line1: 'sample/sample_line1.json?v=20260821b',
-  sample_line2: 'sample/sample_line2.json?v=20260822b'
+  sample_line2: 'sample/sample_line2.json?v=20260822c'
 };
 
 App._exampleWriteState = App._exampleWriteState || {

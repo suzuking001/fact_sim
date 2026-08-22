@@ -189,72 +189,143 @@
   function renderFlowEditor(node){
     const registry = App.entityModelForGraph?.(App.graph || node.graph);
     const wrapper = document.createElement('div');
+    const inputConditions = [['always','Always'],['space-available','Space available'],['empty','Empty'],['not-full','Not full'],['custom-condition','Custom']];
+    const outputConditions = [['available','Available'],['process-complete','Process complete'],['shuttle-group-idle','Shuttle group process complete (Idle)'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
+    const field = (label, content, extraClass)=>{
+      const host = document.createElement('label');
+      host.className = `entityRuleField${extraClass ? ` ${extraClass}` : ''}`;
+      const caption = document.createElement('span'); caption.className = 'entityRuleFieldLabel'; caption.textContent = label;
+      host.append(caption, content);
+      return host;
+    };
+    const conditionKind = (condition, fallback)=>isObject(condition) ? (condition.kind || fallback) : (condition || fallback);
+    const appendConditionParameter = (host, condition, commit)=>{
+      const kind = conditionKind(condition, 'available');
+      if(kind === 'count-reached' || kind === 'time-elapsed'){
+        const parameter = document.createElement('input');
+        parameter.type = 'number'; parameter.min = '0'; parameter.step = kind === 'count-reached' ? '1' : '0.1';
+        parameter.value = String(kind === 'count-reached' ? (condition.count ?? 1) : (condition.seconds ?? 0));
+        parameter.title = kind === 'count-reached' ? 'Count' : 'Seconds';
+        parameter.setAttribute('aria-label', parameter.title);
+        parameter.disabled = running();
+        parameter.addEventListener('change', ()=>{
+          if(kind === 'count-reached') condition.count = Math.max(0, Math.round(Number(parameter.value) || 0));
+          else condition.seconds = Math.max(0, Number(parameter.value) || 0);
+          commit();
+        });
+        host.appendChild(parameter);
+      }else if(kind === 'attribute-condition' || kind === 'custom-condition'){
+        const parameter = document.createElement('input');
+        parameter.type = 'text'; parameter.className = 'selectionInspectorInput';
+        parameter.title = kind === 'attribute-condition' ? 'Condition JSON: path/operator/value' : 'Restricted expression AST JSON';
+        parameter.setAttribute('aria-label', parameter.title);
+        parameter.value = JSON.stringify(kind === 'attribute-condition'
+          ? { path:condition.path || '', operator:condition.operator || 'eq', value:condition.value ?? '' }
+          : (condition.expression || { op:'compare', path:'', operator:'eq', value:'' }));
+        parameter.disabled = running();
+        parameter.addEventListener('change', ()=>{
+          try{
+            const parsed = JSON.parse(parameter.value || '{}');
+            if(kind === 'attribute-condition') Object.assign(condition, parsed);
+            else condition.expression = parsed;
+            parameter.setCustomValidity(''); commit();
+          }catch(_err){ parameter.setCustomValidity('Enter valid JSON'); parameter.reportValidity(); }
+        });
+        host.appendChild(parameter);
+      }
+    };
     const renderRules = (kind)=>{
       const key = kind === 'input' ? 'inputRules' : 'outputRules';
       const card = makeCard(kind === 'input' ? 'INPUT' : 'OUTPUT', kind === 'input'
         ? 'What the node accepts. Descendants are searched automatically.'
-        : 'Rules are evaluated from top to bottom.');
+        : 'Rules are evaluated from top to bottom. Combine conditions with AND or OR.');
       const rows = Array.isArray(node.properties?.[key]) ? node.properties[key] : [];
       const list = document.createElement('div'); list.className = 'entityRuleList';
       const commit = ()=>changed(()=>{ node.properties[key] = rows; node.setDirtyCanvas?.(true, true); });
       rows.forEach((rule, index)=>{
-        const row = document.createElement('div'); row.className = 'entityRuleRow';
-        const target = select(typeOptions(registry, true, kind === 'output'), targetValue(rule.target));
-        target.addEventListener('change', ()=>{ rule.target = parseTarget(target.value); commit(); });
-        const conditions = kind === 'input'
-          ? [['always','Always'],['space-available','Space available'],['empty','Empty'],['not-full','Not full'],['custom-condition','Custom']]
-          : [['available','Available'],['process-complete','Process complete'],['shuttle-group-idle','Shuttle group process complete (Idle)'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
-        const conditionKey = kind === 'input' ? 'acceptWhen' : 'releaseWhen';
-        const condition = select(conditions, rule?.[conditionKey]?.kind || rule?.[conditionKey] || conditions[0][0]);
-        condition.addEventListener('change', ()=>{ rule[conditionKey] = { kind: condition.value }; commit(); App.selectionInspector?.refresh?.(); });
-        row.append(target, condition);
-        const conditionSpec = isObject(rule[conditionKey]) ? rule[conditionKey] : { kind: condition.value };
-        if(condition.value === 'count-reached' || condition.value === 'time-elapsed'){
-          const parameter = document.createElement('input');
-          parameter.type = 'number'; parameter.min = '0'; parameter.step = condition.value === 'count-reached' ? '1' : '0.1';
-          parameter.value = String(condition.value === 'count-reached' ? (conditionSpec.count ?? 1) : (conditionSpec.seconds ?? 0));
-          parameter.title = condition.value === 'count-reached' ? 'Count' : 'Seconds';
-          parameter.addEventListener('change', ()=>{
-            if(condition.value === 'count-reached') conditionSpec.count = Math.max(0, Math.round(Number(parameter.value) || 0));
-            else conditionSpec.seconds = Math.max(0, Number(parameter.value) || 0);
-            rule[conditionKey] = conditionSpec; commit();
-          });
-          row.appendChild(parameter);
-        }else if(condition.value === 'attribute-condition' || condition.value === 'custom-condition'){
-          const parameter = document.createElement('input');
-          parameter.type = 'text'; parameter.className = 'selectionInspectorInput';
-          parameter.title = condition.value === 'attribute-condition' ? 'Condition JSON: path/operator/value' : 'Restricted expression AST JSON';
-          parameter.value = JSON.stringify(condition.value === 'attribute-condition'
-            ? { path:conditionSpec.path || '', operator:conditionSpec.operator || 'eq', value:conditionSpec.value ?? '' }
-            : (conditionSpec.expression || { op:'compare', path:'', operator:'eq', value:'' }));
-          parameter.addEventListener('change', ()=>{
-            try{
-              const parsed = JSON.parse(parameter.value || '{}');
-              if(condition.value === 'attribute-condition') Object.assign(conditionSpec, parsed);
-              else conditionSpec.expression = parsed;
-              rule[conditionKey] = conditionSpec; parameter.setCustomValidity(''); commit();
-            }catch(_err){ parameter.setCustomValidity('Enter valid JSON'); parameter.reportValidity(); }
-          });
-          row.appendChild(parameter);
-        }
-        if(kind === 'output'){
-          const ports = (node.outputs || []).map((port, portIndex)=>[port.portId || `out-${portIndex + 1}`, port.name || `Out ${portIndex + 1}`]);
-          const to = select(ports, rule.toPortId || ports[0]?.[0] || '');
-          to.addEventListener('change', ()=>{ rule.toPortId = to.value; commit(); });
-          row.appendChild(to);
-        }
+        const ruleCard = document.createElement('article'); ruleCard.className = 'entityRuleCard';
+        const header = document.createElement('div'); header.className = 'entityRuleHeader';
+        const title = document.createElement('strong'); title.className = 'entityRuleTitle'; title.textContent = `Rule ${index + 1}`;
         const controls = document.createElement('div'); controls.className = 'entityRuleControls';
         const up = button('↑', ()=>{ if(index > 0){ rows.splice(index - 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
         const down = button('↓', ()=>{ if(index < rows.length - 1){ rows.splice(index + 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
         const remove = button('×', ()=>{ rows.splice(index, 1); commit(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn is-danger');
+        up.title = 'Move rule up'; down.title = 'Move rule down'; remove.title = 'Delete rule';
         up.disabled = running() || index === 0; down.disabled = running() || index === rows.length - 1; remove.disabled = running();
-        controls.append(up, down, remove); row.appendChild(controls); list.appendChild(row);
+        controls.append(up, down, remove); header.append(title, controls); ruleCard.appendChild(header);
+
+        const body = document.createElement('div'); body.className = 'entityRuleBody';
+        const target = select(typeOptions(registry, true, kind === 'output'), targetValue(rule.target));
+        target.disabled = running();
+        target.addEventListener('change', ()=>{ rule.target = parseTarget(target.value); commit(); });
+        body.appendChild(field('Target', target));
+
+        if(kind === 'input'){
+          const conditionSpec = isObject(rule.acceptWhen) ? rule.acceptWhen : { kind:conditionKind(rule.acceptWhen, 'always') };
+          const condition = select(inputConditions, conditionKind(conditionSpec, 'always'));
+          condition.disabled = running();
+          condition.addEventListener('change', ()=>{ rule.acceptWhen = { kind:condition.value }; commit(); App.selectionInspector?.refresh?.(); });
+          const conditionHost = document.createElement('div'); conditionHost.className = 'entityRuleConditionLine'; conditionHost.appendChild(condition);
+          appendConditionParameter(conditionHost, conditionSpec, commit);
+          body.appendChild(field('Accept when', conditionHost, 'is-wide'));
+        }else{
+          const stored = rule.releaseWhen;
+          const isCompound = isObject(stored) && (stored.kind === 'all' || stored.kind === 'any');
+          const compound = {
+            kind: isCompound ? stored.kind : 'all',
+            conditions: isCompound && Array.isArray(stored.conditions)
+              ? stored.conditions
+              : [isObject(stored) ? stored : { kind:conditionKind(stored, 'available') }]
+          };
+          if(!compound.conditions.length) compound.conditions.push({ kind:'available' });
+          const persistCompound = ()=>{ rule.releaseWhen = { kind:compound.kind, conditions:compound.conditions }; commit(); };
+          const conditionsHost = document.createElement('div'); conditionsHost.className = 'entityRuleConditions';
+          const joinRow = document.createElement('div'); joinRow.className = 'entityRuleConditionJoin';
+          const joinLabel = document.createElement('span'); joinLabel.textContent = 'Match';
+          const join = select([['all','All conditions (AND)'],['any','Any condition (OR)']], compound.kind);
+          join.disabled = running();
+          join.addEventListener('change', ()=>{ compound.kind = join.value; persistCompound(); });
+          joinRow.append(joinLabel, join); conditionsHost.appendChild(joinRow);
+          const conditionList = document.createElement('div'); conditionList.className = 'entityRuleConditionList';
+          compound.conditions.forEach((conditionSpec, conditionIndex)=>{
+            const conditionLine = document.createElement('div'); conditionLine.className = 'entityRuleConditionLine';
+            const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(conditionIndex + 1);
+            const condition = select(outputConditions, conditionKind(conditionSpec, 'available'));
+            condition.disabled = running();
+            condition.addEventListener('change', ()=>{
+              compound.conditions[conditionIndex] = { kind:condition.value };
+              persistCompound(); App.selectionInspector?.refresh?.();
+            });
+            const removeCondition = button('×', ()=>{
+              compound.conditions.splice(conditionIndex, 1);
+              if(!compound.conditions.length) compound.conditions.push({ kind:'available' });
+              persistCompound(); App.selectionInspector?.refresh?.();
+            }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
+            removeCondition.title = 'Delete condition'; removeCondition.disabled = running() || compound.conditions.length <= 1;
+            conditionLine.append(number, condition);
+            appendConditionParameter(conditionLine, conditionSpec, persistCompound);
+            conditionLine.appendChild(removeCondition); conditionList.appendChild(conditionLine);
+          });
+          conditionsHost.appendChild(conditionList);
+          const addCondition = button('+ Add condition', ()=>{
+            compound.conditions.push({ kind:'available' }); persistCompound(); App.selectionInspector?.refresh?.();
+          }, 'selectionInspectorBtn entityRuleAddCondition');
+          addCondition.disabled = running(); conditionsHost.appendChild(addCondition);
+          body.appendChild(field('Conditions', conditionsHost, 'is-wide'));
+
+          const ports = (node.outputs || []).map((port, portIndex)=>[port.portId || `out-${portIndex + 1}`, port.name || `Out ${portIndex + 1}`]);
+          const to = select(ports, rule.toPortId || ports[0]?.[0] || '');
+          to.disabled = running();
+          to.addEventListener('change', ()=>{ rule.toPortId = to.value; commit(); });
+          body.appendChild(field('Output to', to));
+        }
+        ruleCard.appendChild(body); list.appendChild(ruleCard);
       });
       card.section.appendChild(list);
       const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
         rows.push(kind === 'input'
-          ? { ruleId: `input-rule-${Date.now()}`, target: { mode: 'category', category: 'work' }, acceptWhen: { kind: 'always' }, fromPortId: null }
-          : { ruleId: `output-rule-${Date.now()}`, target: { mode: 'otherwise' }, releaseWhen: { kind: 'available' }, toPortId: node.outputs?.[0]?.portId || 'out-1' });
+          ? { ruleId:`input-rule-${Date.now()}`, target:{ mode:'category', category:'work' }, acceptWhen:{ kind:'always' }, fromPortId:null }
+          : { ruleId:`output-rule-${Date.now()}`, target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }] }, toPortId:node.outputs?.[0]?.portId || 'out-1' });
         commit(); App.selectionInspector?.refresh?.();
       }, 'selectionInspectorBtn is-primary');
       add.disabled = running(); card.section.appendChild(add); wrapper.appendChild(card.card);

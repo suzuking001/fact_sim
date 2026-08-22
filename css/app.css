@@ -1972,6 +1972,22 @@ body.timeline-hidden #timelineRevealHandle{
 .entityInspectorTabPanel[hidden],.entityCurrentSummary[hidden],.entityCurrentInstances[hidden]{ display:none !important; }
 .entityRuleList,.entityRecipeList{ display:grid; gap:8px; margin-bottom:10px; }
 .entityRuleRow,.entityRecipeRow{ display:grid; grid-template-columns:minmax(130px,1.2fr) minmax(120px,1fr) minmax(100px,1fr) auto; gap:7px; align-items:center; padding:8px; border:1px solid rgba(100,116,139,.16); border-radius:9px; background:#f8fafc; }
+.entityRuleCard{ overflow:hidden; border:1px solid rgba(100,116,139,.2); border-radius:11px; background:#f8fafc; }
+.entityRuleHeader{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 9px; border-bottom:1px solid rgba(100,116,139,.14); background:#f1f5f9; }
+.entityRuleTitle{ color:#334155; font-size:12px; }
+.entityRuleBody{ display:grid; grid-template-columns:minmax(135px,1fr) minmax(260px,2fr) minmax(135px,1fr); gap:10px; align-items:start; padding:10px; }
+.entityRuleField{ display:grid; gap:5px; min-width:0; }
+.entityRuleFieldLabel{ color:#64748b; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.entityRuleField select,.entityRuleField input{ min-width:0; width:100%; box-sizing:border-box; }
+.entityRuleConditions,.entityRuleConditionList{ display:grid; gap:7px; }
+.entityRuleConditionJoin{ display:flex; align-items:center; gap:7px; color:#64748b; font-size:11px; font-weight:700; }
+.entityRuleConditionJoin select{ flex:1; }
+.entityRuleConditionLine{ display:flex; align-items:center; gap:6px; min-width:0; }
+.entityRuleConditionLine select{ flex:1 1 170px; }
+.entityRuleConditionLine input{ flex:1 1 130px; }
+.entityRuleConditionNumber{ display:grid; flex:0 0 20px; width:20px; height:20px; place-items:center; border-radius:999px; background:#e2e8f0; color:#475569; font-size:10px; font-weight:800; }
+.entityRuleConditionRemove{ flex:0 0 auto; }
+.entityRuleAddCondition{ justify-self:start; }
 .entityRecipeRow{ margin-left:calc(var(--recipe-depth,0) * 20px); }
 .entityRecipeRow input,.entityRecipeRow select,.entityRuleRow select{ min-width:0; width:100%; box-sizing:border-box; }
 .entityCurrentSummary{ display:grid; gap:5px; margin-top:9px; }
@@ -1982,7 +1998,10 @@ body.timeline-hidden #timelineRevealHandle{
 .entityCurrentChildren{ display:grid; gap:3px; }
 .entityAdvancedPreview{ margin:0; padding:10px; overflow:auto; border-radius:8px; background:#0f172a; color:#e2e8f0; font-size:11px; }
 .selectionInspectorNotice.is-error{ color:#b91c1c; }
-@media(max-width:760px){ .entityRuleRow,.entityRecipeRow{ grid-template-columns:1fr; } }
+@media(max-width:760px){
+  .entityRuleRow,.entityRecipeRow,.entityRuleBody{ grid-template-columns:1fr; }
+  .entityRuleConditionLine{ flex-wrap:wrap; }
+}
 
 @media (max-width: 1100px){
   .selectionInspectorLayout{

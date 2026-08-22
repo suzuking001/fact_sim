@@ -212,7 +212,14 @@
         this.properties.outputRules = [{
           ruleId: 'shuttle-output-1',
           target: { mode: 'category', category: 'work' },
-          releaseWhen: { kind: 'shuttle-group-idle' },
+          releaseWhen: {
+            kind: 'all',
+            conditions: [
+              { kind: 'process-complete' },
+              { kind: 'shuttle-group-idle' },
+              { kind: 'downstream-ready' }
+            ]
+          },
           toPortId: this.outputs?.[0]?.portId || 'out-1'
         }];
       }
@@ -473,35 +480,51 @@
       return false;
     }
 
-    _selectShuttleOutputRule(groupIdle){
+    _evaluateShuttleOutputCondition(condition, context){
+      const spec = isObject(condition) ? condition : { kind: condition };
+      const kind = text(spec.kind).toLowerCase().replace(/[ _-]+/g, '-') || 'available';
+      const ctx = isObject(context) ? context : {};
+      if(kind === 'all' || kind === 'any'){
+        const rows = Array.isArray(spec.conditions) ? spec.conditions : (Array.isArray(spec.children) ? spec.children : []);
+        return kind === 'all'
+          ? rows.length > 0 && rows.every((entry)=>this._evaluateShuttleOutputCondition(entry, ctx))
+          : rows.some((entry)=>this._evaluateShuttleOutputCondition(entry, ctx));
+      }
+      if(kind === 'not') return !this._evaluateShuttleOutputCondition(spec.condition || spec.child, ctx);
+      if(kind === 'available') return !!this._payload;
+      if(kind === 'process-complete') return this._state === 'WAIT';
+      if(kind === 'shuttle-group-idle') return !!ctx.groupIdle;
+      if(kind === 'downstream-ready') return ctx.downstreamReady !== false;
+      if(typeof App.evaluateEntityCondition !== 'function') return false;
+      const store = this._store();
+      const instance = store?.get?.(this._payload) || null;
+      return !!(store && App.evaluateEntityCondition(store, this, instance, spec, {
+        nowMs: nowMs(),
+        processComplete: this._state === 'WAIT',
+        shuttleGroupIdle: !!ctx.groupIdle,
+        downstreamReady: ctx.downstreamReady !== false
+      }));
+    }
+
+    _selectShuttleOutputRule(context){
       const rules = Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length
         ? this.properties.outputRules
         : [{
             ruleId: 'default-shuttle-output',
             target: { mode: 'category', category: 'work' },
-            releaseWhen: { kind: 'shuttle-group-idle' },
+            releaseWhen: {
+              kind: 'all',
+              conditions: [
+                { kind: 'process-complete' },
+                { kind: 'shuttle-group-idle' },
+                { kind: 'downstream-ready' }
+              ]
+            },
             toPortId: this.outputs?.[0]?.portId || 'out-1'
           }];
       for(const rule of rules){
         if(!this._shuttleRuleTargetMatches(rule)) continue;
-        const condition = rule?.releaseWhen;
-        const kind = text(isObject(condition) ? condition.kind : condition).toLowerCase() || 'available';
-        let accepted = false;
-        if(kind === 'available') accepted = !!this._payload;
-        else if(kind === 'process-complete') accepted = this._state === 'WAIT';
-        else if(kind === 'shuttle-group-idle') accepted = !!groupIdle;
-        else if(kind === 'downstream-ready') accepted = true;
-        else if(typeof App.evaluateEntityCondition === 'function'){
-          const store = this._store();
-          const instance = store?.get?.(this._payload) || null;
-          accepted = !!(store && App.evaluateEntityCondition(store, this, instance, condition, {
-            nowMs: nowMs(),
-            processComplete: this._state === 'WAIT',
-            shuttleGroupIdle: !!groupIdle,
-            downstreamReady: true
-          }));
-        }
-        if(accepted) return rule;
+        if(this._evaluateShuttleOutputCondition(rule?.releaseWhen, context)) return rule;
       }
       return null;
     }
@@ -638,10 +661,11 @@
       const groupIdle = now + 0.001 >= timing.nextTransferAt
         && peers.every((node)=>!node?._payload || node._state !== 'PROCESS');
       if(!groupIdle) return false;
-      if(transferNodes.some((node)=>!node._selectShuttleOutputRule(groupIdle))) return false;
       const vacatingNodeIds = new Set(transferNodes.map((node)=>node.id));
       for(const node of transferNodes){
-        if(!node._shuttleDownstreamReady(vacatingNodeIds)) return false;
+        const downstreamReady = node._shuttleDownstreamReady(vacatingNodeIds);
+        if(!node._selectShuttleOutputRule({ groupIdle, downstreamReady })) return false;
+        if(!downstreamReady) return false;
       }
       let moved = false;
       for(const node of transferNodes){
@@ -799,7 +823,10 @@
       const selected = App.selectEntityRule(store, this, rules, {
         nowMs: nowMs(),
         processComplete: this._processComplete,
-        downstreamReady: true
+        resolveDownstreamReady: (rule, instance)=>{
+          const resolvedSlot = portIndexById(this.outputs, rule?.toPortId);
+          return this._downstreamReady(resolvedSlot >= 0 ? resolvedSlot : 0, instance);
+        }
       }, 'output');
       if(!selected) return null;
       const slot = portIndexById(this.outputs, selected.rule.toPortId);
@@ -1015,7 +1042,7 @@
     if(originalType === 'factory/sink') return [];
     const releaseKind = (originalType === 'factory/source' || originalType === 'factory/entitysource')
       ? 'available'
-      : (originalType === 'factory/shuttle_stage' ? 'shuttle-group-idle' : 'process-complete');
+      : 'process-complete';
     return (Array.isArray(node?.outputs) ? node.outputs : []).map((port, index)=>{
       const routeTypeId = originalType === 'factory/branch'
         ? typeIdForLegacyName(model, port?.routeType)
@@ -1025,7 +1052,16 @@
         target: routeTypeId
           ? { mode: 'type', typeId: routeTypeId }
           : { mode: 'category', category: categoryForPort(port) },
-        releaseWhen: { kind: releaseKind },
+        releaseWhen: originalType === 'factory/shuttle_stage'
+          ? {
+              kind: 'all',
+              conditions: [
+                { kind: 'process-complete' },
+                { kind: 'shuttle-group-idle' },
+                { kind: 'downstream-ready' }
+              ]
+            }
+          : { kind: releaseKind },
         toPortId: port.portId || `out-${index + 1}`
       };
     });

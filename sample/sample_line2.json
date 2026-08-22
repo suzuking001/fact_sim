@@ -979,7 +979,12 @@
               "category": "work"
             },
             "releaseWhen": {
-              "kind": "shuttle-group-idle"
+              "kind": "all",
+              "conditions": [
+                { "kind": "process-complete" },
+                { "kind": "shuttle-group-idle" },
+                { "kind": "downstream-ready" }
+              ]
             },
             "toPortId": "out-1"
           }
@@ -1047,7 +1052,12 @@
               "category": "work"
             },
             "releaseWhen": {
-              "kind": "shuttle-group-idle"
+              "kind": "all",
+              "conditions": [
+                { "kind": "process-complete" },
+                { "kind": "shuttle-group-idle" },
+                { "kind": "downstream-ready" }
+              ]
             },
             "toPortId": "out-1"
           }
@@ -1115,7 +1125,12 @@
               "category": "work"
             },
             "releaseWhen": {
-              "kind": "shuttle-group-idle"
+              "kind": "all",
+              "conditions": [
+                { "kind": "process-complete" },
+                { "kind": "shuttle-group-idle" },
+                { "kind": "downstream-ready" }
+              ]
             },
             "toPortId": "out-1"
           }
@@ -1183,7 +1198,12 @@
               "category": "work"
             },
             "releaseWhen": {
-              "kind": "shuttle-group-idle"
+              "kind": "all",
+              "conditions": [
+                { "kind": "process-complete" },
+                { "kind": "shuttle-group-idle" },
+                { "kind": "downstream-ready" }
+              ]
             },
             "toPortId": "out-1"
           }
@@ -1251,7 +1271,12 @@
               "category": "work"
             },
             "releaseWhen": {
-              "kind": "shuttle-group-idle"
+              "kind": "all",
+              "conditions": [
+                { "kind": "process-complete" },
+                { "kind": "shuttle-group-idle" },
+                { "kind": "downstream-ready" }
+              ]
             },
             "toPortId": "out-1"
           }

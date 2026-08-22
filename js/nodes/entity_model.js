@@ -93,6 +93,14 @@
     if(typeof value === 'string') return { kind: normalizeText(value).toLowerCase().replace(/[ _-]+/g, '-') };
     const source = isObject(value) ? clone(value, {}) : {};
     source.kind = normalizeText(source.kind || fallback || 'always').toLowerCase().replace(/[ _-]+/g, '-');
+    if(source.kind === 'all' || source.kind === 'any'){
+      const rows = Array.isArray(source.conditions) ? source.conditions : (Array.isArray(source.children) ? source.children : []);
+      source.conditions = rows.map((entry)=>normalizeCondition(entry, 'always'));
+      delete source.children;
+    }else if(source.kind === 'not'){
+      source.condition = normalizeCondition(source.condition || source.child, 'always');
+      delete source.child;
+    }
     return source;
   }
 
@@ -687,6 +695,9 @@
     const type = store.typeOf(instance);
     const ctx = isObject(context) ? context : {};
     switch(spec.kind){
+      case 'all': return spec.conditions.length > 0 && spec.conditions.every((entry)=>evaluateCondition(store, node, instance, entry, ctx));
+      case 'any': return spec.conditions.some((entry)=>evaluateCondition(store, node, instance, entry, ctx));
+      case 'not': return !evaluateCondition(store, node, instance, spec.condition, ctx);
       case 'always': case 'available': return !!instance;
       case 'space-available': case 'not-full': {
         const capacity = Number(node?.properties?.contentCapacity);
@@ -742,12 +753,19 @@
   function selectRule(store, node, rules, context, kind){
     const normalized = normalizeRules(rules, kind);
     const nodeId = node?.id;
+    const conditionContext = (rule, instance)=>{
+      const resolved = { ...context, target: rule.target, rule };
+      if(typeof context?.resolveDownstreamReady === 'function'){
+        resolved.downstreamReady = !!context.resolveDownstreamReady(rule, instance);
+      }
+      return resolved;
+    };
     for(const rule of normalized){
       if(rule.target.mode === 'otherwise'){
         const roots = store.rootsAt(nodeId);
         const candidate = roots[0] || null;
         const condition = kind === 'input' ? rule.acceptWhen : rule.releaseWhen;
-        if(evaluateCondition(store, node, candidate, condition, { ...context, target: rule.target })) return { rule, instance: candidate };
+        if(evaluateCondition(store, node, candidate, condition, conditionContext(rule, candidate))) return { rule, instance: candidate };
         continue;
       }
       const candidates = context?.incomingRoot
@@ -755,7 +773,7 @@
         : store.findAtNode(nodeId, rule.target);
       for(const instance of candidates){
         const condition = kind === 'input' ? rule.acceptWhen : rule.releaseWhen;
-        if(evaluateCondition(store, node, instance, condition, { ...context, target: rule.target })) return { rule, instance };
+        if(evaluateCondition(store, node, instance, condition, conditionContext(rule, instance))) return { rule, instance };
       }
     }
     return null;
