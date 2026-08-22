@@ -198,9 +198,6 @@
       if(!Array.isArray(this.properties.initialContents)) this.properties.initialContents = [];
       if(!Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
       if(!Array.isArray(this.properties.outputRules)) this.properties.outputRules = [];
-      if(id === 'shuttle' && !text(this.properties.shuttleGroupId)){
-        this.properties.shuttleGroupId = 'shuttle-1';
-      }
       if(id === 'shuttle' && !this.properties.inputRules.length){
         this.properties.inputRules = [{
           ruleId: 'shuttle-input-1',
@@ -219,7 +216,7 @@
             kind: 'all',
             conditions: [
               { kind: 'process-complete' },
-              { kind: 'shuttle-group-idle' },
+              { kind: 'shuttle-group-idle', groupId: text(this.properties.shuttleGroupId) || 'shuttle-1' },
               { kind: 'downstream-ready' }
             ]
           },
@@ -283,12 +280,14 @@
         return;
       }
       this.applyPreset(this.properties.presetId, true);
+      this._migrateLegacyShuttleGroupSetting();
       this._state = this.properties?.stateMachine?.initialState || 'IDLE';
       this._stateName = String(this._state).toLowerCase();
       restoreSerializedGeometry(this, serializedNode);
     }
 
     onSerialize(serialized){
+      this._migrateLegacyShuttleGroupSetting();
       serialized.type = 'factory/basic';
       ensurePortIds(this);
       serialized.inputs = clone(this.inputs, serialized.inputs || []);
@@ -301,13 +300,12 @@
       if(this._legacyPrototype && typeof this._legacyPrototype.onPropertyChanged === 'function'){
         return this._legacyPrototype.onPropertyChanged.call(this, name);
       }
-      if(name === 'presetId') this.applyPreset(this.properties.presetId, false);
+      if(name === 'presetId'){
+        this.applyPreset(this.properties.presetId, false);
+        this._migrateLegacyShuttleGroupSetting();
+      }
       if(name === 'processTime') this.properties.processTime = Math.max(0, Number(this.properties.processTime) || 0);
       if(name === 'contentCapacity') this.properties.contentCapacity = Math.max(0, Math.round(Number(this.properties.contentCapacity) || 0));
-      if(name === 'shuttleGroupId'){
-        this.properties.shuttleGroupId = text(this.properties.shuttleGroupId) || 'shuttle-1';
-        this._markShuttleGroupDirty();
-      }
     }
 
     getInspectorSchema(){
@@ -319,9 +317,6 @@
         processTime: { type: 'number', label: 'Process time (s)' },
         contentCapacity: { type: 'number', label: 'Node capacity' }
       };
-      if(this.properties?.presetId === 'shuttle'){
-        schema.shuttleGroupId = { type: 'text', label: 'Shuttle Group ID' };
-      }
       return schema;
     }
 
@@ -398,7 +393,65 @@
     }
 
     _shuttleGroupId(){
+      const findGroupId = (condition)=>{
+        if(!condition || typeof condition !== 'object') return '';
+        const kind = text(condition.kind).toLowerCase().replace(/[ _-]+/g, '-');
+        if(kind === 'shuttle-group-idle') return text(condition.groupId);
+        if(kind === 'all' || kind === 'any'){
+          const children = Array.isArray(condition.conditions) ? condition.conditions : (Array.isArray(condition.children) ? condition.children : []);
+          for(const child of children){
+            const found = findGroupId(child);
+            if(found) return found;
+          }
+        }
+        if(kind === 'not') return findGroupId(condition.condition || condition.child);
+        return '';
+      };
+      for(const rule of (Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [])){
+        const found = findGroupId(rule?.releaseWhen);
+        if(found) return found;
+      }
       return text(this.properties?.shuttleGroupId);
+    }
+
+    _migrateLegacyShuttleGroupSetting(){
+      if(text(this.properties?.presetId).toLowerCase() !== 'shuttle') return;
+      const legacyGroupId = text(this.properties?.shuttleGroupId) || 'shuttle-1';
+      const rules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+      const visit = (condition)=>{
+        if(!condition || typeof condition !== 'object') return false;
+        const kind = text(condition.kind).toLowerCase().replace(/[ _-]+/g, '-');
+        if(kind === 'shuttle-group-idle'){
+          if(!text(condition.groupId)) condition.groupId = legacyGroupId;
+          return true;
+        }
+        const children = kind === 'all' || kind === 'any'
+          ? (Array.isArray(condition.conditions) ? condition.conditions : (Array.isArray(condition.children) ? condition.children : []))
+          : [];
+        let found = children.some((child)=> visit(child));
+        if(kind === 'not') found = visit(condition.condition || condition.child) || found;
+        return found;
+      };
+      for(const rule of rules){
+        if(visit(rule?.releaseWhen)) continue;
+        const groupCondition = { kind: 'shuttle-group-idle', groupId: legacyGroupId };
+        const release = rule?.releaseWhen;
+        if(release && typeof release === 'object'){
+          const releaseKind = text(release.kind).toLowerCase().replace(/[ _-]+/g, '-');
+          if(releaseKind === 'all'){
+            const conditions = Array.isArray(release.conditions)
+              ? release.conditions
+              : (Array.isArray(release.children) ? release.children : []);
+            release.conditions = [...conditions, groupCondition];
+            delete release.children;
+          }else{
+            rule.releaseWhen = { kind: 'all', conditions: [release, groupCondition] };
+          }
+        }else{
+          rule.releaseWhen = groupCondition;
+        }
+      }
+      delete this.properties.shuttleGroupId;
     }
 
     _shuttleGroupNodes(){
@@ -408,7 +461,7 @@
       if(!groupId) return [this];
       const peers = graph._nodes.filter((node)=> node instanceof BasicNode
         && text(node.properties?.presetId).toLowerCase() === 'shuttle'
-        && text(node.properties?.shuttleGroupId) === groupId);
+        && node._shuttleGroupId() === groupId);
       return peers.length ? peers : [this];
     }
 
@@ -528,7 +581,7 @@
               kind: 'all',
               conditions: [
                 { kind: 'process-complete' },
-                { kind: 'shuttle-group-idle' },
+                { kind: 'shuttle-group-idle', groupId: this._shuttleGroupId() || 'shuttle-1' },
                 { kind: 'downstream-ready' }
               ]
             },
@@ -606,7 +659,7 @@
       return !!node
         && node instanceof BasicNode
         && text(node.properties?.presetId).toLowerCase() === 'shuttle'
-        && text(node.properties?.shuttleGroupId) === this._shuttleGroupId();
+        && node._shuttleGroupId() === this._shuttleGroupId();
     }
 
     _shuttleDownstreamReady(vacatingNodeIds, slot){
@@ -1096,7 +1149,7 @@
               kind: 'all',
               conditions: [
                 { kind: 'process-complete' },
-                { kind: 'shuttle-group-idle' },
+                { kind: 'shuttle-group-idle', groupId: text(node?.properties?.shuttleGroupId || node?.properties?.groupId) || 'shuttle-1' },
                 { kind: 'downstream-ready' }
               ]
             }
@@ -1159,6 +1212,7 @@
         if(!Array.isArray(node.properties.outputRules) || !node.properties.outputRules.length){
           node.properties.outputRules = migratedOutputRules(node, originalType, data.__factSimEntityModel);
         }
+        if(originalType === 'factory/shuttle_stage') delete node.properties.shuttleGroupId;
         convertedNodeCount += 1;
       }
       ensurePortIds(node);

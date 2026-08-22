@@ -954,7 +954,6 @@
       ],
       "properties": {
         "processTime": 5,
-        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
         "initialContents": [],
@@ -982,7 +981,7 @@
               "kind": "all",
               "conditions": [
                 { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle" },
+                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
                 { "kind": "downstream-ready" }
               ]
             },
@@ -1027,7 +1026,6 @@
       ],
       "properties": {
         "processTime": 5,
-        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
         "initialContents": [],
@@ -1055,7 +1053,7 @@
               "kind": "all",
               "conditions": [
                 { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle" },
+                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
                 { "kind": "downstream-ready" }
               ]
             },
@@ -1100,7 +1098,6 @@
       ],
       "properties": {
         "processTime": 20,
-        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
         "initialContents": [],
@@ -1128,7 +1125,7 @@
               "kind": "all",
               "conditions": [
                 { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle" },
+                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
                 { "kind": "downstream-ready" }
               ]
             },
@@ -1173,7 +1170,6 @@
       ],
       "properties": {
         "processTime": 5,
-        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
         "initialContents": [],
@@ -1201,7 +1197,7 @@
               "kind": "all",
               "conditions": [
                 { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle" },
+                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
                 { "kind": "downstream-ready" }
               ]
             },
@@ -1246,7 +1242,6 @@
       ],
       "properties": {
         "processTime": 5,
-        "shuttleGroupId": "shuttle-1",
         "basicNodeVersion": 1,
         "presetId": "shuttle",
         "initialContents": [],
@@ -1274,7 +1269,7 @@
               "kind": "all",
               "conditions": [
                 { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle" },
+                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
                 { "kind": "downstream-ready" }
               ]
             },

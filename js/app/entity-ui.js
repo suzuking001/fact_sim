@@ -201,7 +201,18 @@
     const conditionKind = (condition, fallback)=>isObject(condition) ? (condition.kind || fallback) : (condition || fallback);
     const appendConditionParameter = (host, condition, commit)=>{
       const kind = conditionKind(condition, 'available');
-      if(kind === 'count-reached' || kind === 'time-elapsed'){
+      if(kind === 'shuttle-group-idle'){
+        const parameter = document.createElement('input');
+        parameter.type = 'text'; parameter.className = 'selectionInspectorInput';
+        parameter.value = String(condition.groupId || node.properties?.shuttleGroupId || 'shuttle-1');
+        parameter.placeholder = 'Shuttle group ID'; parameter.title = 'Shuttle group ID';
+        parameter.setAttribute('aria-label', 'Shuttle group ID'); parameter.disabled = running();
+        parameter.addEventListener('change', ()=>{
+          condition.groupId = String(parameter.value || '').trim() || 'shuttle-1';
+          parameter.value = condition.groupId; commit();
+        });
+        host.appendChild(parameter);
+      }else if(kind === 'count-reached' || kind === 'time-elapsed'){
         const parameter = document.createElement('input');
         parameter.type = 'number'; parameter.min = '0'; parameter.step = kind === 'count-reached' ? '1' : '0.1';
         parameter.value = String(kind === 'count-reached' ? (condition.count ?? 1) : (condition.seconds ?? 0));
@@ -332,7 +343,9 @@
             const condition = select(outputConditions, conditionKind(conditionSpec, 'available'));
             condition.disabled = running();
             condition.addEventListener('change', ()=>{
-              compound.conditions[conditionIndex] = { kind:condition.value };
+              compound.conditions[conditionIndex] = condition.value === 'shuttle-group-idle'
+                ? { kind:condition.value, groupId:String(node.properties?.shuttleGroupId || 'shuttle-1') }
+                : { kind:condition.value };
               persistCompound(); App.selectionInspector?.refresh?.();
             });
             const removeCondition = button('×', ()=>{
