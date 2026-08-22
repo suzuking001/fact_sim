@@ -200,6 +200,22 @@
       if(id === 'shuttle' && !text(this.properties.shuttleGroupId)){
         this.properties.shuttleGroupId = 'shuttle-1';
       }
+      if(id === 'shuttle' && !this.properties.inputRules.length){
+        this.properties.inputRules = [{
+          ruleId: 'shuttle-input-1',
+          target: { mode: 'category', category: 'work' },
+          acceptWhen: { kind: 'space-available' },
+          fromPortId: this.inputs?.[0]?.portId || 'in-1'
+        }];
+      }
+      if(id === 'shuttle' && !this.properties.outputRules.length){
+        this.properties.outputRules = [{
+          ruleId: 'shuttle-output-1',
+          target: { mode: 'category', category: 'work' },
+          releaseWhen: { kind: 'shuttle-group-idle' },
+          toPortId: this.outputs?.[0]?.portId || 'out-1'
+        }];
+      }
       if(!preserveTitle) this.title = preset.title;
       this._ensurePresetPorts();
       if(id === 'shuttle') this._applyShuttleStateColor();
@@ -441,6 +457,55 @@
       timing.lastTransferAt = NaN;
     }
 
+    _shuttleRuleTargetMatches(rule){
+      const target = rule?.target || {};
+      const mode = text(target.mode).toLowerCase();
+      if(!mode || mode === 'otherwise') return true;
+      if(mode === 'category') return text(target.category).toLowerCase() === 'work';
+      if(mode === 'type'){
+        const wanted = text(target.typeId);
+        const payloadTypeId = text(this._payload?.typeId);
+        if(payloadTypeId) return payloadTypeId === wanted;
+        const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(this.graph) : null;
+        const type = registry?.get?.(wanted);
+        return !!type && text(type.name) === text(this._payload?.type);
+      }
+      return false;
+    }
+
+    _selectShuttleOutputRule(groupIdle){
+      const rules = Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length
+        ? this.properties.outputRules
+        : [{
+            ruleId: 'default-shuttle-output',
+            target: { mode: 'category', category: 'work' },
+            releaseWhen: { kind: 'shuttle-group-idle' },
+            toPortId: this.outputs?.[0]?.portId || 'out-1'
+          }];
+      for(const rule of rules){
+        if(!this._shuttleRuleTargetMatches(rule)) continue;
+        const condition = rule?.releaseWhen;
+        const kind = text(isObject(condition) ? condition.kind : condition).toLowerCase() || 'available';
+        let accepted = false;
+        if(kind === 'available') accepted = !!this._payload;
+        else if(kind === 'process-complete') accepted = this._state === 'WAIT';
+        else if(kind === 'shuttle-group-idle') accepted = !!groupIdle;
+        else if(kind === 'downstream-ready') accepted = true;
+        else if(typeof App.evaluateEntityCondition === 'function'){
+          const store = this._store();
+          const instance = store?.get?.(this._payload) || null;
+          accepted = !!(store && App.evaluateEntityCondition(store, this, instance, condition, {
+            nowMs: nowMs(),
+            processComplete: this._state === 'WAIT',
+            shuttleGroupIdle: !!groupIdle,
+            downstreamReady: true
+          }));
+        }
+        if(accepted) return rule;
+      }
+      return null;
+    }
+
     _applyShuttleStateColor(){
       switch(this._state){
         case 'PROCESS': this.color = '#2ecc71'; this.bgcolor = '#e8f8f2'; break;
@@ -570,7 +635,10 @@
       if(!Number.isFinite(timing.nextTransferAt)){
         timing.nextTransferAt = now + this._shuttleGroupCycleMs();
       }
-      if(now + 0.001 < timing.nextTransferAt) return false;
+      const groupIdle = now + 0.001 >= timing.nextTransferAt
+        && peers.every((node)=>!node?._payload || node._state !== 'PROCESS');
+      if(!groupIdle) return false;
+      if(transferNodes.some((node)=>!node._selectShuttleOutputRule(groupIdle))) return false;
       const vacatingNodeIds = new Set(transferNodes.map((node)=>node.id));
       for(const node of transferNodes){
         if(!node._shuttleDownstreamReady(vacatingNodeIds)) return false;
@@ -947,7 +1015,7 @@
     if(originalType === 'factory/sink') return [];
     const releaseKind = (originalType === 'factory/source' || originalType === 'factory/entitysource')
       ? 'available'
-      : 'process-complete';
+      : (originalType === 'factory/shuttle_stage' ? 'shuttle-group-idle' : 'process-complete');
     return (Array.isArray(node?.outputs) ? node.outputs : []).map((port, index)=>{
       const routeTypeId = originalType === 'factory/branch'
         ? typeIdForLegacyName(model, port?.routeType)

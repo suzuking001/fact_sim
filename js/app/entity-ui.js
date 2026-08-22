@@ -203,7 +203,7 @@
         target.addEventListener('change', ()=>{ rule.target = parseTarget(target.value); commit(); });
         const conditions = kind === 'input'
           ? [['always','Always'],['space-available','Space available'],['empty','Empty'],['not-full','Not full'],['custom-condition','Custom']]
-          : [['available','Available'],['process-complete','Process complete'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
+          : [['available','Available'],['process-complete','Process complete'],['shuttle-group-idle','Shuttle group process complete (Idle)'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
         const conditionKey = kind === 'input' ? 'acceptWhen' : 'releaseWhen';
         const condition = select(conditions, rule?.[conditionKey]?.kind || rule?.[conditionKey] || conditions[0][0]);
         condition.addEventListener('change', ()=>{ rule[conditionKey] = { kind: condition.value }; commit(); App.selectionInspector?.refresh?.(); });

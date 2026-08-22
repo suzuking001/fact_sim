@@ -710,6 +710,7 @@
       }
       case 'downstream-ready': return ctx.downstreamReady !== false;
       case 'process-complete': return !!ctx.processComplete;
+      case 'shuttle-group-idle': return !!ctx.shuttleGroupIdle;
       case 'attribute-condition': {
         const source = spec.source === 'type' ? type : instance?.attributes;
         return compareAttribute(valueAtPath(source, spec.path), spec.operator, spec.value);

@@ -11,7 +11,7 @@ var App = window.App || (window.App = {});
     carrier: 'sample/graph (3).json',
     pallet_station_demo: 'sample/pallet_station_demo.json',
     sample_line1: 'sample/sample_line1.json?v=20260821b',
-    sample_line2: 'sample/sample_line2.json?v=20260822a'
+    sample_line2: 'sample/sample_line2.json?v=20260822b'
   };
   const DEFAULTS = {
     suite: 'standard',
