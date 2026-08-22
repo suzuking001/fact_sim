@@ -7,6 +7,7 @@ function _captureHistory(){
   let snap;
   try{
     const data = App.graph.serialize();
+    if(typeof App.injectEntityModel === 'function') App.injectEntityModel(data, App.graph);
     if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
       App.stopGroups.injectSerializedData(data, App.graph);
     }
@@ -50,6 +51,7 @@ function resetHistory(){
       App.history._timer = null;
     }
     const data = App.graph.serialize();
+    if(typeof App.injectEntityModel === 'function') App.injectEntityModel(data, App.graph);
     if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
       App.stopGroups.injectSerializedData(data, App.graph);
     }
@@ -70,6 +72,7 @@ function applySnapshot(snap){
     App.graph.clear();
     if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
     App.graph.configure(data);
+    if(typeof App.restoreEntityModel === 'function') App.restoreEntityModel(App.graph, data, true);
     if(typeof window.normalizeGraphOverlaySizes === 'function'){
       window.normalizeGraphOverlaySizes(App.graph);
     }

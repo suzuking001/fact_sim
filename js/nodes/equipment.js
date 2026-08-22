@@ -110,7 +110,10 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       return true;
     }
     if(!this._compiled){
-      try{ this._compiled = new Function('work','signalArr', this.properties.script); }
+      const source = (typeof this.properties?.script === 'string' && this.properties.script.trim())
+        ? this.properties.script
+        : 'return true;';
+      try{ this._compiled = new Function('work','signalArr', source); }
       catch(e){ console.error(e); }
     }
     try{ return this._compiled ? this._compiled(w,s) : true; }

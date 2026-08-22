@@ -169,6 +169,12 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     if(typeof window.applyNodeStateTheme === 'function') window.applyNodeStateTheme(this, this._state);
   }
 
+  _markSelfDirty(){
+    if(!this.graph) return;
+    if(!(this.graph.__dirtyNodeIds instanceof Set)) this.graph.__dirtyNodeIds = new Set();
+    this.graph.__dirtyNodeIds.add(this.id);
+  }
+
   _operation(){
     const value = String(this.properties.operation || 'load').toLowerCase();
     return value === 'unload' || value === 'transfer' ? value : 'load';
@@ -243,6 +249,14 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     if(this._lastInputRefs[slot] === entity) return null;
     if(!this.canAcceptEntityInput(slot, entity)) return null;
     this._lastInputRefs[slot] = entity;
+    if(!entity.__factAcceptedBy || typeof entity.__factAcceptedBy !== 'object') entity.__factAcceptedBy = {};
+    entity.__factAcceptedBy[String(this.id)] = true;
+    if(this.graph){
+      if(!(this.graph.__dirtyNodeIds instanceof Set)) this.graph.__dirtyNodeIds = new Set();
+      const linkId = this.inputs?.[slot]?.link;
+      const originId = linkId == null ? null : this.graph.links?.[linkId]?.origin_id;
+      if(originId != null) this.graph.__dirtyNodeIds.add(originId);
+    }
     const store = this._store();
     if(store) store.register(entity);
     if(slot === this._sourceInIndex) this._sourceHost = entity;
@@ -349,6 +363,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     }
     this._phase = 'ready';
     this._setState('IDLE', 'ready');
+    this._markSelfDirty();
   }
 
   _outputHasLinks(slot){
@@ -396,7 +411,8 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     for(const linkId of output.links){
       const link = this.graph?.links?.[linkId];
       const target = link && this.graph?.getNodeById ? this.graph.getNodeById(link.target_id) : null;
-      if(target && !this._targetHasReference(target, entity)) return false;
+      const acceptedBy = target && entity?.__factAcceptedBy && entity.__factAcceptedBy[String(target.id)];
+      if(target && !acceptedBy && !this._targetHasReference(target, entity)) return false;
     }
     return true;
   }
@@ -411,6 +427,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     this._offer = { slot, entity, onDone, armed: false, armedAt: 0, until: 0 };
     this._phase = 'offer';
     this._setState('WAIT', 'handoff_wait');
+    this._markSelfDirty();
   }
 
   _tickOffer(now){
@@ -422,11 +439,11 @@ class TransferStationNode extends LiteGraph.LGraphNode{
       offer.armed = true;
       offer.armedAt = now;
       offer.until = now + Math.max(1, this._normalizeTime(this.properties.downTime, 0.2) * 1000);
+      this._until = offer.until;
       this._setState('DOWN', 'handoff');
       return;
     }
-    const accepted = this._offerAccepted(offer.slot, offer.entity);
-    if(now < offer.until || (!accepted && now <= offer.until)) return;
+    if(now < offer.until) return;
     try{ this.setOutputData(offer.slot, null); }catch(_e){}
     this._offer = null;
     const done = offer.onDone;
@@ -444,6 +461,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     if(op !== 'load' && this._sourceHost) this._releaseQueue.push({ slot: this._sourceOutIndex, entity: this._sourceHost, field: '_sourceHost' });
     if(op !== 'unload' && this._targetHost) this._releaseQueue.push({ slot: this._targetOutIndex, entity: this._targetHost, field: '_targetHost' });
     this._phase = 'release';
+    this._markSelfDirty();
     this._advanceRelease();
   }
 
@@ -540,12 +558,20 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     if(name === 'quantity') this.properties.quantity = this._normalizeQuantity(this.properties.quantity);
   }
 
-  onConfigure(){
+  onConfigure(serializedNode){
+    const serializedPreset = String(
+      serializedNode?.properties?.preset ?? this.properties?.preset ?? 'custom'
+    );
     this.properties = { ...TRANSFER_STATION_DEFAULTS, ...(this.properties || {}) };
     this.properties.processTime = this._normalizeTime(this.properties.processTime, 1);
     this.properties.downTime = this._normalizeTime(this.properties.downTime, 0.2);
     this.properties.quantity = this._normalizeQuantity(this.properties.quantity);
-    this._syncPortLabels();
+    if(serializedPreset !== 'custom' && Object.prototype.hasOwnProperty.call(TRANSFER_STATION_PRESETS, serializedPreset)){
+      this._applyPreset(serializedPreset, false);
+    }else{
+      this.properties.preset = 'custom';
+      this._syncPortLabels();
+    }
   }
 
   onDrawForeground(ctx){

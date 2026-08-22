@@ -376,9 +376,14 @@ export function registerRuntimeMethodsGroup13(
   (FactSimRuntimeClass.prototype as any).initialize = async function (this: any): Promise<void> {
       try {
         await this.ensureStaticServer();
-        this.browser = await chromium.launch({
-          headless: true
-        });
+        try {
+          this.browser = await chromium.launch({ headless: true });
+        } catch (launchError) {
+          const message = toErrorMessage(launchError);
+          if (!message.includes("Executable doesn't exist")) throw launchError;
+          this.logger?.("Bundled Chromium is unavailable; falling back to installed Microsoft Edge.");
+          this.browser = await chromium.launch({ headless: true, channel: "msedge" });
+        }
         this.browserContext = await this.browser.newContext({
           viewport: { width: 1440, height: 900 }
         });

@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const WORKER_MODE = 'event-fast-worker';
-  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260803a';
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260803b';
   const UNSAFE_WORKER_TYPES = new Set([
     'factory/carrierroute',
     'factory/shuttle_stage'
@@ -70,6 +70,7 @@ var App = window.App || (window.App = {});
     const data = (typeof App.compactGraphData === 'function') ? App.compactGraphData(cloneJson(graphData)) : cloneJson(graphData);
     const graph = new LGraph();
     graph.configure(data);
+    if(typeof App.restoreEntityModel === 'function') App.restoreEntityModel(graph, data, true);
     if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function'){
       try{ App.repairGraphLinks(graph); }catch(_e){}
     }

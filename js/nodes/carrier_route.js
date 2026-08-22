@@ -719,13 +719,74 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   _carrierConfigNodes(){
     const nodes = this.graph && Array.isArray(this.graph._nodes) ? this.graph._nodes : [];
-    return nodes.filter((node)=>
+    const live = nodes.filter((node)=>
       node &&
       (typeof node.isForCarrierId === 'function' ||
        node.type === 'factory/carrierconfig' ||
        node.type === 'factory/carrierhome' ||
        node.type === 'factory/palletcarrierconfig' ||
        node.type === 'factory/palletcarrier'));
+    const migrated = Array.isArray(this.properties?.migratedCarrierConfigs)
+      ? this.properties.migratedCarrierConfigs.map((row)=>this._migratedCarrierConfig(row)).filter(Boolean)
+      : [];
+    return live.concat(migrated);
+  }
+
+  _migratedCarrierConfig(row){
+    if(!row || typeof row !== 'object') return null;
+    const props = row.properties && typeof row.properties === 'object' ? row.properties : {};
+    const sourceType = String(row.sourceType || '').toLowerCase();
+    const palletMode = sourceType.indexOf('pallet') >= 0;
+    const configId = Number(row.nodeId);
+    const carrierId = String(props.carrierId ?? '').trim();
+    const positive = (value, fallback)=>{
+      const n = Math.round(Number(value));
+      return isFinite(n) && n > 0 ? n : fallback;
+    };
+    const palletIds = String(props.initialPalletIds ?? '')
+      .replace(/\r/g, '\n').split(/(?:,|\n)+/).map((value)=>String(value || '').trim()).filter(Boolean);
+    return {
+      id: configId,
+      properties: props,
+      getCarrierMode(){ return palletMode ? 'pallet' : 'carrier'; },
+      isForCarrierId(id){ return !!carrierId && carrierId === String(id ?? '').trim(); },
+      applyToCarrier(agv){
+        if(!agv || typeof agv !== 'object') return agv;
+        if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
+        if(!Array.isArray(agv.cargo)) agv.cargo = [];
+        agv.meta.carrierId = carrierId || String(agv.id ?? '').trim();
+        agv.meta.configNodeId = configId;
+        if(!palletMode){
+          const capacity = positive(props.capacity, 1);
+          if(Array.isArray(agv.pallets)) delete agv.pallets;
+          agv.capacity = capacity;
+          agv.meta.capacity = capacity;
+          agv.meta.carrierMode = 'carrier';
+          return agv;
+        }
+        const palletCapacity = positive(props.palletCapacity, 1);
+        const workCapacity = positive(props.palletWorkCapacity, 1);
+        agv.meta.carrierMode = 'pallet';
+        agv.meta.palletCapacity = palletCapacity;
+        agv.meta.palletWorkCapacity = workCapacity;
+        if(!Array.isArray(agv.pallets)) agv.pallets = [];
+        agv.pallets = agv.pallets.slice(0, palletCapacity).map((pallet, index)=>({
+          palletId: String(pallet?.palletId ?? pallet?.id ?? palletIds[index] ?? `P-${index + 1}`),
+          capacity: positive(pallet?.capacity, workCapacity),
+          works: Array.isArray(pallet?.works) ? pallet.works.slice(0, workCapacity) : []
+        }));
+        if(!agv.meta.__palletSeeded && !agv.pallets.length){
+          for(const id of palletIds.slice(0, palletCapacity)){
+            agv.pallets.push({ palletId: id, capacity: workCapacity, works: [] });
+          }
+          agv.meta.__palletSeeded = true;
+        }
+        agv.capacity = Math.max(1, agv.pallets.reduce((sum, pallet)=>sum + positive(pallet.capacity, workCapacity), 0));
+        agv.meta.capacity = agv.capacity;
+        agv.cargo.length = 0;
+        return agv;
+      }
+    };
   }
 
   _carrierConfigByNodeId(nodeId){

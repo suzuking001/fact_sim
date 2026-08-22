@@ -37,7 +37,8 @@ var App = window.App || (window.App = {});
   function inferKindId(node){
     const type = normalizeText(node && node.type);
     const title = normalizeText(node && node.title);
-    const src = `${type} ${title}`;
+    const preset = normalizeText(node && node.properties && node.properties.presetId);
+    const src = `${type} ${title} ${preset}`;
     if(src.indexOf('source') >= 0) return KINDS.Source;
     if(src.indexOf('branch') >= 0) return KINDS.Branch;
     if(src.indexOf('merge') >= 0 || src.indexOf('join') >= 0) return KINDS.Merge;
@@ -273,8 +274,17 @@ var App = window.App || (window.App = {});
         const node = getNode(ctx, nodeIndex);
         if(!node) return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
         const before = captureState(node);
-        const ready = downstreamReady(ctx, nodeIndex, 0, null);
         const sigCount = Math.max(0, Number(node.properties && node.properties.sigExtra) || 0);
+
+        if(typeof node._holdPendingWork === 'function' && node._holdPendingWork()){
+          for(let i = 0; i < sigCount; i += 1){
+            if(typeof node._emit === 'function') node._emit(i, 'SEND');
+          }
+          const held = captureState(node);
+          return buildResult(before, held, NaN);
+        }
+
+        const ready = downstreamReady(ctx, nodeIndex, 0, null);
 
         if(ready){
           if((!node._seq || !node._seq.length) && typeof node._parseSeq === 'function') node._parseSeq();
@@ -283,6 +293,8 @@ var App = window.App || (window.App = {});
           const WorkCtor = window.Work || function(id, type){ this.id = id; this.type = type; };
           const work = new WorkCtor(nextId, entry.type);
           if(typeof node.setOutputData === 'function') node.setOutputData(0, work);
+          node._pendingWork = work;
+          if(typeof node._animateWorkOutput === 'function') node._animateWorkOutput(work);
           node._counter = nextId;
           node._cursor = node._seq && node._seq.length ? ((node._cursor + 1) % node._seq.length) : 0;
           for(let i = 0; i < sigCount; i += 1){

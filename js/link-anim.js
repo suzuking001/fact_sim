@@ -5,6 +5,11 @@
   const cfg = window.NODES_CONFIG?.animations || {};
   const defaultDuration = (cfg.linkMs || 800);
   const iconRadius = cfg.radius || 22.5;
+  const configuredArrivalHoldMs = Number(cfg.arrivalHoldMs);
+  const arrivalHoldMs = Math.max(0, Number.isFinite(configuredArrivalHoldMs) ? configuredArrivalHoldMs : 120);
+  const getFrameNow = ()=> typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
   const LINK_ANIM_PALETTE = Object.freeze({
     defaultTypeAccent: '#8e8e93',
     defaultBubbleFill: '#d5d8dc',
@@ -168,15 +173,201 @@ class LinkAnimator{
     this.animations = [];
     this._max = Math.max(200, Number(cfg.maxTransient) || 1500);
     this._sampleOffset = 0;
+    this._visibleHits = [];
+    this._hoverAnim = null;
+    this._hoverRenderedAt = 0;
   }
   clear(graph){
     if(!graph){
       this.animations.length = 0;
       this._sampleOffset = 0;
+      this._visibleHits.length = 0;
+      this._hideTooltip();
       return;
     }
     this.animations = this.animations.filter((anim)=> anim && anim.graph && anim.graph !== graph);
     if(!this.animations.length) this._sampleOffset = 0;
+    if(this._hoverAnim?.graph === graph) this._hideTooltip();
+  }
+  _tooltip(){
+    let tooltip = document.getElementById('factEntityHoverTooltip');
+    if(tooltip) return tooltip;
+    tooltip = document.createElement('div');
+    tooltip.id = 'factEntityHoverTooltip';
+    tooltip.className = 'factEntityHoverTooltip';
+    tooltip.hidden = true;
+    tooltip.setAttribute('role', 'tooltip');
+    document.body.appendChild(tooltip);
+    return tooltip;
+  }
+  _hideTooltip(){
+    const tooltip = document.getElementById('factEntityHoverTooltip');
+    if(tooltip) tooltip.hidden = true;
+    this._hoverAnim = null;
+    this._hoverRenderedAt = 0;
+  }
+  _treeMatch(tree, type, info){
+    if(!tree) return 0;
+    const id = String(info?.id ?? '').trim().toLowerCase();
+    const expectedCategory = type === 'agv' ? 'carrier' : (type === 'pallet' ? 'container' : type);
+    const category = String(tree.category || '').toLowerCase();
+    let identityScore = 0;
+    if(id){
+      const displayId = String(tree.displayId ?? '').trim().toLowerCase();
+      const instanceId = String(tree.instanceId ?? '').trim().toLowerCase();
+      if(displayId === id || instanceId === id) identityScore += 20;
+      else if(displayId.startsWith(`${id} #`)) identityScore += 12;
+      else if(String(tree.name || '').trim().toLowerCase() === id) identityScore += 8;
+    }
+    const typeName = String(info?.t ?? info?.type ?? '').trim().toLowerCase();
+    if(typeName && (String(tree.name || '').trim().toLowerCase() === typeName || String(tree.typeId || '').trim().toLowerCase() === typeName)) identityScore += 6;
+    if(!identityScore) return 0;
+    return identityScore + (category === expectedCategory ? 2 : 0);
+  }
+  _resolveHoverTree(anim){
+    const info = anim?.info || {};
+    if(info.tree && typeof info.tree === 'object') return { tree: info.tree, node: null };
+    const graph = anim?.graph;
+    let best = null;
+    const visit = (tree, node)=>{
+      if(!tree) return;
+      const score = this._treeMatch(tree, String(anim?.type || '').toLowerCase(), info);
+      if(score > (best?.score || 0)) best = { score, tree, node };
+      for(const child of (Array.isArray(tree.children) ? tree.children : [])) visit(child, node);
+    };
+    for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
+      try{
+        const data = typeof node.getCurrentContents === 'function'
+          ? node.getCurrentContents({ includeInstances: true })
+          : window.App?.currentContentsForNode?.(node, { includeInstances: true });
+        for(const tree of (data?.instances || [])) visit(tree, node);
+      }catch(_e){}
+    }
+    if(best) return best;
+    const category = anim?.type === 'agv' ? 'carrier' : (anim?.type === 'pallet' ? 'container' : 'work');
+    const name = String(info.t ?? info.type ?? info.label ?? (category === 'carrier' ? 'Carrier' : category === 'container' ? 'Container' : 'Work'));
+    return {
+      node: null,
+      tree: {
+        instanceId: String(info.instanceId ?? info.id ?? ''),
+        displayId: String(info.id ?? ''),
+        typeId: String(info.typeId ?? ''),
+        name,
+        category,
+        attributes: info.attributes && typeof info.attributes === 'object' ? info.attributes : {},
+        children: Array.isArray(info.children) ? info.children : []
+      }
+    };
+  }
+  _renderHoverTooltip(anim){
+    const tooltip = this._tooltip();
+    const resolved = this._resolveHoverTree(anim);
+    const tree = resolved.tree;
+    const displayLabel = (entry)=>{
+      const name = String(entry?.name || entry?.typeId || 'Entity');
+      const displayId = String(entry?.displayId || '');
+      return displayId && displayId !== name ? `${name} · ${displayId}` : name;
+    };
+    tooltip.replaceChildren();
+    const header = document.createElement('div');
+    header.className = 'factEntityHoverHeader';
+    const title = document.createElement('strong');
+    title.textContent = displayLabel(tree);
+    const category = document.createElement('span');
+    category.textContent = String(tree.category || anim?.type || 'entity');
+    header.append(title, category);
+    tooltip.appendChild(header);
+    const meta = document.createElement('div');
+    meta.className = 'factEntityHoverMeta';
+    const metaRows = [];
+    if(tree.typeId) metaRows.push(`Type ID: ${tree.typeId}`);
+    if(tree.instanceId) metaRows.push(`Instance ID: ${tree.instanceId}`);
+    if(resolved.node) metaRows.push(`Node: ${resolved.node.title || resolved.node.type || ''} #${resolved.node.id}`);
+    meta.textContent = metaRows.join('  ·  ');
+    if(meta.textContent) tooltip.appendChild(meta);
+    const attributes = tree.attributes && typeof tree.attributes === 'object'
+      ? Object.entries(tree.attributes).filter(([key, value])=>!key.startsWith('__') && (value == null || ['string','number','boolean'].includes(typeof value))).slice(0, 8)
+      : [];
+    if(attributes.length){
+      const attr = document.createElement('div');
+      attr.className = 'factEntityHoverAttributes';
+      attributes.forEach(([key, value])=>{
+        const item = document.createElement('span');
+        item.textContent = `${key}: ${String(value)}`;
+        attr.appendChild(item);
+      });
+      tooltip.appendChild(attr);
+    }
+    const treeHost = document.createElement('div');
+    treeHost.className = 'factEntityHoverTree';
+    let rendered = 0;
+    const appendTree = (entry, depth)=>{
+      if(!entry || rendered >= 80 || depth > 12) return;
+      rendered++;
+      const row = document.createElement('div');
+      row.className = 'factEntityHoverTreeRow';
+      row.style.setProperty('--entity-hover-depth', String(depth));
+      const branch = document.createElement('span');
+      branch.textContent = depth ? '└' : '●';
+      const text = document.createElement('span');
+      text.textContent = displayLabel(entry);
+      row.append(branch, text);
+      treeHost.appendChild(row);
+      for(const child of (Array.isArray(entry.children) ? entry.children : [])) appendTree(child, depth + 1);
+    };
+    appendTree(tree, 0);
+    tooltip.appendChild(treeHost);
+    tooltip.hidden = false;
+    return tooltip;
+  }
+  _positionTooltip(tooltip, pointer){
+    if(!tooltip || !pointer) return;
+    let left = Number(pointer.clientX) + 18;
+    let top = Number(pointer.clientY) + 18;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    const rect = tooltip.getBoundingClientRect();
+    if(rect.right > window.innerWidth - 8) left = Math.max(8, Number(pointer.clientX) - rect.width - 18);
+    if(rect.bottom > window.innerHeight - 8) top = Math.max(8, Number(pointer.clientY) - rect.height - 18);
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+  _updateHover(canvas){
+    const pointer = canvas?.__factEntityHoverPointer;
+    if(!pointer){ this._hideTooltip(); return; }
+    const point = Array.isArray(canvas.graph_mouse) ? canvas.graph_mouse : null;
+    if(!point){ this._hideTooltip(); return; }
+    let hit = null;
+    let bestDistance = Infinity;
+    for(const candidate of this._visibleHits){
+      if(candidate.canvas !== canvas) continue;
+      const distance = Math.hypot(Number(point[0]) - candidate.x, Number(point[1]) - candidate.y);
+      if(distance <= candidate.radius && distance < bestDistance){ hit = candidate; bestDistance = distance; }
+    }
+    if(!hit){ this._hideTooltip(); return; }
+    const frameNow = getFrameNow();
+    let tooltip = this._tooltip();
+    if(this._hoverAnim !== hit.anim || frameNow - this._hoverRenderedAt > 250){
+      tooltip = this._renderHoverTooltip(hit.anim);
+      this._hoverAnim = hit.anim;
+      this._hoverRenderedAt = frameNow;
+    }
+    this._positionTooltip(tooltip, pointer);
+  }
+  installHover(canvas){
+    const element = canvas?.canvas;
+    if(!element || element.__factEntityHoverInstalled) return;
+    element.__factEntityHoverInstalled = true;
+    const trackPointer = (event)=>{
+      canvas.__factEntityHoverPointer = { clientX: event.clientX, clientY: event.clientY };
+      canvas.dirty_canvas = true;
+    };
+    element.addEventListener('pointermove', trackPointer, { passive: true });
+    element.addEventListener('pointerdown', trackPointer, { passive: true });
+    element.addEventListener('pointerleave', ()=>{
+      canvas.__factEntityHoverPointer = null;
+      this._hideTooltip();
+    }, { passive: true });
   }
   _trimTransient(){
     if(this.animations.length <= this._max) return;
@@ -197,6 +388,12 @@ class LinkAnimator{
     if(slot && slot.dir) return slot.dir;
     if(node.horizontal) return isInput ? LiteGraph.UP : LiteGraph.DOWN;
     return isInput ? LiteGraph.LEFT : LiteGraph.RIGHT;
+  }
+  _entityKey(type, info){
+    if(String(type || '').toLowerCase() !== 'work' || !info || info.id == null) return '';
+    const id = String(info.id);
+    const workType = String(info.t ?? info.type ?? '');
+    return `${id}\u0000${workType}`;
   }
   _bezierPoint(start, startDir, end, endDir, t){
     const dist = Math.hypot(end[0]-start[0], end[1]-start[1]);
@@ -229,13 +426,59 @@ class LinkAnimator{
   spawn(graph, linkId, type, durationMs, info){
     if(!graph || !linkId) return;
     const now = getNow();
+    const duration = durationMs || defaultDuration;
+    const processTimed = Number.isFinite(Number(durationMs)) && Number(durationMs) > 0;
+    const entityId = info && info.id != null ? String(info.id) : '';
+    const entityType = info ? String(info.t ?? info.type ?? '') : '';
+    if(entityId && String(type).toLowerCase() === 'work'){
+      const entityKey = this._entityKey(type, info);
+      if(processTimed && entityKey){
+        // A later process leg owns the visual for this Work. Remove an older
+        // completed/incoming leg and any WAIT icon before starting the next
+        // link, otherwise the same Work is drawn at IN and OUT simultaneously.
+        this.animations = this.animations.filter((anim)=>{
+          if(!anim || anim.graph !== graph || this._entityKey(anim.type, anim.info) !== entityKey) return true;
+          if(anim.tail) return false;
+          if(anim.linkId === linkId) return true;
+          return !(Number(anim.start) < now);
+        });
+      }
+      const existing = this.animations.find((anim)=>{
+        if(!anim || anim.tail || anim.graph !== graph || anim.linkId !== linkId || anim.type !== type) return false;
+        const activeDuration = anim.duration || defaultDuration;
+        if((now - anim.start) >= activeDuration) return false;
+        const activeInfo = anim.info || {};
+        return String(activeInfo.id ?? '') === entityId &&
+          String(activeInfo.t ?? activeInfo.type ?? '') === entityType;
+      });
+      if(existing){
+        if(processTimed && !existing.processTimed){
+          // Source may draw a short provisional hand-off before the receiver runs.
+          // Once the receiver starts processing, restart the same visual at that
+          // exact time so arrival coincides with PROCESS completion.
+          existing.start = now;
+          existing.duration = duration;
+          existing.processTimed = true;
+          existing.pendingProcess = false;
+          existing.arrivalHoldStartedAt = null;
+        }else{
+          const elapsed = Math.max(0, now - existing.start);
+          existing.duration = Math.max(existing.duration || defaultDuration, elapsed + duration);
+        }
+        existing.info = info || existing.info || null;
+        return;
+      }
+    }
     this.animations.push({
       graph,
       linkId,
       type,
       info: info || null,
       start: now,
-      duration: durationMs || defaultDuration,
+      duration,
+      processTimed,
+      pendingProcess: String(type).toLowerCase() === 'work' && !processTimed,
+      arrivalHoldStartedAt: null,
       tail: false
     });
     this._trimTransient();
@@ -305,8 +548,14 @@ class LinkAnimator{
     return { step, labelEvery };
   }
   draw(canvas, ctx){
-    if(!this.animations.length || !canvas || !ctx) return;
+    if(!canvas || !ctx) return;
+    if(!this.animations.length){
+      this._visibleHits.length = 0;
+      this._hideTooltip();
+      return;
+    }
     const now = getNow();
+    const frameNow = getFrameNow();
     const policy = this._adaptiveRenderPolicy(canvas);
     const step = Math.max(1, Number(policy.step) || 1);
     const labelEvery = Math.max(1, Number(policy.labelEvery) || 1);
@@ -315,6 +564,27 @@ class LinkAnimator{
       : 0;
     let transientIdx = 0;
     let labelCounter = 0;
+    const latestVisibleWorkStart = new Map();
+    for(const anim of this.animations){
+      if(!anim || anim.tail || anim.pendingProcess || !anim.graph) continue;
+      const entityKey = this._entityKey(anim.type, anim.info);
+      if(!entityKey) continue;
+      const duration = anim.duration || defaultDuration;
+      const rawT = (now - anim.start) / duration;
+      const withinArrivalHold = rawT < 1 || anim.arrivalHoldStartedAt == null ||
+        (frameNow - anim.arrivalHoldStartedAt) < arrivalHoldMs;
+      if(!withinArrivalHold) continue;
+      let graphEntries = latestVisibleWorkStart.get(anim.graph);
+      if(!graphEntries){
+        graphEntries = new Map();
+        latestVisibleWorkStart.set(anim.graph, graphEntries);
+      }
+      const previousStart = graphEntries.get(entityKey);
+      if(previousStart == null || Number(anim.start) > previousStart){
+        graphEntries.set(entityKey, Number(anim.start));
+      }
+    }
+    const visibleHits = [];
     ctx.save();
     this.animations = this.animations.filter(anim=>{
       const graph = anim.graph;
@@ -324,8 +594,13 @@ class LinkAnimator{
       const originNode = graph.getNodeById(link.origin_id);
       const targetNode = graph.getNodeById(link.target_id);
       if(!originNode || !targetNode) return false;
+      const entityKey = this._entityKey(anim.type, anim.info);
+      const latestStart = entityKey ? latestVisibleWorkStart.get(graph)?.get(entityKey) : null;
       let x, y;
         if(anim.tail){
+          // Keep the WAIT icon queued, but do not draw it while the same Work
+          // is still visible on an incoming/process link.
+          if(latestStart != null) return true;
           const start = originNode.getConnectionPos(false, link.origin_slot);
           const allowAgvWait =
             anim.type === 'agv' &&
@@ -348,19 +623,34 @@ class LinkAnimator{
           y = start[1];
       }else{
         const duration = anim.duration || defaultDuration;
-        const t = Math.min((now - anim.start) / duration, 1);
-        if(t >= 1) return false;
-        const shouldDrawTransient = (step <= 1) || ((transientIdx % step) === drawTransientRemainder);
+        const rawT = (now - anim.start) / duration;
+        if(anim.pendingProcess){
+          // Source publishes the payload before the receiver's execution pass.
+          // Keep that provisional record invisible so motion starts only when
+          // the receiver actually begins PROCESS.
+          return rawT < 1;
+        }
+        let t = Math.max(0, Math.min(rawT, 1));
+        if(rawT >= 1){
+          if(anim.arrivalHoldStartedAt == null) anim.arrivalHoldStartedAt = frameNow;
+          if(frameNow - anim.arrivalHoldStartedAt >= arrivalHoldMs) return false;
+          t = 1;
+        }else{
+          anim.arrivalHoldStartedAt = null;
+        }
+        if(latestStart != null && Number(anim.start) < latestStart) return true;
+        const shouldDrawTransient = rawT >= 1 || (step <= 1) || ((transientIdx % step) === drawTransientRemainder);
         transientIdx++;
         if(!shouldDrawTransient){
           return true;
         }
         const start = originNode.getConnectionPos(false, link.origin_slot);
         const startDir = this._getSlotDir(originNode, link.origin_slot, false);
-        const eased = t * t * (3 - 2 * t);
         const end = targetNode.getConnectionPos(true, link.target_slot);
         const endDir = this._getSlotDir(targetNode, link.target_slot, true);
-        [x,y] = this._bezierPoint(start, startDir, end, endDir, eased);
+        [x,y] = (typeof canvas.computeConnectionPoint === 'function')
+          ? canvas.computeConnectionPoint(start, end, t, startDir, endDir)
+          : this._bezierPoint(start, startDir, end, endDir, t);
       }
       const info = anim.info || {};
       const iconTheme = getAnimatedIconTheme(anim.type, info);
@@ -375,6 +665,7 @@ class LinkAnimator{
         ctx.arc(x, y, Math.max(0, iconRadius - (iconTheme.lineWidth || 2) * 0.5), 0, Math.PI * 2);
         ctx.stroke();
       }
+      visibleHits.push({ canvas, anim, x, y, radius: iconRadius + 6 });
       // label
       let label = '';
       if(anim.type === 'agv'){
@@ -419,11 +710,30 @@ class LinkAnimator{
       return anim.tail ? true : true;
     });
     ctx.restore();
+    this._visibleHits = visibleHits;
+    this._updateHover(canvas);
   }
 }
 
   const animator = new LinkAnimator();
   window.WorkLinkAnimator = animator;
+  window.installWorkLinkAnimationLayer = function(canvas){
+    if(!canvas || canvas.__workLinkAnimationLayerInstalled) return;
+    const previousForeground = canvas.onDrawForeground;
+    canvas.onDrawForeground = function(ctx, visibleArea){
+      if(typeof previousForeground === 'function'){
+        try{ previousForeground.call(this, ctx, visibleArea); }catch(_e){}
+      }
+      animator.draw(this, ctx);
+      // Keep transient motion and the short arrival hold repainting. Static
+      // WAIT icons do not need to force continuous foreground redraws.
+      if(animator.animations.some((anim)=> anim && !anim.tail)){
+        this.dirty_canvas = true;
+      }
+    };
+    canvas.__workLinkAnimationLayerInstalled = true;
+    animator.installHover(canvas);
+  };
 
   function collectConnectionCullNodes(canvas){
     const graph = canvas && canvas.graph;
@@ -539,6 +849,5 @@ class LinkAnimator{
     }finally{
       if(replaced && this.graph) this.graph._nodes = originalNodes;
     }
-    animator.draw(this, ctx);
   };
 })();

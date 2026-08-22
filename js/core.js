@@ -491,17 +491,73 @@ function _stringifyPropValue(v){
   return String(v);
 }
 
-function _buildPropertySummaryLines(node){
-  const props = (node && node.properties && typeof node.properties === 'object') ? node.properties : null;
-  if(!props) return [];
-  const keys = Object.keys(props);
-  if(!keys.length) return [];
-  keys.sort((a,b)=>a.localeCompare(b));
-  const lines = ['Properties:'];
-  for(const k of keys){
-    lines.push(`- ${k}: ${_stringifyPropValue(props[k])}`);
+function _nodeHoverState(node){
+  const raw = node && node._state != null
+    ? node._state
+    : (node && node._stateName != null ? node._stateName : 'N/A');
+  return String(raw || 'N/A').trim().toUpperCase();
+}
+
+function _nodeHoverMeta(node){
+  const parts = [];
+  const presetId = String(node?.properties?.presetId || '').trim();
+  const preset = presetId && App.BASIC_NODE_PRESETS ? App.BASIC_NODE_PRESETS[presetId] : null;
+  if(preset?.title && String(preset.title) !== String(node?.title || '')) parts.push(String(preset.title));
+  if(node?.type) parts.push(String(node.type));
+  if(node?.id != null) parts.push(`Node #${node.id}`);
+  return [...new Set(parts)].join('  ·  ');
+}
+
+function _buildNodeHoverRuntimeRows(lines){
+  const rows = [];
+  const seen = new Set();
+  for(const raw of (Array.isArray(lines) ? lines : [])){
+    const text = String(raw || '').trim();
+    if(!text || /^state\s*:/i.test(text) || /^properties\s*:?$/i.test(text) || /^-\s+/.test(text)) continue;
+    if(/^\d+\s*:\s*(?:ON|OFF|NC)\b/i.test(text) && rows.length){
+      rows[rows.length - 1].value += `  ${text}`;
+      continue;
+    }
+    const splitAt = text.indexOf(':');
+    const label = splitAt > 0 ? text.slice(0, splitAt).trim() : 'Info';
+    const value = splitAt > 0 ? text.slice(splitAt + 1).trim() : text;
+    const key = `${label}\u0000${value}`;
+    if(seen.has(key)) continue;
+    seen.add(key);
+    rows.push({ label, value: value || '—' });
   }
-  return lines;
+  return rows.slice(0, 6);
+}
+
+function _nodeHoverPropertyValue(key, value){
+  if(Array.isArray(value)){
+    const unit = /rules$/i.test(String(key)) ? 'rules' : 'items';
+    return `${value.length} ${unit}`;
+  }
+  if(value && typeof value === 'object') return `${Object.keys(value).length} fields`;
+  if(String(key) === 'script') return value ? 'Configured' : 'None';
+  const text = _stringifyPropValue(value);
+  return text.length > 48 ? `${text.slice(0, 45)}...` : text;
+}
+
+function _buildNodeHoverPropertyRows(node){
+  const props = (node && node.properties && typeof node.properties === 'object') ? node.properties : null;
+  if(!props) return { rows: [], hiddenCount: 0 };
+  const priority = ['presetId', 'processTime', 'capacity', 'downTime', 'shuttleGroupId', 'inputRules', 'outputRules'];
+  const keys = Object.keys(props).filter((key)=>!key.startsWith('_') && !/^overlay/i.test(key));
+  keys.sort((a, b)=>{
+    const ai = priority.indexOf(a);
+    const bi = priority.indexOf(b);
+    if(ai >= 0 || bi >= 0) return (ai < 0 ? priority.length : ai) - (bi < 0 ? priority.length : bi);
+    return a.localeCompare(b);
+  });
+  let schema = null;
+  try{ schema = typeof node.getInspectorSchema === 'function' ? node.getInspectorSchema() : null; }catch(_e){}
+  const visible = keys.slice(0, 6).map((key)=>({
+    label: String(schema?.[key]?.label || key),
+    value: _nodeHoverPropertyValue(key, props[key])
+  }));
+  return { rows: visible, hiddenCount: Math.max(0, keys.length - visible.length) };
 }
 
 function _trimOverlayText(ctx, text, maxWidth){
@@ -554,6 +610,11 @@ function _overlayGraphViewportSafeRect(){
   const sidebarRect = _overlayVisibleDomRect(document.getElementById('sidebar'));
   if(sidebarRect && sidebarRect.left < safeRight && sidebarRect.right > safeLeft){
     safeLeft = Math.max(safeLeft, sidebarRect.right + 14);
+  }
+
+  const runHudRect = _overlayVisibleDomRect(document.getElementById('editorRunHud'));
+  if(runHudRect && runHudRect.left < safeRight && runHudRect.right > safeLeft){
+    safeTop = Math.max(safeTop, runHudRect.bottom + 14);
   }
 
   const dockRect = _overlayVisibleDomRect(document.getElementById('timelineDock'));
@@ -923,86 +984,174 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
   }
   const scale = Math.max(0.0001, _getCurrentCanvasScale());
   const unit = 1 / scale;
-  const pad = 7 * unit;
-  const lineHeight = 13 * unit;
-  const headerPad = 20 * unit;
-  const boxWidth = 232 * unit;
-  const contentWidth = boxWidth - pad * 2;
-  const maxRows = 14;
+  const pad = 10 * unit;
+  const boxWidth = 340 * unit;
   const anchorOffsetX = (Number(x) || 8) * unit;
   const anchorMarginY = (Number(margin) || 6) * unit;
-  const outerWidth = 5 * unit;
   const palette = _getNodeStatePalette(node && node._state);
-  const overlay = _getOverlayPalette();
   const lowScale = scale < 0.78;
+  const title = String(node?.title || node?.type || 'Node');
+  const metaText = _nodeHoverMeta(node);
+  const stateText = _nodeHoverState(node);
+  const runtimeRows = _buildNodeHoverRuntimeRows(lines);
+  const propertyModel = _buildNodeHoverPropertyRows(node);
+  const propertyRows = propertyModel.rows;
+  const headerHeight = 42 * unit;
+  const sectionLabelHeight = 14 * unit;
+  const runtimeHeight = runtimeRows.length ? sectionLabelHeight + runtimeRows.length * (17 * unit) + (6 * unit) : 0;
+  const propertyLineCount = Math.ceil(propertyRows.length / 2);
+  const propertyHeight = propertyRows.length
+    ? sectionLabelHeight + propertyLineCount * (22 * unit) + (propertyModel.hiddenCount ? 14 * unit : 0) + (6 * unit)
+    : 0;
+  const footerHeight = 28 * unit;
+  const boxHeight = pad + headerHeight + runtimeHeight + propertyHeight + footerHeight;
+  const sectionWidth = boxWidth - pad * 2;
   ctx.save();
   try{
-    ctx.font = `${10 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
-    const wrapped = [];
-    for(const raw of lines){
-      const rows = _wrapOverlayText(ctx, String(raw), contentWidth);
-      for(const row of rows) wrapped.push(row);
-    }
-    if(wrapped.length > maxRows){
-      wrapped.length = maxRows;
-      wrapped.push('...');
-    }
-    const boxHeight = wrapped.length * lineHeight + pad * 2 + headerPad;
     const preferredBoxX = (Number(node.pos?.[0]) || 0) + anchorOffsetX - (4 * unit);
     const preferredBoxY = (Number(node.pos?.[1]) || 0) + (Number(node.size?.[1]) || 0) + anchorMarginY;
     const resolved = _resolveNodeDetailCardPosition(node, preferredBoxX, preferredBoxY, boxWidth, boxHeight);
     const boxX = resolved.x - (Number(node.pos?.[0]) || 0);
     const yTop = resolved.y - (Number(node.pos?.[1]) || 0);
-    const textX = boxX + (4 * unit);
-    ctx.shadowColor = lowScale ? 'transparent' : overlay.shadow;
-    ctx.shadowBlur = lowScale ? 0 : 22;
-    ctx.shadowOffsetY = lowScale ? 0 : 8;
-    ctx.fillStyle = overlay.cardFill;
-    _drawCanvasCard(ctx, boxX, yTop, boxWidth + outerWidth, boxHeight, 9 * unit);
+    const contentX = boxX + pad;
+
+    ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.22)';
+    ctx.shadowBlur = lowScale ? 0 : 28 * unit;
+    ctx.shadowOffsetY = lowScale ? 0 : 10 * unit;
+    ctx.fillStyle = 'rgba(255,255,255,0.97)';
+    _drawCanvasCard(ctx, boxX, yTop, boxWidth, boxHeight, 12 * unit);
     ctx.fill();
     if(node){
       node.__factInspectorDetailCardRect = {
         x: resolved.x,
         y: resolved.y,
-        w: boxWidth + outerWidth,
+        w: boxWidth,
         h: boxHeight
       };
     }
     ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = lowScale ? overlay.cardStroke : overlay.cardStroke;
+    ctx.strokeStyle = 'rgba(148,163,184,0.40)';
     ctx.lineWidth = 1 * unit;
-    _drawCanvasCard(ctx, boxX + (0.5 * unit), yTop + (0.5 * unit), boxWidth + outerWidth - (1 * unit), boxHeight - (1 * unit), 9 * unit);
+    _drawCanvasCard(ctx, boxX + (0.5 * unit), yTop + (0.5 * unit), boxWidth - (1 * unit), boxHeight - (1 * unit), 12 * unit);
     ctx.stroke();
+
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = `600 ${13 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.fillText(_trimOverlayText(ctx, title, 214 * unit), contentX, yTop + (10 * unit), 214 * unit);
+
+    ctx.font = `800 ${9 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    const stateWidth = Math.ceil(ctx.measureText(stateText).width) + (16 * unit);
+    const stateHeight = 18 * unit;
+    const stateX = boxX + boxWidth - pad - stateWidth;
+    const stateY = yTop + (8 * unit);
+    ctx.save();
+    ctx.globalAlpha = 0.14;
     ctx.fillStyle = palette.accent;
-    _drawCanvasCard(ctx, boxX + (2 * unit), yTop + (2 * unit), 3 * unit, Math.max(10 * unit, boxHeight - (4 * unit)), 3 * unit);
+    _drawCanvasCard(ctx, stateX, stateY, stateWidth, stateHeight, 999 * unit);
     ctx.fill();
-    ctx.font = `600 ${9 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
-    const chipLabel = 'Edit';
-    const chipWidth = Math.ceil(ctx.measureText(chipLabel).width) + (14 * unit);
-    const chipHeight = 14 * unit;
-    const chipX = boxX + boxWidth - chipWidth + (2 * unit);
-    const chipY = yTop + (5 * unit);
-    ctx.fillStyle = overlay.buttonFill;
-    _drawCanvasCard(ctx, chipX, chipY, chipWidth, chipHeight, 999 * unit);
-    ctx.fill();
-    ctx.fillStyle = overlay.buttonText;
+    ctx.restore();
+    ctx.fillStyle = palette.accent;
     ctx.textBaseline = 'middle';
-    ctx.fillText(chipLabel, chipX + (7 * unit), chipY + chipHeight * 0.5);
+    ctx.fillText(stateText, stateX + (8 * unit), stateY + stateHeight * 0.5);
+
+    if(metaText){
+      ctx.fillStyle = '#64748b';
+      ctx.font = `${10 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      ctx.textBaseline = 'top';
+      ctx.fillText(_trimOverlayText(ctx, metaText, sectionWidth), contentX, yTop + (30 * unit), sectionWidth);
+    }
+
+    let yy = yTop + pad + headerHeight;
+    const drawSectionLabel = (label)=>{
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = `800 ${9 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      ctx.textBaseline = 'top';
+      ctx.fillText(label, contentX, yy, sectionWidth);
+      yy += sectionLabelHeight;
+    };
+
+    if(runtimeRows.length){
+      drawSectionLabel('RUNTIME');
+      for(const row of runtimeRows){
+        ctx.fillStyle = '#64748b';
+        ctx.font = `${10 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.fillText(_trimOverlayText(ctx, row.label, 92 * unit), contentX, yy + (2 * unit), 92 * unit);
+        ctx.fillStyle = '#334155';
+        ctx.font = `600 ${10.5 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.fillText(_trimOverlayText(ctx, row.value, sectionWidth - (98 * unit)), contentX + (98 * unit), yy + (2 * unit), sectionWidth - (98 * unit));
+        yy += 17 * unit;
+      }
+      yy += 6 * unit;
+    }
+
+    if(propertyRows.length){
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1 * unit;
+      ctx.beginPath();
+      ctx.moveTo(contentX, yy - (4 * unit));
+      ctx.lineTo(contentX + sectionWidth, yy - (4 * unit));
+      ctx.stroke();
+      drawSectionLabel('CONFIGURATION');
+      const gap = 6 * unit;
+      const chipWidth = (sectionWidth - gap) * 0.5;
+      const chipHeight = 19 * unit;
+      propertyRows.forEach((row, index)=>{
+        const col = index % 2;
+        const rowIndex = Math.floor(index / 2);
+        const chipX = contentX + col * (chipWidth + gap);
+        const chipY = yy + rowIndex * (22 * unit);
+        ctx.fillStyle = '#f1f5f9';
+        _drawCanvasCard(ctx, chipX, chipY, chipWidth, chipHeight, 6 * unit);
+        ctx.fill();
+        const text = `${row.label}: ${row.value}`;
+        ctx.fillStyle = '#475569';
+        ctx.font = `${9.5 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.textBaseline = 'middle';
+        ctx.fillText(_trimOverlayText(ctx, text, chipWidth - (12 * unit)), chipX + (6 * unit), chipY + chipHeight * 0.5, chipWidth - (12 * unit));
+      });
+      yy += propertyLineCount * (22 * unit);
+      if(propertyModel.hiddenCount){
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = `${9 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.textBaseline = 'top';
+        ctx.fillText(`+ ${propertyModel.hiddenCount} more settings`, contentX, yy, sectionWidth);
+        yy += 14 * unit;
+      }
+      yy += 6 * unit;
+    }
+
+    const footerY = yTop + boxHeight - footerHeight;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1 * unit;
+    ctx.beginPath();
+    ctx.moveTo(contentX, footerY);
+    ctx.lineTo(contentX + sectionWidth, footerY);
+    ctx.stroke();
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = `${9.5 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Current values · Read only', contentX, footerY + footerHeight * 0.5, 160 * unit);
+
+    const actionLabel = 'Open Details';
+    ctx.font = `600 ${9.5 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    const actionWidth = Math.ceil(ctx.measureText(actionLabel).width) + (18 * unit);
+    const actionHeight = 20 * unit;
+    const actionX = boxX + boxWidth - pad - actionWidth;
+    const actionY = footerY + (5 * unit);
+    ctx.fillStyle = '#0a84ff';
+    _drawCanvasCard(ctx, actionX, actionY, actionWidth, actionHeight, 999 * unit);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(actionLabel, actionX + (9 * unit), actionY + actionHeight * 0.5);
     if(node){
       node.__factInspectorDetailActionRect = {
-        x: (Number(node.pos?.[0]) || 0) + chipX,
-        y: (Number(node.pos?.[1]) || 0) + chipY,
-        w: chipWidth,
-        h: chipHeight
+        x: (Number(node.pos?.[0]) || 0) + actionX,
+        y: (Number(node.pos?.[1]) || 0) + actionY,
+        w: actionWidth,
+        h: actionHeight
       };
-    }
-    ctx.fillStyle = overlay.text;
-    ctx.font = `${10 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
-    ctx.textBaseline = 'top';
-    let yy = yTop + pad + headerPad - (2 * unit);
-    for(const row of wrapped){
-      ctx.fillText(row, textX, yy, boxWidth - pad * 2);
-      yy += lineHeight;
     }
   }finally{
     ctx.restore();
@@ -1057,7 +1206,6 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
     const baseLines = _getOverlaySourceLines(node, lines);
 
     const sigLines = _buildSignalSummaryLines(node);
-    const propLines = _buildPropertySummaryLines(node);
     const compactSrc = baseLines.length ? baseLines : sigLines;
     const importantCount = Math.max(1, Math.min(6, Number(node?.properties?.overlayImportantCount) || 4));
     const compactLines = _pickCompactOverlayLines(compactSrc, importantCount);
@@ -1080,10 +1228,6 @@ function drawStateBelow(ctx, node, lines, x=8, margin=6){
     if(sigLines.length){
       if(detailLines.length) detailLines.push('');
       detailLines.push(...sigLines);
-    }
-    if(propLines.length){
-      if(detailLines.length) detailLines.push('');
-      detailLines.push(...propLines);
     }
     if(!_queueHoverDetailBox(node, detailLines, x, margin)){
       _drawHoverDetailBox(ctx, node, detailLines, x, margin);

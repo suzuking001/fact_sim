@@ -10,8 +10,8 @@ var App = window.App || (window.App = {});
     shuttle_line5: 'sample/shuttle_line5.json',
     carrier: 'sample/graph (3).json',
     pallet_station_demo: 'sample/pallet_station_demo.json',
-    sample_line1: 'sample/sample_line1.json',
-    sample_line2: 'sample/sample_line2.json'
+    sample_line1: 'sample/sample_line1.json?v=20260821b',
+    sample_line2: 'sample/sample_line2.json?v=20260822d'
   };
   const DEFAULTS = {
     suite: 'standard',
@@ -467,10 +467,21 @@ var App = window.App || (window.App = {});
       }
     }
     duplicateRefs.sort((a, b)=> String(a.ref).localeCompare(String(b.ref)));
+    const runtime = graph && graph.__factSimRuntimeInstances;
+    const canonicalInstances = runtime && runtime.instances instanceof Map
+      ? Array.from(runtime.instances.values()).map((instance)=>({
+          instanceId: String(instance.instanceId || ''),
+          typeId: String(instance.typeId || ''),
+          parentId: instance.parentId == null ? null : String(instance.parentId),
+          locationNodeId: instance.locationNodeId == null ? null : Number(instance.locationNodeId),
+          attributes: cloneJson(instance.attributes || {})
+        })).sort((a, b)=>a.instanceId.localeCompare(b.instanceId))
+      : [];
     return {
       uniqueCount: uniqueRefs.size,
       refs: Array.from(uniqueRefs).sort(),
-      duplicateRefs
+      duplicateRefs,
+      canonicalInstances
     };
   }
   function normalizeSinkSnapshot(sinks){
@@ -1234,6 +1245,15 @@ var App = window.App || (window.App = {});
                 engine: row.engine,
                 scenario: row.scenario,
                 message: `Final entity set differs from dt on ${row.scenario}${missingRefs.length ? `, missing=${missingRefs.join(', ')}` : ''}${extraRefs.length ? `, extra=${extraRefs.join(', ')}` : ''}${baseDupes.length !== rowDupes.length ? `, duplicates=${baseDupes.length} != ${rowDupes.length}` : ''}`
+              }), 32);
+            }
+            const baseCanonical = JSON.stringify(Array.isArray(baseEntityLedger.canonicalInstances) ? baseEntityLedger.canonicalInstances : []);
+            const rowCanonical = JSON.stringify(Array.isArray(rowEntityLedger.canonicalInstances) ? rowEntityLedger.canonicalInstances : []);
+            if(baseCanonical !== rowCanonical){
+              pushIssue(report.failures, seen, issue('error', 'FINAL_CANONICAL_ENTITY_DELTA', `Canonical Entity Instances differ from dt on ${row.scenario}`, {
+                engine: row.engine,
+                scenario: row.scenario,
+                message: `Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on ${row.scenario}`
               }), 32);
             }
           }

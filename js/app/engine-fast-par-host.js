@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const PAR_MODE = 'event-fast-par';
-  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260803a';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260803b';
   const MAX_FLUSH_ROUNDS = 16;
 
   function cloneJson(value){
@@ -40,6 +40,7 @@ var App = window.App || (window.App = {});
       : cloneJson(graphData);
     const graph = new LGraph();
     graph.configure(data);
+    if(typeof App.restoreEntityModel === 'function') App.restoreEntityModel(graph, data, true);
     if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function'){
       try{ App.repairGraphLinks(graph); }catch(_e){}
     }

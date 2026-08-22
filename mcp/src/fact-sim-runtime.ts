@@ -191,6 +191,7 @@ import { registerRuntimeMethodsGroup10 } from "./runtime/runtime-methods-group-1
 import { registerRuntimeMethodsGroup11 } from "./runtime/runtime-methods-group-11.js";
 import { registerRuntimeMethodsGroup12 } from "./runtime/runtime-methods-group-12.js";
 import { registerRuntimeMethodsGroup13 } from "./runtime/runtime-methods-group-13.js";
+import { registerRuntimeMethodsGroup14 } from "./runtime/runtime-methods-group-14.js";
 
 export class FactSimRuntime {
   private readonly repoRoot: string;
@@ -293,6 +294,17 @@ export interface FactSimRuntime {
   evaluateCandidateGraph(graphJson: string, wallMs?: number, objective?: OptimizationObjective): Promise<CandidateEvaluationOutput>;
   rankCandidateGraphs(candidates: string[], wallMs?: number, objective?: OptimizationObjective, topK?: number): Promise<CandidateRankingOutput>;
   suggestTopologyImprovements(graphJson: string, maxSuggestions?: number): Promise<TopologyImprovementOutput>;
+  listEntityTypes(): Promise<Record<string, unknown>>;
+  getNodeContents(nodeId: string | number, includeInstances?: boolean): Promise<Record<string, unknown>>;
+  getNodeFlowRules(nodeId: string | number): Promise<Record<string, unknown>>;
+  validateEntityModel(): Promise<Record<string, unknown>>;
+  previewEntityMigration(): Promise<Record<string, unknown>>;
+  upsertEntityType(entityType: Record<string, unknown>): Promise<Record<string, unknown>>;
+  removeEntityType(typeId: string): Promise<Record<string, unknown>>;
+  setNodeInitialContents(nodeId: string | number, initialContents: unknown[]): Promise<Record<string, unknown>>;
+  setNodeFlowRules(nodeId: string | number, inputRules?: unknown[], outputRules?: unknown[]): Promise<Record<string, unknown>>;
+  applyBasicPreset(nodeId: string | number, presetId: string): Promise<Record<string, unknown>>;
+  migrateCurrentGraphToBasic(): Promise<Record<string, unknown>>;
   close(): Promise<void>;
 }
 
@@ -309,3 +321,4 @@ registerRuntimeMethodsGroup10(FactSimRuntime, { getMimeType, toErrorMessage });
 registerRuntimeMethodsGroup11(FactSimRuntime, { getMimeType, toErrorMessage });
 registerRuntimeMethodsGroup12(FactSimRuntime, { getMimeType, toErrorMessage });
 registerRuntimeMethodsGroup13(FactSimRuntime, { getMimeType, toErrorMessage });
+registerRuntimeMethodsGroup14(FactSimRuntime, { getMimeType, toErrorMessage });

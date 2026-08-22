@@ -536,6 +536,17 @@ var App = window.App || (window.App = {});
         if(App.placement && App.placement.active) return;
         const point = canvasPos(canvas, e);
         if(!point) return;
+        const detailNode = findNodeOverlayAction(canvas, point);
+        if(detailNode){
+          e.preventDefault();
+          e.stopPropagation();
+          try{
+            if(typeof canvas.selectNode === 'function') canvas.selectNode(detailNode);
+          }catch(_e){}
+          canvas.selected_group = null;
+          this.openNode(detailNode, true, false);
+          return;
+        }
         const node = (canvas.graph && typeof canvas.graph.getNodeOnPos === 'function')
           ? canvas.graph.getNodeOnPos(point[0], point[1])
           : ((typeof canvas.getNodeOnPos === 'function') ? canvas.getNodeOnPos(point[0], point[1]) : null);

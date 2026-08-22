@@ -323,6 +323,12 @@ async function applyEditOperation(
     originY?: number;
     xPitch?: number;
     yPitch?: number;
+    entityType?: Record<string, unknown>;
+    typeId?: string;
+    initialContents?: unknown[];
+    inputRules?: unknown[];
+    outputRules?: unknown[];
+    presetId?: string;
   }
 ) {
   const {
@@ -349,6 +355,12 @@ async function applyEditOperation(
     originY,
     xPitch,
     yPitch
+    ,entityType
+    ,typeId
+    ,initialContents
+    ,inputRules
+    ,outputRules
+    ,presetId
   } = operation;
 
   switch (action) {
@@ -412,6 +424,25 @@ async function applyEditOperation(
           yPitch
         }
       );
+    case "upsert_entity_type":
+      if (!entityType) throw new Error("entityType is required when action=upsert_entity_type");
+      return runtime.upsertEntityType(entityType);
+    case "remove_entity_type":
+      if (!typeId) throw new Error("typeId is required when action=remove_entity_type");
+      return runtime.removeEntityType(typeId);
+    case "set_initial_contents":
+      if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=set_initial_contents");
+      if (!Array.isArray(initialContents)) throw new Error("initialContents is required when action=set_initial_contents");
+      return runtime.setNodeInitialContents(resolveBatchNodeId(nodeId, refs) as string | number, initialContents);
+    case "set_flow_rules":
+      if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=set_flow_rules");
+      return runtime.setNodeFlowRules(resolveBatchNodeId(nodeId, refs) as string | number, inputRules, outputRules);
+    case "apply_preset":
+      if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=apply_preset");
+      if (!presetId) throw new Error("presetId is required when action=apply_preset");
+      return runtime.applyBasicPreset(resolveBatchNodeId(nodeId, refs) as string | number, presetId);
+    case "migrate_basic":
+      return runtime.migrateCurrentGraphToBasic();
     default:
       throw new Error(`Unsupported action: ${String(action)}`);
   }
@@ -755,6 +786,11 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           "node_ports",
           "ports_by_kind",
           "validate_json"
+          ,"entity_types"
+          ,"node_contents"
+          ,"flow_rules"
+          ,"validate_entity_model"
+          ,"migration_preview"
         ]),
         graphJson: z.string().min(2).optional(),
         filePath: z.string().min(1).optional(),
@@ -766,9 +802,10 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         nodeType: z.string().min(1).optional(),
         nodeId: nodeIdSchema.optional(),
         portKind: portKindSchema.optional()
+        ,includeInstances: z.boolean().optional()
       }
     },
-    async ({ action, graphJson, filePath, fileName, pretty, returnJson, includeNodes, maxNodes, nodeType, nodeId, portKind }, extra) => {
+    async ({ action, graphJson, filePath, fileName, pretty, returnJson, includeNodes, maxNodes, nodeType, nodeId, portKind, includeInstances }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "graph", { action }, async () => {
         switch (action) {
@@ -832,6 +869,18 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
               throw new Error("graphJson is required when action=validate_json");
             }
             return runtime.validateGraphJson(graphJson);
+          case "entity_types":
+            return runtime.listEntityTypes();
+          case "node_contents":
+            if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=node_contents");
+            return runtime.getNodeContents(nodeId, includeInstances);
+          case "flow_rules":
+            if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=flow_rules");
+            return runtime.getNodeFlowRules(nodeId);
+          case "validate_entity_model":
+            return runtime.validateEntityModel();
+          case "migration_preview":
+            return runtime.previewEntityMigration();
           default:
             throw new Error(`Unsupported action: ${String(action)}`);
         }
@@ -844,7 +893,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
     {
       description: "Add, update, remove, connect, disconnect, or build nodes and links.",
       inputSchema: {
-        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch"]),
+        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch", "upsert_entity_type", "remove_entity_type", "set_initial_contents", "set_flow_rules", "apply_preset", "migrate_basic"]),
         nodeType: z.string().min(1).optional(),
         title: z.string().optional(),
         x: z.number().optional(),
@@ -869,9 +918,15 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         yPitch: z.number().positive().optional(),
         operations: unknownArraySchema.optional(),
         ref: z.string().min(1).optional()
+        ,entityType: jsonRecordSchema.optional()
+        ,typeId: z.string().min(1).optional()
+        ,initialContents: unknownArraySchema.optional()
+        ,inputRules: unknownArraySchema.optional()
+        ,outputRules: unknownArraySchema.optional()
+        ,presetId: z.string().min(1).optional()
       }
     },
-    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref }, extra) => {
+    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref, entityType, typeId, initialContents, inputRules, outputRules, presetId }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "edit_graph", { action }, async () => {
         if (action === "batch") {
@@ -927,6 +982,12 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
               originY: typeof current.originY === "number" ? current.originY : undefined,
               xPitch: typeof current.xPitch === "number" ? current.xPitch : undefined,
               yPitch: typeof current.yPitch === "number" ? current.yPitch : undefined
+              ,entityType: current.entityType && typeof current.entityType === "object" ? current.entityType as Record<string, unknown> : undefined
+              ,typeId: typeof current.typeId === "string" ? current.typeId : undefined
+              ,initialContents: Array.isArray(current.initialContents) ? current.initialContents : undefined
+              ,inputRules: Array.isArray(current.inputRules) ? current.inputRules : undefined
+              ,outputRules: Array.isArray(current.outputRules) ? current.outputRules : undefined
+              ,presetId: typeof current.presetId === "string" ? current.presetId : undefined
             });
             storeBatchRef(refs, currentRef || undefined, result);
             results.push({ index, action: String(current.action ?? ""), ref: currentRef || null, result });
@@ -963,6 +1024,12 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           originY,
           xPitch,
           yPitch
+          ,entityType
+          ,typeId
+          ,initialContents
+          ,inputRules
+          ,outputRules
+          ,presetId
         });
         return result;
       });

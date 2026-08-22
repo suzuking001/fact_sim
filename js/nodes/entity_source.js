@@ -164,7 +164,8 @@ class EntitySourceNode extends LiteGraph.LGraphNode{
       const link = this.graph?.links?.[linkId];
       const target = link && this.graph?.getNodeById ? this.graph.getNodeById(link.target_id) : null;
       if(!target) continue;
-      const accepted = target._sourceHost === entity || target._targetHost === entity ||
+      const acceptedBy = entity && entity.__factAcceptedBy && entity.__factAcceptedBy[String(target.id)];
+      const accepted = acceptedBy || target._sourceHost === entity || target._targetHost === entity ||
         target._pendingItem === entity || target._payload === entity || target._currentAgv === entity;
       if(!accepted) return false;
     }
@@ -188,6 +189,10 @@ class EntitySourceNode extends LiteGraph.LGraphNode{
       this._offered = true;
       this._state = 'WAIT';
       this._stateName = 'offering';
+      if(this.graph){
+        if(!(this.graph.__dirtyNodeIds instanceof Set)) this.graph.__dirtyNodeIds = new Set();
+        this.graph.__dirtyNodeIds.add(this.id);
+      }
       return;
     }
     this.setOutputData(this._entityOutIndex, this._rootEntity);
