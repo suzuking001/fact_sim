@@ -1979,12 +1979,14 @@ body.timeline-hidden #timelineRevealHandle{
 .entityRuleField{ display:grid; gap:5px; min-width:0; }
 .entityRuleFieldLabel{ color:#64748b; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
 .entityRuleField select,.entityRuleField input{ min-width:0; width:100%; box-sizing:border-box; }
-.entityRuleConditions,.entityRuleConditionList{ display:grid; gap:7px; }
+.entityRuleConditions,.entityRuleConditionList,.entityRuleMultiValue,.entityRuleMultiValueList{ display:grid; gap:7px; }
 .entityRuleConditionJoin{ display:flex; align-items:center; gap:7px; color:#64748b; font-size:11px; font-weight:700; }
 .entityRuleConditionJoin select{ flex:1; }
 .entityRuleConditionLine{ display:flex; align-items:center; gap:6px; min-width:0; }
 .entityRuleConditionLine select{ flex:1 1 170px; }
 .entityRuleConditionLine input{ flex:1 1 130px; }
+.entityRuleMultiValueLine{ display:flex; align-items:center; gap:6px; min-width:0; }
+.entityRuleMultiValueLine select{ flex:1 1 120px; }
 .entityRuleConditionNumber{ display:grid; flex:0 0 20px; width:20px; height:20px; place-items:center; border-radius:999px; background:#e2e8f0; color:#475569; font-size:10px; font-weight:800; }
 .entityRuleConditionRemove{ flex:0 0 auto; }
 .entityRuleAddCondition{ justify-self:start; }
@@ -2000,7 +2002,7 @@ body.timeline-hidden #timelineRevealHandle{
 .selectionInspectorNotice.is-error{ color:#b91c1c; }
 @media(max-width:760px){
   .entityRuleRow,.entityRecipeRow,.entityRuleBody{ grid-template-columns:1fr; }
-  .entityRuleConditionLine{ flex-wrap:wrap; }
+  .entityRuleConditionLine,.entityRuleMultiValueLine{ flex-wrap:wrap; }
 }
 
 @media (max-width: 1100px){

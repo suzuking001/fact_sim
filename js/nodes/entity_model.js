@@ -89,6 +89,17 @@
     return { mode: 'type', typeId: normalizeText(source.typeId || source.value) };
   }
 
+  function normalizeTargets(values, fallback){
+    const source = Array.isArray(values) && values.length ? values : [fallback];
+    const result = [];
+    for(const value of source){
+      const target = normalizeTarget(value);
+      const key = target.mode === 'type' ? `type:${target.typeId}` : `${target.mode}:${target.category || ''}`;
+      if(!result.some((entry)=>entry.key === key)) result.push({ key, target });
+    }
+    return result.map((entry)=>entry.target);
+  }
+
   function normalizeCondition(value, fallback){
     if(typeof value === 'string') return { kind: normalizeText(value).toLowerCase().replace(/[ _-]+/g, '-') };
     const source = isObject(value) ? clone(value, {}) : {};
@@ -212,10 +223,12 @@
         walkRecipe(props.initialContents, node.id, 'initialContents');
         for(const key of ['inputRules', 'outputRules']){
           (Array.isArray(props[key]) ? props[key] : []).forEach((rule, index)=>{
-            const target = normalizeTarget(rule?.target);
-            if(target.mode === 'type' && target.typeId === id){
-              refs.push({ kind: 'node', id: node.id, field: `${key}[${index}].target` });
-            }
+            const targets = normalizeTargets(rule?.targets, rule?.target);
+            targets.forEach((target, targetIndex)=>{
+              if(target.mode === 'type' && target.typeId === id){
+                refs.push({ kind: 'node', id: node.id, field: `${key}[${index}].targets[${targetIndex}]` });
+              }
+            });
           });
         }
       }
@@ -735,16 +748,20 @@
   function normalizeRules(rows, kind){
     return (Array.isArray(rows) ? rows : []).map((raw, index)=>{
       const source = isObject(raw) ? raw : {};
+      const targets = normalizeTargets(source.targets, source.target);
       const base = {
         ruleId: normalizeText(source.ruleId) || `${kind}-rule-${index + 1}`,
-        target: normalizeTarget(source.target)
+        targets,
+        target: targets[0]
       };
       if(kind === 'input'){
         base.acceptWhen = normalizeCondition(source.acceptWhen, 'always');
         base.fromPortId = normalizeText(source.fromPortId) || null;
       }else{
         base.releaseWhen = normalizeCondition(source.releaseWhen, 'available');
-        base.toPortId = normalizeText(source.toPortId) || null;
+        const sourcePortIds = Array.isArray(source.toPortIds) && source.toPortIds.length ? source.toPortIds : [source.toPortId];
+        base.toPortIds = [...new Set(sourcePortIds.map((entry)=>normalizeText(entry)).filter(Boolean))];
+        base.toPortId = base.toPortIds[0] || null;
       }
       return base;
     });
@@ -761,19 +778,25 @@
       return resolved;
     };
     for(const rule of normalized){
-      if(rule.target.mode === 'otherwise'){
+      const targets = Array.isArray(rule.targets) && rule.targets.length ? rule.targets : [rule.target];
+      const explicitTargets = targets.filter((target)=>target.mode !== 'otherwise');
+      for(const target of explicitTargets){
+        const candidates = context?.incomingRoot
+          ? store.findInTree(context.incomingRoot, target)
+          : store.findAtNode(nodeId, target);
+        for(const instance of candidates){
+          const condition = kind === 'input' ? rule.acceptWhen : rule.releaseWhen;
+          const resolvedRule = { ...rule, target };
+          if(evaluateCondition(store, node, instance, condition, conditionContext(resolvedRule, instance))){
+            return { rule: resolvedRule, instance };
+          }
+        }
+      }
+      if(targets.some((target)=>target.mode === 'otherwise')){
         const roots = store.rootsAt(nodeId);
         const candidate = roots[0] || null;
         const condition = kind === 'input' ? rule.acceptWhen : rule.releaseWhen;
         if(evaluateCondition(store, node, candidate, condition, conditionContext(rule, candidate))) return { rule, instance: candidate };
-        continue;
-      }
-      const candidates = context?.incomingRoot
-        ? store.findInTree(context.incomingRoot, rule.target)
-        : store.findAtNode(nodeId, rule.target);
-      for(const instance of candidates){
-        const condition = kind === 'input' ? rule.acceptWhen : rule.releaseWhen;
-        if(evaluateCondition(store, node, instance, condition, conditionContext(rule, instance))) return { rule, instance };
       }
     }
     return null;
@@ -855,5 +878,6 @@
   App.evaluateEntityCondition = evaluateCondition;
   App.evaluateEntityExpression = evaluateExpression;
   App.normalizeEntityTarget = normalizeTarget;
+  App.normalizeEntityTargets = normalizeTargets;
   App.resetRuntimeInstances = initializeEntityRuntime;
 })(typeof self !== 'undefined' ? self : window);

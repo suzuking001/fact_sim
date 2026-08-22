@@ -160,6 +160,7 @@
       this._payload = null;
       this._currentWork = null;
       this._pendingTransfer = null;
+      this._shuttleTransferSlot = null;
       this._incomingPayload = null;
       this._transferHold = false;
       this._lastInRef = null;
@@ -203,6 +204,7 @@
       if(id === 'shuttle' && !this.properties.inputRules.length){
         this.properties.inputRules = [{
           ruleId: 'shuttle-input-1',
+          targets: [{ mode: 'category', category: 'work' }],
           target: { mode: 'category', category: 'work' },
           acceptWhen: { kind: 'space-available' },
           fromPortId: this.inputs?.[0]?.portId || 'in-1'
@@ -211,6 +213,7 @@
       if(id === 'shuttle' && !this.properties.outputRules.length){
         this.properties.outputRules = [{
           ruleId: 'shuttle-output-1',
+          targets: [{ mode: 'category', category: 'work' }],
           target: { mode: 'category', category: 'work' },
           releaseWhen: {
             kind: 'all',
@@ -220,6 +223,7 @@
               { kind: 'downstream-ready' }
             ]
           },
+          toPortIds: [this.outputs?.[0]?.portId || 'out-1'],
           toPortId: this.outputs?.[0]?.portId || 'out-1'
         }];
       }
@@ -465,19 +469,21 @@
     }
 
     _shuttleRuleTargetMatches(rule){
-      const target = rule?.target || {};
-      const mode = text(target.mode).toLowerCase();
-      if(!mode || mode === 'otherwise') return true;
-      if(mode === 'category') return text(target.category).toLowerCase() === 'work';
-      if(mode === 'type'){
-        const wanted = text(target.typeId);
-        const payloadTypeId = text(this._payload?.typeId);
-        if(payloadTypeId) return payloadTypeId === wanted;
-        const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(this.graph) : null;
-        const type = registry?.get?.(wanted);
-        return !!type && text(type.name) === text(this._payload?.type);
-      }
-      return false;
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target || {}];
+      return targets.some((target)=>{
+        const mode = text(target?.mode).toLowerCase();
+        if(!mode || mode === 'otherwise') return true;
+        if(mode === 'category') return text(target.category).toLowerCase() === 'work';
+        if(mode === 'type'){
+          const wanted = text(target.typeId);
+          const payloadTypeId = text(this._payload?.typeId);
+          if(payloadTypeId) return payloadTypeId === wanted;
+          const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(this.graph) : null;
+          const type = registry?.get?.(wanted);
+          return !!type && text(type.name) === text(this._payload?.type);
+        }
+        return false;
+      });
     }
 
     _evaluateShuttleOutputCondition(condition, context){
@@ -506,11 +512,17 @@
       }));
     }
 
+    _ruleOutputPortIds(rule){
+      const values = Array.isArray(rule?.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule?.toPortId];
+      return [...new Set(values.map((value)=>text(value)).filter(Boolean))];
+    }
+
     _selectShuttleOutputRule(context){
       const rules = Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length
         ? this.properties.outputRules
         : [{
             ruleId: 'default-shuttle-output',
+            targets: [{ mode: 'category', category: 'work' }],
             target: { mode: 'category', category: 'work' },
             releaseWhen: {
               kind: 'all',
@@ -520,11 +532,20 @@
                 { kind: 'downstream-ready' }
               ]
             },
+            toPortIds: [this.outputs?.[0]?.portId || 'out-1'],
             toPortId: this.outputs?.[0]?.portId || 'out-1'
           }];
       for(const rule of rules){
         if(!this._shuttleRuleTargetMatches(rule)) continue;
-        if(this._evaluateShuttleOutputCondition(rule?.releaseWhen, context)) return rule;
+        const slots = this._ruleOutputPortIds(rule)
+          .map((portId)=>portIndexById(this.outputs, portId))
+          .filter((slot)=>slot >= 0);
+        if(!slots.length && this.outputs?.length) slots.push(0);
+        const readySlot = slots.find((slot)=>this._shuttleDownstreamReady(context?.vacatingNodeIds, slot));
+        const resolvedContext = { ...context, downstreamReady: Number.isInteger(readySlot) };
+        if(this._evaluateShuttleOutputCondition(rule?.releaseWhen, resolvedContext)){
+          return { rule, slot:Number.isInteger(readySlot) ? readySlot : (slots[0] ?? -1), downstreamReady:Number.isInteger(readySlot) };
+        }
       }
       return null;
     }
@@ -573,9 +594,12 @@
       this._markShuttleGroupDirty();
     }
 
-    _hasShuttleDownstreamLinks(){
-      const output = this.outputs?.[0];
-      return !!(output && Array.isArray(output.links) && output.links.length);
+    _hasShuttleDownstreamLinks(slot){
+      if(Number.isInteger(slot)){
+        const output = this.outputs?.[slot];
+        return !!(output && Array.isArray(output.links) && output.links.length);
+      }
+      return (this.outputs || []).some((output)=>Array.isArray(output?.links) && output.links.length);
     }
 
     _isSameShuttleGroup(node){
@@ -585,9 +609,9 @@
         && text(node.properties?.shuttleGroupId) === this._shuttleGroupId();
     }
 
-    _shuttleDownstreamReady(vacatingNodeIds){
+    _shuttleDownstreamReady(vacatingNodeIds, slot){
       if(!this._payload) return false;
-      const output = this.outputs?.[0];
+      const output = this.outputs?.[Number.isInteger(slot) ? slot : 0];
       if(!output || !Array.isArray(output.links) || !output.links.length) return false;
       let found = false;
       for(const linkId of output.links){
@@ -615,9 +639,9 @@
       }catch(_e){}
     }
 
-    _spawnShuttleSinkAnimation(work){
+    _spawnShuttleSinkAnimation(work, slot){
       try{
-        const output = this.outputs?.[0];
+        const output = this.outputs?.[Number.isInteger(slot) ? slot : 0];
         if(!root.WorkLinkAnimator || !this.graph || !output || !Array.isArray(output.links)) return;
         const info = work && typeof work === 'object' ? { id: work.id, t: work.type } : null;
         const durationMs = Math.max(120, Number(this.properties?.processTime || 0) * 1000);
@@ -632,14 +656,16 @@
       }catch(_e){}
     }
 
-    _beginShuttleTransfer(){
-      if(!this._payload || !this._hasShuttleDownstreamLinks()) return false;
-      this._spawnShuttleSinkAnimation(this._payload);
+    _beginShuttleTransfer(slot){
+      const outputSlot = Number.isInteger(slot) ? slot : 0;
+      if(!this._payload || !this._hasShuttleDownstreamLinks(outputSlot)) return false;
+      this._spawnShuttleSinkAnimation(this._payload, outputSlot);
       this._pendingTransfer = this._payload;
+      this._shuttleTransferSlot = outputSlot;
       this._payload = null;
       this._currentWork = null;
       this._transferHold = true;
-      this.setOutputData(0, this._pendingTransfer);
+      this.setOutputData(outputSlot, this._pendingTransfer);
       this._setShuttleState('TRANSFER');
       return true;
     }
@@ -662,14 +688,15 @@
         && peers.every((node)=>!node?._payload || node._state !== 'PROCESS');
       if(!groupIdle) return false;
       const vacatingNodeIds = new Set(transferNodes.map((node)=>node.id));
+      const selections = new Map();
       for(const node of transferNodes){
-        const downstreamReady = node._shuttleDownstreamReady(vacatingNodeIds);
-        if(!node._selectShuttleOutputRule({ groupIdle, downstreamReady })) return false;
-        if(!downstreamReady) return false;
+        const selected = node._selectShuttleOutputRule({ groupIdle, vacatingNodeIds });
+        if(!selected?.downstreamReady) return false;
+        selections.set(node.id, selected);
       }
       let moved = false;
       for(const node of transferNodes){
-        if(node._beginShuttleTransfer()) moved = true;
+        if(node._beginShuttleTransfer(selections.get(node.id)?.slot)) moved = true;
       }
       if(moved){
         timing.lastTransferAt = now;
@@ -734,7 +761,7 @@
 
     _executeShuttle(){
       const now = nowMs();
-      this.setOutputData(0, null);
+      for(let slot = 0; slot < (this.outputs?.length || 0); slot++) this.setOutputData(slot, null);
       switch(this._state){
         case 'PROCESS':
           if(now >= this._until) this._setShuttleState('WAIT');
@@ -743,13 +770,14 @@
           this._tryCommitShuttleGroupTransfer();
           break;
         case 'TRANSFER':
-          this.setOutputData(0, this._pendingTransfer);
+          this.setOutputData(Number.isInteger(this._shuttleTransferSlot) ? this._shuttleTransferSlot : 0, this._pendingTransfer);
           this._captureShuttleInputDuringTransfer();
           if(this._transferHold){
             this._transferHold = false;
           }else{
-            this.setOutputData(0, null);
+            this.setOutputData(Number.isInteger(this._shuttleTransferSlot) ? this._shuttleTransferSlot : 0, null);
             this._pendingTransfer = null;
+            this._shuttleTransferSlot = null;
             this._setShuttleState('IDLE');
             this._closeShuttleGroupCycleIfEmpty(now);
           }
@@ -819,18 +847,25 @@
       if(!store) return null;
       const rules = Array.isArray(this.properties.outputRules) && this.properties.outputRules.length
         ? this.properties.outputRules
-        : [{ ruleId: 'default-output', target: { mode: 'otherwise' }, releaseWhen: { kind: 'available' }, toPortId: this.outputs?.[0]?.portId }];
+        : [{ ruleId: 'default-output', targets:[{ mode:'otherwise' }], target: { mode: 'otherwise' }, releaseWhen: { kind: 'available' }, toPortIds:[this.outputs?.[0]?.portId], toPortId: this.outputs?.[0]?.portId }];
       const selected = App.selectEntityRule(store, this, rules, {
         nowMs: nowMs(),
         processComplete: this._processComplete,
         resolveDownstreamReady: (rule, instance)=>{
-          const resolvedSlot = portIndexById(this.outputs, rule?.toPortId);
-          return this._downstreamReady(resolvedSlot >= 0 ? resolvedSlot : 0, instance);
+          const slots = this._ruleOutputPortIds(rule)
+            .map((portId)=>portIndexById(this.outputs, portId))
+            .filter((slot)=>slot >= 0);
+          if(!slots.length && this.outputs?.length) slots.push(0);
+          return slots.some((slot)=>this._downstreamReady(slot, instance));
         }
       }, 'output');
       if(!selected) return null;
-      const slot = portIndexById(this.outputs, selected.rule.toPortId);
-      return { ...selected, slot: slot >= 0 ? slot : 0 };
+      const slots = this._ruleOutputPortIds(selected.rule)
+        .map((portId)=>portIndexById(this.outputs, portId))
+        .filter((slot)=>slot >= 0);
+      if(!slots.length && this.outputs?.length) slots.push(0);
+      const slot = slots.find((candidate)=>this._downstreamReady(candidate, selected.instance));
+      return { ...selected, slot:Number.isInteger(slot) ? slot : (slots[0] ?? -1) };
     }
 
     _executeSink(){
@@ -1032,6 +1067,7 @@
     if(originalType === 'factory/source' || originalType === 'factory/entitysource') return [];
     return (Array.isArray(node?.inputs) ? node.inputs : []).map((port, index)=>({
       ruleId: `migrated-input-${index + 1}`,
+      targets: [{ mode: 'category', category: categoryForPort(port) }],
       target: { mode: 'category', category: categoryForPort(port) },
       acceptWhen: { kind: originalType === 'factory/sink' ? 'always' : 'space-available' },
       fromPortId: port.portId || `in-${index + 1}`
@@ -1049,6 +1085,9 @@
         : '';
       return {
         ruleId: `migrated-output-${index + 1}`,
+        targets: [routeTypeId
+          ? { mode: 'type', typeId: routeTypeId }
+          : { mode: 'category', category: categoryForPort(port) }],
         target: routeTypeId
           ? { mode: 'type', typeId: routeTypeId }
           : { mode: 'category', category: categoryForPort(port) },
@@ -1062,6 +1101,7 @@
               ]
             }
           : { kind: releaseKind },
+        toPortIds: [port.portId || `out-${index + 1}`],
         toPortId: port.portId || `out-${index + 1}`
       };
     });

@@ -255,10 +255,49 @@
         controls.append(up, down, remove); header.append(title, controls); ruleCard.appendChild(header);
 
         const body = document.createElement('div'); body.className = 'entityRuleBody';
-        const target = select(typeOptions(registry, true, kind === 'output'), targetValue(rule.target));
-        target.disabled = running();
-        target.addEventListener('change', ()=>{ rule.target = parseTarget(target.value); commit(); });
-        body.appendChild(field('Target', target));
+        const availableTargets = typeOptions(registry, true, kind === 'output');
+        const targetRows = Array.isArray(rule.targets) && rule.targets.length
+          ? rule.targets
+          : [rule.target || { mode:'category', category:'work' }];
+        const persistTargets = ()=>{
+          rule.targets = targetRows;
+          rule.target = targetRows[0] || { mode:'category', category:'work' };
+          commit();
+        };
+        const targetsHost = document.createElement('div'); targetsHost.className = 'entityRuleMultiValue';
+        const targetList = document.createElement('div'); targetList.className = 'entityRuleMultiValueList';
+        targetRows.forEach((targetSpec, targetIndex)=>{
+          const targetLine = document.createElement('div'); targetLine.className = 'entityRuleMultiValueLine';
+          const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(targetIndex + 1);
+          const target = select(availableTargets, targetValue(targetSpec));
+          target.disabled = running();
+          target.addEventListener('change', ()=>{
+            const parsed = parseTarget(target.value);
+            if(parsed.mode === 'otherwise') targetRows.splice(0, targetRows.length, parsed);
+            else{
+              targetRows[targetIndex] = parsed;
+              for(let rowIndex = targetRows.length - 1; rowIndex >= 0; rowIndex--){
+                if(targetRows[rowIndex]?.mode === 'otherwise') targetRows.splice(rowIndex, 1);
+              }
+            }
+            persistTargets(); App.selectionInspector?.refresh?.();
+          });
+          const removeTarget = button('×', ()=>{
+            targetRows.splice(targetIndex, 1);
+            if(!targetRows.length) targetRows.push({ mode:'category', category:'work' });
+            persistTargets(); App.selectionInspector?.refresh?.();
+          }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
+          removeTarget.title = 'Delete target'; removeTarget.disabled = running() || targetRows.length <= 1;
+          targetLine.append(number, target, removeTarget); targetList.appendChild(targetLine);
+        });
+        targetsHost.appendChild(targetList);
+        const addTarget = button('+ Add target', ()=>{
+          if(targetRows.length === 1 && targetRows[0]?.mode === 'otherwise') targetRows.splice(0, 1);
+          targetRows.push({ mode:'category', category:'work' });
+          persistTargets(); App.selectionInspector?.refresh?.();
+        }, 'selectionInspectorBtn entityRuleAddCondition');
+        addTarget.disabled = running(); targetsHost.appendChild(addTarget);
+        body.appendChild(field('Targets (any match)', targetsHost));
 
         if(kind === 'input'){
           const conditionSpec = isObject(rule.acceptWhen) ? rule.acceptWhen : { kind:conditionKind(rule.acceptWhen, 'always') };
@@ -314,18 +353,47 @@
           body.appendChild(field('Conditions', conditionsHost, 'is-wide'));
 
           const ports = (node.outputs || []).map((port, portIndex)=>[port.portId || `out-${portIndex + 1}`, port.name || `Out ${portIndex + 1}`]);
-          const to = select(ports, rule.toPortId || ports[0]?.[0] || '');
-          to.disabled = running();
-          to.addEventListener('change', ()=>{ rule.toPortId = to.value; commit(); });
-          body.appendChild(field('Output to', to));
+          const portRows = Array.isArray(rule.toPortIds) && rule.toPortIds.length
+            ? rule.toPortIds
+            : [rule.toPortId || ports[0]?.[0] || ''];
+          const persistPorts = ()=>{
+            rule.toPortIds = portRows.filter(Boolean);
+            rule.toPortId = rule.toPortIds[0] || null;
+            commit();
+          };
+          const portsHost = document.createElement('div'); portsHost.className = 'entityRuleMultiValue';
+          const portList = document.createElement('div'); portList.className = 'entityRuleMultiValueList';
+          portRows.forEach((portId, portIndex)=>{
+            const portLine = document.createElement('div'); portLine.className = 'entityRuleMultiValueLine';
+            const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(portIndex + 1);
+            const to = select(ports, portId);
+            to.disabled = running();
+            to.addEventListener('change', ()=>{ portRows[portIndex] = to.value; persistPorts(); });
+            const removePort = button('×', ()=>{
+              portRows.splice(portIndex, 1);
+              if(!portRows.length && ports[0]) portRows.push(ports[0][0]);
+              persistPorts(); App.selectionInspector?.refresh?.();
+            }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
+            removePort.title = 'Delete output destination'; removePort.disabled = running() || portRows.length <= 1;
+            portLine.append(number, to, removePort); portList.appendChild(portLine);
+          });
+          portsHost.appendChild(portList);
+          const addPort = button('+ Add output', ()=>{
+            const next = ports.find(([portId])=>!portRows.includes(portId))?.[0] || ports[0]?.[0];
+            if(next) portRows.push(next);
+            persistPorts(); App.selectionInspector?.refresh?.();
+          }, 'selectionInspectorBtn entityRuleAddCondition');
+          addPort.disabled = running() || !ports.length || portRows.length >= ports.length;
+          portsHost.appendChild(addPort);
+          body.appendChild(field('Output to (first ready)', portsHost));
         }
         ruleCard.appendChild(body); list.appendChild(ruleCard);
       });
       card.section.appendChild(list);
       const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
         rows.push(kind === 'input'
-          ? { ruleId:`input-rule-${Date.now()}`, target:{ mode:'category', category:'work' }, acceptWhen:{ kind:'always' }, fromPortId:null }
-          : { ruleId:`output-rule-${Date.now()}`, target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }] }, toPortId:node.outputs?.[0]?.portId || 'out-1' });
+          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:{ kind:'always' }, fromPortId:null }
+          : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }] }, toPortIds:[node.outputs?.[0]?.portId || 'out-1'], toPortId:node.outputs?.[0]?.portId || 'out-1' });
         commit(); App.selectionInspector?.refresh?.();
       }, 'selectionInspectorBtn is-primary');
       add.disabled = running(); card.section.appendChild(add); wrapper.appendChild(card.card);
