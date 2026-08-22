@@ -173,15 +173,201 @@ class LinkAnimator{
     this.animations = [];
     this._max = Math.max(200, Number(cfg.maxTransient) || 1500);
     this._sampleOffset = 0;
+    this._visibleHits = [];
+    this._hoverAnim = null;
+    this._hoverRenderedAt = 0;
   }
   clear(graph){
     if(!graph){
       this.animations.length = 0;
       this._sampleOffset = 0;
+      this._visibleHits.length = 0;
+      this._hideTooltip();
       return;
     }
     this.animations = this.animations.filter((anim)=> anim && anim.graph && anim.graph !== graph);
     if(!this.animations.length) this._sampleOffset = 0;
+    if(this._hoverAnim?.graph === graph) this._hideTooltip();
+  }
+  _tooltip(){
+    let tooltip = document.getElementById('factEntityHoverTooltip');
+    if(tooltip) return tooltip;
+    tooltip = document.createElement('div');
+    tooltip.id = 'factEntityHoverTooltip';
+    tooltip.className = 'factEntityHoverTooltip';
+    tooltip.hidden = true;
+    tooltip.setAttribute('role', 'tooltip');
+    document.body.appendChild(tooltip);
+    return tooltip;
+  }
+  _hideTooltip(){
+    const tooltip = document.getElementById('factEntityHoverTooltip');
+    if(tooltip) tooltip.hidden = true;
+    this._hoverAnim = null;
+    this._hoverRenderedAt = 0;
+  }
+  _treeMatch(tree, type, info){
+    if(!tree) return 0;
+    const id = String(info?.id ?? '').trim().toLowerCase();
+    const expectedCategory = type === 'agv' ? 'carrier' : (type === 'pallet' ? 'container' : type);
+    const category = String(tree.category || '').toLowerCase();
+    let identityScore = 0;
+    if(id){
+      const displayId = String(tree.displayId ?? '').trim().toLowerCase();
+      const instanceId = String(tree.instanceId ?? '').trim().toLowerCase();
+      if(displayId === id || instanceId === id) identityScore += 20;
+      else if(displayId.startsWith(`${id} #`)) identityScore += 12;
+      else if(String(tree.name || '').trim().toLowerCase() === id) identityScore += 8;
+    }
+    const typeName = String(info?.t ?? info?.type ?? '').trim().toLowerCase();
+    if(typeName && (String(tree.name || '').trim().toLowerCase() === typeName || String(tree.typeId || '').trim().toLowerCase() === typeName)) identityScore += 6;
+    if(!identityScore) return 0;
+    return identityScore + (category === expectedCategory ? 2 : 0);
+  }
+  _resolveHoverTree(anim){
+    const info = anim?.info || {};
+    if(info.tree && typeof info.tree === 'object') return { tree: info.tree, node: null };
+    const graph = anim?.graph;
+    let best = null;
+    const visit = (tree, node)=>{
+      if(!tree) return;
+      const score = this._treeMatch(tree, String(anim?.type || '').toLowerCase(), info);
+      if(score > (best?.score || 0)) best = { score, tree, node };
+      for(const child of (Array.isArray(tree.children) ? tree.children : [])) visit(child, node);
+    };
+    for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
+      try{
+        const data = typeof node.getCurrentContents === 'function'
+          ? node.getCurrentContents({ includeInstances: true })
+          : window.App?.currentContentsForNode?.(node, { includeInstances: true });
+        for(const tree of (data?.instances || [])) visit(tree, node);
+      }catch(_e){}
+    }
+    if(best) return best;
+    const category = anim?.type === 'agv' ? 'carrier' : (anim?.type === 'pallet' ? 'container' : 'work');
+    const name = String(info.t ?? info.type ?? info.label ?? (category === 'carrier' ? 'Carrier' : category === 'container' ? 'Container' : 'Work'));
+    return {
+      node: null,
+      tree: {
+        instanceId: String(info.instanceId ?? info.id ?? ''),
+        displayId: String(info.id ?? ''),
+        typeId: String(info.typeId ?? ''),
+        name,
+        category,
+        attributes: info.attributes && typeof info.attributes === 'object' ? info.attributes : {},
+        children: Array.isArray(info.children) ? info.children : []
+      }
+    };
+  }
+  _renderHoverTooltip(anim){
+    const tooltip = this._tooltip();
+    const resolved = this._resolveHoverTree(anim);
+    const tree = resolved.tree;
+    const displayLabel = (entry)=>{
+      const name = String(entry?.name || entry?.typeId || 'Entity');
+      const displayId = String(entry?.displayId || '');
+      return displayId && displayId !== name ? `${name} · ${displayId}` : name;
+    };
+    tooltip.replaceChildren();
+    const header = document.createElement('div');
+    header.className = 'factEntityHoverHeader';
+    const title = document.createElement('strong');
+    title.textContent = displayLabel(tree);
+    const category = document.createElement('span');
+    category.textContent = String(tree.category || anim?.type || 'entity');
+    header.append(title, category);
+    tooltip.appendChild(header);
+    const meta = document.createElement('div');
+    meta.className = 'factEntityHoverMeta';
+    const metaRows = [];
+    if(tree.typeId) metaRows.push(`Type ID: ${tree.typeId}`);
+    if(tree.instanceId) metaRows.push(`Instance ID: ${tree.instanceId}`);
+    if(resolved.node) metaRows.push(`Node: ${resolved.node.title || resolved.node.type || ''} #${resolved.node.id}`);
+    meta.textContent = metaRows.join('  ·  ');
+    if(meta.textContent) tooltip.appendChild(meta);
+    const attributes = tree.attributes && typeof tree.attributes === 'object'
+      ? Object.entries(tree.attributes).filter(([key, value])=>!key.startsWith('__') && (value == null || ['string','number','boolean'].includes(typeof value))).slice(0, 8)
+      : [];
+    if(attributes.length){
+      const attr = document.createElement('div');
+      attr.className = 'factEntityHoverAttributes';
+      attributes.forEach(([key, value])=>{
+        const item = document.createElement('span');
+        item.textContent = `${key}: ${String(value)}`;
+        attr.appendChild(item);
+      });
+      tooltip.appendChild(attr);
+    }
+    const treeHost = document.createElement('div');
+    treeHost.className = 'factEntityHoverTree';
+    let rendered = 0;
+    const appendTree = (entry, depth)=>{
+      if(!entry || rendered >= 80 || depth > 12) return;
+      rendered++;
+      const row = document.createElement('div');
+      row.className = 'factEntityHoverTreeRow';
+      row.style.setProperty('--entity-hover-depth', String(depth));
+      const branch = document.createElement('span');
+      branch.textContent = depth ? '└' : '●';
+      const text = document.createElement('span');
+      text.textContent = displayLabel(entry);
+      row.append(branch, text);
+      treeHost.appendChild(row);
+      for(const child of (Array.isArray(entry.children) ? entry.children : [])) appendTree(child, depth + 1);
+    };
+    appendTree(tree, 0);
+    tooltip.appendChild(treeHost);
+    tooltip.hidden = false;
+    return tooltip;
+  }
+  _positionTooltip(tooltip, pointer){
+    if(!tooltip || !pointer) return;
+    let left = Number(pointer.clientX) + 18;
+    let top = Number(pointer.clientY) + 18;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    const rect = tooltip.getBoundingClientRect();
+    if(rect.right > window.innerWidth - 8) left = Math.max(8, Number(pointer.clientX) - rect.width - 18);
+    if(rect.bottom > window.innerHeight - 8) top = Math.max(8, Number(pointer.clientY) - rect.height - 18);
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+  _updateHover(canvas){
+    const pointer = canvas?.__factEntityHoverPointer;
+    if(!pointer){ this._hideTooltip(); return; }
+    const point = Array.isArray(canvas.graph_mouse) ? canvas.graph_mouse : null;
+    if(!point){ this._hideTooltip(); return; }
+    let hit = null;
+    let bestDistance = Infinity;
+    for(const candidate of this._visibleHits){
+      if(candidate.canvas !== canvas) continue;
+      const distance = Math.hypot(Number(point[0]) - candidate.x, Number(point[1]) - candidate.y);
+      if(distance <= candidate.radius && distance < bestDistance){ hit = candidate; bestDistance = distance; }
+    }
+    if(!hit){ this._hideTooltip(); return; }
+    const frameNow = getFrameNow();
+    let tooltip = this._tooltip();
+    if(this._hoverAnim !== hit.anim || frameNow - this._hoverRenderedAt > 250){
+      tooltip = this._renderHoverTooltip(hit.anim);
+      this._hoverAnim = hit.anim;
+      this._hoverRenderedAt = frameNow;
+    }
+    this._positionTooltip(tooltip, pointer);
+  }
+  installHover(canvas){
+    const element = canvas?.canvas;
+    if(!element || element.__factEntityHoverInstalled) return;
+    element.__factEntityHoverInstalled = true;
+    const trackPointer = (event)=>{
+      canvas.__factEntityHoverPointer = { clientX: event.clientX, clientY: event.clientY };
+      canvas.dirty_canvas = true;
+    };
+    element.addEventListener('pointermove', trackPointer, { passive: true });
+    element.addEventListener('pointerdown', trackPointer, { passive: true });
+    element.addEventListener('pointerleave', ()=>{
+      canvas.__factEntityHoverPointer = null;
+      this._hideTooltip();
+    }, { passive: true });
   }
   _trimTransient(){
     if(this.animations.length <= this._max) return;
@@ -362,7 +548,12 @@ class LinkAnimator{
     return { step, labelEvery };
   }
   draw(canvas, ctx){
-    if(!this.animations.length || !canvas || !ctx) return;
+    if(!canvas || !ctx) return;
+    if(!this.animations.length){
+      this._visibleHits.length = 0;
+      this._hideTooltip();
+      return;
+    }
     const now = getNow();
     const frameNow = getFrameNow();
     const policy = this._adaptiveRenderPolicy(canvas);
@@ -393,6 +584,7 @@ class LinkAnimator{
         graphEntries.set(entityKey, Number(anim.start));
       }
     }
+    const visibleHits = [];
     ctx.save();
     this.animations = this.animations.filter(anim=>{
       const graph = anim.graph;
@@ -473,6 +665,7 @@ class LinkAnimator{
         ctx.arc(x, y, Math.max(0, iconRadius - (iconTheme.lineWidth || 2) * 0.5), 0, Math.PI * 2);
         ctx.stroke();
       }
+      visibleHits.push({ canvas, anim, x, y, radius: iconRadius + 6 });
       // label
       let label = '';
       if(anim.type === 'agv'){
@@ -517,6 +710,8 @@ class LinkAnimator{
       return anim.tail ? true : true;
     });
     ctx.restore();
+    this._visibleHits = visibleHits;
+    this._updateHover(canvas);
   }
 }
 
@@ -537,6 +732,7 @@ class LinkAnimator{
       }
     };
     canvas.__workLinkAnimationLayerInstalled = true;
+    animator.installHover(canvas);
   };
 
   function collectConnectionCullNodes(canvas){
