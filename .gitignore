@@ -1,2 +1,8 @@
 tmp/*
 !tmp/.gitkeep
+
+# Runtime-generated benchmark, test, and optimization reports
+/artifacts/benchmark/
+/artifacts/engine-test/
+/artifacts/auto-fix/
+/artifacts/auto-optimize/
