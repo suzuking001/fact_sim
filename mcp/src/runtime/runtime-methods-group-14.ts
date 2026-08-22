@@ -19,13 +19,15 @@ export function registerRuntimeMethodsGroup14(
       const app = (window as any).App;
       const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
       if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
-      const store = app?.runtimeInstancesForGraph?.(app.graph);
+      const current = typeof node.getCurrentContents === "function"
+        ? node.getCurrentContents({ includeInstances: requestedInstances })
+        : (app?.currentContentsForNode?.(node, { includeInstances: requestedInstances }) ?? { summary: [], instances: [] });
       return {
         nodeId: node.id,
         initialContents: Array.isArray(node.properties?.initialContents) ? node.properties.initialContents : [],
         current: {
-          summary: store?.summaryAt?.(node.id) ?? [],
-          instances: requestedInstances ? (store?.treesAt?.(node.id) ?? []) : undefined
+          summary: current?.summary ?? [],
+          instances: requestedInstances ? (current?.instances ?? []) : undefined
         }
       };
     }, { requestedNodeId: nodeId, requestedInstances: includeInstances === true });

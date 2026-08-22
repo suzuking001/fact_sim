@@ -328,6 +328,7 @@
     }
 
     getCurrentContents(options){
+      if(typeof App.currentContentsForNode === 'function') return App.currentContentsForNode(this, options);
       const store = this._store();
       if(!store) return { summary: [], instances: [] };
       const includeInstances = options?.includeInstances !== false;

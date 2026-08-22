@@ -664,6 +664,132 @@
     }
   }
 
+  function migrateLegacyInitialContents(graph, registry){
+    let migrated = 0;
+    const types = registry?.list?.() || [];
+    for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
+      const props = isObject(node?.properties) ? node.properties : null;
+      if(!props || (Array.isArray(props.initialContents) && props.initialContents.length)) continue;
+      const signature = `${node?.type || ''} ${props.presetId || ''} ${props.legacySourceType || ''}`.toLowerCase();
+      if(!signature.includes('carrierroute') && !signature.includes('agvroute') && props.presetId !== 'carrier_route') continue;
+      const initialCarrier = normalizeText(props.initialCarrier);
+      if(!initialCarrier || initialCarrier.toLowerCase() === 'undefined' || initialCarrier.toLowerCase() === 'none') continue;
+      const needle = initialCarrier.toLowerCase();
+      const type = types.find((entry)=>entry.category === 'carrier'
+        && (entry.typeId.toLowerCase() === needle || entry.name.toLowerCase() === needle));
+      if(!type) continue;
+      props.initialContents = [{ typeId: type.typeId, quantity: 1, load: 'empty', children: [] }];
+      migrated += 1;
+    }
+    return migrated;
+  }
+
+  function currentContentsForNode(node, options){
+    const graph = node?.graph || App.graph;
+    const store = runtimeInstancesForGraph(graph);
+    if(!node || !store) return { summary: [], instances: [] };
+    const registry = store.registry;
+    const includeInstances = options?.includeInstances !== false;
+    const candidates = [];
+    const push = (value)=>{
+      if(!value || typeof value !== 'object') return;
+      if(!candidates.includes(value)) candidates.push(value);
+    };
+    try{
+      if(typeof node.getEntityRoots === 'function'){
+        for(const value of (node.getEntityRoots() || [])) push(value);
+      }
+    }catch(_e){}
+    [
+      node._activeRoot, node._currentAgv, node._departingAgv, node._pallet,
+      node._payload, node._currentWork, node._pendingWork, node._pendingTransfer,
+      node._sourceHost, node._targetHost, node._palletOffer, node._workOffer
+    ].forEach(push);
+    [node._worksBySlot, node._recv, node._workQueue, node._palletQueue].forEach((rows)=>{
+      if(Array.isArray(rows)) rows.forEach(push);
+    });
+
+    const legacyRoots = candidates.filter((value)=>!store.get(value));
+    if(!legacyRoots.length){
+      if(node._initialCarrierSpawned === true && normalizeText(node.properties?.presetId) === 'carrier_route'){
+        return { summary: [], instances: [] };
+      }
+      return {
+        summary: store.summaryAt(node.id),
+        instances: includeInstances ? store.treesAt(node.id) : []
+      };
+    }
+
+    const used = new Set();
+    const typeFor = (value, category)=>{
+      const direct = registry.get(normalizeText(value?.typeId));
+      if(direct) return direct;
+      const names = [value?.type, value?.id, value?.carrierId, value?.meta?.carrierId]
+        .map((entry)=>normalizeText(entry).toLowerCase()).filter(Boolean);
+      return registry.list().find((entry)=>names.includes(entry.typeId.toLowerCase()) || names.includes(entry.name.toLowerCase()))
+        || registry.list().find((entry)=>entry.category === category)
+        || null;
+    };
+    const categoryFor = (value)=>{
+      const explicit = normalizeText(value?.entityKind || value?.kind).toLowerCase();
+      if(CATEGORIES.has(explicit)) return explicit;
+      if(Array.isArray(value?.cargo) || Array.isArray(value?.pallets) || value?.meta?.carrierId) return 'carrier';
+      if(Array.isArray(value?.works) || value?.palletId != null) return 'container';
+      return 'work';
+    };
+    const childrenFor = (value)=>{
+      const out = [];
+      const append = (rows)=>{
+        if(!Array.isArray(rows)) return;
+        for(const child of rows){
+          if(child && typeof child === 'object' && !out.includes(child)) out.push(child);
+        }
+      };
+      append(value?.children);
+      append(value?.pallets);
+      append(value?.cargo);
+      append(value?.works);
+      return out;
+    };
+    const build = (value)=>{
+      if(!value || typeof value !== 'object' || used.has(value)) return null;
+      used.add(value);
+      const runtime = store.get(value);
+      if(runtime) return store.tree(runtime);
+      const category = categoryFor(value);
+      const type = typeFor(value, category);
+      const displayId = normalizeText(value.id || value.instanceId || value.palletId) || `${type?.name || category}`;
+      return {
+        instanceId: normalizeText(value.instanceId) || `legacy:${category}:${displayId}`,
+        displayId,
+        typeId: type?.typeId || `legacy-${category}`,
+        name: type?.name || normalizeText(value.type) || (category === 'carrier' ? 'Carrier' : category === 'container' ? 'Container' : 'Work'),
+        category,
+        attributes: clone(value.attributes || value.meta || {}, {}),
+        children: childrenFor(value).map(build).filter(Boolean)
+      };
+    };
+    const trees = [];
+    for(const value of legacyRoots){
+      const tree = build(value);
+      if(tree) trees.push(tree);
+    }
+    const counts = new Map();
+    const countTree = (tree)=>{
+      if(!tree) return;
+      const key = tree.typeId || tree.name;
+      const current = counts.get(key) || { typeId: tree.typeId, name: tree.name, quantity: 0 };
+      current.quantity += 1;
+      counts.set(key, current);
+      for(const child of (tree.children || [])) countTree(child);
+    };
+    trees.forEach(countTree);
+    return {
+      summary: Array.from(counts.values()).sort((a, b)=>a.name.localeCompare(b.name)),
+      instances: includeInstances ? trees : []
+    };
+  }
+
   function valueAtPath(source, path){
     const parts = Array.isArray(path) ? path : normalizeText(path).split('.').filter(Boolean);
     let current = source;
@@ -827,6 +953,7 @@
     const model = clone(data?.[MODEL_KEY] || data || { schemaVersion: SCHEMA_VERSION, types: [] }, { schemaVersion: SCHEMA_VERSION, types: [] });
     g.__factSimEntityModel = model;
     g.__factSimTypeRegistry = new EntityTypeRegistry(g, model);
+    migrateLegacyInitialContents(g, g.__factSimTypeRegistry);
     g.__factSimRuntimeInstances = new RuntimeInstanceStore(g, g.__factSimTypeRegistry);
     if(initialize !== false) g.__factSimRuntimeInstances.initializeFromGraph();
     return g.__factSimTypeRegistry;
@@ -843,6 +970,7 @@
     const g = graph || App.graph;
     if(!g) return { ok: false, errors: [{ code: 'GRAPH_REQUIRED' }] };
     const registry = entityModelForGraph(g);
+    migrateLegacyInitialContents(g, registry);
     g.__factSimRuntimeInstances = new RuntimeInstanceStore(g, registry);
     return g.__factSimRuntimeInstances.initializeFromGraph();
   }
@@ -868,6 +996,8 @@
   App.RuntimeInstanceStore = RuntimeInstanceStore;
   App.entityModelForGraph = entityModelForGraph;
   App.runtimeInstancesForGraph = runtimeInstancesForGraph;
+  App.currentContentsForNode = currentContentsForNode;
+  App.migrateLegacyInitialContents = migrateLegacyInitialContents;
   App.restoreEntityModel = restoreEntityModel;
   App.injectEntityModel = injectEntityModel;
   App.initializeEntityRuntime = initializeEntityRuntime;

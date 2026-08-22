@@ -450,7 +450,18 @@
     if(!Array.isArray(node.properties.initialContents)) node.properties.initialContents = [];
     const initial = makeCard('INITIAL', 'Type and quantity recipes are saved. Runtime Instance IDs are generated automatically on Reset.');
     const rows = document.createElement('div'); rows.className = 'entityRecipeList';
-    const refreshRows = ()=>{ rows.innerHTML = ''; renderRecipeRows(node, node.properties.initialContents, rows, 0); };
+    const refreshRows = ()=>{
+      rows.innerHTML = '';
+      const recipes = Array.isArray(node.properties.initialContents) ? node.properties.initialContents : [];
+      if(!recipes.length){
+        const empty = document.createElement('div');
+        empty.className = 'selectionInspectorNotice';
+        empty.textContent = 'None configured. This node starts empty.';
+        rows.appendChild(empty);
+        return;
+      }
+      renderRecipeRows(node, recipes, rows, 0);
+    };
     refreshRows(); initial.section.appendChild(rows);
     const add = button('Add Initial Content', ()=>{
       try{
@@ -472,30 +483,50 @@
     wrapper.appendChild(initial.card);
 
     const current = makeCard('CURRENT', 'Runtime / Read only');
-    const data = typeof node.getCurrentContents === 'function'
-      ? node.getCurrentContents({ includeInstances: false })
-      : (()=>{ const store = App.runtimeInstancesForGraph?.(App.graph || node.graph); return { summary:store?.summaryAt(node.id)||[] }; })();
+    const readCurrent = (includeInstances)=> typeof node.getCurrentContents === 'function'
+      ? node.getCurrentContents({ includeInstances })
+      : (App.currentContentsForNode?.(node, { includeInstances })
+        || (()=>{ const store = App.runtimeInstancesForGraph?.(App.graph || node.graph); return { summary:store?.summaryAt(node.id)||[], instances:includeInstances ? (store?.treesAt(node.id)||[]) : [] }; })());
     const tabs = document.createElement('div'); tabs.className = 'entityContentsToggle';
     const summaryBtn = button('Summary', ()=>{ summaryHost.hidden = false; instancesHost.hidden = true; });
     let instancesLoaded = false;
     const instancesBtn = button('Instances', ()=>{
       summaryHost.hidden = true;
       instancesHost.hidden = false;
-      if(instancesLoaded) return;
       instancesLoaded = true;
-      const instanceData = typeof node.getCurrentContents === 'function'
-        ? node.getCurrentContents({ includeInstances: true })
-        : (()=>{ const store = App.runtimeInstancesForGraph?.(App.graph || node.graph); return { instances:store?.treesAt(node.id)||[] }; })();
-      instancesHost.replaceChildren();
-      for(const tree of instanceData.instances || []) instancesHost.appendChild(renderCurrentTree(tree, 0));
-      if(!instancesHost.children.length) instancesHost.textContent = 'None';
+      refreshCurrent(true);
     });
     tabs.append(summaryBtn, instancesBtn); current.section.appendChild(tabs);
     const summaryHost = document.createElement('div'); summaryHost.className = 'entityCurrentSummary';
-    for(const row of data.summary || []){ const item = document.createElement('div'); item.innerHTML = `<span></span><strong>${Number(row.quantity)||0}</strong>`; item.querySelector('span').textContent = row.name; summaryHost.appendChild(item); }
-    if(!summaryHost.children.length) summaryHost.textContent = 'None';
     const instancesHost = document.createElement('div'); instancesHost.className = 'entityCurrentInstances'; instancesHost.hidden = true;
     instancesHost.textContent = 'Select Instances to load the runtime tree.';
+    let currentSignature = '';
+    const refreshCurrent = (force)=>{
+      const data = readCurrent(instancesLoaded);
+      const signature = JSON.stringify(data || {});
+      if(!force && signature === currentSignature) return;
+      currentSignature = signature;
+      summaryHost.replaceChildren();
+      for(const row of data?.summary || []){
+        const item = document.createElement('div');
+        item.innerHTML = `<span></span><strong>${Number(row.quantity)||0}</strong>`;
+        item.querySelector('span').textContent = row.name;
+        summaryHost.appendChild(item);
+      }
+      if(!summaryHost.children.length) summaryHost.textContent = 'None at this node.';
+      if(instancesLoaded){
+        instancesHost.replaceChildren();
+        for(const tree of data?.instances || []) instancesHost.appendChild(renderCurrentTree(tree, 0));
+        if(!instancesHost.children.length) instancesHost.textContent = 'None at this node.';
+      }
+    };
+    refreshCurrent(true);
+    const updateWhileOpen = ()=>{
+      if(!wrapper.isConnected) return;
+      refreshCurrent(false);
+      window.setTimeout(updateWhileOpen, 250);
+    };
+    window.setTimeout(updateWhileOpen, 250);
     current.section.append(summaryHost, instancesHost); wrapper.appendChild(current.card); return wrapper;
   }
 
