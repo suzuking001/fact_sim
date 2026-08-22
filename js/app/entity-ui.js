@@ -483,42 +483,20 @@
     wrapper.appendChild(initial.card);
 
     const current = makeCard('CURRENT', 'Runtime / Read only');
-    const readCurrent = (includeInstances)=> typeof node.getCurrentContents === 'function'
-      ? node.getCurrentContents({ includeInstances })
-      : (App.currentContentsForNode?.(node, { includeInstances })
-        || (()=>{ const store = App.runtimeInstancesForGraph?.(App.graph || node.graph); return { summary:store?.summaryAt(node.id)||[], instances:includeInstances ? (store?.treesAt(node.id)||[]) : [] }; })());
-    const tabs = document.createElement('div'); tabs.className = 'entityContentsToggle';
-    const summaryBtn = button('Summary', ()=>{ summaryHost.hidden = false; instancesHost.hidden = true; });
-    let instancesLoaded = false;
-    const instancesBtn = button('Instances', ()=>{
-      summaryHost.hidden = true;
-      instancesHost.hidden = false;
-      instancesLoaded = true;
-      refreshCurrent(true);
-    });
-    tabs.append(summaryBtn, instancesBtn); current.section.appendChild(tabs);
-    const summaryHost = document.createElement('div'); summaryHost.className = 'entityCurrentSummary';
-    const instancesHost = document.createElement('div'); instancesHost.className = 'entityCurrentInstances'; instancesHost.hidden = true;
-    instancesHost.textContent = 'Select Instances to load the runtime tree.';
+    const readCurrent = ()=> typeof node.getCurrentContents === 'function'
+      ? node.getCurrentContents({ includeInstances: true })
+      : (App.currentContentsForNode?.(node, { includeInstances: true })
+        || (()=>{ const store = App.runtimeInstancesForGraph?.(App.graph || node.graph); return { instances:store?.treesAt(node.id)||[] }; })());
+    const instancesHost = document.createElement('div'); instancesHost.className = 'entityCurrentInstances';
     let currentSignature = '';
     const refreshCurrent = (force)=>{
-      const data = readCurrent(instancesLoaded);
-      const signature = JSON.stringify(data || {});
+      const data = readCurrent();
+      const signature = JSON.stringify(data?.instances || []);
       if(!force && signature === currentSignature) return;
       currentSignature = signature;
-      summaryHost.replaceChildren();
-      for(const row of data?.summary || []){
-        const item = document.createElement('div');
-        item.innerHTML = `<span></span><strong>${Number(row.quantity)||0}</strong>`;
-        item.querySelector('span').textContent = row.name;
-        summaryHost.appendChild(item);
-      }
-      if(!summaryHost.children.length) summaryHost.textContent = 'None at this node.';
-      if(instancesLoaded){
-        instancesHost.replaceChildren();
-        for(const tree of data?.instances || []) instancesHost.appendChild(renderCurrentTree(tree, 0));
-        if(!instancesHost.children.length) instancesHost.textContent = 'None at this node.';
-      }
+      instancesHost.replaceChildren();
+      for(const tree of data?.instances || []) instancesHost.appendChild(renderCurrentTree(tree, 0));
+      if(!instancesHost.children.length) instancesHost.textContent = 'None at this node.';
     };
     refreshCurrent(true);
     const updateWhileOpen = ()=>{
@@ -527,7 +505,7 @@
       window.setTimeout(updateWhileOpen, 250);
     };
     window.setTimeout(updateWhileOpen, 250);
-    current.section.append(summaryHost, instancesHost); wrapper.appendChild(current.card); return wrapper;
+    current.section.appendChild(instancesHost); wrapper.appendChild(current.card); return wrapper;
   }
 
   function enhanceInspector(){
