@@ -1,0 +1,22 @@
+{
+  "action": "run",
+  "suite": "quick",
+  "engines": [
+    "event-fast-worker"
+  ],
+  "includeCurrentGraph": false,
+  "includeExamples": true,
+  "examples": [
+    "nested_transport_demo"
+  ],
+  "seeds": [
+    1
+  ],
+  "strictFinalParity": true,
+  "targetSimMs": 10000,
+  "maxWallMs": 1800,
+  "realStepMs": 16,
+  "maxLoops": 25000,
+  "saveArtifacts": true,
+  "artifactLabel": "repro-event-fast-worker__nested_transport_demo__seed-1"
+}

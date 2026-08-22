@@ -1,0 +1,292 @@
+{
+  "sampleStepMs": 250,
+  "sampleTimesSec": [
+    0,
+    0.25,
+    0.5,
+    0.75,
+    1,
+    1.25,
+    1.5,
+    1.75,
+    2,
+    2.25
+  ],
+  "sampleCount": 10,
+  "nodeCount": 16,
+  "changingNodeCount": 8,
+  "nodeStates": [
+    {
+      "key": "2:Equip 1A",
+      "nodeId": 2,
+      "label": "Equip 1A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "3:Equip 1B",
+      "nodeId": 3,
+      "label": "Equip 1B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    },
+    {
+      "key": "6:Equip 2A",
+      "nodeId": 6,
+      "label": "Equip 2A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "7:Equip 2B",
+      "nodeId": 7,
+      "label": "Equip 2B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    },
+    {
+      "key": "10:Equip 3A",
+      "nodeId": 10,
+      "label": "Equip 3A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "11:Equip 3B",
+      "nodeId": 11,
+      "label": "Equip 3B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    },
+    {
+      "key": "14:Equip 4A",
+      "nodeId": 14,
+      "label": "Equip 4A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "15:Equip 4B",
+      "nodeId": 15,
+      "label": "Equip 4B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    },
+    {
+      "key": "18:Equip 5A",
+      "nodeId": 18,
+      "label": "Equip 5A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "19:Equip 5B",
+      "nodeId": 19,
+      "label": "Equip 5B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    },
+    {
+      "key": "22:Equip 6A",
+      "nodeId": 22,
+      "label": "Equip 6A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "23:Equip 6B",
+      "nodeId": 23,
+      "label": "Equip 6B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    },
+    {
+      "key": "26:Equip 7A",
+      "nodeId": 26,
+      "label": "Equip 7A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "27:Equip 7B",
+      "nodeId": 27,
+      "label": "Equip 7B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    },
+    {
+      "key": "30:Equip 8A",
+      "nodeId": 30,
+      "label": "Equip 8A",
+      "sequence": [
+        "IDLE",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS",
+        "PROCESS"
+      ]
+    },
+    {
+      "key": "31:Equip 8B",
+      "nodeId": 31,
+      "label": "Equip 8B",
+      "sequence": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE"
+      ]
+    }
+  ]
+}

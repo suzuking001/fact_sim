@@ -1,0 +1,438 @@
+{
+  "engine": "event-fast",
+  "seed": 1,
+  "scenario": "sample_line1",
+  "sourceKind": "example",
+  "ok": true,
+  "status": "PASS",
+  "failures": [],
+  "warnings": [],
+  "metrics": {
+    "simTimeMs": 10100,
+    "wallMs": 13,
+    "loops": 625,
+    "nodeCount": 58,
+    "linkCount": 59,
+    "sinkCount": 3,
+    "totalCompleted": 0,
+    "liveProbeSimTimeMs": 0,
+    "liveProbeWallMs": 0,
+    "liveProbeLoops": 0,
+    "liveTimelineEntries": 0,
+    "liveTimelineSegments": 0
+  },
+  "liveFlowProbe": null,
+  "liveStateProbe": null,
+  "liveTimelineSignature": null,
+  "sinks": [
+    {
+      "id": 45,
+      "title": "Sink",
+      "completedCount": 0,
+      "throughputPerHour": 0
+    },
+    {
+      "id": 55,
+      "title": "Sink",
+      "completedCount": 0,
+      "throughputPerHour": 0
+    },
+    {
+      "id": 66,
+      "title": "Sink",
+      "completedCount": 0,
+      "throughputPerHour": 0
+    }
+  ],
+  "finalStateSnapshot": {
+    "nodeCount": 58,
+    "rows": [
+      {
+        "key": "1:Source",
+        "nodeId": 1,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "2:Basic Node",
+        "nodeId": 2,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "3:Basic Node",
+        "nodeId": 3,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "4:Basic Node",
+        "nodeId": 4,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "5:Basic Node",
+        "nodeId": 5,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "6:Basic Node",
+        "nodeId": 6,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "8:Basic Node",
+        "nodeId": 8,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "9:Basic Node",
+        "nodeId": 9,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "10:Basic Node",
+        "nodeId": 10,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "11:Source",
+        "nodeId": 11,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "12:Source",
+        "nodeId": 12,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "13:Basic Node",
+        "nodeId": 13,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "14:Basic Node",
+        "nodeId": 14,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "15:Basic Node",
+        "nodeId": 15,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "17:Basic Node",
+        "nodeId": 17,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "22:Source",
+        "nodeId": 22,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "23:Basic Node",
+        "nodeId": 23,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "24:Basic Node",
+        "nodeId": 24,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "25:Basic Node",
+        "nodeId": 25,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "26:Basic Node",
+        "nodeId": 26,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "27:Basic Node",
+        "nodeId": 27,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "28:Basic Node",
+        "nodeId": 28,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "29:Source",
+        "nodeId": 29,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "30:Basic Node",
+        "nodeId": 30,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "31:Basic Node",
+        "nodeId": 31,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "32:Basic Node",
+        "nodeId": 32,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "33:Basic Node",
+        "nodeId": 33,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "34:Basic Node",
+        "nodeId": 34,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "35:Basic Node",
+        "nodeId": 35,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "36:Basic Node",
+        "nodeId": 36,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "37:Basic Node",
+        "nodeId": 37,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "38:Basic Node",
+        "nodeId": 38,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "39:Basic Node",
+        "nodeId": 39,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "40:Basic Node",
+        "nodeId": 40,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "42:Basic Node",
+        "nodeId": 42,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "43:Source",
+        "nodeId": 43,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "44:Basic Node",
+        "nodeId": 44,
+        "label": "Basic Node",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "45:Sink",
+        "nodeId": 45,
+        "label": "Sink",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "46:AGV Route",
+        "nodeId": 46,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "47:AGV Route",
+        "nodeId": 47,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "48:AGV Route",
+        "nodeId": 48,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "49:AGV Route",
+        "nodeId": 49,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "50:AGV Route",
+        "nodeId": 50,
+        "label": "AGV Route",
+        "state": "workIn_idle_1|IDLE"
+      },
+      {
+        "key": "51:AGV Route",
+        "nodeId": 51,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "52:Equipment",
+        "nodeId": 52,
+        "label": "Equipment",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "53:Equipment",
+        "nodeId": 53,
+        "label": "Equipment",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "54:Source",
+        "nodeId": 54,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "55:Sink",
+        "nodeId": 55,
+        "label": "Sink",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "56:AGV Route",
+        "nodeId": 56,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "57:AGV Route",
+        "nodeId": 57,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "59:AGV Route",
+        "nodeId": 59,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "60:AGV Route",
+        "nodeId": 60,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "61:AGV Route",
+        "nodeId": 61,
+        "label": "AGV Route",
+        "state": "agvOut_wait|WAIT"
+      },
+      {
+        "key": "62:AGV Route",
+        "nodeId": 62,
+        "label": "AGV Route",
+        "state": "workIn_idle_1|IDLE"
+      },
+      {
+        "key": "63:Equipment",
+        "nodeId": 63,
+        "label": "Equipment",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "64:Equipment",
+        "nodeId": 64,
+        "label": "Equipment",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "65:Source",
+        "nodeId": 65,
+        "label": "Source",
+        "state": "idle|IDLE"
+      },
+      {
+        "key": "66:Sink",
+        "nodeId": 66,
+        "label": "Sink",
+        "state": "idle|IDLE"
+      }
+    ]
+  },
+  "finalWorkSnapshot": {
+    "activeLinkCount": 0,
+    "payloadCount": 0,
+    "observedLinkKeys": [],
+    "observedWorkRefs": []
+  },
+  "finalSinkSnapshot": [
+    {
+      "key": "45:Sink",
+      "id": 45,
+      "title": "Sink",
+      "completedCount": 0
+    },
+    {
+      "key": "55:Sink",
+      "id": 55,
+      "title": "Sink",
+      "completedCount": 0
+    },
+    {
+      "key": "66:Sink",
+      "id": 66,
+      "title": "Sink",
+      "completedCount": 0
+    }
+  ],
+  "finalEntityLedger": {
+    "uniqueCount": 0,
+    "refs": [],
+    "duplicateRefs": [],
+    "canonicalInstances": []
+  },
+  "attempts": 1,
+  "maxAttempts": 2,
+  "attemptStatuses": [
+    "PASS"
+  ],
+  "flaky": false
+}

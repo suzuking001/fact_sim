@@ -1,0 +1,10 @@
+{
+  "scenario": "current_graph",
+  "seed": 1,
+  "baselineEngine": "dt",
+  "candidateEngine": "event",
+  "completedDelta": 0,
+  "sinkCompletedDelta": [],
+  "finalStateDeltaCount": 0,
+  "workflowDeltaCount": 0
+}
