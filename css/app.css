@@ -5501,3 +5501,695 @@ body.sim-running.performance-adaptive #mobileNav,
 body.sim-running.performance-adaptive #tabletActionBar{
   background: rgba(248,250,253,0.98) !important;
 }
+
+/* ===== Compact functional workspace =====
+   Preserve the glass/Apple character while returning vertical space to the
+   graph and keeping workspace controls on one scannable line. */
+:root{
+  --sidebar-width: 324px;
+  --timeline-header: 50px;
+}
+
+/* ===== Basic Node process cycle editor ===== */
+.entityCycleCard{
+  overflow:hidden;
+  border-color:rgba(48,209,88,.18);
+  background:
+    radial-gradient(circle at 50% 32%, rgba(48,209,88,.075), transparent 34%),
+    rgba(255,255,255,.82);
+}
+.entityCycleCard .selectionInspectorSection{
+  gap:10px;
+}
+.entityCycleVisual{
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) 300px minmax(180px,1fr);
+  align-items:center;
+  gap:18px;
+  min-height:250px;
+  padding:10px 12px;
+  border:1px solid rgba(120,120,128,.12);
+  border-radius:20px;
+  background:rgba(248,250,252,.74);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+.entityCycleDonut{
+  position:relative;
+  z-index:1;
+  width:300px;
+  height:260px;
+  justify-self:center;
+  filter:drop-shadow(0 10px 18px rgba(15,23,42,.07));
+}
+.entityCycleDonut svg{
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+.entityCycleDonut circle{
+  transition:stroke-dasharray .2s ease,stroke-dashoffset .2s ease;
+}
+.entityCycleArrow{
+  fill:none;
+  stroke:rgba(255,255,255,.98);
+  stroke-width:2.4px;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter:drop-shadow(0 1px 1px rgba(15,23,42,.34));
+  pointer-events:none;
+}
+.entityCycleDirection{
+  display:block;
+  margin-top:3px;
+  color:#6e6e73;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.08em;
+  line-height:1;
+}
+.entityCycleCenter{
+  position:absolute;
+  z-index:3;
+  top:50%;
+  left:50%;
+  width:120px;
+  height:120px;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:50%;
+  background:rgba(255,255,255,.88);
+  box-shadow:0 8px 24px rgba(15,23,42,.08),inset 0 1px 0 #fff;
+  text-align:center;
+}
+.entityCycleCenter span{
+  color:#6e6e73;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+.entityCycleCenter strong{
+  color:#1d1d1f;
+  font-size:24px;
+  font-weight:760;
+  letter-spacing:-.035em;
+  line-height:1.05;
+}
+.entityCycleCenter small{
+  color:#86868b;
+  font-size:10px;
+}
+.entityCycleCenter .entityCycleDirection{
+  margin-top:3px;
+  color:#6e6e73;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.08em;
+  line-height:1;
+}
+.entityCycleLeader{
+  fill:none;
+  stroke:#8e8e93;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.entityCycleLeaderHalo{
+  fill:none;
+  stroke:rgba(255,255,255,.96);
+  stroke-width:5.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter:drop-shadow(0 1px 1px rgba(15,23,42,.13));
+  pointer-events:none;
+}
+.entityCycleLeader.is-process{stroke:#24b94f;}
+.entityCycleLeader.is-down{stroke:#0a84ff;}
+.entityCycleLeader.is-idle,
+.entityCycleLeader.is-wait{stroke:#c87908;}
+.entityCycleLeaderPoint{
+  fill:#fff;
+  stroke-width:2.2;
+  filter:drop-shadow(0 1px 1px rgba(15,23,42,.2));
+}
+.entityCycleLeaderPoint.is-process{stroke:#24b94f;}
+.entityCycleLeaderPoint.is-down{stroke:#0a84ff;}
+.entityCycleLeaderPoint.is-idle,
+.entityCycleLeaderPoint.is-wait{stroke:#c87908;}
+.entityCycleCalloutBox{
+  stroke-width:1;
+  filter:drop-shadow(0 2px 5px rgba(15,23,42,.08));
+}
+.entityCycleCalloutBox.is-process{
+  fill:#edfbf1;
+  stroke:rgba(36,185,79,.32);
+}
+.entityCycleCalloutBox.is-down{
+  fill:#edf6ff;
+  stroke:rgba(10,132,255,.32);
+}
+.entityCycleCalloutBox.is-idle,
+.entityCycleCalloutBox.is-wait{
+  fill:#fff7e8;
+  stroke:rgba(200,121,8,.3);
+}
+.entityCycleCalloutText{
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-anchor:middle;
+}
+.entityCycleCalloutText.is-process{fill:#16843a;}
+.entityCycleCalloutText.is-down{fill:#0969c8;}
+.entityCycleCalloutText.is-idle,
+.entityCycleCalloutText.is-wait{fill:#9a5a00;}
+.entityCycleInlineControls{
+  position:absolute;
+  z-index:4;
+  left:28%;
+  display:grid;
+  grid-template-columns:repeat(var(--control-count),minmax(0,1fr));
+  gap:5px;
+  width:72%;
+  height:30px;
+}
+.entityCycleInlineControls.is-process{top:1px;}
+.entityCycleInlineControls.is-down{bottom:1px;}
+.entityCycleInlineControl{
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:5px;
+  min-width:0;
+  height:30px;
+  padding:3px 7px;
+  border:1px solid color-mix(in srgb,var(--cycle-color) 28%,rgba(120,120,128,.14));
+  border-radius:9px;
+  background:color-mix(in srgb,var(--cycle-color) 7%,rgba(255,255,255,.94));
+  box-shadow:0 2px 6px rgba(15,23,42,.06),inset 0 1px 0 rgba(255,255,255,.92);
+}
+.entityCycleInlineControl.is-single{
+  grid-template-columns:minmax(0,1fr) auto;
+}
+.entityCycleInlineControl b{
+  color:color-mix(in srgb,var(--cycle-color) 72%,#1d1d1f);
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.02em;
+}
+.entityCycleInlineControl input{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  height:22px;
+  padding:0 5px;
+  border:0;
+  border-radius:5px;
+  outline:0;
+  appearance:textfield;
+  background:rgba(255,255,255,.72);
+  color:#1d1d1f;
+  font:760 13px/22px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  text-align:right;
+}
+.entityCycleInlineControl input::-webkit-inner-spin-button,
+.entityCycleInlineControl input::-webkit-outer-spin-button{
+  margin:0;
+  -webkit-appearance:none;
+}
+.entityCycleInlineControl input:focus{
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--cycle-color) 24%,transparent);
+}
+.entityCycleInlineControl input:disabled{opacity:.5;}
+.entityCycleInlineControl small{
+  color:#6e6e73;
+  font-size:9px;
+  font-weight:750;
+}
+.entityCycleConnections{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:0;
+}
+.entityCycleConnection{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:7px;
+  min-height:58px;
+  padding:8px 9px;
+  border:1px solid rgba(120,120,128,.13);
+  border-radius:14px;
+  background:rgba(255,255,255,.78);
+  box-shadow:0 5px 14px rgba(15,23,42,.045);
+}
+.entityCycleConnection.is-downstream{
+  grid-template-columns:auto minmax(0,1fr);
+}
+.entityCycleConnectionCaption{
+  align-self:end;
+  color:#6e6e73;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.entityCycleConnectionName{
+  grid-column:1;
+  min-width:0;
+  overflow:hidden;
+  color:#1d1d1f;
+  font-size:12px;
+  font-weight:650;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.entityCycleConnection.is-downstream .entityCycleConnectionCaption,
+.entityCycleConnection.is-downstream .entityCycleConnectionName{
+  grid-column:2;
+}
+.entityCycleState{
+  grid-column:2;
+  grid-row:1 / span 2;
+  display:flex;
+  min-width:58px;
+  min-height:40px;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-radius:11px;
+  background:rgba(255,159,10,.1);
+  color:#9a5a00;
+}
+.entityCycleConnection.is-downstream .entityCycleState{
+  grid-column:1;
+}
+.entityCycleState b{
+  font-size:10px;
+  letter-spacing:.05em;
+}
+.entityCycleState small{
+  margin-top:2px;
+  font-size:8px;
+  opacity:.72;
+}
+.entityCycleConnector{
+  position:absolute;
+  top:50%;
+  right:-16px;
+  z-index:1;
+  width:22px;
+  height:22px;
+  margin-top:-11px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(15,23,42,.08);
+  color:#86868b;
+  font-size:20px;
+  line-height:20px;
+  text-align:center;
+}
+.entityCycleConnection.is-downstream .entityCycleConnector{
+  right:auto;
+  left:-16px;
+}
+.entityCycleEditors{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:8px;
+}
+.entityCycleTimeField{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+  min-height:52px;
+  padding:8px 10px;
+  border:1px solid color-mix(in srgb,var(--cycle-color) 22%,transparent);
+  border-radius:14px;
+  background:color-mix(in srgb,var(--cycle-color) 5%,rgba(255,255,255,.88));
+}
+.entityCycleTimeHeading{
+  display:grid;
+  grid-template-columns:9px minmax(0,1fr);
+  align-items:center;
+  gap:1px 7px;
+  min-width:0;
+}
+.entityCycleTimeHeading i{
+  grid-row:1 / span 2;
+  width:9px;
+  height:28px;
+  border-radius:999px;
+  background:var(--cycle-color);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--cycle-color) 12%,transparent);
+}
+.entityCycleTimeHeading b{
+  overflow:hidden;
+  color:#1d1d1f;
+  font-size:11px;
+  letter-spacing:.045em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.entityCycleTimeHeading small{
+  overflow:hidden;
+  color:#86868b;
+  font-size:9px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.entityCycleTimeInput{
+  display:flex;
+  align-items:baseline;
+  gap:4px;
+  flex:0 0 auto;
+  padding:4px 7px;
+  border:1px solid rgba(120,120,128,.14);
+  border-radius:10px;
+  background:rgba(255,255,255,.9);
+}
+.entityCycleTimeInput input{
+  width:62px;
+  padding:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#1d1d1f;
+  font:700 16px/1.2 "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  text-align:right;
+}
+.entityCycleTimeInput input:disabled{
+  opacity:.5;
+}
+.entityCycleTimeInput span{
+  color:#86868b;
+  font-size:9px;
+  font-weight:700;
+}
+@media(max-width:1180px){
+  .entityCycleVisual{
+    grid-template-columns:minmax(150px,1fr) 250px minmax(150px,1fr);
+    gap:12px;
+  }
+  .entityCycleDonut{width:250px;height:217px;}
+  .entityCycleCenter{width:104px;height:104px;}
+  .entityCycleCenter strong{font-size:21px;}
+}
+@media(max-width:760px){
+  .entityCycleVisual{
+    grid-template-columns:1fr 1fr;
+    min-height:0;
+  }
+  .entityCycleDonut{
+    grid-column:1 / -1;
+    grid-row:1;
+    width:240px;
+    height:208px;
+  }
+  .entityCycleConnections{grid-row:2;}
+  .entityCycleCenter{width:100px;height:100px;}
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar{
+  width: var(--sidebar-width);
+  padding: 10px 9px 10px;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(60,60,67,0.24) transparent;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar::before{
+  height: 64px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebarHeader{
+  box-sizing: border-box;
+  height: 52px;
+  min-height: 52px;
+  padding: 8px 10px;
+  margin: 0;
+  border-radius: 18px;
+  box-shadow: 0 9px 22px rgba(15,23,42,0.045), inset 0 1px 0 rgba(255,255,255,0.48);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebarHeader .appBrandRow{
+  gap: 10px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebarHeader .appLogo{
+  width: 34px;
+  height: 34px;
+  padding: 5px;
+  border-radius: 11px;
+  box-shadow: 0 6px 14px rgba(15,23,42,0.07);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebarHeader .appBrandText{
+  font-size: .92rem;
+  letter-spacing: .15em;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar #controls,
+body:not(.mobile-ui):not(.tablet-ui) #sidebar #fileControls,
+body:not(.mobile-ui):not(.tablet-ui) #backgroundPanel,
+body:not(.mobile-ui):not(.tablet-ui) #addNodePanel,
+body:not(.mobile-ui):not(.tablet-ui) #addGroupPanel,
+body:not(.mobile-ui):not(.tablet-ui) #advancedPanel,
+body:not(.mobile-ui):not(.tablet-ui) #shortcutPanel{
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 18px;
+  box-shadow: 0 9px 22px rgba(15,23,42,0.045), inset 0 1px 0 rgba(255,255,255,0.44);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #controls .panelHeader,
+body:not(.mobile-ui):not(.tablet-ui) #fileControls .panelHeader,
+body:not(.mobile-ui):not(.tablet-ui) #addNodePanel .panelHeader,
+body:not(.mobile-ui):not(.tablet-ui) #addGroupPanel .panelHeader,
+body:not(.mobile-ui):not(.tablet-ui) #advancedPanel .panelHeader,
+body:not(.mobile-ui):not(.tablet-ui) #shortcutPanel .panelHeader,
+body:not(.mobile-ui):not(.tablet-ui) #backgroundPanel .panelHeader{
+  min-height: 24px;
+  font-size: 10px;
+  letter-spacing: .12em;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar .control-group,
+body:not(.mobile-ui):not(.tablet-ui) #sidebar .field{
+  gap: 5px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar input,
+body:not(.mobile-ui):not(.tablet-ui) #sidebar select,
+body:not(.mobile-ui):not(.tablet-ui) #sidebar textarea{
+  min-height: 36px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar button{
+  min-height: 34px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 12px;
+  box-shadow: 0 5px 13px rgba(15,23,42,0.045), inset 0 1px 0 rgba(255,255,255,0.5) !important;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar .btn-row{
+  gap: 7px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar .fieldHint{
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #sidebar .exampleSaveActions{
+  margin-top: 2px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .simStatusCard{
+  gap: 7px;
+  padding: 9px 10px;
+  border-radius: 15px;
+  box-shadow: 0 7px 18px rgba(15,23,42,0.045);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .simStatusBadge{
+  min-height: 21px;
+  padding: 0 8px;
+  font-size: 10px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .simStatusGrid{
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .simStatusItem{
+  min-width: 0;
+  gap: 3px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .simStatusItem strong{
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .quickStartCard{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 10px;
+  padding: 8px 10px;
+  border-radius: 15px;
+  box-shadow: 0 7px 18px rgba(15,23,42,0.04);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .quickStartTitle{
+  font-size: 12px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .quickStartSteps{
+  display: none;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) .quickStartHint{
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader{
+  box-sizing: border-box;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  grid-template-areas: "left meta actions";
+  height: var(--timeline-header);
+  min-height: var(--timeline-header);
+  padding: 5px 10px;
+  gap: 10px;
+  flex: 0 0 var(--timeline-header);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineHeaderLeft{
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineTitle{
+  font-size: 9px;
+  letter-spacing: .11em;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineTabs{
+  flex-wrap: nowrap;
+  padding: 3px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineTab{
+  min-height: 30px;
+  padding: 0 11px;
+  font-size: 11px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineSelection,
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelinePropsMeta{
+  width: auto;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineActions{
+  justify-self: end;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 6px;
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineActions::-webkit-scrollbar{
+  display: none;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineBtn{
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 11px;
+  box-shadow: 0 4px 11px rgba(15,23,42,0.04) !important;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineBody{
+  flex: 1 1 auto;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #timelineDock{
+  box-shadow: 0 -8px 24px rgba(15,23,42,0.045);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #editorTopHud{
+  top: 8px;
+  gap: 8px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #editorTopHud #simTimeHud,
+body:not(.mobile-ui):not(.tablet-ui) #editorRunHud{
+  border-radius: 15px;
+  box-shadow: 0 9px 24px rgba(15,23,42,0.065);
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #editorTopHud #simTimeHud{
+  min-width: 144px;
+  padding: 7px 11px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #editorRunHud{
+  gap: 6px;
+  padding: 5px 6px;
+}
+
+body:not(.mobile-ui):not(.tablet-ui) #editorRunHud #btnStart,
+body:not(.mobile-ui):not(.tablet-ui) #editorRunHud #btnReset,
+body:not(.mobile-ui):not(.tablet-ui) .editorRunSpeed{
+  min-height: 36px;
+  border-radius: 11px;
+}
+
+@media (max-width: 1180px){
+  :root{ --sidebar-width: 304px; }
+
+  body:not(.mobile-ui):not(.tablet-ui) #timelineHeader{
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "left actions"
+      "meta meta";
+    height: auto;
+    min-height: 78px;
+    flex-basis: 78px;
+    padding: 6px 9px;
+    gap: 5px 8px;
+  }
+
+  body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineTitle{
+    display: none;
+  }
+}

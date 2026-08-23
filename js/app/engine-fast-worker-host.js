@@ -3,9 +3,9 @@ var App = window.App || (window.App = {});
 (function(){
   const WORKER_MODE = 'event-fast-worker';
   const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260803b';
-  const UNSAFE_WORKER_TYPES = new Set([
-    'factory/carrierroute',
-    'factory/shuttle_stage'
+  const UNSAFE_BASIC_PRESETS = new Set([
+    'carrier_route',
+    'shuttle'
   ]);
 
   function cloneJson(value){
@@ -261,7 +261,8 @@ var App = window.App || (window.App = {});
     const nodes = Array.isArray(graphData && graphData.nodes) ? graphData.nodes : [];
     for(const node of nodes){
       const type = String(node && node.type || '').toLowerCase();
-      if(UNSAFE_WORKER_TYPES.has(type)) return true;
+      const preset = String(node && node.properties && node.properties.presetId || '').toLowerCase();
+      if(type === 'factory/basic' && UNSAFE_BASIC_PRESETS.has(preset)) return true;
     }
     return false;
   }

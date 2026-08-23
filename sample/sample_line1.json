@@ -39,13 +39,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -114,13 +113,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -187,7 +185,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -202,7 +199,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -244,13 +242,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -319,13 +316,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -394,13 +390,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -467,7 +462,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -482,7 +476,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -524,13 +519,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -599,13 +593,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -674,13 +667,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -749,13 +741,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -822,7 +813,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -837,7 +827,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -879,13 +870,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -952,7 +942,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -967,7 +956,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1015,14 +1005,13 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "processTime2": 2,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -1102,13 +1091,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1177,13 +1165,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1258,14 +1245,13 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "processTime2": 2,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -1345,13 +1331,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1420,13 +1405,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1495,13 +1479,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1570,13 +1553,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1651,14 +1633,13 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "processTime2": 2,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -1738,13 +1719,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1813,13 +1793,12 @@
       "properties": {
         "processTime": 20,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1888,13 +1867,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2002,13 +1980,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 3,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2143,13 +2120,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2218,13 +2194,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2291,7 +2266,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -2306,7 +2280,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2348,13 +2323,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2429,14 +2403,13 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "processTime2": 2,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -2516,13 +2489,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2623,13 +2595,12 @@
       "properties": {
         "processTime": 4,
         "downTime": 0.5,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\n\n\n// work: Work object (work.id, work.type など)\n// signalArr: sigIn の配列\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // デフォルト\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// true を返すとこのワークを受け入れて PROCESS に入る\nreturn true;\n",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\n\n\n// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // default\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// Return true to accept this work item and enter PROCESS\nreturn true;\n",
         "sigExtra": 2,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2742,13 +2713,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2808,7 +2778,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "sink",
-        "legacySourceType": "factory/sink",
         "initialContents": [],
         "inputRules": [
           {
@@ -2863,7 +2832,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -2878,7 +2846,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2927,7 +2896,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3003,7 +2971,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3063,7 +3030,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "sink",
-        "legacySourceType": "factory/sink",
         "initialContents": [],
         "inputRules": [
           {
@@ -3169,7 +3135,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -3218,7 +3183,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3310,7 +3276,6 @@
         "agvIds": "AGV-1",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -3359,7 +3324,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3398,7 +3364,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -3413,7 +3378,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -3477,7 +3443,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -3526,7 +3491,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3618,7 +3584,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -3667,7 +3632,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3700,7 +3666,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "sink",
-        "legacySourceType": "factory/sink",
         "initialContents": [],
         "inputRules": [
           {
@@ -3764,7 +3729,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3883,7 +3847,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -3932,7 +3895,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3981,7 +3945,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -4072,7 +4035,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -4121,7 +4083,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4214,7 +4177,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -4263,7 +4225,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4355,7 +4318,6 @@
         "agvIds": "AGV-2",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -4404,7 +4366,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4443,7 +4406,6 @@
         "flipIO": false,
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -4458,7 +4420,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -4525,7 +4488,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -4574,7 +4536,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4641,7 +4604,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -4690,7 +4652,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -4756,7 +4719,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -4805,7 +4767,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -4853,14 +4816,13 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 0,
         "sigEnabled": true,
         "flipIO": false,
         "processTime2": 2,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -4962,7 +4924,6 @@
         "agvIds": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/agvroute",
         "initialContents": [],
         "inputRules": [
           {
@@ -5011,7 +4972,8 @@
             },
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "transportMode": "agv"
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"

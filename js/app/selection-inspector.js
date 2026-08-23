@@ -587,6 +587,7 @@ var App = window.App || (window.App = {});
       const isComplex = Array.isArray(value) || isObjectLike(value);
       const isLongText = typeof value === 'string' && (value.length > 80 || value.indexOf('\n') >= 0 || key === 'text');
       const wrap = this.field(schema?.label || key, isScript || isComplex || isLongText);
+      wrap.dataset.propertyKey = key;
 
       const commit = (next)=>{
         if(next === value) return true;

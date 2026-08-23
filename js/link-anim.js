@@ -176,6 +176,8 @@ class LinkAnimator{
     this._visibleHits = [];
     this._hoverAnim = null;
     this._hoverRenderedAt = 0;
+    this._workVisualKeys = new WeakMap();
+    this._nextWorkVisualKey = 1;
   }
   clear(graph){
     if(!graph){
@@ -390,10 +392,49 @@ class LinkAnimator{
     return isInput ? LiteGraph.LEFT : LiteGraph.RIGHT;
   }
   _entityKey(type, info){
-    if(String(type || '').toLowerCase() !== 'work' || !info || info.id == null) return '';
+    if(String(type || '').toLowerCase() !== 'work' || !info) return '';
+    const entity = info.entity;
+    if(entity && (typeof entity === 'object' || typeof entity === 'function')){
+      let key = this._workVisualKeys.get(entity);
+      if(!key){
+        key = `entity:${this._nextWorkVisualKey++}`;
+        this._workVisualKeys.set(entity, key);
+      }
+      return key;
+    }
+    if(info.instanceId != null && String(info.instanceId)) return `instance:${String(info.instanceId)}`;
+    if(info.id == null) return '';
     const id = String(info.id);
     const workType = String(info.t ?? info.type ?? '');
     return `${id}\u0000${workType}`;
+  }
+  _matchesWorkInfo(candidate, info){
+    if(!candidate || typeof candidate !== 'object' || !info) return false;
+    const candidateId = candidate.id ?? candidate.instanceId ?? candidate.displayId;
+    const candidateType = candidate.type ?? candidate.t ?? candidate.typeId ?? candidate.name;
+    const infoId = info.id ?? info.instanceId ?? info.displayId;
+    const infoType = info.t ?? info.type ?? info.typeId ?? info.name;
+    if(infoId != null && candidateId != null && String(infoId) !== String(candidateId)) return false;
+    if(infoType != null && candidateType != null && String(infoType) !== String(candidateType)) return false;
+    return infoId != null || infoType != null;
+  }
+  _workEntityForLink(graph, linkId, info, preferOrigin){
+    const link = graph?.links?.[linkId];
+    if(!link) return null;
+    const originNode = graph.getNodeById?.(link.origin_id);
+    const targetNode = graph.getNodeById?.(link.target_id);
+    const candidatesFor = (node, origin)=> origin
+      ? [node?._payload, node?._currentWork, node?._pendingWork, node?._activeRoot, node?._offer?.instance]
+      : [node?._payload, node?._currentWork, node?._activeRoot, node?._incomingPayload, node?._offer?.instance];
+    const ordered = preferOrigin
+      ? [...candidatesFor(originNode, true), ...candidatesFor(targetNode, false)]
+      : [...candidatesFor(targetNode, false), ...candidatesFor(originNode, true)];
+    return ordered.find((candidate)=> this._matchesWorkInfo(candidate, info)) || null;
+  }
+  _withWorkEntity(graph, linkId, type, info, preferOrigin){
+    if(String(type || '').toLowerCase() !== 'work' || !info || info.entity) return info;
+    const entity = this._workEntityForLink(graph, linkId, info, !!preferOrigin);
+    return entity ? { ...info, entity } : info;
   }
   _bezierPoint(start, startDir, end, endDir, t){
     const dist = Math.hypot(end[0]-start[0], end[1]-start[1]);
@@ -424,7 +465,8 @@ class LinkAnimator{
     return [x,y];
   }
   spawn(graph, linkId, type, durationMs, info){
-    if(!graph || !linkId) return;
+    if(!graph || linkId == null) return;
+    info = this._withWorkEntity(graph, linkId, type, info, false);
     const now = getNow();
     const duration = durationMs || defaultDuration;
     const processTimed = Number.isFinite(Number(durationMs)) && Number(durationMs) > 0;
@@ -484,7 +526,8 @@ class LinkAnimator{
     this._trimTransient();
   }
   showPortIcon(graph, linkId, type, info){
-    if(!graph || !linkId) return;
+    if(!graph || linkId == null) return;
+    info = this._withWorkEntity(graph, linkId, type, info, true);
     const existing = this.animations.find(anim=>(
       anim.tail &&
       anim.graph === graph &&
@@ -511,6 +554,115 @@ class LinkAnimator{
   }
   hidePortIcon(graph, linkId){
     this.animations = this.animations.filter(anim=>!(anim.tail && anim.graph===graph && anim.linkId===linkId));
+  }
+  _waitingWork(node){
+    if(!node || String(node._state || '').toUpperCase() !== 'WAIT') return null;
+    const legacyWork = node._payload || node._currentWork || null;
+    if(legacyWork){
+      // During a hand-off the sender can remain WAIT until the next execution
+      // pass even though the Store already moved the entity downstream. Do not
+      // revive a sender-side icon in that short interval.
+      try{
+        const store = window.App?.entityStoreForGraph?.(node.graph);
+        const stored = store?.get?.(legacyWork);
+        if(stored?.locationNodeId != null && String(stored.locationNodeId) !== String(node.id)) return null;
+      }catch(_e){}
+      return legacyWork;
+    }
+
+    // Native Basic Nodes keep their runtime entity in _activeRoot. Only use it
+    // for work entities; carrier/container visuals have their own render paths.
+    const activeRoot = node._activeRoot || node._offer?.instance || null;
+    if(!activeRoot) return null;
+    try{
+      const store = window.App?.entityStoreForGraph?.(node.graph);
+      const instance = store?.get?.(activeRoot) || activeRoot;
+      const category = String(store?.typeOf?.(instance)?.category || instance?.category || '').toLowerCase();
+      return category === 'work' ? instance : null;
+    }catch(_e){
+      return null;
+    }
+  }
+  _waitingWorkInfo(work){
+    if(!work) return null;
+    const id = work.id ?? work.instanceId ?? work.displayId ?? '';
+    const type = work.type ?? work.t ?? work.typeId ?? work.name ?? '';
+    if(id === '' && type === '') return null;
+    return {
+      id,
+      t: type,
+      entity: work,
+      instanceId: work.instanceId,
+      typeId: work.typeId,
+      attributes: work.attributes
+    };
+  }
+  _waitingOutputLinks(node){
+    if(!node || !node.graph) return [];
+    const graph = node.graph;
+    const rememberedKeys = ['_waitIconLinks', '_waitIconLinksBranch', '_waitIconLinksSplit'];
+    for(const key of rememberedKeys){
+      const remembered = Array.isArray(node[key]) ? node[key] : [];
+      const valid = remembered.filter((linkId)=>{
+        const link = graph.links?.[linkId];
+        return !!link && link.origin_id === node.id;
+      });
+      if(valid.length) return valid;
+    }
+
+    const connected = [];
+    for(let slot = 0; slot < (node.outputs?.length || 0); slot++){
+      const output = node.outputs[slot];
+      if(!Array.isArray(output?.links) || !output.links.length) continue;
+      const descriptor = `${output.name || ''} ${output.type || ''}`.toLowerCase();
+      if(!descriptor.includes('work') && !descriptor.includes('entity')) continue;
+      for(const linkId of output.links){
+        const link = graph.links?.[linkId];
+        if(link && link.origin_id === node.id) connected.push(linkId);
+      }
+    }
+    // With one connected work output there is no routing ambiguity. Multi-port
+    // nodes retain the exact route captured by their transition handler above.
+    return connected.length === 1 ? connected : [];
+  }
+  _reconcileWaitingWorkIcons(graph){
+    if(!graph || !Array.isArray(graph._nodes)) return;
+    const desired = [];
+    const waitingEntityKeys = new Set();
+    for(const node of graph._nodes){
+      const work = this._waitingWork(node);
+      const info = this._waitingWorkInfo(work);
+      if(!info) continue;
+      const entityKey = this._entityKey('work', info);
+      if(!entityKey) continue;
+      const linkIds = this._waitingOutputLinks(node);
+      if(!linkIds.length) continue;
+      waitingEntityKeys.add(entityKey);
+      for(const linkId of linkIds) desired.push({ linkId, info });
+    }
+    if(!desired.length) return;
+
+    // WAIT plus Current Contents is authoritative. Any remaining transient for
+    // these entities is stale. One filter for the whole graph keeps this pass
+    // inexpensive even on large models.
+    this.animations = this.animations.filter((anim)=>{
+      if(!anim || anim.graph !== graph || anim.tail) return true;
+      return !waitingEntityKeys.has(this._entityKey(anim.type, anim.info));
+    });
+
+    const tailsByLink = new Map();
+    for(const anim of this.animations){
+      if(anim && anim.tail && anim.graph === graph && anim.type === 'work') tailsByLink.set(anim.linkId, anim);
+    }
+    for(const { linkId, info } of desired){
+      const existing = tailsByLink.get(linkId);
+      if(existing){
+        existing.info = info;
+        existing._tailMiss = 0;
+      }else{
+        this.showPortIcon(graph, linkId, 'work', info);
+      }
+    }
   }
   _adaptiveRenderPolicy(canvas){
     const graph = canvas && canvas.graph;
@@ -549,6 +701,10 @@ class LinkAnimator{
   }
   draw(canvas, ctx){
     if(!canvas || !ctx) return;
+    // The node/store state is the source of truth. Transition callbacks create
+    // the normal fast path, while this pass repairs icons lost through a visual
+    // reset, graph redraw, or a high-speed stop between animation frames.
+    this._reconcileWaitingWorkIcons(canvas.graph);
     if(!this.animations.length){
       this._visibleHits.length = 0;
       this._hideTooltip();

@@ -214,7 +214,7 @@ class MergeNode extends EquipmentNode{
     const durationMs = Math.max(0, sec * 1000);
     this._state = 'PROCESS';
     this._until = now + durationMs;
-    this._triggerProcessAnimation(slot, durationMs, { id: w.id, t: w.type });
+    this._triggerProcessAnimation(slot, durationMs, { id: w.id, t: w.type, entity: w });
 
     if(durationMs === 0) return true;
     return false;

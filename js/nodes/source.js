@@ -1,8 +1,8 @@
 // Source node (simple: downstream READY -> supply immediately)
 /*
- * SourceNode（供給ノード）
- * - 接続先が IDLE/READY なら順番に Work を生成
- * - 信号ポートは任意数追加可能（sigExtra）
+ * SourceNode (supply node)
+ * - Generates Work items in sequence while the downstream node is IDLE/READY.
+ * - Supports any number of optional signal ports through sigExtra.
  */
 
 class SourceNode extends LiteGraph.LGraphNode{
@@ -80,7 +80,7 @@ class SourceNode extends LiteGraph.LGraphNode{
   _animateWorkOutput(work){
     const out = this.outputs && this.outputs[0];
     if(!work || !out || !Array.isArray(out.links) || !window.WorkLinkAnimator || !this.graph) return;
-    const info = { id: work.id, t: work.type };
+    const info = { id: work.id, t: work.type, entity: work };
     for(const lid of out.links){
       const link = this.graph.links && this.graph.links[lid];
       if(!link) continue;

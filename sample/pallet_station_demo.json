@@ -3,51 +3,8 @@
   "last_link_id": 14,
   "nodes": [
     {
-      "id": 4,
-      "type": "factory/palletcarrierconfig",
-      "pos": [
-        -250,
-        261
-      ],
-      "size": [
-        201.60000610351562,
-        26
-      ],
-      "inputs": [],
-      "outputs": [],
-      "title": "Pallet Carrier Config IN",
-      "properties": {
-        "carrierId": "Carrier-IN",
-        "palletCapacity": 1,
-        "palletWorkCapacity": 4,
-        "initialPalletIds": "P-1"
-      }
-    },
-    {
-      "id": 5,
-      "type": "factory/palletcarrierconfig",
-      "pos": [
-        -233,
-        438
-      ],
-      "size": [
-        210,
-        26
-      ],
-      "order": 1,
-      "inputs": [],
-      "outputs": [],
-      "title": "Pallet Carrier Config OUT",
-      "properties": {
-        "carrierId": "Carrier-OUT",
-        "palletCapacity": 2,
-        "palletWorkCapacity": 4,
-        "initialPalletIds": ""
-      }
-    },
-    {
       "id": 2,
-      "type": "factory/carrierroute",
+      "type": "factory/basic",
       "pos": [
         128.6999969482422,
         322.70013427734375
@@ -62,12 +19,14 @@
           "name": "carrierIn1",
           "type": "AGV",
           "link": 11,
-          "slot_index": 0
+          "slot_index": 0,
+          "portId": "in-1"
         },
         {
           "name": "palletIn1",
           "type": "PALLET",
-          "link": 14
+          "link": 14,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -79,7 +38,8 @@
           ],
           "slot_index": 0,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "palletOut1",
@@ -88,7 +48,8 @@
             2
           ],
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "Carrier Route IN",
@@ -96,12 +57,116 @@
         "processTime": 1,
         "downTime": 0.3,
         "initialCarrier": "Carrier-IN",
-        "outSequence": ""
+        "outSequence": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "transportMode": "carrier",
+        "migratedCarrierConfigs": [
+          {
+            "nodeId": 4,
+            "properties": {
+              "carrierId": "Carrier-IN",
+              "palletCapacity": 1,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": "P-1"
+            },
+            "configKind": "pallet-carrier"
+          },
+          {
+            "nodeId": 5,
+            "properties": {
+              "carrierId": "Carrier-OUT",
+              "palletCapacity": 2,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": ""
+            },
+            "configKind": "pallet-carrier"
+          }
+        ],
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-2"
+            ],
+            "toPortId": "out-2"
+          }
+        ]
       }
     },
     {
       "id": 9,
-      "type": "factory/carrierroute",
+      "type": "factory/basic",
       "pos": [
         437,
         320
@@ -118,12 +183,14 @@
         {
           "name": "carrierIn1",
           "type": "AGV",
-          "link": 5
+          "link": 5,
+          "portId": "in-1"
         },
         {
           "name": "palletIn1",
           "type": "PALLET",
-          "link": null
+          "link": null,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -135,14 +202,16 @@
           ],
           "slot_index": 0,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "palletOut1",
           "type": "PALLET",
           "links": null,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "Carrier Route",
@@ -150,12 +219,116 @@
         "processTime": 5,
         "downTime": 3,
         "initialCarrier": "",
-        "outSequence": ""
+        "outSequence": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "transportMode": "carrier",
+        "migratedCarrierConfigs": [
+          {
+            "nodeId": 4,
+            "properties": {
+              "carrierId": "Carrier-IN",
+              "palletCapacity": 1,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": "P-1"
+            },
+            "configKind": "pallet-carrier"
+          },
+          {
+            "nodeId": 5,
+            "properties": {
+              "carrierId": "Carrier-OUT",
+              "palletCapacity": 2,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": ""
+            },
+            "configKind": "pallet-carrier"
+          }
+        ],
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-2"
+            ],
+            "toPortId": "out-2"
+          }
+        ]
       }
     },
     {
       "id": 8,
-      "type": "factory/carrierroute",
+      "type": "factory/basic",
       "pos": [
         779,
         652
@@ -179,7 +352,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "palletIn1",
@@ -191,7 +365,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -210,7 +385,8 @@
           "__flipActive": true,
           "slot_index": 0,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "palletOut1",
@@ -224,7 +400,8 @@
           "dir": 3,
           "__flipActive": true,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "Carrier Route",
@@ -233,12 +410,116 @@
         "downTime": 3,
         "initialCarrier": "",
         "outSequence": "",
-        "flipIO": true
+        "flipIO": true,
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "transportMode": "carrier",
+        "migratedCarrierConfigs": [
+          {
+            "nodeId": 4,
+            "properties": {
+              "carrierId": "Carrier-IN",
+              "palletCapacity": 1,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": "P-1"
+            },
+            "configKind": "pallet-carrier"
+          },
+          {
+            "nodeId": 5,
+            "properties": {
+              "carrierId": "Carrier-OUT",
+              "palletCapacity": 2,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": ""
+            },
+            "configKind": "pallet-carrier"
+          }
+        ],
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-2"
+            ],
+            "toPortId": "out-2"
+          }
+        ]
       }
     },
     {
       "id": 10,
-      "type": "factory/carrierroute",
+      "type": "factory/basic",
       "pos": [
         467,
         652
@@ -262,7 +543,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "palletIn1",
@@ -274,7 +556,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -293,7 +576,8 @@
           "__flipActive": true,
           "slot_index": 0,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "palletOut1",
@@ -307,7 +591,8 @@
           "dir": 3,
           "__flipActive": true,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "Carrier Route",
@@ -316,12 +601,116 @@
         "downTime": 3,
         "initialCarrier": "",
         "outSequence": "",
-        "flipIO": true
+        "flipIO": true,
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "transportMode": "carrier",
+        "migratedCarrierConfigs": [
+          {
+            "nodeId": 4,
+            "properties": {
+              "carrierId": "Carrier-IN",
+              "palletCapacity": 1,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": "P-1"
+            },
+            "configKind": "pallet-carrier"
+          },
+          {
+            "nodeId": 5,
+            "properties": {
+              "carrierId": "Carrier-OUT",
+              "palletCapacity": 2,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": ""
+            },
+            "configKind": "pallet-carrier"
+          }
+        ],
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-2"
+            ],
+            "toPortId": "out-2"
+          }
+        ]
       }
     },
     {
       "id": 11,
-      "type": "factory/carrierroute",
+      "type": "factory/basic",
       "pos": [
         151,
         662
@@ -345,7 +734,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "palletIn1",
@@ -357,7 +747,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -376,7 +767,8 @@
           "__flipActive": true,
           "slot_index": 0,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "palletOut1",
@@ -390,7 +782,8 @@
           "dir": 3,
           "__flipActive": true,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "Carrier Route",
@@ -399,12 +792,116 @@
         "downTime": 3,
         "initialCarrier": "",
         "outSequence": "",
-        "flipIO": true
+        "flipIO": true,
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "transportMode": "carrier",
+        "migratedCarrierConfigs": [
+          {
+            "nodeId": 4,
+            "properties": {
+              "carrierId": "Carrier-IN",
+              "palletCapacity": 1,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": "P-1"
+            },
+            "configKind": "pallet-carrier"
+          },
+          {
+            "nodeId": 5,
+            "properties": {
+              "carrierId": "Carrier-OUT",
+              "palletCapacity": 2,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": ""
+            },
+            "configKind": "pallet-carrier"
+          }
+        ],
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-2"
+            ],
+            "toPortId": "out-2"
+          }
+        ]
       }
     },
     {
       "id": 3,
-      "type": "factory/carrierroute",
+      "type": "factory/basic",
       "pos": [
         763.5360107421875,
         338.4256286621094
@@ -418,12 +915,14 @@
         {
           "name": "carrierIn1",
           "type": "AGV",
-          "link": 6
+          "link": 6,
+          "portId": "in-1"
         },
         {
           "name": "palletIn1",
           "type": "PALLET",
-          "link": null
+          "link": null,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -435,7 +934,8 @@
           ],
           "slot_index": 0,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         },
         {
           "name": "palletOut1",
@@ -443,7 +943,8 @@
           "links": null,
           "slot_index": 1,
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-2"
         }
       ],
       "title": "Carrier Route OUT",
@@ -451,12 +952,116 @@
         "processTime": 1,
         "downTime": 0.3,
         "initialCarrier": "Carrier-OUT",
-        "outSequence": ""
+        "outSequence": "",
+        "basicNodeVersion": 1,
+        "presetId": "carrier_route",
+        "transportMode": "carrier",
+        "migratedCarrierConfigs": [
+          {
+            "nodeId": 4,
+            "properties": {
+              "carrierId": "Carrier-IN",
+              "palletCapacity": 1,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": "P-1"
+            },
+            "configKind": "pallet-carrier"
+          },
+          {
+            "nodeId": 5,
+            "properties": {
+              "carrierId": "Carrier-OUT",
+              "palletCapacity": 2,
+              "palletWorkCapacity": 4,
+              "initialPalletIds": ""
+            },
+            "configKind": "pallet-carrier"
+          }
+        ],
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "carrier"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "carrier"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-2"
+            ],
+            "toPortId": "out-2"
+          }
+        ]
       }
     },
     {
       "id": 6,
-      "type": "factory/station",
+      "type": "factory/basic",
       "pos": [
         124,
         43
@@ -477,7 +1082,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         },
         {
           "name": "palletIn",
@@ -489,7 +1095,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-2"
         }
       ],
       "outputs": [
@@ -507,7 +1114,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-1"
         },
         {
           "name": "palletOut",
@@ -523,7 +1131,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-2"
         }
       ],
       "title": "Station",
@@ -531,12 +1140,93 @@
         "processTime": 1,
         "downTime": 1,
         "palletWorkCapacity": 4,
-        "flipIO": true
+        "flipIO": true,
+        "basicNodeVersion": 1,
+        "presetId": "station",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          },
+          {
+            "ruleId": "migrated-input-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-2"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          },
+          {
+            "ruleId": "migrated-output-2",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "container"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "container"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-2"
+            ],
+            "toPortId": "out-2"
+          }
+        ]
       }
     },
     {
       "id": 1,
-      "type": "factory/source",
+      "type": "factory/basic",
       "pos": [
         296.8421936035156,
         62.45530319213867
@@ -555,17 +1245,45 @@
             1
           ],
           "__lastSet": null,
-          "__animToken": null
+          "__animToken": null,
+          "portId": "out-1"
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B,C"
+        "sequence": "A,B,C",
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "sourceMode": "work",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "available"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
       }
     },
     {
       "id": 7,
-      "type": "factory/sink",
+      "type": "factory/basic",
       "pos": [
         -270,
         35
@@ -586,18 +1304,42 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": true
+        "flipIO": true,
+        "basicNodeVersion": 1,
+        "presetId": "sink",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "always"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": []
       }
     },
     {
       "id": 12,
-      "type": "factory/equip",
+      "type": "factory/basic",
       "pos": [
         -90,
         48
@@ -618,7 +1360,8 @@
           ],
           "_flipPrevDir": null,
           "dir": 4,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "in-1"
         }
       ],
       "outputs": [
@@ -635,14 +1378,59 @@
           ],
           "_flipPrevDir": null,
           "dir": 3,
-          "__flipActive": true
+          "__flipActive": true,
+          "portId": "out-1"
         }
       ],
       "title": "Equipment",
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "flipIO": true
+        "flipIO": true,
+        "basicNodeVersion": 1,
+        "presetId": "machine",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "migrated-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "migrated-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "process-complete"
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
       }
     }
   ],
@@ -753,5 +1541,90 @@
       "timelineView": "chart",
       "timelineHeight": 220
     }
+  },
+  "__factSimEntityModel": {
+    "schemaVersion": 1,
+    "types": [
+      {
+        "typeId": "type-pallet-4",
+        "name": "Pallet 4",
+        "category": "container",
+        "subtype": "Pallet",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 4,
+        "allowedContentTypeIds": [
+          "type-a",
+          "type-b",
+          "type-c"
+        ],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-carrier-in",
+        "name": "Carrier-IN",
+        "category": "carrier",
+        "subtype": "Carrier",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 1,
+        "allowedContentTypeIds": [
+          "type-pallet-4"
+        ],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-carrier-out",
+        "name": "Carrier-OUT",
+        "category": "carrier",
+        "subtype": "Carrier",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 2,
+        "allowedContentTypeIds": [
+          "type-pallet-4"
+        ],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-a",
+        "name": "A",
+        "category": "work",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-b",
+        "name": "B",
+        "category": "work",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-c",
+        "name": "C",
+        "category": "work",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      }
+    ]
   }
 }

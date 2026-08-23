@@ -123,7 +123,7 @@ class JoinNode extends EquipmentNode{
       if(!window.WorkLinkAnimator || !this.graph) return;
       const port = this.inputs && this.inputs[slotIndex];
       if(!port || port.link == null) return;
-      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type } : null;
+      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type, entity: work } : null;
       window.WorkLinkAnimator.spawn(this.graph, port.link, 'work', durationMs, info);
     }catch(_e){}
   }

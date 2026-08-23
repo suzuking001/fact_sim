@@ -21,6 +21,7 @@
 
   let ready = false;
   let opening = false;
+  let startupFailed = false;
   let pendingFileOpen = false;
   let progress = 0;
   let progressTarget = 8;
@@ -101,23 +102,23 @@
   }
 
   function markReady(){
-    if(ready || !isWorkspaceReady()) return false;
+    if(ready || startupFailed || !isWorkspaceReady()) return false;
     ready = true;
     progressTarget = 100;
     setProgress(100);
     body.classList.add('landing-choice-ready');
     body.classList.remove('landing-choice-pending');
     setStatus(
-      '準備ができました',
-      '目的に合う開始方法を選んでください。',
-      '選択できます'
+      'Ready',
+      'Choose how you would like to begin.',
+      'Choose an option'
     );
     setActionsEnabled(true);
     return true;
   }
 
   function scheduleReadyPoll(){
-    if(ready || body.classList.contains('landing-hidden')) return;
+    if(ready || startupFailed || body.classList.contains('landing-hidden')) return;
     if(markReady()) return;
     pollHandle = window.setTimeout(scheduleReadyPoll, 180);
   }
@@ -145,8 +146,12 @@
     window.initGraph();
 
     const nodes = Array.isArray(App.graph && App.graph._nodes) ? App.graph._nodes : [];
-    const equipment = nodes.find((node)=> node && node.type === 'factory/equip');
-    const sink = LiteGraph.createNode('factory/sink');
+    const equipment = nodes.find((node)=> node && node.type === 'factory/basic' && node.properties?.presetId === 'machine');
+    const sink = LiteGraph.createNode('factory/basic');
+    if(sink){
+      sink.properties.presetId = 'sink';
+      sink.onPropertyChanged('presetId');
+    }
     if(!equipment || !sink) throw new Error('Starter graph nodes could not be created');
     sink.pos = [660, 180];
     if(typeof window.enforceNodeOverlayMinSize === 'function'){
@@ -192,9 +197,9 @@
     if(!fileInput) throw new Error('File picker is unavailable');
     pendingFileOpen = true;
     setStatus(
-      'JSONファイルを選択してください',
-      '選択をキャンセルした場合は、この画面に戻ります。',
-      'ファイル選択'
+      'Select a JSON file',
+      'If you cancel the file picker, you will return to this screen.',
+      'Choose File'
     );
     fileInput.click();
   }
@@ -209,9 +214,9 @@
     opening = true;
     setActionsEnabled(false);
     setStatus(
-      action === 'sample' ? 'Sample Line2を読み込んでいます...' : '新しいグラフを作成しています...',
-      '開始状態を準備しています。',
-      '準備中'
+      action === 'sample' ? 'Loading Sample Line 2...' : 'Creating a new graph...',
+      'Preparing the initial workspace.',
+      'Preparing'
     );
     try{
       if(action === 'sample') await openSample();
@@ -227,12 +232,35 @@
     opening = false;
     pendingFileOpen = false;
     setStatus(
-      '開始できませんでした',
-      (err && err.message) ? err.message : 'もう一度お試しください。',
-      'エラー'
+      'Unable to start',
+      (err && err.message) ? err.message : 'Please try again.',
+      'Error'
     );
     setActionsEnabled(true);
   }
+
+  function handleStartupError(err){
+    if(ready || startupFailed || body.classList.contains('landing-hidden')) return;
+    startupFailed = true;
+    if(pollHandle) window.clearTimeout(pollHandle);
+    setProgress(Math.min(96, Math.max(1, progress)));
+    setStatus(
+      'Unable to start the simulator',
+      (err && err.message) ? err.message : 'Reload the page to retry with the latest application files.',
+      'Startup error'
+    );
+    setActionsEnabled(false);
+  }
+
+  window.addEventListener('error', (event)=>{
+    const fileName = String(event && event.filename || '');
+    if(!event?.error || (fileName && !fileName.startsWith(window.location.origin))) return;
+    handleStartupError(event.error);
+  });
+  window.addEventListener('unhandledrejection', (event)=>{
+    const reason = event && event.reason;
+    handleStartupError(reason instanceof Error ? reason : new Error(String(reason || 'Application initialization failed.')));
+  });
 
   actionButtons.forEach((button)=>{
     button.addEventListener('click', ()=> runAction(String(button.dataset.landingAction || '')));
@@ -243,16 +271,16 @@
       if(!pendingFileOpen) return;
       if(!fileInput.files || !fileInput.files.length){
         pendingFileOpen = false;
-        setStatus('準備ができました', '目的に合う開始方法を選んでください。', '選択できます');
+        setStatus('Ready', 'Choose how you would like to begin.', 'Choose an option');
         return;
       }
       opening = true;
       setActionsEnabled(false);
-      setStatus('JSONファイルを開いています...', 'グラフを検証して読み込んでいます。', '読込中');
+      setStatus('Opening JSON file...', 'Validating and loading the graph.', 'Loading');
     }, true);
     fileInput.addEventListener('cancel', ()=>{
       pendingFileOpen = false;
-      setStatus('準備ができました', '目的に合う開始方法を選んでください。', '選択できます');
+      setStatus('Ready', 'Choose how you would like to begin.', 'Choose an option');
       setActionsEnabled(true);
     });
   }
@@ -272,7 +300,7 @@
   window.addEventListener('factsim:file-load-failed', (event)=>{
     if(!pendingFileOpen && !opening) return;
     const message = event && event.detail && event.detail.message;
-    handleActionError(new Error(message || 'JSONファイルを読み込めませんでした'));
+    handleActionError(new Error(message || 'The JSON file could not be loaded.'));
   });
 
   window.addEventListener('focus', ()=>{
@@ -281,7 +309,7 @@
       if(!pendingFileOpen || opening) return;
       if(fileInput && fileInput.files && fileInput.files.length) return;
       pendingFileOpen = false;
-      setStatus('準備ができました', '目的に合う開始方法を選んでください。', '選択できます');
+      setStatus('Ready', 'Choose how you would like to begin.', 'Choose an option');
       setActionsEnabled(true);
     }, 220);
   });
@@ -296,7 +324,7 @@
   });
 
   function tick(){
-    if(ready || body.classList.contains('landing-hidden')) return;
+    if(ready || startupFailed || body.classList.contains('landing-hidden')) return;
     const gain = reduceMotion ? 0.42 : 0.14;
     const step = Math.max(reduceMotion ? 0.8 : 0.22, (progressTarget - progress) * gain);
     setProgress(Math.min(96, progress + step));
@@ -304,7 +332,7 @@
   }
 
   setProgress(0);
-  setStatus('シミュレーターを準備しています...', '開始方法を選べるように、編集機能を読み込んでいます。', '起動中');
+  setStatus('Preparing the simulator...', 'Loading the editor so you can choose how to begin.', 'Starting');
   window.requestAnimationFrame(tick);
   scheduleReadyPoll();
 

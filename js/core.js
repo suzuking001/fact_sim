@@ -554,6 +554,7 @@ function _buildNodeHoverPropertyRows(node){
   let schema = null;
   try{ schema = typeof node.getInspectorSchema === 'function' ? node.getInspectorSchema() : null; }catch(_e){}
   const visible = keys.slice(0, 6).map((key)=>({
+    key,
     label: String(schema?.[key]?.label || key),
     value: _nodeHoverPropertyValue(key, props[key])
   }));
@@ -720,11 +721,11 @@ function _wrapOverlayText(ctx, text, maxWidth){
 }
 
 const NODE_STATE_PALETTE = Object.freeze({
-  IDLE:    { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f' },
-  PROCESS: { title: '#d6f5e3', body: '#f4fcf8', accent: '#2ecc71' },
-  WAIT:    { title: '#fee8c7', body: '#fff8ee', accent: '#f39c12' },
-  DOWN:    { title: '#d8ecfb', body: '#f4fafe', accent: '#3498db' },
-  ERROR:   { title: '#ffd9df', body: '#fff4f6', accent: '#dc4c64' }
+  IDLE:    { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f', ink: '#7a5b00' },
+  PROCESS: { title: '#d6f5e3', body: '#f4fcf8', accent: '#2ecc71', ink: '#117a45' },
+  WAIT:    { title: '#fee8c7', body: '#fff8ee', accent: '#f39c12', ink: '#9a5800' },
+  DOWN:    { title: '#d8ecfb', body: '#f4fafe', accent: '#3498db', ink: '#17699e' },
+  ERROR:   { title: '#ffd9df', body: '#fff4f6', accent: '#dc4c64', ink: '#b4233c' }
 });
 
 const OVERLAY_PALETTE = Object.freeze({
@@ -743,6 +744,124 @@ function _getOverlayPalette(){
 function _getNodeStatePalette(state){
   const key = String(state || 'IDLE').toUpperCase();
   return NODE_STATE_PALETTE[key] || NODE_STATE_PALETTE.IDLE;
+}
+
+function _compactOverlayState(node, lines){
+  const direct = node && (node._state ?? node._stateName);
+  if(direct != null && String(direct).trim()) return String(direct).trim().toUpperCase();
+  const stateLine = (Array.isArray(lines) ? lines : []).find((line)=>/^state\s*:/i.test(String(line || '')));
+  const raw = stateLine ? String(stateLine).replace(/^state\s*:\s*/i, '').split(/[\s(]/)[0] : '';
+  return String(raw || 'IDLE').trim().toUpperCase();
+}
+
+function _compactOverlayWork(node, lines){
+  const entity = node && (node._currentWork || node._payload || node._activeRoot);
+  if(entity && typeof entity === 'object'){
+    const id = entity.instanceId ?? entity.id ?? entity.workId ?? entity.palletId ?? entity.carrierId;
+    const typeId = entity.typeId ?? entity.type ?? entity.workType ?? entity.kind;
+    let type = typeId;
+    let category = '';
+    try{
+      const typeDef = typeId != null && window.App?.entityModelForGraph
+        ? window.App.entityModelForGraph(node?.graph || window.App?.graph)?.get?.(typeId)
+        : null;
+      if(typeDef){
+        type = typeDef.name || typeId;
+        category = String(typeDef.category || '');
+      }
+    }catch(_e){}
+    return {
+      id: id == null || String(id).trim() === '' ? '' : String(id),
+      type: type == null || String(type).trim() === '' ? '' : String(type),
+      category
+    };
+  }
+  const workLine = (Array.isArray(lines) ? lines : []).find((line)=>/^work\s*:/i.test(String(line || '')));
+  if(!workLine || /\(none\)|\bnone\b/i.test(String(workLine))) return null;
+  const text = String(workLine).replace(/^work\s*:\s*/i, '');
+  const idMatch = text.match(/\bID\s*=\s*([^\s]+)/i);
+  const typeMatch = text.match(/\bType\s*=\s*(.+)$/i);
+  return {
+    id: idMatch ? String(idMatch[1]).trim() : '',
+    type: typeMatch ? String(typeMatch[1]).trim() : '',
+    category: 'work'
+  };
+}
+
+function _compactOverlayExtra(lines){
+  const rows = [];
+  for(const [index, raw] of (Array.isArray(lines) ? lines : []).entries()){
+    const text = String(raw || '').trim();
+    if(!text || /^(?:state|work|remain|proc(?:ess)?|down|sig)\s*(?:\(|:)/i.test(text)) continue;
+    if(/^tip\s*:/i.test(text) || /^properties\s*:?$/i.test(text) || /^-\s+/.test(text)) continue;
+    const normalized = text.replace(/^shuttle\s+group\s*:/i, 'Group ').replace(/^([^:]{1,18}):\s*/, '$1 ');
+    if(!normalized || rows.some((row)=>row.text === normalized)) continue;
+    const priority = /^(?:shuttle\s+)?group\s*:/i.test(text) ? 0
+      : /^(?:contents|queue|inputs?|routes?|pallet|received|next|downstream)\b/i.test(text) ? 1
+      : /^preset\s*:/i.test(text) ? 8
+      : /rules?\s*:/i.test(text) ? 9
+      : 4;
+    rows.push({ text: normalized, priority, index });
+  }
+  rows.sort((a, b)=>(a.priority - b.priority) || (a.index - b.index));
+  return rows[0]?.text || '';
+}
+
+function _formatCompactSeconds(value){
+  const seconds = Number(value);
+  if(!isFinite(seconds)) return '';
+  const rounded = Math.round(seconds * 10) / 10;
+  return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)} s`;
+}
+
+function _buildCompactOverlayModel(node, lines){
+  const state = _compactOverlayState(node, lines);
+  const work = _compactOverlayWork(node, lines);
+  const extra = _compactOverlayExtra(lines);
+  const now = (typeof simNow === 'function') ? simNow() : 0;
+  const until = Number(node && node._until);
+  const remainingSec = isFinite(until) ? Math.max(0, until - now) / 1000 : 0;
+  const processSec = Number(node?.properties?.processTime);
+  const downSec = Number(node?.properties?.downTime);
+  const activeDuration = state === 'PROCESS'
+    ? (isFinite(processSec) ? Math.max(0, processSec) : 0)
+    : (state === 'DOWN' && isFinite(downSec) ? Math.max(0, downSec) : 0);
+  const progress = activeDuration > 0
+    ? _overlayClamp(1 - (remainingSec / activeDuration), 0, 1)
+    : (state === 'WAIT' ? 1 : 0);
+  const statusText = ({
+    IDLE: 'Available',
+    PROCESS: _formatCompactSeconds(remainingSec),
+    WAIT: 'Output ready',
+    DOWN: _formatCompactSeconds(remainingSec),
+    TRANSFER: 'Moving',
+    ERROR: 'Check details'
+  })[state] || '';
+  const entityLabel = work?.category === 'carrier'
+    ? 'Carrier'
+    : (work?.category === 'container' ? 'Container' : 'Work');
+  const primary = work
+    ? (work.id ? (/\s#\d+$/.test(work.id) ? work.id : `${entityLabel} #${work.id}`) : `${entityLabel} in process`)
+    : ({
+        IDLE: 'Ready for input',
+        PROCESS: 'Processing',
+        WAIT: 'Waiting for output',
+        DOWN: 'Recovering',
+        TRANSFER: 'Transferring',
+        ERROR: 'Attention required'
+      })[state] || 'No active work';
+  const details = [];
+  if(work?.type && !String(work.id || '').startsWith(`${work.type} #`)) details.push(`Type ${work.type}`);
+  if(extra) details.push(extra);
+  if(!extra && isFinite(processSec) && processSec > 0) details.push(`Cycle ${_formatCompactSeconds(processSec)}`);
+  if(!details.length) details.push(state === 'IDLE' ? 'Waiting for entity' : 'Runtime status');
+  return {
+    state,
+    primary,
+    secondary: details.slice(0, 2).join('  ·  '),
+    statusText,
+    progress
+  };
 }
 
 function _drawCanvasCard(ctx, x, y, width, height, radius){
@@ -784,8 +903,9 @@ function _scoreCompactOverlayLine(text){
   if(/^state\s*:/.test(s)) return 0;
   if(/^work\s*:/.test(s)) return 1;
   if(/^remain/.test(s)) return 2;
+  if(/^(?:shuttle\s+)?group\s*:/.test(s)) return 2;
   if(/^proc/.test(s) || /^process/.test(s) || /^down/.test(s)) return 3;
-  if(/^tph/.test(s) || /^ratio/.test(s) || /^downstream/.test(s) || /^next/.test(s)) return 4;
+  if(/^tph/.test(s) || /^ratio/.test(s) || /^downstream/.test(s) || /^next/.test(s) || /^(?:contents|queue|inputs?|routes?|pallet|received)\b/.test(s)) return 4;
   if(/^sig/.test(s)) return 8;
   if(/^properties/.test(s)) return 20;
   if(/^\- /.test(s)) return 21;
@@ -892,40 +1012,24 @@ function _measureOverlayPortBottom(node){
 function _getCompactOverlayLayout(ctx, node, lines){
   const safeLines = Array.isArray(lines) ? lines.map(v => String(v)) : [];
   if(!safeLines.length) return null;
-  ctx.font = '10.5px sans-serif';
-  const lineHeight = 11;
-  const padX = 6;
-  const padY = 4;
+  const model = _buildCompactOverlayModel(node, safeLines);
+  const padX = 8;
+  const padY = 6;
   const outerPad = 5;
   const titleGap = 20;
   const width = Number(node.size && node.size[0]) || 0;
   const height = Number(node.size && node.size[1]) || 0;
   const portBottom = _measureOverlayPortBottom(node);
   const contentTop = Math.max(titleGap, portBottom + 4);
-  const availableWidth = Math.max(64, width - outerPad * 2);
-  const availableHeight = Math.max(lineHeight + padY * 2, height - contentTop - outerPad);
-  const wrapped = [];
-  let preferredTextWidth = 0;
-  let naturalTextWidth = 0;
-  for(const raw of safeLines){
-    naturalTextWidth = Math.max(naturalTextWidth, ctx.measureText(String(raw)).width);
-    const rows = _wrapOverlayText(ctx, String(raw), Math.max(16, availableWidth - padX * 2));
-    for(const row of rows){
-      wrapped.push(row);
-      preferredTextWidth = Math.max(preferredTextWidth, ctx.measureText(String(row)).width);
-    }
-  }
-  if(!wrapped.length) return null;
-  const targetInnerWidth = Math.max(96, Math.min(170, Math.ceil(naturalTextWidth)));
-  const boxWidth = Math.max(72, Math.min(availableWidth, Math.max(Math.ceil(preferredTextWidth + padX * 2), targetInnerWidth + padX * 2)));
-  const maxLines = Math.max(1, Math.floor((availableHeight - padY * 2) / lineHeight));
-  const visible = wrapped.slice(0, maxLines);
-  const boxHeight = visible.length * lineHeight + padY * 2;
-  const boxX = Math.max(outerPad, outerPad + Math.floor((availableWidth - boxWidth) * 0.5));
+  const availableWidth = Math.max(80, width - outerPad * 2);
+  const availableHeight = Math.max(40, height - contentTop - outerPad);
+  const desiredHeight = 56;
+  const boxWidth = availableWidth;
+  const boxHeight = Math.max(40, Math.min(desiredHeight, availableHeight));
+  const boxX = outerPad;
   const boxY = contentTop;
   return {
-    lines: visible,
-    lineHeight,
+    model,
     padX,
     padY,
     boxX,
@@ -933,42 +1037,192 @@ function _getCompactOverlayLayout(ctx, node, lines){
     boxWidth,
     boxHeight,
     textMaxWidth: Math.max(12, boxWidth - padX * 2),
-    minWidth: Math.ceil(Math.max(128, outerPad * 2 + targetInnerWidth + padX * 2)),
-    minHeight: Math.ceil(contentTop + outerPad + wrapped.length * lineHeight + padY * 2)
+    minWidth: 164,
+    minHeight: Math.ceil(contentTop + outerPad + desiredHeight)
   };
 }
 
 function _drawCompactLinesInsideNode(ctx, node, lines){
   const layout = _getCompactOverlayLayout(ctx, node, lines);
   if(!layout) return;
-  const palette = _getNodeStatePalette(node && node._state);
+  const model = layout.model;
+  const palette = _getNodeStatePalette(model.state);
   const overlay = _getOverlayPalette();
   const scale = _getCurrentCanvasScale();
   const lowScale = scale < 0.78;
   ctx.save();
   try{
-    ctx.font = '10.5px Inter, ui-sans-serif, system-ui, sans-serif';
-    ctx.shadowColor = lowScale ? 'transparent' : overlay.shadow;
-    ctx.shadowBlur = lowScale ? 0 : 8;
-    ctx.shadowOffsetY = lowScale ? 0 : 2;
-    ctx.fillStyle = lowScale ? overlay.cardFill : overlay.cardFill;
-    _drawCanvasCard(ctx, layout.boxX, layout.boxY, layout.boxWidth, layout.boxHeight, 8);
+    ctx.shadowColor = lowScale ? 'transparent' : 'rgba(15,23,42,0.10)';
+    ctx.shadowBlur = lowScale ? 0 : 5;
+    ctx.shadowOffsetY = lowScale ? 0 : 1.5;
+    ctx.fillStyle = 'rgba(255,255,255,0.90)';
+    _drawCanvasCard(ctx, layout.boxX, layout.boxY, layout.boxWidth, layout.boxHeight, 7);
     ctx.fill();
     ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = lowScale ? overlay.cardStroke : overlay.cardStroke;
+    ctx.strokeStyle = 'rgba(100,116,139,0.18)';
     ctx.lineWidth = lowScale ? Math.min(2.2, 1 / Math.max(scale, 0.45)) : 1;
-    _drawCanvasCard(ctx, layout.boxX + 0.5, layout.boxY + 0.5, layout.boxWidth - 1, layout.boxHeight - 1, 8);
+    _drawCanvasCard(ctx, layout.boxX + 0.5, layout.boxY + 0.5, layout.boxWidth - 1, layout.boxHeight - 1, 7);
     ctx.stroke();
+
+    const contentX = layout.boxX + layout.padX;
+    const contentRight = layout.boxX + layout.boxWidth - layout.padX;
+    const chipY = layout.boxY + 6;
+    const chipHeight = 14;
+    ctx.font = '700 8px Inter, ui-sans-serif, system-ui, sans-serif';
+    const stateWidth = Math.ceil(ctx.measureText(model.state).width) + 19;
+    ctx.save();
+    ctx.globalAlpha = 0.14;
     ctx.fillStyle = palette.accent;
-    _drawCanvasCard(ctx, layout.boxX + 1.5, layout.boxY + 1.5, 3, Math.max(10, layout.boxHeight - 3), 2);
+    _drawCanvasCard(ctx, contentX, chipY, stateWidth, chipHeight, 999);
     ctx.fill();
-    ctx.fillStyle = overlay.text;
-    ctx.textBaseline = 'top';
-    let yy = layout.boxY + layout.padY;
-    for(const raw of layout.lines){
-      ctx.fillText(_trimOverlayText(ctx, String(raw), layout.textMaxWidth), layout.boxX + layout.padX, yy, layout.textMaxWidth);
-      yy += layout.lineHeight;
+    ctx.restore();
+    ctx.fillStyle = palette.accent;
+    ctx.beginPath();
+    ctx.arc(contentX + 7, chipY + chipHeight * 0.5, 2.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = palette.ink || overlay.text;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(model.state, contentX + 12, chipY + chipHeight * 0.5);
+
+    if(model.statusText){
+      ctx.fillStyle = '#64748b';
+      ctx.font = '600 8.5px Inter, ui-sans-serif, system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(_trimOverlayText(ctx, model.statusText, Math.max(36, layout.boxWidth - stateWidth - 28)), contentRight, chipY + chipHeight * 0.5);
     }
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#172033';
+    ctx.font = '650 10.5px Inter, ui-sans-serif, system-ui, sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText(_trimOverlayText(ctx, model.primary, layout.textMaxWidth), contentX, layout.boxY + 24, layout.textMaxWidth);
+
+    ctx.fillStyle = '#667085';
+    ctx.font = '8.5px Inter, ui-sans-serif, system-ui, sans-serif';
+    ctx.fillText(_trimOverlayText(ctx, model.secondary, layout.textMaxWidth), contentX, layout.boxY + 38, layout.textMaxWidth);
+
+    const trackX = contentX;
+    const trackY = layout.boxY + layout.boxHeight - 5;
+    const trackWidth = Math.max(8, layout.boxWidth - layout.padX * 2);
+    ctx.fillStyle = 'rgba(148,163,184,0.20)';
+    _drawCanvasCard(ctx, trackX, trackY, trackWidth, 2.5, 999);
+    ctx.fill();
+    const fillWidth = trackWidth * _overlayClamp(model.progress, 0, 1);
+    if(fillWidth > 0.5){
+      ctx.fillStyle = palette.accent;
+      _drawCanvasCard(ctx, trackX, trackY, fillWidth, 2.5, 999);
+      ctx.fill();
+    }
+  }finally{
+    ctx.restore();
+  }
+}
+
+function _nodeHoverCycleEntries(node, prefix){
+  const props = node?.properties && typeof node.properties === 'object' ? node.properties : {};
+  const pattern = new RegExp(`^${prefix}(?:\\d+)?$`);
+  const keys = Object.keys(props).filter((key)=>pattern.test(key));
+  if(!keys.includes(prefix) && Object.prototype.hasOwnProperty.call(props, prefix)) keys.unshift(prefix);
+  return Array.from(new Set(keys)).sort((a, b)=>{
+    if(a === prefix) return -1;
+    if(b === prefix) return 1;
+    return (Number(a.replace(prefix, '')) || 1) - (Number(b.replace(prefix, '')) || 1);
+  }).map((key, index)=>({
+    key,
+    label:`${prefix === 'processTime' ? 'P' : 'D'}${index + 1}`,
+    value:Math.max(0, Number(props[key]) || 0)
+  }));
+}
+
+function _buildNodeHoverCycleModel(node){
+  const process = _nodeHoverCycleEntries(node, 'processTime');
+  const down = _nodeHoverCycleEntries(node, 'downTime');
+  const processTotal = process.reduce((sum, entry)=>sum + entry.value, 0);
+  const downTotal = down.reduce((sum, entry)=>sum + entry.value, 0);
+  const total = processTotal + downTotal;
+  if(total <= 0) return null;
+  const processColors = ['#30d158','#18b94f','#0f9f43','#67d986'];
+  const downColors = ['#0a84ff','#3a9cff','#006edc','#69b6ff'];
+  return {
+    process,
+    down,
+    processTotal,
+    downTotal,
+    total,
+    segments:[
+      ...process.map((entry, index)=>({ ...entry, kind:'process', color:processColors[index % processColors.length] })),
+      ...down.map((entry, index)=>({ ...entry, kind:'down', color:downColors[index % downColors.length] }))
+    ]
+  };
+}
+
+function _nodeHoverCycleTime(value){
+  const rounded = Math.round((Math.max(0, Number(value) || 0)) * 100) / 100;
+  return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded} s`;
+}
+
+function _drawNodeHoverCycle(ctx, model, x, y, width, unit){
+  if(!model) return;
+  const centerX = x + (45 * unit);
+  const centerY = y + (39 * unit);
+  const radius = 28 * unit;
+  const stroke = 9 * unit;
+  ctx.save();
+  try{
+    ctx.lineCap = 'butt';
+    ctx.lineWidth = stroke;
+    ctx.strokeStyle = 'rgba(148,163,184,0.20)';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    let angle = Math.PI;
+    for(const segment of model.segments){
+      if(segment.value <= 0) continue;
+      const next = angle + ((segment.value / model.total) * Math.PI * 2);
+      ctx.strokeStyle = segment.color;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, angle, next, false);
+      ctx.stroke();
+      angle = next;
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#64748b';
+    ctx.font = `800 ${7 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.fillText('CYCLE', centerX, centerY - (7 * unit));
+    ctx.fillStyle = '#0f172a';
+    ctx.font = `750 ${14 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.fillText(_nodeHoverCycleTime(model.total), centerX, centerY + (6 * unit));
+
+    const legendX = x + (91 * unit);
+    const legendWidth = Math.max(90 * unit, width - (91 * unit));
+    const drawLegend = (kind, total, entries, top, color, fill)=>{
+      ctx.fillStyle = fill;
+      _drawCanvasCard(ctx, legendX, top, legendWidth, 31 * unit, 7 * unit);
+      ctx.fill();
+      ctx.fillStyle = color;
+      _drawCanvasCard(ctx, legendX + (7 * unit), top + (7 * unit), 4 * unit, 17 * unit, 2 * unit);
+      ctx.fill();
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#334155';
+      ctx.font = `800 ${8.5 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      ctx.fillText(kind, legendX + (17 * unit), top + (10 * unit));
+      ctx.textAlign = 'right';
+      ctx.fillStyle = color;
+      ctx.font = `750 ${10 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      ctx.fillText(_nodeHoverCycleTime(total), legendX + legendWidth - (8 * unit), top + (10 * unit));
+      const detail = entries.length > 1
+        ? entries.map((entry)=>`${entry.label} ${_nodeHoverCycleTime(entry.value)}`).join('  ·  ')
+        : (kind === 'PROCESS' ? 'Processing time' : 'Recovery time');
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#64748b';
+      ctx.font = `${7.5 * unit}px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      ctx.fillText(_trimOverlayText(ctx, detail, legendWidth - (25 * unit)), legendX + (17 * unit), top + (22 * unit), legendWidth - (25 * unit));
+    };
+    drawLegend('PROCESS', model.processTotal, model.process, y + (3 * unit), '#16843a', 'rgba(48,209,88,0.09)');
+    drawLegend('DOWN', model.downTotal, model.down, y + (38 * unit), '#0969c8', 'rgba(10,132,255,0.09)');
   }finally{
     ctx.restore();
   }
@@ -993,18 +1247,26 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
   const title = String(node?.title || node?.type || 'Node');
   const metaText = _nodeHoverMeta(node);
   const stateText = _nodeHoverState(node);
-  const runtimeRows = _buildNodeHoverRuntimeRows(lines);
+  const cycleModel = _buildNodeHoverCycleModel(node);
+  const runtimeRows = _buildNodeHoverRuntimeRows(lines).filter((row)=>{
+    if(!cycleModel) return true;
+    return !/^(?:proc(?:ess)?|down)(?:\d+|n)?(?:\(s\))?$/i.test(String(row.label || ''));
+  });
   const propertyModel = _buildNodeHoverPropertyRows(node);
-  const propertyRows = propertyModel.rows;
+  const propertyRows = propertyModel.rows.filter((row)=>{
+    if(!cycleModel) return true;
+    return !/^(?:processTime|downTime)\d*$/i.test(String(row.key || ''));
+  });
   const headerHeight = 42 * unit;
   const sectionLabelHeight = 14 * unit;
+  const cycleHeight = cycleModel ? sectionLabelHeight + (76 * unit) + (6 * unit) : 0;
   const runtimeHeight = runtimeRows.length ? sectionLabelHeight + runtimeRows.length * (17 * unit) + (6 * unit) : 0;
   const propertyLineCount = Math.ceil(propertyRows.length / 2);
   const propertyHeight = propertyRows.length
     ? sectionLabelHeight + propertyLineCount * (22 * unit) + (propertyModel.hiddenCount ? 14 * unit : 0) + (6 * unit)
     : 0;
   const footerHeight = 28 * unit;
-  const boxHeight = pad + headerHeight + runtimeHeight + propertyHeight + footerHeight;
+  const boxHeight = pad + headerHeight + cycleHeight + runtimeHeight + propertyHeight + footerHeight;
   const sectionWidth = boxWidth - pad * 2;
   ctx.save();
   try{
@@ -1070,6 +1332,12 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
       ctx.fillText(label, contentX, yy, sectionWidth);
       yy += sectionLabelHeight;
     };
+
+    if(cycleModel){
+      drawSectionLabel('PROCESS CYCLE');
+      _drawNodeHoverCycle(ctx, cycleModel, contentX, yy, sectionWidth, unit);
+      yy += 82 * unit;
+    }
 
     if(runtimeRows.length){
       drawSectionLabel('RUNTIME');

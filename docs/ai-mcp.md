@@ -52,18 +52,20 @@ Example:
     {
       "action": "add",
       "ref": "src",
-      "nodeType": "factory/source",
+      "nodeType": "factory/basic",
       "title": "Source",
       "x": 0,
-      "y": 0
+      "y": 0,
+      "properties": { "presetId": "source", "sourceMode": "work" }
     },
     {
       "action": "add",
       "ref": "eq1",
-      "nodeType": "factory/equip",
+      "nodeType": "factory/basic",
       "title": "Equipment",
       "x": 180,
-      "y": 0
+      "y": 0,
+      "properties": { "presetId": "machine" }
     },
     {
       "action": "connect",

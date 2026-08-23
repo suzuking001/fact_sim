@@ -1417,17 +1417,19 @@ window.beginGroupPlacement = beginGroupPlacement;
       { key:'contentCapacity', label:'Capacity', type:'number', min:1, step:1, default:1 }
     ]},
     equip:{
-      type:'factory/equip',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Equipment', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'machine', options:['machine'] },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
     note:{
-      type:'factory/note',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Memo', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'note', options:['note'] },
         { key:'text', label:'Text', type:'textarea', rows:6, default:'Equipment memo...' },
         { key:'fontSize', label:'Font Size (px)', type:'number', min:10, max:64, step:1, default:13 },
         { key:'backgroundColor', label:'Background Color', type:'color', default:'#f8fafc' },
@@ -1435,9 +1437,10 @@ window.beginGroupPlacement = beginGroupPlacement;
       ]
     },
     signal:{
-      type:'factory/signal',
+      type:'factory/basic',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Signal', target:'title' }
+        { key:'title', label:'Title', type:'text', default:'Signal', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'signal', options:['signal'] }
       ]
     },
     shuttle:{
@@ -1449,33 +1452,39 @@ window.beginGroupPlacement = beginGroupPlacement;
       ]
     },
     merge:{
-      type:'factory/merge',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Merge', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'merge', options:['merge'] },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'processTime2', label:'Process Time N (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
     join:{
-      type:'factory/join',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Join', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'join', options:['join'] },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:5 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:6 }
       ]
     },
     source:{
-      type:'factory/source',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Source', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'source', options:['source'] },
+        { key:'sourceMode', label:'Source Mode', type:'select', default:'work', options:['work'] },
         { key:'sequence', label:'Sequence (comma separated)', type:'textarea', default:'A,B' }
       ]
     },
     entitysource:{
-      type:'factory/entitysource',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Entity Source', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'source', options:['source'] },
+        { key:'sourceMode', label:'Source Mode', type:'select', default:'entity', options:['entity'] },
         { key:'rootKind', label:'Root Kind', type:'select', default:'container', options:['pallet', 'carrier', 'container', 'ship'] },
         { key:'rootId', label:'Root ID', type:'text', default:'Container-1' },
         { key:'capacity', label:'Child Capacity', type:'number', min:0, step:1, default:20 },
@@ -1484,50 +1493,37 @@ window.beginGroupPlacement = beginGroupPlacement;
       ]
     },
     sink:{
-      type:'factory/sink',
+      type:'factory/basic',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Sink', target:'title' }
+        { key:'title', label:'Title', type:'text', default:'Sink', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'sink', options:['sink'] }
       ]
     },
     split:{
-      type:'factory/split',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Split', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'split', options:['split'] },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'ratio', label:'Ratio (0-1)', type:'number', min:0, max:1, step:0.1, default:0.5 }
       ]
     },
     branch:{
-      type:'factory/branch',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Branch', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'router', options:['router'] },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
       ]
     },
-    carrierconfig:{
-      type:'factory/carrierconfig',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Carrier Config', target:'title' },
-        { key:'carrierId', label:'Carrier ID', type:'text', default:'Carrier-1' },
-        { key:'capacity', label:'Carrier Capacity (work)', type:'number', min:1, step:1, default:2 }
-      ]
-    },
-    palletcarrierconfig:{
-      type:'factory/palletcarrierconfig',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Pallet Carrier Config', target:'title' },
-        { key:'carrierId', label:'Carrier ID', type:'text', default:'Carrier-1' },
-        { key:'palletCapacity', label:'Pallet Capacity (count)', type:'number', min:1, step:1, default:2 },
-        { key:'palletWorkCapacity', label:'Work Capacity / Pallet', type:'number', min:1, step:1, default:6 },
-        { key:'initialPalletIds', label:'Initial Pallet IDs (comma)', type:'textarea', default:'P-1' }
-      ]
-    },
     agvroute:{
-      type:'factory/agvroute',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'AGV Route', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
+        { key:'transportMode', label:'Transport Mode', type:'select', default:'agv', options:['agv'] },
         { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
         { key:'agvCapacity', label:'AGV Capacity', type:'number', min:1, step:1, default:2 },
@@ -1535,9 +1531,11 @@ window.beginGroupPlacement = beginGroupPlacement;
       ]
     },
     carrierroute:{
-      type:'factory/carrierroute',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Carrier Route', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
+        { key:'transportMode', label:'Transport Mode', type:'select', default:'carrier', options:['carrier'] },
         { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
         { key:'initialCarrier', label:'Initial Carrier ID', type:'text', default:'' },
@@ -1545,18 +1543,20 @@ window.beginGroupPlacement = beginGroupPlacement;
       ]
     },
     station:{
-      type:'factory/station',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Station', target:'title' },
+        { key:'presetId', label:'Preset', type:'select', default:'station', options:['station'] },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
         { key:'palletWorkCapacity', label:'Pallet Work Capacity', type:'number', min:1, step:1, default:6 }
       ]
     },
     transferstation:{
-      type:'factory/transferstation',
+      type:'factory/basic',
       props:[
         { key:'title', label:'Title', type:'text', default:'Transfer Station', target:'title' },
+        { key:'presetId', label:'Node Preset', type:'select', default:'transfer', options:['transfer'] },
         { key:'preset', label:'Preset', type:'select', default:'work_to_pallet', options:[
           { value:'work_to_pallet', label:'Work → Pallet' },
           { value:'work_to_carrier', label:'Work → Carrier' },
@@ -1595,9 +1595,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     sink:{ label:'Sink', description:'Collect completed work and monitor throughput.' },
     split:{ label:'Split', description:'Duplicate one work ID into multiple synchronized downstream branches.' },
     branch:{ label:'Branch', description:'Route work by work type to different output ports.' },
-    carrierconfig:{ label:'Carrier Config', description:'Define carrier IDs and work capacity for route initialization.' },
-    palletcarrierconfig:{ label:'Pallet Carrier Config', description:'Define pallet carrier IDs, pallet capacity, and initial pallets.' },
-    agvroute:{ label:'AGV Route', description:'Legacy AGV route node with travel time and dispatch behavior.' },
+    agvroute:{ label:'AGV Route', description:'Use the Carrier Route preset in AGV transport mode.' },
     carrierroute:{ label:'Carrier Route', description:'Transport carriers, work, and pallets along a timed route.' },
     station:{ label:'Station', description:'Store one pallet, feed work in/out, and hand pallets to carriers.' },
     transferstation:{ label:'Transfer Station', description:'Load, unload, or transfer any nested entity using intuitive presets.' }
@@ -1628,8 +1626,6 @@ window.beginGroupPlacement = beginGroupPlacement;
     merge: 'flow',
     join: 'flow',
     shuttle: 'flow',
-    carrierconfig: 'carrier',
-    palletcarrierconfig: 'carrier',
     carrierroute: 'carrier',
     station: 'carrier',
     transferstation: 'carrier',

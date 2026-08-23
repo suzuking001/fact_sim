@@ -19,9 +19,9 @@ const EXAMPLE_FILES = {
   shuttle_line5: 'sample/shuttle_line5.json',
   carrier: 'sample/graph (3).json',
   pallet_station_demo: 'sample/pallet_station_demo.json',
-  nested_transport_demo: 'sample/nested_transport_demo.json?v=20260803a',
-  sample_line1: 'sample/sample_line1.json?v=20260821b',
-  sample_line2: 'sample/sample_line2.json?v=20260822d'
+  nested_transport_demo: 'sample/nested_transport_demo.json?v=20260823a',
+  sample_line1: 'sample/sample_line1.json?v=20260823a',
+  sample_line2: 'sample/sample_line2.json?v=20260823a'
 };
 
 App._exampleWriteState = App._exampleWriteState || {
@@ -458,8 +458,8 @@ function applyExampleData(data){
   }catch(_e){
     payload = data;
   }
-  if(!payload.__factSimEntityModel && typeof App.inferLegacyEntityModel === 'function'){
-    payload.__factSimEntityModel = App.inferLegacyEntityModel(payload);
+  if(!payload.__factSimEntityModel && typeof App.inferEntityModelFromGraph === 'function'){
+    payload.__factSimEntityModel = App.inferEntityModelFromGraph(payload);
   }
   if(typeof App.applyGraphData === 'function'){
     App.applyGraphData(payload, { source: 'example' });
@@ -503,7 +503,10 @@ function applyExampleData(data){
 function loadExampleFromFile(path, key, fallbackData, token){
   if(!App.graph) return Promise.resolve(false);
   const requestPath = encodeRequestPath(path);
-  return fetch(requestPath)
+  // The launcher intentionally reuses a persistent Chromium profile so the
+  // sample-folder permission survives restarts. Never reuse a model JSON from
+  // that profile's HTTP cache: its node schema may belong to an older build.
+  return fetch(requestPath, { cache: 'no-store' })
     .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
     .then(data=>{
       if(!_isLatestGraphLoadToken(token)) return false;

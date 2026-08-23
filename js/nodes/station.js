@@ -289,7 +289,7 @@ class StationNode extends LiteGraph.LGraphNode{
     const duration = Math.max(0, this._normalizeTime(this.properties.processTime, STATION_DEFAULTS.processTime) * 1000);
     this._until = now + duration;
     if(action === 'work_in'){
-      const info = (payload && typeof payload === 'object') ? { id: payload.id, t: payload.type } : null;
+      const info = (payload && typeof payload === 'object') ? { id: payload.id, t: payload.type, entity: payload } : null;
       this._triggerInputAnim(0, 'work', duration, info);
     }else if(action === 'pallet_in'){
       const info = payload && typeof payload === 'object'
@@ -316,7 +316,7 @@ class StationNode extends LiteGraph.LGraphNode{
     const downMs = Math.max(0, this._normalizeTime(this.properties.downTime, STATION_DEFAULTS.downTime) * 1000);
     this._until = now + downMs;
     if(action === 'work_out'){
-      const info = (payload && typeof payload === 'object') ? { id: payload.id, t: payload.type } : null;
+      const info = (payload && typeof payload === 'object') ? { id: payload.id, t: payload.type, entity: payload } : null;
       this.setOutputData(0, payload);
       this._triggerOutputAnim(0, 'work', downMs, info);
     }else if(action === 'pallet_out'){

@@ -142,20 +142,20 @@ async function main() {
           {
             action: "add",
             ref: "batchEquip",
-            nodeType: "factory/equip",
+            nodeType: "factory/basic",
             title: "MCP Batch Equip",
             x: 80,
             y: 80,
-            properties: { processTime: 5, downTime: 6 }
+            properties: { presetId: "machine", processTime: 5, downTime: 6 }
           },
           {
             action: "add",
             ref: "batchSource",
-            nodeType: "factory/source",
+            nodeType: "factory/basic",
             title: "MCP Batch Source",
             x: 20,
             y: 80,
-            properties: { spawnInterval: 10 }
+            properties: { presetId: "source", sourceMode: "work", spawnInterval: 10 }
           },
           {
             action: "connect",

@@ -9,14 +9,9 @@ var App = window.App || (window.App = {});
     return String(type || '').trim().toLowerCase();
   }
 
-  function isPassiveFallbackType(type){
-    const text = normalizeType(type);
-    return text === 'factory/carrierconfig'
-      || text === 'factory/carrierhome'
-      || text === 'factory/palletcarrierconfig'
-      || text === 'factory/palletcarrier'
-      || text === 'factory/note'
-      || text === 'factory/memo';
+  function isPassiveFallbackNode(node){
+    const preset = normalizeType(node?.properties?.presetId);
+    return preset === 'note' || preset === 'signal';
   }
 
   function hasTimedState(node){
@@ -75,7 +70,7 @@ var App = window.App || (window.App = {});
           const node = nodeRefs[i] || null;
           const type = normalizeType(node && node.type);
           const executable = !!node
-            && !isPassiveFallbackType(type)
+            && !isPassiveFallbackNode(node)
             && (typeof node.onExecute === 'function' || typeof node.getEventUntil === 'function');
           fallbackInfos.push({
             nodeIndex: i,

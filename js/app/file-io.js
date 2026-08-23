@@ -222,8 +222,8 @@ function _applyGraphData(data, options){
     }
   }
   const source = String(opts.source || '').toLowerCase();
-  if(!data.__factSimEntityModel && typeof App.inferLegacyEntityModel === 'function'){
-    data.__factSimEntityModel = App.inferLegacyEntityModel(data);
+  if(!data.__factSimEntityModel && typeof App.inferEntityModelFromGraph === 'function'){
+    data.__factSimEntityModel = App.inferEntityModelFromGraph(data);
   }
   if(source === 'share'){
     const scriptedNodes = _findScriptedNodes(data);

@@ -494,8 +494,15 @@ function initGraph(){
   window.addEventListener('resize', resize, opts);
   resize();
   // Place initial nodes lower so they don't hide under menus
-  const src = LiteGraph.createNode('factory/source'); src.pos=[60,180];
-  const eq  = LiteGraph.createNode('factory/equip');  eq.pos=[360,180];
+  const src = LiteGraph.createNode('factory/basic');
+  src.properties.presetId = 'source';
+  src.properties.sourceMode = 'work';
+  src.onPropertyChanged('presetId');
+  src.pos=[60,180];
+  const eq = LiteGraph.createNode('factory/basic');
+  eq.properties.presetId = 'machine';
+  eq.onPropertyChanged('presetId');
+  eq.pos=[360,180];
   if(typeof window.enforceNodeOverlayMinSize === 'function'){
     try{ window.enforceNodeOverlayMinSize(src); }catch(_e){}
     try{ window.enforceNodeOverlayMinSize(eq); }catch(_e){}

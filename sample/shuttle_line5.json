@@ -4,62 +4,510 @@
   "nodes": [
     {
       "id": 1,
-      "type": "factory/source",
-      "pos": [60, 240],
+      "type": "factory/basic",
+      "pos": [
+        60,
+        240
+      ],
       "title": "Source",
-      "properties": { "sequence": "A,B" }
+      "properties": {
+        "sequence": "A,B",
+        "basicNodeVersion": 1,
+        "presetId": "source",
+        "sourceMode": "work",
+        "initialContents": [],
+        "inputRules": [],
+        "outputRules": [
+          {
+            "ruleId": "source-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "available"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
+              ]
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
+      }
     },
     {
       "id": 2,
-      "type": "factory/shuttle_stage",
-      "pos": [360, 240],
+      "type": "factory/basic",
+      "pos": [
+        360,
+        240
+      ],
       "title": "Shuttle 1",
-      "properties": { "groupId": "shuttle-demo", "processTime": 1.2, "stageIndex": 0 }
+      "properties": {
+        "processTime": 1.2,
+        "stageIndex": 0,
+        "basicNodeVersion": 1,
+        "presetId": "shuttle",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "shuttle-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "shuttle-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
+              ]
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
+      }
     },
     {
       "id": 3,
-      "type": "factory/shuttle_stage",
-      "pos": [660, 240],
+      "type": "factory/basic",
+      "pos": [
+        660,
+        240
+      ],
       "title": "Shuttle 2",
-      "properties": { "groupId": "shuttle-demo", "processTime": 1.6, "stageIndex": 1 }
+      "properties": {
+        "processTime": 1.6,
+        "stageIndex": 1,
+        "basicNodeVersion": 1,
+        "presetId": "shuttle",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "shuttle-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "shuttle-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
+              ]
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
+      }
     },
     {
       "id": 4,
-      "type": "factory/shuttle_stage",
-      "pos": [960, 240],
+      "type": "factory/basic",
+      "pos": [
+        960,
+        240
+      ],
       "title": "Shuttle 3",
-      "properties": { "groupId": "shuttle-demo", "processTime": 1, "stageIndex": 2 }
+      "properties": {
+        "processTime": 1,
+        "stageIndex": 2,
+        "basicNodeVersion": 1,
+        "presetId": "shuttle",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "shuttle-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "shuttle-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
+              ]
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
+      }
     },
     {
       "id": 5,
-      "type": "factory/shuttle_stage",
-      "pos": [1260, 240],
+      "type": "factory/basic",
+      "pos": [
+        1260,
+        240
+      ],
       "title": "Shuttle 4",
-      "properties": { "groupId": "shuttle-demo", "processTime": 1.4, "stageIndex": 3 }
+      "properties": {
+        "processTime": 1.4,
+        "stageIndex": 3,
+        "basicNodeVersion": 1,
+        "presetId": "shuttle",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "shuttle-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "shuttle-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
+              ]
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
+      }
     },
     {
       "id": 6,
-      "type": "factory/shuttle_stage",
-      "pos": [1560, 240],
+      "type": "factory/basic",
+      "pos": [
+        1560,
+        240
+      ],
       "title": "Shuttle 5",
-      "properties": { "groupId": "shuttle-demo", "processTime": 1.8, "stageIndex": 4 }
+      "properties": {
+        "processTime": 1.8,
+        "stageIndex": 4,
+        "basicNodeVersion": 1,
+        "presetId": "shuttle",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "shuttle-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "space-available"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": [
+          {
+            "ruleId": "shuttle-output-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "releaseWhen": {
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
+              ]
+            },
+            "toPortIds": [
+              "out-1"
+            ],
+            "toPortId": "out-1"
+          }
+        ]
+      }
     },
     {
       "id": 7,
-      "type": "factory/sink",
-      "pos": [1880, 240],
+      "type": "factory/basic",
+      "pos": [
+        1880,
+        240
+      ],
       "title": "Sink",
-      "properties": {}
+      "properties": {
+        "basicNodeVersion": 1,
+        "presetId": "sink",
+        "initialContents": [],
+        "inputRules": [
+          {
+            "ruleId": "sink-input-1",
+            "targets": [
+              {
+                "mode": "category",
+                "category": "work"
+              }
+            ],
+            "target": {
+              "mode": "category",
+              "category": "work"
+            },
+            "acceptWhen": {
+              "kind": "always"
+            },
+            "fromPortId": "in-1"
+          }
+        ],
+        "outputRules": []
+      }
     }
   ],
   "links": [
-    [1, 1, 0, 2, 0, 0],
-    [2, 2, 0, 3, 0, 0],
-    [3, 3, 0, 4, 0, 0],
-    [4, 4, 0, 5, 0, 0],
-    [5, 5, 0, 6, 0, 0],
-    [6, 6, 0, 7, 0, 0]
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      0
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      0
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      0
+    ],
+    [
+      5,
+      5,
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      6,
+      6,
+      0,
+      7,
+      0,
+      0
+    ]
   ],
   "groups": [],
-  "version": 0.4
+  "version": 0.4,
+  "__factSimEntityModel": {
+    "schemaVersion": 1,
+    "types": [
+      {
+        "typeId": "type-a",
+        "name": "A",
+        "category": "work",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-b",
+        "name": "B",
+        "category": "work",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      }
+    ]
+  }
 }

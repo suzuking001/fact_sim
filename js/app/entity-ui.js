@@ -89,6 +89,434 @@
     return { card, section };
   }
 
+  function basicDerivedNode(node){
+    return !!node && (node.type === 'factory/basic' || Number(node.properties?.basicNodeVersion) >= 1);
+  }
+
+  function graphLink(node, linkId){
+    if(linkId == null) return null;
+    return node?.graph?.links?.[linkId] || App.graph?.links?.[linkId] || null;
+  }
+
+  function connectedSteps(node, direction){
+    const isInput = direction === 'upstream';
+    const ports = Array.isArray(isInput ? node?.inputs : node?.outputs) ? (isInput ? node.inputs : node.outputs) : [];
+    const result = [];
+    ports.forEach((port, portIndex)=>{
+      const ids = isInput ? [port?.link] : (Array.isArray(port?.links) ? port.links : []);
+      ids.filter((id)=>id != null).forEach((id)=>{
+        const link = graphLink(node, id);
+        if(!link) return;
+        const otherId = isInput ? link.origin_id : link.target_id;
+        const other = node?.graph?.getNodeById?.(otherId) || App.graph?.getNodeById?.(otherId);
+        const title = String(other?.title || other?.properties?.presetId || `Node #${otherId}`);
+        const otherPortIndex = isInput ? link.origin_slot : link.target_slot;
+        const otherPorts = isInput ? other?.outputs : other?.inputs;
+        const otherPort = Array.isArray(otherPorts) ? otherPorts[otherPortIndex] : null;
+        result.push({
+          portIndex,
+          portName: String(port?.name || `${isInput ? 'IN' : 'OUT'} ${portIndex + 1}`),
+          nodeId: otherId,
+          title,
+          otherPortName: String(otherPort?.name || '')
+        });
+      });
+    });
+    return result;
+  }
+
+  function numberedTimeProperties(node, prefix){
+    const props = isObject(node?.properties) ? node.properties : {};
+    const pattern = new RegExp(`^${prefix}(?:\\d+)?$`);
+    const keys = Object.keys(props).filter((key)=>pattern.test(key));
+    if(!keys.includes(prefix)) keys.unshift(prefix);
+    return Array.from(new Set(keys)).sort((a, b)=>{
+      if(a === prefix) return -1;
+      if(b === prefix) return 1;
+      return (Number(a.replace(prefix, '')) || 1) - (Number(b.replace(prefix, '')) || 1);
+    });
+  }
+
+  function processTimeProperties(node){ return numberedTimeProperties(node, 'processTime'); }
+  function downTimeProperties(node){ return numberedTimeProperties(node, 'downTime'); }
+
+  function formatSeconds(value){
+    const number = Math.max(0, Number(value) || 0);
+    return Number.isInteger(number) ? String(number) : String(Math.round(number * 100) / 100);
+  }
+
+  function cycleArc(svg, value, ringFraction, offset, color, label, extraClass = ''){
+    const namespace = 'http://www.w3.org/2000/svg';
+    const radius = 76;
+    const circumference = 2 * Math.PI * radius;
+    const fraction = Math.max(0, Number(ringFraction) || 0);
+    if(fraction <= 0) return offset;
+    const length = circumference * fraction;
+    const circle = document.createElementNS(namespace, 'circle');
+    circle.setAttribute('class', `entityCycleArc${extraClass ? ` ${extraClass}` : ''}`);
+    circle.setAttribute('cx', '150');
+    circle.setAttribute('cy', '130');
+    circle.setAttribute('r', String(radius));
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', color);
+    circle.setAttribute('stroke-width', '24');
+    circle.setAttribute('stroke-linecap', 'butt');
+    circle.setAttribute('stroke-dasharray', `${Math.max(0.1, length)} ${circumference}`);
+    circle.setAttribute('stroke-dashoffset', String(-offset));
+    circle.setAttribute('transform', 'rotate(180 150 130)');
+    if(label) circle.setAttribute('aria-label', `${label}: ${formatSeconds(value)} seconds`);
+    else circle.setAttribute('aria-hidden', 'true');
+    svg.appendChild(circle);
+    return offset + length;
+  }
+
+  function cyclePoint(fraction, radius = 88){
+    const angle = Math.PI + (Math.max(0, Number(fraction) || 0) * Math.PI * 2);
+    return {
+      x: 150 + radius * Math.cos(angle),
+      y: 130 + radius * Math.sin(angle)
+    };
+  }
+
+  function appendCycleLabels(svg){
+    const namespace = 'http://www.w3.org/2000/svg';
+    const group = document.createElementNS(namespace, 'g');
+    group.setAttribute('class', 'entityCycleLabels');
+    const definitions = [
+      { key:'process', label:'PROCESS', x:39, y:16, box:[0, 1, 78, 30] },
+      { key:'down', label:'DOWN', x:35, y:245, box:[0, 230, 70, 29] }
+    ];
+    for(const item of definitions){
+      const box = document.createElementNS(namespace, 'rect');
+      box.setAttribute('class', `entityCycleCalloutBox is-${item.key}`);
+      box.setAttribute('x', String(item.box[0])); box.setAttribute('y', String(item.box[1]));
+      box.setAttribute('width', String(item.box[2])); box.setAttribute('height', String(item.box[3])); box.setAttribute('rx', '10');
+      const text = document.createElementNS(namespace, 'text');
+      text.setAttribute('class', `entityCycleCalloutText is-${item.key}`);
+      text.setAttribute('x', String(item.x)); text.setAttribute('y', String(item.y));
+      text.setAttribute('text-anchor', 'middle'); text.setAttribute('dominant-baseline', 'middle');
+      text.textContent = item.label;
+      group.append(box, text);
+    }
+    svg.appendChild(group);
+  }
+
+  function appendCycleDirectionArrows(svg){
+    const namespace = 'http://www.w3.org/2000/svg';
+    const group = document.createElementNS(namespace, 'g');
+    group.setAttribute('class', 'entityCycleArrows');
+    group.setAttribute('aria-hidden', 'true');
+    [0.12, 0.45, 0.78].forEach((fraction)=>{
+      const point = cyclePoint(fraction, 76);
+      const arrow = document.createElementNS(namespace, 'path');
+      arrow.setAttribute('class', 'entityCycleArrow');
+      arrow.setAttribute('d', 'M -5 -4 L 2 0 L -5 4');
+      arrow.setAttribute('transform', `translate(${point.x} ${point.y}) rotate(${270 + (fraction * 360)})`);
+      group.appendChild(arrow);
+    });
+    svg.appendChild(group);
+  }
+
+  function appendCycleLeader(layer, kind, anchor, target, color, routeIndex = 0, routeCount = 1){
+    const namespace = 'http://www.w3.org/2000/svg';
+    const normalizedAngle = (angle)=>{
+      let result = angle % (Math.PI * 2);
+      if(result < 0) result += Math.PI * 2;
+      return result;
+    };
+    const targetAngle = normalizedAngle(Math.atan2(target.y - 130, target.x - 150));
+    const radiusStep = routeCount > 1 ? Math.min(4, 12 / (routeCount - 1)) : 0;
+    const routeRadius = 94 + (Math.max(0, routeIndex) * radiusStep);
+    const clamp = (value, min, max)=>Math.min(max, Math.max(min, value));
+    const projectedX = clamp((anchor.x - 150) / routeRadius, -1, 1);
+    const projectedY = clamp((anchor.y - 130) / routeRadius, -1, 1);
+    const startAngle = kind === 'process'
+      ? normalizedAngle((Math.PI * 2) - Math.acos(projectedX))
+      : kind === 'down'
+        ? Math.acos(projectedX)
+        : kind === 'idle'
+          ? normalizedAngle(Math.PI - Math.asin(projectedY))
+          : normalizedAngle(Math.asin(projectedY));
+    const polar = (angle)=>({
+      x:150 + routeRadius * Math.cos(angle),
+      y:130 + routeRadius * Math.sin(angle)
+    });
+    const start = polar(startAngle);
+    const outer = polar(targetAngle);
+    const directX = target.x - anchor.x;
+    const directY = target.y - anchor.y;
+    const directLengthSquared = (directX * directX) + (directY * directY);
+    const closestFraction = directLengthSquared > 0
+      ? clamp((((150 - anchor.x) * directX) + ((130 - anchor.y) * directY)) / directLengthSquared, 0, 1)
+      : 0;
+    const closestX = anchor.x + (directX * closestFraction);
+    const closestY = anchor.y + (directY * closestFraction);
+    const clearsDonut = Math.hypot(closestX - 150, closestY - 130) >= 87.5;
+    let delta = targetAngle - startAngle;
+    while(delta > Math.PI) delta -= Math.PI * 2;
+    while(delta < -Math.PI) delta += Math.PI * 2;
+    const sweep = delta >= 0 ? 1 : 0;
+    let path = `M ${anchor.x} ${anchor.y}`;
+    if(clearsDonut){
+      path += ` L ${target.x} ${target.y}`;
+    }else{
+      path += ` L ${start.x} ${start.y}`;
+      if(Math.abs(delta) > 0.0001){
+        path += ` A ${routeRadius} ${routeRadius} 0 0 ${sweep} ${outer.x} ${outer.y}`;
+      }
+      path += ` L ${target.x} ${target.y}`;
+    }
+    const halo = document.createElementNS(namespace, 'path');
+    halo.setAttribute('class', `entityCycleLeaderHalo is-${kind}`);
+    halo.setAttribute('d', path);
+    const line = document.createElementNS(namespace, 'path');
+    line.setAttribute('class', `entityCycleLeader is-${kind}`);
+    line.setAttribute('d', path);
+    if(color) line.style.stroke = color;
+    const point = document.createElementNS(namespace, 'circle');
+    point.setAttribute('class', `entityCycleLeaderPoint is-${kind}`);
+    point.setAttribute('cx', String(target.x));
+    point.setAttribute('cy', String(target.y));
+    point.setAttribute('r', '3.5');
+    if(color) point.style.stroke = color;
+    layer.append(halo, line, point);
+  }
+
+  function connectionLabel(entry, fallback){
+    if(!entry) return fallback;
+    return entry.otherPortName ? `${entry.title} · ${entry.otherPortName}` : entry.title;
+  }
+
+  function renderCycleConnections(host, rows, state, direction){
+    const list = rows.length ? rows : [null];
+    list.forEach((entry, index)=>{
+      const row = document.createElement('div');
+      row.className = `entityCycleConnection is-${direction}`;
+      const caption = document.createElement('span');
+      caption.className = 'entityCycleConnectionCaption';
+      caption.textContent = direction === 'upstream'
+        ? `UPSTREAM ${list.length > 1 ? index + 1 : ''}`.trim()
+        : `DOWNSTREAM ${list.length > 1 ? index + 1 : ''}`.trim();
+      const name = document.createElement('strong');
+      name.className = 'entityCycleConnectionName';
+      name.textContent = connectionLabel(entry, 'Not connected');
+      const stateChip = document.createElement('span');
+      stateChip.className = `entityCycleState is-${state.toLowerCase()}`;
+      stateChip.innerHTML = `<b>${state}</b><small>${state === 'IDLE' ? 'Ready for input' : 'Waiting to release'}</small>`;
+      const connector = document.createElement('span');
+      connector.className = 'entityCycleConnector';
+      connector.textContent = '›';
+      connector.setAttribute('aria-hidden', 'true');
+      if(direction === 'upstream') row.append(caption, name, stateChip);
+      else row.append(stateChip, caption, name);
+      row.appendChild(connector);
+      host.appendChild(row);
+    });
+  }
+
+  function renderCycleEditor(node){
+    const shell = makeCard('Process Cycle', 'Configure input readiness, processing, downstream release, and recovery as one continuous cycle.');
+    shell.card.classList.add('entityCycleCard');
+    const props = isObject(node?.properties) ? node.properties : {};
+    const processKeys = processTimeProperties(node);
+    const downKeys = downTimeProperties(node);
+    const upstream = connectedSteps(node, 'upstream');
+    const downstream = connectedSteps(node, 'downstream');
+    const visual = document.createElement('div');
+    visual.className = 'entityCycleVisual';
+    const upstreamHost = document.createElement('div');
+    upstreamHost.className = 'entityCycleConnections is-upstream';
+    const downstreamHost = document.createElement('div');
+    downstreamHost.className = 'entityCycleConnections is-downstream';
+    renderCycleConnections(upstreamHost, upstream, 'IDLE', 'upstream');
+    renderCycleConnections(downstreamHost, downstream, 'WAIT', 'downstream');
+
+    const donut = document.createElement('div');
+    donut.className = 'entityCycleDonut';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 300 260');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Process cycle time breakdown');
+    svg.innerHTML = '<circle class="entityCycleTrack" cx="150" cy="130" r="76" fill="none" stroke="rgba(120,120,128,.13)" stroke-width="24"></circle>';
+    const arcLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    arcLayer.setAttribute('class', 'entityCycleArcLayer');
+    svg.appendChild(arcLayer);
+    appendCycleDirectionArrows(svg);
+    const leaderLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    leaderLayer.setAttribute('class', 'entityCycleLeaderLayer');
+    svg.appendChild(leaderLayer);
+    appendCycleLabels(svg);
+    const center = document.createElement('div');
+    center.className = 'entityCycleCenter';
+    const totalLabel = document.createElement('span'); totalLabel.textContent = 'CYCLE TIME';
+    const totalValue = document.createElement('strong');
+    const totalUnit = document.createElement('small'); totalUnit.textContent = 'seconds';
+    center.append(totalLabel, totalValue, totalUnit);
+    const direction = document.createElement('span');
+    direction.className = 'entityCycleDirection';
+    direction.textContent = 'CLOCKWISE ↻';
+    direction.setAttribute('aria-hidden', 'true');
+    center.appendChild(direction);
+    const draftValues = Object.fromEntries([
+      ...processKeys.map((key)=>[key, Math.max(0, Number(node.properties?.[key]) || 0)]),
+      ...downKeys.map((key)=>[key, Math.max(0, Number(node.properties?.[key]) || 0)])
+    ]);
+
+    const updateVisual = ()=>{
+      arcLayer.replaceChildren();
+      leaderLayer.replaceChildren();
+      const processValues = processKeys.map((key)=>Math.max(0, Number(draftValues[key]) || 0));
+      const downValues = downKeys.map((key)=>Math.max(0, Number(draftValues[key]) || 0));
+      const processTotal = processValues.reduce((sum, value)=>sum + value, 0);
+      const downTotal = downValues.reduce((sum, value)=>sum + value, 0);
+      const total = processTotal + downTotal;
+      let offset = 0;
+      let fractionOffset = 0;
+      const processSegments = [];
+      const downSegments = [];
+      processValues.forEach((value, index)=>{
+        const color = ['#30d158','#18b94f','#0f9f43','#67d986'][index % 4];
+        const segmentFraction = total > 0 ? value / total : 0;
+        offset = cycleArc(arcLayer, value, segmentFraction, offset, color, `Process ${index + 1}`);
+        processSegments.push({ start:fractionOffset, end:fractionOffset + segmentFraction, color });
+        fractionOffset += segmentFraction;
+      });
+      downValues.forEach((value, index)=>{
+        const color = ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4];
+        const segmentFraction = total > 0 ? value / total : 0;
+        offset = cycleArc(arcLayer, value, segmentFraction, offset, color, `Down ${index + 1}`);
+        downSegments.push({ start:fractionOffset, end:fractionOffset + segmentFraction, color });
+        fractionOffset += segmentFraction;
+      });
+      const svgPoint = (element, edge, fallback)=>{
+        const svgRect = svg.getBoundingClientRect();
+        const elementRect = element?.getBoundingClientRect?.();
+        if(!elementRect || !svgRect.width || !svgRect.height) return fallback;
+        const viewportX = edge === 'left'
+          ? elementRect.left
+          : edge === 'right'
+            ? elementRect.right
+            : elementRect.left + (elementRect.width / 2);
+        const viewportY = edge === 'top'
+          ? elementRect.top
+          : edge === 'bottom'
+            ? elementRect.bottom
+            : elementRect.top + (elementRect.height / 2);
+        return {
+          x:(viewportX - svgRect.left) * (300 / svgRect.width),
+          y:(viewportY - svgRect.top) * (260 / svgRect.height)
+        };
+      };
+      const processControlStart = 84;
+      const controlWidth = 216;
+      const processFields = processControls.querySelectorAll('.entityCycleInlineControl');
+      processSegments.forEach((segment, index)=>{
+        const fallback = { x:processControlStart + ((index + 0.5) * controlWidth / processSegments.length), y:31 };
+        const anchor = svgPoint(processFields[index], 'bottom', fallback);
+        appendCycleLeader(leaderLayer, 'process', anchor, cyclePoint((segment.start + segment.end) / 2), segment.color, index, processSegments.length);
+      });
+      const downFields = downControls.querySelectorAll('.entityCycleInlineControl');
+      downSegments.forEach((segment, index)=>{
+        const fallback = { x:processControlStart + ((index + 0.5) * controlWidth / downSegments.length), y:230 };
+        const anchor = svgPoint(downFields[index], 'top', fallback);
+        appendCycleLeader(leaderLayer, 'down', anchor, cyclePoint((segment.start + segment.end) / 2), segment.color, index, downSegments.length);
+      });
+      const mappedSegment = (segments, index, count)=>{
+        if(!segments.length) return null;
+        if(count <= 1) return segments[0];
+        return segments[Math.round((index * (segments.length - 1)) / (count - 1))];
+      };
+      const upstreamCount = Math.max(1, upstream.length);
+      const upstreamConnectors = upstreamHost.querySelectorAll('.entityCycleConnector');
+      for(let index = 0; index < upstreamCount; index += 1){
+        const segment = mappedSegment(processSegments, index, upstreamCount);
+        const target = cyclePoint(segment?.start ?? 0);
+        const fallback = { x:-13, y:((index + 0.5) * 260) / upstreamCount };
+        appendCycleLeader(leaderLayer, 'idle', svgPoint(upstreamConnectors[index], 'center', fallback), target, '#c87908', index, upstreamCount);
+      }
+      const downstreamCount = Math.max(1, downstream.length);
+      const downstreamConnectors = downstreamHost.querySelectorAll('.entityCycleConnector');
+      for(let index = 0; index < downstreamCount; index += 1){
+        const segment = mappedSegment(downSegments, index, downstreamCount);
+        const fallback = processSegments.at(-1)?.end ?? 0.5;
+        const target = cyclePoint(segment?.start ?? fallback);
+        const fallbackAnchor = { x:313, y:((index + 0.5) * 260) / downstreamCount };
+        appendCycleLeader(leaderLayer, 'wait', svgPoint(downstreamConnectors[index], 'center', fallbackAnchor), target, '#c87908', index, downstreamCount);
+      }
+      totalValue.textContent = `${formatSeconds(total)} s`;
+    };
+    const commit = (key, input)=>{
+      const next = Math.max(0, Number(input.value) || 0);
+      input.value = formatSeconds(next);
+      draftValues[key] = next;
+      changed(()=>{
+        node.properties = isObject(node.properties) ? node.properties : {};
+        node.properties[key] = next;
+        node.onPropertyChanged?.(key);
+        node.setDirtyCanvas?.(true, true);
+      });
+      updateVisual();
+    };
+    const makeInlineTimeField = (host, key, label, color, meta)=>{
+      const field = document.createElement('label');
+      field.className = 'entityCycleInlineControl';
+      field.style.setProperty('--cycle-color', color);
+      field.title = meta;
+      if(label){
+        const badge = document.createElement('b');
+        badge.textContent = label;
+        field.appendChild(badge);
+      }else{
+        field.classList.add('is-single');
+      }
+      const input = document.createElement('input');
+      input.type = 'number'; input.min = '0'; input.step = '0.1';
+      input.value = formatSeconds(node.properties?.[key]);
+      input.disabled = running();
+      input.setAttribute('aria-label', `${host.dataset.label} ${label.replace(/^[A-Z]/, '') || '1'} seconds`);
+      const unit = document.createElement('small'); unit.textContent = 's';
+      input.addEventListener('input', ()=>{
+        const next = Math.max(0, Number(input.value) || 0);
+        draftValues[key] = next;
+        updateVisual();
+      });
+      input.addEventListener('change', ()=>commit(key, input));
+      field.append(input, unit);
+      host.appendChild(field);
+    };
+    const processControls = document.createElement('div');
+    processControls.className = 'entityCycleInlineControls is-process';
+    processControls.dataset.label = 'PROCESS';
+    processControls.style.setProperty('--control-count', String(processKeys.length));
+    processKeys.forEach((key, index)=>{
+      const related = upstream[index] || upstream[0];
+      makeInlineTimeField(processControls, key, `P${index + 1}`, ['#30d158','#18b94f','#0f9f43','#67d986'][index % 4], connectionLabel(related, 'Processing'));
+    });
+    const downControls = document.createElement('div');
+    downControls.className = 'entityCycleInlineControls is-down';
+    downControls.dataset.label = 'DOWN';
+    downControls.style.setProperty('--control-count', String(downKeys.length));
+    downKeys.forEach((key, index)=>{
+      const related = downstream[index] || downstream[0];
+      makeInlineTimeField(downControls, key, `D${index + 1}`, ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4], connectionLabel(related, 'Recovery'));
+    });
+    donut.append(svg, center, processControls, downControls);
+    visual.append(upstreamHost, donut, downstreamHost);
+    shell.section.appendChild(visual);
+    updateVisual();
+    requestAnimationFrame(()=>{
+      if(visual.isConnected) updateVisual();
+    });
+    if(typeof ResizeObserver === 'function'){
+      const observer = new ResizeObserver(()=>{
+        if(!visual.isConnected){ observer.disconnect(); return; }
+        updateVisual();
+      });
+      observer.observe(visual);
+    }
+    return shell.card;
+  }
+
   function renderTypeManager(){
     const host = document.getElementById('entityTypesPanelBody');
     if(!host) return;
@@ -521,21 +949,23 @@
       const existingCards = Array.from(main.children);
       const tabBar = document.createElement('div'); tabBar.className = 'entityInspectorTabs';
       const panels = {};
-      const entityEnabled = typeof node.hasEntityContents === 'function' ? node.hasEntityContents() : !['factory/note','factory/signal'].includes(node.type);
+      const entityEnabled = typeof node.hasEntityContents === 'function' ? node.hasEntityContents() : true;
       const names = entityEnabled ? ['Basic','Flow','Contents','Advanced'] : ['Basic','Advanced'];
       names.forEach((name)=>{ const panel = document.createElement('div'); panel.className = 'entityInspectorTabPanel'; panel.dataset.tab = name.toLowerCase(); panels[name] = panel; });
       if(existingCards[0]) panels.Basic.appendChild(existingCards[0]);
       if(existingCards[1]){
         const hiddenPropertyLabels = new Set([
           'basicNodeVersion', 'initialContents', 'inputRules', 'outputRules', 'selection', 'stateMachine',
-          'legacySourceType', 'migratedCarrierConfigs'
+          'migratedCarrierConfigs'
         ]);
         for(const field of existingCards[1].querySelectorAll('.selectionInspectorField')){
           const label = field.querySelector('.selectionInspectorFieldLabel')?.textContent?.trim();
-          if(hiddenPropertyLabels.has(label)) field.remove();
+          const propertyKey = field.dataset.propertyKey || label;
+          if(hiddenPropertyLabels.has(label) || /^processTime(?:\d+)?$/.test(propertyKey) || /^downTime(?:\d+)?$/.test(propertyKey)) field.remove();
         }
-        panels.Basic.appendChild(existingCards[1]);
       }
+      if(basicDerivedNode(node)) panels.Basic.appendChild(renderCycleEditor(node));
+      if(existingCards[1]) panels.Basic.appendChild(existingCards[1]);
       existingCards.slice(2).forEach((entry)=>panels.Advanced.appendChild(entry));
       if(entityEnabled){ panels.Flow.appendChild(renderFlowEditor(node)); panels.Contents.appendChild(renderContentsEditor(node)); }
       const state = makeCard('State Machine', 'State Machine remains separate from Input / Output Rules.');

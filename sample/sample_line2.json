@@ -42,7 +42,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -215,55 +214,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -358,7 +356,8 @@
             },
             "toPortId": "out-4"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -461,55 +460,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -626,7 +624,8 @@
             },
             "toPortId": "out-5"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -772,55 +771,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -915,7 +913,8 @@
             },
             "toPortId": "out-4"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -980,9 +979,16 @@
             "releaseWhen": {
               "kind": "all",
               "conditions": [
-                { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
-                { "kind": "downstream-ready" }
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
               ]
             },
             "toPortId": "out-1"
@@ -1052,9 +1058,16 @@
             "releaseWhen": {
               "kind": "all",
               "conditions": [
-                { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
-                { "kind": "downstream-ready" }
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
               ]
             },
             "toPortId": "out-1"
@@ -1124,9 +1137,16 @@
             "releaseWhen": {
               "kind": "all",
               "conditions": [
-                { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
-                { "kind": "downstream-ready" }
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
               ]
             },
             "toPortId": "out-1"
@@ -1196,9 +1216,16 @@
             "releaseWhen": {
               "kind": "all",
               "conditions": [
-                { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
-                { "kind": "downstream-ready" }
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
               ]
             },
             "toPortId": "out-1"
@@ -1268,9 +1295,16 @@
             "releaseWhen": {
               "kind": "all",
               "conditions": [
-                { "kind": "process-complete" },
-                { "kind": "shuttle-group-idle", "groupId": "shuttle-1" },
-                { "kind": "downstream-ready" }
+                {
+                  "kind": "process-complete"
+                },
+                {
+                  "kind": "shuttle-group-idle",
+                  "groupId": "shuttle-1"
+                },
+                {
+                  "kind": "downstream-ready"
+                }
               ]
             },
             "toPortId": "out-1"
@@ -1314,11 +1348,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1426,12 +1459,11 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 3,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1563,11 +1595,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1633,11 +1664,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1703,11 +1733,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1773,11 +1802,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1843,11 +1871,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1913,11 +1940,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -1983,11 +2009,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2053,11 +2078,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2129,13 +2153,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -2215,11 +2238,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2288,11 +2310,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2358,11 +2379,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2434,13 +2454,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -2517,11 +2536,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2587,11 +2605,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2657,11 +2674,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2727,11 +2743,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2803,13 +2818,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -2886,11 +2900,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -2956,11 +2969,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3026,11 +3038,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3105,13 +3116,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -3188,11 +3198,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3258,11 +3267,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3334,13 +3342,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -3417,11 +3424,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3521,12 +3527,11 @@
       "properties": {
         "processTime": 2,
         "downTime": 1,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\n\n\n// work: Work object (work.id, work.type など)\n// signalArr: sigIn の配列\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // デフォルト\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// true を返すとこのワークを受け入れて PROCESS に入る\nreturn true;\n",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\n\n\n// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // default\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// Return true to accept this work item and enter PROCESS\nreturn true;\n",
         "sigExtra": 2,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3640,7 +3645,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3713,7 +3717,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3783,7 +3786,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3853,7 +3855,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -3923,7 +3924,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -4025,55 +4025,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -4146,7 +4145,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -4224,55 +4224,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -4345,7 +4344,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -4424,55 +4424,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -4545,7 +4544,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -4623,55 +4623,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -4744,7 +4743,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -4819,55 +4819,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -4940,7 +4939,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -5015,55 +5015,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -5136,7 +5135,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -5175,11 +5175,10 @@
       "properties": {
         "processTime": 20,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5279,12 +5278,11 @@
       "properties": {
         "processTime": 4,
         "downTime": 0.5,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\n\n\n// work: Work object (work.id, work.type など)\n// signalArr: sigIn の配列\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // デフォルト\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// true を返すとこのワークを受け入れて PROCESS に入る\nreturn true;\n",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\n\n\n// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // default\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// Return true to accept this work item and enter PROCESS\nreturn true;\n",
         "sigExtra": 2,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5394,11 +5392,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5506,12 +5503,11 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "sigExtra": 3,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5643,11 +5639,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5713,11 +5708,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5783,11 +5777,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5853,11 +5846,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5923,11 +5915,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -5993,11 +5984,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6063,11 +6053,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6133,11 +6122,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6209,13 +6197,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -6292,11 +6279,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6362,11 +6348,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6432,11 +6417,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6508,13 +6492,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -6591,11 +6574,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6661,11 +6643,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6731,11 +6712,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6801,11 +6781,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -6877,13 +6856,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -6963,11 +6941,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7036,11 +7013,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7106,11 +7082,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7182,13 +7157,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -7265,11 +7239,10 @@
       "properties": {
         "processTime": 20,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7335,11 +7308,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7405,11 +7377,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7481,13 +7452,12 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "processTime2": 2,
         "strictIdMatch": false,
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "merge",
-        "legacySourceType": "factory/merge2",
         "initialContents": [],
         "inputRules": [
           {
@@ -7603,55 +7573,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -7724,7 +7693,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -7767,7 +7737,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7837,7 +7806,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -7939,55 +7907,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -8060,7 +8027,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -8139,55 +8107,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -8260,7 +8227,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -8335,55 +8303,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -8456,7 +8423,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -8534,55 +8502,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -8655,7 +8622,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -8698,7 +8666,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -8768,7 +8735,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -8838,7 +8804,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -8908,7 +8873,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -8974,11 +8938,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -9080,55 +9043,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -9201,7 +9163,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -9299,7 +9262,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "split",
-        "legacySourceType": "factory/split",
         "initialContents": [],
         "inputRules": [
           {
@@ -9479,7 +9441,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "split",
-        "legacySourceType": "factory/split",
         "initialContents": [],
         "inputRules": [
           {
@@ -9618,7 +9579,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "router",
-        "legacySourceType": "factory/branch",
         "initialContents": [],
         "inputRules": [
           {
@@ -9684,7 +9644,6 @@
       "properties": {
         "basicNodeVersion": 1,
         "presetId": "sink",
-        "legacySourceType": "factory/sink",
         "initialContents": [],
         "inputRules": [
           {
@@ -9738,11 +9697,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -9812,7 +9770,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -9878,11 +9835,10 @@
       "properties": {
         "processTime": 2,
         "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: すべて受け入れる（必要ならここに条件を記述）\nreturn true;",
+        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -9967,7 +9923,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -10037,7 +9992,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -10113,7 +10067,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "join",
-        "legacySourceType": "factory/join",
         "initialContents": [],
         "inputRules": [
           {
@@ -10240,55 +10193,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -10383,7 +10335,8 @@
             },
             "toPortId": "out-4"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -10458,55 +10411,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -10579,7 +10531,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -10654,55 +10607,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -10775,7 +10727,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -10850,55 +10803,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -10971,7 +10923,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -11046,55 +10999,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -11167,7 +11119,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -11275,55 +11228,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -11440,7 +11392,8 @@
             },
             "toPortId": "out-5"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -11515,55 +11468,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -11636,7 +11588,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -11711,55 +11664,54 @@
         "outSequence": "",
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -11832,7 +11784,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -11950,55 +11903,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -12071,7 +12023,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -12189,55 +12142,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -12310,7 +12262,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -12428,55 +12381,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -12549,7 +12501,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -12593,7 +12546,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -12681,7 +12633,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -12826,55 +12777,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -12947,7 +12897,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -13093,55 +13044,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -13236,7 +13186,8 @@
             },
             "toPortId": "out-4"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -13354,55 +13305,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -13475,7 +13425,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -13593,55 +13544,54 @@
         "flipIO": true,
         "basicNodeVersion": 1,
         "presetId": "carrier_route",
-        "legacySourceType": "factory/carrierroute",
         "migratedCarrierConfigs": [
           {
             "nodeId": 5,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 19,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-2",
               "capacity": 2
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 122,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 132,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 171,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-1",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           },
           {
             "nodeId": 180,
-            "sourceType": "factory/carrierconfig",
             "properties": {
               "carrierId": "Carrier-3",
               "capacity": 1
-            }
+            },
+            "configKind": "carrier"
           }
         ],
         "initialContents": [],
@@ -13714,7 +13664,8 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "transportMode": "carrier"
       }
     },
     {
@@ -13757,7 +13708,6 @@
         "scriptDisabled": false,
         "basicNodeVersion": 1,
         "presetId": "machine",
-        "legacySourceType": "factory/equip",
         "initialContents": [],
         "inputRules": [
           {
@@ -13818,7 +13768,6 @@
         "sequence": "A,B",
         "basicNodeVersion": 1,
         "presetId": "source",
-        "legacySourceType": "factory/source",
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -13833,7 +13782,8 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "sourceMode": "work"
       }
     }
   ],

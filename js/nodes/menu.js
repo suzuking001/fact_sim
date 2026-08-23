@@ -594,14 +594,7 @@ window.runNodeMutation = runNodeMutation;
     };
   }
 
-  // Flatten "Add Node" menu to factory nodes only:
-  // current: Add Node > factory > node
-  // target : Add Node > node
-  const SKIP_TYPES = new Set([
-    'factory/carrierhome',
-    'factory/merge2',
-    'factory/palletcarrier'
-  ]);
+  // Persist one node type and expose its presets as creation choices.
 
   LiteGraph.LGraphCanvas.onMenuAdd = function(value, options, event, parentMenu, onCreate){
     const canvas = LiteGraph.LGraphCanvas.active_canvas;
@@ -611,40 +604,34 @@ window.runNodeMutation = runNodeMutation;
       return false;
     }
 
-    const filter = canvas.filter || graph.filter;
-    let list = LiteGraph.getNodeTypesInCategory('factory', filter) || [];
-    list = list.filter((nt)=>
-      nt &&
-      !nt.skip_list &&
-      typeof nt.type === 'string' &&
-      nt.type.startsWith('factory/') &&
-      !SKIP_TYPES.has(nt.type)
-    );
+    const presets = window.App?.BASIC_NODE_PRESETS || {};
+    const nodes = Object.entries(presets).map(([presetId, preset])=>({
+      presetId,
+      title: preset?.title || presetId,
+      category: preset?.category || ''
+    })).sort((a, b)=>{
+      const categoryOrder = String(a.category).localeCompare(String(b.category));
+      return categoryOrder || String(a.title).localeCompare(String(b.title));
+    });
 
-    if(!list.length){
+    if(!nodes.length){
       if(typeof rawOnMenuAdd === 'function') return rawOnMenuAdd.apply(this, arguments);
       return false;
     }
 
-    const byType = new Map();
-    for(const nt of list){
-      if(!byType.has(nt.type)) byType.set(nt.type, nt);
-    }
-    const nodes = Array.from(byType.values()).sort((a, b)=>
-      String(a.title || a.type || '').localeCompare(String(b.title || b.type || ''))
-    );
-
-    const menuItems = nodes.map((nt)=>({
-      value: nt.type,
-      content: nt.title || nt.type,
+    const menuItems = nodes.map((preset)=>({
+      value: preset.presetId,
+      content: preset.title,
       has_submenu: false,
       callback: (item, _opt, _ctx, menuRef)=>{
         const ev = resolveMenuEvent(menuRef, event);
         const pos = syncCanvasMouse(canvas, ev) || [0, 0];
         try{
           if(typeof graph.beforeChange === 'function') graph.beforeChange();
-          const node = LiteGraph.createNode(item.value);
+          const node = LiteGraph.createNode('factory/basic');
           if(node){
+            node.properties.presetId = String(item.value || 'basic');
+            if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged('presetId');
             if(typeof window.enforceNodeOverlayMinSize === 'function'){
               try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}
             }

@@ -133,7 +133,7 @@ class BranchNode extends EquipmentNode{
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
       const payload = this._payload || this._currentWork || null;
-      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type } : null;
+      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type, entity: payload } : null;
       if(active){
         if(this._waitIconLinksBranch) return;
         const slot = this._routeSlotForPayload(payload, false);
@@ -154,14 +154,16 @@ class BranchNode extends EquipmentNode{
     if(!duration || duration <= 0) return;
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
-      const info = payload ? { id: payload.id, t: payload.type } : null;
+      const info = payload ? { id: payload.id, t: payload.type, entity: payload } : null;
       const out = this.outputs && this.outputs[slotIndex];
       if(!out || !out.links) return;
       out.links.forEach(id=>{
         const link = this.graph.links[id]; if(!link) return;
         const target = this.graph.getNodeById(link.target_id);
         const sinkCtor = window.SinkNode;
-        const isSink = sinkCtor ? (target instanceof sinkCtor) : (target && target.title === 'Sink');
+        const isSink = !!target && (target.properties?.presetId === 'sink'
+          || (sinkCtor && target instanceof sinkCtor)
+          || target.title === 'Sink');
         if(isSink) window.WorkLinkAnimator.spawn(this.graph, id, 'work', duration, info);
       });
     }catch(_e){}
@@ -310,7 +312,7 @@ class BranchNode extends EquipmentNode{
             if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
               const inPort = this.inputs && this.inputs[0];
               if(inPort && inPort.link != null){
-                const info = (w && typeof w === 'object') ? { id: w.id, t: w.type } : null;
+                const info = (w && typeof w === 'object') ? { id: w.id, t: w.type, entity: w } : null;
                 window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
               }
             }

@@ -22,7 +22,10 @@ if not defined PORT (
   pause
   exit /b 1
 )
-set "URL=http://127.0.0.1:%PORT%/index.html"
+rem The launcher uses a persistent Chrome profile so folder permissions remain
+rem available. Give each launch a fresh document URL to prevent that profile
+rem from reopening a cached index.html that references obsolete node scripts.
+set "URL=http://127.0.0.1:%PORT%/index.html?launch=%RANDOM%%RANDOM%"
 echo URL : %URL%
 echo.
 

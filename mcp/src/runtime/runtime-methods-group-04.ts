@@ -252,7 +252,7 @@ export function registerRuntimeMethodsGroup04(
               timelineChart?: { attachGraph?: (graph: unknown) => void };
               canvas?: { draw?: (a?: boolean, b?: boolean) => void };
               restoreEntityModel?: (graph: unknown, data: unknown, initialize?: boolean) => unknown;
-              inferLegacyEntityModel?: (data: unknown) => unknown;
+              inferEntityModelFromGraph?: (data: unknown) => unknown;
             }
           | undefined;
   
@@ -287,7 +287,7 @@ export function registerRuntimeMethodsGroup04(
           const payload = parsed as Record<string, unknown>;
           const entityData = payload && payload.__factSimEntityModel
             ? payload
-            : { __factSimEntityModel: typeof app.inferLegacyEntityModel === "function" ? app.inferLegacyEntityModel(payload) : { schemaVersion: 1, types: [] } };
+            : { __factSimEntityModel: typeof app.inferEntityModelFromGraph === "function" ? app.inferEntityModelFromGraph(payload) : { schemaVersion: 1, types: [] } };
           app.restoreEntityModel(graph, entityData, true);
         }
   

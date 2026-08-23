@@ -7,33 +7,33 @@ const EQUIP_UI = {
   signalHeightStep: 16
 };
 /*
- * EquipmentNode（装置ノード）
+ * EquipmentNode
  *
- * 概要:
- *   入力（workIn）で受け取った Work を『処理→排出→ダウン→待機』の順に進める
- *   シンプルな状態機械です。処理可否はノードに紐づくスクリプトで判定できます。
+ * Overview:
+ *   Moves Work received through workIn through PROCESS, release, DOWN, and IDLE.
+ *   A node-level script can determine whether an incoming Work item is accepted.
  *
- * 時間単位:
- *   processTime / downTime は「秒(s)」で保持しています。内部では ms に換算して
- *   比較（now >= _until）を行います（simNow() はシミュレーション時間の ms）。
+ * Time units:
+ *   processTime and downTime are stored in seconds and converted to milliseconds
+ *   for comparisons. simNow() returns simulation time in milliseconds.
  *
- * 主な状態:
- *   - IDLE    : 入力待ち／処理対象なし
- *   - PROCESS : 加工中（processTime 経過で WAIT へ）
- *   - WAIT    : 排出待ち（下流が受け取り可能なら即排出して DOWN へ）
- *   - DOWN    : ダウン時間の消化（downTime 経過で IDLE へ）
+ * Main states:
+ *   - IDLE    : Waiting for input; no active Work item.
+ *   - PROCESS : Processing until processTime elapses, then transitions to WAIT.
+ *   - WAIT    : Waiting for downstream acceptance, then releases and enters DOWN.
+ *   - DOWN    : Recovering until downTime elapses, then returns to IDLE.
  *
- * スクリプト:
- *   右クリックメニュー「Edit Script…」で編集できる短い関数です。
- *   true を返すと受け入れて加工、false を返すと『素通し』で右に流します。
- *   第2引数 signalArr には sigIn* から集めた信号が入ります。
+ * Script:
+ *   A small function editable through the Edit Script context-menu command.
+ *   Returning true accepts and processes the item; false passes it through.
+ *   The second argument, signalArr, contains values collected from sigIn* ports.
  *
- * シグナルポート:
- *   sigOut* に現在の状態（IDLE/PROCESS/WAIT/DOWN）をイベント的に出力します。
- *   sigExtra を増減すると sigIn　sigOut* の数が変わります（右クリックメニュー）。
+ * Signal ports:
+ *   Emits the current state (IDLE/PROCESS/WAIT/DOWN) through sigOut*.
+ *   Changing sigExtra adds or removes sigIn* and sigOut* ports.
  *
- * 表示:
- *   ノード下部のオーバーレイに State / 処理中 Work / 残り秒数 / Proc/Down / Sig を表示します。
+ * Display:
+ *   The node overlay shows State, active Work, remaining time, Proc/Down, and Sig.
  */
 
 class EquipmentNode extends LiteGraph.LGraphNode{
@@ -44,7 +44,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     this.resizable = true;
     this.addInput('workIn', 0);
     this.addOutput('workOut', 0);
-    // プロパティ（いずれも秒単位）
+    // Time properties are stored in seconds.
     this.properties = {
       processTime: (window.NODES_CONFIG?.equipment?.processTimeSec ?? 2),
       downTime: (window.NODES_CONFIG?.equipment?.downTimeSec ?? 3),
@@ -52,7 +52,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       sigExtra: 0,
       sigEnabled: true,
 
-    };    // 現在の状態／時刻境界／保持データ
+    };    // Runtime state, time boundary, and held payload.
     this._state = 'IDLE';
     this._until = 0;
     this._payload = null;
@@ -61,7 +61,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     this._currentWork = null;
     
     this._lastInRef = null; // last seen input object
-    this._handoffOffered = false; // WAITで一度だけ出力オファーを出すためのフラグ
+    this._handoffOffered = false; // Prevent duplicate output offers while in WAIT.
     // initial colors (IDLE = yellow)
     this.color = '#f1c40f';   // border (yellow)
     this.bgcolor = '#fff9db'; // fill   (light yellow)
@@ -75,7 +75,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       const out = this.outputs && this.outputs[0];
       if(!out || !out.links) return;
       const payload = this._payload || this._currentWork || null;
-      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type } : null;
+      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type, entity: payload } : null;
       if(active){
         if(this._waitIconLinks) return;
         this._waitIconLinks = out.links.slice();
@@ -91,19 +91,21 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     if(!duration || duration <= 0) return;
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
-      const info = payload ? { id: payload.id, t: payload.type } : null;
+      const info = payload ? { id: payload.id, t: payload.type, entity: payload } : null;
       const out = this.outputs && this.outputs[0];
       if(!out || !out.links) return;
       out.links.forEach(id=>{
         const link = this.graph.links[id]; if(!link) return;
         const target = this.graph.getNodeById(link.target_id);
         const sinkCtor = window.SinkNode;
-        const isSink = sinkCtor ? (target instanceof sinkCtor) : (target && target.title === 'Sink');
+        const isSink = !!target && (target.properties?.presetId === 'sink'
+          || (sinkCtor && target instanceof sinkCtor)
+          || target.title === 'Sink');
         if(isSink) window.WorkLinkAnimator.spawn(this.graph, id, 'work', duration, info);
       });
     }catch(_e){}
   }
-  // スクリプトを（必要なら）コンパイルして実行。true で受け入れ、false で素通し
+  // Compile the script when needed. true accepts; false passes through.
   _evalScript(w, s){
     if(this.properties && this.properties.scriptDisabled){
       // Safe mode for imported/shared graphs: skip user script execution.
@@ -124,12 +126,12 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     if(this._last[i] !== state){ this.setOutputData(i+1, state); this._last[i] = state; }
     else this.setOutputData(i+1, null);
   }
-  // 毎フレーム（LiteGraph の評価タイミング）呼ばれる本体。状態機械で処理を進める
+  // Advance the state machine on each LiteGraph evaluation.
   onExecute(){
-    // 表示用の現在ワークを IDLE 時にクリア
+    // Clear the displayed Work item while IDLE.
     if(this._state === 'IDLE') this._currentWork = null;
 
-    // sigIn* を 0 から順に収集（ポート数は可変）
+    // Collect the variable number of sigIn* values in port order.
     const sig = [];
     for(let i=0;;i++){
       const idx = this.inputs.findIndex(x=>x.name===`sigIn${i}`);
@@ -144,7 +146,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       again = false;
       switch(this._state){
         case 'PROCESS':
-          // 加工中: 規定時間を過ぎたら WAIT へ
+          // Processing: transition to WAIT when the configured time elapses.
           if(now >= this._until){
             this._state = 'WAIT';
             this._handoffOffered = false;
@@ -153,14 +155,14 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           }
           break;
         case 'WAIT': {
-          // 排出待ち: 後工程が受入可能になったら即 DOWN 開始（搬送開始）
+          // Release wait: begin DOWN as soon as downstream can accept the item.
           if(this._downReady()){
             const payload = this._payload;
             this._setWaitIcon(false);
             this._state = 'DOWN';
             const downMs = Math.max(0, this.properties.downTime*1000);
             this._until = now + downMs; // ms
-            // 搬送開始時に即座に workOut を出力
+            // Publish workOut immediately when transfer begins.
             this.setOutputData(0, payload);
             this._spawnSinkTransfer(downMs, payload);
             this._payload = null;
@@ -170,7 +172,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           break;
         }
         case 'DOWN':
-          // ダウン中: 規定時間経過で IDLE へ復帰
+          // Recovery: return to IDLE when downTime elapses.
           if(now >= this._until){
             this.setOutputData(0, null);
             this._state = 'IDLE';
@@ -179,21 +181,21 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           }
           break;
         case 'IDLE': {
-          // IDLE 相当: 入力があれば受入判定
+          // IDLE: evaluate incoming Work when available.
           const in0 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
           const hasLink = !!(in0 && in0.link != null);
           if(!hasLink) break;
           const w = this.getInputData(0);
           if(!w){ this._lastInRef = null; break; }
           if(typeof w !== 'object') break;
-          // 直近に観測した参照と同一なら新規受入れではない（LiteGraphのリンクは値を保持するため）
+          // LiteGraph links retain values, so ignore the same object reference.
           if(this._lastInRef === w) break;
-          // スクリプトが false を返した場合は素通し（受けずに右へ）
+          // Pass through without processing when the script returns false.
           if(!this._evalScript(w, sig)){
             this.setOutputData(0, w);
             break;
           }
-          // 受入れ → PROCESS 開始
+          // Accept the item and begin PROCESS.
           this._currentWork = w;
           this._payload = w;
           this._state = 'PROCESS';
@@ -204,7 +206,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
             if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
               const inPort = this.inputs && this.inputs[0];
               if(inPort && inPort.link != null){
-                const info = (w && typeof w === 'object') ? { id: w.id, t: w.type } : null;
+                const info = (w && typeof w === 'object') ? { id: w.id, t: w.type, entity: w } : null;
                 window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
               }
             }
@@ -217,7 +219,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       if(this._state === 'DOWN') break;
     }
 
-    // 状態シグナルを sigOut* に通知（エッジのみ）
+    // Emit state changes through sigOut*.
     const n = this.properties.sigExtra || 0;
     for(let i=0;i<n;i++) this._emit(i, this._state);
     switch(this._state){
@@ -228,7 +230,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     }
     if(typeof window.applyNodeStateTheme === 'function') window.applyNodeStateTheme(this, this._state);
 
-    // 状態が動いている間は描画を更新
+    // Refresh rendering while the node is active.
     if(this._state !== 'IDLE' || this._payload) this.setDirtyCanvas(true,true);
   }
   _reflowWidgets(){}
@@ -266,10 +268,9 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       }
     }catch(e){}
   }
-  // 下流（workOut の接続先）が受入可能かどうかを判定
+  // Determine whether every workOut destination can accept the item.
   _downReady(){
-    // 出力先が無い（ポート自体が無い、またはリンク未接続）の場合は受け渡し不可
-    // → ワークは装置内で滞留（WAIT を維持）
+    // Without a connected output, the item remains in this node and stays in WAIT.
     if(!this.outputs.length) return false;
     const out = this.outputs[0];
     if(!out || !out.links || out.links.length === 0) return false;
@@ -283,12 +284,12 @@ class EquipmentNode extends LiteGraph.LGraphNode{
         if(!t.canAcceptWorkInput(link.target_slot, this._payload)) return false;
         continue;
       }
-      // _state を持たないノード（Sink 等）は常に受入可能とみなす
+      // Nodes without _state, such as Sink, are treated as always available.
       if(t && typeof t._state !== 'undefined' && t._state !== 'IDLE') return false;
     }
     return hasValidLink;
   }
-  // ノード下部に状態をオーバーレイ表示
+  // Draw the runtime state overlay below the node.
   onDrawForeground(ctx){
     const now = simNow();
     const rem = Math.max(0, this._until - now);

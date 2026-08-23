@@ -239,7 +239,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const duration = Math.max(0,(this.properties.processTime||0)*1000);
     this._until = now + duration;
     const w = this._currentAgv && this._currentAgv.cargo[this._currentAgv.cargo.length-1];
-    if(w) this._triggerAnim(this._workInIndex,'work',duration,{id:w.id, t:w.type});
+    if(w) this._triggerAnim(this._workInIndex,'work',duration,{id:w.id, t:w.type, entity:w});
     if(duration===0) this._handleWorkInProcess(now);
   }
 

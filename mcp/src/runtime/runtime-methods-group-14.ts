@@ -131,7 +131,10 @@ export function registerRuntimeMethodsGroup14(
       const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
       if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
       if(typeof node.applyPreset !== "function") throw new Error("Node is not a Basic Node");
-      node.applyPreset(requestedPreset, false);
+      node.properties = node.properties || {};
+      node.properties.presetId = requestedPreset;
+      if(typeof node.onPropertyChanged === "function") node.onPropertyChanged("presetId");
+      else node.applyPreset(requestedPreset, false);
       node.setDirtyCanvas?.(true, true);
       return { nodeId: node.id, presetId: node.properties.presetId, title: node.title };
     }, { requestedNodeId: nodeId, requestedPreset: presetId });

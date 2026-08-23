@@ -670,7 +670,7 @@
     for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
       const props = isObject(node?.properties) ? node.properties : null;
       if(!props || (Array.isArray(props.initialContents) && props.initialContents.length)) continue;
-      const signature = `${node?.type || ''} ${props.presetId || ''} ${props.legacySourceType || ''}`.toLowerCase();
+      const signature = `${node?.type || ''} ${props.presetId || ''} ${props.sourceMode || ''} ${props.transportMode || ''}`.toLowerCase();
       if(!signature.includes('carrierroute') && !signature.includes('agvroute') && props.presetId !== 'carrier_route') continue;
       const initialCarrier = normalizeText(props.initialCarrier);
       if(!initialCarrier || initialCarrier.toLowerCase() === 'undefined' || initialCarrier.toLowerCase() === 'none') continue;

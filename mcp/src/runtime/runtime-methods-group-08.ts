@@ -145,6 +145,19 @@ export function registerRuntimeMethodsGroup08(
               ...(node.properties ?? {}),
               ...(requestedProperties as Record<string, unknown>)
             };
+            const changedKeys = Object.keys(requestedProperties as Record<string, unknown>);
+            if (changedKeys.includes("presetId") && typeof (node as any).onPropertyChanged === "function") {
+              (node as any).onPropertyChanged("presetId");
+            }
+            for (const key of changedKeys) {
+              if (key === "presetId") continue;
+              if (typeof (node as any).onPropertyChanged === "function") {
+                (node as any).onPropertyChanged(key);
+              }
+            }
+            // Applying a preset supplies its own default title. An explicitly
+            // requested MCP title remains authoritative.
+            if (titleRaw) node.title = titleRaw;
           }
   
           app.graph.add(node);

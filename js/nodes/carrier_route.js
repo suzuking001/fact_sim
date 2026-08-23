@@ -719,13 +719,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   _carrierConfigNodes(){
     const nodes = this.graph && Array.isArray(this.graph._nodes) ? this.graph._nodes : [];
-    const live = nodes.filter((node)=>
-      node &&
-      (typeof node.isForCarrierId === 'function' ||
-       node.type === 'factory/carrierconfig' ||
-       node.type === 'factory/carrierhome' ||
-       node.type === 'factory/palletcarrierconfig' ||
-       node.type === 'factory/palletcarrier'));
+    const live = nodes.filter((node)=>node && typeof node.isForCarrierId === 'function');
     const migrated = Array.isArray(this.properties?.migratedCarrierConfigs)
       ? this.properties.migratedCarrierConfigs.map((row)=>this._migratedCarrierConfig(row)).filter(Boolean)
       : [];
@@ -735,8 +729,8 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _migratedCarrierConfig(row){
     if(!row || typeof row !== 'object') return null;
     const props = row.properties && typeof row.properties === 'object' ? row.properties : {};
-    const sourceType = String(row.sourceType || '').toLowerCase();
-    const palletMode = sourceType.indexOf('pallet') >= 0;
+    const configKind = String(row.configKind || row.sourceType || '').toLowerCase();
+    const palletMode = configKind.indexOf('pallet') >= 0;
     const configId = Number(row.nodeId);
     const carrierId = String(props.carrierId ?? '').trim();
     const positive = (value, fallback)=>{
@@ -1395,7 +1389,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._until = now + duration;
     const w = this._currentWork;
     const inSlot = this._resolveActiveWorkInSlot();
-    if(w && inSlot >= 0) this._triggerAnim(inSlot,'work',duration,{id:w.id, t:w.type});
+    if(w && inSlot >= 0) this._triggerAnim(inSlot,'work',duration,{id:w.id, t:w.type, entity:w});
     if(duration===0) this._handleWorkInProcess(now);
   }
 

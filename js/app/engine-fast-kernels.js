@@ -258,7 +258,7 @@ var App = window.App || (window.App = {});
       if(!window.WorkLinkAnimator || !node || !node.graph) return;
       const port = node.inputs && node.inputs[slotIndex];
       if(!port || port.link == null) return;
-      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type } : null;
+      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type, entity: work } : null;
       window.WorkLinkAnimator.spawn(node.graph, port.link, 'work', durationMs, info);
     }catch(_e){}
   }

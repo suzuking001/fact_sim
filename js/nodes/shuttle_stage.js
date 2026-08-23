@@ -67,7 +67,7 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
         return;
       }
       const payload = this._payload || this._currentWork || this._pendingTransfer || null;
-      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type } : null;
+      const info = (type === 'work' && payload) ? { id: payload.id, t: payload.type, entity: payload } : null;
       if(active){
         if(this._waitIconLinks) return;
         this._waitIconLinks = out.links.slice();
@@ -175,7 +175,7 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
       if(!window.WorkLinkAnimator || !this.graph) return;
       const port = this.inputs && this.inputs[0];
       if(!port || port.link == null) return;
-      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type } : null;
+      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type, entity: work } : null;
       window.WorkLinkAnimator.spawn(this.graph, port.link, 'work', durationMs, info);
     }catch(_e){}
   }
@@ -185,13 +185,13 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
       if(!window.WorkLinkAnimator || !this.graph) return;
       const out = this.outputs && this.outputs[0];
       if(!out || !out.links || !out.links.length) return;
-      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type } : null;
+      const info = (work && typeof work === 'object') ? { id: work.id, t: work.type, entity: work } : null;
       const durationMs = Math.max(120, Number(this.properties.processTime || 0) * 1000);
       for(const lid of out.links){
         const link = this.graph.links && this.graph.links[lid];
         if(!link) continue;
         const target = this.graph.getNodeById ? this.graph.getNodeById(link.target_id) : null;
-        // EquipmentNode互換: 受け側が処理を描画するので、送出側ではSink向けのみ生成
+        // EquipmentNode parity: receivers draw processing, so senders animate only toward Sink.
         const sinkCtor = window.SinkNode;
         const isSink = sinkCtor ? (target instanceof sinkCtor) : (target && target.title === 'Sink');
         if(isSink) window.WorkLinkAnimator.spawn(this.graph, lid, 'work', durationMs, info);

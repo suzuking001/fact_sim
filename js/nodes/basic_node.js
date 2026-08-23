@@ -1,5 +1,5 @@
-// One persisted node type with data-driven presets. Legacy behavior is bridged
-// only for migrated graphs; newly-created nodes use the shared entity/rule path.
+// One persisted node type with data-driven presets. Presets may reuse internal
+// runtime strategies, but every graph node is serialized as factory/basic.
 
 (function(root){
   'use strict';
@@ -7,28 +7,28 @@
   const App = root.App || (root.App = {});
 
   const PRESETS = Object.freeze({
-    basic:       { title: 'Basic Node', category: 'Advanced', entity: true, processTime: 0, contentCapacity: 1 },
-    machine:     { title: 'Machine', category: 'Processing', entity: true, processTime: 2, contentCapacity: 1 },
-    inspection:  { title: 'Inspection', category: 'Processing', entity: true, processTime: 2, contentCapacity: 1 },
-    buffer:      { title: 'Buffer', category: 'Storage', entity: true, processTime: 0, contentCapacity: 10 },
-    conveyor:    { title: 'Conveyor', category: 'Handling', entity: true, processTime: 1, contentCapacity: 1 },
-    router:      { title: 'Router', category: 'Flow Control', entity: true, processTime: 0, contentCapacity: 1 },
-    pack:        { title: 'Pack', category: 'Handling', entity: true, processTime: 1, contentCapacity: 2 },
-    unpack:      { title: 'Unpack', category: 'Handling', entity: true, processTime: 1, contentCapacity: 1 },
-    source:      { title: 'Source', category: 'System', entity: true, processTime: 0, contentCapacity: 1000000 },
-    sink:        { title: 'Sink', category: 'System', entity: true, processTime: 0, contentCapacity: 1000000 },
-    split:       { title: 'Split', category: 'Compatibility', entity: true, processTime: 0, contentCapacity: 1 },
-    merge:       { title: 'Merge', category: 'Compatibility', entity: true, processTime: 0, contentCapacity: 2 },
-    join:        { title: 'Join', category: 'Compatibility', entity: true, processTime: 0, contentCapacity: 2 },
-    shuttle:     { title: 'Shuttle Stage', category: 'Handling', entity: true, processTime: 1, contentCapacity: 1 },
-    carrier_route:{ title: 'Carrier Route', category: 'Compatibility', entity: true, processTime: 1, contentCapacity: 1 },
-    station:     { title: 'Station', category: 'Compatibility', entity: true, processTime: 1, contentCapacity: 2 },
-    transfer:    { title: 'Transfer', category: 'Compatibility', entity: true, processTime: 1, contentCapacity: 2 },
-    signal:      { title: 'Signal', category: 'Utility', entity: false, processTime: 0, contentCapacity: 0 },
-    note:        { title: 'Note', category: 'Utility', entity: false, processTime: 0, contentCapacity: 0 }
+    basic:       { title: 'Basic Node', category: 'Advanced', entity: true, processTime: 0, downTime: 0, contentCapacity: 1 },
+    machine:     { title: 'Machine', category: 'Processing', entity: true, processTime: 2, downTime: 0, contentCapacity: 1 },
+    inspection:  { title: 'Inspection', category: 'Processing', entity: true, processTime: 2, downTime: 0, contentCapacity: 1 },
+    buffer:      { title: 'Buffer', category: 'Storage', entity: true, processTime: 0, downTime: 0, contentCapacity: 10 },
+    conveyor:    { title: 'Conveyor', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
+    router:      { title: 'Router', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 1 },
+    pack:        { title: 'Pack', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
+    unpack:      { title: 'Unpack', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
+    source:      { title: 'Source', category: 'System', entity: true, processTime: 0, downTime: 0, contentCapacity: 1000000 },
+    sink:        { title: 'Sink', category: 'System', entity: true, processTime: 0, downTime: 0, contentCapacity: 1000000 },
+    split:       { title: 'Split', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 1 },
+    merge:       { title: 'Merge', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 2 },
+    join:        { title: 'Join', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 2 },
+    shuttle:     { title: 'Shuttle Stage', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
+    carrier_route:{ title: 'Carrier Route', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
+    station:     { title: 'Station', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
+    transfer:    { title: 'Transfer', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
+    signal:      { title: 'Signal', category: 'Utility', entity: false, processTime: 0, downTime: 0, contentCapacity: 0 },
+    note:        { title: 'Note', category: 'Utility', entity: false, processTime: 0, downTime: 0, contentCapacity: 0 }
   });
 
-  const LEGACY_TO_PRESET = Object.freeze({
+  const TYPE_TO_PRESET = Object.freeze({
     'factory/source': 'source',
     'factory/entitysource': 'source',
     'factory/equip': 'machine',
@@ -92,6 +92,106 @@
     assign(node?.outputs, 'out');
   }
 
+  function defaultPortCounts(presetId){
+    const id = text(presetId).toLowerCase();
+    if(id === 'source') return { inputs: 0, outputs: 1 };
+    if(id === 'sink') return { inputs: 1, outputs: 0 };
+    if(id === 'note' || id === 'signal') return { inputs: 0, outputs: 0 };
+    if(id === 'pack') return { inputs: 2, outputs: 1 };
+    if(id === 'unpack' || id === 'router' || id === 'split') return { inputs: 1, outputs: 2 };
+    if(id === 'merge' || id === 'join') return { inputs: 2, outputs: 1 };
+    return { inputs: 1, outputs: 1 };
+  }
+
+  function defaultEntityCategory(node, port){
+    if(port) return categoryForPort(port);
+    const presetId = text(node?.properties?.presetId).toLowerCase();
+    if(presetId === 'source' && text(node?.properties?.sourceMode).toLowerCase() === 'entity'){
+      const kind = text(node?.properties?.rootKind).toLowerCase();
+      if(kind === 'carrier' || kind === 'agv') return 'carrier';
+      if(kind === 'work') return 'work';
+      return 'container';
+    }
+    if(presetId === 'carrier_route') return 'carrier';
+    return 'work';
+  }
+
+  function targetForCategory(category){
+    return { mode: 'category', category: category || 'work' };
+  }
+
+  function defaultReleaseCondition(node){
+    const presetId = text(node?.properties?.presetId).toLowerCase();
+    if(presetId === 'shuttle'){
+      return {
+        kind: 'all',
+        conditions: [
+          { kind: 'process-complete' },
+          { kind: 'shuttle-group-idle', groupId: text(node?.properties?.shuttleGroupId) || 'shuttle-1' },
+          { kind: 'downstream-ready' }
+        ]
+      };
+    }
+    const primary = ['source', 'buffer', 'router', 'split'].includes(presetId)
+      ? 'available'
+      : 'process-complete';
+    return {
+      kind: 'all',
+      conditions: [
+        { kind: primary },
+        { kind: 'downstream-ready' }
+      ]
+    };
+  }
+
+  function ensurePresetFlowRules(node){
+    if(!node || !isObject(node.properties)) return;
+    const presetId = text(node.properties.presetId).toLowerCase() || 'basic';
+    const preset = PRESETS[presetId] || PRESETS.basic;
+    if(preset.entity === false){
+      if(!Array.isArray(node.properties.inputRules)) node.properties.inputRules = [];
+      if(!Array.isArray(node.properties.outputRules)) node.properties.outputRules = [];
+      return;
+    }
+    ensurePortIds(node);
+    const counts = defaultPortCounts(presetId);
+    const inputs = Array.isArray(node.inputs) && node.inputs.length
+      ? node.inputs
+      : Array.from({ length: counts.inputs }, (_unused, index)=>({ portId: `in-${index + 1}` }));
+    const outputs = Array.isArray(node.outputs) && node.outputs.length
+      ? node.outputs
+      : Array.from({ length: counts.outputs }, (_unused, index)=>({ portId: `out-${index + 1}` }));
+
+    if(!Array.isArray(node.properties.inputRules) || !node.properties.inputRules.length){
+      node.properties.inputRules = inputs.map((port, index)=>{
+        const target = targetForCategory(defaultEntityCategory(node, port));
+        return {
+          ruleId: `${presetId}-input-${index + 1}`,
+          targets: [target],
+          target: clone(target, target),
+          acceptWhen: { kind: presetId === 'sink' ? 'always' : 'space-available' },
+          fromPortId: port.portId || `in-${index + 1}`
+        };
+      });
+    }
+    if(!Array.isArray(node.properties.outputRules) || !node.properties.outputRules.length){
+      if(!outputs.length){
+        node.properties.outputRules = [];
+      }else{
+        const target = targetForCategory(defaultEntityCategory(node, outputs[0]));
+        const toPortIds = outputs.map((port, index)=>port.portId || `out-${index + 1}`);
+        node.properties.outputRules = [{
+          ruleId: `${presetId}-output-1`,
+          targets: [target],
+          target: clone(target, target),
+          releaseWhen: defaultReleaseCondition(node),
+          toPortIds,
+          toPortId: toPortIds[0] || null
+        }];
+      }
+    }
+  }
+
   function portIndexById(rows, portId){
     if(!Array.isArray(rows)) return -1;
     const wanted = text(portId);
@@ -99,13 +199,30 @@
     return rows.findIndex((port)=>text(port?.portId) === wanted);
   }
 
-  function legacyCtor(type){
-    const info = root.LiteGraph?.registered_node_types?.[type];
-    if(!info) return null;
-    return typeof info === 'function' ? info : (typeof info.class === 'function' ? info.class : null);
+  function presetRuntimeCtor(presetId, properties){
+    const preset = text(presetId).toLowerCase();
+    if(preset === 'source') return text(properties?.sourceMode).toLowerCase() === 'entity'
+      ? root.EntitySourceNode
+      : root.SourceNode;
+    if(preset === 'machine' || preset === 'inspection') return root.EquipmentNode;
+    if(preset === 'router') return root.BranchNode;
+    if(preset === 'split') return root.SplitNode;
+    if(preset === 'merge') return root.MergeNode;
+    if(preset === 'join') return root.JoinNode;
+    if(preset === 'carrier_route') return text(properties?.transportMode).toLowerCase() === 'agv'
+      ? root.AGVRouteNode
+      : root.CarrierRouteNode;
+    if(preset === 'station') return root.StationNode;
+    if(preset === 'transfer') return root.TransferStationNode;
+    if(preset === 'sink') return root.SinkNode;
+    if(preset === 'signal') return root.SignalNode;
+    if(preset === 'note') return root.NoteNode;
+    return null;
   }
 
-  function installLegacyMethods(target, ctor){
+  function installPresetRuntimeMethods(target, ctor){
+    for(const name of (target._runtimeMethodNames || [])) delete target[name];
+    target._runtimeMethodNames = [];
     let proto = ctor?.prototype;
     // Lifecycle methods stay behind BasicNode's dispatch layer. Every other
     // method must shadow the generic implementation: several legacy nodes use
@@ -125,6 +242,7 @@
           writable: true,
           value: function(){ return method.apply(this, arguments); }
         });
+        target._runtimeMethodNames.push(name);
       }
       proto = Object.getPrototypeOf(proto);
     }
@@ -142,6 +260,7 @@
         basicNodeVersion: 1,
         presetId: 'basic',
         processTime: 0,
+        downTime: 0,
         contentCapacity: 1,
         initialContents: [],
         inputRules: [],
@@ -162,10 +281,12 @@
       this._pendingTransfer = null;
       this._shuttleTransferSlot = null;
       this._incomingPayload = null;
+      this._incomingPayloadOpensCycle = false;
       this._transferHold = false;
       this._lastInRef = null;
-      this._legacyPrototype = null;
-      this._legacyConfigured = false;
+      this._runtimePrototype = null;
+      this._runtimeConfigured = false;
+      this._runtimeMethodNames = [];
       if(root.enableFlipIO) root.enableFlipIO(this);
     }
 
@@ -194,6 +315,7 @@
       const preset = PRESETS[id];
       this.properties = { ...(this.properties || {}), basicNodeVersion: 1, presetId: id };
       if(!Number.isFinite(Number(this.properties.processTime))) this.properties.processTime = preset.processTime;
+      if(!Number.isFinite(Number(this.properties.downTime))) this.properties.downTime = preset.downTime;
       if(!Number.isFinite(Number(this.properties.contentCapacity))) this.properties.contentCapacity = preset.contentCapacity;
       if(!Array.isArray(this.properties.initialContents)) this.properties.initialContents = [];
       if(!Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
@@ -226,12 +348,13 @@
       }
       if(!preserveTitle) this.title = preset.title;
       this._ensurePresetPorts();
+      ensurePresetFlowRules(this);
       if(id === 'shuttle') this._applyShuttleStateColor();
       return this;
     }
 
     _ensurePresetPorts(){
-      if(this.properties?.legacySourceType){ ensurePortIds(this); return; }
+      if(this._runtimePrototype){ ensurePortIds(this); return; }
       const id = this.properties?.presetId;
       const desiredInputs = id === 'source' || id === 'note' ? 0 : (id === 'pack' ? 2 : 1);
       const desiredOutputs = id === 'sink' || id === 'note' ? 0 : (id === 'unpack' || id === 'router' ? 2 : 1);
@@ -242,11 +365,14 @@
       ensurePortIds(this);
     }
 
-    _configureLegacy(serializedNode){
-      const type = text(this.properties?.legacySourceType);
-      if(!type || type === 'factory/basic') return false;
-      const ctor = legacyCtor(type);
-      if(!ctor) return false;
+    _configurePresetRuntime(serializedNode){
+      const ctor = presetRuntimeCtor(this.properties?.presetId, this.properties);
+      if(!ctor){
+        installPresetRuntimeMethods(this, null);
+        this._runtimePrototype = null;
+        this._runtimeConfigured = false;
+        return false;
+      }
       let temp = null;
       try{ temp = new ctor(); }catch(_e){ temp = null; }
       if(temp){
@@ -261,21 +387,33 @@
           if(typeof temp[key] === 'function') continue;
           this[key] = temp[key];
         }
+        // LiteGraph omits constructor-default ports from several older graph
+        // payloads. After every persisted node became factory/basic, the Basic
+        // constructor's 1-in/1-out defaults would otherwise leak into Source,
+        // Sink and other presets. Materialize the selected runtime preset's
+        // ports only for the sides that were not explicitly serialized.
+        if(!serializedNode || !Array.isArray(serializedNode.inputs)){
+          this.inputs = clone(temp.inputs, []);
+        }
+        if(!serializedNode || !Array.isArray(serializedNode.outputs)){
+          this.outputs = clone(temp.outputs, []);
+        }
       }
-      installLegacyMethods(this, ctor);
-      this._legacyPrototype = ctor.prototype;
+      installPresetRuntimeMethods(this, ctor);
+      this._runtimePrototype = ctor.prototype;
       if(typeof ctor.prototype.onConfigure === 'function'){
         try{ ctor.prototype.onConfigure.call(this, serializedNode); }catch(err){ console.error(err); }
       }
-      this._legacyConfigured = true;
+      this._runtimeConfigured = true;
       ensurePortIds(this);
+      ensurePresetFlowRules(this);
       return true;
     }
 
     onConfigure(serializedNode){
       this.properties = { ...(this.properties || {}), basicNodeVersion: 1 };
       if(!this.properties.presetId) this.properties.presetId = 'basic';
-      if(this._configureLegacy(serializedNode)){
+      if(this._configurePresetRuntime(serializedNode)){
         restoreSerializedGeometry(this, serializedNode);
         return;
       }
@@ -288,6 +426,7 @@
 
     onSerialize(serialized){
       this._migrateLegacyShuttleGroupSetting();
+      ensurePresetFlowRules(this);
       serialized.type = 'factory/basic';
       ensurePortIds(this);
       serialized.inputs = clone(this.inputs, serialized.inputs || []);
@@ -297,32 +436,44 @@
 
     onPropertyChanged(name){
       if(this._isConfiguring) return;
-      if(this._legacyPrototype && typeof this._legacyPrototype.onPropertyChanged === 'function'){
-        return this._legacyPrototype.onPropertyChanged.call(this, name);
-      }
       if(name === 'presetId'){
+        installPresetRuntimeMethods(this, null);
+        this._runtimePrototype = null;
         this.applyPreset(this.properties.presetId, false);
         this._migrateLegacyShuttleGroupSetting();
+        this._configurePresetRuntime(null);
+        return;
+      }
+      if(name === 'sourceMode' || name === 'transportMode'){
+        installPresetRuntimeMethods(this, null);
+        this._runtimePrototype = null;
+        this._configurePresetRuntime(null);
+        return;
+      }
+      if(this._runtimePrototype && typeof this._runtimePrototype.onPropertyChanged === 'function'){
+        return this._runtimePrototype.onPropertyChanged.call(this, name);
       }
       if(name === 'processTime') this.properties.processTime = Math.max(0, Number(this.properties.processTime) || 0);
+      if(name === 'downTime') this.properties.downTime = Math.max(0, Number(this.properties.downTime) || 0);
       if(name === 'contentCapacity') this.properties.contentCapacity = Math.max(0, Math.round(Number(this.properties.contentCapacity) || 0));
     }
 
     getInspectorSchema(){
-      if(this._legacyPrototype && typeof this._legacyPrototype.getInspectorSchema === 'function'){
-        return this._legacyPrototype.getInspectorSchema.call(this);
+      if(this._runtimePrototype && typeof this._runtimePrototype.getInspectorSchema === 'function'){
+        return this._runtimePrototype.getInspectorSchema.call(this);
       }
       const schema = {
         presetId: { type: 'select', label: 'Preset', options: Object.entries(PRESETS).map(([value, row])=>[value, row.title]) },
         processTime: { type: 'number', label: 'Process time (s)' },
+        downTime: { type: 'number', label: 'Down time (s)' },
         contentCapacity: { type: 'number', label: 'Node capacity' }
       };
       return schema;
     }
 
     getEntityRoots(){
-      if(this._legacyPrototype && typeof this._legacyPrototype.getEntityRoots === 'function'){
-        return this._legacyPrototype.getEntityRoots.call(this);
+      if(this._runtimePrototype && typeof this._runtimePrototype.getEntityRoots === 'function'){
+        return this._runtimePrototype.getEntityRoots.call(this);
       }
       return this._store()?.rootsAt(this.id) || [];
     }
@@ -357,8 +508,8 @@
     }
 
     canAcceptEntityInput(slotIndex, value){
-      if(this._legacyPrototype && typeof this._legacyPrototype.canAcceptEntityInput === 'function'){
-        return this._legacyPrototype.canAcceptEntityInput.call(this, slotIndex, value);
+      if(this._runtimePrototype && typeof this._runtimePrototype.canAcceptEntityInput === 'function'){
+        return this._runtimePrototype.canAcceptEntityInput.call(this, slotIndex, value);
       }
       if(this.properties?.presetId === 'source' || this.properties?.presetId === 'note') return false;
       const capacity = Math.max(0, Number(this.properties?.contentCapacity) || 0);
@@ -373,8 +524,8 @@
       return !!App.selectEntityRule(store, this, rules, { incomingRoot: instance, nowMs: nowMs() }, 'input');
     }
 
-    _canAcceptLegacyPayload(slotIndex, payload){
-      if(!this._legacyPrototype) return null;
+    _canAcceptRuntimePayload(slotIndex, payload){
+      if(!this._runtimePrototype) return null;
       if(typeof this._state !== 'undefined' && this._state !== 'IDLE') return false;
       if(this._payload || this._activeRoot || this._offer) return false;
       const currentInput = typeof this.getInputData === 'function' ? this.getInputData(slotIndex) : null;
@@ -389,8 +540,8 @@
           && !this._pendingTransfer
           && !this._incomingPayload;
       }
-      const legacy = this._canAcceptLegacyPayload(slotIndex, work);
-      return legacy === null ? this.canAcceptEntityInput(slotIndex, work) : legacy;
+      const runtime = this._canAcceptRuntimePayload(slotIndex, work);
+      return runtime === null ? this.canAcceptEntityInput(slotIndex, work) : runtime;
     }
 
     _shuttleGroupId(){
@@ -475,17 +626,9 @@
       this.graph.__outputDirty = true;
     }
 
-    _shuttleGroupCycleMs(){
-      let cycleMs = 0;
-      for(const node of this._shuttleGroupNodes()){
-        cycleMs = Math.max(cycleMs, Math.max(0, Number(node?.properties?.processTime) || 0) * 1000);
-      }
-      return cycleMs;
-    }
-
     _shuttleGroupTiming(now){
       const graph = this.graph;
-      if(!graph) return { nextTransferAt: NaN, lastObservedAt: Number(now) || 0 };
+      if(!graph) return { cycleOpen: false, lastObservedAt: Number(now) || 0 };
       if(!(graph.__factSimShuttleGroupTiming instanceof Map)){
         graph.__factSimShuttleGroupTiming = new Map();
       }
@@ -493,9 +636,11 @@
       let timing = graph.__factSimShuttleGroupTiming.get(groupId);
       const current = Number(now) || 0;
       if(!timing || (Number.isFinite(timing.lastObservedAt) && current + 0.001 < timing.lastObservedAt)){
-        timing = { nextTransferAt: NaN, lastTransferAt: NaN, lastObservedAt: current };
+        timing = { cycleOpen: false, lastTransferAt: NaN, lastObservedAt: current };
         graph.__factSimShuttleGroupTiming.set(groupId, timing);
       }
+      if(typeof timing.cycleOpen !== 'boolean') timing.cycleOpen = Number.isFinite(timing.nextTransferAt);
+      delete timing.nextTransferAt;
       timing.lastObservedAt = current;
       return timing;
     }
@@ -509,17 +654,40 @@
 
     _openShuttleGroupCycle(now){
       const timing = this._shuttleGroupTiming(now);
-      if(!Number.isFinite(timing.nextTransferAt) || this._shuttleGroupIsEmpty()){
-        timing.nextTransferAt = (Number(now) || 0) + this._shuttleGroupCycleMs();
+      if(!timing.cycleOpen){
+        timing.cycleOpen = true;
       }
       return timing;
     }
 
+    _closeShuttleGroupCycle(now){
+      const timing = this._shuttleGroupTiming(now);
+      timing.cycleOpen = false;
+      return timing;
+    }
+
+    _shuttleGroupProcessCompleteAt(){
+      let completeAt = NaN;
+      for(const node of this._shuttleGroupNodes()){
+        if(!node?._payload || node._state !== 'PROCESS') continue;
+        const until = Number(node._until);
+        if(!Number.isFinite(until)) continue;
+        completeAt = Number.isFinite(completeAt) ? Math.max(completeAt, until) : until;
+      }
+      return completeAt;
+    }
+
     _closeShuttleGroupCycleIfEmpty(now){
       if(!this._shuttleGroupIsEmpty()) return;
-      const timing = this._shuttleGroupTiming(now);
-      timing.nextTransferAt = NaN;
+      const timing = this._closeShuttleGroupCycle(now);
       timing.lastTransferAt = NaN;
+    }
+
+    _shuttleInputIsExternal(slotIndex){
+      const input = this.inputs?.[Number.isInteger(slotIndex) ? slotIndex : 0];
+      const link = input?.link != null ? this.graph?.links?.[input.link] : null;
+      const origin = link && this.graph?.getNodeById?.(link.origin_id);
+      return !!origin && !this._isSameShuttleGroup(origin);
     }
 
     _shuttleRuleTargetMatches(rule){
@@ -625,7 +793,7 @@
           return;
         }
         const payload = this._payload || this._currentWork || this._pendingTransfer || null;
-        const info = payload ? { id: payload.id, t: payload.type } : null;
+        const info = payload ? { id: payload.id, t: payload.type, entity: payload } : null;
         if(active){
           if(this._waitIconLinks) return;
           this._waitIconLinks = output.links.slice();
@@ -688,7 +856,7 @@
       try{
         const input = this.inputs?.[0];
         if(!root.WorkLinkAnimator || !this.graph || !input || input.link == null) return;
-        const info = work && typeof work === 'object' ? { id: work.id, t: work.type } : null;
+        const info = work && typeof work === 'object' ? { id: work.id, t: work.type, entity: work } : null;
         root.WorkLinkAnimator.spawn(this.graph, input.link, 'work', durationMs, info);
       }catch(_e){}
     }
@@ -697,13 +865,12 @@
       try{
         const output = this.outputs?.[Number.isInteger(slot) ? slot : 0];
         if(!root.WorkLinkAnimator || !this.graph || !output || !Array.isArray(output.links)) return;
-        const info = work && typeof work === 'object' ? { id: work.id, t: work.type } : null;
+        const info = work && typeof work === 'object' ? { id: work.id, t: work.type, entity: work } : null;
         const durationMs = Math.max(120, Number(this.properties?.processTime || 0) * 1000);
         for(const linkId of output.links){
           const link = this.graph.links?.[linkId];
           const target = link && this.graph.getNodeById?.(link.target_id);
           const isSink = text(target?.properties?.presetId).toLowerCase() === 'sink'
-            || text(target?.properties?.legacySourceType).toLowerCase() === 'factory/sink'
             || (root.SinkNode && target instanceof root.SinkNode);
           if(isSink) root.WorkLinkAnimator.spawn(this.graph, linkId, 'work', durationMs, info);
         }
@@ -735,11 +902,8 @@
       if(!transferNodes.length) return false;
       const now = nowMs();
       const timing = this._shuttleGroupTiming(now);
-      if(!Number.isFinite(timing.nextTransferAt)){
-        timing.nextTransferAt = now + this._shuttleGroupCycleMs();
-      }
-      const groupIdle = now + 0.001 >= timing.nextTransferAt
-        && peers.every((node)=>!node?._payload || node._state !== 'PROCESS');
+      if(!timing.cycleOpen) return false;
+      const groupIdle = peers.every((node)=>!node?._payload || node._state !== 'PROCESS');
       if(!groupIdle) return false;
       const vacatingNodeIds = new Set(transferNodes.map((node)=>node.id));
       const selections = new Map();
@@ -754,15 +918,15 @@
       }
       if(moved){
         timing.lastTransferAt = now;
-        timing.nextTransferAt = now + this._shuttleGroupCycleMs();
+        timing.cycleOpen = false;
         this._markShuttleGroupDirty();
       }
       return moved;
     }
 
-    _startShuttleProcess(work, now){
+    _startShuttleProcess(work, now, opensCycle){
       if(!work || typeof work !== 'object') return false;
-      this._openShuttleGroupCycle(now);
+      if(opensCycle) this._openShuttleGroupCycle(now);
       this._payload = work;
       this._currentWork = work;
       const processMs = Math.max(0, Number(this.properties?.processTime || 0) * 1000);
@@ -780,8 +944,10 @@
       if(this._incomingPayload){
         if(this._shuttleGroupIsTransferring()) return false;
         const buffered = this._incomingPayload;
+        const opensCycle = !!this._incomingPayloadOpensCycle;
         this._incomingPayload = null;
-        return this._startShuttleProcess(buffered, now);
+        this._incomingPayloadOpensCycle = false;
+        return this._startShuttleProcess(buffered, now, opensCycle);
       }
       const input = this.inputs?.[0];
       if(!input || input.link == null){
@@ -795,12 +961,14 @@
       }
       if(typeof work !== 'object' || this._lastInRef === work) return false;
       this._lastInRef = work;
+      const opensCycle = this._shuttleInputIsExternal(0);
       if(this._shuttleGroupIsTransferring()){
         this._incomingPayload = work;
+        this._incomingPayloadOpensCycle = opensCycle;
         this._markShuttleGroupDirty();
         return true;
       }
-      return this._startShuttleProcess(work, now);
+      return this._startShuttleProcess(work, now, opensCycle);
     }
 
     _captureShuttleInputDuringTransfer(){
@@ -811,6 +979,7 @@
       if(!work || typeof work !== 'object' || this._lastInRef === work) return;
       this._lastInRef = work;
       this._incomingPayload = work;
+      this._incomingPayloadOpensCycle = this._shuttleInputIsExternal(0);
     }
 
     _executeShuttle(){
@@ -848,13 +1017,13 @@
     }
 
     canAcceptPalletInput(slotIndex, pallet){
-      const legacy = this._canAcceptLegacyPayload(slotIndex, pallet);
-      return legacy === null ? this.canAcceptEntityInput(slotIndex, pallet) : legacy;
+      const runtime = this._canAcceptRuntimePayload(slotIndex, pallet);
+      return runtime === null ? this.canAcceptEntityInput(slotIndex, pallet) : runtime;
     }
 
     canAcceptAgv(slotIndex, carrier){
-      const legacy = this._canAcceptLegacyPayload(slotIndex, carrier);
-      return legacy === null ? this.canAcceptEntityInput(slotIndex, carrier) : legacy;
+      const runtime = this._canAcceptRuntimePayload(slotIndex, carrier);
+      return runtime === null ? this.canAcceptEntityInput(slotIndex, carrier) : runtime;
     }
 
     _downstreamReady(slot, instance){
@@ -891,8 +1060,15 @@
       this._activeRoot = null;
       this._activeTarget = null;
       this._processComplete = false;
-      this._state = 'IDLE';
-      this._stateName = 'idle';
+      const downMs = Math.max(0, Number(this.properties?.downTime) || 0) * 1000;
+      if(downMs > 0){
+        this._state = 'DOWN';
+        this._stateName = 'down';
+        this._until = nowMs() + downMs;
+      }else{
+        this._state = 'IDLE';
+        this._stateName = 'idle';
+      }
       return true;
     }
 
@@ -978,6 +1154,11 @@
       if(preset === 'sink'){ this._executeSink(); return; }
       if(preset === 'pack'){ this._executePack(); return; }
       if(preset === 'unpack'){ this._executeUnpack(); return; }
+      if(this._state === 'DOWN'){
+        if(nowMs() < this._until) return;
+        this._state = 'IDLE';
+        this._stateName = 'idle';
+      }
       for(let index = 0; index < this.inputs.length; index++) this._acceptIncoming(index);
       const store = this._store();
       if(!this._activeRoot) this._activeRoot = store?.rootsAt(this.id)?.[0] || null;
@@ -1006,8 +1187,8 @@
       if(this.properties?.presetId === 'shuttle'){
         return this._executeShuttle();
       }
-      if(this._legacyPrototype && typeof this._legacyPrototype.onExecute === 'function'){
-        return this._legacyPrototype.onExecute.call(this);
+      if(this._runtimePrototype && typeof this._runtimePrototype.onExecute === 'function'){
+        return this._runtimePrototype.onExecute.call(this);
       }
       return this._executeGeneric();
     }
@@ -1026,8 +1207,8 @@
         }
         return;
       }
-      if(this._legacyPrototype && typeof this._legacyPrototype.onDrawForeground === 'function'){
-        return this._legacyPrototype.onDrawForeground.call(this, ctx);
+      if(this._runtimePrototype && typeof this._runtimePrototype.onDrawForeground === 'function'){
+        return this._runtimePrototype.onDrawForeground.call(this, ctx);
       }
       const store = this._store();
       const count = store?.summaryAt(this.id).reduce((sum, row)=>sum + row.quantity, 0) || 0;
@@ -1046,8 +1227,11 @@
       if(this.properties?.presetId === 'shuttle'){
         if(this._state === 'TRANSFER') return Number(now) || 0;
         if(this._state === 'WAIT'){
-          const nextTransferAt = Number(this._shuttleGroupTiming(now).nextTransferAt);
-          if(Number.isFinite(nextTransferAt)) return nextTransferAt;
+          const timing = this._shuttleGroupTiming(now);
+          if(timing.cycleOpen){
+            const completeAt = this._shuttleGroupProcessCompleteAt();
+            if(Number.isFinite(completeAt)) return completeAt;
+          }
         }
       }
       return NaN;
@@ -1161,6 +1345,17 @@
     });
   }
 
+  function applyPresetRuntimeVariant(properties, originalType){
+    const props = isObject(properties) ? properties : {};
+    const type = text(originalType).toLowerCase();
+    if(type === 'factory/entitysource') props.sourceMode = 'entity';
+    else if(type === 'factory/source' && !text(props.sourceMode)) props.sourceMode = 'work';
+    if(type === 'factory/agvroute') props.transportMode = 'agv';
+    else if(type === 'factory/carrierroute' && !text(props.transportMode)) props.transportMode = 'carrier';
+    delete props.legacySourceType;
+    return props;
+  }
+
   function migrateGraphDataToBasic(source, options){
     const data = clone(source, null);
     if(!data) throw new Error('Graph data is not serializable');
@@ -1171,7 +1366,7 @@
     data.__factSimEntityModel = inferLegacyTypes(data);
     const carrierConfigs = nodes.filter((node)=>CONFIG_TYPES.has(node?.type)).map((node)=>({
       nodeId: node.id,
-      sourceType: node.type,
+      configKind: text(node.type).toLowerCase().includes('pallet') ? 'pallet-carrier' : 'carrier',
       properties: clone(node.properties, {})
     }));
     const kept = [];
@@ -1183,8 +1378,27 @@
         removedNodeIds.push(node.id);
         continue;
       }
+      if(node.type === 'factory/basic'){
+        node.properties = isObject(node.properties) ? node.properties : {};
+        const previousType = text(node.properties.legacySourceType);
+        if(previousType){
+          if(!text(node.properties.presetId)) node.properties.presetId = TYPE_TO_PRESET[previousType] || 'basic';
+          applyPresetRuntimeVariant(node.properties, previousType);
+        }
+        if(Array.isArray(node.properties.migratedCarrierConfigs)){
+          node.properties.migratedCarrierConfigs = node.properties.migratedCarrierConfigs.map((row)=>{
+            if(!isObject(row)) return row;
+            if(!text(row.configKind)){
+              row.configKind = text(row.sourceType).toLowerCase().includes('pallet') ? 'pallet-carrier' : 'carrier';
+            }
+            delete row.sourceType;
+            return row;
+          });
+        }
+        ensurePresetFlowRules(node);
+      }
       if(node.type !== 'factory/basic'){
-        const presetId = LEGACY_TO_PRESET[node.type];
+        const presetId = TYPE_TO_PRESET[node.type];
         if(!presetId){
           warnings.push({ code: 'UNKNOWN_NODE_TYPE', nodeId: node.id, type: node.type });
           kept.push(node);
@@ -1195,12 +1409,10 @@
         node.properties = isObject(node.properties) ? node.properties : {};
         node.properties.basicNodeVersion = 1;
         node.properties.presetId = presetId;
+        applyPresetRuntimeVariant(node.properties, originalType);
         if(originalType === 'factory/shuttle_stage'){
           node.properties.shuttleGroupId = text(node.properties.shuttleGroupId || node.properties.groupId) || 'shuttle-1';
           delete node.properties.groupId;
-          delete node.properties.legacySourceType;
-        }else{
-          node.properties.legacySourceType = originalType;
         }
         if((originalType === 'factory/carrierroute' || originalType === 'factory/agvroute') && carrierConfigs.length){
           node.properties.migratedCarrierConfigs = clone(carrierConfigs, []);
@@ -1217,6 +1429,7 @@
         convertedNodeCount += 1;
       }
       ensurePortIds(node);
+      ensurePresetFlowRules(node);
       kept.push(node);
     }
     data.nodes = kept;
@@ -1240,8 +1453,8 @@
   }
 
   App.BASIC_NODE_PRESETS = PRESETS;
-  App.BASIC_NODE_LEGACY_MAP = LEGACY_TO_PRESET;
-  App.inferLegacyEntityModel = inferLegacyTypes;
+  App.BASIC_NODE_TYPE_PRESET_MAP = TYPE_TO_PRESET;
+  App.inferEntityModelFromGraph = inferLegacyTypes;
   App.ensureBasicNodePortIds = ensurePortIds;
   App.migrateGraphDataToBasic = migrateGraphDataToBasic;
   App.previewBasicNodeMigration = (data)=>migrateGraphDataToBasic(data, { previewOnly: true });
