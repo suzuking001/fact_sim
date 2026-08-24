@@ -632,6 +632,9 @@ window.runNodeMutation = runNodeMutation;
           if(node){
             node.properties.presetId = String(item.value || 'basic');
             if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged('presetId');
+            if(typeof window.App?.ensureBasicPresetFlowRules === 'function'){
+              window.App.ensureBasicPresetFlowRules(node, { force: true });
+            }
             if(typeof window.enforceNodeOverlayMinSize === 'function'){
               try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}
             }

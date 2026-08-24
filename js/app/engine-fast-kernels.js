@@ -284,15 +284,20 @@ var App = window.App || (window.App = {});
           return buildResult(before, held, NaN);
         }
 
-        const ready = downstreamReady(ctx, nodeIndex, 0, null);
+        if((!node._seq || !node._seq.length) && typeof node._parseSeq === 'function') node._parseSeq();
+        const nextId = (Number(node._counter) || 0) + 1;
+        const entry = (Array.isArray(node._seq) && node._seq[node._cursor]) ? node._seq[node._cursor] : { type: 'A' };
+        const WorkCtor = window.Work || function(id, type){ this.id = id; this.type = type; };
+        const preview = new WorkCtor(nextId, entry.type);
+        const flowSelection = typeof node._runtimeSelectOutputRule === 'function'
+          ? node._runtimeSelectOutputRule(preview, { processComplete:true })
+          : { slot:0 };
+        const flowSlot = Number.isInteger(flowSelection && flowSelection.slot) ? flowSelection.slot : 0;
+        const ready = !!flowSelection && downstreamReady(ctx, nodeIndex, flowSlot, preview);
 
         if(ready){
-          if((!node._seq || !node._seq.length) && typeof node._parseSeq === 'function') node._parseSeq();
-          const nextId = (Number(node._counter) || 0) + 1;
-          const entry = (Array.isArray(node._seq) && node._seq[node._cursor]) ? node._seq[node._cursor] : { type: 'A' };
-          const WorkCtor = window.Work || function(id, type){ this.id = id; this.type = type; };
-          const work = new WorkCtor(nextId, entry.type);
-          if(typeof node.setOutputData === 'function') node.setOutputData(0, work);
+          const work = preview;
+          if(typeof node.setOutputData === 'function') node.setOutputData(flowSlot, work);
           node._pendingWork = work;
           if(typeof node._animateWorkOutput === 'function') node._animateWorkOutput(work);
           node._counter = nextId;
@@ -342,23 +347,31 @@ var App = window.App || (window.App = {});
               }
               break;
             case 'WAIT': {
-              if(downstreamReady(ctx, nodeIndex, 0, node._payload)){
+              const flowSelection = typeof node._runtimeSelectOutputRule === 'function'
+                ? node._runtimeSelectOutputRule(node._payload, { processComplete:true })
+                : { slot:0 };
+              const flowSlot = Number.isInteger(flowSelection && flowSelection.slot) ? flowSelection.slot : 0;
+              if(flowSelection && downstreamReady(ctx, nodeIndex, flowSlot, node._payload)){
                 const payload = node._payload;
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(false);
                 node._state = 'DOWN';
                 const downMs = Math.max(0, (Number(node.properties && node.properties.downTime) || 0) * 1000);
                 node._until = now + downMs;
-                if(typeof node.setOutputData === 'function') node.setOutputData(0, payload);
-                if(typeof node._spawnSinkTransfer === 'function') node._spawnSinkTransfer(downMs, payload);
+                node._flowOutputSlot = flowSlot;
+                if(typeof node.setOutputData === 'function') node.setOutputData(flowSlot, payload);
+                if(typeof node._spawnSinkTransfer === 'function') node._spawnSinkTransfer(downMs, payload, flowSlot);
                 node._payload = null;
               }else{
-                if(typeof node.setOutputData === 'function') node.setOutputData(0, null);
+                const slot = Number.isInteger(node._flowOutputSlot) ? node._flowOutputSlot : flowSlot;
+                if(typeof node.setOutputData === 'function' && slot >= 0) node.setOutputData(slot, null);
               }
               break;
             }
             case 'DOWN':
               if(now >= Number(node._until)){
-                if(typeof node.setOutputData === 'function') node.setOutputData(0, null);
+                const flowSlot = Number.isInteger(node._flowOutputSlot) ? node._flowOutputSlot : 0;
+                if(typeof node.setOutputData === 'function') node.setOutputData(flowSlot, null);
+                node._flowOutputSlot = null;
                 node._state = 'IDLE';
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(false);
                 again = true;
@@ -375,6 +388,7 @@ var App = window.App || (window.App = {});
               }
               if(typeof work !== 'object') break;
               if(node._lastInRef === work) break;
+              if(typeof node._runtimeSelectInputRule === 'function' && !node._runtimeSelectInputRule(work, 0)) break;
               if(typeof node._evalScript === 'function' && !node._evalScript(work, sig)){
                 if(typeof node.setOutputData === 'function') node.setOutputData(0, work);
                 break;
@@ -419,6 +433,9 @@ var App = window.App || (window.App = {});
           return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
         }
         if(node._lastInRef === work){
+          return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
+        }
+        if(typeof node._runtimeSelectInputRule === 'function' && !node._runtimeSelectInputRule(work, 0)){
           return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
         }
 

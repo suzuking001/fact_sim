@@ -44,8 +44,8 @@ class SourceNode extends LiteGraph.LGraphNode{
     if(n==='sequence') this._parseSeq();
     if(n==='sigExtra') syncSigPorts(this);
   }
-  _downstreamStatus(){
-    const out = this.outputs && this.outputs[0];
+  _downstreamStatus(work=null, slotIndex=0){
+    const out = this.outputs && this.outputs[slotIndex];
     if(!out || !Array.isArray(out.links) || out.links.length === 0){
       return { ready: false, status: 'DISCONNECTED' };
     }
@@ -61,7 +61,7 @@ class SourceNode extends LiteGraph.LGraphNode{
       hasValidLink = true;
 
       if(typeof t.canAcceptWorkInput === 'function'){
-        if(!t.canAcceptWorkInput(link.target_slot, null)){
+        if(!t.canAcceptWorkInput(link.target_slot, work)){
           return { ready: false, status: 'BUSY' };
         }
         continue;
@@ -133,15 +133,22 @@ class SourceNode extends LiteGraph.LGraphNode{
       for(let i=0;i<sigCount;i++) this._emit(i, 'SEND');
       return;
     }
-    const downstream = this._downstreamStatus();
+    if(!this._seq || !this._seq.length) this._parseSeq();
+    const nextId = (this._counter || 0) + 1;
+    const e = this._seq[this._cursor] || {type:'A'};
+    const preview = new Work(nextId, e.type);
+    const flowSelection = typeof this._runtimeSelectOutputRule === 'function'
+      ? this._runtimeSelectOutputRule(preview, { processComplete:true })
+      : { slot:0 };
+    const flowSlot = Number.isInteger(flowSelection?.slot) ? flowSelection.slot : 0;
+    const downstream = flowSelection
+      ? this._downstreamStatus(preview, flowSlot)
+      : { ready:false, status:'RULE BLOCKED' };
     const ready = !!downstream.ready;
 
     if(ready){
-      if(!this._seq || !this._seq.length) this._parseSeq();
-      const nextId = (this._counter || 0) + 1;
-      const e = this._seq[this._cursor] || {type:'A'};
-      const w = new Work(nextId, e.type);
-      this.setOutputData(0, w);
+      const w = preview;
+      this.setOutputData(flowSlot, w);
       this._pendingWork = w;
       this._animateWorkOutput(w);
       this._counter = nextId;

@@ -103,6 +103,19 @@
     return { inputs: 1, outputs: 1 };
   }
 
+  function defaultPortNames(presetId){
+    const id = text(presetId).toLowerCase();
+    if(id === 'source') return { inputs: [], outputs: ['workOut'] };
+    if(id === 'sink') return { inputs: ['workIn'], outputs: [] };
+    if(id === 'note' || id === 'signal') return { inputs: [], outputs: [] };
+    if(id === 'pack') return { inputs: ['itemIn', 'containerIn'], outputs: ['containerOut'] };
+    if(id === 'unpack') return { inputs: ['containerIn'], outputs: ['itemOut', 'emptyContainerOut'] };
+    if(id === 'router' || id === 'split') return { inputs: ['workIn'], outputs: ['workOut1', 'workOut2'] };
+    if(id === 'merge' || id === 'join') return { inputs: ['workIn1', 'workIn2'], outputs: ['workOut'] };
+    if(id === 'carrier_route') return { inputs: ['carrierIn'], outputs: ['carrierOut'] };
+    return { inputs: ['workIn'], outputs: ['workOut'] };
+  }
+
   function defaultEntityCategory(node, port){
     if(port) return categoryForPort(port);
     const presetId = text(node?.properties?.presetId).toLowerCase();
@@ -118,6 +131,22 @@
 
   function targetForCategory(category){
     return { mode: 'category', category: category || 'work' };
+  }
+
+  function targetsForCategories(categories){
+    const unique = [];
+    for(const category of (Array.isArray(categories) ? categories : [categories])){
+      const normalized = text(category).toLowerCase() || 'work';
+      if(!unique.includes(normalized)) unique.push(normalized);
+    }
+    return unique.map(targetForCategory);
+  }
+
+  function allConditions(){
+    const conditions = Array.from(arguments).flat().filter(Boolean).map((condition)=>{
+      return typeof condition === 'string' ? { kind: condition } : clone(condition, condition);
+    });
+    return conditions.length === 1 ? conditions[0] : { kind: 'all', conditions };
   }
 
   function defaultReleaseCondition(node){
@@ -144,8 +173,62 @@
     };
   }
 
-  function ensurePresetFlowRules(node){
+  function makeInputRule(presetId, port, index, categories, acceptKind){
+    const targets = targetsForCategories(categories);
+    return {
+      ruleId: `${presetId}-input-${index + 1}`,
+      targets,
+      target: clone(targets[0], targets[0]),
+      acceptWhen: { kind: acceptKind || 'space-available' },
+      fromPortId: port?.portId || `in-${index + 1}`
+    };
+  }
+
+  function defaultInputRules(node, presetId, inputs){
+    if(presetId === 'source' || presetId === 'note' || presetId === 'signal') return [];
+    return inputs.map((port, index)=>{
+      let categories = [defaultEntityCategory(node, port)];
+      let acceptKind = presetId === 'sink' ? 'always' : 'space-available';
+      if(presetId === 'pack') categories = index === 0 ? ['work'] : ['container', 'carrier'];
+      else if(presetId === 'unpack') categories = ['container', 'carrier'];
+      else if(presetId === 'carrier_route') categories = ['carrier'];
+      return makeInputRule(presetId, port, index, categories, acceptKind);
+    });
+  }
+
+  function makeOutputRule(presetId, index, categories, condition, ports){
+    const targets = targetsForCategories(categories);
+    const toPortIds = ports.map((port, portIndex)=>port?.portId || `out-${portIndex + 1}`);
+    return {
+      ruleId: `${presetId}-output-${index + 1}`,
+      targets,
+      target: clone(targets[0], targets[0]),
+      releaseWhen: clone(condition, condition),
+      toPortIds,
+      toPortId: toPortIds[0] || null
+    };
+  }
+
+  function defaultOutputRules(node, presetId, outputs){
+    if(!outputs.length || presetId === 'sink' || presetId === 'note' || presetId === 'signal') return [];
+    if(presetId === 'unpack'){
+      const itemPort = outputs[0] ? [outputs[0]] : [];
+      const containerPort = outputs[1] ? [outputs[1]] : itemPort;
+      return [
+        makeOutputRule(presetId, 0, ['work'], allConditions('available', 'downstream-ready'), itemPort),
+        makeOutputRule(presetId, 1, ['container', 'carrier'], allConditions('empty', 'downstream-ready'), containerPort)
+      ];
+    }
+    if(presetId === 'pack'){
+      return [makeOutputRule(presetId, 0, ['container', 'carrier'], allConditions('full', 'downstream-ready'), outputs)];
+    }
+    const category = presetId === 'carrier_route' ? 'carrier' : defaultEntityCategory(node, outputs[0]);
+    return [makeOutputRule(presetId, 0, [category], defaultReleaseCondition(node), outputs)];
+  }
+
+  function ensurePresetFlowRules(node, options){
     if(!node || !isObject(node.properties)) return;
+    const force = options?.force === true;
     const presetId = text(node.properties.presetId).toLowerCase() || 'basic';
     const preset = PRESETS[presetId] || PRESETS.basic;
     if(preset.entity === false){
@@ -162,33 +245,11 @@
       ? node.outputs
       : Array.from({ length: counts.outputs }, (_unused, index)=>({ portId: `out-${index + 1}` }));
 
-    if(!Array.isArray(node.properties.inputRules) || !node.properties.inputRules.length){
-      node.properties.inputRules = inputs.map((port, index)=>{
-        const target = targetForCategory(defaultEntityCategory(node, port));
-        return {
-          ruleId: `${presetId}-input-${index + 1}`,
-          targets: [target],
-          target: clone(target, target),
-          acceptWhen: { kind: presetId === 'sink' ? 'always' : 'space-available' },
-          fromPortId: port.portId || `in-${index + 1}`
-        };
-      });
+    if(force || !Array.isArray(node.properties.inputRules) || !node.properties.inputRules.length){
+      node.properties.inputRules = defaultInputRules(node, presetId, inputs);
     }
-    if(!Array.isArray(node.properties.outputRules) || !node.properties.outputRules.length){
-      if(!outputs.length){
-        node.properties.outputRules = [];
-      }else{
-        const target = targetForCategory(defaultEntityCategory(node, outputs[0]));
-        const toPortIds = outputs.map((port, index)=>port.portId || `out-${index + 1}`);
-        node.properties.outputRules = [{
-          ruleId: `${presetId}-output-1`,
-          targets: [target],
-          target: clone(target, target),
-          releaseWhen: defaultReleaseCondition(node),
-          toPortIds,
-          toPortId: toPortIds[0] || null
-        }];
-      }
+    if(force || !Array.isArray(node.properties.outputRules) || !node.properties.outputRules.length){
+      node.properties.outputRules = defaultOutputRules(node, presetId, outputs);
     }
   }
 
@@ -287,6 +348,7 @@
       this._runtimePrototype = null;
       this._runtimeConfigured = false;
       this._runtimeMethodNames = [];
+      this._appliedPresetId = 'basic';
       if(root.enableFlipIO) root.enableFlipIO(this);
     }
 
@@ -313,13 +375,14 @@
     applyPreset(presetId, preserveTitle){
       const id = Object.prototype.hasOwnProperty.call(PRESETS, presetId) ? presetId : 'basic';
       const preset = PRESETS[id];
+      const presetChanged = this._appliedPresetId !== id;
       this.properties = { ...(this.properties || {}), basicNodeVersion: 1, presetId: id };
-      if(!Number.isFinite(Number(this.properties.processTime))) this.properties.processTime = preset.processTime;
-      if(!Number.isFinite(Number(this.properties.downTime))) this.properties.downTime = preset.downTime;
-      if(!Number.isFinite(Number(this.properties.contentCapacity))) this.properties.contentCapacity = preset.contentCapacity;
+      if(presetChanged || !Number.isFinite(Number(this.properties.processTime))) this.properties.processTime = preset.processTime;
+      if(presetChanged || !Number.isFinite(Number(this.properties.downTime))) this.properties.downTime = preset.downTime;
+      if(presetChanged || !Number.isFinite(Number(this.properties.contentCapacity))) this.properties.contentCapacity = preset.contentCapacity;
       if(!Array.isArray(this.properties.initialContents)) this.properties.initialContents = [];
-      if(!Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
-      if(!Array.isArray(this.properties.outputRules)) this.properties.outputRules = [];
+      if(presetChanged || !Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
+      if(presetChanged || !Array.isArray(this.properties.outputRules)) this.properties.outputRules = [];
       if(id === 'shuttle' && !this.properties.inputRules.length){
         this.properties.inputRules = [{
           ruleId: 'shuttle-input-1',
@@ -348,7 +411,8 @@
       }
       if(!preserveTitle) this.title = preset.title;
       this._ensurePresetPorts();
-      ensurePresetFlowRules(this);
+      ensurePresetFlowRules(this, { force: presetChanged });
+      this._appliedPresetId = id;
       if(id === 'shuttle') this._applyShuttleStateColor();
       return this;
     }
@@ -356,12 +420,13 @@
     _ensurePresetPorts(){
       if(this._runtimePrototype){ ensurePortIds(this); return; }
       const id = this.properties?.presetId;
-      const desiredInputs = id === 'source' || id === 'note' ? 0 : (id === 'pack' ? 2 : 1);
-      const desiredOutputs = id === 'sink' || id === 'note' ? 0 : (id === 'unpack' || id === 'router' ? 2 : 1);
-      while(this.inputs.length < desiredInputs) this.addInput(`entityIn${this.inputs.length + 1}`, 0);
-      while(this.outputs.length < desiredOutputs) this.addOutput(`entityOut${this.outputs.length + 1}`, 0);
-      while(this.inputs.length > desiredInputs) this.removeInput(this.inputs.length - 1);
-      while(this.outputs.length > desiredOutputs) this.removeOutput(this.outputs.length - 1);
+      const names = defaultPortNames(id);
+      while(this.inputs.length < names.inputs.length) this.addInput(names.inputs[this.inputs.length], 0);
+      while(this.outputs.length < names.outputs.length) this.addOutput(names.outputs[this.outputs.length], 0);
+      while(this.inputs.length > names.inputs.length) this.removeInput(this.inputs.length - 1);
+      while(this.outputs.length > names.outputs.length) this.removeOutput(this.outputs.length - 1);
+      this.inputs.forEach((port, index)=>{ port.name = names.inputs[index]; });
+      this.outputs.forEach((port, index)=>{ port.name = names.outputs[index]; });
       ensurePortIds(this);
     }
 
@@ -413,6 +478,9 @@
     onConfigure(serializedNode){
       this.properties = { ...(this.properties || {}), basicNodeVersion: 1 };
       if(!this.properties.presetId) this.properties.presetId = 'basic';
+      // A deserialized preset already contains user-edited defaults and rules.
+      // Mark it as applied so configure never replaces those values.
+      this._appliedPresetId = this.properties.presetId;
       if(this._configurePresetRuntime(serializedNode)){
         restoreSerializedGeometry(this, serializedNode);
         return;
@@ -524,6 +592,185 @@
       return !!App.selectEntityRule(store, this, rules, { incomingRoot: instance, nowMs: nowMs() }, 'input');
     }
 
+    _runtimeValueDescriptor(value){
+      const candidate = value && typeof value === 'object' ? value : null;
+      const explicitCategory = text(candidate?.__flowCategory || candidate?.category).toLowerCase();
+      const typeId = text(candidate?.typeId);
+      const typeName = text(candidate?.type || candidate?.typeName || candidate?.name);
+      let category = explicitCategory;
+      let resolvedTypeId = typeId;
+      const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(this.graph) : null;
+      const types = registry?.list?.() || [];
+      if(!resolvedTypeId && typeName){
+        const row = types.find((entry)=>text(entry?.name).toLowerCase() === typeName.toLowerCase());
+        if(row){
+          resolvedTypeId = text(row.typeId);
+          if(!category) category = text(row.category).toLowerCase();
+        }
+      }
+      if(!category && resolvedTypeId){
+        const row = types.find((entry)=>text(entry?.typeId) === resolvedTypeId);
+        if(row) category = text(row.category).toLowerCase();
+      }
+      if(!category) category = 'work';
+      return { category, typeId:resolvedTypeId, typeName };
+    }
+
+    _runtimeTargetMatches(value, target){
+      const normalized = typeof App.normalizeEntityTarget === 'function' ? App.normalizeEntityTarget(target) : target;
+      const descriptor = this._runtimeValueDescriptor(value);
+      const mode = text(normalized?.mode).toLowerCase();
+      if(mode === 'otherwise') return true;
+      if(mode === 'category') return descriptor.category === text(normalized?.category).toLowerCase();
+      if(mode === 'type'){
+        const wanted = text(normalized?.typeId);
+        return !!wanted && (descriptor.typeId === wanted || descriptor.typeName.toLowerCase() === wanted.toLowerCase());
+      }
+      return false;
+    }
+
+    _runtimeRuleTargetMatches(value, rule){
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+      return targets.filter(Boolean).some((target)=>this._runtimeTargetMatches(value, target));
+    }
+
+    _runtimeRuleOutputSlots(rule){
+      const ids = this._ruleOutputPortIds(rule);
+      const slots = ids.map((portId)=>portIndexById(this.outputs, portId)).filter((slot)=>slot >= 0);
+      if(!slots.length && this.outputs?.length) slots.push(0);
+      return Array.from(new Set(slots));
+    }
+
+    _runtimePortReady(slotIndex, value){
+      const output = this.outputs?.[slotIndex];
+      if(!output || !Array.isArray(output.links) || !output.links.length || !this.graph) return false;
+      let hasTarget = false;
+      for(const linkId of output.links){
+        const link = this.graph.links?.[linkId];
+        const target = link && this.graph.getNodeById?.(link.target_id);
+        if(!target) continue;
+        hasTarget = true;
+        if(typeof target.canAcceptWorkInput === 'function'){
+          if(!target.canAcceptWorkInput(link.target_slot, value)) return false;
+        }else if(typeof target.canAcceptEntityInput === 'function'){
+          if(!target.canAcceptEntityInput(link.target_slot, value)) return false;
+        }else if(typeof target._state !== 'undefined' && target._state !== 'IDLE'){
+          return false;
+        }
+      }
+      return hasTarget;
+    }
+
+    _runtimeReadAttribute(value, path){
+      const parts = text(path).split('.').filter(Boolean);
+      let current = value?.attributes || value;
+      for(const part of parts){
+        if(current == null || typeof current !== 'object') return undefined;
+        current = current[part];
+      }
+      return current;
+    }
+
+    _runtimeEvaluateCondition(condition, value, context){
+      const spec = condition && typeof condition === 'object' ? condition : { kind:condition };
+      const kind = text(spec?.kind).toLowerCase().replace(/[ _]+/g, '-');
+      const children = Array.isArray(spec?.conditions) ? spec.conditions : (Array.isArray(spec?.children) ? spec.children : []);
+      if(kind === 'all') return children.every((child)=>this._runtimeEvaluateCondition(child, value, context));
+      if(kind === 'any') return children.some((child)=>this._runtimeEvaluateCondition(child, value, context));
+      if(kind === 'not') return !this._runtimeEvaluateCondition(spec.condition || spec.child, value, context);
+      if(kind === 'always') return true;
+      if(kind === 'available') return !!value;
+      if(kind === 'process-complete') return context?.processComplete === true || this._state === 'WAIT';
+      if(kind === 'downstream-ready'){
+        const slots = Array.isArray(context?.slots) ? context.slots : [];
+        return slots.some((slot)=>this._runtimePortReady(slot, value));
+      }
+      if(kind === 'space-available' || kind === 'not-full'){
+        const capacity = Math.max(0, Number(this.properties?.contentCapacity) || 0);
+        const occupied = this._payload || this._activeRoot || this._offer ? 1 : 0;
+        return capacity > occupied;
+      }
+      if(kind === 'empty'){
+        const childCount = Array.isArray(value?.childIds) ? value.childIds.length
+          : Array.isArray(value?.children) ? value.children.length
+            : Array.isArray(value?.works) ? value.works.length : 0;
+        return childCount === 0;
+      }
+      if(kind === 'full'){
+        const childCount = Array.isArray(value?.childIds) ? value.childIds.length
+          : Array.isArray(value?.children) ? value.children.length
+            : Array.isArray(value?.works) ? value.works.length : 0;
+        const capacity = Math.max(0, Number(value?.capacity ?? this.properties?.contentCapacity) || 0);
+        return capacity > 0 && childCount >= capacity;
+      }
+      if(kind === 'count-reached'){
+        const count = Array.isArray(value?.childIds) ? value.childIds.length
+          : Array.isArray(value?.children) ? value.children.length : (value ? 1 : 0);
+        return count >= Math.max(0, Number(spec.count) || 0);
+      }
+      if(kind === 'time-elapsed'){
+        const arrivedAt = Number(value?.attributes?.__arrivedAtMs ?? value?.__arrivedAtMs ?? context?.arrivedAtMs);
+        return Number.isFinite(arrivedAt) && (nowMs() - arrivedAt) >= Math.max(0, Number(spec.seconds) || 0) * 1000;
+      }
+      if(kind === 'attribute-condition'){
+        const actual = this._runtimeReadAttribute(value, spec.path);
+        const expected = spec.value;
+        const operator = text(spec.operator || 'eq').toLowerCase();
+        if(operator === 'ne' || operator === '!=') return actual !== expected;
+        if(operator === 'gt' || operator === '>') return Number(actual) > Number(expected);
+        if(operator === 'gte' || operator === '>=') return Number(actual) >= Number(expected);
+        if(operator === 'lt' || operator === '<') return Number(actual) < Number(expected);
+        if(operator === 'lte' || operator === '<=') return Number(actual) <= Number(expected);
+        if(operator === 'contains') return String(actual ?? '').includes(String(expected ?? ''));
+        return actual === expected;
+      }
+      if(kind === 'shuttle-group-idle' && typeof this._evaluateShuttleOutputCondition === 'function'){
+        return this._evaluateShuttleOutputCondition(spec, context || {});
+      }
+      return false;
+    }
+
+    _runtimeSelectInputRule(value, slotIndex){
+      const rules = Array.isArray(this.properties?.inputRules) ? this.properties.inputRules : [];
+      if(!rules.length) return { rule:null };
+      const input = this.inputs?.[slotIndex];
+      const candidate = value || { __flowCategory:'work' };
+      let otherwise = null;
+      for(const rule of rules){
+        if(rule?.fromPortId && input?.portId && text(rule.fromPortId) !== text(input.portId)) continue;
+        const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+        if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise = rule; continue; }
+        if(!this._runtimeRuleTargetMatches(candidate, rule)) continue;
+        if(this._runtimeEvaluateCondition(rule.acceptWhen || { kind:'always' }, candidate, { slotIndex })) return { rule };
+      }
+      if(otherwise && this._runtimeEvaluateCondition(otherwise.acceptWhen || { kind:'always' }, candidate, { slotIndex })) return { rule:otherwise };
+      return null;
+    }
+
+    _runtimeSelectOutputRule(value, context){
+      const rules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+      if(!rules.length){
+        const slots = this.outputs?.length ? [0] : [];
+        return slots.length ? { rule:null, slots, slot:slots[0] } : null;
+      }
+      let otherwise = null;
+      const evaluate = (rule)=>{
+        const slots = this._runtimeRuleOutputSlots(rule);
+        const ctx = { ...(context || {}), slots };
+        if(!this._runtimeEvaluateCondition(rule?.releaseWhen || { kind:'available' }, value, ctx)) return null;
+        const readySlot = slots.find((slot)=>this._runtimePortReady(slot, value));
+        return { rule, slots, slot:Number.isInteger(readySlot) ? readySlot : (slots[0] ?? -1) };
+      };
+      for(const rule of rules){
+        const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+        if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise = rule; continue; }
+        if(!this._runtimeRuleTargetMatches(value, rule)) continue;
+        const selected = evaluate(rule);
+        if(selected) return selected;
+      }
+      return otherwise ? evaluate(otherwise) : null;
+    }
+
     _canAcceptRuntimePayload(slotIndex, payload){
       if(!this._runtimePrototype) return null;
       if(typeof this._state !== 'undefined' && this._state !== 'IDLE') return false;
@@ -541,7 +788,9 @@
           && !this._incomingPayload;
       }
       const runtime = this._canAcceptRuntimePayload(slotIndex, work);
-      return runtime === null ? this.canAcceptEntityInput(slotIndex, work) : runtime;
+      if(runtime === null) return this.canAcceptEntityInput(slotIndex, work);
+      if(!runtime) return false;
+      return !!this._runtimeSelectInputRule(work, slotIndex);
     }
 
     _shuttleGroupId(){
@@ -1456,6 +1705,7 @@
   App.BASIC_NODE_TYPE_PRESET_MAP = TYPE_TO_PRESET;
   App.inferEntityModelFromGraph = inferLegacyTypes;
   App.ensureBasicNodePortIds = ensurePortIds;
+  App.ensureBasicPresetFlowRules = ensurePresetFlowRules;
   App.migrateGraphDataToBasic = migrateGraphDataToBasic;
   App.previewBasicNodeMigration = (data)=>migrateGraphDataToBasic(data, { previewOnly: true });
   App.prepareSerializedGraphForSave = function(data){

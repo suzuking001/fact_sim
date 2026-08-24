@@ -87,12 +87,12 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       }
     }catch(_e){}
   }
-  _spawnSinkTransfer(duration, payload){
+  _spawnSinkTransfer(duration, payload, slotIndex=0){
     if(!duration || duration <= 0) return;
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
       const info = payload ? { id: payload.id, t: payload.type, entity: payload } : null;
-      const out = this.outputs && this.outputs[0];
+      const out = this.outputs && this.outputs[slotIndex];
       if(!out || !out.links) return;
       out.links.forEach(id=>{
         const link = this.graph.links[id]; if(!link) return;
@@ -156,25 +156,33 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           break;
         case 'WAIT': {
           // Release wait: begin DOWN as soon as downstream can accept the item.
-          if(this._downReady()){
+          const flowSelection = typeof this._runtimeSelectOutputRule === 'function'
+            ? this._runtimeSelectOutputRule(this._payload, { processComplete:true })
+            : { slot:0 };
+          const flowSlot = Number.isInteger(flowSelection?.slot) ? flowSelection.slot : 0;
+          if(flowSelection && this._downReady(flowSlot, this._payload)){
             const payload = this._payload;
             this._setWaitIcon(false);
             this._state = 'DOWN';
             const downMs = Math.max(0, this.properties.downTime*1000);
             this._until = now + downMs; // ms
             // Publish workOut immediately when transfer begins.
-            this.setOutputData(0, payload);
-            this._spawnSinkTransfer(downMs, payload);
+            this._flowOutputSlot = flowSlot;
+            this.setOutputData(flowSlot, payload);
+            this._spawnSinkTransfer(downMs, payload, flowSlot);
             this._payload = null;
           }else{
-            this.setOutputData(0, null);
+            const slot = Number.isInteger(this._flowOutputSlot) ? this._flowOutputSlot : flowSlot;
+            if(Number.isInteger(slot) && slot >= 0) this.setOutputData(slot, null);
           }
           break;
         }
         case 'DOWN':
           // Recovery: return to IDLE when downTime elapses.
           if(now >= this._until){
-            this.setOutputData(0, null);
+            const flowSlot = Number.isInteger(this._flowOutputSlot) ? this._flowOutputSlot : 0;
+            this.setOutputData(flowSlot, null);
+            this._flowOutputSlot = null;
             this._state = 'IDLE';
             this._setWaitIcon(false);
             again = true; // allow immediate IDLE accept if input already present
@@ -190,6 +198,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           if(typeof w !== 'object') break;
           // LiteGraph links retain values, so ignore the same object reference.
           if(this._lastInRef === w) break;
+          if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(w, 0)) break;
           // Pass through without processing when the script returns false.
           if(!this._evalScript(w, sig)){
             this.setOutputData(0, w);
@@ -257,8 +266,17 @@ class EquipmentNode extends LiteGraph.LGraphNode{
   onPropertyChanged(n){
     try{
       const r01 = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
-      if(n==='processTime') this.properties.processTime = r01(this.properties.processTime);
-      if(n==='downTime') this.properties.downTime = r01(this.properties.downTime);
+      if(n==='processTime' || n==='downTime'){
+        this.properties[n] = r01(this.properties[n]);
+        // The old default script selected cycle times by Work type. Once the
+        // user edits the visible cycle settings, those values become the
+        // authoritative configuration instead of being overwritten on input.
+        const script = String(this.properties?.script || '');
+        if(/this\.properties\.(?:processTime|downTime)\s*=/.test(script)){
+          this.properties.scriptDisabled = true;
+          this._compiled = null;
+        }
+      }
       if(n==='sigExtra'){
         this._syncSignalPorts();
       }
@@ -269,10 +287,10 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     }catch(e){}
   }
   // Determine whether every workOut destination can accept the item.
-  _downReady(){
+  _downReady(slotIndex=0, payload=this._payload){
     // Without a connected output, the item remains in this node and stays in WAIT.
     if(!this.outputs.length) return false;
-    const out = this.outputs[0];
+    const out = this.outputs[slotIndex];
     if(!out || !out.links || out.links.length === 0) return false;
     let hasValidLink = false;
     for(const id of out.links){
@@ -281,7 +299,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       hasValidLink = true;
       const t = this.graph.getNodeById(link.target_id);
       if(t && typeof t.canAcceptWorkInput === 'function'){
-        if(!t.canAcceptWorkInput(link.target_slot, this._payload)) return false;
+        if(!t.canAcceptWorkInput(link.target_slot, payload)) return false;
         continue;
       }
       // Nodes without _state, such as Sink, are treated as always available.

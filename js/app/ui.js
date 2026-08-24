@@ -1902,6 +1902,12 @@ window.beginGroupPlacement = beginGroupPlacement;
             if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged(def.key);
           }
         });
+        // Preset runtime setup can replace the constructor's temporary ports.
+        // Build the standard Flow configuration only after all preset settings
+        // and final ports have been applied.
+        if(node.type === 'factory/basic' && typeof App.ensureBasicPresetFlowRules === 'function'){
+          App.ensureBasicPresetFlowRules(node, { force: true });
+        }
         if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
       }
       if(typeof window.enforceNodeOverlayMinSize === 'function'){

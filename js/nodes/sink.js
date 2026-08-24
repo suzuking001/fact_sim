@@ -106,6 +106,7 @@ class SinkNode extends LiteGraph.LGraphNode{
 
     // Avoid re-counting the same work object across settle passes or held outputs
     if(this._lastInRef === d) return;
+    if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(d, 0)) return;
 
     this._lastInRef = d;
     this._recv.push(d);
