@@ -140,6 +140,53 @@
   function processTimeProperties(node){ return numberedTimeProperties(node, 'processTime'); }
   function downTimeProperties(node){ return numberedTimeProperties(node, 'downTime'); }
 
+  function cycleTimingKeys(node, direction){
+    App.ensureBasicPortTimings?.(node);
+    const ports = direction === 'input' ? node?.inputs : node?.outputs;
+    const signalPattern = direction === 'input' ? /^sigIn/i : /^sigOut/i;
+    const keys = (ports || []).filter((port)=>port?.portId && port?.channel !== 'signal' && !signalPattern.test(String(port.name || '')))
+      .map((port)=>`@${direction}:${port.portId}`);
+    if(keys.length) return keys;
+    return direction === 'input' ? processTimeProperties(node) : downTimeProperties(node);
+  }
+
+  function parseCycleTimingKey(key){
+    const raw = String(key || '').replace(/^@/, '');
+    const separator = raw.indexOf(':');
+    return separator >= 0
+      ? { direction:raw.slice(0, separator), portId:raw.slice(separator + 1) }
+      : { direction:'', portId:'' };
+  }
+
+  function readCycleTiming(node, key){
+    if(!String(key).startsWith('@')) return Math.max(0, Number(node.properties?.[key]) || 0);
+    const { direction, portId } = parseCycleTimingKey(key);
+    const timings = App.ensureBasicPortTimings?.(node) || node.properties?.portTimings || {};
+    return direction === 'input'
+      ? Math.max(0, Number(timings.inputs?.[portId]?.processTimeSec) || 0)
+      : Math.max(0, Number(timings.outputs?.[portId]?.downTimeSec) || 0);
+  }
+
+  function writeCycleTiming(node, key, value){
+    const seconds = Math.max(0, Number(value) || 0);
+    if(!String(key).startsWith('@')){
+      node.properties[key] = seconds;
+      node.onPropertyChanged?.(key);
+      return;
+    }
+    const { direction, portId } = parseCycleTimingKey(key);
+    const timings = App.ensureBasicPortTimings?.(node) || node.properties.portTimings;
+    if(direction === 'input'){
+      timings.inputs[portId] = { ...(timings.inputs[portId] || {}), processTimeSec:seconds };
+      const slot = (node.inputs || []).findIndex((port)=>port?.portId === portId);
+      if(slot === 0) node.properties.processTime = seconds;
+    }else{
+      timings.outputs[portId] = { ...(timings.outputs[portId] || {}), downTimeSec:seconds };
+      const slot = (node.outputs || []).findIndex((port)=>port?.portId === portId);
+      if(slot === 0) node.properties.downTime = seconds;
+    }
+  }
+
   function formatSeconds(value){
     const number = Math.max(0, Number(value) || 0);
     return Number.isInteger(number) ? String(number) : String(Math.round(number * 100) / 100);
@@ -282,9 +329,36 @@
     layer.append(halo, line, point);
   }
 
-  function connectionLabel(entry, fallback){
+  function appendCycleFanoutBus(layer, anchors){
+    if(!Array.isArray(anchors) || !anchors.length) return;
+    const namespace = 'http://www.w3.org/2000/svg';
+    const ring = { x:238, y:130 };
+    const busX = 270;
+    const ys = anchors.map((anchor)=>anchor.y);
+    const minY = Math.min(ring.y, ...ys);
+    const maxY = Math.max(ring.y, ...ys);
+    let path = `M ${ring.x} ${ring.y} H ${busX} M ${busX} ${minY} V ${maxY}`;
+    anchors.forEach((anchor)=>{ path += ` M ${busX} ${anchor.y} H ${anchor.x}`; });
+    const halo = document.createElementNS(namespace, 'path');
+    halo.setAttribute('class', 'entityCycleLeaderHalo is-wait is-fanout');
+    halo.setAttribute('d', path);
+    const line = document.createElementNS(namespace, 'path');
+    line.setAttribute('class', 'entityCycleLeader is-wait is-fanout');
+    line.setAttribute('d', path);
+    const point = document.createElementNS(namespace, 'circle');
+    point.setAttribute('class', 'entityCycleLeaderPoint is-wait');
+    point.setAttribute('cx', String(ring.x));
+    point.setAttribute('cy', String(ring.y));
+    point.setAttribute('r', '3.5');
+    layer.append(halo, line, point);
+  }
+
+  function connectionLabel(entry, fallback, direction){
     if(!entry) return fallback;
-    return entry.otherPortName ? `${entry.title} · ${entry.otherPortName}` : entry.title;
+    const remote = entry.otherPortName ? `${entry.title} · ${entry.otherPortName}` : entry.title;
+    if(direction === 'downstream') return `${entry.portName} → ${remote}`;
+    if(direction === 'upstream') return `${remote} → ${entry.portName}`;
+    return remote;
   }
 
   function renderCycleConnections(host, rows, state, direction){
@@ -294,12 +368,11 @@
       row.className = `entityCycleConnection is-${direction}`;
       const caption = document.createElement('span');
       caption.className = 'entityCycleConnectionCaption';
-      caption.textContent = direction === 'upstream'
-        ? `UPSTREAM ${list.length > 1 ? index + 1 : ''}`.trim()
-        : `DOWNSTREAM ${list.length > 1 ? index + 1 : ''}`.trim();
+      const physicalPort = entry?.portName || `${direction === 'upstream' ? 'inPort' : 'outPort'}${index + 1}`;
+      caption.textContent = `${direction === 'upstream' ? 'INPUT' : 'OUTPUT'} · ${physicalPort}`;
       const name = document.createElement('strong');
       name.className = 'entityCycleConnectionName';
-      name.textContent = connectionLabel(entry, 'Not connected');
+      name.textContent = connectionLabel(entry, 'Not connected', direction);
       const stateChip = document.createElement('span');
       stateChip.className = `entityCycleState is-${state.toLowerCase()}`;
       stateChip.innerHTML = `<b>${state}</b><small>${state === 'IDLE' ? 'Ready for input' : 'Waiting to release'}</small>`;
@@ -318,12 +391,14 @@
     const shell = makeCard('Process Cycle', 'Configure input readiness, processing, downstream release, and recovery as one continuous cycle.');
     shell.card.classList.add('entityCycleCard');
     const props = isObject(node?.properties) ? node.properties : {};
-    const processKeys = processTimeProperties(node);
-    const downKeys = downTimeProperties(node);
+    const processKeys = cycleTimingKeys(node, 'input');
+    const downKeys = cycleTimingKeys(node, 'output');
     const upstream = connectedSteps(node, 'upstream');
     const downstream = connectedSteps(node, 'downstream');
+    const highFanout = Math.max(downstream.length, downKeys.length) > 3;
     const visual = document.createElement('div');
     visual.className = 'entityCycleVisual';
+    visual.classList.toggle('is-high-fanout', highFanout);
     const upstreamHost = document.createElement('div');
     upstreamHost.className = 'entityCycleConnections is-upstream';
     const downstreamHost = document.createElement('div');
@@ -358,8 +433,8 @@
     direction.setAttribute('aria-hidden', 'true');
     center.appendChild(direction);
     const draftValues = Object.fromEntries([
-      ...processKeys.map((key)=>[key, Math.max(0, Number(node.properties?.[key]) || 0)]),
-      ...downKeys.map((key)=>[key, Math.max(0, Number(node.properties?.[key]) || 0)])
+      ...processKeys.map((key)=>[key, readCycleTiming(node, key)]),
+      ...downKeys.map((key)=>[key, readCycleTiming(node, key)])
     ]);
 
     const updateVisual = ()=>{
@@ -415,12 +490,14 @@
         const anchor = svgPoint(processFields[index], 'bottom', fallback);
         appendCycleLeader(leaderLayer, 'process', anchor, cyclePoint((segment.start + segment.end) / 2), segment.color, index, processSegments.length);
       });
-      const downFields = downControls.querySelectorAll('.entityCycleInlineControl');
-      downSegments.forEach((segment, index)=>{
-        const fallback = { x:processControlStart + ((index + 0.5) * controlWidth / downSegments.length), y:230 };
-        const anchor = svgPoint(downFields[index], 'top', fallback);
-        appendCycleLeader(leaderLayer, 'down', anchor, cyclePoint((segment.start + segment.end) / 2), segment.color, index, downSegments.length);
-      });
+      if(!highFanout){
+        const downFields = downControls.querySelectorAll('.entityCycleInlineControl');
+        downSegments.forEach((segment, index)=>{
+          const fallback = { x:processControlStart + ((index + 0.5) * controlWidth / downSegments.length), y:230 };
+          const anchor = svgPoint(downFields[index], 'top', fallback);
+          appendCycleLeader(leaderLayer, 'down', anchor, cyclePoint((segment.start + segment.end) / 2), segment.color, index, downSegments.length);
+        });
+      }
       const mappedSegment = (segments, index, count)=>{
         if(!segments.length) return null;
         if(count <= 1) return segments[0];
@@ -434,14 +511,21 @@
         const fallback = { x:-13, y:((index + 0.5) * 260) / upstreamCount };
         appendCycleLeader(leaderLayer, 'idle', svgPoint(upstreamConnectors[index], 'center', fallback), target, '#c87908', index, upstreamCount);
       }
-      const downstreamCount = Math.max(1, downstream.length);
-      const downstreamConnectors = downstreamHost.querySelectorAll('.entityCycleConnector');
-      for(let index = 0; index < downstreamCount; index += 1){
-        const segment = mappedSegment(downSegments, index, downstreamCount);
-        const fallback = processSegments.at(-1)?.end ?? 0.5;
-        const target = cyclePoint(segment?.start ?? fallback);
-        const fallbackAnchor = { x:313, y:((index + 0.5) * 260) / downstreamCount };
-        appendCycleLeader(leaderLayer, 'wait', svgPoint(downstreamConnectors[index], 'center', fallbackAnchor), target, '#c87908', index, downstreamCount);
+      if(highFanout){
+        const downstreamConnectors = downstreamHost.querySelectorAll('.entityCycleConnector');
+        const anchors = Array.from(downstreamConnectors).map((connector, index)=>
+          svgPoint(connector, 'center', { x:313, y:((index + 0.5) * 260) / Math.max(1, downstreamConnectors.length) }));
+        appendCycleFanoutBus(leaderLayer, anchors);
+      }else{
+        const downstreamCount = Math.max(1, downstream.length);
+        const downstreamConnectors = downstreamHost.querySelectorAll('.entityCycleConnector');
+        for(let index = 0; index < downstreamCount; index += 1){
+          const segment = mappedSegment(downSegments, index, downstreamCount);
+          const fallback = processSegments.at(-1)?.end ?? 0.5;
+          const target = cyclePoint(segment?.start ?? fallback);
+          const fallbackAnchor = { x:313, y:((index + 0.5) * 260) / downstreamCount };
+          appendCycleLeader(leaderLayer, 'wait', svgPoint(downstreamConnectors[index], 'center', fallbackAnchor), target, '#c87908', index, downstreamCount);
+        }
       }
       totalValue.textContent = `${formatSeconds(total)} s`;
     };
@@ -451,8 +535,7 @@
       draftValues[key] = next;
       changed(()=>{
         node.properties = isObject(node.properties) ? node.properties : {};
-        node.properties[key] = next;
-        node.onPropertyChanged?.(key);
+        writeCycleTiming(node, key, next);
         node.setDirtyCanvas?.(true, true);
       });
       updateVisual();
@@ -471,7 +554,7 @@
       }
       const input = document.createElement('input');
       input.type = 'number'; input.min = '0'; input.step = '0.1';
-      input.value = formatSeconds(node.properties?.[key]);
+      input.value = formatSeconds(readCycleTiming(node, key));
       input.disabled = running();
       input.setAttribute('aria-label', `${host.dataset.label} ${label.replace(/^[A-Z]/, '') || '1'} seconds`);
       const unit = document.createElement('small'); unit.textContent = 's';
@@ -490,7 +573,9 @@
     processControls.style.setProperty('--control-count', String(processKeys.length));
     processKeys.forEach((key, index)=>{
       const related = upstream[index] || upstream[0];
-      makeInlineTimeField(processControls, key, `P${index + 1}`, ['#30d158','#18b94f','#0f9f43','#67d986'][index % 4], connectionLabel(related, 'Processing'));
+      const portId = parseCycleTimingKey(key).portId;
+      const portName = portId ? (node.inputs || []).find((port)=>port?.portId === portId)?.name : '';
+      makeInlineTimeField(processControls, key, portName ? `P${index + 1} · ${portName}` : `P${index + 1}`, ['#30d158','#18b94f','#0f9f43','#67d986'][index % 4], connectionLabel(related, 'Processing', 'upstream'));
     });
     const downControls = document.createElement('div');
     downControls.className = 'entityCycleInlineControls is-down';
@@ -498,7 +583,9 @@
     downControls.style.setProperty('--control-count', String(downKeys.length));
     downKeys.forEach((key, index)=>{
       const related = downstream[index] || downstream[0];
-      makeInlineTimeField(downControls, key, `D${index + 1}`, ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4], connectionLabel(related, 'Recovery'));
+      const portId = parseCycleTimingKey(key).portId;
+      const portName = portId ? (node.outputs || []).find((port)=>port?.portId === portId)?.name : '';
+      makeInlineTimeField(downControls, key, portName ? `D${index + 1} · ${portName}` : `D${index + 1}`, ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4], connectionLabel(related, 'Recovery', 'downstream'));
     });
     donut.append(svg, center, processControls, downControls);
     visual.append(upstreamHost, donut, downstreamHost);
@@ -680,7 +767,28 @@
         : 'Rules are evaluated from top to bottom. Combine conditions with AND or OR.');
       const rows = Array.isArray(node.properties?.[key]) ? node.properties[key] : [];
       const list = document.createElement('div'); list.className = 'entityRuleList';
-      const commit = ()=>changed(()=>{ node.properties[key] = rows; node.setDirtyCanvas?.(true, true); });
+      const commit = ()=>changed(()=>{
+        node.properties[key] = rows;
+        App.syncBasicFlowPorts?.(node, { dirty:false });
+        node.setDirtyCanvas?.(true, true);
+      });
+      const referencesOutside = (direction, portId, excludedRule, excludedIndex)=>{
+        if(!portId) return false;
+        if(direction === 'input') return (node.properties.inputRules || []).some((candidate)=>candidate !== excludedRule && candidate.fromPortId === portId);
+        return (node.properties.outputRules || []).some((candidate)=>{
+          const ids = Array.isArray(candidate.toPortIds) ? candidate.toPortIds : [candidate.toPortId];
+          return ids.some((value, valueIndex)=>value === portId && (candidate !== excludedRule || valueIndex !== excludedIndex));
+        });
+      };
+      const confirmPortRelease = (direction, portId, excludedRule, excludedIndex)=>{
+        if(!portId || referencesOutside(direction, portId, excludedRule, excludedIndex)) return true;
+        const ports = direction === 'input' ? node.inputs : node.outputs;
+        const port = (ports || []).find((candidate)=>candidate?.portId === portId);
+        if(!port || port.requiredByPreset || !port.flowManaged) return true;
+        const linkCount = direction === 'input' ? (port.link == null ? 0 : 1) : (Array.isArray(port.links) ? port.links.length : 0);
+        return !linkCount || root.confirm?.(`Delete ${port.name || portId} and its ${linkCount} connected link${linkCount === 1 ? '' : 's'}?`) !== false;
+      };
+      const cleanupPort = (direction, portId)=>App.removeOrphanBasicFlowPort?.(node, direction, portId, { confirmLinked:true });
       rows.forEach((rule, index)=>{
         const ruleCard = document.createElement('article'); ruleCard.className = 'entityRuleCard';
         const header = document.createElement('div'); header.className = 'entityRuleHeader';
@@ -688,7 +796,11 @@
         const controls = document.createElement('div'); controls.className = 'entityRuleControls';
         const up = button('↑', ()=>{ if(index > 0){ rows.splice(index - 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
         const down = button('↓', ()=>{ if(index < rows.length - 1){ rows.splice(index + 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
-        const remove = button('×', ()=>{ rows.splice(index, 1); commit(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn is-danger');
+        const remove = button('×', ()=>{
+          const portIds = kind === 'input' ? [rule.fromPortId] : (Array.isArray(rule.toPortIds) ? rule.toPortIds.slice() : [rule.toPortId]);
+          if(!portIds.every((portId, portIndex)=>confirmPortRelease(kind, portId, rule, portIndex))) return;
+          rows.splice(index, 1); commit(); portIds.forEach((portId)=>cleanupPort(kind, portId)); App.selectionInspector?.refresh?.();
+        }, 'selectionInspectorBtn is-danger');
         up.title = 'Move rule up'; down.title = 'Move rule down'; remove.title = 'Delete rule';
         up.disabled = running() || index === 0; down.disabled = running() || index === rows.length - 1; remove.disabled = running();
         controls.append(up, down, remove); header.append(title, controls); ruleCard.appendChild(header);
@@ -739,6 +851,22 @@
         body.appendChild(field('Targets (any match)', targetsHost));
 
         if(kind === 'input'){
+          const ports = (node.inputs || []).filter((port)=>port?.channel !== 'signal')
+            .map((port, portIndex)=>[port.portId || `in-${portIndex + 1}`, port.name || `In ${portIndex + 1}`]);
+          const inputPort = select([...ports, ['__new__', 'New input port...']], rule.fromPortId || ports[0]?.[0] || '__new__');
+          inputPort.disabled = running();
+          inputPort.addEventListener('change', ()=>{
+            const previous = rule.fromPortId;
+            if(!confirmPortRelease('input', previous, rule, 0)){ inputPort.value = previous || ''; return; }
+            if(inputPort.value === '__new__'){
+              const port = App.createBasicFlowPort?.(node, 'input', rule);
+              if(port) rule.fromPortId = port.portId;
+            }else rule.fromPortId = inputPort.value;
+            commit();
+            if(previous && previous !== rule.fromPortId) cleanupPort('input', previous);
+            App.selectionInspector?.refresh?.();
+          });
+          body.appendChild(field('Input from', inputPort));
           const conditionSpec = isObject(rule.acceptWhen) ? rule.acceptWhen : { kind:conditionKind(rule.acceptWhen, 'always') };
           const condition = select(inputConditions, conditionKind(conditionSpec, 'always'));
           condition.disabled = running();
@@ -793,7 +921,8 @@
           addCondition.disabled = running(); conditionsHost.appendChild(addCondition);
           body.appendChild(field('Conditions', conditionsHost, 'is-wide'));
 
-          const ports = (node.outputs || []).map((port, portIndex)=>[port.portId || `out-${portIndex + 1}`, port.name || `Out ${portIndex + 1}`]);
+          const ports = (node.outputs || []).filter((port)=>port?.channel !== 'signal')
+            .map((port, portIndex)=>[port.portId || `out-${portIndex + 1}`, port.name || `Out ${portIndex + 1}`]);
           const portRows = Array.isArray(rule.toPortIds) && rule.toPortIds.length
             ? rule.toPortIds
             : [rule.toPortId || ports[0]?.[0] || ''];
@@ -807,24 +936,36 @@
           portRows.forEach((portId, portIndex)=>{
             const portLine = document.createElement('div'); portLine.className = 'entityRuleMultiValueLine';
             const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(portIndex + 1);
-            const to = select(ports, portId);
+            const to = select([...ports, ['__new__', 'New output port...']], portId);
             to.disabled = running();
-            to.addEventListener('change', ()=>{ portRows[portIndex] = to.value; persistPorts(); });
+            to.addEventListener('change', ()=>{
+              const previous = portRows[portIndex];
+              if(!confirmPortRelease('output', previous, rule, portIndex)){ to.value = previous || ''; return; }
+              if(to.value === '__new__'){
+                const port = App.createBasicFlowPort?.(node, 'output', rule);
+                if(port) portRows[portIndex] = port.portId;
+              }else portRows[portIndex] = to.value;
+              persistPorts();
+              if(previous && previous !== portRows[portIndex]) cleanupPort('output', previous);
+              App.selectionInspector?.refresh?.();
+            });
             const removePort = button('×', ()=>{
+              const previous = portRows[portIndex];
+              if(!confirmPortRelease('output', previous, rule, portIndex)) return;
               portRows.splice(portIndex, 1);
               if(!portRows.length && ports[0]) portRows.push(ports[0][0]);
-              persistPorts(); App.selectionInspector?.refresh?.();
+              persistPorts(); cleanupPort('output', previous); App.selectionInspector?.refresh?.();
             }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
             removePort.title = 'Delete output destination'; removePort.disabled = running() || portRows.length <= 1;
             portLine.append(number, to, removePort); portList.appendChild(portLine);
           });
           portsHost.appendChild(portList);
           const addPort = button('+ Add output', ()=>{
-            const next = ports.find(([portId])=>!portRows.includes(portId))?.[0] || ports[0]?.[0];
-            if(next) portRows.push(next);
+            const port = App.createBasicFlowPort?.(node, 'output', rule);
+            if(port) portRows.push(port.portId);
             persistPorts(); App.selectionInspector?.refresh?.();
           }, 'selectionInspectorBtn entityRuleAddCondition');
-          addPort.disabled = running() || !ports.length || portRows.length >= ports.length;
+          addPort.disabled = running();
           portsHost.appendChild(addPort);
           body.appendChild(field('Output to (first ready)', portsHost));
         }
@@ -832,14 +973,21 @@
       });
       card.section.appendChild(list);
       const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
-        rows.push(kind === 'input'
+        const next = kind === 'input'
           ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:{ kind:'always' }, fromPortId:null }
-          : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }] }, toPortIds:[node.outputs?.[0]?.portId || 'out-1'], toPortId:node.outputs?.[0]?.portId || 'out-1' });
+          : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }] }, toPortIds:[], toPortId:null };
+        const port = App.createBasicFlowPort?.(node, kind, next);
+        if(kind === 'input') next.fromPortId = port?.portId || null;
+        else{ next.toPortIds = port ? [port.portId] : []; next.toPortId = port?.portId || null; }
+        rows.push(next);
         commit(); App.selectionInspector?.refresh?.();
       }, 'selectionInspectorBtn is-primary');
       add.disabled = running(); card.section.appendChild(add); wrapper.appendChild(card.card);
     };
-    renderRules('input'); renderRules('output'); return wrapper;
+    const presetId = String(node.properties?.presetId || '').toLowerCase();
+    if(presetId !== 'source') renderRules('input');
+    if(presetId !== 'sink') renderRules('output');
+    return wrapper;
   }
 
   function renderRecipeRows(node, rows, host, depth){
@@ -955,7 +1103,7 @@
       if(existingCards[0]) panels.Basic.appendChild(existingCards[0]);
       if(existingCards[1]){
         const hiddenPropertyLabels = new Set([
-          'basicNodeVersion', 'initialContents', 'inputRules', 'outputRules', 'selection', 'stateMachine',
+          'basicNodeVersion', 'initialContents', 'inputRules', 'outputRules', 'portTimings', 'flowPortSequence', 'selection', 'stateMachine',
           'migratedCarrierConfigs'
         ]);
         for(const field of existingCards[1].querySelectorAll('.selectionInspectorField')){
@@ -992,6 +1140,7 @@
   }
 
   App.refreshEntityTypeManager = renderTypeManager;
+  root.addEventListener('factsim:run-state-changed', ()=>App.selectionInspector?.refresh?.());
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>{ installTypePanel(); enhanceInspector(); });
   else{ installTypePanel(); enhanceInspector(); }
 })(window);

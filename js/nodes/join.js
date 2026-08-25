@@ -19,8 +19,8 @@ class JoinNode extends EquipmentNode{
 
     // Rebuild work inputs to support N-way joining.
     this.inputs = [];
-    this.addInput('workIn1', 0);
-    this.addInput('workIn2', 0);
+    this.addInput('inPort1', 0);
+    this.addInput('inPort2', 0);
 
     this._state = 'IDLE';
     this._until = 0;
@@ -40,8 +40,7 @@ class JoinNode extends EquipmentNode{
   }
 
   _isWorkInputName(name){
-    const s = String(name || '');
-    return s === 'workIn' || /^workIn\d+$/.test(s);
+    return true;
   }
 
   _workInputSlots(){
@@ -49,7 +48,7 @@ class JoinNode extends EquipmentNode{
     if(!this.inputs) return slots;
     for(let i=0;i<this.inputs.length;i++){
       const inp = this.inputs[i];
-      if(inp && this._isWorkInputName(inp.name)) slots.push(i);
+      if(inp && String(inp.channel || '').toLowerCase() !== 'signal' && String(inp.type || '').toLowerCase() !== 'string') slots.push(i);
     }
     return slots;
   }
@@ -58,14 +57,14 @@ class JoinNode extends EquipmentNode{
     const slots = this._workInputSlots();
     for(let i=0;i<slots.length;i++){
       const inp = this.inputs[slots[i]];
-      if(inp) inp.name = `workIn${i+1}`;
+      if(inp){ inp.name = `inPort${i+1}`; inp.channel = 'entity'; inp.type = 0; }
     }
   }
 
   _ensureMinWorkInputs(minCount=2){
     let slots = this._workInputSlots();
     while(slots.length < minCount){
-      this.addInput(`workIn${slots.length+1}`, 0);
+      this.addInput(`inPort${slots.length+1}`, 0);
       slots = this._workInputSlots();
     }
     this._normalizeWorkInputNames();
@@ -98,6 +97,7 @@ class JoinNode extends EquipmentNode{
       }
       if(typeof w !== 'object') continue;
       if(this._lastInRefBySlot[slot] === w) continue;
+      if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(w, slot)) continue;
 
       // Guard against duplicate enqueue when one work object fans out.
       if(this._queue.some(item=> item.work === w)){
@@ -145,7 +145,8 @@ class JoinNode extends EquipmentNode{
       return true;
     }
 
-    const durationMs = Math.max(0, this.properties.processTime * 1000);
+    const processSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('input', next.slotIndex) : this.properties.processTime;
+    const durationMs = Math.max(0, processSeconds * 1000);
     this._state = 'PROCESS';
     this._until = now + durationMs;
     this._triggerProcessAnimation(next.slotIndex, durationMs, w);
@@ -153,7 +154,7 @@ class JoinNode extends EquipmentNode{
   }
 
   _addWorkInput(){
-    this.addInput('workIn', 0);
+    this.addInput(`inPort${this.inputs.length + 1}`, 0);
     this._normalizeWorkInputNames();
     this._state = 'IDLE';
     this.setOutputData(0, null);
@@ -188,11 +189,12 @@ class JoinNode extends EquipmentNode{
     window.refreshFlipIO(this);
   }
 
-  canAcceptWorkInput(slotIndex){
+  canAcceptWorkInput(slotIndex, work){
     const inp = this.inputs && this.inputs[slotIndex];
     if(!inp || !this._isWorkInputName(inp.name)) return false;
     // Keep source/equipment generation bounded: new accepts only when ready to start.
-    return this._state === 'IDLE' && this._queue.length === 0;
+    if(this._state !== 'IDLE' || this._queue.length !== 0) return false;
+    return typeof this._runtimeSelectInputRule !== 'function' || !!this._runtimeSelectInputRule(work, slotIndex);
   }
 
   onExecute(){
@@ -224,23 +226,32 @@ class JoinNode extends EquipmentNode{
           break;
 
         case 'WAIT':
-          if(this._downReady()){
+          {
+          const selected = typeof this._runtimeSelectOutputRule === 'function'
+            ? this._runtimeSelectOutputRule(this._payload, { processComplete:true }) : { slot:0 };
+          const outputSlot = Number.isInteger(selected?.slot) ? selected.slot : 0;
+          if(selected && this._downReady(outputSlot, this._payload)){
             const payload = this._payload;
             this._setWaitIcon(false);
             this._state = 'DOWN';
-            const downMs = Math.max(0, this.properties.downTime * 1000);
+            const downSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('output', outputSlot) : this.properties.downTime;
+            const downMs = Math.max(0, downSeconds * 1000);
             this._until = now + downMs;
-            this.setOutputData(0, payload);
-            this._spawnSinkTransfer(downMs, payload);
+            this._flowOutputSlot = outputSlot;
+            this.setOutputData(outputSlot, payload);
+            this._spawnSinkTransfer(downMs, payload, outputSlot);
             this._payload = null;
           }else{
-            this.setOutputData(0, null);
+            this.setOutputData(outputSlot, null);
+          }
           }
           break;
 
         case 'DOWN':
           if(now >= this._until){
-            this.setOutputData(0, null);
+            const outputSlot = Number.isInteger(this._flowOutputSlot) ? this._flowOutputSlot : 0;
+            this.setOutputData(outputSlot, null);
+            this._flowOutputSlot = null;
             this._setWaitIcon(false);
             this._state = 'IDLE';
             this._activeInputSlot = -1;
@@ -290,28 +301,6 @@ class JoinNode extends EquipmentNode{
 }
 
 menuMixin(JoinNode);
-(function(proto){
-  const prev = proto.getExtraMenuOptions;
-  proto.getExtraMenuOptions = function(){
-    let opts = prev ? prev.call(this) : [];
-    if(!Array.isArray(opts)) opts = [];
-    opts.push({
-      content: 'Add workIn',
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._addWorkInput())
-        : this._addWorkInput())
-    });
-    const count = this._workInputSlots().length;
-    opts.push({
-      content: 'Remove workIn',
-      disabled: count <= 2,
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._removeWorkInput())
-        : this._removeWorkInput())
-    });
-    return opts;
-  };
-})(JoinNode.prototype);
 
 JoinNode.title = 'Join';
 window.JoinNode = JoinNode;

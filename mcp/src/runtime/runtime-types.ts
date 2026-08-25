@@ -356,7 +356,9 @@ export type AddNodeOutput = {
 
 export type NodePortInfo = {
   slot: number;
+  portId: string;
   name: string;
+  channel: "entity" | "signal";
   type: string | null;
   hasLink: boolean;
   linkCount: number;

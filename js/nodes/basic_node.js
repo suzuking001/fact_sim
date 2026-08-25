@@ -86,6 +86,11 @@
       (Array.isArray(rows) ? rows : []).forEach((port, index)=>{
         if(!port) return;
         if(!port.portId) port.portId = `${prefix}-${index + 1}`;
+        if(!port.channel){
+          port.channel = (/^sig(?:in|out)\d*$/.test(text(port.name).toLowerCase()) || text(port.type).toLowerCase() === 'string')
+            ? 'signal'
+            : 'entity';
+        }
       });
     };
     assign(node?.inputs, 'in');
@@ -104,20 +109,14 @@
   }
 
   function defaultPortNames(presetId){
-    const id = text(presetId).toLowerCase();
-    if(id === 'source') return { inputs: [], outputs: ['workOut'] };
-    if(id === 'sink') return { inputs: ['workIn'], outputs: [] };
-    if(id === 'note' || id === 'signal') return { inputs: [], outputs: [] };
-    if(id === 'pack') return { inputs: ['itemIn', 'containerIn'], outputs: ['containerOut'] };
-    if(id === 'unpack') return { inputs: ['containerIn'], outputs: ['itemOut', 'emptyContainerOut'] };
-    if(id === 'router' || id === 'split') return { inputs: ['workIn'], outputs: ['workOut1', 'workOut2'] };
-    if(id === 'merge' || id === 'join') return { inputs: ['workIn1', 'workIn2'], outputs: ['workOut'] };
-    if(id === 'carrier_route') return { inputs: ['carrierIn'], outputs: ['carrierOut'] };
-    return { inputs: ['workIn'], outputs: ['workOut'] };
+    const counts = defaultPortCounts(presetId);
+    return {
+      inputs: Array.from({ length:counts.inputs }, (_unused, index)=>`inPort${index + 1}`),
+      outputs: Array.from({ length:counts.outputs }, (_unused, index)=>`outPort${index + 1}`)
+    };
   }
 
-  function defaultEntityCategory(node, port){
-    if(port) return categoryForPort(port);
+  function defaultEntityCategory(node){
     const presetId = text(node?.properties?.presetId).toLowerCase();
     if(presetId === 'source' && text(node?.properties?.sourceMode).toLowerCase() === 'entity'){
       const kind = text(node?.properties?.rootKind).toLowerCase();
@@ -127,6 +126,20 @@
     }
     if(presetId === 'carrier_route') return 'carrier';
     return 'work';
+  }
+
+  function presetPortCategories(node, presetId, direction, index){
+    const id = text(presetId).toLowerCase() || 'basic';
+    if(id === 'pack') return direction === 'input' && index === 0 ? ['work'] : ['container', 'carrier'];
+    if(id === 'unpack') return direction === 'output' && index === 0 ? ['work'] : ['container', 'carrier'];
+    if(id === 'station') return index === 0 ? ['work'] : ['container', 'carrier'];
+    if(id === 'transfer') return ['work', 'container', 'carrier'];
+    if(id === 'carrier_route'){
+      const agvMode = text(node?.properties?.transportMode).toLowerCase() === 'agv';
+      if(agvMode) return index === 0 ? ['work'] : ['carrier'];
+      return index === 0 ? ['carrier'] : ['container'];
+    }
+    return [defaultEntityCategory(node)];
   }
 
   function targetForCategory(category){
@@ -187,11 +200,8 @@
   function defaultInputRules(node, presetId, inputs){
     if(presetId === 'source' || presetId === 'note' || presetId === 'signal') return [];
     return inputs.map((port, index)=>{
-      let categories = [defaultEntityCategory(node, port)];
+      const categories = presetPortCategories(node, presetId, 'input', index);
       let acceptKind = presetId === 'sink' ? 'always' : 'space-available';
-      if(presetId === 'pack') categories = index === 0 ? ['work'] : ['container', 'carrier'];
-      else if(presetId === 'unpack') categories = ['container', 'carrier'];
-      else if(presetId === 'carrier_route') categories = ['carrier'];
       return makeInputRule(presetId, port, index, categories, acceptKind);
     });
   }
@@ -222,8 +232,16 @@
     if(presetId === 'pack'){
       return [makeOutputRule(presetId, 0, ['container', 'carrier'], allConditions('full', 'downstream-ready'), outputs)];
     }
-    const category = presetId === 'carrier_route' ? 'carrier' : defaultEntityCategory(node, outputs[0]);
-    return [makeOutputRule(presetId, 0, [category], defaultReleaseCondition(node), outputs)];
+    if(['station', 'carrier_route', 'transfer'].includes(presetId)){
+      return outputs.map((port, index)=>makeOutputRule(
+        presetId,
+        index,
+        presetPortCategories(node, presetId, 'output', index),
+        defaultReleaseCondition(node),
+        [port]
+      ));
+    }
+    return [makeOutputRule(presetId, 0, [defaultEntityCategory(node)], defaultReleaseCondition(node), outputs)];
   }
 
   function ensurePresetFlowRules(node, options){
@@ -253,11 +271,272 @@
     }
   }
 
+  function ensurePresetRuleCoverage(node){
+    if(!node || !isObject(node.properties)) return;
+    const presetId = text(node.properties.presetId).toLowerCase() || 'basic';
+    if(['source', 'note', 'signal'].includes(presetId)) return;
+    const inputRules = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : (node.properties.inputRules = []);
+    for(const [index, port] of (node.inputs || []).entries()){
+      if(!port || isSignalPort(port) || inputRules.some((rule)=>text(rule?.fromPortId) === text(port.portId))) continue;
+      inputRules.push(makeInputRule(presetId, port, index, presetPortCategories(node, presetId, 'input', index), presetId === 'sink' ? 'always' : 'space-available'));
+    }
+    if(['sink', 'note', 'signal'].includes(presetId)) return;
+    const outputRules = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : (node.properties.outputRules = []);
+    for(const [index, port] of (node.outputs || []).entries()){
+      if(!port || isSignalPort(port) || outputRules.some((rule)=>{
+        const ids = Array.isArray(rule?.toPortIds) ? rule.toPortIds : [rule?.toPortId];
+        return ids.some((portId)=>text(portId) === text(port.portId));
+      })) continue;
+      outputRules.push(makeOutputRule(presetId, index, presetPortCategories(node, presetId, 'output', index), defaultReleaseCondition(node), [port]));
+    }
+  }
+
   function portIndexById(rows, portId){
     if(!Array.isArray(rows)) return -1;
     const wanted = text(portId);
     if(!wanted) return rows.length ? 0 : -1;
     return rows.findIndex((port)=>text(port?.portId) === wanted);
+  }
+
+  function isSignalPort(port){
+    if(text(port?.channel).toLowerCase() === 'signal') return true;
+    if(text(port?.channel).toLowerCase() === 'entity') return false;
+    const name = text(port?.name).toLowerCase();
+    return /^sigin\d*$/.test(name) || /^sigout\d*$/.test(name) || text(port?.type).toLowerCase() === 'string';
+  }
+
+  function normalizeEntityPorts(node){
+    if(!node) return node;
+    ensurePortIds(node);
+    const normalize = (rows, direction)=>{
+      let entityIndex = 0;
+      (Array.isArray(rows) ? rows : []).forEach((port)=>{
+        if(!port) return;
+        if(isSignalPort(port)){
+          port.channel = 'signal';
+          return;
+        }
+        entityIndex += 1;
+        port.channel = 'entity';
+        port.type = 0;
+        port.name = `${direction === 'input' ? 'inPort' : 'outPort'}${entityIndex}`;
+      });
+    };
+    normalize(node.inputs, 'input');
+    normalize(node.outputs, 'output');
+    return node;
+  }
+
+  function entityFlowPorts(node, direction){
+    const rows = direction === 'input' ? node?.inputs : node?.outputs;
+    return (Array.isArray(rows) ? rows : []).filter((port)=>port && !isSignalPort(port));
+  }
+
+  function entityPortSlots(node, direction){
+    const rows = direction === 'input' ? node?.inputs : node?.outputs;
+    const slots = [];
+    (Array.isArray(rows) ? rows : []).forEach((port, index)=>{
+      if(port && !isSignalPort(port)) slots.push(index);
+    });
+    return slots;
+  }
+
+  function ruleTargetsCategory(node, rule, category){
+    const wanted = text(category).toLowerCase();
+    const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+    return targets.filter(Boolean).some((target)=>{
+      const normalized = typeof App.normalizeEntityTarget === 'function' ? App.normalizeEntityTarget(target) : target;
+      const mode = text(normalized?.mode).toLowerCase();
+      if(mode === 'otherwise') return true;
+      if(mode === 'category') return text(normalized.category).toLowerCase() === wanted;
+      if(mode !== 'type') return false;
+      const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(node?.graph) : null;
+      return text(registry?.get?.(normalized.typeId)?.category).toLowerCase() === wanted;
+    });
+  }
+
+  function flowPortSlotsForCategory(node, direction, category){
+    const rows = direction === 'input' ? node?.inputs : node?.outputs;
+    const rules = direction === 'input' ? node?.properties?.inputRules : node?.properties?.outputRules;
+    const ids = new Set();
+    for(const rule of (Array.isArray(rules) ? rules : [])){
+      if(!ruleTargetsCategory(node, rule, category)) continue;
+      if(direction === 'input') ids.add(text(rule?.fromPortId));
+      else for(const portId of (Array.isArray(rule?.toPortIds) ? rule.toPortIds : [rule?.toPortId])) ids.add(text(portId));
+    }
+    const slots = [];
+    (Array.isArray(rows) ? rows : []).forEach((port, index)=>{
+      if(port && !isSignalPort(port) && ids.has(text(port.portId))) slots.push(index);
+    });
+    return Array.isArray(rules) && rules.length ? slots : entityPortSlots(node, direction);
+  }
+
+  function targetCategoryForRule(rule){
+    const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+    const categories = targets.filter(Boolean).map((target)=>{
+      const normalized = typeof App.normalizeEntityTarget === 'function' ? App.normalizeEntityTarget(target) : target;
+      if(text(normalized?.mode).toLowerCase() === 'category') return text(normalized.category).toLowerCase();
+      if(text(normalized?.mode).toLowerCase() === 'type'){
+        const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(rule?.__node?.graph) : null;
+        return text(registry?.get?.(normalized.typeId)?.category).toLowerCase();
+      }
+      return '';
+    }).filter(Boolean);
+    return categories.length && categories.every((category)=>category === categories[0]) ? categories[0] : 'entity';
+  }
+
+  function ensurePortTimings(node){
+    if(!node || !isObject(node.properties)) return { inputs:{}, outputs:{} };
+    const model = isObject(node.properties.portTimings) ? node.properties.portTimings : {};
+    model.inputs = isObject(model.inputs) ? model.inputs : {};
+    model.outputs = isObject(model.outputs) ? model.outputs : {};
+    ensurePortIds(node);
+    entityFlowPorts(node, 'input').forEach((port, index)=>{
+      const key = index === 0 ? 'processTime' : `processTime${index + 1}`;
+      const fallback = Number(node.properties[key]);
+      if(!isObject(model.inputs[port.portId])){
+        model.inputs[port.portId] = { processTimeSec:Math.max(0, Number.isFinite(fallback) ? fallback : Number(node.properties.processTime) || 0) };
+      }
+    });
+    entityFlowPorts(node, 'output').forEach((port, index)=>{
+      const key = index === 0 ? 'downTime' : `downTime${index + 1}`;
+      const fallback = Number(node.properties[key]);
+      if(!isObject(model.outputs[port.portId])){
+        model.outputs[port.portId] = { downTimeSec:Math.max(0, Number.isFinite(fallback) ? fallback : Number(node.properties.downTime) || 0) };
+      }
+    });
+    node.properties.portTimings = model;
+    return model;
+  }
+
+  function flowPortTiming(node, direction, slotIndex){
+    const rows = direction === 'input' ? node?.inputs : node?.outputs;
+    const port = Array.isArray(rows) ? rows[slotIndex] : null;
+    const model = ensurePortTimings(node);
+    const value = direction === 'input'
+      ? model.inputs?.[port?.portId]?.processTimeSec
+      : model.outputs?.[port?.portId]?.downTimeSec;
+    const fallback = direction === 'input' ? node?.properties?.processTime : node?.properties?.downTime;
+    return Math.max(0, Number.isFinite(Number(value)) ? Number(value) : Number(fallback) || 0);
+  }
+
+  function nextFlowPortId(node, direction){
+    node.properties = isObject(node.properties) ? node.properties : {};
+    const prefix = direction === 'input' ? 'in' : 'out';
+    let sequence = Math.max(0, Math.round(Number(node.properties.flowPortSequence) || 0));
+    const used = new Set([...(node.inputs || []), ...(node.outputs || [])].map((port)=>text(port?.portId)).filter(Boolean));
+    let candidate = '';
+    do{ sequence += 1; candidate = `${prefix}-flow-${sequence}`; }while(used.has(candidate));
+    node.properties.flowPortSequence = sequence;
+    return candidate;
+  }
+
+  function nextFlowPortName(node, direction, rule){
+    const rows = direction === 'input' ? node.inputs : node.outputs;
+    const count = entityFlowPorts(node, direction).length + 1;
+    return `${direction === 'input' ? 'inPort' : 'outPort'}${count}`;
+  }
+
+  function createFlowPort(node, direction, rule, options){
+    if(!node || !isObject(node.properties)) return null;
+    const requestedId = text(options?.portId);
+    const rows = direction === 'input' ? node.inputs : node.outputs;
+    const existing = requestedId ? (rows || []).find((port)=>text(port?.portId) === requestedId) : null;
+    if(existing) return existing;
+    const name = text(options?.name) || nextFlowPortName(node, direction, rule || {});
+    if(direction === 'input') node.addInput(name, 0);
+    else node.addOutput(name, 0);
+    const port = rows[rows.length - 1];
+    port.portId = requestedId || nextFlowPortId(node, direction);
+    port.channel = 'entity';
+    port.type = 0;
+    port.flowManaged = true;
+    port.requiredByPreset = false;
+    ensurePortTimings(node);
+    const timings = node.properties.portTimings;
+    if(direction === 'input') timings.inputs[port.portId] = { processTimeSec:Math.max(0, Number(node.properties.processTime) || 0) };
+    else timings.outputs[port.portId] = { downTimeSec:Math.max(0, Number(node.properties.downTime) || 0) };
+    normalizeEntityPorts(node);
+    return port;
+  }
+
+  function markPresetPortsRequired(node){
+    [...(node?.inputs || []), ...(node?.outputs || [])].forEach((port)=>{
+      if(!port || isSignalPort(port) || port.flowManaged) return;
+      port.requiredByPreset = true;
+      port.flowManaged = false;
+    });
+  }
+
+  function syncFlowPorts(node, options){
+    if(!node || !isObject(node.properties)) return { created:[], warnings:[] };
+    const preset = PRESETS[text(node.properties.presetId).toLowerCase()] || PRESETS.basic;
+    ensurePortIds(node);
+    normalizeEntityPorts(node);
+    if(preset.entity === false) return { created:[], warnings:[] };
+    markPresetPortsRequired(node);
+    const created = [];
+    const warnings = [];
+    const inputRules = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : [];
+    const outputRules = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : [];
+    if(text(node.properties.presetId).toLowerCase() !== 'source'){
+      for(const rule of inputRules){
+        let portId = text(rule?.fromPortId);
+        if(!portId || portIndexById(node.inputs, portId) < 0){
+          const port = createFlowPort(node, 'input', rule, { portId:portId || undefined });
+          if(port){ rule.fromPortId = port.portId; created.push({ direction:'input', portId:port.portId }); }
+          else warnings.push(`Unable to create input port for ${text(rule?.ruleId) || 'rule'}`);
+        }
+      }
+    }
+    if(text(node.properties.presetId).toLowerCase() !== 'sink'){
+      for(const rule of outputRules){
+        const requested = Array.isArray(rule?.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule?.toPortId].filter(Boolean);
+        const ids = requested.length ? requested : [''];
+        const resolved = [];
+        for(const value of ids){
+          const portId = text(value);
+          if(portId && portIndexById(node.outputs, portId) >= 0){ resolved.push(portId); continue; }
+          const port = createFlowPort(node, 'output', rule, { portId:portId || undefined });
+          if(port){ resolved.push(port.portId); created.push({ direction:'output', portId:port.portId }); }
+          else warnings.push(`Unable to create output port for ${text(rule?.ruleId) || 'rule'}`);
+        }
+        rule.toPortIds = Array.from(new Set(resolved));
+        rule.toPortId = rule.toPortIds[0] || null;
+      }
+    }
+    ensurePortTimings(node);
+    normalizeEntityPorts(node);
+    if(options?.dirty !== false){
+      node.setDirtyCanvas?.(true, true);
+      node.graph?.change?.();
+    }
+    return { created, warnings };
+  }
+
+  function flowPortReferenced(node, direction, portId){
+    const wanted = text(portId);
+    if(direction === 'input') return (node.properties?.inputRules || []).some((rule)=>text(rule?.fromPortId) === wanted);
+    return (node.properties?.outputRules || []).some((rule)=>{
+      const ids = Array.isArray(rule?.toPortIds) ? rule.toPortIds : [rule?.toPortId];
+      return ids.some((value)=>text(value) === wanted);
+    });
+  }
+
+  function removeOrphanFlowPort(node, direction, portId, options){
+    const rows = direction === 'input' ? node?.inputs : node?.outputs;
+    const index = portIndexById(rows, portId);
+    const port = index >= 0 ? rows[index] : null;
+    if(!port || port.requiredByPreset || !port.flowManaged || flowPortReferenced(node, direction, portId)) return { removed:false, reason:'retained' };
+    const links = direction === 'input' ? [port.link].filter((id)=>id != null) : (Array.isArray(port.links) ? port.links.slice() : []);
+    if(links.length && options?.confirmLinked !== true) return { removed:false, reason:'linked', links };
+    links.forEach((linkId)=>{ try{ node.graph?.removeLink?.(linkId); }catch(_e){} });
+    if(direction === 'input') node.removeInput(index); else node.removeOutput(index);
+    const timings = ensurePortTimings(node);
+    if(direction === 'input') delete timings.inputs[portId]; else delete timings.outputs[portId];
+    normalizeEntityPorts(node);
+    node.setDirtyCanvas?.(true, true);
+    return { removed:true, links };
   }
 
   function presetRuntimeCtor(presetId, properties){
@@ -314,8 +593,8 @@
       super();
       this.title = 'Basic Node';
       this.size = [260, 170];
-      this.addInput('entityIn', 0);
-      this.addOutput('entityOut', 0);
+      this.addInput('inPort1', 0);
+      this.addOutput('outPort1', 0);
       ensurePortIds(this);
       this.properties = {
         basicNodeVersion: 1,
@@ -326,6 +605,7 @@
         initialContents: [],
         inputRules: [],
         outputRules: [],
+        portTimings: { inputs:{}, outputs:{} },
         selection: 'first-available',
         stateMachine: { initialState: 'IDLE', states: ['IDLE', 'PROCESS', 'WAIT', 'DOWN'], transitions: [] }
       };
@@ -380,6 +660,10 @@
       if(presetChanged || !Number.isFinite(Number(this.properties.processTime))) this.properties.processTime = preset.processTime;
       if(presetChanged || !Number.isFinite(Number(this.properties.downTime))) this.properties.downTime = preset.downTime;
       if(presetChanged || !Number.isFinite(Number(this.properties.contentCapacity))) this.properties.contentCapacity = preset.contentCapacity;
+      // A preset change replaces the physical role ports.  Do not carry the
+      // previous preset's per-port durations into the new port layout; let
+      // _ensurePresetPorts seed them from the new preset defaults instead.
+      if(presetChanged) this.properties.portTimings = { inputs:{}, outputs:{} };
       if(!Array.isArray(this.properties.initialContents)) this.properties.initialContents = [];
       if(presetChanged || !Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
       if(presetChanged || !Array.isArray(this.properties.outputRules)) this.properties.outputRules = [];
@@ -412,13 +696,14 @@
       if(!preserveTitle) this.title = preset.title;
       this._ensurePresetPorts();
       ensurePresetFlowRules(this, { force: presetChanged });
+      syncFlowPorts(this, { dirty:false });
       this._appliedPresetId = id;
       if(id === 'shuttle') this._applyShuttleStateColor();
       return this;
     }
 
     _ensurePresetPorts(){
-      if(this._runtimePrototype){ ensurePortIds(this); return; }
+      if(this._runtimePrototype){ ensurePortIds(this); normalizeEntityPorts(this); return; }
       const id = this.properties?.presetId;
       const names = defaultPortNames(id);
       while(this.inputs.length < names.inputs.length) this.addInput(names.inputs[this.inputs.length], 0);
@@ -428,6 +713,9 @@
       this.inputs.forEach((port, index)=>{ port.name = names.inputs[index]; });
       this.outputs.forEach((port, index)=>{ port.name = names.outputs[index]; });
       ensurePortIds(this);
+      normalizeEntityPorts(this);
+      markPresetPortsRequired(this);
+      ensurePortTimings(this);
     }
 
     _configurePresetRuntime(serializedNode){
@@ -466,12 +754,22 @@
       }
       installPresetRuntimeMethods(this, ctor);
       this._runtimePrototype = ctor.prototype;
+      // Materialize preset rules while the temporary runtime ports still carry
+      // their constructor hints. Runtime execution that follows is exclusively
+      // portId/Rule driven; visible entity names are normalized immediately.
+      ensurePortIds(this);
+      ensurePresetFlowRules(this);
+      ensurePresetRuleCoverage(this);
+      normalizeEntityPorts(this);
       if(typeof ctor.prototype.onConfigure === 'function'){
         try{ ctor.prototype.onConfigure.call(this, serializedNode); }catch(err){ console.error(err); }
       }
       this._runtimeConfigured = true;
       ensurePortIds(this);
       ensurePresetFlowRules(this);
+      ensurePresetRuleCoverage(this);
+      markPresetPortsRequired(this);
+      syncFlowPorts(this, { dirty:false });
       return true;
     }
 
@@ -495,6 +793,7 @@
     onSerialize(serialized){
       this._migrateLegacyShuttleGroupSetting();
       ensurePresetFlowRules(this);
+      syncFlowPorts(this, { dirty:false });
       serialized.type = 'factory/basic';
       ensurePortIds(this);
       serialized.inputs = clone(this.inputs, serialized.inputs || []);
@@ -554,6 +853,24 @@
       return { summary: store.summaryAt(this.id), instances: includeInstances ? store.treesAt(this.id) : [] };
     }
 
+    _flowTiming(direction, slotIndex){ return flowPortTiming(this, direction, slotIndex); }
+
+    _selectFlowInputCandidate(){
+      const ruleSlots = (this.properties?.inputRules || []).map((rule)=>portIndexById(this.inputs, rule?.fromPortId)).filter((slot)=>slot >= 0);
+      const slots = [...new Set([...ruleSlots, ...(this.inputs || []).map((_port, slot)=>slot)])].filter((slot)=>!isSignalPort(this.inputs?.[slot]));
+      this._lastInRefs = Array.isArray(this._lastInRefs) ? this._lastInRefs : [];
+      for(const slot of slots){
+        const input = this.inputs?.[slot];
+        if(!input || input.link == null) continue;
+        const work = this.getInputData(slot);
+        if(!work){ this._lastInRefs[slot] = null; continue; }
+        if(typeof work !== 'object' || this._lastInRefs[slot] === work) continue;
+        if(!this._runtimeSelectInputRule(work, slot)) continue;
+        return { work, slot };
+      }
+      return null;
+    }
+
     _acceptIncoming(slotIndex){
       const input = this.inputs?.[slotIndex];
       if(!input || input.link == null) return null;
@@ -572,6 +889,7 @@
       instance.attributes.__arrivedAtMs = nowMs();
       this._activeRoot = instance;
       this._activeTarget = selected.instance;
+      this._activeInputSlot = slotIndex;
       return instance;
     }
 
@@ -612,6 +930,11 @@
         const row = types.find((entry)=>text(entry?.typeId) === resolvedTypeId);
         if(row) category = text(row.category).toLowerCase();
       }
+      if(!category){
+        const kind = text(candidate?.entityKind || candidate?.kind || candidate?.subtype).toLowerCase();
+        if(/carrier|agv/.test(kind) || candidate?.carrierId != null || Array.isArray(candidate?.pallets) || Array.isArray(candidate?.cargo)) category = 'carrier';
+        else if(/container|pallet|box|tray/.test(kind) || candidate?.palletId != null || Array.isArray(candidate?.works)) category = 'container';
+      }
       if(!category) category = 'work';
       return { category, typeId:resolvedTypeId, typeName };
     }
@@ -637,7 +960,12 @@
     _runtimeRuleOutputSlots(rule){
       const ids = this._ruleOutputPortIds(rule);
       const slots = ids.map((portId)=>portIndexById(this.outputs, portId)).filter((slot)=>slot >= 0);
-      if(!slots.length && this.outputs?.length) slots.push(0);
+      if(!slots.length){
+        const entitySlots = typeof App.basicEntityPortSlots === 'function'
+          ? App.basicEntityPortSlots(this, 'output')
+          : [];
+        if(entitySlots.length) slots.push(entitySlots[0]);
+      }
       return Array.from(new Set(slots));
     }
 
@@ -750,7 +1078,11 @@
     _runtimeSelectOutputRule(value, context){
       const rules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
       if(!rules.length){
-        const slots = this.outputs?.length ? [0] : [];
+        const slots = typeof App.basicEntityPortSlots === 'function'
+          ? App.basicEntityPortSlots(this, 'output')
+          : (this.outputs || []).map((port, slot)=>({ port, slot }))
+            .filter(({ port })=>port?.channel !== 'signal')
+            .map(({ slot })=>slot);
         return slots.length ? { rule:null, slots, slot:slots[0] } : null;
       }
       let otherwise = null;
@@ -1100,10 +1432,10 @@
       return found;
     }
 
-    _spawnShuttleProcessAnimation(durationMs, work){
+    _spawnShuttleProcessAnimation(durationMs, work, slotIndex=0){
       if(!(durationMs > 0)) return;
       try{
-        const input = this.inputs?.[0];
+        const input = this.inputs?.[slotIndex];
         if(!root.WorkLinkAnimator || !this.graph || !input || input.link == null) return;
         const info = work && typeof work === 'object' ? { id: work.id, t: work.type, entity: work } : null;
         root.WorkLinkAnimator.spawn(this.graph, input.link, 'work', durationMs, info);
@@ -1173,15 +1505,16 @@
       return moved;
     }
 
-    _startShuttleProcess(work, now, opensCycle){
+    _startShuttleProcess(work, now, opensCycle, inputSlot=0){
       if(!work || typeof work !== 'object') return false;
       if(opensCycle) this._openShuttleGroupCycle(now);
       this._payload = work;
       this._currentWork = work;
-      const processMs = Math.max(0, Number(this.properties?.processTime || 0) * 1000);
+      this._activeInputSlot = inputSlot;
+      const processMs = flowPortTiming(this, 'input', inputSlot) * 1000;
       this._until = now + processMs;
       this._setShuttleState('PROCESS');
-      this._spawnShuttleProcessAnimation(processMs, work);
+      this._spawnShuttleProcessAnimation(processMs, work, inputSlot);
       return true;
     }
 
@@ -1196,39 +1529,36 @@
         const opensCycle = !!this._incomingPayloadOpensCycle;
         this._incomingPayload = null;
         this._incomingPayloadOpensCycle = false;
-        return this._startShuttleProcess(buffered, now, opensCycle);
+        return this._startShuttleProcess(buffered, now, opensCycle, Number.isInteger(this._incomingInputSlot) ? this._incomingInputSlot : 0);
       }
-      const input = this.inputs?.[0];
-      if(!input || input.link == null){
-        this._lastInRef = null;
-        return false;
-      }
-      const work = this.getInputData(0);
-      if(!work){
-        this._lastInRef = null;
-        return false;
-      }
-      if(typeof work !== 'object' || this._lastInRef === work) return false;
+      const candidate = this._selectFlowInputCandidate?.();
+      if(!candidate) return false;
+      const work = candidate.work;
+      const inputSlot = candidate.slot;
       this._lastInRef = work;
-      const opensCycle = this._shuttleInputIsExternal(0);
+      this._lastInRefs[inputSlot] = work;
+      const opensCycle = this._shuttleInputIsExternal(inputSlot);
       if(this._shuttleGroupIsTransferring()){
         this._incomingPayload = work;
         this._incomingPayloadOpensCycle = opensCycle;
+        this._incomingInputSlot = inputSlot;
         this._markShuttleGroupDirty();
         return true;
       }
-      return this._startShuttleProcess(work, now, opensCycle);
+      return this._startShuttleProcess(work, now, opensCycle, inputSlot);
     }
 
     _captureShuttleInputDuringTransfer(){
       if(this._incomingPayload) return;
-      const input = this.inputs?.[0];
-      if(!input || input.link == null) return;
-      const work = this.getInputData(0);
-      if(!work || typeof work !== 'object' || this._lastInRef === work) return;
+      const candidate = this._selectFlowInputCandidate?.();
+      if(!candidate) return;
+      const work = candidate.work;
+      const inputSlot = candidate.slot;
       this._lastInRef = work;
+      this._lastInRefs[inputSlot] = work;
       this._incomingPayload = work;
-      this._incomingPayloadOpensCycle = this._shuttleInputIsExternal(0);
+      this._incomingPayloadOpensCycle = this._shuttleInputIsExternal(inputSlot);
+      this._incomingInputSlot = inputSlot;
     }
 
     _executeShuttle(){
@@ -1309,7 +1639,7 @@
       this._activeRoot = null;
       this._activeTarget = null;
       this._processComplete = false;
-      const downMs = Math.max(0, Number(this.properties?.downTime) || 0) * 1000;
+      const downMs = flowPortTiming(this, 'output', slot) * 1000;
       if(downMs > 0){
         this._state = 'DOWN';
         this._stateName = 'down';
@@ -1416,7 +1746,7 @@
       if(this._state === 'IDLE'){
         this._state = 'PROCESS';
         this._stateName = 'process';
-        this._until = now + Math.max(0, Number(this.properties.processTime) || 0) * 1000;
+        this._until = now + flowPortTiming(this, 'input', Number.isInteger(this._activeInputSlot) ? this._activeInputSlot : 0) * 1000;
       }
       if(this._state === 'PROCESS' && now >= this._until){
         this._processComplete = true;
@@ -1536,13 +1866,6 @@
     return model;
   }
 
-  function categoryForPort(port){
-    const signature = `${text(port?.type)} ${text(port?.name)}`.toLowerCase();
-    if(/agv|carrier/.test(signature)) return 'carrier';
-    if(/pallet|container|box|tray/.test(signature)) return 'container';
-    return 'work';
-  }
-
   function typeIdForLegacyName(model, name){
     const wanted = text(name).toLowerCase();
     if(!wanted) return '';
@@ -1552,10 +1875,11 @@
 
   function migratedInputRules(node, originalType){
     if(originalType === 'factory/source' || originalType === 'factory/entitysource') return [];
+    const presetId = TYPE_TO_PRESET[originalType] || 'basic';
     return (Array.isArray(node?.inputs) ? node.inputs : []).map((port, index)=>({
       ruleId: `migrated-input-${index + 1}`,
-      targets: [{ mode: 'category', category: categoryForPort(port) }],
-      target: { mode: 'category', category: categoryForPort(port) },
+      targets: targetsForCategories(presetPortCategories(node, presetId, 'input', index)),
+      target: targetForCategory(presetPortCategories(node, presetId, 'input', index)[0]),
       acceptWhen: { kind: originalType === 'factory/sink' ? 'always' : 'space-available' },
       fromPortId: port.portId || `in-${index + 1}`
     }));
@@ -1567,17 +1891,19 @@
       ? 'available'
       : 'process-complete';
     return (Array.isArray(node?.outputs) ? node.outputs : []).map((port, index)=>{
+      const presetId = TYPE_TO_PRESET[originalType] || 'basic';
+      const categories = presetPortCategories(node, presetId, 'output', index);
       const routeTypeId = originalType === 'factory/branch'
         ? typeIdForLegacyName(model, port?.routeType)
         : '';
       return {
         ruleId: `migrated-output-${index + 1}`,
-        targets: [routeTypeId
-          ? { mode: 'type', typeId: routeTypeId }
-          : { mode: 'category', category: categoryForPort(port) }],
+        targets: routeTypeId
+          ? [{ mode: 'type', typeId: routeTypeId }]
+          : targetsForCategories(categories),
         target: routeTypeId
           ? { mode: 'type', typeId: routeTypeId }
-          : { mode: 'category', category: categoryForPort(port) },
+          : targetForCategory(categories[0]),
         releaseWhen: originalType === 'factory/shuttle_stage'
           ? {
               kind: 'all',
@@ -1706,6 +2032,14 @@
   App.inferEntityModelFromGraph = inferLegacyTypes;
   App.ensureBasicNodePortIds = ensurePortIds;
   App.ensureBasicPresetFlowRules = ensurePresetFlowRules;
+  App.ensureBasicPortTimings = ensurePortTimings;
+  App.normalizeBasicEntityPorts = normalizeEntityPorts;
+  App.basicEntityPortSlots = entityPortSlots;
+  App.basicFlowPortSlotsForCategory = flowPortSlotsForCategory;
+  App.basicFlowPortTiming = flowPortTiming;
+  App.createBasicFlowPort = createFlowPort;
+  App.syncBasicFlowPorts = syncFlowPorts;
+  App.removeOrphanBasicFlowPort = removeOrphanFlowPort;
   App.migrateGraphDataToBasic = migrateGraphDataToBasic;
   App.previewBasicNodeMigration = (data)=>migrateGraphDataToBasic(data, { previewOnly: true });
   App.prepareSerializedGraphForSave = function(data){

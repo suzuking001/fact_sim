@@ -58,12 +58,12 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     this.size = [300, 190];
     this.resizable = true;
 
-    this._sourceInIndex = this.inputs.length; this.addInput('sourceIn', 0);
-    this._targetInIndex = this.inputs.length; this.addInput('targetIn', 0);
-    this._itemInIndex = this.inputs.length; this.addInput('itemIn', 0);
-    this._sourceOutIndex = this.outputs.length; this.addOutput('sourceOut', 0);
-    this._targetOutIndex = this.outputs.length; this.addOutput('targetOut', 0);
-    this._itemOutIndex = this.outputs.length; this.addOutput('itemOut', 0);
+    this._sourceInIndex = this.inputs.length; this.addInput('inPort1', 0);
+    this._targetInIndex = this.inputs.length; this.addInput('inPort2', 0);
+    this._itemInIndex = this.inputs.length; this.addInput('inPort3', 0);
+    this._sourceOutIndex = this.outputs.length; this.addOutput('outPort1', 0);
+    this._targetOutIndex = this.outputs.length; this.addOutput('outPort2', 0);
+    this._itemOutIndex = this.outputs.length; this.addOutput('outPort3', 0);
 
     this.properties = { ...TRANSFER_STATION_DEFAULTS };
     this._sourceHost = null;
@@ -72,6 +72,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     this._activeItem = null;
     this._processed = 0;
     this._lastInputRefs = [null, null, null];
+    this._activeInputSlot = 0;
     this._releaseQueue = [];
     this._offer = null;
     this._phase = 'collect';
@@ -202,10 +203,11 @@ class TransferStationNode extends LiteGraph.LGraphNode{
   canAcceptEntityInput(slotIndex, entity){
     const slot = Number(slotIndex);
     if(!Number.isFinite(slot)) return false;
+    if(!this._runtimeSelectInputRule?.(entity, slot)) return false;
     if(this._phase !== 'collect' && this._phase !== 'ready') return false;
     if(this._offer || this._releaseQueue.length) return false;
-    if(slot === this._itemInIndex){
-      if(this._operation() !== 'load' || this._pendingItem) return false;
+    const op = this._operation();
+    if(op === 'load' && this._targetHost && !this._pendingItem && this._kindMatches(entity || { entityKind:this.properties.itemKind }, this.properties.itemKind)){
       if(!this._targetHost || !this._kindMatches(entity || { entityKind: this.properties.itemKind }, this.properties.itemKind)) return false;
       const store = this._store();
       if(!entity || !store) return true;
@@ -213,8 +215,9 @@ class TransferStationNode extends LiteGraph.LGraphNode{
       store.register(this._targetHost);
       return !!store.canAttach(entity, this._targetHost, { mode: this.properties.relationMode }).ok;
     }
-    if(!this._requiredHostSlot(slot) || this._hostForSlot(slot)) return false;
-    return !entity || this._kindMatches(entity, this._expectedKindForSlot(slot));
+    if(op !== 'load' && !this._sourceHost && (!entity || this._kindMatches(entity, this.properties.sourceKind))) return true;
+    if(op !== 'unload' && !this._targetHost && (!entity || this._kindMatches(entity, this.properties.targetKind))) return true;
+    return false;
   }
 
   canAcceptWorkInput(slotIndex, work){
@@ -259,9 +262,11 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     }
     const store = this._store();
     if(store) store.register(entity);
-    if(slot === this._sourceInIndex) this._sourceHost = entity;
-    else if(slot === this._targetInIndex) this._targetHost = entity;
-    else this._pendingItem = entity;
+    this._activeInputSlot = slot;
+    const op = this._operation();
+    if(op === 'load' && this._targetHost && !this._pendingItem && this._kindMatches(entity, this.properties.itemKind)) this._pendingItem = entity;
+    else if(op !== 'load' && !this._sourceHost && this._kindMatches(entity, this.properties.sourceKind)) this._sourceHost = entity;
+    else if(op !== 'unload' && !this._targetHost && this._kindMatches(entity, this.properties.targetKind)) this._targetHost = entity;
     this._payload = entity;
     this._pendingAgv = this._kind(entity) === 'carrier' ? entity : null;
     if(this._kind(entity) === 'work') this._lastWorkInRef = entity;
@@ -270,10 +275,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
   }
 
   _captureRequiredInputs(){
-    const op = this._operation();
-    if(op !== 'load') this._captureInput(this._sourceInIndex);
-    if(op !== 'unload') this._captureInput(this._targetInIndex);
-    if(op === 'load' && this._targetHost) this._captureInput(this._itemInIndex);
+    for(const slot of (window.App?.basicEntityPortSlots?.(this, 'input') || [])) this._captureInput(slot);
   }
 
   _hostsReady(){
@@ -310,7 +312,10 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     this._lastError = '';
     this._setState('PROCESS', `${this._operation()}_${this._kind(item)}`);
     const now = simNow();
-    this._until = now + this._normalizeTime(this.properties.processTime, 1) * 1000;
+    const processTime = typeof window.App?.basicFlowPortTiming === 'function'
+      ? window.App.basicFlowPortTiming(this, 'input', this._activeInputSlot)
+      : this.properties.processTime;
+    this._until = now + this._normalizeTime(processTime, this.properties.processTime) * 1000;
   }
 
   _completeProcess(){
@@ -331,7 +336,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
       return;
     }
     if(op === 'unload'){
-      this._beginOffer(this._itemOutIndex, item, ()=>{
+      this._beginOffer(this._outputSlotFor(item, this._itemOutIndex), item, ()=>{
         this._processed += 1;
         this._activeItem = null;
         this._afterItemComplete();
@@ -430,6 +435,18 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     this._markSelfDirty();
   }
 
+  _outputSlotFor(entity, fallbackSlot){
+    const selected = typeof this._runtimeSelectOutputRule === 'function'
+      ? this._runtimeSelectOutputRule(entity, { processComplete:true })
+      : null;
+    if(Number.isInteger(selected?.slot) && selected.slot >= 0) return selected.slot;
+    const entitySlots = typeof window.App?.basicEntityPortSlots === 'function'
+      ? window.App.basicEntityPortSlots(this, 'output')
+      : [];
+    if(entitySlots.includes(fallbackSlot)) return fallbackSlot;
+    return entitySlots[0] ?? fallbackSlot;
+  }
+
   _tickOffer(now){
     const offer = this._offer;
     if(!offer) return;
@@ -438,7 +455,10 @@ class TransferStationNode extends LiteGraph.LGraphNode{
       try{ this.setOutputData(offer.slot, offer.entity); }catch(_e){}
       offer.armed = true;
       offer.armedAt = now;
-      offer.until = now + Math.max(1, this._normalizeTime(this.properties.downTime, 0.2) * 1000);
+      const downTime = typeof window.App?.basicFlowPortTiming === 'function'
+        ? window.App.basicFlowPortTiming(this, 'output', offer.slot)
+        : this.properties.downTime;
+      offer.until = now + Math.max(1, this._normalizeTime(downTime, this.properties.downTime) * 1000);
       this._until = offer.until;
       this._setState('DOWN', 'handoff');
       return;
@@ -458,8 +478,16 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     }
     this._releaseQueue = [];
     const op = this._operation();
-    if(op !== 'load' && this._sourceHost) this._releaseQueue.push({ slot: this._sourceOutIndex, entity: this._sourceHost, field: '_sourceHost' });
-    if(op !== 'unload' && this._targetHost) this._releaseQueue.push({ slot: this._targetOutIndex, entity: this._targetHost, field: '_targetHost' });
+    if(op !== 'load' && this._sourceHost) this._releaseQueue.push({
+      slot: this._outputSlotFor(this._sourceHost, this._sourceOutIndex),
+      entity: this._sourceHost,
+      field: '_sourceHost'
+    });
+    if(op !== 'unload' && this._targetHost) this._releaseQueue.push({
+      slot: this._outputSlotFor(this._targetHost, this._targetOutIndex),
+      entity: this._targetHost,
+      field: '_targetHost'
+    });
     this._phase = 'release';
     this._markSelfDirty();
     this._advanceRelease();

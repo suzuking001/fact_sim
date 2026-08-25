@@ -271,6 +271,7 @@ function resetSimClock(){
 function startSimLoop(stepFn){
   if(simRunning) return;
   simRunning = true;
+  try{ window.dispatchEvent(new CustomEvent('factsim:run-state-changed', { detail:{ running:true } })); }catch(_e){}
   lastRealMs = 0;
   lastUiUpdateMs = 0;
   resetRealtimeFactorSamples();
@@ -314,6 +315,7 @@ function startSimLoop(stepFn){
 
 function stopSimLoop(){
   simRunning = false;
+  try{ window.dispatchEvent(new CustomEvent('factsim:run-state-changed', { detail:{ running:false } })); }catch(_e){}
   if(simRafId){ window.cancelAnimationFrame(simRafId); simRafId = null; }
   applyRenderSuppression(false);
   try{

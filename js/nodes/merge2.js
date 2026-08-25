@@ -28,8 +28,8 @@ class MergeNode extends EquipmentNode{
 
     // Rebuild inputs: multiple work inputs only (sigIn* can be added via menu later)
     this.inputs = [];
-    this.addInput('workIn1', 0);
-    this.addInput('workIn2', 0);
+    this.addInput('inPort1', 0);
+    this.addInput('inPort2', 0);
 
     this._state = 'IDLE';
     this._until = 0;
@@ -60,8 +60,7 @@ class MergeNode extends EquipmentNode{
   }
 
   _isWorkInputName(name){
-    const s = String(name || '');
-    return s === 'workIn' || /^workIn\d+$/.test(s);
+    return true;
   }
 
   _workInputSlots(){
@@ -69,7 +68,7 @@ class MergeNode extends EquipmentNode{
     if(!this.inputs) return slots;
     for(let i=0;i<this.inputs.length;i++){
       const inp = this.inputs[i];
-      if(inp && this._isWorkInputName(inp.name)) slots.push(i);
+      if(inp && String(inp.channel || '').toLowerCase() !== 'signal' && String(inp.type || '').toLowerCase() !== 'string') slots.push(i);
     }
     return slots;
   }
@@ -78,14 +77,14 @@ class MergeNode extends EquipmentNode{
     const slots = this._workInputSlots();
     for(let i=0;i<slots.length;i++){
       const inp = this.inputs[slots[i]];
-      if(inp) inp.name = `workIn${i+1}`;
+      if(inp){ inp.name = `inPort${i+1}`; inp.channel = 'entity'; inp.type = 0; }
     }
   }
 
   _ensureMinWorkInputs(minCount=2){
     let slots = this._workInputSlots();
     while(slots.length < minCount){
-      this.addInput(`workIn${slots.length+1}`, 0);
+      this.addInput(`inPort${slots.length+1}`, 0);
       slots = this._workInputSlots();
     }
     this._normalizeWorkInputNames();
@@ -196,6 +195,7 @@ class MergeNode extends EquipmentNode{
     }
     if(typeof w !== 'object') return false;
     if(this._lastInRefBySlot[slot] === w) return false;
+    if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(w, slot)) return false;
 
     if(this._nextSlotCursor > 0){
       const firstSlot = this._activeSlots[0];
@@ -210,7 +210,9 @@ class MergeNode extends EquipmentNode{
     this._lastInRefBySlot[slot] = w;
 
     const isFirst = (this._nextSlotCursor === 0);
-    const sec = isFirst ? this.properties.processTime : (this.properties.processTime2 || this.properties.processTime);
+    const sec = typeof this._flowTiming === 'function'
+      ? this._flowTiming('input', slot)
+      : (isFirst ? this.properties.processTime : (this.properties.processTime2 || this.properties.processTime));
     const durationMs = Math.max(0, sec * 1000);
     this._state = 'PROCESS';
     this._until = now + durationMs;
@@ -221,7 +223,7 @@ class MergeNode extends EquipmentNode{
   }
 
   _addWorkInput(){
-    this.addInput('workIn', 0);
+    this.addInput(`inPort${this.inputs.length + 1}`, 0);
     this._normalizeWorkInputNames();
     this._state = 'IDLE';
     this.setOutputData(0, null);
@@ -287,23 +289,32 @@ class MergeNode extends EquipmentNode{
           break;
 
         case 'WAIT':
-          if(this._downReady()){
+          {
+          const selected = typeof this._runtimeSelectOutputRule === 'function'
+            ? this._runtimeSelectOutputRule(this._payload, { processComplete:true }) : { slot:0 };
+          const outputSlot = Number.isInteger(selected?.slot) ? selected.slot : 0;
+          if(selected && this._downReady(outputSlot, this._payload)){
             const payload = this._payload;
             this._setWaitIcon(false);
             this._state = 'DOWN';
-            const downMs = Math.max(0, this.properties.downTime * 1000);
+            const downSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('output', outputSlot) : this.properties.downTime;
+            const downMs = Math.max(0, downSeconds * 1000);
             this._until = now + downMs;
-            this.setOutputData(0, payload);
-            this._spawnSinkTransfer(downMs, payload);
+            this._flowOutputSlot = outputSlot;
+            this.setOutputData(outputSlot, payload);
+            this._spawnSinkTransfer(downMs, payload, outputSlot);
             this._payload = null;
           }else{
-            this.setOutputData(0, null);
+            this.setOutputData(outputSlot, null);
+          }
           }
           break;
 
         case 'DOWN':
           if(now >= this._until){
-            this.setOutputData(0, null);
+            const outputSlot = Number.isInteger(this._flowOutputSlot) ? this._flowOutputSlot : 0;
+            this.setOutputData(outputSlot, null);
+            this._flowOutputSlot = null;
             this._setWaitIcon(false);
             this._state = 'IDLE';
             this._resetCycleData(true);
@@ -346,10 +357,11 @@ class MergeNode extends EquipmentNode{
     }
   }
 
-  canAcceptWorkInput(slotIndex){
+  canAcceptWorkInput(slotIndex, work){
     if(this._state !== 'IDLE') return false;
     if(!this._cycleActive && !this._prepareCycleIfNeeded()) return false;
-    return slotIndex === this._expectedSlot();
+    if(slotIndex !== this._expectedSlot()) return false;
+    return typeof this._runtimeSelectInputRule !== 'function' || !!this._runtimeSelectInputRule(work, slotIndex);
   }
 
   onDrawForeground(ctx){
@@ -376,21 +388,6 @@ menuMixin(MergeNode);
   proto.getExtraMenuOptions = function(){
     let opts = prev ? prev.call(this) : [];
     if(!Array.isArray(opts)) opts = [];
-
-    opts.push({
-      content: 'Add workIn',
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._addWorkInput())
-        : this._addWorkInput())
-    });
-    const count = this._workInputSlots().length;
-    opts.push({
-      content: 'Remove workIn',
-      disabled: count <= 2,
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._removeWorkInput())
-        : this._removeWorkInput())
-    });
 
     if(this.properties && Object.prototype.hasOwnProperty.call(this.properties,'flipIO')){
       const label = this.properties.flipIO ? 'Ports: reset alignment' : 'Ports: flip horizontally';

@@ -211,8 +211,8 @@ export function registerRuntimeMethodsGroup08(
         id?: unknown;
         type?: unknown;
         title?: unknown;
-        inputs?: Array<{ name?: unknown; type?: unknown; link?: unknown }>;
-        outputs?: Array<{ name?: unknown; type?: unknown; links?: unknown }>;
+        inputs?: Array<{ portId?: unknown; name?: unknown; channel?: unknown; type?: unknown; link?: unknown }>;
+        outputs?: Array<{ portId?: unknown; name?: unknown; channel?: unknown; type?: unknown; links?: unknown }>;
       };
   
       const inputs = Array.isArray(nodeAs.inputs)
@@ -220,7 +220,9 @@ export function registerRuntimeMethodsGroup08(
             const hasLink = typeof input?.link === "number" || typeof input?.link === "string";
             return {
               slot: index,
+              portId: String(input?.portId ?? `in-${index + 1}`),
               name: String(input?.name ?? ""),
+              channel: input?.channel === "signal" ? "signal" as const : "entity" as const,
               type: typeof input?.type === "string" ? input.type : input?.type === null ? null : String(input?.type ?? ""),
               hasLink,
               linkCount: hasLink ? 1 : 0
@@ -233,7 +235,9 @@ export function registerRuntimeMethodsGroup08(
             const links = Array.isArray(output?.links) ? output.links : [];
             return {
               slot: index,
+              portId: String(output?.portId ?? `out-${index + 1}`),
               name: String(output?.name ?? ""),
+              channel: output?.channel === "signal" ? "signal" as const : "entity" as const,
               type: typeof output?.type === "string" ? output.type : output?.type === null ? null : String(output?.type ?? ""),
               hasLink: links.length > 0,
               linkCount: links.length

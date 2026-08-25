@@ -119,8 +119,20 @@ export function registerRuntimeMethodsGroup14(
       node.properties = node.properties || {};
       if(Array.isArray(requestedInput)) node.properties.inputRules = app.normalizeEntityRules(requestedInput, "input");
       if(Array.isArray(requestedOutput)) node.properties.outputRules = app.normalizeEntityRules(requestedOutput, "output");
+      const sync = typeof app.syncBasicFlowPorts === "function"
+        ? app.syncBasicFlowPorts(node, { dirty:false })
+        : { created:[], warnings:["Flow port synchronization is unavailable"] };
       node.setDirtyCanvas?.(true, true);
-      return { nodeId: node.id, inputRules: node.properties.inputRules || [], outputRules: node.properties.outputRules || [] };
+      return {
+        nodeId: node.id,
+        inputRules: node.properties.inputRules || [],
+        outputRules: node.properties.outputRules || [],
+        inputs: (node.inputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged, requiredByPreset:!!port.requiredByPreset })),
+        outputs: (node.outputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged, requiredByPreset:!!port.requiredByPreset })),
+        portTimings: node.properties.portTimings || { inputs:{}, outputs:{} },
+        createdPorts: sync.created || [],
+        warnings: sync.warnings || []
+      };
     }, { requestedNodeId: nodeId, requestedInput: inputRules, requestedOutput: outputRules });
   };
 

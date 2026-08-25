@@ -299,14 +299,15 @@ var App = window.App || (window.App = {});
           const work = preview;
           if(typeof node.setOutputData === 'function') node.setOutputData(flowSlot, work);
           node._pendingWork = work;
-          if(typeof node._animateWorkOutput === 'function') node._animateWorkOutput(work);
+          node._pendingOutputSlot = flowSlot;
+          if(typeof node._animateWorkOutput === 'function') node._animateWorkOutput(work, flowSlot);
           node._counter = nextId;
           node._cursor = node._seq && node._seq.length ? ((node._cursor + 1) % node._seq.length) : 0;
           for(let i = 0; i < sigCount; i += 1){
             if(typeof node._emit === 'function') node._emit(i, 'SEND');
           }
         }else{
-          if(typeof node.setOutputData === 'function') node.setOutputData(0, null);
+          if(typeof node.setOutputData === 'function') (node.outputs || []).forEach((_output, slot)=>node.setOutputData(slot, null));
           for(let i = 0; i < sigCount; i += 1){
             if(typeof node._emit === 'function') node._emit(i, 'IDLE');
           }
@@ -355,7 +356,8 @@ var App = window.App || (window.App = {});
                 const payload = node._payload;
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(false);
                 node._state = 'DOWN';
-                const downMs = Math.max(0, (Number(node.properties && node.properties.downTime) || 0) * 1000);
+                const downSeconds = typeof node._flowTiming === 'function' ? node._flowTiming('output', flowSlot) : Number(node.properties && node.properties.downTime) || 0;
+                const downMs = Math.max(0, downSeconds * 1000);
                 node._until = now + downMs;
                 node._flowOutputSlot = flowSlot;
                 if(typeof node.setOutputData === 'function') node.setOutputData(flowSlot, payload);
@@ -378,17 +380,23 @@ var App = window.App || (window.App = {});
               }
               break;
             case 'IDLE': {
-              const input0 = (node.inputs && node.inputs[0]) ? node.inputs[0] : null;
-              const hasLink = !!(input0 && input0.link != null);
-              if(!hasLink) break;
-              const work = (typeof node.getInputData === 'function') ? node.getInputData(0) : null;
-              if(!work){
-                node._lastInRef = null;
-                break;
+              const ruleSlots = (node.properties?.inputRules || []).map((rule)=>
+                (node.inputs || []).findIndex((port)=>port?.portId === rule?.fromPortId)).filter((slot)=>slot >= 0);
+              const candidateSlots = [...new Set([...ruleSlots, ...(node.inputs || []).map((_port, slot)=>slot)])]
+                .filter((slot)=>node.inputs?.[slot]?.channel !== 'signal');
+              node._lastInRefs = Array.isArray(node._lastInRefs) ? node._lastInRefs : [];
+              let work = null;
+              let inputSlot = -1;
+              for(const slot of candidateSlots){
+                const input = node.inputs?.[slot];
+                if(!input || input.link == null) continue;
+                const candidate = typeof node.getInputData === 'function' ? node.getInputData(slot) : null;
+                if(!candidate){ node._lastInRefs[slot] = null; continue; }
+                if(typeof candidate !== 'object' || node._lastInRefs[slot] === candidate) continue;
+                if(typeof node._runtimeSelectInputRule === 'function' && !node._runtimeSelectInputRule(candidate, slot)) continue;
+                work = candidate; inputSlot = slot; break;
               }
-              if(typeof work !== 'object') break;
-              if(node._lastInRef === work) break;
-              if(typeof node._runtimeSelectInputRule === 'function' && !node._runtimeSelectInputRule(work, 0)) break;
+              if(!work || inputSlot < 0) break;
               if(typeof node._evalScript === 'function' && !node._evalScript(work, sig)){
                 if(typeof node.setOutputData === 'function') node.setOutputData(0, work);
                 break;
@@ -397,10 +405,13 @@ var App = window.App || (window.App = {});
               node._currentWork = work;
               node._payload = work;
               node._state = 'PROCESS';
-              const durationMs = Math.max(0, (Number(node.properties && node.properties.processTime) || 0) * 1000);
+              node._activeInputSlot = inputSlot;
+              const processSeconds = typeof node._flowTiming === 'function' ? node._flowTiming('input', inputSlot) : Number(node.properties && node.properties.processTime) || 0;
+              const durationMs = Math.max(0, processSeconds * 1000);
               node._until = now + durationMs;
               node._lastInRef = work;
-              maybeSpawnInputAnimation(node, 0, durationMs, work);
+              node._lastInRefs[inputSlot] = work;
+              maybeSpawnInputAnimation(node, inputSlot, durationMs, work);
               if(durationMs === 0) again = true;
               break;
             }
@@ -425,29 +436,31 @@ var App = window.App || (window.App = {});
         const node = getNode(ctx, nodeIndex);
         if(!node) return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
         const now = Number.isFinite(nowMs) ? nowMs : 0;
-        const work = (typeof node.getInputData === 'function') ? node.getInputData(0) : null;
         if(typeof node._calcThroughputPerHour === 'function') node._calcThroughputPerHour(now);
-
-        if(!work){
-          node._lastInRef = null;
-          return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
-        }
-        if(node._lastInRef === work){
-          return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
-        }
-        if(typeof node._runtimeSelectInputRule === 'function' && !node._runtimeSelectInputRule(work, 0)){
-          return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
-        }
-
-        node._lastInRef = work;
+        const ruleSlots = (node.properties?.inputRules || []).map((rule)=>
+          (node.inputs || []).findIndex((port)=>port?.portId === rule?.fromPortId)).filter((slot)=>slot >= 0);
+        const slots = [...new Set([...ruleSlots, ...(node.inputs || []).map((_port, slot)=>slot)])]
+          .filter((slot)=>node.inputs?.[slot]?.channel !== 'signal');
+        node._lastInRefs = Array.isArray(node._lastInRefs) ? node._lastInRefs : [];
         if(!Array.isArray(node._recv)) node._recv = [];
         if(!Array.isArray(node._recentRecvTimes)) node._recentRecvTimes = [];
-        node._recv.push(work);
-        node._recentRecvTimes.push(now);
+        let received = false;
+        for(const slot of slots){
+          const work = typeof node.getInputData === 'function' ? node.getInputData(slot) : null;
+          if(!work){ node._lastInRefs[slot] = null; continue; }
+          if(node._lastInRefs[slot] === work) continue;
+          if(typeof node._runtimeSelectInputRule === 'function' && !node._runtimeSelectInputRule(work, slot)) continue;
+          node._lastInRefs[slot] = work;
+          node._lastInRef = work;
+          node._recv.push(work);
+          node._recentRecvTimes.push(now);
+          node._lastWork = work;
+          node._lastAt = now;
+          if(typeof node._recordSample === 'function') node._recordSample(now);
+          received = true;
+        }
+        if(!received) return { nextUntil: NaN, stateChanged: false, outputsChanged: false };
         if(typeof node._pruneRecentRecvTimes === 'function') node._pruneRecentRecvTimes(now);
-        node._lastWork = work;
-        node._lastAt = now;
-        if(typeof node._recordSample === 'function') node._recordSample(now);
         const tph = (typeof node._calcThroughputPerHour === 'function')
           ? node._calcThroughputPerHour(now)
           : 0;
@@ -494,7 +507,8 @@ var App = window.App || (window.App = {});
               if(slotIndex >= 0 && downstreamReady(ctx, nodeIndex, slotIndex, payload)){
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(false);
                 node._state = 'DOWN';
-                const downMs = Math.max(0, (Number(node.properties && node.properties.downTime) || 0) * 1000);
+                const downSeconds = typeof node._flowTiming === 'function' ? node._flowTiming('output', slotIndex) : Number(node.properties && node.properties.downTime) || 0;
+                const downMs = Math.max(0, downSeconds * 1000);
                 node._until = now + downMs;
                 if(typeof node._clearWorkOutputs === 'function') node._clearWorkOutputs();
                 if(typeof node.setOutputData === 'function') node.setOutputData(slotIndex, payload);
@@ -514,21 +528,16 @@ var App = window.App || (window.App = {});
               }
               break;
             case 'IDLE': {
-              const input0 = (node.inputs && node.inputs[0]) ? node.inputs[0] : null;
-              const hasLink = !!(input0 && input0.link != null);
-              if(!hasLink) break;
-              const work = (typeof node.getInputData === 'function') ? node.getInputData(0) : null;
-              if(!work){
-                node._lastInRef = null;
-                break;
-              }
-              if(typeof work !== 'object') break;
-              if(node._lastInRef === work) break;
+              const candidate = typeof node._selectFlowInputCandidate === 'function' ? node._selectFlowInputCandidate() : null;
+              if(!candidate) break;
+              const work = candidate.work;
+              const inputSlot = candidate.slot;
               if(typeof node._evalScript === 'function' && !node._evalScript(work, sig)){
                 node._currentWork = work;
                 node._payload = work;
                 node._state = 'WAIT';
                 node._lastInRef = work;
+                node._lastInRefs[inputSlot] = work;
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(true);
                 again = true;
                 break;
@@ -536,10 +545,12 @@ var App = window.App || (window.App = {});
               node._currentWork = work;
               node._payload = work;
               node._state = 'PROCESS';
-              const durationMs = Math.max(0, (Number(node.properties && node.properties.processTime) || 0) * 1000);
+              const processSeconds = typeof node._flowTiming === 'function' ? node._flowTiming('input', inputSlot) : Number(node.properties && node.properties.processTime) || 0;
+              const durationMs = Math.max(0, processSeconds * 1000);
               node._until = now + durationMs;
               node._lastInRef = work;
-              maybeSpawnInputAnimation(node, 0, durationMs, work);
+              node._lastInRefs[inputSlot] = work;
+              maybeSpawnInputAnimation(node, inputSlot, durationMs, work);
               if(durationMs === 0) again = true;
               break;
             }
@@ -558,9 +569,9 @@ var App = window.App || (window.App = {});
   }
 
   function createSplitKernel(){
-    function downReadyForAll(ctx, nodeIndex, node, payload){
-      const rows = (typeof node._workOutputs === 'function') ? node._workOutputs() : [];
-      if(rows.length < 2) return false;
+    function downReadyForAll(ctx, nodeIndex, node, payload, rows){
+      rows = Array.isArray(rows) ? rows : ((typeof node._workOutputs === 'function') ? node._workOutputs() : []);
+      if(!rows.length) return false;
       let connectedCount = 0;
       for(const row of rows){
         const status = getOutgoingStatus(ctx, nodeIndex, row.slotIndex, payload);
@@ -595,12 +606,15 @@ var App = window.App || (window.App = {});
               }
               break;
             case 'WAIT': {
-              const workOuts = (typeof node._workOutputs === 'function') ? node._workOutputs() : [];
-              if(downReadyForAll(ctx, nodeIndex, node, node._payload)){
+              const workOuts = typeof node._flowSplitOutputs === 'function'
+                ? node._flowSplitOutputs()
+                : ((typeof node._workOutputs === 'function') ? node._workOutputs() : []);
+              if(downReadyForAll(ctx, nodeIndex, node, node._payload, workOuts)){
                 const payload = node._payload;
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(false);
                 node._state = 'DOWN';
-                const downMs = Math.max(0, (Number(node.properties && node.properties.downTime) || 0) * 1000);
+                const downMs = Math.max(0, ...workOuts.map((row)=>
+                  (typeof node._flowTiming === 'function' ? node._flowTiming('output', row.slotIndex) : Number(node.properties && node.properties.downTime) || 0) * 1000));
                 node._until = now + downMs;
                 for(let i = 0; i < workOuts.length; i += 1){
                   const slotIndex = workOuts[i].slotIndex;
@@ -628,22 +642,17 @@ var App = window.App || (window.App = {});
               }
               break;
             case 'IDLE': {
-              const input0 = (node.inputs && node.inputs[0]) ? node.inputs[0] : null;
-              const hasLink = !!(input0 && input0.link != null);
-              if(!hasLink) break;
-              const work = (typeof node.getInputData === 'function') ? node.getInputData(0) : null;
-              if(!work){
-                node._lastInRef = null;
-                break;
-              }
-              if(typeof work !== 'object') break;
-              if(node._lastInRef === work) break;
+              const candidate = typeof node._selectFlowInputCandidate === 'function' ? node._selectFlowInputCandidate() : null;
+              if(!candidate) break;
+              const work = candidate.work;
+              const inputSlot = candidate.slot;
               if(typeof node._evalScript === 'function' && !node._evalScript(work, sig)){
                 node._currentWork = work;
                 node._payload = work;
                 node._state = 'WAIT';
                 node._handoffOffered = false;
                 node._lastInRef = work;
+                node._lastInRefs[inputSlot] = work;
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(true);
                 again = true;
                 break;
@@ -651,10 +660,12 @@ var App = window.App || (window.App = {});
               node._currentWork = work;
               node._payload = work;
               node._state = 'PROCESS';
-              const durationMs = Math.max(0, (Number(node.properties && node.properties.processTime) || 0) * 1000);
+              const processSeconds = typeof node._flowTiming === 'function' ? node._flowTiming('input', inputSlot) : Number(node.properties && node.properties.processTime) || 0;
+              const durationMs = Math.max(0, processSeconds * 1000);
               node._until = now + durationMs;
               node._lastInRef = work;
-              maybeSpawnInputAnimation(node, 0, durationMs, work);
+              node._lastInRefs[inputSlot] = work;
+              maybeSpawnInputAnimation(node, inputSlot, durationMs, work);
               if(durationMs === 0) again = true;
               break;
             }
@@ -710,22 +721,31 @@ var App = window.App || (window.App = {});
               }
               break;
             case 'WAIT':
-              if(downstreamReady(ctx, nodeIndex, 0, node._payload)){
+              {
+              const selected = typeof node._runtimeSelectOutputRule === 'function'
+                ? node._runtimeSelectOutputRule(node._payload, { processComplete:true }) : { slot:0 };
+              const outputSlot = Number.isInteger(selected?.slot) ? selected.slot : 0;
+              if(selected && downstreamReady(ctx, nodeIndex, outputSlot, node._payload)){
                 const payload = node._payload;
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(false);
                 node._state = 'DOWN';
-                const downMs = Math.max(0, (Number(node.properties && node.properties.downTime) || 0) * 1000);
+                const downSeconds = typeof node._flowTiming === 'function' ? node._flowTiming('output', outputSlot) : Number(node.properties && node.properties.downTime) || 0;
+                const downMs = Math.max(0, downSeconds * 1000);
                 node._until = now + downMs;
-                if(typeof node.setOutputData === 'function') node.setOutputData(0, payload);
-                if(typeof node._spawnSinkTransfer === 'function') node._spawnSinkTransfer(downMs, payload);
+                node._flowOutputSlot = outputSlot;
+                if(typeof node.setOutputData === 'function') node.setOutputData(outputSlot, payload);
+                if(typeof node._spawnSinkTransfer === 'function') node._spawnSinkTransfer(downMs, payload, outputSlot);
                 node._payload = null;
               }else{
-                if(typeof node.setOutputData === 'function') node.setOutputData(0, null);
+                if(typeof node.setOutputData === 'function') node.setOutputData(outputSlot, null);
+              }
               }
               break;
             case 'DOWN':
               if(now >= Number(node._until)){
-                if(typeof node.setOutputData === 'function') node.setOutputData(0, null);
+                const outputSlot = Number.isInteger(node._flowOutputSlot) ? node._flowOutputSlot : 0;
+                if(typeof node.setOutputData === 'function') node.setOutputData(outputSlot, null);
+                node._flowOutputSlot = null;
                 if(typeof node._setWaitIcon === 'function') node._setWaitIcon(false);
                 node._state = 'IDLE';
                 if(typeof node._resetCycleData === 'function') node._resetCycleData(true);

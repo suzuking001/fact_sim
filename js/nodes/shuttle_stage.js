@@ -10,8 +10,8 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
     this.title = title;
     this.size = SHUTTLE_STAGE_UI.baseSize.slice();
     this.resizable = true;
-    this.addInput('workIn', 0);
-    this.addOutput('workOut', 0);
+    this.addInput('inPort1', 0);
+    this.addOutput('outPort1', 0);
 
     this.properties = {
       processTime: 2,
@@ -329,7 +329,8 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
   canAcceptWorkInput(slotIndex){
     if(!this.inputs || slotIndex < 0 || slotIndex >= this.inputs.length) return false;
     const inp = this.inputs[slotIndex];
-    if(!inp || inp.name !== 'workIn') return false;
+    if(!inp || inp.channel === 'signal') return false;
+    if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule({ entityKind:'work' }, slotIndex)) return false;
     return this._state === 'IDLE' && !this._payload && !this._pendingTransfer;
   }
 

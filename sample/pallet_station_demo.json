@@ -16,40 +16,52 @@
       "order": 3,
       "inputs": [
         {
-          "name": "carrierIn1",
-          "type": "AGV",
+          "name": "inPort1",
+          "type": 0,
           "link": 11,
           "slot_index": 0,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletIn1",
-          "type": "PALLET",
+          "name": "inPort2",
+          "type": 0,
           "link": 14,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "carrierOut1",
-          "type": "AGV",
+          "name": "outPort1",
+          "type": 0,
           "links": [
             5
           ],
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletOut1",
-          "type": "PALLET",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             2
           ],
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Carrier Route IN",
@@ -161,7 +173,25 @@
             ],
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1
+            },
+            "in-2": {
+              "processTimeSec": 1
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.3
+            },
+            "out-2": {
+              "downTimeSec": 0.3
+            }
+          }
+        }
       }
     },
     {
@@ -181,37 +211,49 @@
       "order": 8,
       "inputs": [
         {
-          "name": "carrierIn1",
-          "type": "AGV",
+          "name": "inPort1",
+          "type": 0,
           "link": 5,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletIn1",
-          "type": "PALLET",
+          "name": "inPort2",
+          "type": 0,
           "link": null,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "carrierOut1",
-          "type": "AGV",
+          "name": "outPort1",
+          "type": 0,
           "links": [
             6
           ],
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletOut1",
-          "type": "PALLET",
+          "name": "outPort2",
+          "type": 0,
           "links": null,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Carrier Route",
@@ -323,7 +365,25 @@
             ],
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            },
+            "in-2": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            },
+            "out-2": {
+              "downTimeSec": 3
+            }
+          }
+        }
       }
     },
     {
@@ -343,8 +403,8 @@
       "order": 7,
       "inputs": [
         {
-          "name": "carrierIn1",
-          "type": "AGV",
+          "name": "inPort1",
+          "type": 0,
           "link": 8,
           "pos": [
             159.60000610351562,
@@ -353,11 +413,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletIn1",
-          "type": "PALLET",
+          "name": "inPort2",
+          "type": 0,
           "link": null,
           "pos": [
             159.60000610351562,
@@ -366,13 +429,16 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "carrierOut1",
-          "type": "AGV",
+          "name": "outPort1",
+          "type": 0,
           "links": [
             9
           ],
@@ -386,11 +452,14 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletOut1",
-          "type": "PALLET",
+          "name": "outPort2",
+          "type": 0,
           "links": null,
           "pos": [
             10,
@@ -401,7 +470,10 @@
           "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Carrier Route",
@@ -514,7 +586,25 @@
             ],
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            },
+            "in-2": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            },
+            "out-2": {
+              "downTimeSec": 3
+            }
+          }
+        }
       }
     },
     {
@@ -534,8 +624,8 @@
       "order": 9,
       "inputs": [
         {
-          "name": "carrierIn1",
-          "type": "AGV",
+          "name": "inPort1",
+          "type": 0,
           "link": 9,
           "pos": [
             159.60000610351562,
@@ -544,11 +634,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletIn1",
-          "type": "PALLET",
+          "name": "inPort2",
+          "type": 0,
           "link": null,
           "pos": [
             159.60000610351562,
@@ -557,13 +650,16 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "carrierOut1",
-          "type": "AGV",
+          "name": "outPort1",
+          "type": 0,
           "links": [
             10
           ],
@@ -577,11 +673,14 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletOut1",
-          "type": "PALLET",
+          "name": "outPort2",
+          "type": 0,
           "links": null,
           "pos": [
             10,
@@ -592,7 +691,10 @@
           "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Carrier Route",
@@ -705,7 +807,25 @@
             ],
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            },
+            "in-2": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            },
+            "out-2": {
+              "downTimeSec": 3
+            }
+          }
+        }
       }
     },
     {
@@ -725,8 +845,8 @@
       "order": 10,
       "inputs": [
         {
-          "name": "carrierIn1",
-          "type": "AGV",
+          "name": "inPort1",
+          "type": 0,
           "link": 10,
           "pos": [
             159.60000610351562,
@@ -735,11 +855,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletIn1",
-          "type": "PALLET",
+          "name": "inPort2",
+          "type": 0,
           "link": null,
           "pos": [
             159.60000610351562,
@@ -748,13 +871,16 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "carrierOut1",
-          "type": "AGV",
+          "name": "outPort1",
+          "type": 0,
           "links": [
             11
           ],
@@ -768,11 +894,14 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletOut1",
-          "type": "PALLET",
+          "name": "outPort2",
+          "type": 0,
           "links": null,
           "pos": [
             10,
@@ -783,7 +912,10 @@
           "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Carrier Route",
@@ -896,7 +1028,25 @@
             ],
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            },
+            "in-2": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            },
+            "out-2": {
+              "downTimeSec": 3
+            }
+          }
+        }
       }
     },
     {
@@ -913,38 +1063,50 @@
       "order": 4,
       "inputs": [
         {
-          "name": "carrierIn1",
-          "type": "AGV",
+          "name": "inPort1",
+          "type": 0,
           "link": 6,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletIn1",
-          "type": "PALLET",
+          "name": "inPort2",
+          "type": 0,
           "link": null,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "carrierOut1",
-          "type": "AGV",
+          "name": "outPort1",
+          "type": 0,
           "links": [
             8
           ],
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletOut1",
-          "type": "PALLET",
+          "name": "outPort2",
+          "type": 0,
           "links": null,
           "slot_index": 1,
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Carrier Route OUT",
@@ -1056,7 +1218,25 @@
             ],
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1
+            },
+            "in-2": {
+              "processTimeSec": 1
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.3
+            },
+            "out-2": {
+              "downTimeSec": 0.3
+            }
+          }
+        }
       }
     },
     {
@@ -1073,7 +1253,7 @@
       "order": 5,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 1,
           "pos": [
@@ -1083,11 +1263,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletIn",
-          "type": "PALLET",
+          "name": "inPort2",
+          "type": 0,
           "link": 2,
           "pos": [
             142.8000030517578,
@@ -1096,12 +1279,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             12
@@ -1115,11 +1301,14 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "palletOut",
-          "type": "PALLET",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             14
           ],
@@ -1132,7 +1321,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Station",
@@ -1221,7 +1413,25 @@
             ],
             "toPortId": "out-2"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1
+            },
+            "in-2": {
+              "processTimeSec": 1
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 1
+            },
+            "out-2": {
+              "downTimeSec": 1
+            }
+          }
+        }
       }
     },
     {
@@ -1239,14 +1449,17 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             1
           ],
           "__lastSet": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -1278,7 +1491,15 @@
             ],
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       }
     },
     {
@@ -1295,7 +1516,7 @@
       "order": 6,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 13,
           "pos": [
@@ -1305,7 +1526,10 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [],
@@ -1334,7 +1558,15 @@
             "fromPortId": "in-1"
           }
         ],
-        "outputRules": []
+        "outputRules": [],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 0
+            }
+          },
+          "outputs": {}
+        }
       }
     },
     {
@@ -1351,7 +1583,7 @@
       "order": 11,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 12,
           "pos": [
@@ -1361,12 +1593,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             13
@@ -1379,7 +1614,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Equipment",
@@ -1430,7 +1668,19 @@
             ],
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       }
     }
   ],
@@ -1449,7 +1699,7 @@
       1,
       6,
       1,
-      "PALLET"
+      0
     ],
     [
       5,
@@ -1457,7 +1707,7 @@
       0,
       9,
       0,
-      "AGV"
+      0
     ],
     [
       6,
@@ -1465,7 +1715,7 @@
       0,
       3,
       0,
-      "AGV"
+      0
     ],
     [
       8,
@@ -1473,7 +1723,7 @@
       0,
       8,
       0,
-      "AGV"
+      0
     ],
     [
       9,
@@ -1481,7 +1731,7 @@
       0,
       10,
       0,
-      "AGV"
+      0
     ],
     [
       10,
@@ -1489,7 +1739,7 @@
       0,
       11,
       0,
-      "AGV"
+      0
     ],
     [
       11,
@@ -1497,7 +1747,7 @@
       0,
       2,
       0,
-      "AGV"
+      0
     ],
     [
       12,
@@ -1521,7 +1771,7 @@
       1,
       2,
       1,
-      "PALLET"
+      0
     ]
   ],
   "groups": [],

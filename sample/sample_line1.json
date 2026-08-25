@@ -18,22 +18,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 42,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             8
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -71,7 +77,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -92,22 +110,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 8,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             9
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -145,7 +169,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -167,14 +203,17 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             10
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -200,7 +239,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -221,22 +268,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 10,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             11
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -274,7 +327,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -295,22 +360,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 11,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             12
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -348,7 +419,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -369,22 +452,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 12,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             14
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -422,7 +511,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -444,14 +545,17 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             17
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -477,7 +581,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -498,22 +610,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 17,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             18
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -551,7 +669,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -572,22 +702,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 18,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             19
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -625,7 +761,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -646,22 +794,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 19,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             20
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -699,7 +853,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -720,22 +886,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 21,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             22
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -773,7 +945,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -795,14 +979,17 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             21
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -828,7 +1015,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -849,22 +1044,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 24,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             23
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -902,7 +1103,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -924,14 +1137,17 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             24
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -957,7 +1173,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -978,28 +1202,37 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn1",
+          "name": "inPort1",
           "type": 0,
           "link": 20,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "workIn2",
+          "name": "inPort2",
           "type": 0,
           "link": 23,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             25
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1049,7 +1282,22 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            },
+            "in-2": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -1070,22 +1318,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 26,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             27
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1123,7 +1377,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -1144,22 +1410,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 25,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             28
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1197,7 +1469,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -1218,28 +1502,37 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn1",
+          "name": "inPort1",
           "type": 0,
           "link": 27,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "workIn2",
+          "name": "inPort2",
           "type": 0,
           "link": 28,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             29
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1289,7 +1582,22 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            },
+            "in-2": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -1310,22 +1618,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 29,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             30
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1363,7 +1677,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -1384,22 +1710,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 30,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             31
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1437,7 +1769,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -1458,22 +1802,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 9,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             32
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1511,7 +1861,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1532,22 +1894,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 31,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             33
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1585,7 +1953,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1606,28 +1986,37 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn1",
+          "name": "inPort1",
           "type": 0,
           "link": 32,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "workIn2",
+          "name": "inPort2",
           "type": 0,
           "link": 33,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             34
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1677,7 +2066,22 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            },
+            "in-2": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1698,22 +2102,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 34,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             35
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1751,7 +2161,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1772,22 +2194,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 35,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             36
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1825,7 +2253,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 20
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -1846,22 +2286,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 36,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             37
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -1899,7 +2345,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -1920,61 +2378,73 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 2,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
           "name": "sigIn0",
           "type": "string",
           "link": 43,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "signal"
         },
         {
           "name": "sigIn1",
           "type": "string",
           "link": 44,
-          "portId": "in-3"
+          "portId": "in-3",
+          "channel": "signal"
         },
         {
           "name": "sigIn2",
           "type": "string",
           "link": null,
-          "portId": "in-4"
+          "portId": "in-4",
+          "channel": "signal"
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             3
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
           "name": "sigOut0",
           "type": "string",
           "links": null,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "signal"
         },
         {
           "name": "sigOut1",
           "type": "string",
           "links": null,
           "__animToken": null,
-          "portId": "out-3"
+          "portId": "out-3",
+          "channel": "signal"
         },
         {
           "name": "sigOut2",
           "type": "string",
           "links": null,
           "__animToken": null,
-          "portId": "out-4"
+          "portId": "out-4",
+          "channel": "signal"
         }
       ],
       "properties": {
@@ -2078,7 +2548,19 @@
             },
             "toPortId": "out-4"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -2099,22 +2581,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 4,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             5
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -2152,7 +2640,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -2173,22 +2673,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 5,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             39
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -2226,7 +2732,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2248,14 +2766,17 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             40
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -2281,7 +2802,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2302,22 +2831,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 40,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             41
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -2355,7 +2890,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -2376,28 +2923,37 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn1",
+          "name": "inPort1",
           "type": 0,
           "link": 39,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "workIn2",
+          "name": "inPort2",
           "type": 0,
           "link": 41,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             42
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -2447,7 +3003,22 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            },
+            "in-2": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -2468,22 +3039,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 37,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             45
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -2521,7 +3098,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -2542,34 +3131,42 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 1,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
           "name": "sigIn0",
           "type": "string",
           "link": null,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "signal"
         },
         {
           "name": "sigIn1",
           "type": "string",
           "link": null,
-          "portId": "in-3"
+          "portId": "in-3",
+          "channel": "signal"
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             2
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
           "name": "sigOut0",
@@ -2579,7 +3176,8 @@
           ],
           "slot_index": 1,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "signal"
         },
         {
           "name": "sigOut1",
@@ -2589,7 +3187,8 @@
           ],
           "slot_index": 2,
           "__animToken": null,
-          "portId": "out-3"
+          "portId": "out-3",
+          "channel": "signal"
         }
       ],
       "properties": {
@@ -2671,7 +3270,19 @@
             },
             "toPortId": "out-3"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 4
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2692,22 +3303,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 3,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             4
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -2745,7 +3362,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2766,10 +3395,13 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 45,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [],
@@ -2792,7 +3424,15 @@
             "fromPortId": "in-1"
           }
         ],
-        "outputRules": []
+        "outputRules": [],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 0
+            }
+          },
+          "outputs": {}
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -2814,14 +3454,17 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             55
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -2847,7 +3490,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2868,22 +3519,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 55,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             52
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Equipment",
@@ -2922,7 +3579,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2943,22 +3612,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 53,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             54
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Equipment",
@@ -2997,7 +3672,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3018,10 +3705,13 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 54,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [],
@@ -3044,7 +3734,15 @@
             "fromPortId": "in-1"
           }
         ],
-        "outputRules": []
+        "outputRules": [],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 0
+            }
+          },
+          "outputs": {}
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3065,7 +3763,7 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
           "pos": [
@@ -3075,11 +3773,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 46,
           "pos": [
             130,
@@ -3088,12 +3789,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "pos": [
@@ -3103,11 +3807,14 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             49
           ],
@@ -3120,7 +3827,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -3184,7 +3894,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3205,7 +3933,7 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
           "pos": [
@@ -3215,11 +3943,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 49,
           "pos": [
             130,
@@ -3228,12 +3959,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "pos": [
@@ -3244,11 +3978,14 @@
           "dir": 3,
           "__flipActive": true,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             50
           ],
@@ -3261,7 +3998,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -3325,7 +4065,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3347,13 +4105,16 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             1
           ],
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -3379,7 +4140,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -3400,35 +4169,47 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 52,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 51,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             48
           ],
           "slot_index": 1,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -3492,7 +4273,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3513,7 +4312,7 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
           "pos": [
@@ -3523,11 +4322,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 50,
           "pos": [
             130,
@@ -3536,12 +4338,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "pos": [
@@ -3552,11 +4357,14 @@
           "dir": 3,
           "__flipActive": true,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             51
           ],
@@ -3569,7 +4377,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -3633,7 +4444,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3654,10 +4483,13 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 56,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [],
@@ -3680,7 +4512,15 @@
             "fromPortId": "in-1"
           }
         ],
-        "outputRules": []
+        "outputRules": [],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 0
+            }
+          },
+          "outputs": {}
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3701,22 +4541,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 57,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             56
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Equipment",
@@ -3755,7 +4601,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3776,7 +4634,7 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
           "pos": [
@@ -3786,11 +4644,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 60,
           "pos": [
             130,
@@ -3799,12 +4660,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "pos": [
@@ -3815,11 +4679,14 @@
           "dir": 3,
           "__flipActive": true,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             61
           ],
@@ -3832,7 +4699,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -3896,7 +4766,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3917,22 +4805,28 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 63,
           "slot_index": 0,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             62
           ],
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Equipment",
@@ -3971,7 +4865,19 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 5
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -3992,35 +4898,47 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 64,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             65
           ],
           "slot_index": 1,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -4084,7 +5002,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4105,7 +5041,7 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
           "slot_index": 0,
@@ -4116,11 +5052,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 58,
           "pos": [
             130,
@@ -4129,12 +5068,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "pos": [
@@ -4145,11 +5087,14 @@
           "dir": 3,
           "__flipActive": true,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             59
           ],
@@ -4162,7 +5107,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -4226,7 +5174,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4247,7 +5213,7 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
           "pos": [
@@ -4257,11 +5223,14 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 59,
           "pos": [
             130,
@@ -4270,12 +5239,15 @@
           "_flipPrevDir": null,
           "dir": 4,
           "__flipActive": true,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "pos": [
@@ -4286,11 +5258,14 @@
           "dir": 3,
           "__flipActive": true,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             60
           ],
@@ -4303,7 +5278,10 @@
           "_flipPrevDir": null,
           "dir": 3,
           "__flipActive": true,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -4367,7 +5345,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4389,13 +5385,16 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             63
           ],
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "Source",
@@ -4421,7 +5420,15 @@
             "toPortId": "out-1"
           }
         ],
-        "sourceMode": "work"
+        "sourceMode": "work",
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -4442,38 +5449,50 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 65,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             57
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             58
           ],
           "slot_index": 1,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -4537,7 +5556,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 5
+            },
+            "out-2": {
+              "downTimeSec": 5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4558,38 +5595,50 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 47,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             53
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             46
           ],
           "slot_index": 1,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -4653,7 +5702,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 5
+            },
+            "out-2": {
+              "downTimeSec": 5
+            }
+          }
+        }
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -4674,37 +5741,49 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": 62,
           "slot_index": 0,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 61,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             64
           ],
           "slot_index": 1,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -4768,7 +5847,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 5
+            },
+            "out-2": {
+              "downTimeSec": 5
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -4789,28 +5886,37 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn1",
+          "name": "inPort1",
           "type": 0,
           "link": 14,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "workIn2",
+          "name": "inPort2",
           "type": 0,
           "link": 22,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": [
             26
           ],
           "slot_index": 0,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "properties": {
@@ -4860,7 +5966,22 @@
             },
             "toPortId": "out-1"
           }
-        ]
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 2
+            },
+            "in-2": {
+              "processTimeSec": 2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 3
+            }
+          }
+        }
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -4881,35 +6002,47 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "workIn",
+          "name": "inPort1",
           "type": 0,
           "link": null,
-          "portId": "in-1"
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvIn",
-          "type": "AGV",
+          "name": "inPort2",
+          "type": 0,
           "link": 48,
-          "portId": "in-2"
+          "portId": "in-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "outputs": [
         {
-          "name": "workOut",
+          "name": "outPort1",
           "type": 0,
           "links": null,
           "__animToken": null,
-          "portId": "out-1"
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         },
         {
-          "name": "agvOut",
-          "type": "AGV",
+          "name": "outPort2",
+          "type": 0,
           "links": [
             47
           ],
           "slot_index": 1,
           "__animToken": null,
-          "portId": "out-2"
+          "portId": "out-2",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
         }
       ],
       "title": "AGV Route",
@@ -4973,7 +6106,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv"
+        "transportMode": "agv",
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 3
+            },
+            "in-2": {
+              "processTimeSec": 3
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0.5
+            },
+            "out-2": {
+              "downTimeSec": 0.5
+            }
+          }
+        }
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -5298,7 +6449,7 @@
       1,
       51,
       1,
-      "AGV"
+      0
     ],
     [
       47,
@@ -5306,7 +6457,7 @@
       1,
       47,
       1,
-      "AGV"
+      0
     ],
     [
       48,
@@ -5314,7 +6465,7 @@
       1,
       49,
       1,
-      "AGV"
+      0
     ],
     [
       49,
@@ -5322,7 +6473,7 @@
       1,
       48,
       1,
-      "AGV"
+      0
     ],
     [
       50,
@@ -5330,7 +6481,7 @@
       1,
       46,
       1,
-      "AGV"
+      0
     ],
     [
       51,
@@ -5338,7 +6489,7 @@
       1,
       50,
       1,
-      "AGV"
+      0
     ],
     [
       52,
@@ -5394,7 +6545,7 @@
       1,
       56,
       1,
-      "AGV"
+      0
     ],
     [
       59,
@@ -5402,7 +6553,7 @@
       1,
       60,
       1,
-      "AGV"
+      0
     ],
     [
       60,
@@ -5410,7 +6561,7 @@
       1,
       61,
       1,
-      "AGV"
+      0
     ],
     [
       61,
@@ -5418,7 +6569,7 @@
       1,
       62,
       1,
-      "AGV"
+      0
     ],
     [
       62,
@@ -5442,7 +6593,7 @@
       1,
       57,
       1,
-      "AGV"
+      0
     ],
     [
       65,
@@ -5450,7 +6601,7 @@
       1,
       59,
       1,
-      "AGV"
+      0
     ]
   ],
   "groups": [

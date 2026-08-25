@@ -16,10 +16,10 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this.resizable = true;
     this.size = [280, 150];
 
-    this._agvInIndex  = this.inputs.length;  this.addInput('carrierIn', 'AGV');
-    this._agvOutIndex = this.outputs.length; this.addOutput('carrierOut', 'AGV');
-    this._palletInIndex = this.inputs.length; this.addInput('palletIn', 'PALLET');
-    this._palletOutIndex = this.outputs.length; this.addOutput('palletOut', 'PALLET');
+    this._agvInIndex  = this.inputs.length;  this.addInput('inPort1', 0);
+    this._agvOutIndex = this.outputs.length; this.addOutput('outPort1', 0);
+    this._palletInIndex = this.inputs.length; this.addInput('inPort2', 0);
+    this._palletOutIndex = this.outputs.length; this.addOutput('outPort2', 0);
 
     this.properties = {
       processTime: window.NODES_CONFIG?.carrierRoute?.processTimeSec ?? CARRIER_ROUTE_DEFAULTS.processTime,
@@ -72,230 +72,69 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this._syncSignalOutputs();
   }
 
-  _isWorkInputPort(p){
-    const n = String(p?.name || '');
-    return n === 'workIn' || /^workIn\d+$/.test(n);
-  }
-  _isWorkOutputPort(p){
-    const n = String(p?.name || '');
-    return n === 'workOut' || /^workOut\d+$/.test(n);
-  }
   _workInputSlots(){
-    const slots = [];
-    if(!this.inputs) return slots;
-    for(let i = 0; i < this.inputs.length; i++){
-      if(this._isWorkInputPort(this.inputs[i])) slots.push(i);
+    if(Array.isArray(this.properties?.inputRules) && this.properties.inputRules.length){
+      return window.App?.basicFlowPortSlotsForCategory?.(this, 'input', 'work') || [];
     }
-    return slots;
+    return window.App?.basicEntityPortSlots?.(this, 'input') || [];
   }
   _workOutputSlots(){
-    const slots = [];
-    if(!this.outputs) return slots;
-    for(let i = 0; i < this.outputs.length; i++){
-      if(this._isWorkOutputPort(this.outputs[i])) slots.push(i);
+    if(Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length){
+      return window.App?.basicFlowPortSlotsForCategory?.(this, 'output', 'work') || [];
     }
-    return slots;
-  }
-  _isCarrierInputPort(p){
-    const n = String(p?.name || '');
-    return n === 'carrierIn' || /^carrierIn\d+$/.test(n);
-  }
-  _isCarrierOutputPort(p){
-    const n = String(p?.name || '');
-    return n === 'carrierOut' || /^carrierOut\d+$/.test(n);
-  }
-  _isPalletInputPort(p){
-    const n = String(p?.name || '');
-    return n === 'palletIn' || /^palletIn\d+$/.test(n);
-  }
-  _isPalletOutputPort(p){
-    const n = String(p?.name || '');
-    return n === 'palletOut' || /^palletOut\d+$/.test(n);
+    return window.App?.basicEntityPortSlots?.(this, 'output') || [];
   }
   _carrierInputSlots(){
-    const slots = [];
-    if(!this.inputs) return slots;
-    for(let i = 0; i < this.inputs.length; i++){
-      if(this._isCarrierInputPort(this.inputs[i])) slots.push(i);
+    if(Array.isArray(this.properties?.inputRules) && this.properties.inputRules.length){
+      return window.App?.basicFlowPortSlotsForCategory?.(this, 'input', 'carrier') || [];
     }
-    return slots;
+    return window.App?.basicEntityPortSlots?.(this, 'input') || [];
   }
   _carrierOutputSlots(){
-    const slots = [];
-    if(!this.outputs) return slots;
-    for(let i = 0; i < this.outputs.length; i++){
-      if(this._isCarrierOutputPort(this.outputs[i])) slots.push(i);
+    if(Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length){
+      return window.App?.basicFlowPortSlotsForCategory?.(this, 'output', 'carrier') || [];
     }
-    return slots;
+    return window.App?.basicEntityPortSlots?.(this, 'output') || [];
   }
   _palletInputSlots(){
-    const slots = [];
-    if(!this.inputs) return slots;
-    for(let i = 0; i < this.inputs.length; i++){
-      if(this._isPalletInputPort(this.inputs[i])) slots.push(i);
+    if(Array.isArray(this.properties?.inputRules) && this.properties.inputRules.length){
+      return window.App?.basicFlowPortSlotsForCategory?.(this, 'input', 'container') || [];
     }
-    return slots;
+    return window.App?.basicEntityPortSlots?.(this, 'input') || [];
   }
   _palletOutputSlots(){
-    const slots = [];
-    if(!this.outputs) return slots;
-    for(let i = 0; i < this.outputs.length; i++){
-      if(this._isPalletOutputPort(this.outputs[i])) slots.push(i);
+    if(Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length){
+      return window.App?.basicFlowPortSlotsForCategory?.(this, 'output', 'container') || [];
     }
-    return slots;
+    return window.App?.basicEntityPortSlots?.(this, 'output') || [];
   }
   _normalizeCarrierPortNames(){
-    const wIns = this._workInputSlots();
-    const wOuts = this._workOutputSlots();
-    const ins = this._carrierInputSlots();
-    const outs = this._carrierOutputSlots();
-    const pIns = this._palletInputSlots();
-    const pOuts = this._palletOutputSlots();
-    for(let i = 0; i < wIns.length; i++){
-      const p = this.inputs[wIns[i]];
-      if(p) p.name = `workIn${i + 1}`;
-    }
-    for(let i = 0; i < wOuts.length; i++){
-      const p = this.outputs[wOuts[i]];
-      if(p) p.name = `workOut${i + 1}`;
-    }
-    for(let i = 0; i < ins.length; i++){
-      const p = this.inputs[ins[i]];
-      if(p) p.name = `carrierIn${i + 1}`;
-    }
-    for(let i = 0; i < outs.length; i++){
-      const p = this.outputs[outs[i]];
-      if(p) p.name = `carrierOut${i + 1}`;
-    }
-    for(let i = 0; i < pIns.length; i++){
-      const p = this.inputs[pIns[i]];
-      if(p) p.name = `palletIn${i + 1}`;
-    }
-    for(let i = 0; i < pOuts.length; i++){
-      const p = this.outputs[pOuts[i]];
-      if(p) p.name = `palletOut${i + 1}`;
-    }
-    this._reorderLanePorts();
-  }
-  _remapSlotCacheByMap(cache, slotMap){
-    const src = cache && typeof cache === 'object' ? cache : null;
-    if(!src) return Object.create(null);
-    const dst = Object.create(null);
-    for(const key in src){
-      if(!Object.prototype.hasOwnProperty.call(src, key)) continue;
-      const oldSlot = Number(key);
-      if(!isFinite(oldSlot)) continue;
-      if(!Object.prototype.hasOwnProperty.call(slotMap, oldSlot)) continue;
-      const newSlot = slotMap[oldSlot];
-      dst[newSlot] = src[key];
-    }
-    return dst;
-  }
-  _remapLinksAfterPortReorder(inMap, outMap){
-    const links = this.graph && this.graph.links;
-    if(!links) return;
-    for(const id in links){
-      if(!Object.prototype.hasOwnProperty.call(links, id)) continue;
-      const link = links[id];
-      if(!link) continue;
-      if(link.origin_id === this.id && Object.prototype.hasOwnProperty.call(outMap, link.origin_slot)){
-        link.origin_slot = outMap[link.origin_slot];
-      }
-      if(link.target_id === this.id && Object.prototype.hasOwnProperty.call(inMap, link.target_slot)){
-        link.target_slot = inMap[link.target_slot];
-      }
-    }
-  }
-  _reorderLanePorts(){
-    const oldInputs = Array.isArray(this.inputs) ? this.inputs.slice() : [];
-    const oldOutputs = Array.isArray(this.outputs) ? this.outputs.slice() : [];
-    if(!oldInputs.length && !oldOutputs.length) return;
-
-    const workIns = [];
-    const carrierIns = [];
-    const palletIns = [];
-    const otherIns = [];
-    for(let i = 0; i < oldInputs.length; i++){
-      const port = oldInputs[i];
-      if(this._isWorkInputPort(port)) workIns.push({ oldIdx: i, port });
-      else if(this._isCarrierInputPort(port)) carrierIns.push({ oldIdx: i, port });
-      else if(this._isPalletInputPort(port)) palletIns.push({ oldIdx: i, port });
-      else otherIns.push({ oldIdx: i, port });
-    }
-
-    const workOuts = [];
-    const carrierOuts = [];
-    const palletOuts = [];
-    const otherOuts = [];
-    for(let i = 0; i < oldOutputs.length; i++){
-      const port = oldOutputs[i];
-      if(this._isWorkOutputPort(port)) workOuts.push({ oldIdx: i, port });
-      else if(this._isCarrierOutputPort(port)) carrierOuts.push({ oldIdx: i, port });
-      else if(this._isPalletOutputPort(port)) palletOuts.push({ oldIdx: i, port });
-      else otherOuts.push({ oldIdx: i, port });
-    }
-
-    const newInputsMeta = [];
-    const inputLaneCount = Math.max(workIns.length, carrierIns.length, palletIns.length);
-    for(let i = 0; i < inputLaneCount; i++){
-      if(workIns[i]) newInputsMeta.push(workIns[i]);      // workInN first
-      if(carrierIns[i]) newInputsMeta.push(carrierIns[i]); // carrierInN next
-      if(palletIns[i]) newInputsMeta.push(palletIns[i]);   // palletInN next
-    }
-    for(const item of otherIns) newInputsMeta.push(item);
-
-    const newOutputsMeta = [];
-    const outputLaneCount = Math.max(workOuts.length, carrierOuts.length, palletOuts.length);
-    for(let i = 0; i < outputLaneCount; i++){
-      if(workOuts[i]) newOutputsMeta.push(workOuts[i]);      // workOutN first
-      if(carrierOuts[i]) newOutputsMeta.push(carrierOuts[i]); // carrierOutN next
-      if(palletOuts[i]) newOutputsMeta.push(palletOuts[i]);   // palletOutN next
-    }
-    for(const item of otherOuts) newOutputsMeta.push(item);
-
-    const sameInputs =
-      oldInputs.length === newInputsMeta.length &&
-      oldInputs.every((port, idx)=> port === newInputsMeta[idx]?.port);
-    const sameOutputs =
-      oldOutputs.length === newOutputsMeta.length &&
-      oldOutputs.every((port, idx)=> port === newOutputsMeta[idx]?.port);
-    if(sameInputs && sameOutputs) return;
-
-    const inMap = {};
-    for(let i = 0; i < newInputsMeta.length; i++){
-      inMap[newInputsMeta[i].oldIdx] = i;
-    }
-    const outMap = {};
-    for(let i = 0; i < newOutputsMeta.length; i++){
-      outMap[newOutputsMeta[i].oldIdx] = i;
-    }
-
-    this.inputs = newInputsMeta.map((item)=> item.port);
-    this.outputs = newOutputsMeta.map((item)=> item.port);
-    this._remapLinksAfterPortReorder(inMap, outMap);
-
-    this._lastWorkInRefBySlot = this._remapSlotCacheByMap(this._lastWorkInRefBySlot, inMap);
-    this._lastAgvInRefBySlot = this._remapSlotCacheByMap(this._lastAgvInRefBySlot, inMap);
-    this._lastPalletInRefBySlot = this._remapSlotCacheByMap(this._lastPalletInRefBySlot, inMap);
+    window.App?.normalizeBasicEntityPorts?.(this);
   }
   _ensureMinCarrierPorts(minCount = 1){
     let ins = this._carrierInputSlots();
+    let outs = this._carrierOutputSlots();
+    const ruleDriven = Array.isArray(this.properties?.inputRules) && this.properties.inputRules.length
+      && Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length;
+    if(ruleDriven && (!ins.length || !outs.length)){
+      this._normalizeCarrierPortNames();
+      return;
+    }
     while(ins.length < minCount){
-      this.addInput('carrierIn', 'AGV');
+      this.addInput(`inPort${this.inputs.length + 1}`, 0);
       ins = this._carrierInputSlots();
     }
-    let outs = this._carrierOutputSlots();
     while(outs.length < minCount){
-      this.addOutput('carrierOut', 'AGV');
+      this.addOutput(`outPort${this.outputs.length + 1}`, 0);
       outs = this._carrierOutputSlots();
     }
     // Keep IN/OUT as one-to-one lane pairs.
     while(ins.length < outs.length){
-      this.addInput('carrierIn', 'AGV');
+      this.addInput(`inPort${this.inputs.length + 1}`, 0);
       ins = this._carrierInputSlots();
     }
     while(outs.length < ins.length){
-      this.addOutput('carrierOut', 'AGV');
+      this.addOutput(`outPort${this.outputs.length + 1}`, 0);
       outs = this._carrierOutputSlots();
     }
     this._normalizeCarrierPortNames();
@@ -480,42 +319,54 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   }
   _ensureWorkLanePairs(minCount = 0){
     let ins = this._workInputSlots();
+    let outs = this._workOutputSlots();
+    const ruleDriven = Array.isArray(this.properties?.inputRules) && this.properties.inputRules.length
+      && Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length;
+    if(ruleDriven && (!ins.length || !outs.length)){
+      this._normalizeCarrierPortNames();
+      return;
+    }
     while(ins.length < minCount){
-      this.addInput('workIn', 'work');
+      this.addInput(`inPort${this.inputs.length + 1}`, 0);
       ins = this._workInputSlots();
     }
-    let outs = this._workOutputSlots();
     while(outs.length < minCount){
-      this.addOutput('workOut', 'work');
+      this.addOutput(`outPort${this.outputs.length + 1}`, 0);
       outs = this._workOutputSlots();
     }
     while(ins.length < outs.length){
-      this.addInput('workIn', 'work');
+      this.addInput(`inPort${this.inputs.length + 1}`, 0);
       ins = this._workInputSlots();
     }
     while(outs.length < ins.length){
-      this.addOutput('workOut', 'work');
+      this.addOutput(`outPort${this.outputs.length + 1}`, 0);
       outs = this._workOutputSlots();
     }
     this._normalizeCarrierPortNames();
   }
   _ensurePalletLanePairs(minCount = 1){
     let ins = this._palletInputSlots();
+    let outs = this._palletOutputSlots();
+    const ruleDriven = Array.isArray(this.properties?.inputRules) && this.properties.inputRules.length
+      && Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length;
+    if(ruleDriven && (!ins.length || !outs.length)){
+      this._normalizeCarrierPortNames();
+      return;
+    }
     while(ins.length < minCount){
-      this.addInput('palletIn', 'PALLET');
+      this.addInput(`inPort${this.inputs.length + 1}`, 0);
       ins = this._palletInputSlots();
     }
-    let outs = this._palletOutputSlots();
     while(outs.length < minCount){
-      this.addOutput('palletOut', 'PALLET');
+      this.addOutput(`outPort${this.outputs.length + 1}`, 0);
       outs = this._palletOutputSlots();
     }
     while(ins.length < outs.length){
-      this.addInput('palletIn', 'PALLET');
+      this.addInput(`inPort${this.inputs.length + 1}`, 0);
       ins = this._palletInputSlots();
     }
     while(outs.length < ins.length){
-      this.addOutput('palletOut', 'PALLET');
+      this.addOutput(`outPort${this.outputs.length + 1}`, 0);
       outs = this._palletOutputSlots();
     }
     this._normalizeCarrierPortNames();
@@ -527,8 +378,8 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     return Math.min(this._palletInputSlots().length, this._palletOutputSlots().length);
   }
   _addWorkLane(){
-    this.addInput('workIn', 'work');
-    this.addOutput('workOut', 'work');
+    this.addInput(`inPort${this.inputs.length + 1}`, 0);
+    this.addOutput(`outPort${this.outputs.length + 1}`, 0);
     this._ensureWorkLanePairs(0);
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true, true);
@@ -562,8 +413,8 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this.setDirtyCanvas(true, true);
   }
   _addPalletLane(){
-    this.addInput('palletIn', 'PALLET');
-    this.addOutput('palletOut', 'PALLET');
+    this.addInput(`inPort${this.inputs.length + 1}`, 0);
+    this.addOutput(`outPort${this.outputs.length + 1}`, 0);
     this._ensurePalletLanePairs(1);
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true, true);
@@ -597,7 +448,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this.setDirtyCanvas(true, true);
   }
   _addCarrierIn(){
-    this.addInput('carrierIn', 'AGV');
+    this.addInput(`inPort${this.inputs.length + 1}`, 0);
     this._normalizeCarrierPortNames();
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true, true);
@@ -617,7 +468,7 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     this.setDirtyCanvas(true, true);
   }
   _addCarrierOut(){
-    this.addOutput('carrierOut', 'AGV');
+    this.addOutput(`outPort${this.outputs.length + 1}`, 0);
     this._normalizeCarrierPortNames();
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true, true);

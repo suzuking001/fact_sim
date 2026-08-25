@@ -4,21 +4,20 @@ class SplitNode extends EquipmentNode{
   constructor(){
     super('Split');
     this.title = 'Split';
-    if(this.outputs && this.outputs[0]) this.outputs[0].name = 'workOut1';
+    if(this.outputs && this.outputs[0]) this.outputs[0].name = 'outPort1';
     this._ensureMinWorkOutputs(2);
     this.properties.ratio = 0.5;
     window.refreshFlipIO(this);
   }
   _isWorkOutputName(name){
-    const s = String(name || '');
-    return s === 'workOut' || /^workOut\d+$/.test(s);
+    return true;
   }
   _workOutputSlots(){
     const slots = [];
     if(!this.outputs) return slots;
     for(let i=0;i<this.outputs.length;i++){
       const out = this.outputs[i];
-      if(out && this._isWorkOutputName(out.name)) slots.push(i);
+      if(out && String(out.channel || '').toLowerCase() !== 'signal' && String(out.type || '').toLowerCase() !== 'string') slots.push(i);
     }
     return slots;
   }
@@ -29,19 +28,19 @@ class SplitNode extends EquipmentNode{
     const slots = this._workOutputSlots();
     for(let i=0;i<slots.length;i++){
       const out = this.outputs[slots[i]];
-      if(out) out.name = `workOut${i+1}`;
+      if(out){ out.name = `outPort${i+1}`; out.channel = 'entity'; out.type = 0; }
     }
   }
   _ensureMinWorkOutputs(minCount=2){
     let slots = this._workOutputSlots();
     while(slots.length < minCount){
-      this.addOutput(`workOut${slots.length+1}`, 0);
+      this.addOutput(`outPort${slots.length+1}`, 0);
       slots = this._workOutputSlots();
     }
     this._normalizeWorkOutputNames();
   }
   _addWorkOutput(){
-    this.addOutput('workOut', 0);
+    this.addOutput(`outPort${this._workOutputSlots().length + 1}`, 0);
     this._normalizeWorkOutputNames();
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true,true);
@@ -115,9 +114,55 @@ class SplitNode extends EquipmentNode{
     }catch(_e){}
   }
 
-  _downReadySplit(){
-    const entries = this._workOutputs();
-    if(entries.length < 2) return false;
+  _flowSplitOutputs(){
+    const all = this._workOutputs();
+    const rules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+    if(!rules.length || typeof this._runtimeRuleTargetMatches !== 'function' || typeof this._runtimeRuleOutputSlots !== 'function') return all;
+
+    // A Split is the deliberate exception to the normal "first matching output
+    // rule wins" resolver: every matching destination is a branch of the same
+    // split operation.  Older converted graphs store one rule per physical OUT
+    // port, while new graphs may store all ports in one rule, so support both
+    // representations and keep the operation atomic.
+    const conditionReady = (condition)=>{
+      const spec = condition && typeof condition === 'object' ? condition : { kind:condition };
+      const kind = String(spec?.kind || 'available').trim().toLowerCase().replace(/[ _]+/g, '-');
+      const children = Array.isArray(spec?.conditions) ? spec.conditions
+        : (Array.isArray(spec?.children) ? spec.children : []);
+      if(kind === 'all') return children.every(conditionReady);
+      if(kind === 'any') return children.some(conditionReady);
+      if(kind === 'not') return !conditionReady(spec.condition || spec.child);
+      // Physical readiness is checked once, for the complete branch set, by
+      // _downReadySplit.  Treating it as a membership filter here would allow a
+      // partial split whenever only one downstream happened to be ready.
+      if(kind === 'downstream-ready') return true;
+      return typeof this._runtimeEvaluateCondition === 'function'
+        ? this._runtimeEvaluateCondition(spec, this._payload, { processComplete:this._state === 'WAIT' })
+        : true;
+    };
+    const slots = new Set();
+    let otherwise = null;
+    let selected = false;
+    const addRule = (rule)=>{
+      if(!conditionReady(rule?.releaseWhen || { kind:'available' })) return false;
+      this._runtimeRuleOutputSlots(rule).forEach((slot)=>slots.add(slot));
+      return true;
+    };
+    for(const rule of rules){
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+      if(targets.some((target)=>String(target?.mode || '').toLowerCase() === 'otherwise')){
+        otherwise = rule;
+        continue;
+      }
+      if(!this._runtimeRuleTargetMatches(this._payload, rule)) continue;
+      if(addRule(rule)) selected = true;
+    }
+    if(!selected && otherwise) addRule(otherwise);
+    return all.filter(({slotIndex})=>slots.has(slotIndex));
+  }
+
+  _downReadySplit(entries=this._flowSplitOutputs()){
+    if(!entries.length) return false;
     const payload = this._payload;
     let connectedCount = 0;
     const readyFor = (out)=>{
@@ -172,12 +217,13 @@ class SplitNode extends EquipmentNode{
           }
           break;
         case 'WAIT': {
-          const workOuts = this._workOutputs();
-          if(this._downReadySplit()){
+          const workOuts = this._flowSplitOutputs();
+          if(this._downReadySplit(workOuts)){
             const payload = this._payload;
             this._setWaitIcon(false);
             this._state = 'DOWN';
-            const downMs = Math.max(0, this.properties.downTime*1000);
+            const downMs = Math.max(0, ...workOuts.map(({slotIndex})=>
+              (typeof this._flowTiming === 'function' ? this._flowTiming('output', slotIndex) : this.properties.downTime) * 1000));
             this._until = now + downMs;
             // Output split works simultaneously to all workOut ports
             for(let i=0;i<workOuts.length;i++){
@@ -201,13 +247,10 @@ class SplitNode extends EquipmentNode{
           }
           break;
         case 'IDLE': {
-          const in0 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
-          const hasLink = !!(in0 && in0.link != null);
-          if(!hasLink) break;
-          const w = this.getInputData(0);
-          if(!w){ this._lastInRef = null; break; }
-          if(typeof w !== 'object') break;
-          if(this._lastInRef === w) break;
+          const candidate = this._selectFlowInputCandidate?.();
+          if(!candidate) break;
+          const w = candidate.work;
+          const inputSlot = candidate.slot;
           // Script false -> skip process but still obey downstream readiness via WAIT
           if(!this._evalScript(w, sig)){
             this._currentWork = w;
@@ -215,6 +258,7 @@ class SplitNode extends EquipmentNode{
             this._state = 'WAIT';
             this._handoffOffered = false;
             this._lastInRef = w;
+            this._lastInRefs[inputSlot] = w;
             this._setWaitIcon(true);
             again = true;
             break;
@@ -223,12 +267,14 @@ class SplitNode extends EquipmentNode{
           this._currentWork = w;
           this._payload = w;
           this._state = 'PROCESS';
-          const durationMs = Math.max(0, this.properties.processTime*1000);
+          const processSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('input', inputSlot) : this.properties.processTime;
+          const durationMs = Math.max(0, processSeconds*1000);
           this._until = now + durationMs;
           this._lastInRef = w;
+          this._lastInRefs[inputSlot] = w;
           try{
             if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
-              const inPort = this.inputs && this.inputs[0];
+              const inPort = this.inputs && this.inputs[inputSlot];
               if(inPort && inPort.link != null){
                 const info = (w && typeof w === 'object') ? { id: w.id, t: w.type, entity: w } : null;
                 window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
@@ -274,28 +320,6 @@ class SplitNode extends EquipmentNode{
 }
 
 menuMixin(SplitNode);
-(function(proto){
-  const prev = proto.getExtraMenuOptions;
-  proto.getExtraMenuOptions = function(){
-    let opts = prev ? prev.call(this) : [];
-    if(!Array.isArray(opts)) opts = [];
-    opts.push({
-      content: 'Add workOut',
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._addWorkOutput())
-        : this._addWorkOutput())
-    });
-    const count = this._workOutputSlots().length;
-    opts.push({
-      content: 'Remove workOut',
-      disabled: count <= 2,
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._removeWorkOutput())
-        : this._removeWorkOutput())
-    });
-    return opts;
-  };
-})(SplitNode.prototype);
 // Ensure palette/menu shows proper name
 SplitNode.title = 'Split';
 window.SplitNode = SplitNode;

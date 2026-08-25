@@ -4,14 +4,14 @@ var App = window.App || (window.App = {});
   const DEFAULT_EXAMPLES = [];
   const EXAMPLE_ALIASES = { agv_config: 'carrier', carrier_config: 'carrier' };
   const EXAMPLE_FILES = {
-    simple: 'sample/simple.json',
-    branch: 'sample/branch.json',
-    parallel_benchmark: 'sample/parallel_benchmark.json',
-    shuttle_line5: 'sample/shuttle_line5.json',
-    carrier: 'sample/graph (3).json',
-    pallet_station_demo: 'sample/pallet_station_demo.json',
-    sample_line1: 'sample/sample_line1.json?v=20260823a',
-    sample_line2: 'sample/sample_line2.json?v=20260823a'
+    simple: 'sample/simple.json?v=20260824f',
+    branch: 'sample/branch.json?v=20260824f',
+    parallel_benchmark: 'sample/parallel_benchmark.json?v=20260824f',
+    shuttle_line5: 'sample/shuttle_line5.json?v=20260824f',
+    carrier: 'sample/graph (3).json?v=20260824f',
+    pallet_station_demo: 'sample/pallet_station_demo.json?v=20260824f',
+    sample_line1: 'sample/sample_line1.json?v=20260824f',
+    sample_line2: 'sample/sample_line2.json?v=20260824f'
   };
   const DEFAULTS = {
     suite: 'standard',

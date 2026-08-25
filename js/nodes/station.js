@@ -12,10 +12,10 @@ class StationNode extends LiteGraph.LGraphNode{
     this.title = 'Station';
     this.size = [190, 66];
     this.resizable = true;
-    this.addInput('workIn', 0);
-    this.addInput('palletIn', 'PALLET');
-    this.addOutput('workOut', 0);
-    this.addOutput('palletOut', 'PALLET');
+    this.addInput('inPort1', 0);
+    this.addInput('inPort2', 0);
+    this.addOutput('outPort1', 0);
+    this.addOutput('outPort2', 0);
     this.properties = {
       processTime: STATION_DEFAULTS.processTime,
       downTime: STATION_DEFAULTS.downTime,
@@ -31,6 +31,9 @@ class StationNode extends LiteGraph.LGraphNode{
     this._pallet = null;
     this._lastWorkInRef = null;
     this._lastPalletInRef = null;
+    this._lastEntityInRefs = [];
+    this._activeInputSlot = 0;
+    this._activeOutputSlot = 0;
     this._palletWaitIconLinks = null;
     this._palletWaitIconKey = '';
     this._setState('IDLE', 'idle');
@@ -73,12 +76,14 @@ class StationNode extends LiteGraph.LGraphNode{
   }
 
   _clearOutputs(){
-    try{ this.setOutputData(0, null); }catch(_e){}
-    try{ this.setOutputData(1, null); }catch(_e){}
+    for(const slot of (window.App?.basicEntityPortSlots?.(this, 'output') || [])){
+      try{ this.setOutputData(slot, null); }catch(_e){}
+    }
   }
 
   _carrierWaitInfo(){
-    const out = this.outputs && this.outputs[1];
+    const slot = this._firstOutputSlot('container', this._pallet);
+    const out = this.outputs && this.outputs[slot];
     const links = (out && Array.isArray(out.links)) ? out.links : [];
     for(const lid of links){
       const link = this.graph && this.graph.links ? this.graph.links[lid] : null;
@@ -112,7 +117,8 @@ class StationNode extends LiteGraph.LGraphNode{
   _setPalletOutWaitIcon(active){
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
-      const out = this.outputs && this.outputs[1];
+      const slot = this._firstOutputSlot('container', this._pallet);
+      const out = this.outputs && this.outputs[slot];
       const hasLinks = !!(out && out.links && out.links.length);
       if(!active || !hasLinks){
         if(this._palletWaitIconLinks){
@@ -149,8 +155,25 @@ class StationNode extends LiteGraph.LGraphNode{
   }
 
   _hasConnectedWorkInput(){
-    const port = this.inputs && this.inputs[0];
-    return !!(port && port.link != null);
+    return this._inputSlotsFor('work').some((slot)=>this.inputs?.[slot]?.link != null);
+  }
+
+  _inputSlotsFor(category){
+    return window.App?.basicFlowPortSlotsForCategory?.(this, 'input', category)
+      || window.App?.basicEntityPortSlots?.(this, 'input') || [];
+  }
+
+  _outputSlotsFor(category){
+    return window.App?.basicFlowPortSlotsForCategory?.(this, 'output', category)
+      || window.App?.basicEntityPortSlots?.(this, 'output') || [];
+  }
+
+  _firstOutputSlot(category, payload){
+    const selected = this._runtimeSelectOutputRule?.(payload, { processComplete:true });
+    const allowed = new Set(this._outputSlotsFor(category));
+    const selectedSlot = selected?.slots?.find((slot)=>allowed.has(slot));
+    if(Number.isInteger(selectedSlot)) return selectedSlot;
+    return this._outputSlotsFor(category)[0] ?? -1;
   }
 
   _isFull(){
@@ -174,21 +197,23 @@ class StationNode extends LiteGraph.LGraphNode{
 
   canAcceptWorkInput(slotIndex){
     const slot = Number(slotIndex);
-    if(isFinite(slot) && slot !== 0) return false;
+    if(isFinite(slot) && !this._inputSlotsFor('work').includes(slot)) return false;
     if(this._state !== 'IDLE') return false;
     if(!this._pallet) return false;
-    return !this._isFull();
+    return !this._isFull() && !!this._runtimeSelectInputRule?.({ __flowCategory:'work' }, slot);
   }
 
   canAcceptPalletInput(slotIndex){
     const slot = Number(slotIndex);
-    if(isFinite(slot) && slot !== 1) return false;
+    const allowed = new Set([...this._inputSlotsFor('container'), ...this._inputSlotsFor('carrier')]);
+    if(isFinite(slot) && !allowed.has(slot)) return false;
     if(this._state !== 'IDLE') return false;
-    return !this._pallet;
+    return !this._pallet && !!this._runtimeSelectInputRule?.({ __flowCategory:'container' }, slot);
   }
 
   _downstreamWorkReady(work){
-    const out = this.outputs && this.outputs[0];
+    const slot = Number.isInteger(this._activeOutputSlot) ? this._activeOutputSlot : this._firstOutputSlot('work', work);
+    const out = this.outputs && this.outputs[slot];
     if(!out || !out.links || out.links.length === 0) return false;
     let hasValid = false;
     for(const id of out.links){
@@ -209,7 +234,8 @@ class StationNode extends LiteGraph.LGraphNode{
   }
 
   _downstreamPalletReady(pallet){
-    const out = this.outputs && this.outputs[1];
+    const slot = Number.isInteger(this._activeOutputSlot) ? this._activeOutputSlot : this._firstOutputSlot('container', pallet);
+    const out = this.outputs && this.outputs[slot];
     if(!out || !out.links || out.links.length === 0) return false;
     let hasValid = false;
     for(const id of out.links){
@@ -230,35 +256,32 @@ class StationNode extends LiteGraph.LGraphNode{
   }
 
   _peekNewWorkInput(){
-    const port = this.inputs && this.inputs[0];
-    if(!port || port.link == null){
-      this._lastWorkInRef = null;
-      return null;
+    for(const slot of this._inputSlotsFor('work')){
+      const port = this.inputs?.[slot];
+      if(!port || port.link == null){ this._lastEntityInRefs[slot] = null; continue; }
+      const work = this.getInputData(slot);
+      if(!work){ this._lastEntityInRefs[slot] = null; continue; }
+      if(this._lastEntityInRefs[slot] === work || typeof work !== 'object') continue;
+      if(!this._runtimeSelectInputRule?.(work, slot)) continue;
+      this._activeInputSlot = slot;
+      return work;
     }
-    const work = this.getInputData(0);
-    if(!work){
-      this._lastWorkInRef = null;
-      return null;
-    }
-    if(this._lastWorkInRef === work) return null;
-    if(typeof work !== 'object') return null;
-    return work;
+    return null;
   }
 
   _peekNewPalletInput(){
-    const port = this.inputs && this.inputs[1];
-    if(!port || port.link == null){
-      this._lastPalletInRef = null;
-      return null;
+    const slots = [...new Set([...this._inputSlotsFor('container'), ...this._inputSlotsFor('carrier')])];
+    for(const slot of slots){
+      const port = this.inputs?.[slot];
+      if(!port || port.link == null){ this._lastEntityInRefs[slot] = null; continue; }
+      const pallet = this.getInputData(slot);
+      if(!pallet){ this._lastEntityInRefs[slot] = null; continue; }
+      if(this._lastEntityInRefs[slot] === pallet || typeof pallet !== 'object') continue;
+      if(!this._runtimeSelectInputRule?.(pallet, slot)) continue;
+      this._activeInputSlot = slot;
+      return pallet;
     }
-    const pallet = this.getInputData(1);
-    if(!pallet){
-      this._lastPalletInRef = null;
-      return null;
-    }
-    if(this._lastPalletInRef === pallet) return null;
-    if(typeof pallet !== 'object') return null;
-    return pallet;
+    return null;
   }
 
   _triggerInputAnim(slot, type, duration, info){
@@ -286,16 +309,17 @@ class StationNode extends LiteGraph.LGraphNode{
     this._payload = payload;
     this._setState('PROCESS', action);
     const now = simNow();
-    const duration = Math.max(0, this._normalizeTime(this.properties.processTime, STATION_DEFAULTS.processTime) * 1000);
+    const processSec = window.App?.basicFlowPortTiming?.(this, 'input', this._activeInputSlot);
+    const duration = Math.max(0, this._normalizeTime(processSec, this.properties.processTime) * 1000);
     this._until = now + duration;
     if(action === 'work_in'){
       const info = (payload && typeof payload === 'object') ? { id: payload.id, t: payload.type, entity: payload } : null;
-      this._triggerInputAnim(0, 'work', duration, info);
+      this._triggerInputAnim(this._activeInputSlot, 'work', duration, info);
     }else if(action === 'pallet_in'){
       const info = payload && typeof payload === 'object'
         ? { id: String(payload.palletId ?? payload.id ?? 'pallet'), workCount: Array.isArray(payload.works) ? payload.works.length : 0, capacity: Number(payload.capacity) || 0 }
         : null;
-      this._triggerInputAnim(1, 'pallet', duration, info);
+      this._triggerInputAnim(this._activeInputSlot, 'pallet', duration, info);
     }
   }
 
@@ -313,18 +337,19 @@ class StationNode extends LiteGraph.LGraphNode{
     this._setState('DOWN', action);
     this._setPalletOutWaitIcon(false);
     const now = simNow();
-    const downMs = Math.max(0, this._normalizeTime(this.properties.downTime, STATION_DEFAULTS.downTime) * 1000);
+    const downSec = window.App?.basicFlowPortTiming?.(this, 'output', this._activeOutputSlot);
+    const downMs = Math.max(0, this._normalizeTime(downSec, this.properties.downTime) * 1000);
     this._until = now + downMs;
     if(action === 'work_out'){
       const info = (payload && typeof payload === 'object') ? { id: payload.id, t: payload.type, entity: payload } : null;
-      this.setOutputData(0, payload);
-      this._triggerOutputAnim(0, 'work', downMs, info);
+      this.setOutputData(this._activeOutputSlot, payload);
+      this._triggerOutputAnim(this._activeOutputSlot, 'work', downMs, info);
     }else if(action === 'pallet_out'){
       const info = payload && typeof payload === 'object'
         ? { id: String(payload.palletId ?? payload.id ?? 'pallet'), workCount: Array.isArray(payload.works) ? payload.works.length : 0, capacity: Number(payload.capacity) || 0 }
         : null;
-      this.setOutputData(1, payload);
-      this._triggerOutputAnim(1, 'pallet', downMs, info);
+      this.setOutputData(this._activeOutputSlot, payload);
+      this._triggerOutputAnim(this._activeOutputSlot, 'pallet', downMs, info);
     }
   }
 
@@ -344,12 +369,14 @@ class StationNode extends LiteGraph.LGraphNode{
       const pallet = this._peekNewPalletInput();
       if(!pallet) return false;
       this._lastPalletInRef = pallet;
+      this._lastEntityInRefs[this._activeInputSlot] = pallet;
       this._startProcess('pallet_in', pallet);
       return true;
     }
 
     if(this._isFull()){
-      if(!this._hasOutputLinks(1)){
+      this._activeOutputSlot = this._firstOutputSlot('container', this._pallet);
+      if(!this._hasOutputLinks(this._activeOutputSlot)){
         this._startWait('pallet_out', this._pallet);
       }else{
         this._startProcess('pallet_out', this._pallet);
@@ -360,6 +387,7 @@ class StationNode extends LiteGraph.LGraphNode{
     const workIn = this._peekNewWorkInput();
     if(workIn){
       this._lastWorkInRef = workIn;
+      this._lastEntityInRefs[this._activeInputSlot] = workIn;
       this._startProcess('work_in', workIn);
       return true;
     }
@@ -373,7 +401,8 @@ class StationNode extends LiteGraph.LGraphNode{
     }
 
     const workOut = this._firstWork();
-    if(workOut && this._hasOutputLinks(0)){
+    this._activeOutputSlot = this._firstOutputSlot('work', workOut);
+    if(workOut && this._hasOutputLinks(this._activeOutputSlot)){
       this._startProcess('work_out', workOut);
       return true;
     }
@@ -433,9 +462,9 @@ class StationNode extends LiteGraph.LGraphNode{
 
   _handleDown(now){
     if(this._action === 'work_out'){
-      this.setOutputData(0, this._payload);
+      this.setOutputData(this._activeOutputSlot, this._payload);
     }else if(this._action === 'pallet_out'){
-      this.setOutputData(1, this._payload);
+      this.setOutputData(this._activeOutputSlot, this._payload);
     }
 
     if(now < this._until) return;

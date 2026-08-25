@@ -46,8 +46,30 @@
             ],
             "toPortId": "out-1"
           }
-        ]
-      }
+        ],
+        "portTimings": {
+          "inputs": {},
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": 0,
+          "links": [
+            1
+          ],
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ]
     },
     {
       "id": 2,
@@ -115,8 +137,44 @@
             ],
             "toPortId": "out-1"
           }
-        ]
-      }
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1.2
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": 0,
+          "link": 1,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": 0,
+          "links": [
+            2
+          ],
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ]
     },
     {
       "id": 3,
@@ -184,8 +242,44 @@
             ],
             "toPortId": "out-1"
           }
-        ]
-      }
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1.6
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": 0,
+          "link": 2,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": 0,
+          "links": [
+            3
+          ],
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ]
     },
     {
       "id": 4,
@@ -253,8 +347,44 @@
             ],
             "toPortId": "out-1"
           }
-        ]
-      }
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": 0,
+          "link": 3,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": 0,
+          "links": [
+            4
+          ],
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ]
     },
     {
       "id": 5,
@@ -322,8 +452,44 @@
             ],
             "toPortId": "out-1"
           }
-        ]
-      }
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1.4
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": 0,
+          "link": 4,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": 0,
+          "links": [
+            5
+          ],
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ]
     },
     {
       "id": 6,
@@ -391,8 +557,44 @@
             ],
             "toPortId": "out-1"
           }
-        ]
-      }
+        ],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 1.8
+            }
+          },
+          "outputs": {
+            "out-1": {
+              "downTimeSec": 0
+            }
+          }
+        }
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": 0,
+          "link": 5,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": 0,
+          "links": [
+            6
+          ],
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ]
     },
     {
       "id": 7,
@@ -425,8 +627,28 @@
             "fromPortId": "in-1"
           }
         ],
-        "outputRules": []
-      }
+        "outputRules": [],
+        "portTimings": {
+          "inputs": {
+            "in-1": {
+              "processTimeSec": 0
+            }
+          },
+          "outputs": {}
+        }
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": 0,
+          "link": 6,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": false,
+          "requiredByPreset": true
+        }
+      ],
+      "outputs": []
     }
   ],
   "links": [

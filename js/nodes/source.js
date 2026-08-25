@@ -10,7 +10,7 @@ class SourceNode extends LiteGraph.LGraphNode{
     super();
     this.title = 'Source';
     this.size = [200,150];
-    this.addOutput('workOut', 0);
+    this.addOutput('outPort1', 0);
     this.color = '#fee8c7';
     this.bgcolor = '#fff8ee';
     this.boxcolor = '#f39c12';
@@ -26,6 +26,7 @@ class SourceNode extends LiteGraph.LGraphNode{
     this._readyPrev = false;
     this._counter = 0;
     this._pendingWork = null;
+    this._pendingOutputSlot = null;
     this._parseSeq();
     if(window.enableFlipIO) window.enableFlipIO(this);
   }
@@ -77,8 +78,8 @@ class SourceNode extends LiteGraph.LGraphNode{
     }
     return { ready: true, status: 'READY' };
   }
-  _animateWorkOutput(work){
-    const out = this.outputs && this.outputs[0];
+  _animateWorkOutput(work, slotIndex=0){
+    const out = this.outputs && this.outputs[slotIndex];
     if(!work || !out || !Array.isArray(out.links) || !window.WorkLinkAnimator || !this.graph) return;
     const info = { id: work.id, t: work.type, entity: work };
     for(const lid of out.links){
@@ -101,7 +102,8 @@ class SourceNode extends LiteGraph.LGraphNode{
     });
   }
   _pendingWorkAccepted(work){
-    const out = this.outputs && this.outputs[0];
+    const slot = Number.isInteger(this._pendingOutputSlot) ? this._pendingOutputSlot : 0;
+    const out = this.outputs && this.outputs[slot];
     if(!work || !out || !Array.isArray(out.links) || !out.links.length || !this.graph) return false;
     let targetCount = 0;
     for(const lid of out.links){
@@ -120,9 +122,12 @@ class SourceNode extends LiteGraph.LGraphNode{
     if(!work) return false;
     if(this._pendingWorkAccepted(work)){
       this._pendingWork = null;
-      this.setOutputData(0, null);
+      const slot = Number.isInteger(this._pendingOutputSlot) ? this._pendingOutputSlot : 0;
+      this.setOutputData(slot, null);
+      this._pendingOutputSlot = null;
     }else{
-      this.setOutputData(0, work);
+      const slot = Number.isInteger(this._pendingOutputSlot) ? this._pendingOutputSlot : 0;
+      this.setOutputData(slot, work);
     }
     return true;
   }
@@ -150,14 +155,15 @@ class SourceNode extends LiteGraph.LGraphNode{
       const w = preview;
       this.setOutputData(flowSlot, w);
       this._pendingWork = w;
-      this._animateWorkOutput(w);
+      this._pendingOutputSlot = flowSlot;
+      this._animateWorkOutput(w, flowSlot);
       this._counter = nextId;
       this._cursor = (this._cursor + 1) % this._seq.length;
       for(let i=0;i<sigCount;i++) this._emit(i, 'SEND');
       return;
     }
 
-    this.setOutputData(0, null);
+    (this.outputs || []).forEach((_output, slot)=>this.setOutputData(slot, null));
     for(let i=0;i<sigCount;i++) this._emit(i, 'IDLE');
   }
 }

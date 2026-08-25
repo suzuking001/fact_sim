@@ -25,7 +25,7 @@ class SinkNode extends LiteGraph.LGraphNode{
   constructor(){
     super();
     this.title = 'Sink';
-    this.addInput('workIn', 0);
+    this.addInput('inPort1', 0);
     this.size = [244,224];
     this._applyTheme();
     this.__disableCompactOverlay = true;
@@ -34,6 +34,7 @@ class SinkNode extends LiteGraph.LGraphNode{
     this._maxSamples = 60;
     this._prevAt = null;
     this._lastInRef = null; // prevent duplicate intake on same link value
+    this._lastInRefs = [];
     this._recentRecvTimes = [];
     this._throughputPerHour = 0;
     this.properties = this.properties || {};
@@ -95,28 +96,28 @@ class SinkNode extends LiteGraph.LGraphNode{
   }
 
   onExecute(){
-    const d = this.getInputData(0);
     const now = simNow();
     const currentTph = this._calcThroughputPerHour(now);
-
-    if(!d){
-      this._lastInRef = null;
-      return;
+    const ruleSlots = (this.properties?.inputRules || []).map((rule)=>
+      (this.inputs || []).findIndex((port)=>port?.portId === rule?.fromPortId)).filter((slot)=>slot >= 0);
+    const slots = [...new Set([...ruleSlots, ...(this.inputs || []).map((_port, slot)=>slot)])]
+      .filter((slot)=>this.inputs?.[slot]?.channel !== 'signal');
+    for(const slot of slots){
+      const d = this.getInputData(slot);
+      if(!d){ this._lastInRefs[slot] = null; continue; }
+      if(this._lastInRefs[slot] === d) continue;
+      if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(d, slot)) continue;
+      this._lastInRefs[slot] = d;
+      this._lastInRef = d;
+      this._recv.push(d);
+      this._recentRecvTimes.push(now);
+      this._pruneRecentRecvTimes(now);
+      this._lastWork = d;
+      this._lastAt = now;
+      const tph = this._calcThroughputPerHour(now);
+      this._recordSample(now, tph || currentTph);
+      this.tooltip = `Got:${this._recv.length} | TPH(1h): ${this._formatThroughputPerHour(tph)}`;
     }
-
-    // Avoid re-counting the same work object across settle passes or held outputs
-    if(this._lastInRef === d) return;
-    if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(d, 0)) return;
-
-    this._lastInRef = d;
-    this._recv.push(d);
-    this._recentRecvTimes.push(now);
-    this._pruneRecentRecvTimes(now);
-    this._lastWork = d;
-    this._lastAt = now;
-    const tph = this._calcThroughputPerHour(now);
-    this._recordSample(now, tph || currentTph);
-    this.tooltip = `Got:${this._recv.length} | TPH(1h): ${this._formatThroughputPerHour(tph)}`;
   }
 
   onDrawForeground(ctx){

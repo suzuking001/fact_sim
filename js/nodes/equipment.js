@@ -42,8 +42,8 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     this.title = title;
     this.size = EQUIP_UI.baseSize.slice();
     this.resizable = true;
-    this.addInput('workIn', 0);
-    this.addOutput('workOut', 0);
+    this.addInput('inPort1', 0);
+    this.addOutput('outPort1', 0);
     // Time properties are stored in seconds.
     this.properties = {
       processTime: (window.NODES_CONFIG?.equipment?.processTimeSec ?? 2),
@@ -61,6 +61,8 @@ class EquipmentNode extends LiteGraph.LGraphNode{
     this._currentWork = null;
     
     this._lastInRef = null; // last seen input object
+    this._lastInRefs = [];
+    this._activeInputSlot = 0;
     this._handoffOffered = false; // Prevent duplicate output offers while in WAIT.
     // initial colors (IDLE = yellow)
     this.color = '#f1c40f';   // border (yellow)
@@ -118,13 +120,39 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       try{ this._compiled = new Function('work','signalArr', source); }
       catch(e){ console.error(e); }
     }
-    try{ return this._compiled ? this._compiled(w,s) : true; }
+    try{
+      const accepted = this._compiled ? this._compiled(w,s) : true;
+      // Legacy trusted scripts may intentionally choose cycle times by Work.
+      // Mirror those explicit assignments into the first stable port timing;
+      // visible Details edits disable such scripts and remain authoritative.
+      const timings = window.App?.ensureBasicPortTimings?.(this);
+      if(this.inputs?.[0]?.portId && timings?.inputs?.[this.inputs[0].portId]) timings.inputs[this.inputs[0].portId].processTimeSec = Math.max(0, Number(this.properties.processTime) || 0);
+      if(this.outputs?.[0]?.portId && timings?.outputs?.[this.outputs[0].portId]) timings.outputs[this.outputs[0].portId].downTimeSec = Math.max(0, Number(this.properties.downTime) || 0);
+      return accepted;
+    }
     catch(e){ console.error(e); return false; }
   }
   _emit(i,state){
     if(!this.properties.sigEnabled){ this.setOutputData(i+1, null); return; }
     if(this._last[i] !== state){ this.setOutputData(i+1, state); this._last[i] = state; }
     else this.setOutputData(i+1, null);
+  }
+  _selectFlowInputCandidate(){
+    const ruleSlots = (this.properties?.inputRules || []).map((rule)=>
+      (this.inputs || []).findIndex((port)=>port?.portId === rule?.fromPortId)).filter((slot)=>slot >= 0);
+    const slots = [...new Set([...ruleSlots, ...(this.inputs || []).map((_port, slot)=>slot)])]
+      .filter((slot)=>this.inputs?.[slot]?.channel !== 'signal');
+    this._lastInRefs = Array.isArray(this._lastInRefs) ? this._lastInRefs : [];
+    for(const slot of slots){
+      const input = this.inputs?.[slot];
+      if(!input || input.link == null) continue;
+      const work = this.getInputData(slot);
+      if(!work){ this._lastInRefs[slot] = null; continue; }
+      if(typeof work !== 'object' || this._lastInRefs[slot] === work) continue;
+      if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(work, slot)) continue;
+      return { work, slot };
+    }
+    return null;
   }
   // Advance the state machine on each LiteGraph evaluation.
   onExecute(){
@@ -164,7 +192,8 @@ class EquipmentNode extends LiteGraph.LGraphNode{
             const payload = this._payload;
             this._setWaitIcon(false);
             this._state = 'DOWN';
-            const downMs = Math.max(0, this.properties.downTime*1000);
+            const downSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('output', flowSlot) : this.properties.downTime;
+            const downMs = Math.max(0, downSeconds*1000);
             this._until = now + downMs; // ms
             // Publish workOut immediately when transfer begins.
             this._flowOutputSlot = flowSlot;
@@ -190,15 +219,22 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           break;
         case 'IDLE': {
           // IDLE: evaluate incoming Work when available.
-          const in0 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
-          const hasLink = !!(in0 && in0.link != null);
-          if(!hasLink) break;
-          const w = this.getInputData(0);
-          if(!w){ this._lastInRef = null; break; }
-          if(typeof w !== 'object') break;
-          // LiteGraph links retain values, so ignore the same object reference.
-          if(this._lastInRef === w) break;
-          if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(w, 0)) break;
+          const ruleSlots = (this.properties?.inputRules || []).map((rule)=>
+            (this.inputs || []).findIndex((port)=>port?.portId === rule?.fromPortId)).filter((slot)=>slot >= 0);
+          const candidateSlots = [...new Set([...ruleSlots, ...(this.inputs || []).map((_port, slot)=>slot)])]
+            .filter((slot)=>this.inputs?.[slot]?.channel !== 'signal');
+          let w = null;
+          let inputSlot = -1;
+          for(const slot of candidateSlots){
+            const input = this.inputs?.[slot];
+            if(!input || input.link == null) continue;
+            const candidate = this.getInputData(slot);
+            if(!candidate){ this._lastInRefs[slot] = null; continue; }
+            if(typeof candidate !== 'object' || this._lastInRefs[slot] === candidate) continue;
+            if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule(candidate, slot)) continue;
+            w = candidate; inputSlot = slot; break;
+          }
+          if(!w || inputSlot < 0) break;
           // Pass through without processing when the script returns false.
           if(!this._evalScript(w, sig)){
             this.setOutputData(0, w);
@@ -208,12 +244,15 @@ class EquipmentNode extends LiteGraph.LGraphNode{
           this._currentWork = w;
           this._payload = w;
           this._state = 'PROCESS';
-          const durationMs = Math.max(0, this.properties.processTime*1000);
+          this._activeInputSlot = inputSlot;
+          const processSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('input', inputSlot) : this.properties.processTime;
+          const durationMs = Math.max(0, processSeconds*1000);
           this._until = now + durationMs; // ms
           this._lastInRef = w; // remember last accepted input to avoid duplicate starts
+          this._lastInRefs[inputSlot] = w;
           try{
             if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
-              const inPort = this.inputs && this.inputs[0];
+              const inPort = this.inputs && this.inputs[inputSlot];
               if(inPort && inPort.link != null){
                 const info = (w && typeof w === 'object') ? { id: w.id, t: w.type, entity: w } : null;
                 window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
@@ -268,6 +307,9 @@ class EquipmentNode extends LiteGraph.LGraphNode{
       const r01 = v=> Math.max(0, Math.round(parseFloat(v||0)*10)/10);
       if(n==='processTime' || n==='downTime'){
         this.properties[n] = r01(this.properties[n]);
+        const timings = window.App?.ensureBasicPortTimings?.(this);
+        if(n === 'processTime' && this.inputs?.[0]?.portId && timings?.inputs?.[this.inputs[0].portId]) timings.inputs[this.inputs[0].portId].processTimeSec = this.properties[n];
+        if(n === 'downTime' && this.outputs?.[0]?.portId && timings?.outputs?.[this.outputs[0].portId]) timings.outputs[this.outputs[0].portId].downTimeSec = this.properties[n];
         // The old default script selected cycle times by Work type. Once the
         // user edits the visible cycle settings, those values become the
         // authoritative configuration instead of being overwritten on input.

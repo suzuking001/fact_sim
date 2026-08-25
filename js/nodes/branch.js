@@ -11,9 +11,8 @@ class BranchNode extends EquipmentNode{
 
   _isWorkOutput(out){
     if(!out) return false;
-    if(out.__branchWorkOut) return true;
-    const n = String(out.name || '');
-    return n === 'workOut' || n.startsWith('workOut ');
+    return String(out.channel || '').toLowerCase() !== 'signal'
+      && String(out.type || '').toLowerCase() !== 'string';
   }
 
   _workOutputs(){
@@ -43,35 +42,36 @@ class BranchNode extends EquipmentNode{
     rows.forEach(({out}, i)=>{
       out.__branchWorkOut = true;
       if(typeof out.routeType === 'undefined' || out.routeType === null){
-        const n = String(out.name || '').trim();
-        if(n.startsWith('workOut ')) out.routeType = n.slice(8).trim();
-        else out.routeType = this._defaultRouteType(i);
+        out.routeType = this._defaultRouteType(i);
       }
-      out.name = this._outputLabel(out.routeType);
+      out.name = `outPort${i + 1}`;
       out.type = 0;
+      out.channel = 'entity';
     });
     while(rows.length < minCount){
-      this.addOutput('workOut', 0);
+      this.addOutput(`outPort${rows.length + 1}`, 0);
       rows = this._workOutputs();
       const last = rows[rows.length - 1];
       if(last && last.out){
         last.out.__branchWorkOut = true;
         if(!last.out.routeType) last.out.routeType = this._defaultRouteType(rows.length - 1);
-        last.out.name = this._outputLabel(last.out.routeType);
+        last.out.name = `outPort${rows.length}`;
+        last.out.channel = 'entity';
       }
     }
   }
 
   _addWorkOutput(){
     this._ensureMinWorkOutputs(2);
-    this.addOutput('workOut', 0);
+    this.addOutput(`outPort${this._workOutputs().length + 1}`, 0);
     const rows = this._workOutputs();
     const last = rows[rows.length - 1];
     if(last && last.out){
       last.out.__branchWorkOut = true;
       last.out.routeType = this._defaultRouteType(rows.length - 1);
-      last.out.name = this._outputLabel(last.out.routeType);
+      last.out.name = `outPort${rows.length}`;
       last.out.type = 0;
+      last.out.channel = 'entity';
     }
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true,true);
@@ -88,6 +88,7 @@ class BranchNode extends EquipmentNode{
       });
     }
     this.removeOutput(last.slotIndex);
+    window.App?.normalizeBasicEntityPorts?.(this);
     window.refreshFlipIO(this);
     this.setDirtyCanvas(true,true);
   }
@@ -112,6 +113,10 @@ class BranchNode extends EquipmentNode{
   }
 
   _routeSlotForPayload(payload, allowWarn = true){
+    if(typeof this._runtimeSelectOutputRule === 'function' && Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length){
+      const selected = this._runtimeSelectOutputRule(payload, { processComplete:this._state === 'WAIT' });
+      return Number.isInteger(selected?.slot) ? selected.slot : -1;
+    }
     const exact = this._findRouteSlot(payload);
     if(exact >= 0) return exact;
     const fallback = this._firstConnectedRouteSlot();
@@ -265,7 +270,8 @@ class BranchNode extends EquipmentNode{
           if(slot >= 0 && this._downReadyForSlot(slot, payload)){
             this._setWaitIcon(false);
             this._state = 'DOWN';
-            const downMs = Math.max(0, this.properties.downTime*1000);
+            const downSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('output', slot) : this.properties.downTime;
+            const downMs = Math.max(0, downSeconds*1000);
             this._until = now + downMs;
             this._clearWorkOutputs();
             this.setOutputData(slot, payload);
@@ -285,19 +291,17 @@ class BranchNode extends EquipmentNode{
           }
           break;
         case 'IDLE': {
-          const in0 = (this.inputs && this.inputs[0]) ? this.inputs[0] : null;
-          const hasLink = !!(in0 && in0.link != null);
-          if(!hasLink) break;
-          const w = this.getInputData(0);
-          if(!w){ this._lastInRef = null; break; }
-          if(typeof w !== 'object') break;
-          if(this._lastInRef === w) break;
+          const candidate = this._selectFlowInputCandidate?.();
+          if(!candidate) break;
+          const w = candidate.work;
+          const inputSlot = candidate.slot;
           // Script false -> route without process
           if(!this._evalScript(w, sig)){
             this._currentWork = w;
             this._payload = w;
             this._state = 'WAIT';
             this._lastInRef = w;
+            this._lastInRefs[inputSlot] = w;
             this._setWaitIcon(true);
             again = true;
             break;
@@ -305,12 +309,14 @@ class BranchNode extends EquipmentNode{
           this._currentWork = w;
           this._payload = w;
           this._state = 'PROCESS';
-          const durationMs = Math.max(0, this.properties.processTime*1000);
+          const processSeconds = typeof this._flowTiming === 'function' ? this._flowTiming('input', inputSlot) : this.properties.processTime;
+          const durationMs = Math.max(0, processSeconds*1000);
           this._until = now + durationMs;
           this._lastInRef = w;
+          this._lastInRefs[inputSlot] = w;
           try{
             if(durationMs > 0 && window.WorkLinkAnimator && this.graph){
-              const inPort = this.inputs && this.inputs[0];
+              const inPort = this.inputs && this.inputs[inputSlot];
               if(inPort && inPort.link != null){
                 const info = (w && typeof w === 'object') ? { id: w.id, t: w.type, entity: w } : null;
                 window.WorkLinkAnimator.spawn(this.graph, inPort.link, 'work', durationMs, info);
@@ -356,28 +362,6 @@ class BranchNode extends EquipmentNode{
 }
 
 menuMixin(BranchNode);
-(function(proto){
-  const prev = proto.getExtraMenuOptions;
-  proto.getExtraMenuOptions = function(){
-    let opts = prev ? prev.call(this) : [];
-    if(!Array.isArray(opts)) opts = [];
-    opts.push({
-      content: 'Add workOut',
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._addWorkOutput())
-        : this._addWorkOutput())
-    });
-    const cnt = this._workOutputs().length;
-    opts.push({
-      content: 'Remove workOut',
-      disabled: cnt <= 2,
-      callback: ()=> (window.runNodeMutation
-        ? window.runNodeMutation(this, ()=> this._removeWorkOutput())
-        : this._removeWorkOutput())
-    });
-    return opts;
-  };
-})(BranchNode.prototype);
 
 BranchNode.title = 'Branch';
 window.BranchNode = BranchNode;

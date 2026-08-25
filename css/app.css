@@ -5822,6 +5822,42 @@ body.sim-running.performance-adaptive #tabletActionBar{
   right:auto;
   left:-16px;
 }
+.entityCycleVisual.is-high-fanout{
+  grid-template-columns:minmax(180px,.8fr) 340px minmax(300px,1.25fr);
+  min-height:450px;
+  gap:22px;
+}
+.entityCycleVisual.is-high-fanout .entityCycleDonut{
+  width:340px;
+  height:295px;
+}
+.entityCycleVisual.is-high-fanout .entityCycleConnections.is-downstream{
+  gap:6px;
+}
+.entityCycleVisual.is-high-fanout .entityCycleConnection{
+  min-height:50px;
+  padding:7px 9px;
+}
+.entityCycleVisual.is-high-fanout .entityCycleInlineControls.is-down{
+  left:0;
+  bottom:-88px;
+  width:100%;
+  height:auto;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+}
+.entityCycleVisual.is-high-fanout .entityCycleInlineControl{
+  height:34px;
+  padding:4px 8px;
+}
+.entityCycleVisual.is-high-fanout .entityCycleInlineControl b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.entityCycleVisual.is-high-fanout .entityCycleLeader.is-fanout{
+  stroke-width:2;
+}
 .entityCycleEditors{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(190px,1fr));

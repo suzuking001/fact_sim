@@ -15,10 +15,10 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this.resizable = true;
     this.size = [280, 150];
     // ports: workIn, agvIn -> workOut, agvOut
-    this._workInIndex = this.inputs.length;  this.addInput('workIn', 'work');
-    this._agvInIndex  = this.inputs.length;  this.addInput('agvIn', 'AGV');
-    this._workOutIndex= this.outputs.length; this.addOutput('workOut', 'work');
-    this._agvOutIndex = this.outputs.length; this.addOutput('agvOut', 'AGV');
+    this._workInIndex = this.inputs.length;  this.addInput('inPort1', 0);
+    this._agvInIndex  = this.inputs.length;  this.addInput('inPort2', 0);
+    this._workOutIndex= this.outputs.length; this.addOutput('outPort1', 0);
+    this._agvOutIndex = this.outputs.length; this.addOutput('outPort2', 0);
 
     this.properties = {
       processTime: window.NODES_CONFIG?.agvRoute?.processTimeSec ?? AGV_ROUTE_DEFAULTS.processTime,
@@ -63,15 +63,47 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   _hasWorkOutLink(){ const port = this.outputs[this._workOutIndex]; return !!(port && port.links && port.links.length); }
   _hasAgvOutLink(){ const port = this.outputs[this._agvOutIndex]; return !!(port && port.links && port.links.length); }
 
-  canAcceptAgv(){ return !this._currentAgv && !this._departingAgv; }
+  _inputSlotsFor(category){
+    return window.App?.basicFlowPortSlotsForCategory?.(this, 'input', category)
+      || window.App?.basicEntityPortSlots?.(this, 'input') || [];
+  }
+  _outputSlotsFor(category){
+    return window.App?.basicFlowPortSlotsForCategory?.(this, 'output', category)
+      || window.App?.basicEntityPortSlots?.(this, 'output') || [];
+  }
+  _selectedOutputSlot(category, payload){
+    const allowed = new Set(this._outputSlotsFor(category));
+    const selected = this._runtimeSelectOutputRule?.(payload, { processComplete:true });
+    const slot = selected?.slots?.find((candidate)=>allowed.has(candidate));
+    return Number.isInteger(slot) ? slot : (this._outputSlotsFor(category)[0] ?? -1);
+  }
+  _refreshFlowIndexes(){
+    const workIn = this._inputSlotsFor('work');
+    const carrierIn = this._inputSlotsFor('carrier');
+    const linkedWork = workIn.find((slot)=>this.inputs?.[slot]?.link != null);
+    const linkedCarrier = carrierIn.find((slot)=>this.inputs?.[slot]?.link != null);
+    if(Number.isInteger(linkedWork ?? workIn[0])) this._workInIndex = linkedWork ?? workIn[0];
+    if(Number.isInteger(linkedCarrier ?? carrierIn[0])) this._agvInIndex = linkedCarrier ?? carrierIn[0];
+    const workOut = this._selectedOutputSlot('work', this._workOffer || this._pendingUnload?.[0]);
+    const carrierOut = this._selectedOutputSlot('carrier', this._departingAgv || this._currentAgv);
+    if(workOut >= 0) this._workOutIndex = workOut;
+    if(carrierOut >= 0) this._agvOutIndex = carrierOut;
+  }
+
+  canAcceptAgv(slotIndex, agv){
+    const slot = Number.isFinite(Number(slotIndex)) ? Number(slotIndex) : this._inputSlotsFor('carrier')[0];
+    return this._inputSlotsFor('carrier').includes(slot)
+      && !!this._runtimeSelectInputRule?.(agv || { __flowCategory:'carrier' }, slot)
+      && !this._currentAgv && !this._departingAgv;
+  }
   canAcceptWorkInput(slotIndex){
-    if(slotIndex !== this._workInIndex) return false;
+    if(!this._inputSlotsFor('work').includes(Number(slotIndex))) return false;
     if(!this._currentAgv) return false;
     if(!this._stateName || !this._stateName.startsWith('workIn_idle')) return false;
     const cap = this._currentAgv.capacity || 0;
     const load = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
     if(cap <= 0 || load >= cap) return false;
-    return true;
+    return !!this._runtimeSelectInputRule?.({ __flowCategory:'work' }, Number(slotIndex));
   }
 
   _setState(name, kind){
@@ -88,9 +120,10 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   }
 
   _emit(i,state){
-    // signal outputs start after workOut/agvOut
-    const base = 2;
-    const idx = base + i;
+    const signalOutputs = (this.outputs || []).map((port, slot)=>({ port, slot }))
+      .filter(({port})=>port?.channel === 'signal' || /^sigOut\d+$/.test(String(port?.name || '')));
+    const idx = signalOutputs[i]?.slot;
+    if(!Number.isInteger(idx)) return;
     if(!this.properties.sigEnabled) { if(this.outputs[idx]) this.setOutputData(idx, null); return; }
     if(!this.outputs || idx >= this.outputs.length) return;
     if(this._lastSig[i] !== state){ this.setOutputData(idx, state); this._lastSig[i] = state; }
@@ -99,11 +132,12 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
 
   _syncSignalOutputs(){
     const extra = Math.max(0, this.properties.sigExtra || 0);
-    const needed = 2 + extra;
     this.outputs = this.outputs || [];
-    while(this.outputs.length > needed){
-      const idx = this.outputs.length - 1;
-      if(idx < 2) break;
+    let signalSlots = this.outputs.map((port, slot)=>({ port, slot }))
+      .filter(({port})=>port?.channel === 'signal' || /^sigOut\d+$/.test(String(port?.name || '')))
+      .map(({slot})=>slot);
+    while(signalSlots.length > extra){
+      const idx = signalSlots.pop();
       const out = this.outputs[idx];
       if(out && out.links){
         [...out.links].forEach((id)=>{
@@ -112,13 +146,15 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       }
       this.removeOutput(idx);
     }
-    while(this.outputs.length < needed){
-      const idx = this.outputs.length - 2;
-      this.addOutput(`sigOut${idx}`, 0);
+    while(signalSlots.length < extra){
+      this.addOutput(`sigOut${signalSlots.length}`, 'string');
+      const slot = this.outputs.length - 1;
+      this.outputs[slot].channel = 'signal';
+      signalSlots.push(slot);
     }
     for(let i = 0; i < extra; i++){
-      const out = this.outputs[2 + i];
-      if(out) out.name = `sigOut${i}`;
+      const out = this.outputs[signalSlots[i]];
+      if(out){ out.name = `sigOut${i}`; out.channel = 'signal'; }
     }
     if(Array.isArray(this._lastSig)){
       if(this._lastSig.length > extra) this._lastSig.length = extra;
@@ -129,12 +165,14 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   }
 
   _captureAgvInput(){
-    const port = this.inputs[this._agvInIndex];
-    if(!port || port.link == null) return;
-    const agv = this.getInputData(this._agvInIndex);
+    const slot = this._inputSlotsFor('carrier').find((candidate)=>this.inputs?.[candidate]?.link != null) ?? -1;
+    if(slot < 0) return;
+    this._agvInIndex = slot;
+    const port = this.inputs[slot];
+    const agv = this.getInputData(slot);
     if(!agv){ this._lastAgvInRef = null; return; }
     if(this._lastAgvInRef === agv) return;
-    if(this.canAcceptAgv(agv)){
+    if(this.canAcceptAgv(slot, agv)){
       const a = agv instanceof AGV ? agv : new AGV(String(agv.id ?? agv), this.properties.agvCapacity);
       if(!Array.isArray(a.cargo)) a.cargo = [];
       a.capacity = Math.max(1, a.capacity || this.properties.agvCapacity || 1);
@@ -236,7 +274,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const ord = this._loadIndex;
     this._setState(`workIn_process_${ord}`,'PROCESS');
     const now = simNow();
-    const duration = Math.max(0,(this.properties.processTime||0)*1000);
+    const processSec = this._flowTiming?.('input', this._workInIndex) ?? this.properties.processTime;
+    const duration = Math.max(0,(processSec||0)*1000);
     this._until = now + duration;
     const w = this._currentAgv && this._currentAgv.cargo[this._currentAgv.cargo.length-1];
     if(w) this._triggerAnim(this._workInIndex,'work',duration,{id:w.id, t:w.type, entity:w});
@@ -284,7 +323,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._workOfferArmed = true;
     this._workOfferAccepted = false;
     const now = simNow();
-    this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    const downSec = this._flowTiming?.('output', this._workOutIndex) ?? this.properties.downTime;
+    this._until = now + Math.max(0,(downSec||0)*1000);
     this._emitWorkOffer();
   }
 
@@ -338,7 +378,8 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._setAgvOutWaitIcon(false);
     this._setState('agvOut_down','DOWN');
     const now = simNow();
-    this._until = now + Math.max(0,(this.properties.downTime||0)*1000);
+    const downSec = this._flowTiming?.('output', this._agvOutIndex) ?? this.properties.downTime;
+    this._until = now + Math.max(0,(downSec||0)*1000);
     this._departingAgv = this._currentAgv;
     this._departingAccepted = false;
     this._currentAgv = null;
@@ -422,6 +463,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   }
 
   _captureWorkInput(){
+    this._refreshFlowIndexes();
     if(!this._currentAgv) return;
     // Keep last input reference while busy so a held upstream output is not re-accepted.
     if(!this._stateName.startsWith('workIn_idle')) return;
@@ -432,6 +474,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const w = this.getInputData(this._workInIndex);
     if(!w){ this._lastWorkInRef = null; return; }
     if(this._lastWorkInRef === w) return;
+    if(!this._runtimeSelectInputRule?.(w, this._workInIndex)) return;
     if(this._currentAgv.cargo.length >= this._currentAgv.capacity) return;
     this._lastWorkInRef = w;
     this._currentWork = w;
@@ -516,6 +559,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   }
 
   onExecute(){
+    this._refreshFlowIndexes();
     const now = simNow();
     this._captureAgvInput();
     this._captureWorkInput();

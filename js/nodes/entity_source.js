@@ -18,7 +18,7 @@ class EntitySourceNode extends LiteGraph.LGraphNode{
     this.size = [280, 165];
     this.resizable = true;
     this._entityOutIndex = this.outputs.length;
-    this.addOutput('entityOut', 0);
+    this.addOutput('outPort1', 0);
     this.properties = { ...ENTITY_SOURCE_DEFAULTS };
     this._rootEntity = null;
     this._consumed = false;

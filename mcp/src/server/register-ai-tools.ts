@@ -119,14 +119,18 @@ function summarizePorts(result: Awaited<ReturnType<FactSimRuntime["getNodePorts"
     title: result.title,
     inputs: result.inputs.map((port) => ({
       slot: port.slot,
+      portId: port.portId,
       name: port.name,
+      channel: port.channel,
       type: port.type,
       hasLink: port.hasLink,
       linkCount: port.linkCount
     })),
     outputs: result.outputs.map((port) => ({
       slot: port.slot,
+      portId: port.portId,
       name: port.name,
+      channel: port.channel,
       type: port.type,
       hasLink: port.hasLink,
       linkCount: port.linkCount
