@@ -1,4 +1,0 @@
-
-> fact_sim_mcp@0.3.0 nightly:optimize
-> node scripts/auto-optimize-event-fast.mjs --profile nightly --label overnight-event-fast-par-restart-20260315-025334 --allow-dirty --min-runtime-hours 5 --max-no-improvement-iterations 60 --max-iterations 9999 --benchmark-wall-ms 500 --target-engine event-fast-par --optimize-engines event-fast-par --benchmark-example parallel_benchmark --no-current-graph
-

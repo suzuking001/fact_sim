@@ -1,7 +1,0 @@
-1. Performance hypothesis: the `event-fast-par` host loop was doing avoidable allocation work on every parallel substep by building temporary `simTime` arrays and `flatMap`-ing emitted messages before rebucketing them. Cutting that churn should reduce GC and host-side coordination overhead in cross-partition benchmark runs.
-
-2. What changed: only [engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773932476515-19420/js/app/engine-fast-par-host.js#L125) was edited. `reduceGlobalSimTime` now computes the minimum directly without allocating an intermediate array, and `_stepParallel` now buckets emitted messages directly from worker result payloads instead of `flatMap` + rebucket passes, via [bucketPayloadMessages](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773932476515-19420/js/app/engine-fast-par-host.js#L288) and the updated hot loop at [_stepParallel](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773932476515-19420/js/app/engine-fast-par-host.js#L624).
-
-3. Focused verification run: `node --check js/app/engine-fast-par-host.js`. I did not run benchmark or parity suites locally in this trimmed workspace; the requested runner-side `quick`/`standard` verification remains the main correctness gate.
-
-4. Residual risk: correctness risk is low because message contents, routing, and flush ordering semantics were left intact. The main uncertainty is payoff: if `parallel_benchmark` spends most of its time in fully independent partitions with little host rebucketing, this may not clear the 1% keep threshold.

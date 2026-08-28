@@ -1,7 +1,0 @@
-1. Changed [`js/app/engine-fast-par-host.js` line 477](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773525102050-29016/js/app/engine-fast-par-host.js#L477) so `PartitionWorkerHost.disposeAsync()` calls `stopAsync()` before setting `_disposed = true`. Before this, dispose suppressed the worker `stop` RPC entirely.
-
-2. Verification run:
-   I used a focused Node `vm` harness that loaded the edited file with a fake `Worker`, created an `EventFastParHost` with two partitions, called `resetAsync()` then `disposeAsync()`, and asserted each worker received `["init","reset","stop"]`. It passed after the patch.
-
-3. Residual risk:
-   This was a narrow teardown-path fix, not a full engine suite run. It does not change `dt`, `event`, or fast-engine stepping/benchmark behavior, but I did not run an end-to-end browser simulation or broader correctness suite in this workspace.

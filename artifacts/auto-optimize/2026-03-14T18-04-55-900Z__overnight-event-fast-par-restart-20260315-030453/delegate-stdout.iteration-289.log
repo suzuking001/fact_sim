@@ -1,5 +1,0 @@
-1. Changed [engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773518398690-13516/js/app/engine-fast-par-host.js#L674) and [engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773518398690-13516/js/app/engine-fast-par-host.js#L725) so `event-fast-par` no longer sums `loops` across independent workers. It now reports the max per-worker loop count, which preserves global loop semantics and avoids inflating `loops`/`maxLoops` behavior. `dt` and `event` paths were untouched.
-
-2. Verification ran: a focused local Node harness loaded the patched host file, mocked two independent partition workers, and asserted both `runBenchmarkCaseAsync()` and `runUntilSimTimeAsync()` return the max loop count (`9`) instead of the summed count. The harness passed.
-
-3. Residual risk: verification was targeted at the aggregation contract in the patched file, not a full browser-integrated sim run from this temp workspace. The change is narrow and low-risk, but broader runtime behavior still depends on the surrounding app build using this patched file.

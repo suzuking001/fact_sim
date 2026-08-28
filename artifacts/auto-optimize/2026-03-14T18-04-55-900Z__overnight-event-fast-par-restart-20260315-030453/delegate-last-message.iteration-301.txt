@@ -1,7 +1,0 @@
-1. Changed only the fast headless mode enumerators so fallback-capable modes stay visible to benchmark and engine-test discovery even when `Worker` is unavailable. Live `supported` mode gating stayed unchanged, so `dt`/`event` behavior is untouched. Edits are in [engine-fast-worker-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773521777463-27056/js/app/engine-fast-worker-host.js#L900) and [engine-fast-par-host.js](/C:/Users/suzuk/AppData/Local/Temp/fact-sim-auto-patch/1773521777463-27056/js/app/engine-fast-par-host.js#L1098).
-
-2. Verification run:
-   - Local no-`Worker` harness: `getBenchmarkSimModes()` and `getEngineTestModes()` now return `["dt","event","event-fast","event-fast-worker","event-fast-par"]`, while `getSupportedSimModes()` remains `["dt","event","event-fast"]`.
-   - `fact-sim-ai` `engine_test` run with `action="run"`, `engines=["event-fast-worker","event-fast-par"]`, `examples=["simple","sample_line1"]`, `reruns=0`, `strictFinalParity=false`, `targetSimMs=3000`, `maxWallMs=1500`: `PASS`, 9/9 cases, no failures.
-
-3. Residual risk: low. This patch only changes benchmark/test mode discovery. If the hidden failure expected live `getSupportedSimModes()` to expose fallback wrappers too, that would still be outside this fix, but the current live behavior and the protected `dt`/`event` engines were left unchanged.
