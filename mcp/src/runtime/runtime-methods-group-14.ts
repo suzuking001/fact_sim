@@ -119,7 +119,10 @@ export function registerRuntimeMethodsGroup14(
       const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
       if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
       node.properties = node.properties || {};
-      if(Array.isArray(requestedInput)) node.properties.inputRules = app.normalizeEntityRules(requestedInput, "input");
+      if(Array.isArray(requestedInput)){
+        node.properties.inputRules = app.normalizeEntityRules(requestedInput, "input");
+        node.onPropertyChanged?.('inputRules');
+      }
       if(Array.isArray(requestedOutput)){
         node.properties.outputRules = app.normalizeEntityRules(requestedOutput, "output");
         node.onPropertyChanged?.('outputRules');
@@ -132,6 +135,7 @@ export function registerRuntimeMethodsGroup14(
       const sync = typeof app.syncBasicFlowPorts === "function"
         ? app.syncBasicFlowPorts(node, { dirty:false })
         : { created:[], warnings:["Flow port synchronization is unavailable"] };
+      app.syncFlowRuleTimings?.(node);
       node.setDirtyCanvas?.(true, true);
       return {
         nodeId: node.id,

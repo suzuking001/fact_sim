@@ -126,6 +126,24 @@
     return source;
   }
 
+  function normalizeTimingStages(rows, prefix){
+    const result = [];
+    const used = new Set();
+    for(const [index, raw] of (Array.isArray(rows) ? rows : []).entries()){
+      if(!isObject(raw)) continue;
+      let stageId = normalizeText(raw.stageId) || `${prefix}-${index + 1}`;
+      while(used.has(stageId)) stageId = `${prefix}-${used.size + 1}`;
+      used.add(stageId);
+      result.push({
+        stageId,
+        name:normalizeText(raw.name) || `${prefix.startsWith('down') ? 'Down' : 'Process'} ${result.length + 1}`,
+        durationSec:Math.max(0, Number(raw.durationSec) || 0),
+        ...(normalizeText(raw.portId) ? { portId:normalizeText(raw.portId) } : {})
+      });
+    }
+    return result;
+  }
+
   function normalizeRecipe(raw){
     const source = isObject(raw) ? raw : {};
     const load = normalizeText(source.load || 'empty').toLowerCase();
@@ -972,7 +990,16 @@
         return now - arrivedAt >= elapsedMs;
       }
       case 'downstream-ready': return ctx.downstreamReady !== false;
-      case 'process-complete': return !!ctx.processComplete;
+      case 'node-idle': case 'down-complete': {
+        const stateName = normalizeText(node?._stateName).toLowerCase();
+        return node?._state === 'IDLE' || stateName === 'idle' || /(?:^|_)idle(?:_|$)/.test(stateName);
+      }
+      case 'process-complete': {
+        if(!ctx.processComplete) return false;
+        const stageId = normalizeText(spec.stageId);
+        if(!stageId || stageId === 'all') return true;
+        return (Array.isArray(ctx.activeProcessStageIds) ? ctx.activeProcessStageIds : []).includes(stageId);
+      }
       case 'shuttle-group-idle': return !!ctx.shuttleGroupIdle;
       case 'attribute-condition': {
         const source = spec.source === 'type' ? type : instance?.attributes;
@@ -996,11 +1023,13 @@
       if(kind === 'input'){
         base.acceptWhen = normalizeCondition(source.acceptWhen, 'always');
         base.fromPortId = normalizeText(source.fromPortId) || null;
+        base.processStages = normalizeTimingStages(source.processStages, `${base.ruleId}-process`);
       }else{
         base.releaseWhen = normalizeCondition(source.releaseWhen, 'available');
         const sourcePortIds = Array.isArray(source.toPortIds) && source.toPortIds.length ? source.toPortIds : [source.toPortId];
         base.toPortIds = [...new Set(sourcePortIds.map((entry)=>normalizeText(entry)).filter(Boolean))];
         base.toPortId = base.toPortIds[0] || null;
+        base.downStages = normalizeTimingStages(source.downStages, `${base.ruleId}-down`);
       }
       return base;
     });

@@ -1977,8 +1977,12 @@ body.timeline-hidden #timelineRevealHandle{
 .entityRuleTitle{ color:#334155; font-size:12px; }
 .entityRuleBody{ display:grid; grid-template-columns:minmax(135px,1fr) minmax(260px,2fr) minmax(135px,1fr); gap:10px; align-items:start; padding:10px; }
 .entityRuleField{ display:grid; gap:5px; min-width:0; }
+.entityRuleField.is-wide{ grid-column:1 / -1; }
 .entityRuleFieldLabel{ color:#64748b; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
 .entityRuleField select,.entityRuleField input{ min-width:0; width:100%; box-sizing:border-box; }
+.entityFlowGuide{ display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; padding:10px 12px; border:1px solid rgba(59,130,246,.18); border-radius:12px; background:linear-gradient(135deg,rgba(239,246,255,.88),rgba(248,250,252,.92)); color:#475569; font-size:11px; line-height:1.5; }
+.entityFlowGuide strong{ flex:0 0 auto; color:#1e3a5f; }
+.entityFlowGuide b{ color:#334155; font-weight:800; }
 .entityRuleConditions,.entityRuleConditionList,.entityRuleMultiValue,.entityRuleMultiValueList{ display:grid; gap:7px; }
 .entityRuleConditionJoin{ display:flex; align-items:center; gap:7px; color:#64748b; font-size:11px; font-weight:700; }
 .entityRuleConditionJoin select{ flex:1; }
@@ -1999,6 +2003,14 @@ body.timeline-hidden #timelineRevealHandle{
 .entityRuleConditionNumber{ display:grid; flex:0 0 20px; width:20px; height:20px; place-items:center; border-radius:999px; background:#e2e8f0; color:#475569; font-size:10px; font-weight:800; }
 .entityRuleConditionRemove{ flex:0 0 auto; }
 .entityRuleAddCondition{ justify-self:start; }
+.entityRuleTimingStages,.entityRuleTimingStageList{ display:grid; gap:7px; }
+.entityRuleTimingHint{ color:#64748b; font-size:10px; line-height:1.45; }
+.entityRuleTimingStageRow{ display:grid; grid-template-columns:20px minmax(120px,1fr) minmax(122px,.8fr) minmax(96px,124px) auto; gap:7px; align-items:center; padding:7px; border:1px solid rgba(100,116,139,.14); border-radius:9px; background:rgba(255,255,255,.76); }
+.entityRuleTimingField .entityRuleTimingStageRow:not(:has(.entityRuleTimingPort)){ grid-template-columns:20px minmax(150px,1fr) minmax(96px,140px) auto; }
+.entityRuleTimingDuration{ display:grid; grid-template-columns:minmax(70px,1fr) auto; align-items:center; gap:5px; min-width:0; padding:2px 7px; border:1px solid rgba(100,116,139,.22); border-radius:8px; background:#fff; }
+.entityRuleTimingDuration input{ height:28px; padding:0; border:0; outline:0; background:transparent; text-align:right; font-size:14px; font-weight:780; }
+.entityRuleTimingDuration small{ color:#64748b; font-size:10px; font-weight:800; }
+.entityRuleTimingPort{ min-width:0; }
 .entityRecipeRow{ margin-left:calc(var(--recipe-depth,0) * 20px); }
 .entityRecipeRow input,.entityRecipeRow select,.entityRuleRow select{ min-width:0; width:100%; box-sizing:border-box; }
 .entityCurrentSummary{ display:grid; gap:5px; margin-top:9px; }
@@ -2038,6 +2050,12 @@ body.timeline-hidden #timelineRevealHandle{
 .selectionInspectorNotice.is-error{ color:#b91c1c; }
 @media(max-width:760px){
   .entityRuleRow,.entityRecipeRow,.entityRuleBody{ grid-template-columns:1fr; }
+  .entityFlowGuide{ display:grid; }
+  .entityRuleTimingStageRow,
+  .entityRuleTimingField .entityRuleTimingStageRow:not(:has(.entityRuleTimingPort)){ grid-template-columns:20px minmax(0,1fr); }
+  .entityRuleTimingStageRow .entityRuleTimingPort,
+  .entityRuleTimingStageRow .entityRuleTimingDuration,
+  .entityRuleTimingStageRow .entityRuleControls{ grid-column:2; }
   .entitySourceSequenceRow{ grid-template-columns:28px minmax(0,1fr); }
   .entitySourceSequenceQuantity,.entitySourceSequenceRow .entityRuleControls{ grid-column:2; }
   .entityRuleConditionLine,.entityRuleMultiValueLine{ flex-wrap:wrap; }
@@ -5713,6 +5731,15 @@ body.sim-running.performance-adaptive #tabletActionBar{
   font-size:9px;
   font-weight:850;
   letter-spacing:.02em;
+}
+.entityCycleReadOnlyValue{
+  min-width:0;
+  overflow:hidden;
+  color:#1d1d1f;
+  font:780 13px/22px "SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  text-align:right;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 .entityCycleInlineControl input{
   box-sizing:border-box;

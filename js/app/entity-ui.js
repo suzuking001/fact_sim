@@ -106,6 +106,8 @@
     const ports = Array.isArray(isInput ? node?.inputs : node?.outputs) ? (isInput ? node.inputs : node.outputs) : [];
     const result = [];
     ports.forEach((port, portIndex)=>{
+      const name = String(port?.name || '').toLowerCase();
+      if(port?.channel === 'signal' || /^sig(?:in|out)\d*$/.test(name)) return;
       const ids = isInput ? [port?.link] : (Array.isArray(port?.links) ? port.links : []);
       ids.filter((id)=>id != null).forEach((id)=>{
         const link = graphLink(node, id);
@@ -144,6 +146,17 @@
   function downTimeProperties(node){ return numberedTimeProperties(node, 'downTime'); }
 
   function cycleTimingKeys(node, direction){
+    App.syncFlowRuleTimings?.(node);
+    const rules = direction === 'input' ? node?.properties?.inputRules : node?.properties?.outputRules;
+    const stageProperty = direction === 'input' ? 'processStages' : 'downStages';
+    const ruleKeys = (Array.isArray(rules) ? rules : []).flatMap((rule, ruleIndex)=>{
+      const ruleId = String(rule?.ruleId || `${direction}-rule-${ruleIndex + 1}`);
+      return (Array.isArray(rule?.[stageProperty]) ? rule[stageProperty] : []).map((stage, stageIndex)=>{
+        const stageId = String(stage?.stageId || `${stageProperty}-${stageIndex + 1}`);
+        return `@rule:${direction}:${encodeURIComponent(ruleId)}:${encodeURIComponent(stageId)}`;
+      });
+    });
+    if(ruleKeys.length) return ruleKeys;
     App.ensureBasicPortTimings?.(node);
     const ports = direction === 'input' ? node?.inputs : node?.outputs;
     const signalPattern = direction === 'input' ? /^sigIn/i : /^sigOut/i;
@@ -163,14 +176,38 @@
   function parseCycleTimingKey(key){
     const raw = String(key || '').replace(/^@/, '');
     const parts = raw.split(':');
+    if(parts[0] === 'rule' && parts.length >= 4){
+      return {
+        source:'rule',
+        direction:parts[1],
+        ruleId:decodeURIComponent(parts[2]),
+        stageId:decodeURIComponent(parts.slice(3).join(':')),
+        portId:''
+      };
+    }
     return parts.length >= 2
-      ? { direction:parts[0], portId:parts[1], stageId:parts.slice(2).join(':') }
-      : { direction:'', portId:'', stageId:'' };
+      ? { source:'port', direction:parts[0], portId:parts[1], stageId:parts.slice(2).join(':'), ruleId:'' }
+      : { source:'', direction:'', portId:'', stageId:'', ruleId:'' };
+  }
+
+  function cycleTimingDescriptor(node, key){
+    const parsed = parseCycleTimingKey(key);
+    if(parsed.source !== 'rule') return { ...parsed, stage:null, rule:null };
+    const rules = parsed.direction === 'input' ? node?.properties?.inputRules : node?.properties?.outputRules;
+    const property = parsed.direction === 'input' ? 'processStages' : 'downStages';
+    const rule = (Array.isArray(rules) ? rules : []).find((entry)=>String(entry?.ruleId || '') === parsed.ruleId) || null;
+    const stage = (Array.isArray(rule?.[property]) ? rule[property] : []).find((entry)=>String(entry?.stageId || '') === parsed.stageId) || null;
+    const portId = parsed.direction === 'input'
+      ? String(rule?.fromPortId || '')
+      : String(stage?.portId || rule?.toPortIds?.[0] || rule?.toPortId || '');
+    return { ...parsed, rule, stage, portId };
   }
 
   function readCycleTiming(node, key){
     if(!String(key).startsWith('@')) return Math.max(0, Number(node.properties?.[key]) || 0);
-    const { direction, portId, stageId } = parseCycleTimingKey(key);
+    const descriptor = cycleTimingDescriptor(node, key);
+    if(descriptor.source === 'rule') return Math.max(0, Number(descriptor.stage?.durationSec) || 0);
+    const { direction, portId, stageId } = descriptor;
     const timings = App.ensureBasicPortTimings?.(node) || node.properties?.portTimings || {};
     if(direction === 'input'){
       const timing = timings.inputs?.[portId] || {};
@@ -402,7 +439,7 @@
   }
 
   function renderCycleEditor(node){
-    const shell = makeCard('Process Cycle', 'Configure input readiness, processing, downstream release, and recovery as one continuous cycle.');
+    const shell = makeCard('Process Cycle', 'Read-only summary. Configure Process, release readiness, downstream conditions, and Down recovery in Flow.');
     shell.card.classList.add('entityCycleCard');
     const props = isObject(node?.properties) ? node.properties : {};
     const processKeys = cycleTimingKeys(node, 'input');
@@ -543,19 +580,8 @@
       }
       totalValue.textContent = `${formatSeconds(total)} s`;
     };
-    const commit = (key, input)=>{
-      const next = Math.max(0, Number(input.value) || 0);
-      input.value = formatSeconds(next);
-      draftValues[key] = next;
-      changed(()=>{
-        node.properties = isObject(node.properties) ? node.properties : {};
-        writeCycleTiming(node, key, next);
-        node.setDirtyCanvas?.(true, true);
-      });
-      updateVisual();
-    };
     const makeInlineTimeField = (host, key, label, color, meta)=>{
-      const field = document.createElement('label');
+      const field = document.createElement('div');
       field.className = 'entityCycleInlineControl';
       field.style.setProperty('--cycle-color', color);
       field.title = meta;
@@ -566,19 +592,12 @@
       }else{
         field.classList.add('is-single');
       }
-      const input = document.createElement('input');
-      input.type = 'number'; input.min = '0'; input.step = '0.1';
-      input.value = formatSeconds(readCycleTiming(node, key));
-      input.disabled = running();
-      input.setAttribute('aria-label', `${host.dataset.label} ${label.replace(/^[A-Z]/, '') || '1'} seconds`);
+      const value = document.createElement('strong');
+      value.className = 'entityCycleReadOnlyValue';
+      value.textContent = formatSeconds(readCycleTiming(node, key));
+      value.setAttribute('aria-label', `${host.dataset.label} ${label.replace(/^[A-Z]/, '') || '1'} seconds`);
       const unit = document.createElement('small'); unit.textContent = 's';
-      input.addEventListener('input', ()=>{
-        const next = Math.max(0, Number(input.value) || 0);
-        draftValues[key] = next;
-        updateVisual();
-      });
-      input.addEventListener('change', ()=>commit(key, input));
-      field.append(input, unit);
+      field.append(value, unit);
       host.appendChild(field);
     };
     const processControls = document.createElement('div');
@@ -587,9 +606,11 @@
     processControls.style.setProperty('--control-count', String(processKeys.length));
     processKeys.forEach((key, index)=>{
       const related = upstream[index] || upstream[0];
-      const portId = parseCycleTimingKey(key).portId;
+      const descriptor = cycleTimingDescriptor(node, key);
+      const portId = descriptor.portId;
       const portName = portId ? (node.inputs || []).find((port)=>port?.portId === portId)?.name : '';
-      makeInlineTimeField(processControls, key, portName ? `P${index + 1} · ${portName}` : `P${index + 1}`, ['#30d158','#18b94f','#0f9f43','#67d986'][index % 4], connectionLabel(related, 'Processing', 'upstream'));
+      const stageName = String(descriptor.stage?.name || '').trim();
+      makeInlineTimeField(processControls, key, stageName ? `P${index + 1} · ${stageName}` : (portName ? `P${index + 1} · ${portName}` : `P${index + 1}`), ['#30d158','#18b94f','#0f9f43','#67d986'][index % 4], `${connectionLabel(related, 'Processing', 'upstream')}${stageName ? ` / ${stageName}` : ''}`);
     });
     const downControls = document.createElement('div');
     downControls.className = 'entityCycleInlineControls is-down';
@@ -597,9 +618,11 @@
     downControls.style.setProperty('--control-count', String(downKeys.length));
     downKeys.forEach((key, index)=>{
       const related = downstream[index] || downstream[0];
-      const portId = parseCycleTimingKey(key).portId;
+      const descriptor = cycleTimingDescriptor(node, key);
+      const portId = descriptor.portId;
       const portName = portId ? (node.outputs || []).find((port)=>port?.portId === portId)?.name : '';
-      makeInlineTimeField(downControls, key, portName ? `D${index + 1} · ${portName}` : `D${index + 1}`, ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4], connectionLabel(related, 'Recovery', 'downstream'));
+      const stageName = String(descriptor.stage?.name || '').trim();
+      makeInlineTimeField(downControls, key, stageName ? `D${index + 1} · ${stageName}` : (portName ? `D${index + 1} · ${portName}` : `D${index + 1}`), ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4], `${connectionLabel(related, 'Recovery', 'downstream')}${stageName ? ` / ${stageName}` : ''}`);
     });
     donut.append(svg, center, processControls, downControls);
     visual.append(upstreamHost, donut, downstreamHost);
@@ -716,9 +739,14 @@
   }
 
   function renderFlowEditor(node){
+    App.syncFlowRuleTimings?.(node);
     const registry = App.entityModelForGraph?.(App.graph || node.graph);
     const wrapper = document.createElement('div');
-    const inputConditions = [['always','Always'],['space-available','Space available'],['empty','Empty'],['not-full','Not full'],['custom-condition','Custom']];
+    const guide = document.createElement('aside');
+    guide.className = 'entityFlowGuide';
+    guide.innerHTML = '<strong>Flow controls the complete Entity cycle.</strong><span><b>Process</b> is configured on Input Rules. <b>Down / recovery</b> is configured on Output Rules. <b>Space available</b> checks Node Capacity; <b>Node idle</b> means recovery is complete; <b>Downstream ready</b> checks whether the next Node can accept the Entity.</span>';
+    wrapper.appendChild(guide);
+    const inputConditions = [['always','Always'],['node-idle','Node idle (Down complete)'],['space-available','Space available'],['empty','Empty'],['not-full','Not full'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
     const outputConditions = [['available','Available'],['process-complete','Process complete'],['shuttle-group-idle','Shuttle group process complete (Idle)'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
     const field = (label, content, extraClass)=>{
       const host = document.createElement('label');
@@ -728,9 +756,25 @@
       return host;
     };
     const conditionKind = (condition, fallback)=>isObject(condition) ? (condition.kind || fallback) : (condition || fallback);
+    const processStageOptions = ()=>{
+      const options = [['all','All process stages']];
+      for(const [ruleIndex, rule] of (node.properties?.inputRules || []).entries()){
+        const inputName = (node.inputs || []).find((port)=>port?.portId === rule?.fromPortId)?.name || `Input ${ruleIndex + 1}`;
+        for(const [stageIndex, stage] of (Array.isArray(rule?.processStages) ? rule.processStages : []).entries()){
+          options.push([stage.stageId, `${inputName} / ${stage.name || `Process ${stageIndex + 1}`}`]);
+        }
+      }
+      return options;
+    };
     const appendConditionParameter = (host, condition, commit)=>{
       const kind = conditionKind(condition, 'available');
-      if(kind === 'shuttle-group-idle'){
+      if(kind === 'process-complete'){
+        const parameter = select(processStageOptions(), condition.stageId || 'all');
+        parameter.title = 'Process stage that must be complete';
+        parameter.setAttribute('aria-label', parameter.title); parameter.disabled = running();
+        parameter.addEventListener('change', ()=>{ condition.stageId = parameter.value; commit(); });
+        host.appendChild(parameter);
+      }else if(kind === 'shuttle-group-idle'){
         const parameter = document.createElement('input');
         parameter.type = 'text'; parameter.className = 'selectionInspectorInput';
         parameter.value = String(condition.groupId || 'shuttle-1');
@@ -894,8 +938,76 @@
         node.properties[key] = rows;
         node.onPropertyChanged?.(key);
         App.syncBasicFlowPorts?.(node, { dirty:false });
+        App.syncFlowRuleTimings?.(node);
         node.setDirtyCanvas?.(true, true);
       });
+      const renderTimingStages = (rule, direction)=>{
+        const property = direction === 'input' ? 'processStages' : 'downStages';
+        const label = direction === 'input' ? 'Process stages' : 'Down / recovery stages';
+        const hint = direction === 'input'
+          ? 'Sequential processing after this Input Rule accepts an Entity.'
+          : 'Recovery after this Output Rule transfers an Entity. Input remains blocked until all Down stages finish.';
+        const host = document.createElement('div'); host.className = 'entityRuleTimingStages';
+        const explanation = document.createElement('small'); explanation.className = 'entityRuleTimingHint'; explanation.textContent = hint;
+        const stages = Array.isArray(rule[property]) ? rule[property] : (rule[property] = []);
+        const list = document.createElement('div'); list.className = 'entityRuleTimingStageList';
+        const uniqueStageId = ()=>{
+          const prefix = `${rule.ruleId || direction}-${direction === 'input' ? 'process' : 'down'}`;
+          let index = stages.length + 1;
+          let candidate = `${prefix}-${index}`;
+          const used = new Set(stages.map((stage)=>String(stage?.stageId || '')));
+          while(used.has(candidate)){ index += 1; candidate = `${prefix}-${index}`; }
+          return candidate;
+        };
+        stages.forEach((stage, stageIndex)=>{
+          const row = document.createElement('div'); row.className = 'entityRuleTimingStageRow';
+          const order = document.createElement('span'); order.className = 'entityRuleConditionNumber'; order.textContent = String(stageIndex + 1);
+          const name = document.createElement('input'); name.type = 'text'; name.value = stage.name || `${direction === 'input' ? 'Process' : 'Down'} ${stageIndex + 1}`;
+          name.setAttribute('aria-label', `${label} ${stageIndex + 1} name`); name.disabled = running();
+          name.addEventListener('change', ()=>{ stage.name = String(name.value || '').trim() || `${direction === 'input' ? 'Process' : 'Down'} ${stageIndex + 1}`; commit(); });
+          const durationWrap = document.createElement('label'); durationWrap.className = 'entityRuleTimingDuration';
+          const duration = document.createElement('input'); duration.type = 'number'; duration.min = '0'; duration.step = '0.1'; duration.value = formatSeconds(stage.durationSec);
+          duration.setAttribute('aria-label', `${label} ${stageIndex + 1} seconds`); duration.disabled = running();
+          duration.addEventListener('change', ()=>{ stage.durationSec = Math.max(0, Number(duration.value) || 0); duration.value = formatSeconds(stage.durationSec); commit(); });
+          const unit = document.createElement('small'); unit.textContent = 's'; durationWrap.append(duration, unit);
+          let outputPort = null;
+          if(direction === 'output'){
+            const selectedPortIds = (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]).filter(Boolean);
+            const outputOptions = [['', 'All selected outputs'], ...selectedPortIds.map((portId)=>[
+              portId,
+              (node.outputs || []).find((port)=>port?.portId === portId)?.name || portId
+            ])];
+            outputPort = select(outputOptions, stage.portId || '');
+            outputPort.classList.add('entityRuleTimingPort');
+            outputPort.setAttribute('aria-label', `${label} ${stageIndex + 1} output port`);
+            outputPort.disabled = running();
+            outputPort.addEventListener('change', ()=>{
+              if(outputPort.value) stage.portId = outputPort.value;
+              else delete stage.portId;
+              commit();
+            });
+          }
+          const controls = document.createElement('div'); controls.className = 'entityRuleControls';
+          const up = button('↑', ()=>{ if(stageIndex > 0){ stages.splice(stageIndex - 1, 0, stages.splice(stageIndex, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
+          const down = button('↓', ()=>{ if(stageIndex < stages.length - 1){ stages.splice(stageIndex + 1, 0, stages.splice(stageIndex, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
+          const remove = button('×', ()=>{ stages.splice(stageIndex, 1); commit(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn is-danger');
+          up.disabled = running() || stageIndex === 0; down.disabled = running() || stageIndex === stages.length - 1; remove.disabled = running() || stages.length <= 1;
+          controls.append(up, down, remove);
+          row.append(order, name);
+          if(outputPort) row.appendChild(outputPort);
+          row.append(durationWrap, controls);
+          list.appendChild(row);
+        });
+        host.append(explanation, list);
+        const add = button(`+ Add ${direction === 'input' ? 'Process' : 'Down'} stage`, ()=>{
+          const stage = { stageId:uniqueStageId(), name:`${direction === 'input' ? 'Process' : 'Down'} ${stages.length + 1}`, durationSec:0 };
+          if(direction === 'output') stage.portId = rule.toPortIds?.[0] || rule.toPortId || undefined;
+          stages.push(stage);
+          commit(); App.selectionInspector?.refresh?.();
+        }, 'selectionInspectorBtn entityRuleAddCondition');
+        add.disabled = running(); host.appendChild(add);
+        return field(label, host, 'is-wide entityRuleTimingField');
+      };
       const referencesOutside = (direction, portId, excludedRule, excludedIndex)=>{
         if(!portId) return false;
         if(direction === 'input') return (node.properties.inputRules || []).some((candidate)=>candidate !== excludedRule && candidate.fromPortId === portId);
@@ -998,13 +1110,44 @@
             App.selectionInspector?.refresh?.();
           });
           body.appendChild(field('Input from', inputPort));
-          const conditionSpec = isObject(rule.acceptWhen) ? rule.acceptWhen : { kind:conditionKind(rule.acceptWhen, 'always') };
-          const condition = select(inputConditions, conditionKind(conditionSpec, 'always'));
-          condition.disabled = running();
-          condition.addEventListener('change', ()=>{ rule.acceptWhen = { kind:condition.value }; commit(); App.selectionInspector?.refresh?.(); });
-          const conditionHost = document.createElement('div'); conditionHost.className = 'entityRuleConditionLine'; conditionHost.appendChild(condition);
-          appendConditionParameter(conditionHost, conditionSpec, commit);
-          body.appendChild(field('Accept when', conditionHost, 'is-wide'));
+          const stored = rule.acceptWhen;
+          const isCompound = isObject(stored) && (stored.kind === 'all' || stored.kind === 'any');
+          const compound = {
+            kind:isCompound ? stored.kind : 'all',
+            conditions:isCompound && Array.isArray(stored.conditions)
+              ? stored.conditions
+              : [isObject(stored) ? stored : { kind:conditionKind(stored, 'always') }]
+          };
+          if(!compound.conditions.length) compound.conditions.push({ kind:'always' });
+          const persistCompound = ()=>{ rule.acceptWhen = { kind:compound.kind, conditions:compound.conditions }; commit(); };
+          const conditionsHost = document.createElement('div'); conditionsHost.className = 'entityRuleConditions';
+          const joinRow = document.createElement('div'); joinRow.className = 'entityRuleConditionJoin';
+          const joinLabel = document.createElement('span'); joinLabel.textContent = 'Match';
+          const join = select([['all','All conditions (AND)'],['any','Any condition (OR)']], compound.kind);
+          join.disabled = running(); join.addEventListener('change', ()=>{ compound.kind = join.value; persistCompound(); });
+          joinRow.append(joinLabel, join); conditionsHost.appendChild(joinRow);
+          const conditionList = document.createElement('div'); conditionList.className = 'entityRuleConditionList';
+          compound.conditions.forEach((conditionSpec, conditionIndex)=>{
+            const conditionLine = document.createElement('div'); conditionLine.className = 'entityRuleConditionLine';
+            const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(conditionIndex + 1);
+            const required = conditionKind(conditionSpec, 'always') === 'node-idle';
+            const condition = select(inputConditions, conditionKind(conditionSpec, 'always')); condition.disabled = running() || required;
+            if(required) condition.title = 'Required: the Node cannot accept another Entity until Down / recovery is complete.';
+            condition.addEventListener('change', ()=>{ compound.conditions[conditionIndex] = { kind:condition.value }; persistCompound(); App.selectionInspector?.refresh?.(); });
+            const removeCondition = button('×', ()=>{
+              compound.conditions.splice(conditionIndex, 1);
+              if(!compound.conditions.length) compound.conditions.push({ kind:'always' });
+              persistCompound(); App.selectionInspector?.refresh?.();
+            }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
+            removeCondition.disabled = running() || required || compound.conditions.length <= 1;
+            conditionLine.append(number, condition); appendConditionParameter(conditionLine, conditionSpec, persistCompound); conditionLine.appendChild(removeCondition);
+            conditionList.appendChild(conditionLine);
+          });
+          conditionsHost.appendChild(conditionList);
+          const addCondition = button('+ Add condition', ()=>{ compound.conditions.push({ kind:'node-idle' }); persistCompound(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn entityRuleAddCondition');
+          addCondition.disabled = running(); conditionsHost.appendChild(addCondition);
+          body.appendChild(field('Acceptance conditions', conditionsHost, 'is-wide'));
+          body.appendChild(renderTimingStages(rule, 'input'));
         }else{
           const stored = rule.releaseWhen;
           const isCompound = isObject(stored) && (stored.kind === 'all' || stored.kind === 'any');
@@ -1028,7 +1171,9 @@
             const conditionLine = document.createElement('div'); conditionLine.className = 'entityRuleConditionLine';
             const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(conditionIndex + 1);
             const condition = select(outputConditions, conditionKind(conditionSpec, 'available'));
-            condition.disabled = running();
+            const required = conditionKind(conditionSpec, 'available') === 'downstream-ready';
+            condition.disabled = running() || required;
+            if(required) condition.title = 'Required: the selected downstream port must be ready before transfer.';
             condition.addEventListener('change', ()=>{
               compound.conditions[conditionIndex] = condition.value === 'shuttle-group-idle'
                 ? { kind:condition.value, groupId:String(node.properties?.shuttleGroupId || 'shuttle-1') }
@@ -1040,7 +1185,7 @@
               if(!compound.conditions.length) compound.conditions.push({ kind:'available' });
               persistCompound(); App.selectionInspector?.refresh?.();
             }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
-            removeCondition.title = 'Delete condition'; removeCondition.disabled = running() || compound.conditions.length <= 1;
+            removeCondition.title = required ? 'Required flow condition' : 'Delete condition'; removeCondition.disabled = running() || required || compound.conditions.length <= 1;
             conditionLine.append(number, condition);
             appendConditionParameter(conditionLine, conditionSpec, persistCompound);
             conditionLine.appendChild(removeCondition); conditionList.appendChild(conditionLine);
@@ -1099,14 +1244,15 @@
           addPort.disabled = running();
           portsHost.appendChild(addPort);
           body.appendChild(field('Output to (first ready)', portsHost));
+          body.appendChild(renderTimingStages(rule, 'output'));
         }
         ruleCard.appendChild(body); list.appendChild(ruleCard);
       });
       card.section.appendChild(list);
       const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
         const next = kind === 'input'
-          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:{ kind:'always' }, fromPortId:null }
-          : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }] }, toPortIds:[], toPortId:null };
+          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:{ kind:'all', conditions:[{ kind:'node-idle' }, { kind:'space-available' }] }, processStages:[], fromPortId:null }
+          : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }, { kind:'downstream-ready' }] }, downStages:[], toPortIds:[], toPortId:null };
         const port = App.createBasicFlowPort?.(node, kind, next);
         if(kind === 'input') next.fromPortId = port?.portId || null;
         else{ next.toPortIds = port ? [port.portId] : []; next.toPortId = port?.portId || null; }

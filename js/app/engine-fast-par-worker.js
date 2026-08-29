@@ -137,7 +137,7 @@ return true;`;
     importScripts(
       '../nodes-config.js',
       '../nodes/work.js?v=20260828a',
-      '../nodes/entity_model.js?v=20260828a',
+      '../nodes/entity_model.js?v=20260829a',
       '../nodes/entity_store.js',
       '../nodes/sigports.js',
       '../nodes/equipment.js?v=20260824f',
@@ -154,7 +154,7 @@ return true;`;
       '../nodes/station.js?v=20260824f',
       '../nodes/transfer_station.js?v=20260824f',
       '../nodes/sink.js?v=20260824f',
-      '../nodes/basic_node.js?v=20260829b',
+      '../nodes/basic_node.js?v=20260829d',
       '../nodes/register.js',
       'graph-links.js',
       'stop-groups.js',
