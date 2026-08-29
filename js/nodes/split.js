@@ -7,6 +7,7 @@ class SplitNode extends EquipmentNode{
     if(this.outputs && this.outputs[0]) this.outputs[0].name = 'outPort1';
     this._ensureMinWorkOutputs(2);
     this.properties.ratio = 0.5;
+    this._splitOutputOffers = [];
     window.refreshFlipIO(this);
   }
   _isWorkOutputName(name){
@@ -70,6 +71,40 @@ class SplitNode extends EquipmentNode{
     return Object.assign(c, w);
   }
 
+  _beginSplitOutputOffers(workOuts, payload){
+    this._splitOutputOffers = [];
+    for(let i=0;i<workOuts.length;i++){
+      const {slotIndex, out} = workOuts[i];
+      const work = (i === 0) ? payload : this._cloneWork(payload);
+      const pendingTargetIds = [];
+      for(const linkId of (Array.isArray(out?.links) ? out.links : [])){
+        const link = this.graph?.links?.[linkId];
+        if(link?.target_id != null && !pendingTargetIds.includes(link.target_id)) pendingTargetIds.push(link.target_id);
+      }
+      this._splitOutputOffers.push({ slotIndex, work, pendingTargetIds });
+      this.setOutputData(slotIndex, work);
+    }
+  }
+
+  acknowledgeEntityOutput(work, targetNodeId, outputSlot){
+    const offer = (this._splitOutputOffers || []).find((entry)=>
+      entry.slotIndex === outputSlot && entry.work === work);
+    if(!offer) return false;
+    offer.pendingTargetIds = offer.pendingTargetIds.filter((id)=>id !== targetNodeId);
+    return true;
+  }
+
+  _splitOutputsAccepted(){
+    return Array.isArray(this._splitOutputOffers)
+      && this._splitOutputOffers.length > 0
+      && this._splitOutputOffers.every((entry)=>entry.pendingTargetIds.length === 0);
+  }
+
+  _clearSplitOutputOffers(){
+    for(const {slotIndex} of (this._splitOutputOffers || [])) this.setOutputData(slotIndex, null);
+    this._splitOutputOffers = [];
+  }
+
   _setWaitIcon(active, type='work'){
     try{
       if(!window.WorkLinkAnimator || !this.graph) return;
@@ -106,7 +141,7 @@ class SplitNode extends EquipmentNode{
         const link = this.graph.links[id]; if(!link) return;
         const target = this.graph.getNodeById(link.target_id);
         const sinkCtor = window.SinkNode;
-        const isSink = !!target && (target.properties?.presetId === 'sink'
+        const isSink = !!target && (window.App?.basicNodeBehavior?.(target) === 'sink'
           || (sinkCtor && target instanceof sinkCtor)
           || target.title === 'Sink');
         if(isSink) window.WorkLinkAnimator.spawn(this.graph, id, 'work', duration, info);
@@ -225,12 +260,13 @@ class SplitNode extends EquipmentNode{
             const downMs = Math.max(0, ...workOuts.map(({slotIndex})=>
               (typeof this._flowTiming === 'function' ? this._flowTiming('output', slotIndex) : this.properties.downTime) * 1000));
             this._until = now + downMs;
-            // Output split works simultaneously to all workOut ports
-            for(let i=0;i<workOuts.length;i++){
-              const {slotIndex} = workOuts[i];
-              const wOut = (i === 0) ? payload : this._cloneWork(payload);
-              this.setOutputData(slotIndex, wOut);
-              this._spawnSplitTransfer(downMs, wOut, slotIndex);
+            // Keep every branch visible until its downstream node explicitly
+            // accepts it.  A zero-duration DOWN phase used to clear these link
+            // values in the same event timestamp, before event-mode consumers
+            // had a chance to execute.
+            this._beginSplitOutputOffers(workOuts, payload);
+            for(const offer of this._splitOutputOffers){
+              this._spawnSplitTransfer(downMs, offer.work, offer.slotIndex);
             }
             this._payload = null;
           }else{
@@ -239,8 +275,8 @@ class SplitNode extends EquipmentNode{
           break;
         }
         case 'DOWN':
-          if(now >= this._until){
-            this._workOutputs().forEach(({slotIndex})=> this.setOutputData(slotIndex, null));
+          if(now >= this._until && this._splitOutputsAccepted()){
+            this._clearSplitOutputOffers();
             this._state = 'IDLE';
             this._setWaitIcon(false);
             again = true;

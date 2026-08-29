@@ -15,26 +15,63 @@ class SourceNode extends LiteGraph.LGraphNode{
     this.bgcolor = '#fff8ee';
     this.boxcolor = '#f39c12';
     this.properties = {
-      sequence: 'A,B',
-      sigExtra: 0,
-      sigEnabled: true,
+      outputRules: [],
     };
     syncSigPorts(this);
     this._seq = [];
     this._cursor = 0;
+    this._sequenceQuantityCursor = 0;
+    this._sequenceSignature = '';
+    this._sequenceErrors = [];
     this._outLast = [];
     this._readyPrev = false;
     this._counter = 0;
+    this._lastGeneratedAt = -Infinity;
     this._pendingWork = null;
     this._pendingOutputSlot = null;
     this._parseSeq();
     if(window.enableFlipIO) window.enableFlipIO(this);
   }
+  onAdded(){
+    if(!this._sourceSequenceWasSerialized && window.App?.ensureSourceSequence){
+      window.App.ensureSourceSequence(this, { createDefault:true });
+      window.App.refreshEntityTypeManager?.();
+    }
+    this._parseSeq();
+  }
   _parseSeq(){
-    this._seq = [];
+    const validation = window.App?.inspectSourceSequence
+      ? window.App.inspectSourceSequence(this)
+      : { ok:false, entries:[], errors:[{ code:'SOURCE_SEQUENCE_API_UNAVAILABLE' }] };
+    this._seq = validation.ok ? validation.entries.map((entry)=>({
+      entryId:entry.entryId,
+      typeId:entry.typeId,
+      type:entry.typeName,
+      quantity:entry.quantity
+    })) : [];
     this._cursor = 0;
-    this.properties.sequence.split(/[\,\n]+/).forEach(t=>{ t=t.trim(); if(t) this._seq.push({type:t}); });
-    if(!this._seq.length) this._seq.push({type:'A'});
+    this._sequenceQuantityCursor = 0;
+    this._sequenceSignature = JSON.stringify(window.App?.basicNodeSequenceEntries?.(this) || []);
+    this._sequenceErrors = validation.errors || [];
+  }
+  _ensureSequenceFresh(){
+    const signature = JSON.stringify(window.App?.basicNodeSequenceEntries?.(this) || []);
+    if(signature !== this._sequenceSignature) this._parseSeq();
+  }
+  _currentSequenceEntry(){
+    this._ensureSequenceFresh();
+    if(!this._seq.length) return null;
+    return this._seq[this._cursor % this._seq.length] || null;
+  }
+  _advanceSequence(){
+    const entry = this._currentSequenceEntry();
+    if(!entry) return false;
+    this._sequenceQuantityCursor += 1;
+    if(this._sequenceQuantityCursor >= entry.quantity){
+      this._sequenceQuantityCursor = 0;
+      this._cursor = (this._cursor + 1) % this._seq.length;
+    }
+    return true;
   }
   _emit(i,state){
     if(!this.properties.sigEnabled){ this.setOutputData(i+1, null); return; }
@@ -42,8 +79,7 @@ class SourceNode extends LiteGraph.LGraphNode{
     else this.setOutputData(i+1, null);
   }
   onPropertyChanged(n){
-    if(n==='sequence') this._parseSeq();
-    if(n==='sigExtra') syncSigPorts(this);
+    if(n==='outputRules') this._parseSeq();
   }
   _downstreamStatus(work=null, slotIndex=0){
     const out = this.outputs && this.outputs[slotIndex];
@@ -117,31 +153,40 @@ class SourceNode extends LiteGraph.LGraphNode{
     }
     return targetCount > 0;
   }
+  acknowledgeEntityOutput(work, targetNodeId, outputSlot){
+    if(!work || this._pendingWork !== work) return false;
+    const slot = Number.isInteger(this._pendingOutputSlot) ? this._pendingOutputSlot : Number(outputSlot);
+    const out = this.outputs && this.outputs[slot];
+    if(out && Array.isArray(out.links) && this.graph){
+      const expectedTargets = out.links.map((linkId)=>this.graph.links?.[linkId]?.target_id).filter((id)=>id != null);
+      if(expectedTargets.length && !expectedTargets.includes(targetNodeId)) return false;
+    }
+    this._pendingWork = null;
+    this._pendingOutputSlot = null;
+    if(Number.isInteger(slot) && slot >= 0) this.setOutputData(slot, null);
+    return true;
+  }
   _holdPendingWork(){
     const work = this._pendingWork;
     if(!work) return false;
-    if(this._pendingWorkAccepted(work)){
-      this._pendingWork = null;
-      const slot = Number.isInteger(this._pendingOutputSlot) ? this._pendingOutputSlot : 0;
-      this.setOutputData(slot, null);
-      this._pendingOutputSlot = null;
-    }else{
-      const slot = Number.isInteger(this._pendingOutputSlot) ? this._pendingOutputSlot : 0;
-      this.setOutputData(slot, work);
-    }
+    const slot = Number.isInteger(this._pendingOutputSlot) ? this._pendingOutputSlot : 0;
+    this.setOutputData(slot, work);
     return true;
   }
   onExecute(){
-    const extra = this.properties.sigExtra || 0;
-    const sigCount = Math.max(0, extra);
+    const sigCount = 0;
     if(this._holdPendingWork()){
       for(let i=0;i<sigCount;i++) this._emit(i, 'SEND');
       return;
     }
-    if(!this._seq || !this._seq.length) this._parseSeq();
+    const e = this._currentSequenceEntry();
+    if(!e){
+      (this.outputs || []).forEach((_output, slot)=>this.setOutputData(slot, null));
+      for(let i=0;i<sigCount;i++) this._emit(i, 'IDLE');
+      return;
+    }
     const nextId = (this._counter || 0) + 1;
-    const e = this._seq[this._cursor] || {type:'A'};
-    const preview = new Work(nextId, e.type);
+    const preview = new Work(nextId, e.type, e.typeId);
     const flowSelection = typeof this._runtimeSelectOutputRule === 'function'
       ? this._runtimeSelectOutputRule(preview, { processComplete:true })
       : { slot:0 };
@@ -152,13 +197,19 @@ class SourceNode extends LiteGraph.LGraphNode{
     const ready = !!downstream.ready;
 
     if(ready){
+      const generatedAt = Number(simNow());
+      if(Number.isFinite(this._lastGeneratedAt) && generatedAt <= this._lastGeneratedAt){
+        this.setOutputData(flowSlot, null);
+        return;
+      }
       const w = preview;
       this.setOutputData(flowSlot, w);
       this._pendingWork = w;
       this._pendingOutputSlot = flowSlot;
       this._animateWorkOutput(w, flowSlot);
       this._counter = nextId;
-      this._cursor = (this._cursor + 1) % this._seq.length;
+      this._lastGeneratedAt = generatedAt;
+      this._advanceSequence();
       for(let i=0;i<sigCount;i++) this._emit(i, 'SEND');
       return;
     }
@@ -172,15 +223,14 @@ menuMixin(SourceNode);
 window.SourceNode = SourceNode;
 
 SourceNode.prototype.onDrawForeground = function(ctx){
-  const next = (this._seq && this._seq.length) ? this._seq[this._cursor] : {type:'A'};
+  const next = (typeof this._currentSequenceEntry === 'function') ? this._currentSequenceEntry() : null;
   const downstream = (typeof this._downstreamStatus === 'function')
     ? this._downstreamStatus().status
     : 'DISCONNECTED';
   const lines = [
-    `Next: ID=${(this._counter||0)+1} Type=${next?next.type:'A'}`,
+    next ? `Next: ID=${(this._counter||0)+1} Type=${next.type}` : 'Next: Sequence invalid',
     `Downstream: ${downstream}`,
-    `Sig: enabled=${!!this.properties.sigEnabled} extra=${this.properties.sigExtra}`,
-    `SeqLen: ${this._seq?this._seq.length:0} Cursor: ${this._cursor}`,
+    `SeqLen: ${this._seq?this._seq.length:0} Cursor: ${this._cursor + 1}/${this._seq?.length || 0}`,
     `localCounter: ${this._counter||0}`
   ];
   drawStateBelow(ctx, this, lines, 8, 6);

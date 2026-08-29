@@ -332,7 +332,9 @@ async function applyEditOperation(
     initialContents?: unknown[];
     inputRules?: unknown[];
     outputRules?: unknown[];
-    presetId?: string;
+    nodeOperations?: unknown[];
+    inputPolicy?: Record<string, unknown>;
+    templateId?: string;
   }
 ) {
   const {
@@ -364,7 +366,9 @@ async function applyEditOperation(
     ,initialContents
     ,inputRules
     ,outputRules
-    ,presetId
+    ,nodeOperations
+    ,inputPolicy
+    ,templateId
   } = operation;
 
   switch (action) {
@@ -440,11 +444,11 @@ async function applyEditOperation(
       return runtime.setNodeInitialContents(resolveBatchNodeId(nodeId, refs) as string | number, initialContents);
     case "set_flow_rules":
       if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=set_flow_rules");
-      return runtime.setNodeFlowRules(resolveBatchNodeId(nodeId, refs) as string | number, inputRules, outputRules);
-    case "apply_preset":
-      if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=apply_preset");
-      if (!presetId) throw new Error("presetId is required when action=apply_preset");
-      return runtime.applyBasicPreset(resolveBatchNodeId(nodeId, refs) as string | number, presetId);
+      return runtime.setNodeFlowRules(resolveBatchNodeId(nodeId, refs) as string | number, inputRules, outputRules, nodeOperations, inputPolicy);
+    case "apply_template":
+      if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=apply_template");
+      if (!templateId) throw new Error("templateId is required when action=apply_template");
+      return runtime.applyBasicTemplate(resolveBatchNodeId(nodeId, refs) as string | number, templateId);
     case "migrate_basic":
       return runtime.migrateCurrentGraphToBasic();
     default:
@@ -897,7 +901,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
     {
       description: "Add, update, remove, connect, disconnect, or build nodes and links.",
       inputSchema: {
-        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch", "upsert_entity_type", "remove_entity_type", "set_initial_contents", "set_flow_rules", "apply_preset", "migrate_basic"]),
+        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch", "upsert_entity_type", "remove_entity_type", "set_initial_contents", "set_flow_rules", "apply_template", "migrate_basic"]),
         nodeType: z.string().min(1).optional(),
         title: z.string().optional(),
         x: z.number().optional(),
@@ -927,10 +931,12 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         ,initialContents: unknownArraySchema.optional()
         ,inputRules: unknownArraySchema.optional()
         ,outputRules: unknownArraySchema.optional()
-        ,presetId: z.string().min(1).optional()
+        ,nodeOperations: unknownArraySchema.optional()
+        ,inputPolicy: jsonRecordSchema.optional()
+        ,templateId: z.string().min(1).optional()
       }
     },
-    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref, entityType, typeId, initialContents, inputRules, outputRules, presetId }, extra) => {
+    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref, entityType, typeId, initialContents, inputRules, outputRules, nodeOperations, inputPolicy, templateId }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "edit_graph", { action }, async () => {
         if (action === "batch") {
@@ -991,7 +997,9 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
               ,initialContents: Array.isArray(current.initialContents) ? current.initialContents : undefined
               ,inputRules: Array.isArray(current.inputRules) ? current.inputRules : undefined
               ,outputRules: Array.isArray(current.outputRules) ? current.outputRules : undefined
-              ,presetId: typeof current.presetId === "string" ? current.presetId : undefined
+              ,nodeOperations: Array.isArray(current.nodeOperations) ? current.nodeOperations : undefined
+              ,inputPolicy: current.inputPolicy && typeof current.inputPolicy === "object" ? current.inputPolicy as Record<string, unknown> : undefined
+              ,templateId: typeof current.templateId === "string" ? current.templateId : undefined
             });
             storeBatchRef(refs, currentRef || undefined, result);
             results.push({ index, action: String(current.action ?? ""), ref: currentRef || null, result });
@@ -1033,7 +1041,9 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           ,initialContents
           ,inputRules
           ,outputRules
-          ,presetId
+          ,nodeOperations
+          ,inputPolicy
+          ,templateId
         });
         return result;
       });

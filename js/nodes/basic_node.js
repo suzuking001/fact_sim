@@ -1,5 +1,5 @@
-// One persisted node type with data-driven presets. Presets may reuse internal
-// runtime strategies, but every graph node is serialized as factory/basic.
+// One persisted Entity node type. Add-node templates only seed common rules,
+// timings and operations; template identity is never part of the saved node.
 
 (function(root){
   'use strict';
@@ -27,6 +27,54 @@
     signal:      { title: 'Signal', category: 'Utility', entity: false, processTime: 0, downTime: 0, contentCapacity: 0 },
     note:        { title: 'Note', category: 'Utility', entity: false, processTime: 0, downTime: 0, contentCapacity: 0 }
   });
+
+  const TEMPLATE_OPERATIONS = Object.freeze({
+    basic:        [{ operationId:'process-1', trigger:'process', kind:'process' }],
+    machine:      [{ operationId:'process-1', trigger:'process', kind:'process' }],
+    inspection:   [{ operationId:'process-1', trigger:'process', kind:'process' }],
+    buffer:       [{ operationId:'hold-1', trigger:'input-accepted', kind:'hold' }],
+    conveyor:     [{ operationId:'process-1', trigger:'process', kind:'process' }],
+    router:       [{ operationId:'route-1', trigger:'release', kind:'route' }],
+    pack:         [{ operationId:'attach-1', trigger:'input-accepted', kind:'attach' }],
+    unpack:       [{ operationId:'detach-1', trigger:'release', kind:'detach' }],
+    source:       [{ operationId:'create-1', trigger:'release', kind:'create' }],
+    sink:         [{ operationId:'destroy-1', trigger:'input-accepted', kind:'destroy' }],
+    split:        [{ operationId:'clone-1', trigger:'release', kind:'clone', dispatch:'all-ready' }],
+    merge:        [{ operationId:'merge-1', trigger:'input-accepted', kind:'merge' }],
+    join:         [{ operationId:'join-1', trigger:'input-accepted', kind:'join' }],
+    shuttle:      [{ operationId:'shuttle-1', trigger:'release', kind:'synchronized-step', groupId:'shuttle-1' }],
+    carrier_route:[{ operationId:'transport-1', trigger:'process', kind:'carrier-transport', routePolicy:'first-ready' }],
+    station:      [{ operationId:'station-1', trigger:'process', kind:'station-transfer' }],
+    transfer:     [{ operationId:'transfer-1', trigger:'process', kind:'transfer' }],
+    signal:       [],
+    note:         []
+  });
+
+  const OPERATION_BEHAVIOR = Object.freeze({
+    create:'source', destroy:'sink', clone:'split', merge:'merge', join:'join',
+    'synchronized-step':'shuttle', 'carrier-transport':'carrier_route',
+    'station-transfer':'station', transfer:'transfer', attach:'pack', detach:'unpack',
+    route:'router', hold:'buffer', process:'machine'
+  });
+
+  // Public, declarative registry used by both the editor and execution-plan
+  // compiler. Templates only seed these operation rows; no template identity
+  // is required after a node has been created.
+  const ACTION_REGISTRY = Object.freeze(Object.fromEntries(
+    Object.entries(OPERATION_BEHAVIOR).map(([kind, behavior])=>[
+      kind,
+      Object.freeze({ kind, behavior })
+    ])
+  ));
+
+  const LEGACY_PROPERTY_KEYS = new Set([
+    'presetId', 'sourceSequence', 'processTime', 'processTime2', 'downTime',
+    'ratio', 'strictIdMatch', 'stageIndex', 'shuttleGroupId', 'initialCarrier',
+    'agvIds', 'agvCapacity', 'palletWorkCapacity', 'transportMode', 'outSequence',
+    'sourceMode', 'rootKind', 'rootId', 'capacity', 'accepts', 'preset', 'operation',
+    'sourceKind', 'targetKind', 'itemKind', 'batchMode', 'quantity', 'relationMode',
+    'searchDepth', 'autoRelease', 'script', 'scriptDisabled', 'sigEnabled', 'sigExtra'
+  ]);
 
   const TYPE_TO_PRESET = Object.freeze({
     'factory/source': 'source',
@@ -56,6 +104,177 @@
   function clone(value, fallback){ try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return fallback; } }
   function text(value){ return String(value == null ? '' : value).trim(); }
   function nowMs(){ return typeof root.simNow === 'function' ? Number(root.simNow()) || 0 : 0; }
+
+  function hasSequenceTarget(node){
+    return (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : []).some((rule)=>{
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+      return targets.some((target)=>text(target?.mode || target?.kind || target).toLowerCase() === 'sequence');
+    });
+  }
+
+  function sequenceTarget(node){
+    for(const rule of (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : [])){
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+      const target = targets.find((entry)=>text(entry?.mode || entry?.kind || entry).toLowerCase() === 'sequence');
+      if(target) return target;
+    }
+    return null;
+  }
+
+  function sequenceEntries(node){
+    const target = sequenceTarget(node);
+    return Array.isArray(target?.entries) ? target.entries : [];
+  }
+
+  function operationRows(node){
+    return Array.isArray(node?.properties?.operations) ? node.properties.operations : [];
+  }
+
+  function operationByKind(node, kind){
+    const wanted = text(kind).toLowerCase();
+    return operationRows(node).find((entry)=>text(entry?.kind).toLowerCase() === wanted) || null;
+  }
+
+  function behaviorId(node){
+    if(hasSequenceTarget(node)) return 'source';
+    for(const operation of operationRows(node)){
+      const behavior = OPERATION_BEHAVIOR[text(operation?.kind).toLowerCase()];
+      if(behavior) return behavior;
+    }
+    return 'basic';
+  }
+
+  function compileExecutionPlan(node){
+    const properties = node?.properties || {};
+    return {
+      version: 2,
+      behavior: behaviorId(node),
+      operations: normalizeOperations(properties.operations),
+      inputRules: clone(Array.isArray(properties.inputRules) ? properties.inputRules : [], []),
+      outputRules: clone(Array.isArray(properties.outputRules) ? properties.outputRules : [], []),
+      inputPolicy: clone(isObject(properties.inputPolicy) ? properties.inputPolicy : { mode:'first', requiredPortIds:[], match:null }, {}),
+      selection: text(properties.selection) || 'first-available',
+      portTimings: clone(isObject(properties.portTimings) ? properties.portTimings : { inputs:{}, outputs:{} }, { inputs:{}, outputs:{} })
+    };
+  }
+
+  function operationConfig(node, kind){
+    const operation = operationByKind(node, kind);
+    if(!operation) return {};
+    operation.config = isObject(operation.config) ? operation.config : {};
+    return operation.config;
+  }
+
+  function normalizeOperations(rows){
+    const result = [];
+    const used = new Set();
+    for(const [index, raw] of (Array.isArray(rows) ? rows : []).entries()){
+      if(!isObject(raw)) continue;
+      const kind = text(raw.kind).toLowerCase();
+      if(!kind) continue;
+      let operationId = text(raw.operationId) || `${kind}-${index + 1}`;
+      while(used.has(operationId)) operationId = `${kind}-${used.size + 1}`;
+      used.add(operationId);
+      result.push({ ...clone(raw, {}), operationId, trigger:text(raw.trigger) || 'process', kind });
+    }
+    return result;
+  }
+
+  function commonProperties(properties){
+    const source = isObject(properties) ? properties : {};
+    const result = {
+      basicNodeVersion: 2,
+      contentCapacity: Math.max(0, Math.round(Number.isFinite(Number(source.contentCapacity)) ? Number(source.contentCapacity) : 1)),
+      initialContents: clone(Array.isArray(source.initialContents) ? source.initialContents : [], []),
+      inputRules: clone(Array.isArray(source.inputRules) ? source.inputRules : [], []),
+      outputRules: clone(Array.isArray(source.outputRules) ? source.outputRules : [], []),
+      portTimings: clone(isObject(source.portTimings) ? source.portTimings : { inputs:{}, outputs:{} }, { inputs:{}, outputs:{} }),
+      inputPolicy: clone(isObject(source.inputPolicy) ? source.inputPolicy : { mode:'first', requiredPortIds:[], match:null }, { mode:'first', requiredPortIds:[], match:null }),
+      selection: text(source.selection) || 'first-available',
+      stateMachine: clone(isObject(source.stateMachine) ? source.stateMachine : { initialState:'IDLE', states:['IDLE','PROCESS','WAIT','DOWN'], transitions:[] }, {}),
+      operations: normalizeOperations(source.operations)
+    };
+    if(Number.isFinite(Number(source.flowPortSequence))) result.flowPortSequence = Math.max(0, Math.round(Number(source.flowPortSequence)));
+    return result;
+  }
+
+  function templateOperations(templateId, legacyProperties){
+    const id = Object.prototype.hasOwnProperty.call(TEMPLATE_OPERATIONS, templateId) ? templateId : 'basic';
+    const rows = clone(TEMPLATE_OPERATIONS[id], []);
+    const legacy = isObject(legacyProperties) ? legacyProperties : {};
+    const configKeys = [
+      'transportMode', 'outSequence', 'strictIdMatch', 'ratio', 'preset', 'operation',
+      'sourceKind', 'targetKind', 'itemKind', 'batchMode', 'quantity', 'relationMode',
+      'searchDepth', 'autoRelease'
+    ];
+    const config = {};
+    for(const key of configKeys){
+      if(Object.prototype.hasOwnProperty.call(legacy, key)) config[key] = clone(legacy[key], legacy[key]);
+    }
+    if(rows[0] && Object.keys(config).length) rows[0].config = config;
+    if(id === 'shuttle' && rows[0]) rows[0].groupId = text(legacy.shuttleGroupId) || text(rows[0].groupId) || 'shuttle-1';
+    return normalizeOperations(rows);
+  }
+
+  function legacyTimingOverrides(script, model){
+    const source = text(script);
+    if(!source) return {};
+    const result = {};
+    const pattern = /work\.type\s*===\s*['"]([^'"]+)['"][\s\S]*?processTime\s*=\s*([0-9.]+)[\s\S]*?downTime\s*=\s*([0-9.]+)/g;
+    let match = null;
+    while((match = pattern.exec(source))){
+      const typeId = typeIdForLegacyName(model, match[1]);
+      if(typeId) result[typeId] = { processTimeSec:Math.max(0, Number(match[2]) || 0), downTimeSec:Math.max(0, Number(match[3]) || 0) };
+    }
+    return result;
+  }
+
+  function moveSequenceIntoTarget(properties){
+    const rules = Array.isArray(properties?.outputRules) ? properties.outputRules : [];
+    const legacyRows = Array.isArray(properties?.sourceSequence) ? properties.sourceSequence : [];
+    for(const rule of rules){
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target].filter(Boolean);
+      const sequence = targets.find((entry)=>text(entry?.mode || entry?.kind || entry).toLowerCase() === 'sequence');
+      if(!sequence) continue;
+      sequence.mode = 'sequence';
+      sequence.entries = clone(Array.isArray(sequence.entries) ? sequence.entries : legacyRows, []);
+      rule.targets = [sequence];
+      rule.target = sequence;
+      break;
+    }
+  }
+
+  function upgradeNodeProperties(node, templateHint){
+    const legacy = isObject(node?.properties) ? node.properties : {};
+    const hint = text(templateHint || legacy.presetId).toLowerCase() || (hasSequenceTarget(node) ? 'source' : 'basic');
+    moveSequenceIntoTarget(legacy);
+    const next = commonProperties(legacy);
+    if(!next.operations.length) next.operations = templateOperations(hint, legacy);
+    if(legacy.strictIdMatch){
+      next.inputPolicy = { mode:'all', requiredPortIds:[], match:{ path:'instanceId', operator:'eq' } };
+    }
+    if(text(legacy.outSequence)) next.selection = 'round-robin';
+    node.properties = next;
+    ensurePortTimings(node);
+    const inputPorts = entityFlowPorts(node, 'input');
+    const outputPorts = entityFlowPorts(node, 'output');
+    inputPorts.forEach((port, index)=>{
+      const key = index === 0 ? 'processTime' : `processTime${index + 1}`;
+      const value = Number(legacy[key]);
+      const timing = node.properties.portTimings.inputs[port.portId] || (node.properties.portTimings.inputs[port.portId] = {});
+      if(Number.isFinite(value) && !Number.isFinite(Number(timing.processTimeSec))) timing.processTimeSec = Math.max(0, value);
+      if(!Array.isArray(timing.processStages)){
+        timing.processStages = [{ stageId:`${port.portId}-process-1`, durationSec:Math.max(0, Number(timing.processTimeSec) || 0) }];
+      }
+    });
+    outputPorts.forEach((port, index)=>{
+      const key = index === 0 ? 'downTime' : `downTime${index + 1}`;
+      const value = Number(legacy[key]);
+      const timing = node.properties.portTimings.outputs[port.portId] || (node.properties.portTimings.outputs[port.portId] = {});
+      if(Number.isFinite(value) && !Number.isFinite(Number(timing.downTimeSec))) timing.downTimeSec = Math.max(0, value);
+    });
+    return hint;
+  }
 
   function normalizeSerializedVector(value){
     if(Array.isArray(value)) return value;
@@ -117,14 +336,8 @@
   }
 
   function defaultEntityCategory(node){
-    const presetId = text(node?.properties?.presetId).toLowerCase();
-    if(presetId === 'source' && text(node?.properties?.sourceMode).toLowerCase() === 'entity'){
-      const kind = text(node?.properties?.rootKind).toLowerCase();
-      if(kind === 'carrier' || kind === 'agv') return 'carrier';
-      if(kind === 'work') return 'work';
-      return 'container';
-    }
-    if(presetId === 'carrier_route') return 'carrier';
+    const behavior = behaviorId(node);
+    if(behavior === 'carrier_route') return 'carrier';
     return 'work';
   }
 
@@ -163,13 +376,14 @@
   }
 
   function defaultReleaseCondition(node){
-    const presetId = text(node?.properties?.presetId).toLowerCase();
+    const presetId = behaviorId(node);
     if(presetId === 'shuttle'){
+      const shuttle = operationByKind(node, 'synchronized-step');
       return {
         kind: 'all',
         conditions: [
           { kind: 'process-complete' },
-          { kind: 'shuttle-group-idle', groupId: text(node?.properties?.shuttleGroupId) || 'shuttle-1' },
+          { kind: 'shuttle-group-idle', groupId: text(shuttle?.groupId) || 'shuttle-1' },
           { kind: 'downstream-ready' }
         ]
       };
@@ -198,7 +412,7 @@
   }
 
   function defaultInputRules(node, presetId, inputs){
-    if(presetId === 'source' || presetId === 'note' || presetId === 'signal') return [];
+    if(hasSequenceTarget(node) || presetId === 'source' || presetId === 'note' || presetId === 'signal') return [];
     return inputs.map((port, index)=>{
       const categories = presetPortCategories(node, presetId, 'input', index);
       let acceptKind = presetId === 'sink' ? 'always' : 'space-available';
@@ -241,13 +455,18 @@
         [port]
       ));
     }
-    return [makeOutputRule(presetId, 0, [defaultEntityCategory(node)], defaultReleaseCondition(node), outputs)];
+    const rule = makeOutputRule(presetId, 0, [defaultEntityCategory(node)], defaultReleaseCondition(node), outputs);
+    if(presetId === 'source'){
+      rule.targets = [{ mode:'sequence' }];
+      rule.target = rule.targets[0];
+    }
+    return [rule];
   }
 
   function ensurePresetFlowRules(node, options){
     if(!node || !isObject(node.properties)) return;
     const force = options?.force === true;
-    const presetId = text(node.properties.presetId).toLowerCase() || 'basic';
+    const presetId = text(options?.templateId).toLowerCase() || behaviorId(node);
     const preset = PRESETS[presetId] || PRESETS.basic;
     if(preset.entity === false){
       if(!Array.isArray(node.properties.inputRules)) node.properties.inputRules = [];
@@ -255,7 +474,7 @@
       return;
     }
     ensurePortIds(node);
-    const counts = defaultPortCounts(presetId);
+    const counts = hasSequenceTarget(node) ? { inputs:0, outputs:1 } : defaultPortCounts(presetId);
     const inputs = Array.isArray(node.inputs) && node.inputs.length
       ? node.inputs
       : Array.from({ length: counts.inputs }, (_unused, index)=>({ portId: `in-${index + 1}` }));
@@ -273,8 +492,8 @@
 
   function ensurePresetRuleCoverage(node){
     if(!node || !isObject(node.properties)) return;
-    const presetId = text(node.properties.presetId).toLowerCase() || 'basic';
-    if(['source', 'note', 'signal'].includes(presetId)) return;
+    const presetId = behaviorId(node);
+    if(hasSequenceTarget(node) || ['source', 'note', 'signal'].includes(presetId)) return;
     const inputRules = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : (node.properties.inputRules = []);
     for(const [index, port] of (node.inputs || []).entries()){
       if(!port || isSignalPort(port) || inputRules.some((rule)=>text(rule?.fromPortId) === text(port.portId))) continue;
@@ -397,6 +616,14 @@
       if(!isObject(model.inputs[port.portId])){
         model.inputs[port.portId] = { processTimeSec:Math.max(0, Number.isFinite(fallback) ? fallback : Number(node.properties.processTime) || 0) };
       }
+      const timing = model.inputs[port.portId];
+      if(!Array.isArray(timing.processStages) || !timing.processStages.length){
+        timing.processStages = [{
+          stageId:`${port.portId}-process-1`,
+          durationSec:Math.max(0, Number(timing.processTimeSec) || 0)
+        }];
+      }
+      timing.processTimeSec = timing.processStages.reduce((sum, stage)=>sum + Math.max(0, Number(stage?.durationSec) || 0), 0);
     });
     entityFlowPorts(node, 'output').forEach((port, index)=>{
       const key = index === 0 ? 'downTime' : `downTime${index + 1}`;
@@ -414,7 +641,9 @@
     const port = Array.isArray(rows) ? rows[slotIndex] : null;
     const model = ensurePortTimings(node);
     const value = direction === 'input'
-      ? model.inputs?.[port?.portId]?.processTimeSec
+      ? (Array.isArray(model.inputs?.[port?.portId]?.processStages)
+        ? model.inputs[port.portId].processStages.reduce((sum, stage)=>sum + Math.max(0, Number(stage?.durationSec) || 0), 0)
+        : model.inputs?.[port?.portId]?.processTimeSec)
       : model.outputs?.[port?.portId]?.downTimeSec;
     const fallback = direction === 'input' ? node?.properties?.processTime : node?.properties?.downTime;
     return Math.max(0, Number.isFinite(Number(value)) ? Number(value) : Number(fallback) || 0);
@@ -451,35 +680,42 @@
     port.channel = 'entity';
     port.type = 0;
     port.flowManaged = true;
-    port.requiredByPreset = false;
+    delete port.requiredByPreset;
     ensurePortTimings(node);
     const timings = node.properties.portTimings;
-    if(direction === 'input') timings.inputs[port.portId] = { processTimeSec:Math.max(0, Number(node.properties.processTime) || 0) };
+    if(direction === 'input'){
+      const durationSec = Math.max(0, Number(node.properties.processTime) || 0);
+      timings.inputs[port.portId] = {
+        processTimeSec:durationSec,
+        processStages:[{ stageId:`${port.portId}-process-1`, durationSec }]
+      };
+    }
     else timings.outputs[port.portId] = { downTimeSec:Math.max(0, Number(node.properties.downTime) || 0) };
     normalizeEntityPorts(node);
     return port;
   }
 
-  function markPresetPortsRequired(node){
+  function markEntityPortsManaged(node){
     [...(node?.inputs || []), ...(node?.outputs || [])].forEach((port)=>{
-      if(!port || isSignalPort(port) || port.flowManaged) return;
-      port.requiredByPreset = true;
-      port.flowManaged = false;
+      if(!port || isSignalPort(port)) return;
+      port.flowManaged = true;
+      delete port.requiredByPreset;
     });
   }
 
   function syncFlowPorts(node, options){
     if(!node || !isObject(node.properties)) return { created:[], warnings:[] };
-    const preset = PRESETS[text(node.properties.presetId).toLowerCase()] || PRESETS.basic;
+    const behavior = behaviorId(node);
+    const preset = PRESETS[behavior] || PRESETS.basic;
     ensurePortIds(node);
     normalizeEntityPorts(node);
     if(preset.entity === false) return { created:[], warnings:[] };
-    markPresetPortsRequired(node);
+    markEntityPortsManaged(node);
     const created = [];
     const warnings = [];
     const inputRules = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : [];
     const outputRules = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : [];
-    if(text(node.properties.presetId).toLowerCase() !== 'source'){
+    if(behavior !== 'source'){
       for(const rule of inputRules){
         let portId = text(rule?.fromPortId);
         if(!portId || portIndexById(node.inputs, portId) < 0){
@@ -489,7 +725,7 @@
         }
       }
     }
-    if(text(node.properties.presetId).toLowerCase() !== 'sink'){
+    if(behavior !== 'sink'){
       for(const rule of outputRules){
         const requested = Array.isArray(rule?.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule?.toPortId].filter(Boolean);
         const ids = requested.length ? requested : [''];
@@ -527,7 +763,7 @@
     const rows = direction === 'input' ? node?.inputs : node?.outputs;
     const index = portIndexById(rows, portId);
     const port = index >= 0 ? rows[index] : null;
-    if(!port || port.requiredByPreset || !port.flowManaged || flowPortReferenced(node, direction, portId)) return { removed:false, reason:'retained' };
+    if(!port || !port.flowManaged || flowPortReferenced(node, direction, portId)) return { removed:false, reason:'retained' };
     const links = direction === 'input' ? [port.link].filter((id)=>id != null) : (Array.isArray(port.links) ? port.links.slice() : []);
     if(links.length && options?.confirmLinked !== true) return { removed:false, reason:'linked', links };
     links.forEach((linkId)=>{ try{ node.graph?.removeLink?.(linkId); }catch(_e){} });
@@ -539,17 +775,17 @@
     return { removed:true, links };
   }
 
-  function presetRuntimeCtor(presetId, properties){
-    const preset = text(presetId).toLowerCase();
-    if(preset === 'source') return text(properties?.sourceMode).toLowerCase() === 'entity'
-      ? root.EntitySourceNode
-      : root.SourceNode;
+  function actionRuntimeCtor(node){
+    const preset = behaviorId(node);
+    const properties = node?.properties || {};
+    if(hasSequenceTarget(node)) return root.SourceNode;
+    if(preset === 'source') return root.SourceNode;
     if(preset === 'machine' || preset === 'inspection') return root.EquipmentNode;
     if(preset === 'router') return root.BranchNode;
     if(preset === 'split') return root.SplitNode;
     if(preset === 'merge') return root.MergeNode;
     if(preset === 'join') return root.JoinNode;
-    if(preset === 'carrier_route') return text(properties?.transportMode).toLowerCase() === 'agv'
+    if(preset === 'carrier_route') return text(operationConfig(node, 'carrier-transport')?.transportMode || properties?.transportMode).toLowerCase() === 'agv'
       ? root.AGVRouteNode
       : root.CarrierRouteNode;
     if(preset === 'station') return root.StationNode;
@@ -560,7 +796,7 @@
     return null;
   }
 
-  function installPresetRuntimeMethods(target, ctor){
+  function installActionRuntimeMethods(target, ctor){
     for(const name of (target._runtimeMethodNames || [])) delete target[name];
     target._runtimeMethodNames = [];
     let proto = ctor?.prototype;
@@ -597,17 +833,16 @@
       this.addOutput('outPort1', 0);
       ensurePortIds(this);
       this.properties = {
-        basicNodeVersion: 1,
-        presetId: 'basic',
-        processTime: 0,
-        downTime: 0,
+        basicNodeVersion: 2,
         contentCapacity: 1,
         initialContents: [],
         inputRules: [],
         outputRules: [],
         portTimings: { inputs:{}, outputs:{} },
+        inputPolicy: { mode:'first', requiredPortIds:[], match:null },
         selection: 'first-available',
-        stateMachine: { initialState: 'IDLE', states: ['IDLE', 'PROCESS', 'WAIT', 'DOWN'], transitions: [] }
+        stateMachine: { initialState: 'IDLE', states: ['IDLE', 'PROCESS', 'WAIT', 'DOWN'], transitions: [] },
+        operations: templateOperations('basic')
       };
       this._state = 'IDLE';
       this._stateName = 'idle';
@@ -628,13 +863,13 @@
       this._runtimePrototype = null;
       this._runtimeConfigured = false;
       this._runtimeMethodNames = [];
-      this._appliedPresetId = 'basic';
+      this._appliedTemplateId = 'basic';
+      this._executionPlan = compileExecutionPlan(this);
       if(root.enableFlipIO) root.enableFlipIO(this);
     }
 
     _store(){ return typeof App.runtimeInstancesForGraph === 'function' ? App.runtimeInstancesForGraph(this.graph) : null; }
-    _preset(){ return PRESETS[this.properties?.presetId] || PRESETS.basic; }
-    hasEntityContents(){ return this._preset().entity !== false; }
+    hasEntityContents(){ return true; }
 
     configure(serializedNode){
       const normalizedNode = serializedNode && typeof serializedNode === 'object'
@@ -652,21 +887,23 @@
       }
     }
 
-    applyPreset(presetId, preserveTitle){
-      const id = Object.prototype.hasOwnProperty.call(PRESETS, presetId) ? presetId : 'basic';
+    applyTemplate(templateId, preserveTitle){
+      const id = Object.prototype.hasOwnProperty.call(PRESETS, templateId) ? templateId : 'basic';
       const preset = PRESETS[id];
-      const presetChanged = this._appliedPresetId !== id;
-      this.properties = { ...(this.properties || {}), basicNodeVersion: 1, presetId: id };
-      if(presetChanged || !Number.isFinite(Number(this.properties.processTime))) this.properties.processTime = preset.processTime;
-      if(presetChanged || !Number.isFinite(Number(this.properties.downTime))) this.properties.downTime = preset.downTime;
-      if(presetChanged || !Number.isFinite(Number(this.properties.contentCapacity))) this.properties.contentCapacity = preset.contentCapacity;
-      // A preset change replaces the physical role ports.  Do not carry the
-      // previous preset's per-port durations into the new port layout; let
-      // _ensurePresetPorts seed them from the new preset defaults instead.
-      if(presetChanged) this.properties.portTimings = { inputs:{}, outputs:{} };
+      const templateChanged = this._appliedTemplateId !== id;
+      if(templateChanged){
+        installActionRuntimeMethods(this, null);
+        this._runtimePrototype = null;
+        this._runtimeConfigured = false;
+      }
+      this.properties = commonProperties(this.properties);
+      this.properties.basicNodeVersion = 2;
+      if(templateChanged || !Number.isFinite(Number(this.properties.contentCapacity))) this.properties.contentCapacity = preset.contentCapacity;
+      if(templateChanged) this.properties.portTimings = { inputs:{}, outputs:{} };
       if(!Array.isArray(this.properties.initialContents)) this.properties.initialContents = [];
-      if(presetChanged || !Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
-      if(presetChanged || !Array.isArray(this.properties.outputRules)) this.properties.outputRules = [];
+      if(templateChanged || !Array.isArray(this.properties.inputRules)) this.properties.inputRules = [];
+      if(templateChanged || !Array.isArray(this.properties.outputRules)) this.properties.outputRules = [];
+      if(templateChanged || !Array.isArray(this.properties.operations)) this.properties.operations = templateOperations(id);
       if(id === 'shuttle' && !this.properties.inputRules.length){
         this.properties.inputRules = [{
           ruleId: 'shuttle-input-1',
@@ -685,7 +922,7 @@
             kind: 'all',
             conditions: [
               { kind: 'process-complete' },
-              { kind: 'shuttle-group-idle', groupId: text(this.properties.shuttleGroupId) || 'shuttle-1' },
+              { kind: 'shuttle-group-idle', groupId: text(operationByKind(this, 'synchronized-step')?.groupId) || 'shuttle-1' },
               { kind: 'downstream-ready' }
             ]
           },
@@ -694,17 +931,22 @@
         }];
       }
       if(!preserveTitle) this.title = preset.title;
-      this._ensurePresetPorts();
-      ensurePresetFlowRules(this, { force: presetChanged });
+      this._ensureTemplatePorts(id, preset.processTime, preset.downTime);
+      ensurePresetFlowRules(this, { force: templateChanged, templateId:id });
       syncFlowPorts(this, { dirty:false });
-      this._appliedPresetId = id;
+      this._appliedTemplateId = id;
       if(id === 'shuttle') this._applyShuttleStateColor();
+      if(id === 'source' && this.graph){
+        App.ensureSourceSequence?.(this, { createDefault:true });
+        if(typeof this._parseSeq === 'function') this._parseSeq();
+      }
+      this._configureActionRuntime(null);
       return this;
     }
 
-    _ensurePresetPorts(){
+    _ensureTemplatePorts(templateId, processTime, downTime){
       if(this._runtimePrototype){ ensurePortIds(this); normalizeEntityPorts(this); return; }
-      const id = this.properties?.presetId;
+      const id = templateId || behaviorId(this);
       const names = defaultPortNames(id);
       while(this.inputs.length < names.inputs.length) this.addInput(names.inputs[this.inputs.length], 0);
       while(this.outputs.length < names.outputs.length) this.addOutput(names.outputs[this.outputs.length], 0);
@@ -714,14 +956,20 @@
       this.outputs.forEach((port, index)=>{ port.name = names.outputs[index]; });
       ensurePortIds(this);
       normalizeEntityPorts(this);
-      markPresetPortsRequired(this);
+      markEntityPortsManaged(this);
       ensurePortTimings(this);
+      for(const [portId, timing] of Object.entries(this.properties.portTimings.inputs || {})){
+        const durationSec = Math.max(0, Number(processTime) || 0);
+        timing.processStages = [{ stageId:`${portId}-process-1`, durationSec }];
+        timing.processTimeSec = durationSec;
+      }
+      for(const timing of Object.values(this.properties.portTimings.outputs || {})) timing.downTimeSec = Math.max(0, Number(downTime) || 0);
     }
 
-    _configurePresetRuntime(serializedNode){
-      const ctor = presetRuntimeCtor(this.properties?.presetId, this.properties);
+    _configureActionRuntime(serializedNode){
+      const ctor = actionRuntimeCtor(this);
       if(!ctor){
-        installPresetRuntimeMethods(this, null);
+        installActionRuntimeMethods(this, null);
         this._runtimePrototype = null;
         this._runtimeConfigured = false;
         return false;
@@ -752,7 +1000,33 @@
           this.outputs = clone(temp.outputs, []);
         }
       }
-      installPresetRuntimeMethods(this, ctor);
+      const activeOperation = operationRows(this).find((operation)=>OPERATION_BEHAVIOR[text(operation?.kind).toLowerCase()] === behaviorId(this));
+      if(isObject(activeOperation?.config)) Object.assign(this.properties, clone(activeOperation.config, {}));
+      if(behaviorId(this) === 'carrier_route'){
+        const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(this.graph) : null;
+        const carrierRecipe = (Array.isArray(this.properties?.initialContents) ? this.properties.initialContents : [])
+          .find((recipe)=> text(registry?.get?.(recipe?.typeId)?.category).toLowerCase() === 'carrier');
+        const carrierType = carrierRecipe ? registry?.get?.(carrierRecipe.typeId) : null;
+        if(carrierType){
+          // Carrier Route still executes through the proven transport action
+          // implementation. Feed its transient bootstrap fields from the
+          // canonical Initial Contents recipe; they are intentionally removed
+          // again by commonProperties() when the graph is serialized.
+          this.properties.initialCarrier = text(carrierType.name) || text(carrierType.typeId);
+          this.properties.initialCarrierTypeId = text(carrierType.typeId);
+        }
+      }
+      if(behaviorId(this) === 'merge' && this.properties?.inputPolicy?.match){
+        const match = this.properties.inputPolicy.match;
+        this.properties.strictIdMatch = text(match.path).toLowerCase() === 'instanceid';
+      }
+      ensurePortIds(this);
+      ensurePortTimings(this);
+      const inputSlots = entityPortSlots(this, 'input');
+      const outputSlots = entityPortSlots(this, 'output');
+      this.properties.processTime = inputSlots.length ? flowPortTiming(this, 'input', inputSlots[0]) : 0;
+      this.properties.downTime = outputSlots.length ? flowPortTiming(this, 'output', outputSlots[0]) : 0;
+      installActionRuntimeMethods(this, ctor);
       this._runtimePrototype = ctor.prototype;
       // Materialize preset rules while the temporary runtime ports still carry
       // their constructor hints. Runtime execution that follows is exclusively
@@ -768,22 +1042,19 @@
       ensurePortIds(this);
       ensurePresetFlowRules(this);
       ensurePresetRuleCoverage(this);
-      markPresetPortsRequired(this);
+      markEntityPortsManaged(this);
       syncFlowPorts(this, { dirty:false });
+      this._executionPlan = compileExecutionPlan(this);
       return true;
     }
 
     onConfigure(serializedNode){
-      this.properties = { ...(this.properties || {}), basicNodeVersion: 1 };
-      if(!this.properties.presetId) this.properties.presetId = 'basic';
-      // A deserialized preset already contains user-edited defaults and rules.
-      // Mark it as applied so configure never replaces those values.
-      this._appliedPresetId = this.properties.presetId;
-      if(this._configurePresetRuntime(serializedNode)){
+      const legacyTemplate = text(this.properties?.presetId) || (hasSequenceTarget(this) ? 'source' : 'basic');
+      this._appliedTemplateId = upgradeNodeProperties(this, legacyTemplate);
+      if(this._configureActionRuntime(serializedNode)){
         restoreSerializedGeometry(this, serializedNode);
         return;
       }
-      this.applyPreset(this.properties.presetId, true);
       this._migrateLegacyShuttleGroupSetting();
       this._state = this.properties?.stateMachine?.initialState || 'IDLE';
       this._stateName = String(this._state).toLowerCase();
@@ -796,46 +1067,40 @@
       syncFlowPorts(this, { dirty:false });
       serialized.type = 'factory/basic';
       ensurePortIds(this);
-      serialized.inputs = clone(this.inputs, serialized.inputs || []);
-      serialized.outputs = clone(this.outputs, serialized.outputs || []);
-      serialized.properties = clone(this.properties, {});
+      const serializePorts = (rows)=>clone(rows, []).map((port)=>{
+        delete port.requiredByPreset;
+        if(!isSignalPort(port)) port.flowManaged = true;
+        return port;
+      });
+      serialized.inputs = serializePorts(this.inputs);
+      serialized.outputs = serializePorts(this.outputs);
+      serialized.properties = commonProperties(this.properties);
     }
 
     onPropertyChanged(name){
       if(this._isConfiguring) return;
-      if(name === 'presetId'){
-        installPresetRuntimeMethods(this, null);
-        this._runtimePrototype = null;
-        this.applyPreset(this.properties.presetId, false);
-        this._migrateLegacyShuttleGroupSetting();
-        this._configurePresetRuntime(null);
-        return;
+      if(['inputRules','outputRules','portTimings','inputPolicy','selection','stateMachine','operations'].includes(name)){
+        this._executionPlan = compileExecutionPlan(this);
       }
-      if(name === 'sourceMode' || name === 'transportMode'){
-        installPresetRuntimeMethods(this, null);
-        this._runtimePrototype = null;
-        this._configurePresetRuntime(null);
-        return;
+      if(name === 'outputRules' || name === 'operations'){
+        const wantsSequenceRuntime = hasSequenceTarget(this);
+        const hasSequenceRuntime = this._runtimePrototype === root.SourceNode?.prototype;
+        if(name === 'operations' || wantsSequenceRuntime !== hasSequenceRuntime){
+          installActionRuntimeMethods(this, null);
+          this._runtimePrototype = null;
+          this._configureActionRuntime({ inputs:this.inputs || [], outputs:this.outputs || [] });
+        }else if(wantsSequenceRuntime && typeof this._parseSeq === 'function'){
+          this._parseSeq();
+        }
       }
       if(this._runtimePrototype && typeof this._runtimePrototype.onPropertyChanged === 'function'){
         return this._runtimePrototype.onPropertyChanged.call(this, name);
       }
-      if(name === 'processTime') this.properties.processTime = Math.max(0, Number(this.properties.processTime) || 0);
-      if(name === 'downTime') this.properties.downTime = Math.max(0, Number(this.properties.downTime) || 0);
       if(name === 'contentCapacity') this.properties.contentCapacity = Math.max(0, Math.round(Number(this.properties.contentCapacity) || 0));
     }
 
     getInspectorSchema(){
-      if(this._runtimePrototype && typeof this._runtimePrototype.getInspectorSchema === 'function'){
-        return this._runtimePrototype.getInspectorSchema.call(this);
-      }
-      const schema = {
-        presetId: { type: 'select', label: 'Preset', options: Object.entries(PRESETS).map(([value, row])=>[value, row.title]) },
-        processTime: { type: 'number', label: 'Process time (s)' },
-        downTime: { type: 'number', label: 'Down time (s)' },
-        contentCapacity: { type: 'number', label: 'Node capacity' }
-      };
-      return schema;
+      return { contentCapacity: { type: 'number', label: 'Node capacity' } };
     }
 
     getEntityRoots(){
@@ -853,7 +1118,22 @@
       return { summary: store.summaryAt(this.id), instances: includeInstances ? store.treesAt(this.id) : [] };
     }
 
-    _flowTiming(direction, slotIndex){ return flowPortTiming(this, direction, slotIndex); }
+    _flowTiming(direction, slotIndex){
+      const override = this._activeTimingOverride;
+      const value = direction === 'input' ? override?.processTimeSec : override?.downTimeSec;
+      return Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : flowPortTiming(this, direction, slotIndex);
+    }
+
+    _timingOverrideFor(value){
+      const descriptor = this._runtimeValueDescriptor(value);
+      for(const operation of operationRows(this)){
+        const rows = operation?.config?.timingByTypeId;
+        if(!isObject(rows)) continue;
+        const matched = rows[descriptor.typeId] || Object.entries(rows).find(([key])=>key.toLowerCase() === descriptor.typeName.toLowerCase())?.[1];
+        if(isObject(matched)) return matched;
+      }
+      return null;
+    }
 
     _selectFlowInputCandidate(){
       const ruleSlots = (this.properties?.inputRules || []).map((rule)=>portIndexById(this.inputs, rule?.fromPortId)).filter((slot)=>slot >= 0);
@@ -897,7 +1177,7 @@
       if(this._runtimePrototype && typeof this._runtimePrototype.canAcceptEntityInput === 'function'){
         return this._runtimePrototype.canAcceptEntityInput.call(this, slotIndex, value);
       }
-      if(this.properties?.presetId === 'source' || this.properties?.presetId === 'note') return false;
+      if(hasSequenceTarget(this) || behaviorId(this) === 'source') return false;
       const capacity = Math.max(0, Number(this.properties?.contentCapacity) || 0);
       const store = this._store();
       const roots = store?.rootsAt(this.id) || [];
@@ -939,11 +1219,47 @@
       return { category, typeId:resolvedTypeId, typeName };
     }
 
+    _acknowledgeAcceptedInputs(){
+      if(!this.graph || !Array.isArray(this.inputs)) return;
+      for(let slot = 0; slot < this.inputs.length; slot += 1){
+        const input = this.inputs[slot];
+        if(!input || input.link == null || isSignalPort(input)) continue;
+        const link = this.graph.links?.[input.link];
+        const work = link?.data;
+        if(!link || !work || typeof work !== 'object') continue;
+        const accepted = this._lastInRef === work
+          || this._payload === work
+          || this._currentWork === work
+          || this._activeRoot === work
+          || this._activeTarget === work
+          || this._incomingPayload === work
+          || (Array.isArray(this._lastInRefs) && this._lastInRefs[slot] === work)
+          || (Array.isArray(this._worksBySlot) && this._worksBySlot.includes(work));
+        if(!accepted) continue;
+        const origin = this.graph.getNodeById?.(link.origin_id);
+        origin?.acknowledgeEntityOutput?.(work, this.id, link.origin_slot);
+      }
+    }
+
+    _notifyReadyEntityUpstreams(){
+      if(!this.graph || this._state !== 'IDLE' || !Array.isArray(this.inputs)) return;
+      if(this._payload || this._activeRoot || this._offer || this._pendingTransfer || this._incomingPayload) return;
+      for(const input of this.inputs){
+        if(!input || input.link == null || isSignalPort(input)) continue;
+        const link = this.graph.links?.[input.link];
+        const origin = link && this.graph.getNodeById?.(link.origin_id);
+        if(!origin || typeof origin.acknowledgeEntityOutput !== 'function') continue;
+        if(!this.graph.__dirtyNodeIds) this.graph.__dirtyNodeIds = new Set();
+        this.graph.__dirtyNodeIds.add(origin.id);
+      }
+    }
+
     _runtimeTargetMatches(value, target){
       const normalized = typeof App.normalizeEntityTarget === 'function' ? App.normalizeEntityTarget(target) : target;
       const descriptor = this._runtimeValueDescriptor(value);
       const mode = text(normalized?.mode).toLowerCase();
       if(mode === 'otherwise') return true;
+      if(mode === 'sequence') return hasSequenceTarget(this);
       if(mode === 'category') return descriptor.category === text(normalized?.category).toLowerCase();
       if(mode === 'type'){
         const wanted = text(normalized?.typeId);
@@ -1069,9 +1385,15 @@
         const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
         if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise = rule; continue; }
         if(!this._runtimeRuleTargetMatches(candidate, rule)) continue;
-        if(this._runtimeEvaluateCondition(rule.acceptWhen || { kind:'always' }, candidate, { slotIndex })) return { rule };
+        if(this._runtimeEvaluateCondition(rule.acceptWhen || { kind:'always' }, candidate, { slotIndex })){
+          this._activeTimingOverride = this._timingOverrideFor(candidate);
+          return { rule };
+        }
       }
-      if(otherwise && this._runtimeEvaluateCondition(otherwise.acceptWhen || { kind:'always' }, candidate, { slotIndex })) return { rule:otherwise };
+      if(otherwise && this._runtimeEvaluateCondition(otherwise.acceptWhen || { kind:'always' }, candidate, { slotIndex })){
+        this._activeTimingOverride = this._timingOverrideFor(candidate);
+        return { rule:otherwise };
+      }
       return null;
     }
 
@@ -1112,7 +1434,8 @@
     }
 
     canAcceptWorkInput(slotIndex, work){
-      if(this.properties?.presetId === 'shuttle'){
+      if(hasSequenceTarget(this)) return false;
+      if((this._executionPlan?.behavior || behaviorId(this)) === 'shuttle'){
         if(!this.inputs || slotIndex < 0 || slotIndex >= this.inputs.length) return false;
         return this._state === 'IDLE'
           && !this._payload
@@ -1144,12 +1467,13 @@
         const found = findGroupId(rule?.releaseWhen);
         if(found) return found;
       }
-      return text(this.properties?.shuttleGroupId);
+      return text(operationByKind(this, 'synchronized-step')?.groupId);
     }
 
     _migrateLegacyShuttleGroupSetting(){
-      if(text(this.properties?.presetId).toLowerCase() !== 'shuttle') return;
-      const legacyGroupId = text(this.properties?.shuttleGroupId) || 'shuttle-1';
+      if(behaviorId(this) !== 'shuttle') return;
+      const shuttle = operationByKind(this, 'synchronized-step');
+      const legacyGroupId = text(shuttle?.groupId) || 'shuttle-1';
       const rules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
       const visit = (condition)=>{
         if(!condition || typeof condition !== 'object') return false;
@@ -1184,7 +1508,6 @@
           rule.releaseWhen = groupCondition;
         }
       }
-      delete this.properties.shuttleGroupId;
     }
 
     _shuttleGroupNodes(){
@@ -1193,7 +1516,7 @@
       const groupId = this._shuttleGroupId();
       if(!groupId) return [this];
       const peers = graph._nodes.filter((node)=> node instanceof BasicNode
-        && text(node.properties?.presetId).toLowerCase() === 'shuttle'
+        && behaviorId(node) === 'shuttle'
         && node._shuttleGroupId() === groupId);
       return peers.length ? peers : [this];
     }
@@ -1408,7 +1731,7 @@
     _isSameShuttleGroup(node){
       return !!node
         && node instanceof BasicNode
-        && text(node.properties?.presetId).toLowerCase() === 'shuttle'
+        && behaviorId(node) === 'shuttle'
         && node._shuttleGroupId() === this._shuttleGroupId();
     }
 
@@ -1447,11 +1770,11 @@
         const output = this.outputs?.[Number.isInteger(slot) ? slot : 0];
         if(!root.WorkLinkAnimator || !this.graph || !output || !Array.isArray(output.links)) return;
         const info = work && typeof work === 'object' ? { id: work.id, t: work.type, entity: work } : null;
-        const durationMs = Math.max(120, Number(this.properties?.processTime || 0) * 1000);
+        const durationMs = Math.max(120, flowPortTiming(this, 'input', Number.isInteger(this._activeInputSlot) ? this._activeInputSlot : 0) * 1000);
         for(const linkId of output.links){
           const link = this.graph.links?.[linkId];
           const target = link && this.graph.getNodeById?.(link.target_id);
-          const isSink = text(target?.properties?.presetId).toLowerCase() === 'sink'
+          const isSink = behaviorId(target) === 'sink'
             || (root.SinkNode && target instanceof root.SinkNode);
           if(isSink) root.WorkLinkAnimator.spawn(this.graph, linkId, 'work', durationMs, info);
         }
@@ -1726,8 +2049,7 @@
     }
 
     _executeGeneric(){
-      const preset = this.properties?.presetId;
-      if(preset === 'note' || preset === 'signal') return;
+      const preset = behaviorId(this);
       if(this._offer){ this._finishOffer(); return; }
       if(preset === 'source'){ this._executeSource(); return; }
       if(preset === 'sink'){ this._executeSink(); return; }
@@ -1763,17 +2085,26 @@
     }
 
     onExecute(){
-      if(this.properties?.presetId === 'shuttle'){
-        return this._executeShuttle();
+      let result;
+      if(hasSequenceTarget(this) && this._runtimePrototype && typeof this._runtimePrototype.onExecute === 'function'){
+        result = this._runtimePrototype.onExecute.call(this);
+      }else if((this._executionPlan?.behavior || behaviorId(this)) === 'shuttle'){
+        result = this._executeShuttle();
+      }else if(this._runtimePrototype && typeof this._runtimePrototype.onExecute === 'function'){
+        result = this._runtimePrototype.onExecute.call(this);
+      }else{
+        result = this._executeGeneric();
       }
-      if(this._runtimePrototype && typeof this._runtimePrototype.onExecute === 'function'){
-        return this._runtimePrototype.onExecute.call(this);
-      }
-      return this._executeGeneric();
+      this._acknowledgeAcceptedInputs();
+      this._notifyReadyEntityUpstreams();
+      return result;
     }
 
     onDrawForeground(ctx){
-      if(this.properties?.presetId === 'shuttle'){
+      if(hasSequenceTarget(this) && this._runtimePrototype && typeof this._runtimePrototype.onDrawForeground === 'function'){
+        return this._runtimePrototype.onDrawForeground.call(this, ctx);
+      }
+      if(behaviorId(this) === 'shuttle'){
         const remaining = Math.max(0, this._until - nowMs());
         if(typeof root.drawStateBelow === 'function'){
           root.drawStateBelow(ctx, this, [
@@ -1781,7 +2112,7 @@
             `Shuttle group: ${this._shuttleGroupId() || '-'}`,
             this._currentWork ? `Work: ID=${this._currentWork.id} Type=${this._currentWork.type}` : 'Work: (none)',
             `Remain(s): ${(remaining / 1000).toFixed(1)}`,
-            `Process(s): ${this.properties.processTime}`
+            `Process(s): ${flowPortTiming(this, 'input', Number.isInteger(this._activeInputSlot) ? this._activeInputSlot : 0)}`
           ], 8, 6);
         }
         return;
@@ -1793,7 +2124,7 @@
       const count = store?.summaryAt(this.id).reduce((sum, row)=>sum + row.quantity, 0) || 0;
       if(typeof root.drawStateBelow === 'function'){
         root.drawStateBelow(ctx, this, [
-          `Preset: ${this._preset().title}`,
+          `Operations: ${operationRows(this).map((entry)=>entry.kind).join(', ') || 'none'}`,
           `State: ${this._stateName}`,
           `Contents: ${count}`,
           `Input rules: ${this.properties.inputRules?.length || 0}`,
@@ -1803,7 +2134,7 @@
     }
 
     getEventUntil(now){
-      if(this.properties?.presetId === 'shuttle'){
+      if(behaviorId(this) === 'shuttle'){
         if(this._state === 'TRANSFER') return Number(now) || 0;
         if(this._state === 'WAIT'){
           const timing = this._shuttleGroupTiming(now);
@@ -1839,8 +2170,10 @@
     const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
     for(const node of nodes){
       const props = isObject(node?.properties) ? node.properties : {};
-      if(node.type === 'factory/source'){
-        String(props.sequence || 'A').split(/[,\n]+/).map(text).filter(Boolean).forEach((name)=>ensure(name, 'work', 0, ''));
+      if(node.type === 'factory/source' || text(props.presetId).toLowerCase() === 'source'){
+        if(!Array.isArray(props.sourceSequence) || !props.sourceSequence.length){
+          String(props.sequence || 'A').split(/[,\n]+/).map(text).filter(Boolean).forEach((name)=>ensure(name, 'work', 0, ''));
+        }
       }
       if(node.type === 'factory/carrierconfig' || node.type === 'factory/carrierhome'){
         ensure(text(props.carrierId) || `Carrier ${props.capacity || 1}`, 'carrier', props.capacity || 1, 'Carrier');
@@ -1920,7 +2253,41 @@
     });
   }
 
-  function applyPresetRuntimeVariant(properties, originalType){
+  function replaceLegacySourceSequence(properties, model){
+    const props = isObject(properties) ? properties : {};
+    if(Array.isArray(props.sourceSequence) && props.sourceSequence.length){
+      delete props.sequence;
+      return props.sourceSequence;
+    }
+    const names = String(props.sequence || '').split(/[,\n]+/).map(text).filter(Boolean);
+    const fallbackType = (Array.isArray(model?.types) ? model.types : []).find((entry)=>entry?.category === 'work') || null;
+    const rows = [];
+    for(const name of names){
+      const typeId = typeIdForLegacyName(model, name);
+      if(!typeId) continue;
+      rows.push({ entryId:`source-sequence-${rows.length + 1}`, typeId, quantity:1 });
+    }
+    if(!rows.length && fallbackType){
+      rows.push({ entryId:'source-sequence-1', typeId:fallbackType.typeId, quantity:1 });
+    }
+    props.sourceSequence = rows;
+    delete props.sequence;
+    return rows;
+  }
+
+  function markWorkSourceAsSequenceFlow(properties){
+    const props = isObject(properties) ? properties : {};
+    const rules = Array.isArray(props.outputRules) ? props.outputRules : [];
+    if(rules.length){
+      rules[0].targets = [{ mode:'sequence', entries:clone(Array.isArray(props.sourceSequence) ? props.sourceSequence : [], []) }];
+      rules[0].target = rules[0].targets[0];
+    }
+    delete props.sourceSequence;
+    delete props.sourceMode;
+    return props;
+  }
+
+  function applyTemplateRuntimeVariant(properties, originalType){
     const props = isObject(properties) ? properties : {};
     const type = text(originalType).toLowerCase();
     if(type === 'factory/entitysource') props.sourceMode = 'entity';
@@ -1953,44 +2320,36 @@
         removedNodeIds.push(node.id);
         continue;
       }
-      if(node.type === 'factory/basic'){
-        node.properties = isObject(node.properties) ? node.properties : {};
-        const previousType = text(node.properties.legacySourceType);
-        if(previousType){
-          if(!text(node.properties.presetId)) node.properties.presetId = TYPE_TO_PRESET[previousType] || 'basic';
-          applyPresetRuntimeVariant(node.properties, previousType);
-        }
-        if(Array.isArray(node.properties.migratedCarrierConfigs)){
-          node.properties.migratedCarrierConfigs = node.properties.migratedCarrierConfigs.map((row)=>{
-            if(!isObject(row)) return row;
-            if(!text(row.configKind)){
-              row.configKind = text(row.sourceType).toLowerCase().includes('pallet') ? 'pallet-carrier' : 'carrier';
-            }
-            delete row.sourceType;
-            return row;
-          });
-        }
-        ensurePresetFlowRules(node);
+      node.properties = isObject(node.properties) ? node.properties : {};
+      const originalType = node.type;
+      const templateId = text(node.properties.presetId).toLowerCase()
+        || TYPE_TO_PRESET[originalType]
+        || (hasSequenceTarget(node) ? 'source' : 'basic');
+
+      if(templateId === 'note' || templateId === 'signal'){
+        node.type = `factory/${templateId}`;
+        const allowed = templateId === 'note'
+          ? ['text', 'fontSize', 'backgroundColor', 'textColor']
+          : ['script', 'sigExtra', 'sigEnabled', 'scriptDisabled'];
+        node.properties = Object.fromEntries(Object.entries(node.properties).filter(([key])=>allowed.includes(key)));
+        kept.push(node);
+        continue;
       }
-      if(node.type !== 'factory/basic'){
-        const presetId = TYPE_TO_PRESET[node.type];
-        if(!presetId){
+
+      if(originalType !== 'factory/basic'){
+        if(!TYPE_TO_PRESET[originalType]){
           warnings.push({ code: 'UNKNOWN_NODE_TYPE', nodeId: node.id, type: node.type });
           kept.push(node);
           continue;
         }
-        const originalType = node.type;
         node.type = 'factory/basic';
-        node.properties = isObject(node.properties) ? node.properties : {};
-        node.properties.basicNodeVersion = 1;
-        node.properties.presetId = presetId;
-        applyPresetRuntimeVariant(node.properties, originalType);
+        applyTemplateRuntimeVariant(node.properties, originalType);
+        if(templateId === 'source' && text(node.properties.sourceMode || 'work').toLowerCase() !== 'entity'){
+          replaceLegacySourceSequence(node.properties, data.__factSimEntityModel);
+        }
         if(originalType === 'factory/shuttle_stage'){
           node.properties.shuttleGroupId = text(node.properties.shuttleGroupId || node.properties.groupId) || 'shuttle-1';
           delete node.properties.groupId;
-        }
-        if((originalType === 'factory/carrierroute' || originalType === 'factory/agvroute') && carrierConfigs.length){
-          node.properties.migratedCarrierConfigs = clone(carrierConfigs, []);
         }
         if(!Array.isArray(node.properties.initialContents)) node.properties.initialContents = [];
         ensurePortIds(node);
@@ -2000,11 +2359,46 @@
         if(!Array.isArray(node.properties.outputRules) || !node.properties.outputRules.length){
           node.properties.outputRules = migratedOutputRules(node, originalType, data.__factSimEntityModel);
         }
-        if(originalType === 'factory/shuttle_stage') delete node.properties.shuttleGroupId;
+        if(templateId === 'source' && text(node.properties.sourceMode || 'work').toLowerCase() !== 'entity'){
+          markWorkSourceAsSequenceFlow(node.properties);
+        }
         convertedNodeCount += 1;
+      }else if(templateId === 'source' || hasSequenceTarget(node)){
+        replaceLegacySourceSequence(node.properties, data.__factSimEntityModel);
+        if(!Array.isArray(node.properties.outputRules) || !node.properties.outputRules.length){
+          node.properties.outputRules = migratedOutputRules(node, 'factory/source', data.__factSimEntityModel);
+        }
+        markWorkSourceAsSequenceFlow(node.properties);
       }
       ensurePortIds(node);
-      ensurePresetFlowRules(node);
+      if(!Array.isArray(node.properties.operations) || !node.properties.operations.length){
+        node.properties.operations = templateOperations(templateId, node.properties);
+      }
+      if(templateId === 'carrier_route' && (!Array.isArray(node.properties.initialContents) || !node.properties.initialContents.length)){
+        const carrierTypes = data.__factSimEntityModel.types.filter((entry)=>entry.category === 'carrier');
+        const initialCarrier = text(node.properties.initialCarrier);
+        const agvIds = String(node.properties.agvIds || '').split(/[,\n]+/).map(text).filter(Boolean);
+        const selectedType = carrierTypes.find((entry)=>initialCarrier
+          && (text(entry.typeId).toLowerCase() === initialCarrier.toLowerCase() || text(entry.name).toLowerCase() === initialCarrier.toLowerCase()))
+          || carrierTypes[0];
+        const quantity = agvIds.length || (initialCarrier ? 1 : 0);
+        if(selectedType && quantity > 0){
+          node.properties.initialContents = [{ typeId:selectedType.typeId, quantity, load:'empty', children:[] }];
+        }
+      }
+      const timingOverrides = legacyTimingOverrides(node.properties.script, data.__factSimEntityModel);
+      if(Object.keys(timingOverrides).length && node.properties.operations[0]){
+        node.properties.operations[0].config = isObject(node.properties.operations[0].config) ? node.properties.operations[0].config : {};
+        node.properties.operations[0].config.timingByTypeId = timingOverrides;
+      }
+      ensurePresetFlowRules(node, { templateId });
+      upgradeNodeProperties(node, templateId);
+      normalizeEntityPorts(node);
+      for(const port of [...(node.inputs || []), ...(node.outputs || [])]){
+        if(!port || isSignalPort(port)) continue;
+        delete port.requiredByPreset;
+        port.flowManaged = true;
+      }
       kept.push(node);
     }
     data.nodes = kept;
@@ -2027,11 +2421,30 @@
     return { data, preview };
   }
 
-  App.BASIC_NODE_PRESETS = PRESETS;
-  App.BASIC_NODE_TYPE_PRESET_MAP = TYPE_TO_PRESET;
+  App.BASIC_NODE_TEMPLATES = PRESETS;
+  App.BASIC_NODE_TYPE_TEMPLATE_MAP = TYPE_TO_PRESET;
   App.inferEntityModelFromGraph = inferLegacyTypes;
   App.ensureBasicNodePortIds = ensurePortIds;
-  App.ensureBasicPresetFlowRules = ensurePresetFlowRules;
+  App.ensureBasicTemplateFlowRules = ensurePresetFlowRules;
+  App.basicNodeHasSequenceTarget = hasSequenceTarget;
+  App.configureBasicSequenceGenerator = (node)=>{
+    if(!node) return null;
+    if(typeof node.applyTemplate === 'function') node.applyTemplate('source', true);
+    App.ensureSourceSequence?.(node, { createDefault:true });
+    if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged('outputRules');
+    syncFlowPorts(node, { dirty:false });
+    return node;
+  };
+  App.applyBasicTemplate = (node, templateId, options)=>{
+    if(!node || typeof node.applyTemplate !== 'function') throw new Error('Node is not a Basic Node');
+    return node.applyTemplate(templateId, options?.preserveTitle === true);
+  };
+  App.basicNodeBehavior = behaviorId;
+  App.basicNodeSequenceEntries = sequenceEntries;
+  App.normalizeBasicOperations = normalizeOperations;
+  App.commonBasicNodeProperties = commonProperties;
+  App.BASIC_ACTION_REGISTRY = ACTION_REGISTRY;
+  App.compileBasicExecutionPlan = compileExecutionPlan;
   App.ensureBasicPortTimings = ensurePortTimings;
   App.normalizeBasicEntityPorts = normalizeEntityPorts;
   App.basicEntityPortSlots = entityPortSlots;

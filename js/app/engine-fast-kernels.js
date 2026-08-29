@@ -36,26 +36,23 @@ var App = window.App || (window.App = {});
 
   function inferKindId(node){
     const type = normalizeText(node && node.type);
-    const title = normalizeText(node && node.title);
-    const preset = normalizeText(node && node.properties && node.properties.presetId);
-    const src = `${type} ${title} ${preset}`;
-    if(src.indexOf('source') >= 0) return KINDS.Source;
-    if(src.indexOf('branch') >= 0) return KINDS.Branch;
-    if(src.indexOf('merge') >= 0 || src.indexOf('join') >= 0) return KINDS.Merge;
-    if(src.indexOf('split') >= 0) return KINDS.Split;
-    if(src.indexOf('sink') >= 0) return KINDS.Sink;
-    if(
-      src.indexOf('equipment') >= 0
-      || src.indexOf('/equip') >= 0
-      || src.indexOf(' equip') >= 0
-      || src.indexOf('machine') >= 0
-      || src.indexOf('process') >= 0
-    ) return KINDS.Equipment;
-    if(src.indexOf('buffer') >= 0 || src.indexOf('queue') >= 0 || src.indexOf('stocker') >= 0) return KINDS.Buffer;
-    if(src.indexOf('agv_route') >= 0 || src.indexOf('agv route') >= 0 || src.indexOf('carrier_route') >= 0 || src.indexOf('carrier route') >= 0) return KINDS.AGVRoute;
-    if(src.indexOf('shuttle') >= 0) return KINDS.ShuttleStage;
-    if(src.indexOf('conveyor') >= 0) return KINDS.Conveyor;
-    if(src.indexOf('note') >= 0 || src.indexOf('memo') >= 0) return KINDS.Note;
+    if(type === 'factory/note') return KINDS.Note;
+    if(type === 'factory/signal') return KINDS.FallbackOnly;
+    const operationKinds = new Set((Array.isArray(node?.properties?.operations) ? node.properties.operations : [])
+      .map((operation)=>normalizeText(operation?.kind)).filter(Boolean));
+    const hasSequenceTarget = (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : []).some((rule)=>{
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+      return targets.some((target)=>normalizeText(target?.mode || target?.kind || target) === 'sequence');
+    });
+    if(hasSequenceTarget || operationKinds.has('create')) return KINDS.Source;
+    if(operationKinds.has('destroy')) return KINDS.Sink;
+    if(operationKinds.has('clone')) return KINDS.Split;
+    if(operationKinds.has('merge') || operationKinds.has('join')) return KINDS.Merge;
+    if(operationKinds.has('route')) return KINDS.Branch;
+    if(operationKinds.has('carrier-transport')) return KINDS.AGVRoute;
+    if(operationKinds.has('synchronized-step')) return KINDS.ShuttleStage;
+    if(operationKinds.has('hold')) return KINDS.Buffer;
+    if(operationKinds.has('process')) return KINDS.Equipment;
     return KINDS.Unknown;
   }
 
@@ -284,11 +281,20 @@ var App = window.App || (window.App = {});
           return buildResult(before, held, NaN);
         }
 
-        if((!node._seq || !node._seq.length) && typeof node._parseSeq === 'function') node._parseSeq();
+        const entry = typeof node._currentSequenceEntry === 'function'
+          ? node._currentSequenceEntry()
+          : null;
+        if(!entry){
+          if(typeof node.setOutputData === 'function') (node.outputs || []).forEach((_output, slot)=>node.setOutputData(slot, null));
+          for(let i = 0; i < sigCount; i += 1){
+            if(typeof node._emit === 'function') node._emit(i, 'IDLE');
+          }
+          const invalid = captureState(node);
+          return buildResult(before, invalid, NaN);
+        }
         const nextId = (Number(node._counter) || 0) + 1;
-        const entry = (Array.isArray(node._seq) && node._seq[node._cursor]) ? node._seq[node._cursor] : { type: 'A' };
-        const WorkCtor = window.Work || function(id, type){ this.id = id; this.type = type; };
-        const preview = new WorkCtor(nextId, entry.type);
+        const WorkCtor = window.Work || function(id, type, typeId){ this.id = id; this.type = type; this.typeId = typeId || ''; this.__flowCategory = 'work'; };
+        const preview = new WorkCtor(nextId, entry.type, entry.typeId);
         const flowSelection = typeof node._runtimeSelectOutputRule === 'function'
           ? node._runtimeSelectOutputRule(preview, { processComplete:true })
           : { slot:0 };
@@ -302,7 +308,7 @@ var App = window.App || (window.App = {});
           node._pendingOutputSlot = flowSlot;
           if(typeof node._animateWorkOutput === 'function') node._animateWorkOutput(work, flowSlot);
           node._counter = nextId;
-          node._cursor = node._seq && node._seq.length ? ((node._cursor + 1) % node._seq.length) : 0;
+          if(typeof node._advanceSequence === 'function') node._advanceSequence();
           for(let i = 0; i < sigCount; i += 1){
             if(typeof node._emit === 'function') node._emit(i, 'SEND');
           }

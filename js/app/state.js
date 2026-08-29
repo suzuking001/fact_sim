@@ -7,7 +7,12 @@ App.canvas = null;
 App.timelineChart = null;
 App.toastTimer = null;
 App.engine = null;
-App.simMode = App.simMode || 'dt';
+// Basic/Flow nodes perform considerably more work per fixed dt tick than the
+// original specialized nodes.  The heap scheduler preserves the same model
+// semantics while executing only nodes whose state or event time changed, so
+// use it as the production default.  A user's explicit choice is restored by
+// ui.js and dt remains available as the strict validation baseline.
+App.simMode = App.simMode || 'event';
 App._controllers = App._controllers || {};
 App.placement = App.placement || { active: false, kind: '', item: null, pendingChange: false };
 App.render = App.render || {

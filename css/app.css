@@ -1987,6 +1987,15 @@ body.timeline-hidden #timelineRevealHandle{
 .entityRuleConditionLine input{ flex:1 1 130px; }
 .entityRuleMultiValueLine{ display:flex; align-items:center; gap:6px; min-width:0; }
 .entityRuleMultiValueLine select{ flex:1 1 120px; }
+.entitySourceSequenceList{ display:grid; gap:8px; }
+.entitySourceSequenceRow{ display:grid; grid-template-columns:32px minmax(160px,1fr) minmax(104px,140px) auto; gap:8px; align-items:center; padding:9px; border:1px solid rgba(100,116,139,.18); border-radius:11px; background:rgba(248,250,252,.9); }
+.entitySourceSequenceOrder{ display:grid; place-items:center; width:28px; height:28px; border-radius:9px; color:#475569; background:#e2e8f0; font-size:12px; font-weight:800; }
+.entitySourceSequenceQuantity{ display:flex; align-items:center; gap:6px; color:#64748b; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.entitySourceSequenceQuantity input{ width:76px; min-width:0; box-sizing:border-box; }
+.entitySourceSequencePreview{ margin-top:10px; padding:9px 11px; overflow-wrap:anywhere; border-radius:10px; color:#334155; background:#f1f5f9; font-size:12px; font-weight:650; line-height:1.5; }
+.entitySourceSequenceRuntime{ margin-top:8px; color:#64748b; font-size:11px; font-weight:700; }
+.entitySourceSequenceInline{ margin-top:10px; padding:12px; border:1px solid rgba(59,130,246,.18); border-radius:12px; background:linear-gradient(180deg,rgba(239,246,255,.72),rgba(248,250,252,.9)); }
+.entitySourceSequenceInlineTitle{ display:block; margin-bottom:2px; color:#1e3a5f; font-size:12px; letter-spacing:.02em; }
 .entityRuleConditionNumber{ display:grid; flex:0 0 20px; width:20px; height:20px; place-items:center; border-radius:999px; background:#e2e8f0; color:#475569; font-size:10px; font-weight:800; }
 .entityRuleConditionRemove{ flex:0 0 auto; }
 .entityRuleAddCondition{ justify-self:start; }
@@ -2029,6 +2038,8 @@ body.timeline-hidden #timelineRevealHandle{
 .selectionInspectorNotice.is-error{ color:#b91c1c; }
 @media(max-width:760px){
   .entityRuleRow,.entityRecipeRow,.entityRuleBody{ grid-template-columns:1fr; }
+  .entitySourceSequenceRow{ grid-template-columns:28px minmax(0,1fr); }
+  .entitySourceSequenceQuantity,.entitySourceSequenceRow .entityRuleControls{ grid-column:2; }
   .entityRuleConditionLine,.entityRuleMultiValueLine{ flex-wrap:wrap; }
 }
 

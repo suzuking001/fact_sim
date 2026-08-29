@@ -146,11 +146,10 @@
     window.initGraph();
 
     const nodes = Array.isArray(App.graph && App.graph._nodes) ? App.graph._nodes : [];
-    const equipment = nodes.find((node)=> node && node.type === 'factory/basic' && node.properties?.presetId === 'machine');
+    const equipment = nodes.find((node)=> node && node.type === 'factory/basic' && App.basicNodeBehavior?.(node) === 'machine');
     const sink = LiteGraph.createNode('factory/basic');
     if(sink){
-      sink.properties.presetId = 'sink';
-      sink.onPropertyChanged('presetId');
+      App.applyBasicTemplate?.(sink, 'sink');
     }
     if(!equipment || !sink) throw new Error('Starter graph nodes could not be created');
     sink.pos = [660, 180];

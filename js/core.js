@@ -502,9 +502,6 @@ function _nodeHoverState(node){
 
 function _nodeHoverMeta(node){
   const parts = [];
-  const presetId = String(node?.properties?.presetId || '').trim();
-  const preset = presetId && App.BASIC_NODE_PRESETS ? App.BASIC_NODE_PRESETS[presetId] : null;
-  if(preset?.title && String(preset.title) !== String(node?.title || '')) parts.push(String(preset.title));
   if(node?.type) parts.push(String(node.type));
   if(node?.id != null) parts.push(`Node #${node.id}`);
   return [...new Set(parts)].join('  ·  ');
@@ -545,7 +542,7 @@ function _nodeHoverPropertyValue(key, value){
 function _buildNodeHoverPropertyRows(node){
   const props = (node && node.properties && typeof node.properties === 'object') ? node.properties : null;
   if(!props) return { rows: [], hiddenCount: 0 };
-  const priority = ['presetId', 'processTime', 'capacity', 'downTime', 'shuttleGroupId', 'inputRules', 'outputRules'];
+  const priority = ['contentCapacity', 'inputRules', 'outputRules', 'operations', 'initialContents', 'portTimings'];
   const keys = Object.keys(props).filter((key)=>!key.startsWith('_') && !/^overlay/i.test(key));
   keys.sort((a, b)=>{
     const ai = priority.indexOf(a);

@@ -122,30 +122,30 @@ return true;`;
     }
     importScripts(
       '../nodes-config.js',
-      '../nodes/work.js',
-      '../nodes/entity_model.js',
+      '../nodes/work.js?v=20260828a',
+      '../nodes/entity_model.js?v=20260828a',
       '../nodes/entity_store.js',
       '../nodes/sigports.js',
       '../nodes/equipment.js?v=20260824f',
       '../nodes/note.js',
       '../nodes/signal.js',
-      '../nodes/source.js?v=20260824f',
+      '../nodes/source.js?v=20260829a',
       '../nodes/entity_source.js?v=20260824f',
-      '../nodes/split.js?v=20260825a',
+      '../nodes/split.js?v=20260829a',
       '../nodes/branch.js?v=20260824f',
       '../nodes/merge2.js?v=20260824f',
       '../nodes/join.js?v=20260824f',
       '../nodes/agv_route.js?v=20260824f',
-      '../nodes/carrier_route.js?v=20260824f',
+      '../nodes/carrier_route.js?v=20260829a',
       '../nodes/station.js?v=20260824f',
       '../nodes/transfer_station.js?v=20260824f',
       '../nodes/sink.js?v=20260824f',
-      '../nodes/basic_node.js?v=20260824f',
+      '../nodes/basic_node.js?v=20260829b',
       '../nodes/register.js',
       'graph-links.js',
       'stop-groups.js',
       'engine.js',
-      'engine-fast-kernels.js?v=20260824f',
+      'engine-fast-kernels.js?v=20260828a',
       'engine-fast-compiler.js',
       'engine-fast-compat.js',
       'engine-fast-runtime.js',
@@ -189,9 +189,7 @@ return true;`;
     let totalCompleted = 0;
     for(const node of nodes){
       if(!node) continue;
-      const type = String(node.type || '').toLowerCase();
-      const title = String(node.title || '').toLowerCase();
-      if(type.indexOf('sink') < 0 && title !== 'sink' && !Array.isArray(node._recv)) continue;
+      if(!Array.isArray(node._recv)) continue;
       const completed = Array.isArray(node._recv) ? node._recv.length : 0;
       totalCompleted += Math.max(0, completed);
       sinks.push({

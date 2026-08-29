@@ -41,8 +41,10 @@ export function registerRuntimeMethodsGroup14(
       if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
       return {
         nodeId: node.id,
-        presetId: node.properties?.presetId ?? null,
+        behavior: app?.basicNodeBehavior?.(node) ?? "basic",
         selection: node.properties?.selection ?? "first-available",
+        inputPolicy: node.properties?.inputPolicy ?? { mode:"first", requiredPortIds:[], match:null },
+        operations: Array.isArray(node.properties?.operations) ? node.properties.operations : [],
         inputRules: Array.isArray(node.properties?.inputRules) ? node.properties.inputRules : [],
         outputRules: Array.isArray(node.properties?.outputRules) ? node.properties.outputRules : []
       };
@@ -110,46 +112,61 @@ export function registerRuntimeMethodsGroup14(
     }, { requestedNodeId: nodeId, requestedContents: initialContents });
   };
 
-  (FactSimRuntimeClass.prototype as any).setNodeFlowRules = async function (this: any, nodeId: string | number, inputRules?: unknown[], outputRules?: unknown[]) {
+  (FactSimRuntimeClass.prototype as any).setNodeFlowRules = async function (this: any, nodeId: string | number, inputRules?: unknown[], outputRules?: unknown[], nodeOperations?: unknown[], inputPolicy?: Record<string, unknown>) {
     const page = await this.ensureReady();
-    return page.evaluate(({ requestedNodeId, requestedInput, requestedOutput }: any) => {
+    return page.evaluate(({ requestedNodeId, requestedInput, requestedOutput, requestedOperations, requestedInputPolicy }: any) => {
       const app = (window as any).App;
       const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
       if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
       node.properties = node.properties || {};
       if(Array.isArray(requestedInput)) node.properties.inputRules = app.normalizeEntityRules(requestedInput, "input");
-      if(Array.isArray(requestedOutput)) node.properties.outputRules = app.normalizeEntityRules(requestedOutput, "output");
+      if(Array.isArray(requestedOutput)){
+        node.properties.outputRules = app.normalizeEntityRules(requestedOutput, "output");
+        node.onPropertyChanged?.('outputRules');
+      }
+      if(Array.isArray(requestedOperations)){
+        node.properties.operations = app.normalizeBasicOperations(requestedOperations);
+        node.onPropertyChanged?.('operations');
+      }
+      if(requestedInputPolicy && typeof requestedInputPolicy === 'object') node.properties.inputPolicy = requestedInputPolicy;
       const sync = typeof app.syncBasicFlowPorts === "function"
         ? app.syncBasicFlowPorts(node, { dirty:false })
         : { created:[], warnings:["Flow port synchronization is unavailable"] };
       node.setDirtyCanvas?.(true, true);
       return {
         nodeId: node.id,
+        behavior: app.basicNodeBehavior?.(node) || 'basic',
+        inputPolicy: node.properties.inputPolicy,
+        operations: node.properties.operations || [],
         inputRules: node.properties.inputRules || [],
         outputRules: node.properties.outputRules || [],
-        inputs: (node.inputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged, requiredByPreset:!!port.requiredByPreset })),
-        outputs: (node.outputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged, requiredByPreset:!!port.requiredByPreset })),
+        inputs: (node.inputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged })),
+        outputs: (node.outputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged })),
         portTimings: node.properties.portTimings || { inputs:{}, outputs:{} },
         createdPorts: sync.created || [],
         warnings: sync.warnings || []
       };
-    }, { requestedNodeId: nodeId, requestedInput: inputRules, requestedOutput: outputRules });
+    }, { requestedNodeId: nodeId, requestedInput: inputRules, requestedOutput: outputRules, requestedOperations: nodeOperations, requestedInputPolicy: inputPolicy });
   };
 
-  (FactSimRuntimeClass.prototype as any).applyBasicPreset = async function (this: any, nodeId: string | number, presetId: string) {
+  (FactSimRuntimeClass.prototype as any).applyBasicTemplate = async function (this: any, nodeId: string | number, templateId: string) {
     const page = await this.ensureReady();
-    return page.evaluate(({ requestedNodeId, requestedPreset }: any) => {
+    return page.evaluate(({ requestedNodeId, requestedTemplate }: any) => {
       const app = (window as any).App;
       const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
       if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
-      if(typeof node.applyPreset !== "function") throw new Error("Node is not a Basic Node");
-      node.properties = node.properties || {};
-      node.properties.presetId = requestedPreset;
-      if(typeof node.onPropertyChanged === "function") node.onPropertyChanged("presetId");
-      else node.applyPreset(requestedPreset, false);
+      if(typeof node.applyTemplate !== "function") throw new Error("Node is not a Basic Node");
+      node.applyTemplate(requestedTemplate, false);
       node.setDirtyCanvas?.(true, true);
-      return { nodeId: node.id, presetId: node.properties.presetId, title: node.title };
-    }, { requestedNodeId: nodeId, requestedPreset: presetId });
+      const serialized = typeof node.serialize === "function" ? node.serialize() : null;
+      return {
+        nodeId: node.id,
+        templateApplied: requestedTemplate,
+        behavior: app.basicNodeBehavior?.(node),
+        title: node.title,
+        properties: serialized?.properties || {}
+      };
+    }, { requestedNodeId: nodeId, requestedTemplate: templateId });
   };
 
   (FactSimRuntimeClass.prototype as any).migrateCurrentGraphToBasic = async function (this: any) {

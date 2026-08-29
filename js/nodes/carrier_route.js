@@ -697,7 +697,31 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
 
   _applyCarrierConfig(agv){
     const cfg = this._findCarrierConfigForAgv(agv);
-    if(cfg && typeof cfg.applyToCarrier === 'function') cfg.applyToCarrier(agv);
+    if(cfg && typeof cfg.applyToCarrier === 'function'){
+      cfg.applyToCarrier(agv);
+      return cfg;
+    }
+    // Entity Type is now the single carrier definition source. The legacy
+    // transport action has no Carrier Config nodes after the Basic Node
+    // migration, so resolve capacity directly from the model registry.
+    const registry = window.App?.entityModelForGraph?.(this.graph);
+    const types = registry?.list?.() || [];
+    const typeId = String(agv?.typeId || this.properties?.initialCarrierTypeId || '').trim();
+    const carrierId = String(agv?.type || agv?.id || '').trim().toLowerCase();
+    const entityType = (typeId ? registry?.get?.(typeId) : null)
+      || types.find((entry)=> String(entry?.category || '').toLowerCase() === 'carrier'
+        && String(entry?.name || '').trim().toLowerCase() === carrierId);
+    if(entityType && agv){
+      if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
+      agv.typeId = entityType.typeId;
+      agv.type = entityType.name;
+      agv.entityKind = 'carrier';
+      agv.__flowCategory = 'carrier';
+      const capacity = Math.max(1, Math.round(Number(entityType.capacity) || 1));
+      agv.capacity = capacity;
+      agv.meta.capacity = capacity;
+      agv.meta.carrierId = String(agv.id || entityType.name);
+    }
     return cfg;
   }
 
@@ -872,6 +896,18 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _trySpawnInitialCarrier(){
     if(this._initialCarrierSpawned) return;
     if(this._currentAgv || this._departingAgv) return;
+    const store = window.App?.runtimeInstancesForGraph?.(this.graph);
+    const initialInstance = store?.rootsAt?.(this.id)?.find((instance)=>{
+      const type = store.typeOf?.(instance);
+      return String(type?.category || instance?.entityKind || '').toLowerCase() === 'carrier';
+    }) || null;
+    if(initialInstance){
+      const inSlot = this._carrierInputSlots()[0] ?? 0;
+      if(this._adoptIncomingAgv(initialInstance, false, 0, inSlot)){
+        this._initialCarrierSpawned = true;
+      }
+      return;
+    }
     const id = this._normalizeInitialCarrierId();
     if(!id) return;
     if(this._carrierComponentHasCarrierId(id)){
@@ -957,13 +993,16 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
   _normalizeAgv(agv){
     let a = agv;
     if(!(a instanceof AGV)){
-      const id = String(a?.id ?? a ?? `Carrier-${this.id}`);
-      const cap = Math.max(1, Math.round(Number(a?.capacity ?? a?.meta?.capacity ?? 1) || 1));
-      a = new AGV(id, cap);
-      if(agv && typeof agv === 'object'){
-        if(Array.isArray(agv.cargo)) a.cargo = agv.cargo;
-        if(Array.isArray(agv.pallets)) a.pallets = agv.pallets;
-        if(agv.meta && typeof agv.meta === 'object') a.meta = agv.meta;
+      const canonicalInstance = a && typeof a === 'object' && a.instanceId;
+      if(!canonicalInstance){
+        const id = String(a?.id ?? a ?? `Carrier-${this.id}`);
+        const cap = Math.max(1, Math.round(Number(a?.capacity ?? a?.meta?.capacity ?? 1) || 1));
+        a = new AGV(id, cap);
+        if(agv && typeof agv === 'object'){
+          if(Array.isArray(agv.cargo)) a.cargo = agv.cargo;
+          if(Array.isArray(agv.pallets)) a.pallets = agv.pallets;
+          if(agv.meta && typeof agv.meta === 'object') a.meta = agv.meta;
+        }
       }
     }
     if(!Array.isArray(a.cargo)) a.cargo = [];
@@ -982,6 +1021,8 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const a = this._normalizeAgv(agv);
     if(!this.canAcceptAgv(inputSlot, a)) return false;
     this._applyCarrierConfig(a);
+    const store = window.App?.runtimeInstancesForGraph?.(this.graph);
+    if(a?.instanceId && store?.get?.(a)) store.moveRoot(a, this.id);
     this._currentAgv = a;
     this._departingAgv = null;
     this._departingAccepted = false;

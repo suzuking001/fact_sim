@@ -11,10 +11,8 @@
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -22,13 +20,35 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -54,7 +74,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -66,8 +109,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -80,10 +122,8 @@
       ],
       "title": "Shuttle 1",
       "properties": {
-        "processTime": 1.2,
-        "stageIndex": 0,
-        "basicNodeVersion": 1,
-        "presetId": "shuttle",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -141,7 +181,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1.2
+              "processTimeSec": 1.2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1.2
+                }
+              ]
             }
           },
           "outputs": {
@@ -149,7 +195,31 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "shuttle-1",
+            "trigger": "release",
+            "kind": "synchronized-step",
+            "groupId": "shuttle-1"
+          }
+        ]
       },
       "inputs": [
         {
@@ -158,8 +228,7 @@
           "link": 1,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -171,8 +240,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -185,10 +253,8 @@
       ],
       "title": "Shuttle 2",
       "properties": {
-        "processTime": 1.6,
-        "stageIndex": 1,
-        "basicNodeVersion": 1,
-        "presetId": "shuttle",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -246,7 +312,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1.6
+              "processTimeSec": 1.6,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1.6
+                }
+              ]
             }
           },
           "outputs": {
@@ -254,7 +326,31 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "shuttle-1",
+            "trigger": "release",
+            "kind": "synchronized-step",
+            "groupId": "shuttle-1"
+          }
+        ]
       },
       "inputs": [
         {
@@ -263,8 +359,7 @@
           "link": 2,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -276,8 +371,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -290,10 +384,8 @@
       ],
       "title": "Shuttle 3",
       "properties": {
-        "processTime": 1,
-        "stageIndex": 2,
-        "basicNodeVersion": 1,
-        "presetId": "shuttle",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -351,7 +443,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -359,7 +457,31 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "shuttle-1",
+            "trigger": "release",
+            "kind": "synchronized-step",
+            "groupId": "shuttle-1"
+          }
+        ]
       },
       "inputs": [
         {
@@ -368,8 +490,7 @@
           "link": 3,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -381,8 +502,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -395,10 +515,8 @@
       ],
       "title": "Shuttle 4",
       "properties": {
-        "processTime": 1.4,
-        "stageIndex": 3,
-        "basicNodeVersion": 1,
-        "presetId": "shuttle",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -456,7 +574,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1.4
+              "processTimeSec": 1.4,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1.4
+                }
+              ]
             }
           },
           "outputs": {
@@ -464,7 +588,31 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "shuttle-1",
+            "trigger": "release",
+            "kind": "synchronized-step",
+            "groupId": "shuttle-1"
+          }
+        ]
       },
       "inputs": [
         {
@@ -473,8 +621,7 @@
           "link": 4,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -486,8 +633,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -500,10 +646,8 @@
       ],
       "title": "Shuttle 5",
       "properties": {
-        "processTime": 1.8,
-        "stageIndex": 4,
-        "basicNodeVersion": 1,
-        "presetId": "shuttle",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -561,7 +705,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1.8
+              "processTimeSec": 1.8,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1.8
+                }
+              ]
             }
           },
           "outputs": {
@@ -569,7 +719,31 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "shuttle-1",
+            "trigger": "release",
+            "kind": "synchronized-step",
+            "groupId": "shuttle-1"
+          }
+        ]
       },
       "inputs": [
         {
@@ -578,8 +752,7 @@
           "link": 5,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -591,8 +764,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -605,8 +777,8 @@
       ],
       "title": "Sink",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -631,11 +803,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -644,8 +845,7 @@
           "link": 6,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []

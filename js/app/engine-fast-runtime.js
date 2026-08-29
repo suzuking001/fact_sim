@@ -430,7 +430,22 @@ var App = window.App || (window.App = {});
 
       if(kernel && typeof kernel.execute === 'function'){
         this.stats.kernelExec += 1;
-        return kernel.execute(nodeIndex, nowMs, this);
+        const result = kernel.execute(nodeIndex, nowMs, this);
+        // Specialized kernels bypass BasicNode.onExecute(), so run the common
+        // entity hand-off hooks here as part of the same execution step.  This
+        // keeps Source/Split offers alive until the consumer has accepted them
+        // and wakes an upstream offer when this node becomes available again.
+        const node = this.getNode(nodeIndex);
+        // Input acknowledgement is only relevant when this execution changed
+        // the node or its visible output. Avoid scanning every input on idle
+        // kernel calls, which is especially expensive in parallel benchmarks.
+        if(result?.stateChanged || result?.outputsChanged){
+          node?._acknowledgeAcceptedInputs?.();
+        }
+        if(result?.stateChanged){
+          node?._notifyReadyEntityUpstreams?.();
+        }
+        return result;
       }
 
       this.stats.compatExec += 1;

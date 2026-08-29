@@ -158,9 +158,12 @@ var App = window.App || (window.App = {});
       else kernelNodeIds.push(Number(node.id));
       const kindName = getKindName(kindId);
       if(kindName) kindNameSet.add(kindName);
-      const text = `${String(node.type || '').toLowerCase()} ${String(node.title || '').toLowerCase()}`;
-      if(text.indexOf('source') >= 0) sourceNodeIndices.push(i);
-      if(text.indexOf('sink') >= 0) sinkNodeIndices.push(i);
+      const hasSequenceTarget = (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : []).some((rule)=>{
+        const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
+        return targets.some((target)=>String(target?.mode || target?.kind || target || '').toLowerCase() === 'sequence');
+      });
+      if(hasSequenceTarget || kindId === kernels.KINDS?.Source) sourceNodeIndices.push(i);
+      if(kindId === kernels.KINDS?.Sink) sinkNodeIndices.push(i);
     }
 
     return {

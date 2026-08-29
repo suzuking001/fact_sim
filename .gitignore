@@ -6,3 +6,12 @@ tmp/*
 /artifacts/engine-test/
 /artifacts/auto-fix/
 /artifacts/auto-optimize/
+
+# Local test runners and operating-system metadata
+/playwright-report/
+/test-results/
+/coverage/
+/.nyc_output/
+.DS_Store
+Thumbs.db
+*.log

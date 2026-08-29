@@ -11,10 +11,8 @@
       ],
       "title": "Source 1",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -22,13 +20,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -54,7 +64,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -66,8 +99,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -80,10 +112,8 @@
       ],
       "title": "Equip 1A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -137,7 +167,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -145,7 +181,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -154,8 +213,7 @@
           "link": 1,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -167,8 +225,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -181,10 +238,8 @@
       ],
       "title": "Equip 1B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -238,7 +293,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -246,7 +307,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -255,8 +339,7 @@
           "link": 2,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -268,8 +351,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -282,8 +364,8 @@
       ],
       "title": "Sink 1",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -308,11 +390,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -321,8 +432,7 @@
           "link": 3,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []
@@ -336,10 +446,8 @@
       ],
       "title": "Source 2",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -347,13 +455,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -379,7 +499,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -391,8 +534,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -405,10 +547,8 @@
       ],
       "title": "Equip 2A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -462,7 +602,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -470,7 +616,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -479,8 +648,7 @@
           "link": 4,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -492,8 +660,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -506,10 +673,8 @@
       ],
       "title": "Equip 2B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -563,7 +728,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -571,7 +742,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -580,8 +774,7 @@
           "link": 5,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -593,8 +786,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -607,8 +799,8 @@
       ],
       "title": "Sink 2",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -633,11 +825,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -646,8 +867,7 @@
           "link": 6,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []
@@ -661,10 +881,8 @@
       ],
       "title": "Source 3",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -672,13 +890,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -704,7 +934,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -716,8 +969,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -730,10 +982,8 @@
       ],
       "title": "Equip 3A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -787,7 +1037,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -795,7 +1051,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -804,8 +1083,7 @@
           "link": 7,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -817,8 +1095,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -831,10 +1108,8 @@
       ],
       "title": "Equip 3B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -888,7 +1163,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -896,7 +1177,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -905,8 +1209,7 @@
           "link": 8,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -918,8 +1221,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -932,8 +1234,8 @@
       ],
       "title": "Sink 3",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -958,11 +1260,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -971,8 +1302,7 @@
           "link": 9,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []
@@ -986,10 +1316,8 @@
       ],
       "title": "Source 4",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -997,13 +1325,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -1029,7 +1369,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -1041,8 +1404,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1055,10 +1417,8 @@
       ],
       "title": "Equip 4A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1112,7 +1472,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1120,7 +1486,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1129,8 +1518,7 @@
           "link": 10,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1142,8 +1530,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1156,10 +1543,8 @@
       ],
       "title": "Equip 4B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1213,7 +1598,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1221,7 +1612,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1230,8 +1644,7 @@
           "link": 11,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1243,8 +1656,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1257,8 +1669,8 @@
       ],
       "title": "Sink 4",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1283,11 +1695,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1296,8 +1737,7 @@
           "link": 12,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []
@@ -1311,10 +1751,8 @@
       ],
       "title": "Source 5",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -1322,13 +1760,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -1354,7 +1804,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -1366,8 +1839,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1380,10 +1852,8 @@
       ],
       "title": "Equip 5A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1437,7 +1907,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1445,7 +1921,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1454,8 +1953,7 @@
           "link": 13,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1467,8 +1965,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1481,10 +1978,8 @@
       ],
       "title": "Equip 5B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1538,7 +2033,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1546,7 +2047,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1555,8 +2079,7 @@
           "link": 14,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1568,8 +2091,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1582,8 +2104,8 @@
       ],
       "title": "Sink 5",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1608,11 +2130,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1621,8 +2172,7 @@
           "link": 15,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []
@@ -1636,10 +2186,8 @@
       ],
       "title": "Source 6",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -1647,13 +2195,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -1679,7 +2239,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -1691,8 +2274,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1705,10 +2287,8 @@
       ],
       "title": "Equip 6A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1762,7 +2342,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1770,7 +2356,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1779,8 +2388,7 @@
           "link": 16,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1792,8 +2400,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1806,10 +2413,8 @@
       ],
       "title": "Equip 6B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1863,7 +2468,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1871,7 +2482,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1880,8 +2514,7 @@
           "link": 17,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1893,8 +2526,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -1907,8 +2539,8 @@
       ],
       "title": "Sink 6",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1933,11 +2565,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -1946,8 +2607,7 @@
           "link": 18,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []
@@ -1961,10 +2621,8 @@
       ],
       "title": "Source 7",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -1972,13 +2630,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -2004,7 +2674,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -2016,8 +2709,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -2030,10 +2722,8 @@
       ],
       "title": "Equip 7A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2087,7 +2777,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -2095,7 +2791,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -2104,8 +2823,7 @@
           "link": 19,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2117,8 +2835,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -2131,10 +2848,8 @@
       ],
       "title": "Equip 7B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2188,7 +2903,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -2196,7 +2917,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -2205,8 +2949,7 @@
           "link": 20,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2218,8 +2961,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -2232,8 +2974,8 @@
       ],
       "title": "Sink 7",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2258,11 +3000,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -2271,8 +3042,7 @@
           "link": 21,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []
@@ -2286,10 +3056,8 @@
       ],
       "title": "Source 8",
       "properties": {
-        "sequence": "A",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -2297,13 +3065,25 @@
             "ruleId": "source-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "all",
@@ -2329,7 +3109,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "inputs": [],
       "outputs": [
@@ -2341,8 +3144,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -2355,10 +3157,8 @@
       ],
       "title": "Equip 8A",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2412,7 +3212,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -2420,7 +3226,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -2429,8 +3258,7 @@
           "link": 22,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2442,8 +3270,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -2456,10 +3283,8 @@
       ],
       "title": "Equip 8B",
       "properties": {
-        "processTime": 1,
-        "downTime": 3,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2513,7 +3338,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -2521,7 +3352,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "inputs": [
         {
@@ -2530,8 +3384,7 @@
           "link": 23,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2543,8 +3396,7 @@
           ],
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ]
     },
@@ -2557,8 +3409,8 @@
       ],
       "title": "Sink 8",
       "properties": {
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2583,11 +3435,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "inputs": [
         {
@@ -2596,8 +3477,7 @@
           "link": 24,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": []

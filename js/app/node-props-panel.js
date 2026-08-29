@@ -144,7 +144,10 @@ var App = window.App || (window.App = {});
         const nodeTitle = String(node?.title || '(untitled)');
         const nodeType = String(node?.type || '');
         const connectedTo = this._connectedToSummary(node);
-        const properties = isObjectLike(node?.properties) ? node.properties : {};
+        const rawProperties = isObjectLike(node?.properties) ? node.properties : {};
+        const properties = node?.type === 'factory/basic' && typeof App.commonBasicNodeProperties === 'function'
+          ? App.commonBasicNodeProperties(rawProperties)
+          : rawProperties;
         const propsText = stringifyValue(properties);
         const propsSummary = summarizeProperties(properties);
         const searchable = `${nodeId} ${nodeTitle} ${nodeType} ${connectedTo} ${propsText}`.toLowerCase();

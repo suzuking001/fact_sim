@@ -604,11 +604,11 @@ window.runNodeMutation = runNodeMutation;
       return false;
     }
 
-    const presets = window.App?.BASIC_NODE_PRESETS || {};
-    const nodes = Object.entries(presets).map(([presetId, preset])=>({
-      presetId,
-      title: preset?.title || presetId,
-      category: preset?.category || ''
+    const templates = window.App?.BASIC_NODE_TEMPLATES || {};
+    const nodes = Object.entries(templates).map(([templateId, template])=>({
+      templateId,
+      title: template?.title || templateId,
+      category: template?.category || ''
     })).sort((a, b)=>{
       const categoryOrder = String(a.category).localeCompare(String(b.category));
       return categoryOrder || String(a.title).localeCompare(String(b.title));
@@ -620,7 +620,7 @@ window.runNodeMutation = runNodeMutation;
     }
 
     const menuItems = nodes.map((preset)=>({
-      value: preset.presetId,
+      value: preset.templateId,
       content: preset.title,
       has_submenu: false,
       callback: (item, _opt, _ctx, menuRef)=>{
@@ -628,12 +628,15 @@ window.runNodeMutation = runNodeMutation;
         const pos = syncCanvasMouse(canvas, ev) || [0, 0];
         try{
           if(typeof graph.beforeChange === 'function') graph.beforeChange();
-          const node = LiteGraph.createNode('factory/basic');
+          const templateId = String(item.value || 'basic').toLowerCase();
+          const nodeType = templateId === 'note' || templateId === 'signal' ? `factory/${templateId}` : 'factory/basic';
+          const node = LiteGraph.createNode(nodeType);
           if(node){
-            node.properties.presetId = String(item.value || 'basic');
-            if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged('presetId');
-            if(typeof window.App?.ensureBasicPresetFlowRules === 'function'){
-              window.App.ensureBasicPresetFlowRules(node, { force: true });
+            if(nodeType === 'factory/basic' && typeof window.App?.applyBasicTemplate === 'function'){
+              window.App.applyBasicTemplate(node, templateId);
+            }
+            if(nodeType === 'factory/basic' && typeof window.App?.ensureBasicTemplateFlowRules === 'function'){
+              window.App.ensureBasicTemplateFlowRules(node, { force: true, templateId });
             }
             if(typeof window.enforceNodeOverlayMinSize === 'function'){
               try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}

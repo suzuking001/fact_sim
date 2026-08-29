@@ -46,9 +46,10 @@
     return el;
   }
 
-  function typeOptions(registry, includeCategory, includeOtherwise){
+  function typeOptions(registry, includeCategory, includeOtherwise, includeSequence){
     const out = [];
     if(includeOtherwise) out.push(['otherwise', 'Otherwise']);
+    if(includeSequence) out.push(['sequence', 'Sequence (generate Work)']);
     if(includeCategory){
       out.push(['category:work', 'Any Work'], ['category:container', 'Any Container'], ['category:carrier', 'Any Carrier']);
     }
@@ -59,6 +60,7 @@
   function targetValue(target){
     const normalized = App.normalizeEntityTarget ? App.normalizeEntityTarget(target) : target;
     if(normalized?.mode === 'otherwise') return 'otherwise';
+    if(normalized?.mode === 'sequence') return 'sequence';
     if(normalized?.mode === 'category') return `category:${normalized.category}`;
     return `type:${normalized?.typeId || ''}`;
   }
@@ -66,6 +68,7 @@
   function parseTarget(value){
     const text = String(value || '');
     if(text === 'otherwise') return { mode: 'otherwise' };
+    if(text === 'sequence') return { mode: 'sequence' };
     if(text.startsWith('category:')) return { mode: 'category', category: text.slice(9) };
     return { mode: 'type', typeId: text.replace(/^type:/, '') };
   }
@@ -109,7 +112,7 @@
         if(!link) return;
         const otherId = isInput ? link.origin_id : link.target_id;
         const other = node?.graph?.getNodeById?.(otherId) || App.graph?.getNodeById?.(otherId);
-        const title = String(other?.title || other?.properties?.presetId || `Node #${otherId}`);
+        const title = String(other?.title || `Node #${otherId}`);
         const otherPortIndex = isInput ? link.origin_slot : link.target_slot;
         const otherPorts = isInput ? other?.outputs : other?.inputs;
         const otherPort = Array.isArray(otherPorts) ? otherPorts[otherPortIndex] : null;
@@ -144,27 +147,37 @@
     App.ensureBasicPortTimings?.(node);
     const ports = direction === 'input' ? node?.inputs : node?.outputs;
     const signalPattern = direction === 'input' ? /^sigIn/i : /^sigOut/i;
-    const keys = (ports || []).filter((port)=>port?.portId && port?.channel !== 'signal' && !signalPattern.test(String(port.name || '')))
-      .map((port)=>`@${direction}:${port.portId}`);
+    const entityPorts = (ports || []).filter((port)=>port?.portId && port?.channel !== 'signal' && !signalPattern.test(String(port.name || '')));
+    const timings = node.properties?.portTimings || {};
+    const keys = direction === 'input'
+      ? entityPorts.flatMap((port)=>{
+          const stages = timings.inputs?.[port.portId]?.processStages;
+          return (Array.isArray(stages) && stages.length ? stages : [{ stageId:`${port.portId}-process-1` }])
+            .map((stage)=>`@${direction}:${port.portId}:${stage.stageId}`);
+        })
+      : entityPorts.map((port)=>`@${direction}:${port.portId}`);
     if(keys.length) return keys;
     return direction === 'input' ? processTimeProperties(node) : downTimeProperties(node);
   }
 
   function parseCycleTimingKey(key){
     const raw = String(key || '').replace(/^@/, '');
-    const separator = raw.indexOf(':');
-    return separator >= 0
-      ? { direction:raw.slice(0, separator), portId:raw.slice(separator + 1) }
-      : { direction:'', portId:'' };
+    const parts = raw.split(':');
+    return parts.length >= 2
+      ? { direction:parts[0], portId:parts[1], stageId:parts.slice(2).join(':') }
+      : { direction:'', portId:'', stageId:'' };
   }
 
   function readCycleTiming(node, key){
     if(!String(key).startsWith('@')) return Math.max(0, Number(node.properties?.[key]) || 0);
-    const { direction, portId } = parseCycleTimingKey(key);
+    const { direction, portId, stageId } = parseCycleTimingKey(key);
     const timings = App.ensureBasicPortTimings?.(node) || node.properties?.portTimings || {};
-    return direction === 'input'
-      ? Math.max(0, Number(timings.inputs?.[portId]?.processTimeSec) || 0)
-      : Math.max(0, Number(timings.outputs?.[portId]?.downTimeSec) || 0);
+    if(direction === 'input'){
+      const timing = timings.inputs?.[portId] || {};
+      const stage = (timing.processStages || []).find((entry)=>String(entry?.stageId) === stageId);
+      return Math.max(0, Number(stage?.durationSec ?? timing.processTimeSec) || 0);
+    }
+    return Math.max(0, Number(timings.outputs?.[portId]?.downTimeSec) || 0);
   }
 
   function writeCycleTiming(node, key, value){
@@ -174,16 +187,17 @@
       node.onPropertyChanged?.(key);
       return;
     }
-    const { direction, portId } = parseCycleTimingKey(key);
+    const { direction, portId, stageId } = parseCycleTimingKey(key);
     const timings = App.ensureBasicPortTimings?.(node) || node.properties.portTimings;
     if(direction === 'input'){
-      timings.inputs[portId] = { ...(timings.inputs[portId] || {}), processTimeSec:seconds };
-      const slot = (node.inputs || []).findIndex((port)=>port?.portId === portId);
-      if(slot === 0) node.properties.processTime = seconds;
+      const timing = timings.inputs[portId] = { ...(timings.inputs[portId] || {}) };
+      timing.processStages = Array.isArray(timing.processStages) ? timing.processStages : [];
+      let stage = timing.processStages.find((entry)=>String(entry?.stageId) === stageId);
+      if(!stage){ stage = { stageId:stageId || `${portId}-process-1`, durationSec:0 }; timing.processStages.push(stage); }
+      stage.durationSec = seconds;
+      timing.processTimeSec = timing.processStages.reduce((sum, entry)=>sum + Math.max(0, Number(entry?.durationSec) || 0), 0);
     }else{
       timings.outputs[portId] = { ...(timings.outputs[portId] || {}), downTimeSec:seconds };
-      const slot = (node.outputs || []).findIndex((port)=>port?.portId === portId);
-      if(slot === 0) node.properties.downTime = seconds;
     }
   }
 
@@ -719,7 +733,7 @@
       if(kind === 'shuttle-group-idle'){
         const parameter = document.createElement('input');
         parameter.type = 'text'; parameter.className = 'selectionInspectorInput';
-        parameter.value = String(condition.groupId || node.properties?.shuttleGroupId || 'shuttle-1');
+        parameter.value = String(condition.groupId || 'shuttle-1');
         parameter.placeholder = 'Shuttle group ID'; parameter.title = 'Shuttle group ID';
         parameter.setAttribute('aria-label', 'Shuttle group ID'); parameter.disabled = running();
         parameter.addEventListener('change', ()=>{
@@ -760,6 +774,115 @@
         host.appendChild(parameter);
       }
     };
+    const renderSourceSequence = (host, sequenceTarget)=>{
+      const section = document.createElement('div');
+      section.className = 'entitySourceSequenceInline';
+      const heading = document.createElement('strong');
+      heading.className = 'entitySourceSequenceInlineTitle';
+      heading.textContent = 'Sequence order';
+      const hint = document.createElement('p');
+      hint.className = 'selectionInspectorHint';
+      hint.textContent = 'Generate these Work Types in order, then repeat. Conditions and destinations remain part of this Output Rule.';
+      section.append(heading, hint);
+      const workTypes = (registry?.list?.() || []).filter((entry)=>entry.category === 'work');
+      const rows = Array.isArray(sequenceTarget?.entries) ? sequenceTarget.entries : [];
+      const list = document.createElement('div');
+      list.className = 'entitySourceSequenceList';
+      const replaceRows = (mutator)=>{
+        const next = clone(rows, []);
+        mutator(next);
+        changed(()=>{
+          sequenceTarget.entries = next;
+          node.onPropertyChanged?.('outputRules');
+          node.setDirtyCanvas?.(true, true);
+        });
+        App.selectionInspector?.refresh?.();
+      };
+      rows.forEach((entry, index)=>{
+        const row = document.createElement('article');
+        row.className = 'entitySourceSequenceRow';
+        const order = document.createElement('span');
+        order.className = 'entitySourceSequenceOrder';
+        order.textContent = String(index + 1);
+        const type = select(workTypes.map((candidate)=>[candidate.typeId, candidate.name]), entry.typeId);
+        type.setAttribute('aria-label', `Sequence ${index + 1} Work Type`);
+        type.disabled = running() || !workTypes.length;
+        type.addEventListener('change', ()=>replaceRows((next)=>{ next[index].typeId = type.value; }));
+        const quantityWrap = document.createElement('label');
+        quantityWrap.className = 'entitySourceSequenceQuantity';
+        const quantityLabel = document.createElement('span'); quantityLabel.textContent = 'Qty';
+        const quantity = document.createElement('input');
+        quantity.type = 'number'; quantity.min = '1'; quantity.step = '1'; quantity.value = String(entry.quantity ?? 1);
+        quantity.setAttribute('aria-label', `Sequence ${index + 1} quantity`);
+        quantity.disabled = running();
+        quantity.addEventListener('change', ()=>replaceRows((next)=>{ next[index].quantity = Math.max(1, Math.round(Number(quantity.value) || 1)); }));
+        quantityWrap.append(quantityLabel, quantity);
+        const controls = document.createElement('div'); controls.className = 'entityRuleControls';
+        const up = button('↑', ()=>replaceRows((next)=>{ if(index > 0) next.splice(index - 1, 0, next.splice(index, 1)[0]); }));
+        const down = button('↓', ()=>replaceRows((next)=>{ if(index < next.length - 1) next.splice(index + 1, 0, next.splice(index, 1)[0]); }));
+        const remove = button('×', ()=>replaceRows((next)=>next.splice(index, 1)), 'selectionInspectorBtn is-danger');
+        up.title = 'Move up'; down.title = 'Move down'; remove.title = 'Delete sequence entry';
+        up.disabled = running() || index === 0;
+        down.disabled = running() || index === rows.length - 1;
+        remove.disabled = running();
+        controls.append(up, down, remove);
+        row.append(order, type, quantityWrap, controls);
+        list.appendChild(row);
+      });
+      if(!rows.length){
+        const empty = document.createElement('div'); empty.className = 'selectionInspectorNotice is-error';
+        empty.textContent = 'No sequence entries. This Source will not generate Work.';
+        list.appendChild(empty);
+      }
+      section.appendChild(list);
+      const add = button('+ Add Work Type', ()=>{
+        if(!workTypes.length){
+          changed(()=>App.ensureSourceSequence?.(node, { createDefault:true }));
+          App.refreshEntityTypeManager?.();
+          App.selectionInspector?.refresh?.();
+          return;
+        }
+        replaceRows((next)=>next.push({
+          entryId:App.nextSourceSequenceEntryId?.(next) || `source-sequence-${next.length + 1}`,
+          typeId:workTypes[0].typeId,
+          quantity:1
+        }));
+      }, 'selectionInspectorBtn is-primary');
+      add.disabled = running();
+      section.appendChild(add);
+
+      const preview = document.createElement('div'); preview.className = 'entitySourceSequencePreview';
+      const previewNames = [];
+      for(const entry of rows){
+        const typeName = registry?.get?.(entry.typeId)?.name || 'Missing Type';
+        const count = Math.max(0, Math.min(24 - previewNames.length, Math.round(Number(entry.quantity) || 0)));
+        for(let index = 0; index < count; index++) previewNames.push(typeName);
+        if(previewNames.length >= 24) break;
+      }
+      preview.textContent = previewNames.length ? `${previewNames.join(' → ')} → Repeat` : 'Sequence preview unavailable';
+      section.appendChild(preview);
+
+      const validation = App.inspectSourceSequence?.(node, registry);
+      if(validation && !validation.ok){
+        const notice = document.createElement('div'); notice.className = 'selectionInspectorNotice is-error';
+        notice.textContent = validation.errors.map((entry)=>entry.code).join(' · ');
+        section.appendChild(notice);
+      }
+      const runtime = document.createElement('div'); runtime.className = 'entitySourceSequenceRuntime';
+      const updateRuntime = ()=>{
+        if(!runtime.isConnected) return;
+        const current = typeof node._currentSequenceEntry === 'function' ? node._currentSequenceEntry() : null;
+        const rowIndex = current ? Math.max(0, Number(node._cursor) || 0) : -1;
+        const quantityIndex = current ? Math.max(0, Number(node._sequenceQuantityCursor) || 0) : -1;
+        runtime.textContent = current
+          ? `Next: ${current.type} · Entry ${rowIndex + 1}/${node._seq?.length || rows.length} · Item ${quantityIndex + 1}/${current.quantity}`
+          : 'Next: unavailable';
+        root.setTimeout(updateRuntime, 250);
+      };
+      section.appendChild(runtime);
+      root.setTimeout(updateRuntime, 0);
+      host.appendChild(section);
+    };
     const renderRules = (kind)=>{
       const key = kind === 'input' ? 'inputRules' : 'outputRules';
       const card = makeCard(kind === 'input' ? 'INPUT' : 'OUTPUT', kind === 'input'
@@ -769,6 +892,7 @@
       const list = document.createElement('div'); list.className = 'entityRuleList';
       const commit = ()=>changed(()=>{
         node.properties[key] = rows;
+        node.onPropertyChanged?.(key);
         App.syncBasicFlowPorts?.(node, { dirty:false });
         node.setDirtyCanvas?.(true, true);
       });
@@ -784,7 +908,7 @@
         if(!portId || referencesOutside(direction, portId, excludedRule, excludedIndex)) return true;
         const ports = direction === 'input' ? node.inputs : node.outputs;
         const port = (ports || []).find((candidate)=>candidate?.portId === portId);
-        if(!port || port.requiredByPreset || !port.flowManaged) return true;
+        if(!port || !port.flowManaged) return true;
         const linkCount = direction === 'input' ? (port.link == null ? 0 : 1) : (Array.isArray(port.links) ? port.links.length : 0);
         return !linkCount || root.confirm?.(`Delete ${port.name || portId} and its ${linkCount} connected link${linkCount === 1 ? '' : 's'}?`) !== false;
       };
@@ -806,7 +930,7 @@
         controls.append(up, down, remove); header.append(title, controls); ruleCard.appendChild(header);
 
         const body = document.createElement('div'); body.className = 'entityRuleBody';
-        const availableTargets = typeOptions(registry, true, kind === 'output');
+        const availableTargets = typeOptions(registry, true, kind === 'output', kind === 'output');
         const targetRows = Array.isArray(rule.targets) && rule.targets.length
           ? rule.targets
           : [rule.target || { mode:'category', category:'work' }];
@@ -823,15 +947,20 @@
           const target = select(availableTargets, targetValue(targetSpec));
           target.disabled = running();
           target.addEventListener('change', ()=>{
-            const parsed = parseTarget(target.value);
-            if(parsed.mode === 'otherwise') targetRows.splice(0, targetRows.length, parsed);
+          const parsed = parseTarget(target.value);
+            if(parsed.mode === 'sequence'){
+              parsed.entries = [];
+              targetRows.splice(0, targetRows.length, parsed);
+            }else if(parsed.mode === 'otherwise') targetRows.splice(0, targetRows.length, parsed);
             else{
               targetRows[targetIndex] = parsed;
               for(let rowIndex = targetRows.length - 1; rowIndex >= 0; rowIndex--){
                 if(targetRows[rowIndex]?.mode === 'otherwise') targetRows.splice(rowIndex, 1);
               }
             }
-            persistTargets(); App.selectionInspector?.refresh?.();
+            persistTargets();
+            if(parsed.mode === 'sequence') App.ensureSourceSequence?.(node, { createDefault:true });
+            App.selectionInspector?.refresh?.();
           });
           const removeTarget = button('×', ()=>{
             targetRows.splice(targetIndex, 1);
@@ -847,8 +976,10 @@
           targetRows.push({ mode:'category', category:'work' });
           persistTargets(); App.selectionInspector?.refresh?.();
         }, 'selectionInspectorBtn entityRuleAddCondition');
-        addTarget.disabled = running(); targetsHost.appendChild(addTarget);
+        addTarget.disabled = running() || targetRows.some((target)=>target?.mode === 'sequence'); targetsHost.appendChild(addTarget);
         body.appendChild(field('Targets (any match)', targetsHost));
+        const sequence = targetRows.find((target)=>target?.mode === 'sequence');
+        if(kind === 'output' && sequence) renderSourceSequence(body, sequence);
 
         if(kind === 'input'){
           const ports = (node.inputs || []).filter((port)=>port?.channel !== 'signal')
@@ -984,9 +1115,9 @@
       }, 'selectionInspectorBtn is-primary');
       add.disabled = running(); card.section.appendChild(add); wrapper.appendChild(card.card);
     };
-    const presetId = String(node.properties?.presetId || '').toLowerCase();
-    if(presetId !== 'source') renderRules('input');
-    if(presetId !== 'sink') renderRules('output');
+    const behavior = App.basicNodeBehavior?.(node) || 'basic';
+    if(!App.basicNodeHasSequenceTarget?.(node) && behavior !== 'source') renderRules('input');
+    if(behavior !== 'sink') renderRules('output');
     return wrapper;
   }
 
@@ -1084,6 +1215,66 @@
     current.section.appendChild(instancesHost); wrapper.appendChild(current.card); return wrapper;
   }
 
+  function renderOperationsEditor(node){
+    const card = makeCard('Operations', 'Common constrained operations define behavior. No arbitrary JavaScript is executed by Entity Nodes.');
+    const kinds = [
+      ['process','Process'], ['hold','Hold / Buffer'], ['route','Route'], ['create','Create from Sequence'],
+      ['destroy','Destroy at input'], ['clone','Clone to all ready outputs'], ['merge','Merge inputs'],
+      ['join','Join inputs'], ['attach','Attach to Container'], ['detach','Detach child'],
+      ['synchronized-step','Synchronized step'], ['carrier-transport','Carrier transport'],
+      ['station-transfer','Station transfer'], ['transfer','Transfer'], ['set-attribute','Set attribute']
+    ];
+    const triggers = [['input-accepted','Input accepted'],['process','Process'],['release','Release']];
+    const rows = Array.isArray(node.properties?.operations) ? node.properties.operations : (node.properties.operations = []);
+    const list = document.createElement('div'); list.className = 'entityRuleList';
+    const commit = ()=>changed(()=>{
+      node.properties.operations = App.normalizeBasicOperations?.(rows) || rows;
+      node.onPropertyChanged?.('operations');
+      node.setDirtyCanvas?.(true, true);
+    });
+    rows.forEach((operation, index)=>{
+      const row = document.createElement('article'); row.className = 'entityRuleCard';
+      const header = document.createElement('div'); header.className = 'entityRuleHeader';
+      const title = document.createElement('strong'); title.className = 'entityRuleTitle'; title.textContent = `Operation ${index + 1}`;
+      const controls = document.createElement('div'); controls.className = 'entityRuleControls';
+      const up = button('↑', ()=>{ if(index > 0){ rows.splice(index - 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
+      const down = button('↓', ()=>{ if(index < rows.length - 1){ rows.splice(index + 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
+      const remove = button('×', ()=>{ rows.splice(index, 1); commit(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn is-danger');
+      up.disabled = running() || index === 0; down.disabled = running() || index === rows.length - 1; remove.disabled = running();
+      controls.append(up, down, remove); header.append(title, controls); row.appendChild(header);
+      const body = document.createElement('div'); body.className = 'entityRuleBody';
+      const kind = select(kinds, operation.kind || 'process'); kind.disabled = running();
+      kind.addEventListener('change', ()=>{ operation.kind = kind.value; commit(); App.selectionInspector?.refresh?.(); });
+      const trigger = select(triggers, operation.trigger || 'process'); trigger.disabled = running();
+      trigger.addEventListener('change', ()=>{ operation.trigger = trigger.value; commit(); });
+      const kindField = document.createElement('label'); kindField.className = 'entityRuleField';
+      kindField.innerHTML = '<span class="entityRuleFieldLabel">Operation</span>'; kindField.appendChild(kind);
+      const triggerField = document.createElement('label'); triggerField.className = 'entityRuleField';
+      triggerField.innerHTML = '<span class="entityRuleFieldLabel">When</span>'; triggerField.appendChild(trigger);
+      body.append(kindField, triggerField);
+      if(operation.kind === 'synchronized-step'){
+        const group = document.createElement('input'); group.className = 'selectionInspectorInput'; group.value = String(operation.groupId || 'shuttle-1'); group.disabled = running();
+        group.addEventListener('change', ()=>{ operation.groupId = String(group.value || '').trim() || 'shuttle-1'; commit(); });
+        const field = document.createElement('label'); field.className = 'entityRuleField'; field.innerHTML = '<span class="entityRuleFieldLabel">Group ID</span>'; field.appendChild(group); body.appendChild(field);
+      }
+      if(operation.kind === 'clone'){
+        operation.dispatch = operation.dispatch || 'all-ready';
+        const dispatch = select([['all-ready','All ready outputs'],['first-ready','First ready output']], operation.dispatch); dispatch.disabled = running();
+        dispatch.addEventListener('change', ()=>{ operation.dispatch = dispatch.value; commit(); });
+        const field = document.createElement('label'); field.className = 'entityRuleField'; field.innerHTML = '<span class="entityRuleFieldLabel">Dispatch</span>'; field.appendChild(dispatch); body.appendChild(field);
+      }
+      row.appendChild(body); list.appendChild(row);
+    });
+    if(!rows.length){ const empty = document.createElement('div'); empty.className = 'selectionInspectorNotice'; empty.textContent = 'No operation. The node only stores matching Entities.'; list.appendChild(empty); }
+    card.section.appendChild(list);
+    const add = button('+ Add Operation', ()=>{
+      rows.push({ operationId:`operation-${Date.now()}`, trigger:'process', kind:'process' });
+      commit(); App.selectionInspector?.refresh?.();
+    }, 'selectionInspectorBtn is-primary');
+    add.disabled = running(); card.section.appendChild(add);
+    return card.card;
+  }
+
   function enhanceInspector(){
     const Ctor = App.SelectionInspector;
     if(!Ctor || Ctor.prototype.__entityTabsInstalled) return;
@@ -1093,18 +1284,31 @@
       raw.call(this, node);
       const main = this.root?.querySelector('.selectionInspectorMain');
       if(!main) return;
+      if(node?.type === 'factory/basic' && typeof App.commonBasicNodeProperties === 'function'){
+        const commonPropertyCount = Object.keys(App.commonBasicNodeProperties(node.properties)).length;
+        const propertyStat = Array.from(this.root.querySelectorAll('.selectionInspectorStat')).find((entry)=>
+          entry.querySelector('.selectionInspectorStatLabel')?.textContent?.trim() === 'Properties');
+        const propertyValue = propertyStat?.querySelector('.selectionInspectorStatValue');
+        if(propertyValue) propertyValue.textContent = String(commonPropertyCount);
+      }
       main.querySelectorAll('.entityTreeCard').forEach((entry)=>entry.remove());
       const existingCards = Array.from(main.children);
       const tabBar = document.createElement('div'); tabBar.className = 'entityInspectorTabs';
       const panels = {};
-      const entityEnabled = typeof node.hasEntityContents === 'function' ? node.hasEntityContents() : true;
+      const entityEnabled = node?.type === 'factory/basic';
       const names = entityEnabled ? ['Basic','Flow','Contents','Advanced'] : ['Basic','Advanced'];
       names.forEach((name)=>{ const panel = document.createElement('div'); panel.className = 'entityInspectorTabPanel'; panel.dataset.tab = name.toLowerCase(); panels[name] = panel; });
       if(existingCards[0]) panels.Basic.appendChild(existingCards[0]);
       if(existingCards[1]){
+        const hint = existingCards[1].querySelector('.selectionInspectorHint');
+        if(hint) hint.textContent = 'Common node settings are saved immediately and used in the next simulation run.';
         const hiddenPropertyLabels = new Set([
           'basicNodeVersion', 'initialContents', 'inputRules', 'outputRules', 'portTimings', 'flowPortSequence', 'selection', 'stateMachine',
-          'migratedCarrierConfigs'
+          'inputPolicy', 'operations', 'presetId', 'Preset', 'sourceSequence', 'sequence', 'migratedCarrierConfigs',
+          'ratio', 'strictIdMatch', 'stageIndex', 'shuttleGroupId', 'initialCarrier', 'agvIds', 'agvCapacity',
+          'palletWorkCapacity', 'transportMode', 'outSequence', 'sourceMode', 'rootKind', 'rootId', 'capacity',
+          'accepts', 'preset', 'operation', 'sourceKind', 'targetKind', 'itemKind', 'batchMode', 'quantity',
+          'relationMode', 'searchDepth', 'autoRelease', 'script', 'scriptDisabled', 'sigEnabled', 'sigExtra'
         ]);
         for(const field of existingCards[1].querySelectorAll('.selectionInspectorField')){
           const label = field.querySelector('.selectionInspectorFieldLabel')?.textContent?.trim();
@@ -1116,6 +1320,7 @@
       if(existingCards[1]) panels.Basic.appendChild(existingCards[1]);
       existingCards.slice(2).forEach((entry)=>panels.Advanced.appendChild(entry));
       if(entityEnabled){ panels.Flow.appendChild(renderFlowEditor(node)); panels.Contents.appendChild(renderContentsEditor(node)); }
+      if(entityEnabled) panels.Advanced.appendChild(renderOperationsEditor(node));
       const state = makeCard('State Machine', 'State Machine remains separate from Input / Output Rules.');
       const stateEditor = document.createElement('textarea');
       stateEditor.className = 'selectionInspectorTextarea entityAdvancedEditor';

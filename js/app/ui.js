@@ -291,11 +291,34 @@ if(simModeSelect){
     option.textContent = (typeof App.getSimModeLabel === 'function') ? App.getSimModeLabel(value) : value;
     simModeSelect.appendChild(option);
   }
-  let currentMode = (App.setSimMode ? App.setSimMode('dt') : 'dt');
+  const readPreferredMode = ()=>{
+    try{ return String(localStorage.getItem('fact_sim_sim_mode') || '').trim(); }catch(_e){ return ''; }
+  };
+  const savePreferredMode = (mode)=>{
+    try{ localStorage.setItem('fact_sim_sim_mode', String(mode || 'event')); }catch(_e){}
+  };
+  const updateModeHint = (mode)=>{
+    const hint = document.getElementById('simModeHint');
+    if(!hint) return;
+    if(mode === 'dt'){
+      hint.innerHTML = '<strong>dt</strong> is the fixed-step validation baseline. Use <strong>event</strong> for faster production runs.';
+    }else if(mode === 'event'){
+      hint.innerHTML = '<strong>Recommended.</strong> Event scheduling skips unchanged nodes and preserves strict parity with dt.';
+    }else{
+      hint.innerHTML = 'Fast engines are useful for benchmarks and large models. Validate changes against dt before release.';
+    }
+  };
+  const preferredMode = readPreferredMode() || App.simMode || 'event';
+  const supportedValues = Array.from(simModeSelect.options || []).map((option)=>option.value);
+  const initialMode = supportedValues.includes(preferredMode) ? preferredMode : 'event';
+  let currentMode = (App.setSimMode ? App.setSimMode(initialMode) : initialMode);
   simModeSelect.value = currentMode;
+  updateModeHint(currentMode);
   simModeSelect.addEventListener('change', ()=>{
     const mode = (App.setSimMode ? App.setSimMode(simModeSelect.value) : simModeSelect.value);
     simModeSelect.value = mode;
+    savePreferredMode(mode);
+    updateModeHint(mode);
     if(typeof window.updateSimTime === 'function') window.updateSimTime();
     if(typeof window.isSimRunning === 'function' && window.isSimRunning()){
       stopSimulation();
@@ -1472,11 +1495,9 @@ window.beginGroupPlacement = beginGroupPlacement;
     },
     source:{
       type:'factory/basic',
+      flowTemplate:'sequence',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Source', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'source', options:['source'] },
-        { key:'sourceMode', label:'Source Mode', type:'select', default:'work', options:['work'] },
-        { key:'sequence', label:'Sequence (comma separated)', type:'textarea', default:'A,B' }
+        { key:'title', label:'Title', type:'text', default:'Source', target:'title' }
       ]
     },
     entitysource:{
@@ -1574,6 +1595,21 @@ window.beginGroupPlacement = beginGroupPlacement;
       ]
     }
   };
+
+  const NODE_TEMPLATE_IDS = {
+    equip:'machine', branch:'router', entitysource:'source', agvroute:'carrier_route',
+    carrierroute:'carrier_route', transferstation:'transfer'
+  };
+  Object.entries(NODE_SCHEMAS).forEach(([kind, schema])=>{
+    schema.templateId = NODE_TEMPLATE_IDS[kind] || kind;
+    if(kind === 'note' || kind === 'signal') schema.type = `factory/${kind}`;
+    if(kind !== 'note' && kind !== 'signal'){
+      const titleField = (Array.isArray(schema.props) ? schema.props : []).find((field)=>field.key === 'title');
+      schema.props = [titleField || { key:'title', label:'Title', type:'text', default:'Basic Node', target:'title' }];
+    }else if(Array.isArray(schema.props)){
+      schema.props = schema.props.filter((field)=>field.key !== 'presetId');
+    }
+  });
 
   const NODE_META = {
     machine:{ label:'Machine', description:'Process a selected Entity using shared Input / Output Rules.' },
@@ -1874,6 +1910,9 @@ window.beginGroupPlacement = beginGroupPlacement;
       const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
       const node = LiteGraph.createNode(schema.type);
       if(!node) return;
+      if(node.type === 'factory/basic' && typeof App.applyBasicTemplate === 'function'){
+        App.applyBasicTemplate(node, schema.templateId || kind);
+      }
       // Position near top-left with slight offset to avoid perfect overlap
       const baseX = 60, baseY = 120;
       const jitterX = Math.floor(Math.random()*60);
@@ -1896,6 +1935,23 @@ window.beginGroupPlacement = beginGroupPlacement;
             if(typeof val === 'string' && val.trim()) node.title = val.trim();
           }else if(def.apply){
             def.apply(node, val);
+          }else if(node.type === 'factory/basic' && /^processTime(?:\d+)?$/.test(def.key)){
+            const timings = App.ensureBasicPortTimings?.(node);
+            const index = def.key === 'processTime' ? 0 : Math.max(0, Number(def.key.replace('processTime', '')) - 1);
+            const port = (node.inputs || []).filter((entry)=>entry?.channel !== 'signal')[index];
+            if(port && timings?.inputs?.[port.portId]){
+              const seconds = Math.max(0, Number(val) || 0);
+              timings.inputs[port.portId].processTimeSec = seconds;
+              timings.inputs[port.portId].processStages = [{ stageId:`${port.portId}-process-1`, durationSec:seconds }];
+            }
+          }else if(node.type === 'factory/basic' && /^downTime(?:\d+)?$/.test(def.key)){
+            const timings = App.ensureBasicPortTimings?.(node);
+            const index = def.key === 'downTime' ? 0 : Math.max(0, Number(def.key.replace('downTime', '')) - 1);
+            const port = (node.outputs || []).filter((entry)=>entry?.channel !== 'signal')[index];
+            if(port && timings?.outputs?.[port.portId]) timings.outputs[port.portId].downTimeSec = Math.max(0, Number(val) || 0);
+          }else if(node.type === 'factory/basic' && ['ratio','strictIdMatch','transportMode','outSequence','preset','operation','sourceKind','targetKind','itemKind','batchMode','quantity','relationMode','searchDepth','autoRelease'].includes(def.key)){
+            const operation = Array.isArray(node.properties?.operations) ? node.properties.operations[0] : null;
+            if(operation){ operation.config = operation.config || {}; operation.config[def.key] = val; node.onPropertyChanged?.('operations'); }
           }else{
             node.properties = node.properties || {};
             node.properties[def.key] = val;
@@ -1905,8 +1961,11 @@ window.beginGroupPlacement = beginGroupPlacement;
         // Preset runtime setup can replace the constructor's temporary ports.
         // Build the standard Flow configuration only after all preset settings
         // and final ports have been applied.
-        if(node.type === 'factory/basic' && typeof App.ensureBasicPresetFlowRules === 'function'){
-          App.ensureBasicPresetFlowRules(node, { force: true });
+        if(node.type === 'factory/basic' && typeof App.ensureBasicTemplateFlowRules === 'function'){
+          App.ensureBasicTemplateFlowRules(node, { force: false, templateId:schema.templateId || kind });
+        }
+        if(schema.flowTemplate === 'sequence' && typeof App.configureBasicSequenceGenerator === 'function'){
+          App.configureBasicSequenceGenerator(node);
         }
         if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
       }

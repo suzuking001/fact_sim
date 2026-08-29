@@ -495,13 +495,11 @@ function initGraph(){
   resize();
   // Place initial nodes lower so they don't hide under menus
   const src = LiteGraph.createNode('factory/basic');
-  src.properties.presetId = 'source';
-  src.properties.sourceMode = 'work';
-  src.onPropertyChanged('presetId');
+  if(typeof App.configureBasicSequenceGenerator === 'function') App.configureBasicSequenceGenerator(src);
+  src.title = 'Source';
   src.pos=[60,180];
   const eq = LiteGraph.createNode('factory/basic');
-  eq.properties.presetId = 'machine';
-  eq.onPropertyChanged('presetId');
+  App.applyBasicTemplate?.(eq, 'machine');
   eq.pos=[360,180];
   if(typeof window.enforceNodeOverlayMinSize === 'function'){
     try{ window.enforceNodeOverlayMinSize(src); }catch(_e){}

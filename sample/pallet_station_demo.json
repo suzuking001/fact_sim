@@ -22,8 +22,7 @@
           "slot_index": 0,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -31,8 +30,7 @@
           "link": 14,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -47,8 +45,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -60,42 +57,21 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Carrier Route IN",
       "properties": {
-        "processTime": 1,
-        "downTime": 0.3,
-        "initialCarrier": "Carrier-IN",
-        "outSequence": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
-        "transportMode": "carrier",
-        "migratedCarrierConfigs": [
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
+        "initialContents": [
           {
-            "nodeId": 4,
-            "properties": {
-              "carrierId": "Carrier-IN",
-              "palletCapacity": 1,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": "P-1"
-            },
-            "configKind": "pallet-carrier"
-          },
-          {
-            "nodeId": 5,
-            "properties": {
-              "carrierId": "Carrier-OUT",
-              "palletCapacity": 2,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": ""
-            },
-            "configKind": "pallet-carrier"
+            "typeId": "type-carrier-in",
+            "quantity": 1,
+            "load": "empty",
+            "children": []
           }
         ],
-        "initialContents": [],
         "inputRules": [
           {
             "ruleId": "migrated-input-1",
@@ -177,10 +153,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -191,7 +179,34 @@
               "downTimeSec": 0.3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "carrier",
+              "outSequence": ""
+            }
+          }
+        ]
       }
     },
     {
@@ -216,8 +231,7 @@
           "link": 5,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -225,8 +239,7 @@
           "link": null,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -241,8 +254,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -252,41 +264,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Carrier Route",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "initialCarrier": "",
-        "outSequence": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
-        "transportMode": "carrier",
-        "migratedCarrierConfigs": [
-          {
-            "nodeId": 4,
-            "properties": {
-              "carrierId": "Carrier-IN",
-              "palletCapacity": 1,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": "P-1"
-            },
-            "configKind": "pallet-carrier"
-          },
-          {
-            "nodeId": 5,
-            "properties": {
-              "carrierId": "Carrier-OUT",
-              "palletCapacity": 2,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": ""
-            },
-            "configKind": "pallet-carrier"
-          }
-        ],
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -369,10 +353,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -383,7 +379,34 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "carrier",
+              "outSequence": ""
+            }
+          }
+        ]
       }
     },
     {
@@ -415,8 +438,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -431,8 +453,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -454,8 +475,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -472,42 +492,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Carrier Route",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "initialCarrier": "",
-        "outSequence": "",
-        "flipIO": true,
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
-        "transportMode": "carrier",
-        "migratedCarrierConfigs": [
-          {
-            "nodeId": 4,
-            "properties": {
-              "carrierId": "Carrier-IN",
-              "palletCapacity": 1,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": "P-1"
-            },
-            "configKind": "pallet-carrier"
-          },
-          {
-            "nodeId": 5,
-            "properties": {
-              "carrierId": "Carrier-OUT",
-              "palletCapacity": 2,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": ""
-            },
-            "configKind": "pallet-carrier"
-          }
-        ],
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -590,10 +581,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -604,7 +607,34 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "carrier",
+              "outSequence": ""
+            }
+          }
+        ]
       }
     },
     {
@@ -636,8 +666,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -652,8 +681,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -675,8 +703,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -693,42 +720,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Carrier Route",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "initialCarrier": "",
-        "outSequence": "",
-        "flipIO": true,
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
-        "transportMode": "carrier",
-        "migratedCarrierConfigs": [
-          {
-            "nodeId": 4,
-            "properties": {
-              "carrierId": "Carrier-IN",
-              "palletCapacity": 1,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": "P-1"
-            },
-            "configKind": "pallet-carrier"
-          },
-          {
-            "nodeId": 5,
-            "properties": {
-              "carrierId": "Carrier-OUT",
-              "palletCapacity": 2,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": ""
-            },
-            "configKind": "pallet-carrier"
-          }
-        ],
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -811,10 +809,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -825,7 +835,34 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "carrier",
+              "outSequence": ""
+            }
+          }
+        ]
       }
     },
     {
@@ -857,8 +894,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -873,8 +909,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -896,8 +931,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -914,42 +948,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Carrier Route",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "initialCarrier": "",
-        "outSequence": "",
-        "flipIO": true,
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
-        "transportMode": "carrier",
-        "migratedCarrierConfigs": [
-          {
-            "nodeId": 4,
-            "properties": {
-              "carrierId": "Carrier-IN",
-              "palletCapacity": 1,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": "P-1"
-            },
-            "configKind": "pallet-carrier"
-          },
-          {
-            "nodeId": 5,
-            "properties": {
-              "carrierId": "Carrier-OUT",
-              "palletCapacity": 2,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": ""
-            },
-            "configKind": "pallet-carrier"
-          }
-        ],
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1032,10 +1037,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -1046,7 +1063,34 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "carrier",
+              "outSequence": ""
+            }
+          }
+        ]
       }
     },
     {
@@ -1068,8 +1112,7 @@
           "link": 6,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -1077,8 +1120,7 @@
           "link": null,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1093,8 +1135,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -1105,42 +1146,21 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Carrier Route OUT",
       "properties": {
-        "processTime": 1,
-        "downTime": 0.3,
-        "initialCarrier": "Carrier-OUT",
-        "outSequence": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
-        "transportMode": "carrier",
-        "migratedCarrierConfigs": [
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
+        "initialContents": [
           {
-            "nodeId": 4,
-            "properties": {
-              "carrierId": "Carrier-IN",
-              "palletCapacity": 1,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": "P-1"
-            },
-            "configKind": "pallet-carrier"
-          },
-          {
-            "nodeId": 5,
-            "properties": {
-              "carrierId": "Carrier-OUT",
-              "palletCapacity": 2,
-              "palletWorkCapacity": 4,
-              "initialPalletIds": ""
-            },
-            "configKind": "pallet-carrier"
+            "typeId": "type-carrier-out",
+            "quantity": 1,
+            "load": "empty",
+            "children": []
           }
         ],
-        "initialContents": [],
         "inputRules": [
           {
             "ruleId": "migrated-input-1",
@@ -1222,10 +1242,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1236,7 +1268,34 @@
               "downTimeSec": 0.3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "carrier",
+              "outSequence": ""
+            }
+          }
+        ]
       }
     },
     {
@@ -1265,8 +1324,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -1281,8 +1339,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1303,8 +1360,7 @@
           "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -1323,18 +1379,13 @@
           "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Station",
       "properties": {
-        "processTime": 1,
-        "downTime": 1,
-        "palletWorkCapacity": 4,
-        "flipIO": true,
-        "basicNodeVersion": 1,
-        "presetId": "station",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1417,10 +1468,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 1
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 1
+              "processTimeSec": 1,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 1
+                }
+              ]
             }
           },
           "outputs": {
@@ -1431,7 +1494,30 @@
               "downTimeSec": 1
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "station-1",
+            "trigger": "process",
+            "kind": "station-transfer"
+          }
+        ]
       }
     },
     {
@@ -1458,16 +1544,13 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B,C",
-        "basicNodeVersion": 1,
-        "presetId": "source",
-        "sourceMode": "work",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
@@ -1475,13 +1558,45 @@
             "ruleId": "migrated-output-1",
             "targets": [
               {
-                "mode": "category",
-                "category": "work"
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-3",
+                    "typeId": "type-c",
+                    "quantity": 1
+                  }
+                ]
               }
             ],
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-3",
+                  "typeId": "type-c",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
@@ -1499,7 +1614,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       }
     },
     {
@@ -1528,16 +1666,14 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": true,
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1562,11 +1698,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       }
     },
     {
@@ -1595,8 +1760,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1616,17 +1780,13 @@
           "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Equipment",
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "flipIO": true,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1672,7 +1832,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1680,7 +1846,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       }
     }
   ],

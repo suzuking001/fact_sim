@@ -79,12 +79,23 @@
     if(typeof value === 'string'){
       const text = normalizeText(value);
       if(text.toLowerCase() === 'otherwise') return { mode: 'otherwise' };
+      if(text.toLowerCase() === 'sequence') return { mode: 'sequence' };
       if(CATEGORIES.has(text.toLowerCase())) return { mode: 'category', category: text.toLowerCase() };
       return { mode: 'type', typeId: text };
     }
     const source = isObject(value) ? value : {};
     const mode = normalizeText(source.mode || source.kind).toLowerCase();
     if(mode === 'otherwise') return { mode: 'otherwise' };
+    if(mode === 'sequence') return {
+      mode: 'sequence',
+      entries:(Array.isArray(source.entries) ? source.entries : []).map((entry)=>(
+        isObject(entry) ? {
+          entryId:normalizeText(entry.entryId),
+          typeId:normalizeText(entry.typeId),
+          quantity:Number(entry.quantity)
+        } : entry
+      ))
+    };
     if(mode === 'category') return { mode: 'category', category: normalizeCategory(source.category) };
     return { mode: 'type', typeId: normalizeText(source.typeId || source.value) };
   }
@@ -124,6 +135,102 @@
       load: LOAD_MODES.has(load) ? load : 'empty',
       children: (Array.isArray(source.children) ? source.children : []).map(normalizeRecipe)
     };
+  }
+
+  function nextSourceSequenceEntryId(rows){
+    const used = new Set((Array.isArray(rows) ? rows : []).map((entry)=>normalizeText(entry?.entryId)).filter(Boolean));
+    let index = 1;
+    while(used.has(`source-sequence-${index}`)) index += 1;
+    return `source-sequence-${index}`;
+  }
+
+  function sourceSequenceTarget(node){
+    for(const rule of (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : [])){
+      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target].filter(Boolean);
+      const target = targets.find((entry)=>normalizeText(entry?.mode || entry?.kind || entry).toLowerCase() === 'sequence');
+      if(target) return target;
+    }
+    return null;
+  }
+
+  function sourceSequenceRows(node){
+    const target = sourceSequenceTarget(node);
+    return Array.isArray(target?.entries) ? target.entries : [];
+  }
+
+  function inspectSourceSequence(node, registryOverride){
+    const registry = registryOverride || entityModelForGraph(node?.graph || App.graph);
+    const rows = sourceSequenceRows(node);
+    const errors = [];
+    const entries = [];
+    const entryIds = new Set();
+    if(!rows.length) errors.push({ code:'SOURCE_SEQUENCE_EMPTY', nodeId:node?.id ?? null });
+    rows.forEach((raw, index)=>{
+      const entryId = normalizeText(raw?.entryId);
+      const typeId = normalizeText(raw?.typeId);
+      const quantity = Number(raw?.quantity);
+      const type = registry?.get?.(typeId) || null;
+      if(!entryId) errors.push({ code:'SOURCE_SEQUENCE_ENTRY_ID_REQUIRED', nodeId:node?.id ?? null, index });
+      else if(entryIds.has(entryId)) errors.push({ code:'SOURCE_SEQUENCE_ENTRY_ID_DUPLICATE', nodeId:node?.id ?? null, index, entryId });
+      else entryIds.add(entryId);
+      if(!typeId || !type) errors.push({ code:'SOURCE_SEQUENCE_TYPE_MISSING', nodeId:node?.id ?? null, index, typeId });
+      else if(type.category !== 'work') errors.push({ code:'SOURCE_SEQUENCE_TYPE_NOT_WORK', nodeId:node?.id ?? null, index, typeId });
+      if(!Number.isInteger(quantity) || quantity < 1) errors.push({ code:'SOURCE_SEQUENCE_QUANTITY_INVALID', nodeId:node?.id ?? null, index, quantity:raw?.quantity });
+      entries.push({
+        entryId,
+        typeId,
+        quantity,
+        typeName:type?.name || ''
+      });
+    });
+    return { ok:errors.length === 0, nodeId:node?.id ?? null, entries, errors };
+  }
+
+  function normalizeSourceSequence(rows, registry, nodeId){
+    const used = new Set();
+    const normalized = (Array.isArray(rows) ? rows : []).map((raw, index)=>{
+      let entryId = normalizeText(raw?.entryId);
+      if(!entryId || used.has(entryId)){
+        entryId = nextSourceSequenceEntryId(Array.from(used).map((value)=>({ entryId:value })));
+      }
+      used.add(entryId);
+      return {
+        entryId,
+        typeId:normalizeText(raw?.typeId),
+        quantity:Number(raw?.quantity)
+      };
+    });
+    const probe = { id:nodeId ?? null, graph:registry?.graph || null, properties:{ outputRules:[{ targets:[{ mode:'sequence', entries:normalized }] }] } };
+    const validation = inspectSourceSequence(probe, registry);
+    if(!validation.ok){
+      const error = new Error(`Invalid Source Sequence: ${validation.errors.map((entry)=>entry.code).join(', ')}`);
+      error.validation = validation;
+      throw error;
+    }
+    return normalized;
+  }
+
+  function ensureSourceSequence(node, options){
+    if(!node) return { ok:false, errors:[{ code:'SOURCE_NODE_REQUIRED' }] };
+    node.properties = isObject(node.properties) ? node.properties : {};
+    const registry = entityModelForGraph(node.graph || App.graph);
+    if(!registry) return { ok:false, errors:[{ code:'GRAPH_REQUIRED', nodeId:node.id ?? null }] };
+    const target = sourceSequenceTarget(node);
+    if(!target) return { ok:false, errors:[{ code:'SOURCE_SEQUENCE_TARGET_REQUIRED', nodeId:node.id ?? null }] };
+    if(sourceSequenceRows(node).length){
+      return inspectSourceSequence(node, registry);
+    }
+    if(options?.createDefault === false) return inspectSourceSequence(node, registry);
+    let workType = registry.list().find((entry)=>entry.category === 'work') || null;
+    if(!workType){
+      workType = registry.upsert({
+        name:'Work A', category:'work', subtype:'', tags:['preset'], capacity:0,
+        allowedContentTypeIds:[], defaultAttributes:{}
+      });
+    }
+    target.entries = [{ entryId:'source-sequence-1', typeId:workType.typeId, quantity:1 }];
+    try{ node.graph?.change?.(); }catch(_e){}
+    return inspectSourceSequence(node, registry);
   }
 
   class EntityTypeRegistry{
@@ -221,6 +328,9 @@
       for(const node of nodes){
         const props = isObject(node?.properties) ? node.properties : {};
         walkRecipe(props.initialContents, node.id, 'initialContents');
+        sourceSequenceRows(node).forEach((entry, index)=>{
+          if(normalizeText(entry?.typeId) === id) refs.push({ kind:'node', id:node.id, field:`outputRules.sequence.entries[${index}].typeId` });
+        });
         for(const key of ['inputRules', 'outputRules']){
           (Array.isArray(props[key]) ? props[key] : []).forEach((rule, index)=>{
             const targets = normalizeTargets(rule?.targets, rule?.target);
@@ -507,6 +617,9 @@
     _targetMatches(instance, target){
       const normalized = normalizeTarget(target);
       if(normalized.mode === 'otherwise') return true;
+      // Sequence is a virtual OUTPUT target that creates the next Entity. It
+      // never matches an Instance already held by a node.
+      if(normalized.mode === 'sequence') return false;
       if(normalized.mode === 'type') return instance.typeId === normalized.typeId;
       const type = this.typeOf(instance);
       return !!type && type.category === normalized.category;
@@ -670,9 +783,9 @@
     for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
       const props = isObject(node?.properties) ? node.properties : null;
       if(!props || (Array.isArray(props.initialContents) && props.initialContents.length)) continue;
-      const signature = `${node?.type || ''} ${props.presetId || ''} ${props.sourceMode || ''} ${props.transportMode || ''}`.toLowerCase();
-      if(!signature.includes('carrierroute') && !signature.includes('agvroute') && props.presetId !== 'carrier_route') continue;
-      const initialCarrier = normalizeText(props.initialCarrier);
+      const transport = (Array.isArray(props.operations) ? props.operations : []).find((operation)=>normalizeText(operation?.kind).toLowerCase() === 'carrier-transport');
+      if(!transport) continue;
+      const initialCarrier = normalizeText(transport?.config?.initialCarrier);
       if(!initialCarrier || initialCarrier.toLowerCase() === 'undefined' || initialCarrier.toLowerCase() === 'none') continue;
       const needle = initialCarrier.toLowerCase();
       const type = types.find((entry)=>entry.category === 'carrier'
@@ -711,7 +824,7 @@
 
     const legacyRoots = candidates.filter((value)=>!store.get(value));
     if(!legacyRoots.length){
-      if(node._initialCarrierSpawned === true && normalizeText(node.properties?.presetId) === 'carrier_route'){
+      if(node._initialCarrierSpawned === true && App.basicNodeBehavior?.(node) === 'carrier_route'){
         return { summary: [], instances: [] };
       }
       return {
@@ -985,6 +1098,12 @@
     for(const node of nodes){
       const validation = store.validateInitialContents(node);
       result.errors.push(...validation.errors.map((entry)=>({ ...entry, nodeId: node.id })));
+      const hasSequenceTarget = (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : [])
+        .some((rule)=>normalizeTargets(rule?.targets, rule?.target).some((target)=>target.mode === 'sequence'));
+      if(hasSequenceTarget){
+        const sourceValidation = inspectSourceSequence(node, registry);
+        result.errors.push(...sourceValidation.errors);
+      }
     }
     result.ok = result.errors.length === 0;
     return result;
@@ -1003,6 +1122,12 @@
   App.initializeEntityRuntime = initializeEntityRuntime;
   App.validateEntityModel = validateEntityModel;
   App.normalizeEntityRecipe = normalizeRecipe;
+  App.nextSourceSequenceEntryId = nextSourceSequenceEntryId;
+  App.inspectSourceSequence = inspectSourceSequence;
+  App.normalizeSourceSequence = normalizeSourceSequence;
+  App.ensureSourceSequence = ensureSourceSequence;
+  App.sourceSequenceTarget = sourceSequenceTarget;
+  App.sourceSequenceRows = sourceSequenceRows;
   App.normalizeEntityRules = normalizeRules;
   App.selectEntityRule = selectRule;
   App.evaluateEntityCondition = evaluateCondition;

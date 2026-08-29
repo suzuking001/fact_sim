@@ -2,10 +2,10 @@ var App = window.App || (window.App = {});
 
 (function(){
   const WORKER_MODE = 'event-fast-worker';
-  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260824f';
-  const UNSAFE_BASIC_PRESETS = new Set([
-    'carrier_route',
-    'shuttle'
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260829b';
+  const UNSAFE_BASIC_OPERATIONS = new Set([
+    'carrier-transport',
+    'synchronized-step'
   ]);
 
   function cloneJson(value){
@@ -55,7 +55,7 @@ var App = window.App || (window.App = {});
   function serializeGraphForWorker(graphOrData){
     if(graphOrData && typeof graphOrData.serialize === 'function'){
       if(typeof App.serializeGraphData === 'function'){
-        return cloneJson(App.serializeGraphData());
+        return cloneJson(App.serializeGraphData(graphOrData));
       }
       const data = graphOrData.serialize();
       if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
@@ -243,9 +243,7 @@ var App = window.App || (window.App = {});
     let totalCompleted = 0;
     for(const node of nodes){
       if(!node) continue;
-      const type = String(node.type || '').toLowerCase();
-      const title = String(node.title || '').toLowerCase();
-      if(type.indexOf('sink') < 0 && title !== 'sink' && !Array.isArray(node._recv)) continue;
+      if(!Array.isArray(node._recv)) continue;
       const completed = Array.isArray(node._recv) ? node._recv.length : 0;
       totalCompleted += Math.max(0, completed);
       sinks.push({
@@ -261,8 +259,8 @@ var App = window.App || (window.App = {});
     const nodes = Array.isArray(graphData && graphData.nodes) ? graphData.nodes : [];
     for(const node of nodes){
       const type = String(node && node.type || '').toLowerCase();
-      const preset = String(node && node.properties && node.properties.presetId || '').toLowerCase();
-      if(type === 'factory/basic' && UNSAFE_BASIC_PRESETS.has(preset)) return true;
+      const operations = Array.isArray(node?.properties?.operations) ? node.properties.operations : [];
+      if(type === 'factory/basic' && operations.some((operation)=>UNSAFE_BASIC_OPERATIONS.has(String(operation?.kind || '').toLowerCase()))) return true;
     }
     return false;
   }
@@ -421,7 +419,20 @@ var App = window.App || (window.App = {});
     }
 
     _createEngine(){
-      const graph = createGraphFromData(this.graphData);
+      // Match the synchronous engine-test lifecycle: runtime constructors and
+      // reset hooks must observe t=0. Resetting the shared clock only after
+      // engine creation shifted carrier schedules by the previous test case's
+      // final time, which left Sample Line2 in different terminal states.
+      if(typeof window.setSimTime === 'function'){
+        try{ window.setSimTime(0); }catch(_e){}
+      }
+      if(typeof window.updateSimTime === 'function'){
+        try{ window.updateSimTime(); }catch(_e){}
+      }
+      // Seed graph construction as well as execution. Node constructors may
+      // consume randomness, so starting the seeded stream only at engine
+      // creation produced a different stream from the dt reference case.
+      const graph = this._runSeeded(()=> createGraphFromData(this.graphData));
       const engine = this._runSeeded(()=> App.createSimEngine(this.fallbackMode, graph));
       this._lastRuntimeMode = String(
         (engine && engine.runtimeMode)
@@ -499,7 +510,10 @@ var App = window.App || (window.App = {});
           const now = performance.now();
           if((now - started) > opts.maxWallMs) break;
           if(loops >= opts.maxLoops) break;
-          if(engine && typeof engine.update === 'function') this._runSeeded(()=> engine.update(opts.realStepMs));
+          const currentSimMs = (typeof window.simNow === 'function') ? Number(window.simNow()) || 0 : 0;
+          const remainingSimMs = Math.max(0, opts.targetSimMs - currentSimMs);
+          const stepMs = Math.min(opts.realStepMs, remainingSimMs);
+          if(engine && typeof engine.update === 'function' && stepMs > 0) this._runSeeded(()=> engine.update(stepMs));
           loops += 1;
         }
         const simMs = (typeof window.simNow === 'function') ? Number(window.simNow()) : 0;

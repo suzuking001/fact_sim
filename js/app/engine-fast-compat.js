@@ -10,8 +10,8 @@ var App = window.App || (window.App = {});
   }
 
   function isPassiveFallbackNode(node){
-    const preset = normalizeType(node?.properties?.presetId);
-    return preset === 'note' || preset === 'signal';
+    const type = normalizeType(node?.type);
+    return type === 'factory/note' || type === 'factory/signal';
   }
 
   function hasTimedState(node){

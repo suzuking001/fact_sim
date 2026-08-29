@@ -2,9 +2,11 @@
 var workCounter = 0;
 
 class Work{
-  constructor(id = null, type = 'A'){
+  constructor(id = null, type = 'A', typeId = ''){
     this.id = id;
     this.type = type;
+    this.typeId = typeId || '';
+    this.__flowCategory = 'work';
   }
   toString(){ return `ID:${this.id},Type:${this.type}`; }
 }

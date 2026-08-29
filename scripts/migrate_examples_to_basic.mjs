@@ -25,7 +25,7 @@ const embeddedExamples = new Map([
   ["branch.json", ["branch.js", "branch"]],
   ["parallel_benchmark.json", ["parallel_benchmark.js", "parallel_benchmark"]],
   ["shuttle_line5.json", ["shuttle_line5.js", "shuttle_line5"]],
-  ["graph (3).json", ["carrier.js", "carrier"]],
+  ["carrier.json", ["carrier.js", "carrier"]],
   ["pallet_station_demo.json", ["pallet_station_demo.js", "pallet_station_demo"]],
   ["sample_line1.json", ["sample_line1.js", "sample_line1"]],
   ["sample_line2.json", ["sample_line2.js", "sample_line2"]]

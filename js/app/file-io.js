@@ -133,21 +133,22 @@ function _applyViewState(view){
   return applied;
 }
 
-function _serializeGraph(){
-  if(!App.graph) throw new Error('graph is not initialized');
-  const serialized = App.graph.serialize();
+function _serializeGraph(graph){
+  const targetGraph = graph || App.graph;
+  if(!targetGraph) throw new Error('graph is not initialized');
+  const serialized = targetGraph.serialize();
   if(typeof App.injectEntityModel === 'function'){
-    App.injectEntityModel(serialized, App.graph);
+    App.injectEntityModel(serialized, targetGraph);
   }
   if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
-    App.stopGroups.injectSerializedData(serialized, App.graph);
+    App.stopGroups.injectSerializedData(serialized, targetGraph);
   }
-  if(App.backgroundLayout && typeof App.backgroundLayout.serialize === 'function'){
+  if(targetGraph === App.graph && App.backgroundLayout && typeof App.backgroundLayout.serialize === 'function'){
     const bg = App.backgroundLayout.serialize();
     if(bg) serialized.__factSimBackground = bg;
     else delete serialized.__factSimBackground;
   }
-  const viewState = _captureViewState();
+  const viewState = targetGraph === App.graph ? _captureViewState() : null;
   if(viewState){
     serialized.__factSimView = viewState;
   }
@@ -409,8 +410,8 @@ function _compactGraphData(graph){
   return g;
 }
 
-App.serializeGraphData = function(){
-  return _serializeGraph();
+App.serializeGraphData = function(graph){
+  return _serializeGraph(graph);
 };
 
 App.serializeGraphDataForSave = function(){

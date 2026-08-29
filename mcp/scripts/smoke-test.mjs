@@ -146,7 +146,12 @@ async function main() {
             title: "MCP Batch Equip",
             x: 80,
             y: 80,
-            properties: { presetId: "machine", processTime: 5, downTime: 6 }
+            properties: {}
+          },
+          {
+            action: "apply_template",
+            nodeId: "$batchEquip",
+            templateId: "machine"
           },
           {
             action: "add",
@@ -155,19 +160,24 @@ async function main() {
             title: "MCP Batch Source",
             x: 20,
             y: 80,
-            properties: { presetId: "source", sourceMode: "work", spawnInterval: 10 }
+            properties: {}
+          },
+          {
+            action: "apply_template",
+            nodeId: "$batchSource",
+            templateId: "source"
           },
           {
             action: "connect",
             fromNodeId: "$batchSource",
             toNodeId: "$batchEquip",
-            portKind: "work"
+            portKind: "entity"
           }
         ]
       }
     }));
-    if (typeof batch?.operationCount !== "number" || batch.operationCount !== 3) {
-      throw new Error("edit_graph batch did not return operationCount=3");
+    if (typeof batch?.operationCount !== "number" || batch.operationCount !== 5) {
+      throw new Error("edit_graph batch did not return operationCount=5");
     }
     if (!batch?.refs?.batchEquip || !batch?.refs?.batchSource) {
       throw new Error("edit_graph batch refs were not returned");

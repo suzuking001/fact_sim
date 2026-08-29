@@ -302,8 +302,8 @@ export interface FactSimRuntime {
   upsertEntityType(entityType: Record<string, unknown>): Promise<Record<string, unknown>>;
   removeEntityType(typeId: string): Promise<Record<string, unknown>>;
   setNodeInitialContents(nodeId: string | number, initialContents: unknown[]): Promise<Record<string, unknown>>;
-  setNodeFlowRules(nodeId: string | number, inputRules?: unknown[], outputRules?: unknown[]): Promise<Record<string, unknown>>;
-  applyBasicPreset(nodeId: string | number, presetId: string): Promise<Record<string, unknown>>;
+  setNodeFlowRules(nodeId: string | number, inputRules?: unknown[], outputRules?: unknown[], nodeOperations?: unknown[], inputPolicy?: Record<string, unknown>): Promise<Record<string, unknown>>;
+  applyBasicTemplate(nodeId: string | number, templateId: string): Promise<Record<string, unknown>>;
   migrateCurrentGraphToBasic(): Promise<Record<string, unknown>>;
   close(): Promise<void>;
 }

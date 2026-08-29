@@ -166,7 +166,7 @@ class BranchNode extends EquipmentNode{
         const link = this.graph.links[id]; if(!link) return;
         const target = this.graph.getNodeById(link.target_id);
         const sinkCtor = window.SinkNode;
-        const isSink = !!target && (target.properties?.presetId === 'sink'
+        const isSink = !!target && (window.App?.basicNodeBehavior?.(target) === 'sink'
           || (sinkCtor && target instanceof sinkCtor)
           || target.title === 'Sink');
         if(isSink) window.WorkLinkAnimator.spawn(this.graph, id, 'work', duration, info);

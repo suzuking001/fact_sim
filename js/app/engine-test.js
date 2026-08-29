@@ -4,14 +4,14 @@ var App = window.App || (window.App = {});
   const DEFAULT_EXAMPLES = [];
   const EXAMPLE_ALIASES = { agv_config: 'carrier', carrier_config: 'carrier' };
   const EXAMPLE_FILES = {
-    simple: 'sample/simple.json?v=20260824f',
-    branch: 'sample/branch.json?v=20260824f',
-    parallel_benchmark: 'sample/parallel_benchmark.json?v=20260824f',
-    shuttle_line5: 'sample/shuttle_line5.json?v=20260824f',
-    carrier: 'sample/graph (3).json?v=20260824f',
-    pallet_station_demo: 'sample/pallet_station_demo.json?v=20260824f',
-    sample_line1: 'sample/sample_line1.json?v=20260824f',
-    sample_line2: 'sample/sample_line2.json?v=20260824f'
+    simple: 'sample/simple.json?v=20260828a',
+    branch: 'sample/branch.json?v=20260828a',
+    parallel_benchmark: 'sample/parallel_benchmark.json?v=20260828a',
+    shuttle_line5: 'sample/shuttle_line5.json?v=20260828a',
+    carrier: 'sample/carrier.json?v=20260829a',
+    pallet_station_demo: 'sample/pallet_station_demo.json?v=20260828a',
+    sample_line1: 'sample/sample_line1.json?v=20260828a',
+    sample_line2: 'sample/sample_line2.json?v=20260828a'
   };
   const DEFAULTS = {
     suite: 'standard',
@@ -278,6 +278,7 @@ var App = window.App || (window.App = {});
     const payload = (typeof App.compactGraphData === 'function') ? App.compactGraphData(cloneJson(data)) : cloneJson(data);
     const graph = new LGraph();
     graph.configure(payload);
+    if(typeof App.restoreEntityModel === 'function') App.restoreEntityModel(graph, payload, true);
     if(App.repairGraphLinks && typeof App.repairGraphLinks === 'function') App.repairGraphLinks(graph);
     if(App.stopGroups && typeof App.stopGroups.restoreSerializedData === 'function') App.stopGroups.restoreSerializedData(graph, payload, false);
     applySerializedRuntimeNodeStates(graph, payload);
@@ -820,9 +821,7 @@ var App = window.App || (window.App = {});
     let totalCompleted = 0;
     for(const node of nodes){
       if(!node) continue;
-      const type = String(node.type || '').toLowerCase();
-      const title = String(node.title || '').toLowerCase();
-      if(type.indexOf('sink') < 0 && title !== 'sink' && !Array.isArray(node._recv)) continue;
+      if(!Array.isArray(node._recv)) continue;
       const completed = Array.isArray(node._recv) ? node._recv.length : 0;
       const throughput = (typeof node.getThroughputPerHour === 'function') ? Number(node.getThroughputPerHour()) : NaN;
       totalCompleted += Math.max(0, completed);
@@ -930,6 +929,12 @@ var App = window.App || (window.App = {});
       const startWall = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
       const payload = (typeof App.compactGraphData === 'function') ? App.compactGraphData(cloneJson(source.data)) : cloneJson(source.data);
       const finalSettleMs = finalSnapshotSettleMs(options);
+      // Constructors/configure hooks must see the same initial clock for every
+      // engine. Previously the synchronous baseline graph was constructed at
+      // the previous case's terminal time, while worker graphs were built at
+      // t=0, producing false carrier-state parity failures.
+      if(typeof window.setSimTime === 'function') try{ window.setSimTime(0); }catch(_e){}
+      if(typeof window.updateSimTime === 'function') try{ window.updateSimTime(); }catch(_e){}
       const baselineGraph = createGraphFromData(payload);
       const expected = {
         nodeCount: Array.isArray(baselineGraph && baselineGraph._nodes) ? baselineGraph._nodes.length : 0,

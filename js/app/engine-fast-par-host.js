@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const PAR_MODE = 'event-fast-par';
-  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260824f';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260829b';
   const MAX_FLUSH_ROUNDS = 16;
 
   function cloneJson(value){
@@ -25,7 +25,7 @@ var App = window.App || (window.App = {});
 
   function serializeGraphData(graphOrData){
     if(graphOrData && typeof graphOrData.serialize === 'function'){
-      if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData());
+      if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData(graphOrData));
       const data = graphOrData.serialize();
       return (typeof App.compactGraphData === 'function') ? App.compactGraphData(data) : data;
     }

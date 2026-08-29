@@ -100,7 +100,7 @@ class EquipmentNode extends LiteGraph.LGraphNode{
         const link = this.graph.links[id]; if(!link) return;
         const target = this.graph.getNodeById(link.target_id);
         const sinkCtor = window.SinkNode;
-        const isSink = !!target && (target.properties?.presetId === 'sink'
+        const isSink = !!target && (window.App?.basicNodeBehavior?.(target) === 'sink'
           || (sinkCtor && target instanceof sinkCtor)
           || target.title === 'Sink');
         if(isSink) window.WorkLinkAnimator.spawn(this.graph, id, 'work', duration, info);
@@ -109,6 +109,10 @@ class EquipmentNode extends LiteGraph.LGraphNode{
   }
   // Compile the script when needed. true accepts; false passes through.
   _evalScript(w, s){
+    // Entity Basic v2 deliberately has no arbitrary JavaScript execution.
+    // Type-specific durations and acceptance are represented by common Flow
+    // conditions and constrained operation configuration instead.
+    if(Number(this.properties?.basicNodeVersion) >= 2) return true;
     if(this.properties && this.properties.scriptDisabled){
       // Safe mode for imported/shared graphs: skip user script execution.
       return true;

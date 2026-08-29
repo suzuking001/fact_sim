@@ -23,8 +23,7 @@
           "link": 42,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -38,19 +37,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -81,7 +73,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -89,7 +87,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -115,8 +136,7 @@
           "link": 8,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -130,19 +150,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -173,7 +186,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -181,7 +200,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -212,34 +254,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -247,7 +311,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -273,8 +360,7 @@
           "link": 10,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -288,19 +374,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -331,7 +410,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -339,7 +424,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -365,8 +473,7 @@
           "link": 11,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -380,19 +487,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -423,7 +523,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -431,7 +537,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -457,8 +586,7 @@
           "link": 12,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -472,19 +600,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -515,7 +636,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -523,7 +650,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -554,34 +704,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -589,7 +761,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -615,8 +810,7 @@
           "link": 17,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -630,19 +824,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -673,7 +860,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -681,7 +874,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -707,8 +923,7 @@
           "link": 18,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -722,19 +937,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -765,7 +973,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -773,7 +987,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -799,8 +1036,7 @@
           "link": 19,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -814,19 +1050,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -857,7 +1086,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -865,7 +1100,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -891,8 +1149,7 @@
           "link": 21,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -906,19 +1163,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -949,7 +1199,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -957,7 +1213,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -988,34 +1267,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -1023,7 +1324,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1049,8 +1373,7 @@
           "link": 24,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1064,19 +1387,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1107,7 +1423,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1115,7 +1437,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -1146,34 +1491,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -1181,7 +1548,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1207,8 +1597,7 @@
           "link": 20,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -1216,8 +1605,7 @@
           "link": 23,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1231,20 +1619,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "processTime2": 2,
-        "basicNodeVersion": 1,
-        "presetId": "merge",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1286,10 +1666,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1297,7 +1689,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "merge-1",
+            "trigger": "input-accepted",
+            "kind": "merge"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -1323,8 +1738,7 @@
           "link": 26,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1338,19 +1752,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1381,7 +1788,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1389,7 +1802,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -1415,8 +1851,7 @@
           "link": 25,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1430,19 +1865,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1473,7 +1901,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1481,7 +1915,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -1507,8 +1964,7 @@
           "link": 27,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -1516,8 +1972,7 @@
           "link": 28,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1531,20 +1986,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "processTime2": 2,
-        "basicNodeVersion": 1,
-        "presetId": "merge",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1586,10 +2033,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1597,7 +2056,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "merge-1",
+            "trigger": "input-accepted",
+            "kind": "merge"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -1623,8 +2105,7 @@
           "link": 29,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1638,19 +2119,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1681,7 +2155,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1689,7 +2169,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -1715,8 +2218,7 @@
           "link": 30,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1730,19 +2232,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1773,7 +2268,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1781,7 +2282,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -1807,8 +2331,7 @@
           "link": 9,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1822,19 +2345,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1865,7 +2381,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1873,7 +2395,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1899,8 +2444,7 @@
           "link": 31,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -1914,19 +2458,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -1957,7 +2494,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -1965,7 +2508,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -1991,8 +2557,7 @@
           "link": 32,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -2000,8 +2565,7 @@
           "link": 33,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2015,20 +2579,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "processTime2": 2,
-        "basicNodeVersion": 1,
-        "presetId": "merge",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2070,10 +2626,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -2081,7 +2649,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "merge-1",
+            "trigger": "input-accepted",
+            "kind": "merge"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2107,8 +2698,7 @@
           "link": 34,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2122,19 +2712,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2165,7 +2748,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -2173,7 +2762,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2199,8 +2811,7 @@
           "link": 35,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2214,19 +2825,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 20,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2257,7 +2861,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 20
+              "processTimeSec": 20,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 20
+                }
+              ]
             }
           },
           "outputs": {
@@ -2265,7 +2875,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -2291,8 +2924,7 @@
           "link": 36,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2306,19 +2938,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2349,7 +2974,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -2357,7 +2988,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -2383,8 +3037,7 @@
           "link": 2,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "sigIn0",
@@ -2419,8 +3072,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "sigOut0",
@@ -2448,14 +3100,8 @@
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 3,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2552,7 +3198,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -2560,7 +3212,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -2586,8 +3261,7 @@
           "link": 4,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2601,19 +3275,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2644,7 +3311,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -2652,7 +3325,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -2678,8 +3374,7 @@
           "link": 5,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2693,19 +3388,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2736,7 +3424,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -2744,7 +3438,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2775,34 +3492,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -2810,7 +3549,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -2836,8 +3598,7 @@
           "link": 40,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2851,19 +3612,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -2894,7 +3648,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -2902,7 +3662,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -2928,8 +3711,7 @@
           "link": 39,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -2937,8 +3719,7 @@
           "link": 41,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -2952,20 +3733,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "processTime2": 2,
-        "basicNodeVersion": 1,
-        "presetId": "merge",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3007,10 +3780,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -3018,7 +3803,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "merge-1",
+            "trigger": "input-accepted",
+            "kind": "merge"
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -3044,8 +3852,7 @@
           "link": 37,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -3059,19 +3866,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3102,7 +3902,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -3110,7 +3916,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3136,8 +3965,7 @@
           "link": 1,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "sigIn0",
@@ -3165,8 +3993,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "sigOut0",
@@ -3192,14 +4019,8 @@
         }
       ],
       "properties": {
-        "processTime": 4,
-        "downTime": 0.5,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\n\n\n// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 2.0;\n  this.properties.downTime = 1.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 0.5;\n}else{\n  // default\n  this.properties.processTime = 3.0;\n  this.properties.downTime = 0.8;\n}\n\n// Return true to accept this work item and enter PROCESS\nreturn true;\n",
-        "sigExtra": 2,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3274,7 +4095,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 4
+              "processTimeSec": 4,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 4
+                }
+              ]
             }
           },
           "outputs": {
@@ -3282,7 +4109,30 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -3308,8 +4158,7 @@
           "link": 3,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -3323,19 +4172,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3366,7 +4208,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -3374,7 +4222,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -3400,16 +4271,14 @@
           "link": 45,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3428,11 +4297,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3463,34 +4361,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -3498,7 +4418,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -3524,8 +4467,7 @@
           "link": 55,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -3539,20 +4481,13 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Equipment",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3583,7 +4518,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -3591,7 +4532,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -3617,8 +4581,7 @@
           "link": 53,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -3632,20 +4595,13 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Equipment",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3676,7 +4632,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -3684,7 +4646,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3710,16 +4695,14 @@
           "link": 54,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3738,11 +4721,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3775,8 +4787,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -3791,8 +4802,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -3809,8 +4819,7 @@
           "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -3829,22 +4838,13 @@
           "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": true,
-        "agvCapacity": 2,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -3894,14 +4894,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -3912,7 +4923,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -3945,8 +4982,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -3961,8 +4997,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -3980,8 +5015,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -4000,22 +5034,13 @@
           "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": true,
-        "agvCapacity": 2,
-        "agvIds": "AGV-1",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -4065,14 +5090,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -4083,7 +5119,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4113,34 +5175,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -4148,7 +5232,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -4174,8 +5281,7 @@
           "link": 52,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -4183,8 +5289,7 @@
           "link": 51,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -4195,8 +5300,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -4208,22 +5312,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "agvCapacity": 2,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -4273,14 +5368,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -4291,7 +5397,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4324,8 +5456,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -4340,8 +5471,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -4359,8 +5489,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -4379,22 +5508,13 @@
           "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": true,
-        "agvCapacity": 2,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -4444,14 +5564,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -4462,7 +5593,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4488,16 +5645,14 @@
           "link": 56,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "sink",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -4516,11 +5671,40 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 0
+              "processTimeSec": 0,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 0
+                }
+              ]
             }
           },
           "outputs": {}
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "destroy-1",
+            "trigger": "input-accepted",
+            "kind": "destroy"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4546,8 +5730,7 @@
           "link": 57,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -4561,20 +5744,13 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Equipment",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -4605,7 +5781,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -4613,7 +5795,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4646,8 +5851,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -4662,8 +5866,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -4681,8 +5884,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -4701,22 +5903,13 @@
           "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": true,
-        "agvCapacity": 1,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -4766,14 +5959,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -4784,7 +5988,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -4811,8 +6041,7 @@
           "slot_index": 0,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -4825,20 +6054,13 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Equipment",
       "properties": {
-        "processTime": 5,
-        "downTime": 3,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "machine",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -4869,7 +6091,13 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 5
+              "processTimeSec": 5,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 5
+                }
+              ]
             }
           },
           "outputs": {
@@ -4877,7 +6105,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "process-1",
+            "trigger": "process",
+            "kind": "process"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -4903,8 +6154,7 @@
           "link": null,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -4912,8 +6162,7 @@
           "link": 64,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -4924,8 +6173,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -4937,22 +6185,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "agvCapacity": 1,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -5002,14 +6241,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -5020,7 +6270,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -5054,8 +6330,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -5070,8 +6345,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -5089,8 +6363,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -5109,22 +6382,13 @@
           "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": true,
-        "agvCapacity": 1,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -5174,14 +6438,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -5192,7 +6467,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -5225,8 +6526,7 @@
           "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -5241,8 +6541,7 @@
           "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -5260,8 +6559,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -5280,22 +6578,13 @@
           "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": true,
-        "agvCapacity": 1,
-        "agvIds": "AGV-2",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -5345,14 +6634,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -5363,7 +6663,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -5393,34 +6719,56 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "Source",
       "properties": {
-        "sequence": "A,B",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "basicNodeVersion": 1,
-        "presetId": "source",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [],
         "outputRules": [
           {
             "ruleId": "migrated-output-1",
             "target": {
-              "mode": "category",
-              "category": "work"
+              "mode": "sequence",
+              "entries": [
+                {
+                  "entryId": "source-sequence-1",
+                  "typeId": "type-a",
+                  "quantity": 1
+                },
+                {
+                  "entryId": "source-sequence-2",
+                  "typeId": "type-b",
+                  "quantity": 1
+                }
+              ]
             },
             "releaseWhen": {
               "kind": "available"
             },
-            "toPortId": "out-1"
+            "toPortId": "out-1",
+            "targets": [
+              {
+                "mode": "sequence",
+                "entries": [
+                  {
+                    "entryId": "source-sequence-1",
+                    "typeId": "type-a",
+                    "quantity": 1
+                  },
+                  {
+                    "entryId": "source-sequence-2",
+                    "typeId": "type-b",
+                    "quantity": 1
+                  }
+                ]
+              }
+            ]
           }
         ],
-        "sourceMode": "work",
         "portTimings": {
           "inputs": {},
           "outputs": {
@@ -5428,7 +6776,30 @@
               "downTimeSec": 0
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "create-1",
+            "trigger": "release",
+            "kind": "create"
+          }
+        ]
       },
       "color": "#f39c12",
       "bgcolor": "#fff6e6"
@@ -5454,8 +6825,7 @@
           "link": null,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -5463,8 +6833,7 @@
           "link": 65,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -5478,8 +6847,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -5491,22 +6859,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "agvCapacity": 1,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -5556,14 +6915,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -5574,7 +6944,33 @@
               "downTimeSec": 5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
@@ -5600,8 +6996,7 @@
           "link": null,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -5609,8 +7004,7 @@
           "link": 47,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -5624,8 +7018,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -5637,22 +7030,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "agvCapacity": 2,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -5702,14 +7086,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -5720,7 +7115,33 @@
               "downTimeSec": 5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#3498db",
       "bgcolor": "#e8f1fb"
@@ -5747,8 +7168,7 @@
           "slot_index": 0,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -5756,8 +7176,7 @@
           "link": 61,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -5769,8 +7188,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -5782,22 +7200,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "agvCapacity": 1,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -5847,14 +7256,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -5865,7 +7285,33 @@
               "downTimeSec": 5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -5891,8 +7337,7 @@
           "link": 14,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -5900,8 +7345,7 @@
           "link": 22,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -5915,20 +7359,12 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "properties": {
-        "processTime": 2,
-        "downTime": 3,
-        "script": "// work: Work object, signalArr: array of signals\n// this._state values: IDLE, PROCESS, WAIT, DOWN\n// Return true to accept work into PROCESS state.\n\n// Default: Accept all work items (add conditions here if needed)\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "processTime2": 2,
-        "basicNodeVersion": 1,
-        "presetId": "merge",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -5970,10 +7406,22 @@
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 2
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 2
+              "processTimeSec": 2,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 2
+                }
+              ]
             }
           },
           "outputs": {
@@ -5981,7 +7429,30 @@
               "downTimeSec": 3
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "merge-1",
+            "trigger": "input-accepted",
+            "kind": "merge"
+          }
+        ]
       },
       "color": "#2ecc71",
       "bgcolor": "#e8f8f2"
@@ -6007,8 +7478,7 @@
           "link": null,
           "portId": "in-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "inPort2",
@@ -6016,8 +7486,7 @@
           "link": 48,
           "portId": "in-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "outputs": [
@@ -6028,8 +7497,7 @@
           "__animToken": null,
           "portId": "out-1",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         },
         {
           "name": "outPort2",
@@ -6041,22 +7509,13 @@
           "__animToken": null,
           "portId": "out-2",
           "channel": "entity",
-          "flowManaged": false,
-          "requiredByPreset": true
+          "flowManaged": true
         }
       ],
       "title": "AGV Route",
       "properties": {
-        "processTime": 3,
-        "downTime": 0.5,
-        "script": "// work: Work object (work.id, work.type, etc.)\n// signalArr: array of sigIn values\n\nif(work.type === 'A'){\n  this.properties.processTime = 5.0;\n  this.properties.downTime = 3.0;\n}else if(work.type === 'B'){\n  this.properties.processTime = 4.0;\n  this.properties.downTime = 2.0;\n}else{\n  // default\n  this.properties.processTime = 10.0;\n  this.properties.downTime = 2.0;\n}\n\n// Return true to accept this work item into PROCESS\nreturn true;",
-        "sigExtra": 0,
-        "sigEnabled": true,
-        "flipIO": false,
-        "agvCapacity": 2,
-        "agvIds": "",
-        "basicNodeVersion": 1,
-        "presetId": "carrier_route",
+        "basicNodeVersion": 2,
+        "contentCapacity": 1,
         "initialContents": [],
         "inputRules": [
           {
@@ -6106,14 +7565,25 @@
             "toPortId": "out-2"
           }
         ],
-        "transportMode": "agv",
         "portTimings": {
           "inputs": {
             "in-1": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-1-process-1",
+                  "durationSec": 3
+                }
+              ]
             },
             "in-2": {
-              "processTimeSec": 3
+              "processTimeSec": 3,
+              "processStages": [
+                {
+                  "stageId": "in-2-process-1",
+                  "durationSec": 3
+                }
+              ]
             }
           },
           "outputs": {
@@ -6124,7 +7594,33 @@
               "downTimeSec": 0.5
             }
           }
-        }
+        },
+        "inputPolicy": {
+          "mode": "first",
+          "requiredPortIds": [],
+          "match": null
+        },
+        "selection": "first-available",
+        "stateMachine": {
+          "initialState": "IDLE",
+          "states": [
+            "IDLE",
+            "PROCESS",
+            "WAIT",
+            "DOWN"
+          ],
+          "transitions": []
+        },
+        "operations": [
+          {
+            "operationId": "transport-1",
+            "trigger": "process",
+            "kind": "carrier-transport",
+            "config": {
+              "transportMode": "agv"
+            }
+          }
+        ]
       },
       "color": "#f1c40f",
       "bgcolor": "#fff9db"
