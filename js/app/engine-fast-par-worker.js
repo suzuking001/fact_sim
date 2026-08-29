@@ -154,7 +154,7 @@ return true;`;
       '../nodes/station.js?v=20260824f',
       '../nodes/transfer_station.js?v=20260824f',
       '../nodes/sink.js?v=20260824f',
-      '../nodes/basic_node.js?v=20260829e',
+      '../nodes/basic_node.js?v=20260829g',
       '../nodes/register.js',
       'graph-links.js',
       'stop-groups.js',

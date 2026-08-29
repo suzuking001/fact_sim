@@ -402,13 +402,16 @@
     };
   }
 
-  function makeInputRule(presetId, port, index, categories, acceptKind){
+  function makeInputRule(presetId, port, index, categories, acceptCondition){
     const targets = targetsForCategories(categories);
+    const condition = isObject(acceptCondition)
+      ? clone(acceptCondition, acceptCondition)
+      : { kind: text(acceptCondition) || 'space-available' };
     return {
       ruleId: `${presetId}-input-${index + 1}`,
       targets,
       target: clone(targets[0], targets[0]),
-      acceptWhen: { kind: acceptKind || 'space-available' },
+      acceptWhen: condition,
       fromPortId: port?.portId || `in-${index + 1}`
     };
   }
@@ -417,8 +420,12 @@
     if(hasSequenceTarget(node) || presetId === 'source' || presetId === 'note' || presetId === 'signal') return [];
     return inputs.map((port, index)=>{
       const categories = presetPortCategories(node, presetId, 'input', index);
-      let acceptKind = presetId === 'sink' ? 'always' : 'space-available';
-      return makeInputRule(presetId, port, index, categories, acceptKind);
+      const acceptCondition = presetId === 'sink'
+        ? { kind:'always' }
+        : presetId === 'shuttle'
+          ? { kind:'space-available' }
+          : allConditions('node-idle', 'space-available');
+      return makeInputRule(presetId, port, index, categories, acceptCondition);
     });
   }
 
@@ -499,7 +506,17 @@
     const inputRules = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : (node.properties.inputRules = []);
     for(const [index, port] of (node.inputs || []).entries()){
       if(!port || isSignalPort(port) || inputRules.some((rule)=>text(rule?.fromPortId) === text(port.portId))) continue;
-      inputRules.push(makeInputRule(presetId, port, index, presetPortCategories(node, presetId, 'input', index), presetId === 'sink' ? 'always' : 'space-available'));
+      inputRules.push(makeInputRule(
+        presetId,
+        port,
+        index,
+        presetPortCategories(node, presetId, 'input', index),
+        presetId === 'sink'
+          ? { kind:'always' }
+          : presetId === 'shuttle'
+            ? { kind:'space-available' }
+            : allConditions('node-idle', 'space-available')
+      ));
     }
     if(['sink', 'note', 'signal'].includes(presetId)) return;
     const outputRules = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : (node.properties.outputRules = []);
@@ -668,22 +685,6 @@
     return (Array.isArray(rows) ? rows : []).reduce((sum, stage)=>sum + Math.max(0, Number(stage?.durationSec) || 0), 0);
   }
 
-  function conditionContainsKind(condition, wanted){
-    const spec = isObject(condition) ? condition : { kind:condition };
-    if(text(spec.kind).toLowerCase().replace(/[ _]+/g, '-') === wanted) return true;
-    const children = Array.isArray(spec.conditions) ? spec.conditions : (Array.isArray(spec.children) ? spec.children : []);
-    return children.some((child)=>conditionContainsKind(child, wanted));
-  }
-
-  function appendRequiredCondition(condition, requiredKind, fallbackKind){
-    const current = isObject(condition) ? condition : { kind:text(condition) || fallbackKind };
-    if(conditionContainsKind(current, requiredKind)) return current;
-    if(text(current.kind).toLowerCase() === 'all' && Array.isArray(current.conditions)){
-      return { ...current, conditions:[{ kind:requiredKind }, ...current.conditions] };
-    }
-    return { kind:'all', conditions:[{ kind:requiredKind }, current] };
-  }
-
   function pruneSignalFlowRules(node){
     if(!node || !isObject(node.properties)) return;
     const inputById = new Map((node.inputs || []).map((port)=>[text(port?.portId), port]));
@@ -704,19 +705,56 @@
     });
   }
 
+  function coalesceSplitOutputRules(node){
+    if(behaviorId(node) !== 'split' || !Array.isArray(node.properties?.outputRules) || node.properties.outputRules.length < 2) return;
+    const groups = new Map();
+    const merged = [];
+    const signature = (rule)=>JSON.stringify({
+      targets:Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target].filter(Boolean),
+      releaseWhen:rule?.releaseWhen || { kind:'available' }
+    });
+    for(const rule of node.properties.outputRules){
+      if(!isObject(rule)){ merged.push(rule); continue; }
+      const key = signature(rule);
+      const existing = groups.get(key);
+      if(!existing){
+        const copy = rule;
+        copy.toPortIds = [...new Set((Array.isArray(copy.toPortIds) && copy.toPortIds.length ? copy.toPortIds : [copy.toPortId]).map(text).filter(Boolean))];
+        copy.toPortId = copy.toPortIds[0] || null;
+        if(Array.isArray(copy.downStages)) copy.downStages = copy.downStages.map((stage, stageIndex)=>({
+          ...stage,
+          ...(!text(stage?.portId) && copy.toPortIds[stageIndex] ? { portId:copy.toPortIds[stageIndex] } : {})
+        }));
+        groups.set(key, copy); merged.push(copy); continue;
+      }
+      const incomingPortIds = [...new Set((Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]).map(text).filter(Boolean))];
+      existing.toPortIds = [...new Set([...(existing.toPortIds || []), ...incomingPortIds])];
+      existing.toPortId = existing.toPortIds[0] || null;
+      const incomingStages = Array.isArray(rule.downStages) ? rule.downStages : [];
+      for(const [stageIndex, stage] of incomingStages.entries()){
+        if(!isObject(stage)) continue;
+        const portId = text(stage.portId) || incomingPortIds[stageIndex] || incomingPortIds[0] || '';
+        existing.downStages = Array.isArray(existing.downStages) ? existing.downStages : [];
+        existing.downStages.push({ ...clone(stage, stage), ...(portId ? { portId } : {}) });
+      }
+    }
+    node.properties.outputRules = merged;
+  }
+
   function syncFlowRuleTimings(node){
     if(!node || !isObject(node.properties)) return { inputs:{}, outputs:{} };
     ensurePortIds(node);
     pruneSignalFlowRules(node);
+    coalesceSplitOutputRules(node);
     const timings = ensurePortTimings(node);
     const inputRules = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : [];
     const outputRules = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : [];
+    const behavior = behaviorId(node);
     const claimedInputs = new Set();
     const claimedOutputs = new Set();
 
     for(const [index, rule] of inputRules.entries()){
       if(!isObject(rule)) continue;
-      rule.acceptWhen = appendRequiredCondition(rule.acceptWhen, 'node-idle', 'always');
       const portId = text(rule.fromPortId);
       const cached = portId ? timings.inputs?.[portId] : null;
       const fallback = cached?.processTimeSec ?? flowPortTiming(node, 'input', Math.max(0, portIndexById(node.inputs, portId)));
@@ -737,7 +775,14 @@
     for(const [index, rule] of outputRules.entries()){
       if(!isObject(rule)) continue;
       const portIds = (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]).map(text).filter(Boolean);
-      if(portIds.length) rule.releaseWhen = appendRequiredCondition(rule.releaseWhen, 'downstream-ready', 'available');
+      if(behavior === 'shuttle'){
+        rule.downStages = [];
+        for(const portId of portIds){
+          claimedOutputs.add(portId);
+          timings.outputs[portId] = { downStages:[], downTimeSec:0 };
+        }
+        continue;
+      }
       const prefix = `${text(rule.ruleId) || `output-rule-${index + 1}`}-down`;
       const configuredStages = Array.isArray(rule.downStages) && rule.downStages.length ? rule.downStages : null;
       if(configuredStages){
@@ -997,6 +1042,7 @@
       this._currentWork = null;
       this._pendingTransfer = null;
       this._shuttleTransferSlot = null;
+      this._shuttleTransferOffers = [];
       this._incomingPayload = null;
       this._incomingPayloadOpensCycle = false;
       this._transferHold = false;
@@ -1050,7 +1096,7 @@
           ruleId: 'shuttle-input-1',
           targets: [{ mode: 'category', category: 'work' }],
           target: { mode: 'category', category: 'work' },
-          acceptWhen: { kind: 'space-available' },
+          acceptWhen: { kind:'space-available' },
           fromPortId: this.inputs?.[0]?.portId || 'in-1'
         }];
       }
@@ -1270,6 +1316,7 @@
     }
 
     _flowTiming(direction, slotIndex){
+      if(direction === 'output' && (this._executionPlan?.behavior || behaviorId(this)) === 'shuttle') return 0;
       const override = this._activeTimingOverride;
       const value = direction === 'input' ? override?.processTimeSec : override?.downTimeSec;
       if(Number.isFinite(Number(value))) return Math.max(0, Number(value));
@@ -1854,11 +1901,12 @@
           .map((portId)=>portIndexById(this.outputs, portId))
           .filter((slot)=>slot >= 0);
         if(!slots.length && this.outputs?.length) slots.push(0);
-        const readySlot = slots.find((slot)=>this._shuttleDownstreamReady(context?.vacatingNodeIds, slot));
-        const resolvedContext = { ...context, downstreamReady: Number.isInteger(readySlot) };
+        const readySlots = slots.filter((slot)=>this._shuttleDownstreamReady(context?.vacatingNodeIds, slot));
+        const allReady = slots.length > 0 && readySlots.length === slots.length;
+        const resolvedContext = { ...context, downstreamReady: allReady };
         if(this._evaluateShuttleOutputCondition(rule?.releaseWhen, resolvedContext)){
           this._activeFlowOutputRule = rule;
-          return { rule, slot:Number.isInteger(readySlot) ? readySlot : (slots[0] ?? -1), downstreamReady:Number.isInteger(readySlot) };
+          return { rule, slots, slot:slots[0] ?? -1, downstreamReady:allReady };
         }
       }
       return null;
@@ -1879,8 +1927,8 @@
     _setShuttleWaitIcon(active){
       try{
         if(!root.WorkLinkAnimator || !this.graph) return;
-        const output = this.outputs?.[0];
-        if(!output || !Array.isArray(output.links) || !output.links.length){
+        const links = (this.outputs || []).flatMap((output)=>Array.isArray(output?.links) ? output.links : []);
+        if(!links.length){
           if(!active) this._waitIconLinks = null;
           return;
         }
@@ -1888,7 +1936,7 @@
         const info = payload ? { id: payload.id, t: payload.type, entity: payload } : null;
         if(active){
           if(this._waitIconLinks) return;
-          this._waitIconLinks = output.links.slice();
+          this._waitIconLinks = [...new Set(links)];
           this._waitIconLinks.forEach((linkId)=> root.WorkLinkAnimator.showPortIcon(this.graph, linkId, 'work', info));
         }else if(this._waitIconLinks){
           this._waitIconLinks.forEach((linkId)=> root.WorkLinkAnimator.hidePortIcon(this.graph, linkId));
@@ -1969,17 +2017,35 @@
       }catch(_e){}
     }
 
-    _beginShuttleTransfer(slot){
-      const outputSlot = Number.isInteger(slot) ? slot : 0;
-      if(!this._payload || !this._hasShuttleDownstreamLinks(outputSlot)) return false;
-      this._spawnShuttleSinkAnimation(this._payload, outputSlot);
-      this._pendingTransfer = this._payload;
-      this._shuttleTransferSlot = outputSlot;
+    _cloneShuttleWork(work){
+      if(!work || typeof work !== 'object') return work;
+      let copy;
+      try{
+        copy = typeof root.Work === 'function'
+          ? new root.Work(work.id, work.type, work.typeId)
+          : Object.create(Object.getPrototypeOf(work) || Object.prototype);
+      }catch(_e){ copy = {}; }
+      return Object.assign(copy, work);
+    }
+
+    _beginShuttleTransfer(slots){
+      const outputSlots = [...new Set((Array.isArray(slots) ? slots : [slots]).filter(Number.isInteger))];
+      if(!this._payload || !outputSlots.length || !outputSlots.every((slot)=>this._hasShuttleDownstreamLinks(slot))) return false;
+      const payload = this._payload;
+      this._shuttleTransferOffers = outputSlots.map((slot, index)=>({
+        slot,
+        work:index === 0 ? payload : this._cloneShuttleWork(payload)
+      }));
+      for(const offer of this._shuttleTransferOffers){
+        this._spawnShuttleSinkAnimation(offer.work, offer.slot);
+        this.setOutputData(offer.slot, offer.work);
+      }
+      this._pendingTransfer = this._shuttleTransferOffers[0]?.work || payload;
+      this._shuttleTransferSlot = this._shuttleTransferOffers[0]?.slot ?? outputSlots[0];
       this._payload = null;
       this._currentWork = null;
       this._transferHold = true;
-      this._until = nowMs() + (this._flowTiming('output', outputSlot) * 1000);
-      this.setOutputData(outputSlot, this._pendingTransfer);
+      this._until = nowMs() + Math.max(0, ...outputSlots.map((slot)=>this._flowTiming('output', slot) * 1000));
       this._setShuttleState('TRANSFER');
       return true;
     }
@@ -2007,7 +2073,7 @@
       }
       let moved = false;
       for(const node of transferNodes){
-        if(node._beginShuttleTransfer(selections.get(node.id)?.slot)) moved = true;
+        if(node._beginShuttleTransfer(selections.get(node.id)?.slots)) moved = true;
       }
       if(moved){
         timing.lastTransferAt = now;
@@ -2084,13 +2150,14 @@
           this._tryCommitShuttleGroupTransfer();
           break;
         case 'TRANSFER':
-          this.setOutputData(Number.isInteger(this._shuttleTransferSlot) ? this._shuttleTransferSlot : 0, this._pendingTransfer);
+          for(const offer of (this._shuttleTransferOffers || [])) this.setOutputData(offer.slot, offer.work);
           this._captureShuttleInputDuringTransfer();
           if(now < this._until) break;
           if(this._transferHold){
             this._transferHold = false;
           }else{
-            this.setOutputData(Number.isInteger(this._shuttleTransferSlot) ? this._shuttleTransferSlot : 0, null);
+            for(const offer of (this._shuttleTransferOffers || [])) this.setOutputData(offer.slot, null);
+            this._shuttleTransferOffers = [];
             this._pendingTransfer = null;
             this._shuttleTransferSlot = null;
             this._setShuttleState('IDLE');
@@ -2409,7 +2476,11 @@
       ruleId: `migrated-input-${index + 1}`,
       targets: targetsForCategories(presetPortCategories(node, presetId, 'input', index)),
       target: targetForCategory(presetPortCategories(node, presetId, 'input', index)[0]),
-      acceptWhen: { kind: originalType === 'factory/sink' ? 'always' : 'space-available' },
+      acceptWhen: originalType === 'factory/sink'
+        ? { kind:'always' }
+        : presetId === 'shuttle'
+          ? { kind:'space-available' }
+          : allConditions('node-idle', 'space-available'),
       fromPortId: port.portId || `in-${index + 1}`
     }));
   }

@@ -147,6 +147,7 @@
 
   function cycleTimingKeys(node, direction){
     App.syncFlowRuleTimings?.(node);
+    if(direction === 'output' && App.basicNodeBehavior?.(node) === 'shuttle') return [];
     const rules = direction === 'input' ? node?.properties?.inputRules : node?.properties?.outputRules;
     const stageProperty = direction === 'input' ? 'processStages' : 'downStages';
     const ruleKeys = (Array.isArray(rules) ? rules : []).flatMap((rule, ruleIndex)=>{
@@ -276,13 +277,13 @@
     };
   }
 
-  function appendCycleLabels(svg){
+  function appendCycleLabels(svg, showDown){
     const namespace = 'http://www.w3.org/2000/svg';
     const group = document.createElementNS(namespace, 'g');
     group.setAttribute('class', 'entityCycleLabels');
     const definitions = [
       { key:'process', label:'PROCESS', x:39, y:16, box:[0, 1, 78, 30] },
-      { key:'down', label:'DOWN', x:35, y:245, box:[0, 230, 70, 29] }
+      ...(showDown === false ? [] : [{ key:'down', label:'DOWN', x:35, y:245, box:[0, 230, 70, 29] }])
     ];
     for(const item of definitions){
       const box = document.createElementNS(namespace, 'rect');
@@ -439,7 +440,10 @@
   }
 
   function renderCycleEditor(node){
-    const shell = makeCard('Process Cycle', 'Read-only summary. Configure Process, release readiness, downstream conditions, and Down recovery in Flow.');
+    const shuttle = App.basicNodeBehavior?.(node) === 'shuttle';
+    const shell = makeCard('Process Cycle', shuttle
+      ? 'Read-only summary. Configure Process and synchronized release conditions in Flow. Shuttle stages do not use Down / recovery.'
+      : 'Read-only summary. Configure Process, release readiness, downstream conditions, and Down recovery in Flow.');
     shell.card.classList.add('entityCycleCard');
     const props = isObject(node?.properties) ? node.properties : {};
     const processKeys = cycleTimingKeys(node, 'input');
@@ -471,7 +475,7 @@
     const leaderLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     leaderLayer.setAttribute('class', 'entityCycleLeaderLayer');
     svg.appendChild(leaderLayer);
-    appendCycleLabels(svg);
+    appendCycleLabels(svg, !shuttle);
     const center = document.createElement('div');
     center.className = 'entityCycleCenter';
     const totalLabel = document.createElement('span'); totalLabel.textContent = 'CYCLE TIME';
@@ -624,7 +628,8 @@
       const stageName = String(descriptor.stage?.name || '').trim();
       makeInlineTimeField(downControls, key, stageName ? `D${index + 1} · ${stageName}` : (portName ? `D${index + 1} · ${portName}` : `D${index + 1}`), ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4], `${connectionLabel(related, 'Recovery', 'downstream')}${stageName ? ` / ${stageName}` : ''}`);
     });
-    donut.append(svg, center, processControls, downControls);
+    donut.append(svg, center, processControls);
+    if(!shuttle) donut.appendChild(downControls);
     visual.append(upstreamHost, donut, downstreamHost);
     shell.section.appendChild(visual);
     updateVisual();
@@ -740,13 +745,16 @@
 
   function renderFlowEditor(node){
     App.syncFlowRuleTimings?.(node);
+    const behavior = App.basicNodeBehavior?.(node) || 'basic';
     const registry = App.entityModelForGraph?.(App.graph || node.graph);
     const wrapper = document.createElement('div');
     const guide = document.createElement('aside');
     guide.className = 'entityFlowGuide';
-    guide.innerHTML = '<strong>Flow controls the complete Entity cycle.</strong><span><b>Process</b> is configured on Input Rules. <b>Down / recovery</b> is configured on Output Rules. <b>Space available</b> checks Node Capacity; <b>Node idle</b> means recovery is complete; <b>Downstream ready</b> checks whether the next Node can accept the Entity.</span>';
+    guide.innerHTML = behavior === 'shuttle'
+      ? '<strong>Flow controls the synchronized shuttle cycle.</strong><span><b>Process</b> is configured on Input Rules. Shuttle stages advance together when <b>Process complete</b>, <b>Shuttle group process complete</b>, and the selected downstream condition are satisfied. Shuttle stages do not use Down / recovery.</span>'
+      : '<strong>Flow controls the complete Entity cycle.</strong><span>Process and Down times are edited beside their completion conditions. <b>Capacity available (Not full)</b> checks Node Capacity; <b>Down complete (Idle)</b> means recovery has finished; <b>Downstream ready</b> checks whether the next Node can accept the Entity.</span>';
     wrapper.appendChild(guide);
-    const inputConditions = [['always','Always'],['node-idle','Node idle (Down complete)'],['space-available','Space available'],['empty','Empty'],['not-full','Not full'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
+    const inputConditions = [['always','Always'],['node-idle','Down complete (Idle)'],['space-available','Capacity available (Not full)'],['empty','Empty'],['not-full','Not full'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
     const outputConditions = [['available','Available'],['process-complete','Process complete'],['shuttle-group-idle','Shuttle group process complete (Idle)'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
     const field = (label, content, extraClass)=>{
       const host = document.createElement('label');
@@ -766,14 +774,44 @@
       }
       return options;
     };
+    const processStages = ()=>(node.properties?.inputRules || []).flatMap((rule)=>Array.isArray(rule?.processStages) ? rule.processStages : []);
+    const downStages = ()=>(node.properties?.outputRules || []).flatMap((rule)=>Array.isArray(rule?.downStages) ? rule.downStages : []);
+    const appendSeconds = (host, label, stage, commit)=>{
+      if(!stage) return;
+      const wrap = document.createElement('label'); wrap.className = 'entityRuleInlineTime';
+      const caption = document.createElement('span'); caption.textContent = label;
+      const input = document.createElement('input'); input.type = 'number'; input.min = '0'; input.step = '0.1';
+      input.value = formatSeconds(stage.durationSec); input.disabled = running(); input.setAttribute('aria-label', `${label} seconds`);
+      const unit = document.createElement('small'); unit.textContent = 's';
+      input.addEventListener('change', ()=>{
+        stage.durationSec = Math.max(0, Number(input.value) || 0);
+        input.value = formatSeconds(stage.durationSec);
+        commit();
+      });
+      wrap.append(caption, input, unit); host.appendChild(wrap);
+    };
     const appendConditionParameter = (host, condition, commit)=>{
       const kind = conditionKind(condition, 'available');
       if(kind === 'process-complete'){
-        const parameter = select(processStageOptions(), condition.stageId || 'all');
+        const availableStages = processStages();
+        const selectedStage = availableStages.find((stage)=>String(stage?.stageId) === String(condition.stageId || '')) || availableStages[0] || null;
+        const parameter = select(processStageOptions(), condition.stageId || selectedStage?.stageId || 'all');
         parameter.title = 'Process stage that must be complete';
         parameter.setAttribute('aria-label', parameter.title); parameter.disabled = running();
-        parameter.addEventListener('change', ()=>{ condition.stageId = parameter.value; commit(); });
+        parameter.addEventListener('change', ()=>{ condition.stageId = parameter.value; commit(); App.selectionInspector?.refresh?.(); });
         host.appendChild(parameter);
+        appendSeconds(host, 'Process time', selectedStage, commit);
+      }else if(kind === 'node-idle' || kind === 'down-complete'){
+        const availableStages = downStages();
+        const selectedStage = availableStages.find((stage)=>String(stage?.stageId) === String(condition.downStageId || '')) || availableStages[0] || null;
+        if(availableStages.length > 1){
+          const stageSelect = select(availableStages.map((stage, index)=>[stage.stageId, stage.name || `Down ${index + 1}`]), selectedStage?.stageId || '');
+          stageSelect.title = 'Down stage whose completion is required';
+          stageSelect.setAttribute('aria-label', stageSelect.title); stageSelect.disabled = running();
+          stageSelect.addEventListener('change', ()=>{ condition.downStageId = stageSelect.value; commit(); App.selectionInspector?.refresh?.(); });
+          host.appendChild(stageSelect);
+        }
+        appendSeconds(host, 'Down time', selectedStage, commit);
       }else if(kind === 'shuttle-group-idle'){
         const parameter = document.createElement('input');
         parameter.type = 'text'; parameter.className = 'selectionInspectorInput';
@@ -1130,24 +1168,21 @@
           compound.conditions.forEach((conditionSpec, conditionIndex)=>{
             const conditionLine = document.createElement('div'); conditionLine.className = 'entityRuleConditionLine';
             const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(conditionIndex + 1);
-            const required = conditionKind(conditionSpec, 'always') === 'node-idle';
-            const condition = select(inputConditions, conditionKind(conditionSpec, 'always')); condition.disabled = running() || required;
-            if(required) condition.title = 'Required: the Node cannot accept another Entity until Down / recovery is complete.';
+            const condition = select(inputConditions, conditionKind(conditionSpec, 'always')); condition.disabled = running();
             condition.addEventListener('change', ()=>{ compound.conditions[conditionIndex] = { kind:condition.value }; persistCompound(); App.selectionInspector?.refresh?.(); });
             const removeCondition = button('×', ()=>{
               compound.conditions.splice(conditionIndex, 1);
               if(!compound.conditions.length) compound.conditions.push({ kind:'always' });
               persistCompound(); App.selectionInspector?.refresh?.();
             }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
-            removeCondition.disabled = running() || required || compound.conditions.length <= 1;
+            removeCondition.disabled = running() || compound.conditions.length <= 1;
             conditionLine.append(number, condition); appendConditionParameter(conditionLine, conditionSpec, persistCompound); conditionLine.appendChild(removeCondition);
             conditionList.appendChild(conditionLine);
           });
           conditionsHost.appendChild(conditionList);
-          const addCondition = button('+ Add condition', ()=>{ compound.conditions.push({ kind:'node-idle' }); persistCompound(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn entityRuleAddCondition');
+          const addCondition = button('+ Add condition', ()=>{ compound.conditions.push({ kind:'always' }); persistCompound(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn entityRuleAddCondition');
           addCondition.disabled = running(); conditionsHost.appendChild(addCondition);
-          body.appendChild(field('Acceptance conditions', conditionsHost, 'is-wide'));
-          body.appendChild(renderTimingStages(rule, 'input'));
+          body.appendChild(field('Acceptance conditions', conditionsHost));
         }else{
           const stored = rule.releaseWhen;
           const isCompound = isObject(stored) && (stored.kind === 'all' || stored.kind === 'any');
@@ -1171,9 +1206,7 @@
             const conditionLine = document.createElement('div'); conditionLine.className = 'entityRuleConditionLine';
             const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(conditionIndex + 1);
             const condition = select(outputConditions, conditionKind(conditionSpec, 'available'));
-            const required = conditionKind(conditionSpec, 'available') === 'downstream-ready';
-            condition.disabled = running() || required;
-            if(required) condition.title = 'Required: the selected downstream port must be ready before transfer.';
+            condition.disabled = running();
             condition.addEventListener('change', ()=>{
               compound.conditions[conditionIndex] = condition.value === 'shuttle-group-idle'
                 ? { kind:condition.value, groupId:String(node.properties?.shuttleGroupId || 'shuttle-1') }
@@ -1185,7 +1218,7 @@
               if(!compound.conditions.length) compound.conditions.push({ kind:'available' });
               persistCompound(); App.selectionInspector?.refresh?.();
             }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
-            removeCondition.title = required ? 'Required flow condition' : 'Delete condition'; removeCondition.disabled = running() || required || compound.conditions.length <= 1;
+            removeCondition.title = 'Delete condition'; removeCondition.disabled = running() || compound.conditions.length <= 1;
             conditionLine.append(number, condition);
             appendConditionParameter(conditionLine, conditionSpec, persistCompound);
             conditionLine.appendChild(removeCondition); conditionList.appendChild(conditionLine);
@@ -1195,7 +1228,7 @@
             compound.conditions.push({ kind:'available' }); persistCompound(); App.selectionInspector?.refresh?.();
           }, 'selectionInspectorBtn entityRuleAddCondition');
           addCondition.disabled = running(); conditionsHost.appendChild(addCondition);
-          body.appendChild(field('Conditions', conditionsHost, 'is-wide'));
+          body.appendChild(field('Conditions', conditionsHost));
 
           const ports = (node.outputs || []).filter((port)=>port?.channel !== 'signal')
             .map((port, portIndex)=>[port.portId || `out-${portIndex + 1}`, port.name || `Out ${portIndex + 1}`]);
@@ -1243,15 +1276,14 @@
           }, 'selectionInspectorBtn entityRuleAddCondition');
           addPort.disabled = running();
           portsHost.appendChild(addPort);
-          body.appendChild(field('Output to (first ready)', portsHost));
-          body.appendChild(renderTimingStages(rule, 'output'));
+          body.appendChild(field('Output to', portsHost));
         }
         ruleCard.appendChild(body); list.appendChild(ruleCard);
       });
       card.section.appendChild(list);
       const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
         const next = kind === 'input'
-          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:{ kind:'all', conditions:[{ kind:'node-idle' }, { kind:'space-available' }] }, processStages:[], fromPortId:null }
+          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'node-idle' }, { kind:'space-available' }] }, processStages:[], fromPortId:null }
           : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }, { kind:'downstream-ready' }] }, downStages:[], toPortIds:[], toPortId:null };
         const port = App.createBasicFlowPort?.(node, kind, next);
         if(kind === 'input') next.fromPortId = port?.portId || null;
@@ -1261,7 +1293,6 @@
       }, 'selectionInspectorBtn is-primary');
       add.disabled = running(); card.section.appendChild(add); wrapper.appendChild(card.card);
     };
-    const behavior = App.basicNodeBehavior?.(node) || 'basic';
     if(!App.basicNodeHasSequenceTarget?.(node) && behavior !== 'source') renderRules('input');
     if(behavior !== 'sink') renderRules('output');
     return wrapper;
