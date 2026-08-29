@@ -193,7 +193,8 @@
       inputPolicy: clone(isObject(source.inputPolicy) ? source.inputPolicy : { mode:'first', requiredPortIds:[], match:null }, { mode:'first', requiredPortIds:[], match:null }),
       selection: text(source.selection) || 'first-available',
       stateMachine: clone(isObject(source.stateMachine) ? source.stateMachine : { initialState:'IDLE', states:['IDLE','PROCESS','WAIT','DOWN'], transitions:[] }, {}),
-      operations: normalizeOperations(source.operations)
+      operations: normalizeOperations(source.operations),
+      flipIO: source.flipIO === true
     };
     if(Number.isFinite(Number(source.flowPortSequence))) result.flowPortSequence = Math.max(0, Math.round(Number(source.flowPortSequence)));
     return result;
@@ -763,6 +764,19 @@
         `${text(rule.ruleId) || `input-rule-${index + 1}`}-process`,
         fallback
       );
+      if(behavior === 'shuttle'){
+        rule.downStages = [];
+      }else{
+        const legacyRule = outputRules[index] || outputRules[0];
+        const legacyStages = Array.isArray(legacyRule?.downStages) && legacyRule.downStages.length ? legacyRule.downStages : null;
+        const fallbackDown = Number(node.properties.downTime) || Object.values(timings.outputs || {})
+          .reduce((maximum, timing)=>Math.max(maximum, Number(timing?.downTimeSec) || 0), 0);
+        rule.downStages = normalizeTimingStages(
+          Array.isArray(rule.downStages) && rule.downStages.length ? rule.downStages : legacyStages,
+          `down-${text(rule.ruleId) || `input-rule-${index + 1}`}`,
+          fallbackDown
+        ).map((stage, stageIndex)=>({ ...stage, name:text(stage.name) || `Down ${stageIndex + 1}` }));
+      }
       if(portId && !claimedInputs.has(portId)){
         claimedInputs.add(portId);
         timings.inputs[portId] = {
@@ -775,6 +789,7 @@
     for(const [index, rule] of outputRules.entries()){
       if(!isObject(rule)) continue;
       const portIds = (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]).map(text).filter(Boolean);
+      if((behavior === 'shuttle' || behavior === 'split') && portIds.length > 1) rule.dispatch = 'all-ready';
       if(behavior === 'shuttle'){
         rule.downStages = [];
         for(const portId of portIds){
@@ -806,6 +821,17 @@
         claimedOutputs.add(portId);
         const stages = rule.downStages.filter((stage)=>!text(stage?.portId) || text(stage.portId) === portId);
         timings.outputs[portId] = { downStages:clone(stages, []), downTimeSec:timingStageTotal(stages) };
+      }
+    }
+
+    if(behavior !== 'shuttle' && inputRules.length){
+      const defaultDownStages = Array.isArray(inputRules[0]?.downStages) ? inputRules[0].downStages : [];
+      const defaultDownTime = timingStageTotal(defaultDownStages);
+      for(const port of entityFlowPorts(node, 'output')){
+        timings.outputs[port.portId] = {
+          downStages:clone(defaultDownStages, []),
+          downTimeSec:defaultDownTime
+        };
       }
     }
 
@@ -1265,6 +1291,14 @@
       ensurePortIds(this);
       const serializePorts = (rows)=>clone(rows, []).map((port)=>{
         delete port.requiredByPreset;
+        if(port.__flipActive || Object.prototype.hasOwnProperty.call(port, '_flipPrevDir')){
+          const previousDirection = port._flipPrevDir;
+          delete port.pos;
+          delete port.__flipActive;
+          delete port._flipPrevDir;
+          if(previousDirection == null) delete port.dir;
+          else port.dir = previousDirection;
+        }
         if(!isSignalPort(port)) port.flowManaged = true;
         return port;
       });
@@ -1275,6 +1309,7 @@
 
     onPropertyChanged(name){
       if(this._isConfiguring) return;
+      if(name === 'flipIO') root.refreshFlipIO?.(this);
       if(name === 'inputRules' || name === 'outputRules') syncFlowRuleTimings(this);
       if(['inputRules','outputRules','portTimings','inputPolicy','selection','stateMachine','operations'].includes(name)){
         this._executionPlan = compileExecutionPlan(this);
@@ -1320,7 +1355,7 @@
       const override = this._activeTimingOverride;
       const value = direction === 'input' ? override?.processTimeSec : override?.downTimeSec;
       if(Number.isFinite(Number(value))) return Math.max(0, Number(value));
-      const activeRule = direction === 'input' ? this._activeFlowInputRule : this._activeFlowOutputRule;
+      const activeRule = direction === 'input' ? this._activeFlowInputRule : (this._activeFlowInputRule || this._activeFlowOutputRule);
       let stages = direction === 'input' ? activeRule?.processStages : activeRule?.downStages;
       if(direction === 'output' && Array.isArray(stages)){
         const portId = text(this.outputs?.[slotIndex]?.portId);
@@ -2025,7 +2060,7 @@
           ? new root.Work(work.id, work.type, work.typeId)
           : Object.create(Object.getPrototypeOf(work) || Object.prototype);
       }catch(_e){ copy = {}; }
-      return Object.assign(copy, work);
+      return Object.assign(copy, clone(work, { ...work }));
     }
 
     _beginShuttleTransfer(slots){

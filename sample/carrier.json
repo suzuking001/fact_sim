@@ -1547,13 +1547,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 21,
-          "pos": [
-            130,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -1567,13 +1560,6 @@
             30
           ],
           "slot_index": 0,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -1665,7 +1651,8 @@
             "trigger": "process",
             "kind": "process"
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -1685,13 +1672,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 30,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -1700,13 +1680,6 @@
           "name": "inPort2",
           "type": 0,
           "link": 22,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -1715,13 +1688,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 25,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -1732,13 +1698,6 @@
           "name": "outPort1",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -1749,13 +1708,6 @@
           "links": [
             23
           ],
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 1,
           "portId": "out-2",
           "channel": "entity",
@@ -1767,13 +1719,6 @@
           "links": [
             24
           ],
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 2,
           "portId": "out-3",
           "channel": "entity",
@@ -1968,7 +1913,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -1992,13 +1938,6 @@
             21
           ],
           "slot_index": 0,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -2084,7 +2023,8 @@
             "trigger": "release",
             "kind": "create"
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -2104,13 +2044,6 @@
           "name": "inPort1",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -2119,13 +2052,6 @@
           "name": "inPort2",
           "type": 0,
           "link": 11,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -2134,13 +2060,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 26,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -2151,13 +2070,6 @@
           "name": "outPort1",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -2168,13 +2080,6 @@
           "links": [
             22
           ],
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 1,
           "portId": "out-2",
           "channel": "entity",
@@ -2186,13 +2091,6 @@
           "links": [
             25
           ],
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 2,
           "portId": "out-3",
           "channel": "entity",
@@ -2387,7 +2285,8 @@
               "outSequence": "1,2"
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -2407,13 +2306,6 @@
           "name": "inPort1",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -2422,13 +2314,6 @@
           "name": "inPort2",
           "type": 0,
           "link": 23,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -2437,13 +2322,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 24,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -2454,13 +2332,6 @@
           "name": "outPort1",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -2471,13 +2342,6 @@
           "links": [
             17
           ],
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
           "flowManaged": true
@@ -2486,13 +2350,6 @@
           "name": "outPort3",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-3",
           "channel": "entity",
           "flowManaged": true
@@ -2693,7 +2550,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     }
   ],

@@ -399,6 +399,16 @@ function _compactGraphData(graph){
     delete n.boxcolor;
     delete n.shape;
 
+    for(const port of [...(Array.isArray(n.inputs) ? n.inputs : []), ...(Array.isArray(n.outputs) ? n.outputs : [])]){
+      if(!port || (!port.__flipActive && !Object.prototype.hasOwnProperty.call(port, '_flipPrevDir'))) continue;
+      const previousDirection = port._flipPrevDir;
+      delete port.pos;
+      delete port.__flipActive;
+      delete port._flipPrevDir;
+      if(previousDirection == null) delete port.dir;
+      else port.dir = previousDirection;
+    }
+
     if(n.properties && typeof n.properties === 'object'){
       if(n.properties.flipIO === false) delete n.properties.flipIO;
       if(n.properties.sigExtra === 0) delete n.properties.sigExtra;

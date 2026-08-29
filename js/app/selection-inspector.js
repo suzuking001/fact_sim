@@ -596,6 +596,7 @@ var App = window.App || (window.App = {});
           node.properties[key] = next;
           if(key === 'script') node._compiled = null;
           if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged(key);
+          if(key === 'flipIO' && typeof window.refreshFlipIO === 'function') window.refreshFlipIO(node);
           if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
         });
         value = next;
@@ -829,15 +830,18 @@ var App = window.App || (window.App = {});
       layout.appendChild(main);
 
       side.innerHTML = [
-        '<section class="selectionInspectorCard">',
+        '<section class="selectionInspectorCard nodeDetailsCard">',
         '<div class="selectionInspectorHeader">',
         '<div>',
         '<div class="selectionInspectorEyebrow">Node Details</div>',
-        `<h2 class="selectionInspectorTitle">${escapeHtml(node.title || node.type || 'Node')}</h2>`,
         `<p class="selectionInspectorSubtitle">${escapeHtml(node.type || 'Unknown type')}</p>`,
         '</div>',
         `<div class="selectionInspectorPills"><span class="selectionInspectorPill">#${escapeHtml(node.id)}</span></div>`,
         '</div>',
+        '<label class="selectionInspectorField nodeDetailsTitleField">',
+        '<span class="selectionInspectorFieldLabel">Title</span>',
+        '<input type="text" class="selectionInspectorInput nodeDetailsTitleInput" aria-label="Node title">',
+        '</label>',
         '<div class="selectionInspectorStatGrid">',
         `<div class="selectionInspectorStat"><span class="selectionInspectorStatLabel">State</span><span class="selectionInspectorStatValue">${escapeHtml(String(node._stateName || node._state || 'N/A'))}</span></div>`,
         `<div class="selectionInspectorStat"><span class="selectionInspectorStatLabel">Properties</span><span class="selectionInspectorStatValue">${propKeys.length}</span></div>`,
@@ -846,6 +850,24 @@ var App = window.App || (window.App = {});
         '</div>',
         '</section>'
       ].join('');
+
+      const titleInput = side.querySelector('.nodeDetailsTitleInput');
+      titleInput.value = String(node.title || node.type || 'Node');
+      const titleEl = side.querySelector('.selectionInspectorTitle');
+      const applyTitle = ()=>{
+        const nextTitle = titleInput.value.trim() || node.type || 'Node';
+        if(nextTitle !== node.title){
+          withGraphChange(()=>{
+            node.title = nextTitle;
+            if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
+          });
+        }
+        if(titleEl) titleEl.textContent = nextTitle;
+        this.setMeta(`Details: ${nextTitle} #${node.id}`);
+        return true;
+      };
+      titleInput.addEventListener('input', applyTitle);
+      titleInput.addEventListener('change', applyTitle);
 
       const actionsCard = document.createElement('section');
       actionsCard.className = 'selectionInspectorCard';
@@ -864,41 +886,13 @@ var App = window.App || (window.App = {});
         actionRow.appendChild(btn);
       });
 
-      const general = document.createElement('section');
-      general.className = 'selectionInspectorCard';
-      general.innerHTML = '<div class="selectionInspectorSection"><h3 class="selectionInspectorSectionTitle">General</h3><p class="selectionInspectorHint">Edit the node name and common settings here. Advanced editing paths have been removed to keep this flow predictable.</p><div class="selectionInspectorFields"></div></div>';
-      const generalFields = general.querySelector('.selectionInspectorFields');
-      const titleField = this.field('Title', true);
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text';
-      titleInput.className = 'selectionInspectorInput';
-      titleInput.value = String(node.title || node.type || 'Node');
-      const titleEl = side.querySelector('.selectionInspectorTitle');
-      const applyTitle = ()=>{
-        const nextTitle = titleInput.value.trim() || node.type || 'Node';
-        if(nextTitle !== node.title){
-          withGraphChange(()=>{
-            node.title = nextTitle;
-            if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
-          });
-        }
-        if(titleEl) titleEl.textContent = nextTitle;
-        this.setMeta(`Details: ${nextTitle} #${node.id}`);
-        return true;
-      };
-      titleInput.addEventListener('input', applyTitle);
-      titleInput.addEventListener('change', applyTitle);
-      titleField.appendChild(titleInput);
-      generalFields.appendChild(titleField);
-      main.appendChild(general);
-
       const propsCard = document.createElement('section');
-      propsCard.className = 'selectionInspectorCard';
+      propsCard.className = 'selectionInspectorCard nodePropertiesCard';
       propsCard.innerHTML = '<div class="selectionInspectorSection"><h3 class="selectionInspectorSectionTitle">Properties</h3><p class="selectionInspectorHint">Property changes save immediately. Scripts stay behind a dedicated button so the main editor stays simple.</p><div class="selectionInspectorFields"></div></div>';
       const propFields = propsCard.querySelector('.selectionInspectorFields');
       if(propKeys.length) propKeys.forEach((key)=> this.renderNodeProp(propFields, node, key, props[key]));
       else propFields.innerHTML = '<div class="selectionInspectorNotice">This node has no custom properties yet.</div>';
-      main.appendChild(propsCard);
+      side.appendChild(propsCard);
       this.renderEntityTreeCard(main, node);
     }
 

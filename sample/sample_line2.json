@@ -52,7 +52,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -130,13 +138,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 30,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -145,13 +146,6 @@
           "name": "inPort2",
           "type": 0,
           "link": 22,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -160,13 +154,6 @@
           "name": "inPort3",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -175,13 +162,6 @@
           "name": "inPort4",
           "type": 0,
           "link": 25,
-          "pos": [
-            176.39999389648438,
-            74
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-4",
           "channel": "entity",
           "flowManaged": true
@@ -192,13 +172,6 @@
           "name": "outPort1",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
@@ -211,13 +184,6 @@
           "links": [
             23
           ],
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 1,
           "__lastSet": null,
           "__animToken": null,
@@ -229,13 +195,6 @@
           "name": "outPort3",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-3",
@@ -248,13 +207,6 @@
           "links": [
             24
           ],
-          "pos": [
-            10,
-            74
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
@@ -276,7 +228,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -287,7 +247,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -298,7 +266,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -309,7 +285,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           }
@@ -440,7 +424,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -575,7 +560,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -586,7 +579,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -597,7 +598,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -608,7 +617,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           },
@@ -619,7 +636,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-5"
           }
@@ -793,13 +818,6 @@
           "name": "inPort1",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -808,13 +826,6 @@
           "name": "inPort2",
           "type": 0,
           "link": 23,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -823,13 +834,6 @@
           "name": "inPort3",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -838,13 +842,6 @@
           "name": "inPort4",
           "type": 0,
           "link": 24,
-          "pos": [
-            176.39999389648438,
-            74
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-4",
           "channel": "entity",
           "flowManaged": true
@@ -855,13 +852,6 @@
           "name": "outPort1",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
@@ -874,13 +864,6 @@
           "links": [
             34
           ],
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
           "slot_index": 1,
@@ -892,13 +875,6 @@
           "name": "outPort3",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-3",
@@ -911,13 +887,6 @@
           "links": [
             33
           ],
-          "pos": [
-            10,
-            74
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
@@ -946,7 +915,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -957,7 +934,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -968,7 +953,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -979,7 +972,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           }
@@ -1110,7 +1111,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -1782,7 +1784,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -1940,7 +1950,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -1951,7 +1969,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -1962,7 +1988,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -1973,7 +2007,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           }
@@ -2116,7 +2158,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -2226,7 +2276,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -2336,7 +2394,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -2446,7 +2512,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -2556,7 +2630,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -2666,7 +2748,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -2776,7 +2866,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -2886,7 +2984,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -3004,7 +3110,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -3015,7 +3129,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -3140,7 +3262,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -3253,7 +3383,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -3363,7 +3501,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -3481,7 +3627,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -3492,7 +3646,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -3614,7 +3776,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -3724,7 +3894,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -3834,7 +4012,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -3944,7 +4130,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -4062,7 +4256,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -4073,7 +4275,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -4195,7 +4405,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -4305,7 +4523,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -4415,7 +4641,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -4536,7 +4770,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -4547,7 +4789,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -4669,7 +4919,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -4779,7 +5037,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -4897,7 +5163,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -4908,7 +5182,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -5030,7 +5312,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -5178,7 +5468,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -5189,7 +5487,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -5200,7 +5506,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -5333,7 +5647,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -5447,7 +5769,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -5558,7 +5888,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -5669,7 +6007,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -5780,7 +6126,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -5930,7 +6284,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -5941,7 +6303,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -5952,7 +6322,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -6162,7 +6540,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -6173,7 +6559,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -6184,7 +6578,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -6388,7 +6790,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -6399,7 +6809,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -6410,7 +6828,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -6620,7 +7046,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -6631,7 +7065,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -6642,7 +7084,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -6842,7 +7292,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -6853,7 +7311,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -6864,7 +7330,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -7064,7 +7538,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -7075,7 +7557,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -7086,7 +7576,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -7246,7 +7744,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -7394,7 +7900,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -7405,7 +7919,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -7416,7 +7938,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -7548,7 +8078,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -7706,7 +8244,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -7717,7 +8263,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -7728,7 +8282,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -7739,7 +8301,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           }
@@ -7882,7 +8452,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -7992,7 +8570,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -8102,7 +8688,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -8212,7 +8806,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -8322,7 +8924,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -8432,7 +9042,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -8542,7 +9160,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -8652,7 +9278,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -8770,7 +9404,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -8781,7 +9423,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -8903,7 +9553,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -9013,7 +9671,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -9123,7 +9789,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -9241,7 +9915,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -9252,7 +9934,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -9374,7 +10064,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -9484,7 +10182,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -9594,7 +10300,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -9704,7 +10418,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -9822,7 +10544,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -9833,7 +10563,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -9958,7 +10696,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -10071,7 +10817,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -10181,7 +10935,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -10299,7 +11061,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -10310,7 +11080,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -10432,7 +11210,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -10542,7 +11328,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -10652,7 +11446,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -10770,7 +11572,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -10781,7 +11591,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -10953,7 +11771,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -10964,7 +11790,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -10975,7 +11809,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -11136,7 +11978,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -11247,7 +12097,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -11397,7 +12255,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -11408,7 +12274,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -11419,7 +12293,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -11623,7 +12505,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -11634,7 +12524,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -11645,7 +12543,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -11845,7 +12751,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -11856,7 +12770,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -11867,7 +12789,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -12077,7 +13007,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -12088,7 +13026,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -12099,7 +13045,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -12260,7 +13214,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -12371,7 +13333,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -12482,7 +13452,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -12593,7 +13571,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -12703,7 +13689,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -12853,7 +13847,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -12864,7 +13866,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -12875,7 +13885,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -13100,7 +14118,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -13349,7 +14375,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -13550,7 +14584,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -13755,7 +14797,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -13866,7 +14916,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -13976,7 +15034,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -14054,13 +15120,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 248,
-          "pos": [
-            130,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -14076,13 +15135,6 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -14101,7 +15153,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -14159,7 +15219,8 @@
             "trigger": "process",
             "kind": "process"
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -14212,7 +15273,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -14330,7 +15399,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -14341,7 +15418,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           }
@@ -14518,7 +15603,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -14529,7 +15622,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -14540,7 +15641,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -14551,7 +15660,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           }
@@ -14774,7 +15891,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -14785,7 +15910,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -14796,7 +15929,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -14996,7 +16137,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -15007,7 +16156,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -15018,7 +16175,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -15218,7 +16383,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -15229,7 +16402,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -15240,7 +16421,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -15440,7 +16629,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -15451,7 +16648,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -15462,7 +16667,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -15703,7 +16916,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -15714,7 +16935,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -15725,7 +16954,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -15736,7 +16973,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           },
@@ -15747,7 +16992,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-5"
           }
@@ -15993,7 +17246,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -16004,7 +17265,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -16015,7 +17284,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -16215,7 +17492,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -16226,7 +17511,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -16237,7 +17530,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -16365,13 +17666,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 270,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -16380,13 +17674,6 @@
           "name": "inPort2",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -16395,13 +17682,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 271,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -16417,13 +17697,6 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -16434,13 +17707,6 @@
           "links": null,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
           "flowManaged": true
@@ -16454,13 +17720,6 @@
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-3",
           "channel": "entity",
           "flowManaged": true
@@ -16479,7 +17738,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -16490,7 +17757,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -16501,7 +17776,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -16609,7 +17892,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -16629,13 +17913,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 272,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -16644,13 +17921,6 @@
           "name": "inPort2",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -16659,13 +17929,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 273,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -16681,13 +17944,6 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -16698,13 +17954,6 @@
           "links": null,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
           "flowManaged": true
@@ -16718,13 +17967,6 @@
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-3",
           "channel": "entity",
           "flowManaged": true
@@ -16750,7 +17992,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -16761,7 +18011,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -16772,7 +18030,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -16880,7 +18146,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -16900,13 +18167,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 284,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -16915,13 +18175,6 @@
           "name": "inPort2",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -16930,13 +18183,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 285,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -16952,13 +18198,6 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -16969,13 +18208,6 @@
           "links": null,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
           "flowManaged": true
@@ -16989,13 +18221,6 @@
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-3",
           "channel": "entity",
           "flowManaged": true
@@ -17014,7 +18239,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -17025,7 +18258,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -17036,7 +18277,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -17144,7 +18393,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -17198,7 +18448,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -17277,13 +18535,6 @@
           "type": 0,
           "link": 249,
           "slot_index": 0,
-          "pos": [
-            130,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -17301,13 +18552,6 @@
             "type": "B"
           },
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -17326,7 +18570,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }
@@ -17384,7 +18636,8 @@
             "trigger": "process",
             "kind": "process"
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -17404,13 +18657,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 282,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -17419,13 +18665,6 @@
           "name": "inPort2",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -17434,13 +18673,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 283,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -17456,13 +18688,6 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -17473,13 +18698,6 @@
           "links": null,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
           "flowManaged": true
@@ -17493,13 +18711,6 @@
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-3",
           "channel": "entity",
           "flowManaged": true
@@ -17518,7 +18729,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -17529,7 +18748,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -17540,7 +18767,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -17648,7 +18883,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -17668,13 +18904,6 @@
           "name": "inPort1",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -17683,13 +18912,6 @@
           "name": "inPort2",
           "type": 0,
           "link": 280,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -17698,13 +18920,6 @@
           "name": "inPort3",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -17713,13 +18928,6 @@
           "name": "inPort4",
           "type": 0,
           "link": 281,
-          "pos": [
-            176.39999389648438,
-            74
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-4",
           "channel": "entity",
           "flowManaged": true
@@ -17730,13 +18938,6 @@
           "name": "outPort1",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
@@ -17749,13 +18950,6 @@
           "links": [
             22
           ],
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 1,
           "__lastSet": null,
           "__animToken": null,
@@ -17767,13 +18961,6 @@
           "name": "outPort3",
           "type": 0,
           "links": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-3",
@@ -17786,13 +18973,6 @@
           "links": [
             25
           ],
-          "pos": [
-            10,
-            74
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
@@ -17821,7 +19001,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -17832,7 +19020,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -17843,7 +19039,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           },
@@ -17854,7 +19058,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-4"
           }
@@ -17985,7 +19197,8 @@
               "outSequence": "1,2"
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -18005,13 +19218,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 278,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -18020,13 +19226,6 @@
           "name": "inPort2",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -18035,13 +19234,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 279,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -18057,13 +19249,6 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -18074,13 +19259,6 @@
           "links": null,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
           "flowManaged": true
@@ -18094,13 +19272,6 @@
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-3",
           "channel": "entity",
           "flowManaged": true
@@ -18119,7 +19290,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -18130,7 +19309,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -18141,7 +19328,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -18249,7 +19444,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -18269,13 +19465,6 @@
           "name": "inPort1",
           "type": 0,
           "link": 274,
-          "pos": [
-            176.39999389648438,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-1",
           "channel": "entity",
           "flowManaged": true
@@ -18284,13 +19473,6 @@
           "name": "inPort2",
           "type": 0,
           "link": null,
-          "pos": [
-            176.39999389648438,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-2",
           "channel": "entity",
           "flowManaged": true
@@ -18299,13 +19481,6 @@
           "name": "inPort3",
           "type": 0,
           "link": 275,
-          "pos": [
-            176.39999389648438,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 4,
-          "__flipActive": true,
           "portId": "in-3",
           "channel": "entity",
           "flowManaged": true
@@ -18321,13 +19496,6 @@
           "slot_index": 0,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            14
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-1",
           "channel": "entity",
           "flowManaged": true
@@ -18338,13 +19506,6 @@
           "links": null,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            34
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-2",
           "channel": "entity",
           "flowManaged": true
@@ -18358,13 +19519,6 @@
           "slot_index": 2,
           "__lastSet": null,
           "__animToken": null,
-          "pos": [
-            10,
-            54
-          ],
-          "_flipPrevDir": null,
-          "dir": 3,
-          "__flipActive": true,
           "portId": "out-3",
           "channel": "entity",
           "flowManaged": true
@@ -18390,7 +19544,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           },
@@ -18401,7 +19563,15 @@
               "category": "container"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-2"
           },
@@ -18412,7 +19582,15 @@
               "category": "carrier"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-3"
           }
@@ -18520,7 +19698,8 @@
               "outSequence": ""
             }
           }
-        ]
+        ],
+        "flipIO": true
       }
     },
     {
@@ -18573,7 +19752,15 @@
               "category": "work"
             },
             "acceptWhen": {
-              "kind": "space-available"
+              "kind": "all",
+              "conditions": [
+                {
+                  "kind": "down-complete"
+                },
+                {
+                  "kind": "space-available"
+                }
+              ]
             },
             "fromPortId": "in-1"
           }

@@ -66,7 +66,9 @@
           content: this.properties.flipIO ? 'Ports: reset alignment' : 'Ports: flip horizontally',
           callback: ()=>{
             this.properties.flipIO = !this.properties.flipIO;
+            this.onPropertyChanged?.('flipIO');
             if(window.refreshFlipIO) window.refreshFlipIO(this);
+            this.graph?.change?.();
           }
         });
       }

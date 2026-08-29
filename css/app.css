@@ -5999,6 +5999,93 @@ body.sim-running.performance-adaptive #tabletActionBar{
   .entityCycleCenter{width:100px;height:100px;}
 }
 
+/* Compact Details sidebar: title, tools, cycle summary, then properties. */
+.nodeDetailsTitleField{
+  margin:14px 18px 0;
+}
+.entityCycleCard.is-compact{
+  background:rgba(255,255,255,.92);
+}
+.entityCycleCard.is-compact .selectionInspectorSection{
+  gap:10px;
+  padding:16px;
+}
+.entityCycleVisual.is-compact{
+  display:flex;
+  min-height:0;
+  padding:0;
+  flex-direction:column;
+  gap:10px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.entityCycleVisual.is-compact .entityCycleDonut{
+  width:min(100%,260px);
+  height:auto;
+  aspect-ratio:300 / 260;
+}
+.entityCycleVisual.is-compact .entityCycleCenter{
+  width:104px;
+  height:104px;
+}
+.entityCycleVisual.is-compact .entityCycleCenter strong{
+  font-size:21px;
+}
+.entityCycleTimingPanel{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  padding:10px;
+  border:1px solid rgba(120,120,128,.14);
+  border-radius:12px;
+  background:rgba(248,250,252,.82);
+}
+.entityCycleTimingHeading,
+.entityCycleTimingRow{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+.entityCycleTimingHeading{
+  padding-bottom:7px;
+  border-bottom:1px solid rgba(120,120,128,.12);
+}
+.entityCycleTimingHeading strong{
+  color:#1d1d1f;
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.entityCycleTimingHeading span,
+.entityCycleTimingRow strong{
+  color:#3a3a3c;
+  font-size:11px;
+}
+.entityCycleTimingRow{
+  grid-template-columns:8px minmax(0,1fr) auto;
+  color:#515154;
+  font-size:11px;
+}
+.entityCycleTimingRow i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--cycle-color);
+}
+.entityCycleTimingRow span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.entityCycleTimingEmpty{
+  margin:0;
+  color:#86868b;
+  font-size:11px;
+}
+
 body:not(.mobile-ui):not(.tablet-ui) #sidebar{
   width: var(--sidebar-width);
   padding: 10px 9px 10px;

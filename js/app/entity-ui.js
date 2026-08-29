@@ -145,10 +145,61 @@
   function processTimeProperties(node){ return numberedTimeProperties(node, 'processTime'); }
   function downTimeProperties(node){ return numberedTimeProperties(node, 'downTime'); }
 
+  function flowConditionLeaves(condition, acceptedKinds){
+    if(!condition) return [];
+    const spec = isObject(condition) ? condition : { kind:String(condition) };
+    const kind = String(spec.kind || '').toLowerCase();
+    if(kind === 'all' || kind === 'any'){
+      const children = Array.isArray(spec.conditions) ? spec.conditions : (Array.isArray(spec.children) ? spec.children : []);
+      return children.flatMap((child)=>flowConditionLeaves(child, acceptedKinds));
+    }
+    return acceptedKinds.has(kind) ? [spec] : [];
+  }
+
+  function conditionTimingKeys(node, direction, inputRules, outputRules){
+    if(direction === 'input'){
+      const stages = inputRules.flatMap((rule, ruleIndex)=>{
+        const ruleId = String(rule?.ruleId || `input-rule-${ruleIndex + 1}`);
+        return (Array.isArray(rule?.processStages) ? rule.processStages : []).map((stage, stageIndex)=>({
+          ruleId,
+          stage,
+          stageId:String(stage?.stageId || `processStages-${stageIndex + 1}`)
+        }));
+      });
+      const conditions = outputRules.flatMap((rule)=>flowConditionLeaves(rule?.releaseWhen, new Set(['process-complete'])));
+      return conditions.map((condition, conditionIndex)=>{
+        const selected = stages.find((entry)=>condition.stageId && entry.stageId === String(condition.stageId))
+          || stages[conditionIndex]
+          || stages[0];
+        return selected ? `@rule:input:${encodeURIComponent(selected.ruleId)}:${encodeURIComponent(selected.stageId)}` : null;
+      }).filter(Boolean);
+    }
+    const keys = [];
+    inputRules.forEach((rule, ruleIndex)=>{
+      const ruleId = String(rule?.ruleId || `down-rule-${ruleIndex + 1}`);
+      const stages = Array.isArray(rule?.downStages) ? rule.downStages : [];
+      const conditions = flowConditionLeaves(rule?.acceptWhen, new Set(['node-idle','down-complete']));
+      conditions.forEach((condition, conditionIndex)=>{
+        const selected = stages.find((stage)=>condition.downStageId && String(stage?.stageId || '') === String(condition.downStageId))
+          || stages[conditionIndex]
+          || stages[0];
+        if(!selected) return;
+        const stageId = String(selected.stageId || `downStages-${conditionIndex + 1}`);
+        keys.push(`@rule:down:${encodeURIComponent(ruleId)}:${encodeURIComponent(stageId)}`);
+      });
+    });
+    return keys;
+  }
+
   function cycleTimingKeys(node, direction){
     App.syncFlowRuleTimings?.(node);
-    if(direction === 'output' && App.basicNodeBehavior?.(node) === 'shuttle') return [];
-    const rules = direction === 'input' ? node?.properties?.inputRules : node?.properties?.outputRules;
+    if(direction === 'down' && App.basicNodeBehavior?.(node) === 'shuttle') return [];
+    const inputRules = Array.isArray(node?.properties?.inputRules) ? node.properties.inputRules : [];
+    const outputRules = Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : [];
+    if(inputRules.length || outputRules.length) return conditionTimingKeys(node, direction, inputRules, outputRules);
+    const rules = direction === 'input'
+      ? inputRules
+      : (inputRules.some((rule)=>Array.isArray(rule?.downStages)) ? inputRules : outputRules);
     const stageProperty = direction === 'input' ? 'processStages' : 'downStages';
     const ruleKeys = (Array.isArray(rules) ? rules : []).flatMap((rule, ruleIndex)=>{
       const ruleId = String(rule?.ruleId || `${direction}-rule-${ruleIndex + 1}`);
@@ -194,7 +245,10 @@
   function cycleTimingDescriptor(node, key){
     const parsed = parseCycleTimingKey(key);
     if(parsed.source !== 'rule') return { ...parsed, stage:null, rule:null };
-    const rules = parsed.direction === 'input' ? node?.properties?.inputRules : node?.properties?.outputRules;
+    const inputRules = Array.isArray(node?.properties?.inputRules) ? node.properties.inputRules : [];
+    const rules = parsed.direction === 'input'
+      ? inputRules
+      : (inputRules.some((entry)=>Array.isArray(entry?.downStages)) ? inputRules : node?.properties?.outputRules);
     const property = parsed.direction === 'input' ? 'processStages' : 'downStages';
     const rule = (Array.isArray(rules) ? rules : []).find((entry)=>String(entry?.ruleId || '') === parsed.ruleId) || null;
     const stage = (Array.isArray(rule?.[property]) ? rule[property] : []).find((entry)=>String(entry?.stageId || '') === parsed.stageId) || null;
@@ -487,16 +541,25 @@
     direction.textContent = 'CLOCKWISE ↻';
     direction.setAttribute('aria-hidden', 'true');
     center.appendChild(direction);
-    const draftValues = Object.fromEntries([
-      ...processKeys.map((key)=>[key, readCycleTiming(node, key)]),
-      ...downKeys.map((key)=>[key, readCycleTiming(node, key)])
-    ]);
+    const timingPreviews = new Map();
+    const displayedTiming = (key)=>{
+      const stageId = String(cycleTimingDescriptor(node, key)?.stage?.stageId || '');
+      return stageId && timingPreviews.has(stageId)
+        ? timingPreviews.get(stageId)
+        : readCycleTiming(node, key);
+    };
 
     const updateVisual = ()=>{
       arcLayer.replaceChildren();
       leaderLayer.replaceChildren();
-      const processValues = processKeys.map((key)=>Math.max(0, Number(draftValues[key]) || 0));
-      const downValues = downKeys.map((key)=>Math.max(0, Number(draftValues[key]) || 0));
+      const processValues = processKeys.map((key)=>Math.max(0, Number(displayedTiming(key)) || 0));
+      const downValues = downKeys.map((key)=>Math.max(0, Number(displayedTiming(key)) || 0));
+      processControls.querySelectorAll('.entityCycleReadOnlyValue').forEach((field, index)=>{
+        field.textContent = formatSeconds(processValues[index]);
+      });
+      downControls.querySelectorAll('.entityCycleReadOnlyValue').forEach((field, index)=>{
+        field.textContent = formatSeconds(downValues[index]);
+      });
       const processTotal = processValues.reduce((sum, value)=>sum + value, 0);
       const downTotal = downValues.reduce((sum, value)=>sum + value, 0);
       const total = processTotal + downTotal;
@@ -633,6 +696,17 @@
     visual.append(upstreamHost, donut, downstreamHost);
     shell.section.appendChild(visual);
     updateVisual();
+    const onTimingPreview = (event)=>{
+      if(String(event?.detail?.nodeId ?? '') !== String(node?.id ?? '')) return;
+      if(!visual.isConnected){ root.removeEventListener('factsim:cycle-timing-change', onTimingPreview); return; }
+      const stageId = String(event?.detail?.stageId || '');
+      if(stageId){
+        if(event.detail.preview) timingPreviews.set(stageId, Math.max(0, Number(event.detail.seconds) || 0));
+        else timingPreviews.delete(stageId);
+      }
+      updateVisual();
+    };
+    root.addEventListener('factsim:cycle-timing-change', onTimingPreview);
     requestAnimationFrame(()=>{
       if(visual.isConnected) updateVisual();
     });
@@ -643,6 +717,111 @@
       });
       observer.observe(visual);
     }
+    return shell.card;
+  }
+
+  function renderCompactCycleEditor(node){
+    const shuttle = App.basicNodeBehavior?.(node) === 'shuttle';
+    const shell = makeCard('Process Cycle', shuttle
+      ? 'Process summary. Edit timing in Flow. Shuttle stages do not use Down / recovery.'
+      : 'Cycle summary. Edit Process and Down timing directly beside their Flow conditions.');
+    shell.card.classList.add('entityCycleCard', 'is-compact');
+    const processKeys = cycleTimingKeys(node, 'input');
+    const downKeys = cycleTimingKeys(node, 'down');
+    const timingPreviews = new Map();
+    const displayedTiming = (key)=>{
+      const stageId = String(cycleTimingDescriptor(node, key)?.stage?.stageId || '');
+      return stageId && timingPreviews.has(stageId)
+        ? timingPreviews.get(stageId)
+        : readCycleTiming(node, key);
+    };
+    const visual = document.createElement('div');
+    visual.className = 'entityCycleVisual is-compact';
+    const donut = document.createElement('div');
+    donut.className = 'entityCycleDonut';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 300 260');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Process cycle time breakdown');
+    svg.innerHTML = '<circle class="entityCycleTrack" cx="150" cy="130" r="76" fill="none" stroke="rgba(120,120,128,.13)" stroke-width="24"></circle>';
+    const arcLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    svg.appendChild(arcLayer);
+    appendCycleDirectionArrows(svg);
+    const center = document.createElement('div');
+    center.className = 'entityCycleCenter';
+    center.innerHTML = '<span>CYCLE TIME</span><strong>0 s</strong><small>seconds</small>';
+    donut.append(svg, center);
+    visual.appendChild(donut);
+    const timingPanel = (title, keys, colors)=>{
+      const panel = document.createElement('section');
+      panel.className = `entityCycleTimingPanel is-${title.toLowerCase()}`;
+      const heading = document.createElement('div');
+      heading.className = 'entityCycleTimingHeading';
+      heading.innerHTML = `<strong>${title}</strong><span>0 s</span>`;
+      panel.appendChild(heading);
+      if(!keys.length){
+        const empty = document.createElement('p');
+        empty.className = 'entityCycleTimingEmpty';
+        empty.textContent = 'No stages configured';
+        panel.appendChild(empty);
+      }
+      keys.forEach((key, index)=>{
+        const descriptor = cycleTimingDescriptor(node, key);
+        const row = document.createElement('div');
+        row.className = 'entityCycleTimingRow';
+        row.style.setProperty('--cycle-color', colors[index % colors.length]);
+        const marker = document.createElement('i'); marker.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span');
+        const stageName = String(descriptor.stage?.name || '').trim();
+        label.textContent = stageName && !new RegExp(`^${title}\\s+\\d+$`, 'i').test(stageName)
+          ? stageName
+          : `${title} ${index + 1}`;
+        const value = document.createElement('strong'); value.textContent = '0 s';
+        row.append(marker, label, value); panel.appendChild(row);
+      });
+      return panel;
+    };
+    const processPanel = timingPanel('Process', processKeys, ['#30d158','#18b94f','#0f9f43','#67d986']);
+    const downPanel = timingPanel('Down', downKeys, ['#0a84ff','#3a9cff','#006edc','#69b6ff']);
+    visual.appendChild(processPanel);
+    if(!shuttle) visual.appendChild(downPanel);
+    shell.section.appendChild(visual);
+    const updateVisual = ()=>{
+      const processValues = processKeys.map((key)=>Math.max(0, Number(displayedTiming(key)) || 0));
+      const downValues = downKeys.map((key)=>Math.max(0, Number(displayedTiming(key)) || 0));
+      const processTotal = processValues.reduce((sum, value)=>sum + value, 0);
+      const downTotal = downValues.reduce((sum, value)=>sum + value, 0);
+      const total = processTotal + downTotal;
+      arcLayer.replaceChildren();
+      let offset = 0;
+      processValues.forEach((value, index)=>{
+        offset = cycleArc(arcLayer, value, total > 0 ? value / total : 0, offset, ['#30d158','#18b94f','#0f9f43','#67d986'][index % 4], `Process ${index + 1}`);
+      });
+      downValues.forEach((value, index)=>{
+        offset = cycleArc(arcLayer, value, total > 0 ? value / total : 0, offset, ['#0a84ff','#3a9cff','#006edc','#69b6ff'][index % 4], `Down ${index + 1}`);
+      });
+      center.querySelector('strong').textContent = `${formatSeconds(total)} s`;
+      processPanel.querySelector('.entityCycleTimingHeading span').textContent = `${formatSeconds(processTotal)} s`;
+      processPanel.querySelectorAll('.entityCycleTimingRow strong').forEach((field, index)=>{
+        field.textContent = `${formatSeconds(processValues[index])} s`;
+      });
+      downPanel.querySelector('.entityCycleTimingHeading span').textContent = `${formatSeconds(downTotal)} s`;
+      downPanel.querySelectorAll('.entityCycleTimingRow strong').forEach((field, index)=>{
+        field.textContent = `${formatSeconds(downValues[index])} s`;
+      });
+    };
+    updateVisual();
+    const onTimingPreview = (event)=>{
+      if(String(event?.detail?.nodeId ?? '') !== String(node?.id ?? '')) return;
+      if(!visual.isConnected){ root.removeEventListener('factsim:cycle-timing-change', onTimingPreview); return; }
+      const stageId = String(event?.detail?.stageId || '');
+      if(stageId){
+        if(event.detail.preview) timingPreviews.set(stageId, Math.max(0, Number(event.detail.seconds) || 0));
+        else timingPreviews.delete(stageId);
+      }
+      updateVisual();
+    };
+    root.addEventListener('factsim:cycle-timing-change', onTimingPreview);
     return shell.card;
   }
 
@@ -752,9 +931,9 @@
     guide.className = 'entityFlowGuide';
     guide.innerHTML = behavior === 'shuttle'
       ? '<strong>Flow controls the synchronized shuttle cycle.</strong><span><b>Process</b> is configured on Input Rules. Shuttle stages advance together when <b>Process complete</b>, <b>Shuttle group process complete</b>, and the selected downstream condition are satisfied. Shuttle stages do not use Down / recovery.</span>'
-      : '<strong>Flow controls the complete Entity cycle.</strong><span>Process and Down times are edited beside their completion conditions. <b>Capacity available (Not full)</b> checks Node Capacity; <b>Down complete (Idle)</b> means recovery has finished; <b>Downstream ready</b> checks whether the next Node can accept the Entity.</span>';
+      : '<strong>Flow controls the complete Entity cycle.</strong><span>Select <b>Process complete</b> or <b>Down complete (Idle)</b> to edit its time directly in the condition row. <b>Capacity available (Not full)</b> checks Node Capacity; <b>Downstream ready</b> checks whether the next Node can accept the Entity.</span>';
     wrapper.appendChild(guide);
-    const inputConditions = [['always','Always'],['node-idle','Down complete (Idle)'],['space-available','Capacity available (Not full)'],['empty','Empty'],['not-full','Not full'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
+    const inputConditions = [['always','Always'],['down-complete','Down complete (Idle)'],['space-available','Capacity available (Not full)'],['empty','Empty'],['not-full','Not full'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
     const outputConditions = [['available','Available'],['process-complete','Process complete'],['shuttle-group-idle','Shuttle group process complete (Idle)'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
     const field = (label, content, extraClass)=>{
       const host = document.createElement('label');
@@ -764,53 +943,53 @@
       return host;
     };
     const conditionKind = (condition, fallback)=>isObject(condition) ? (condition.kind || fallback) : (condition || fallback);
-    const processStageOptions = ()=>{
-      const options = [['all','All process stages']];
-      for(const [ruleIndex, rule] of (node.properties?.inputRules || []).entries()){
-        const inputName = (node.inputs || []).find((port)=>port?.portId === rule?.fromPortId)?.name || `Input ${ruleIndex + 1}`;
-        for(const [stageIndex, stage] of (Array.isArray(rule?.processStages) ? rule.processStages : []).entries()){
-          options.push([stage.stageId, `${inputName} / ${stage.name || `Process ${stageIndex + 1}`}`]);
-        }
-      }
-      return options;
+    const downStages = ()=>{
+      const inputStages = (node.properties?.inputRules || []).flatMap((rule)=>Array.isArray(rule?.downStages) ? rule.downStages : []);
+      return inputStages.length ? inputStages : (node.properties?.outputRules || []).flatMap((rule)=>Array.isArray(rule?.downStages) ? rule.downStages : []);
     };
-    const processStages = ()=>(node.properties?.inputRules || []).flatMap((rule)=>Array.isArray(rule?.processStages) ? rule.processStages : []);
-    const downStages = ()=>(node.properties?.outputRules || []).flatMap((rule)=>Array.isArray(rule?.downStages) ? rule.downStages : []);
-    const appendSeconds = (host, label, stage, commit)=>{
+    const appendSeconds = (host, label, stage, commit, linkedStages)=>{
       if(!stage) return;
+      const stagesToUpdate = Array.isArray(linkedStages) && linkedStages.length ? linkedStages : [stage];
       const wrap = document.createElement('label'); wrap.className = 'entityRuleInlineTime';
       const caption = document.createElement('span'); caption.textContent = label;
       const input = document.createElement('input'); input.type = 'number'; input.min = '0'; input.step = '0.1';
       input.value = formatSeconds(stage.durationSec); input.disabled = running(); input.setAttribute('aria-label', `${label} seconds`);
       const unit = document.createElement('small'); unit.textContent = 's';
+      const notifyCycle = (seconds, preview)=>root.dispatchEvent(new CustomEvent('factsim:cycle-timing-change', {
+        detail:{ nodeId:node?.id, stageId:String(stage.stageId || ''), seconds, preview }
+      }));
+      input.addEventListener('input', ()=>notifyCycle(Math.max(0, Number(input.value) || 0), true));
       input.addEventListener('change', ()=>{
-        stage.durationSec = Math.max(0, Number(input.value) || 0);
-        input.value = formatSeconds(stage.durationSec);
+        const seconds = Math.max(0, Number(input.value) || 0);
+        stagesToUpdate.forEach((linkedStage)=>{ linkedStage.durationSec = seconds; });
+        input.value = formatSeconds(seconds);
         commit();
+        notifyCycle(seconds, false);
       });
       wrap.append(caption, input, unit); host.appendChild(wrap);
     };
-    const appendConditionParameter = (host, condition, commit)=>{
+    const appendConditionParameter = (host, condition, commit, timingRule)=>{
       const kind = conditionKind(condition, 'available');
       if(kind === 'process-complete'){
-        const availableStages = processStages();
-        const selectedStage = availableStages.find((stage)=>String(stage?.stageId) === String(condition.stageId || '')) || availableStages[0] || null;
-        const parameter = select(processStageOptions(), condition.stageId || selectedStage?.stageId || 'all');
-        parameter.title = 'Process stage that must be complete';
-        parameter.setAttribute('aria-label', parameter.title); parameter.disabled = running();
-        parameter.addEventListener('change', ()=>{ condition.stageId = parameter.value; commit(); App.selectionInspector?.refresh?.(); });
-        host.appendChild(parameter);
-        appendSeconds(host, 'Process time', selectedStage, commit);
+        const processConditions = (node.properties?.outputRules || []).flatMap((rule)=>flowConditionLeaves(rule?.releaseWhen, new Set(['process-complete'])));
+        const conditionIndex = Math.max(0, processConditions.indexOf(condition));
+        const linkedStages = (node.properties?.inputRules || []).map((rule)=>{
+          const stages = Array.isArray(rule?.processStages) ? rule.processStages : [];
+          return stages.find((stage)=>condition.stageId && String(stage?.stageId) === String(condition.stageId))
+            || stages[conditionIndex]
+            || stages[0]
+            || null;
+        }).filter(Boolean);
+        appendSeconds(host, 'Process time', linkedStages[0] || null, commit, linkedStages);
       }else if(kind === 'node-idle' || kind === 'down-complete'){
-        const availableStages = downStages();
-        const selectedStage = availableStages.find((stage)=>String(stage?.stageId) === String(condition.downStageId || '')) || availableStages[0] || null;
-        if(availableStages.length > 1){
-          const stageSelect = select(availableStages.map((stage, index)=>[stage.stageId, stage.name || `Down ${index + 1}`]), selectedStage?.stageId || '');
-          stageSelect.title = 'Down stage whose completion is required';
-          stageSelect.setAttribute('aria-label', stageSelect.title); stageSelect.disabled = running();
-          stageSelect.addEventListener('change', ()=>{ condition.downStageId = stageSelect.value; commit(); App.selectionInspector?.refresh?.(); });
-          host.appendChild(stageSelect);
-        }
+        const ruleStages = Array.isArray(timingRule?.downStages) ? timingRule.downStages : [];
+        const availableStages = ruleStages.length ? ruleStages : downStages();
+        const downConditions = flowConditionLeaves(timingRule?.acceptWhen, new Set(['node-idle','down-complete']));
+        const conditionIndex = Math.max(0, downConditions.indexOf(condition));
+        const selectedStage = availableStages.find((stage)=>String(stage?.stageId) === String(condition.downStageId || ''))
+          || availableStages[conditionIndex]
+          || availableStages[0]
+          || null;
         appendSeconds(host, 'Down time', selectedStage, commit);
       }else if(kind === 'shuttle-group-idle'){
         const parameter = document.createElement('input');
@@ -967,9 +1146,12 @@
     };
     const renderRules = (kind)=>{
       const key = kind === 'input' ? 'inputRules' : 'outputRules';
+      const simultaneousOutput = behavior === 'shuttle' || behavior === 'split';
       const card = makeCard(kind === 'input' ? 'INPUT' : 'OUTPUT', kind === 'input'
         ? 'What the node accepts. Descendants are searched automatically.'
-        : 'Rules are evaluated from top to bottom. Combine conditions with AND or OR.');
+        : simultaneousOutput
+          ? 'Rules are evaluated from top to bottom. Ports listed in one Output Rule transfer simultaneously when every selected downstream is ready. Use separate rules for alternative routing.'
+          : 'Rules are evaluated from top to bottom. Multiple ports in one rule are alternative destinations; the first ready port is selected.');
       const rows = Array.isArray(node.properties?.[key]) ? node.properties[key] : [];
       const list = document.createElement('div'); list.className = 'entityRuleList';
       const commit = ()=>changed(()=>{
@@ -980,17 +1162,18 @@
         node.setDirtyCanvas?.(true, true);
       });
       const renderTimingStages = (rule, direction)=>{
-        const property = direction === 'input' ? 'processStages' : 'downStages';
-        const label = direction === 'input' ? 'Process stages' : 'Down / recovery stages';
-        const hint = direction === 'input'
+        const isProcess = direction === 'input';
+        const property = isProcess ? 'processStages' : 'downStages';
+        const label = isProcess ? 'Process stages' : 'Down / recovery stages';
+        const hint = isProcess
           ? 'Sequential processing after this Input Rule accepts an Entity.'
-          : 'Recovery after this Output Rule transfers an Entity. Input remains blocked until all Down stages finish.';
+          : 'Recovery after the accepted Entity is transferred. Input remains blocked until all Down stages finish.';
         const host = document.createElement('div'); host.className = 'entityRuleTimingStages';
         const explanation = document.createElement('small'); explanation.className = 'entityRuleTimingHint'; explanation.textContent = hint;
         const stages = Array.isArray(rule[property]) ? rule[property] : (rule[property] = []);
         const list = document.createElement('div'); list.className = 'entityRuleTimingStageList';
         const uniqueStageId = ()=>{
-          const prefix = `${rule.ruleId || direction}-${direction === 'input' ? 'process' : 'down'}`;
+          const prefix = `${rule.ruleId || direction}-${isProcess ? 'process' : 'down'}`;
           let index = stages.length + 1;
           let candidate = `${prefix}-${index}`;
           const used = new Set(stages.map((stage)=>String(stage?.stageId || '')));
@@ -1000,9 +1183,9 @@
         stages.forEach((stage, stageIndex)=>{
           const row = document.createElement('div'); row.className = 'entityRuleTimingStageRow';
           const order = document.createElement('span'); order.className = 'entityRuleConditionNumber'; order.textContent = String(stageIndex + 1);
-          const name = document.createElement('input'); name.type = 'text'; name.value = stage.name || `${direction === 'input' ? 'Process' : 'Down'} ${stageIndex + 1}`;
+          const name = document.createElement('input'); name.type = 'text'; name.value = stage.name || `${isProcess ? 'Process' : 'Down'} ${stageIndex + 1}`;
           name.setAttribute('aria-label', `${label} ${stageIndex + 1} name`); name.disabled = running();
-          name.addEventListener('change', ()=>{ stage.name = String(name.value || '').trim() || `${direction === 'input' ? 'Process' : 'Down'} ${stageIndex + 1}`; commit(); });
+          name.addEventListener('change', ()=>{ stage.name = String(name.value || '').trim() || `${isProcess ? 'Process' : 'Down'} ${stageIndex + 1}`; commit(); });
           const durationWrap = document.createElement('label'); durationWrap.className = 'entityRuleTimingDuration';
           const duration = document.createElement('input'); duration.type = 'number'; duration.min = '0'; duration.step = '0.1'; duration.value = formatSeconds(stage.durationSec);
           duration.setAttribute('aria-label', `${label} ${stageIndex + 1} seconds`); duration.disabled = running();
@@ -1037,8 +1220,8 @@
           list.appendChild(row);
         });
         host.append(explanation, list);
-        const add = button(`+ Add ${direction === 'input' ? 'Process' : 'Down'} stage`, ()=>{
-          const stage = { stageId:uniqueStageId(), name:`${direction === 'input' ? 'Process' : 'Down'} ${stages.length + 1}`, durationSec:0 };
+        const add = button(`+ Add ${isProcess ? 'Process' : 'Down'} stage`, ()=>{
+          const stage = { stageId:uniqueStageId(), name:`${isProcess ? 'Process' : 'Down'} ${stages.length + 1}`, durationSec:0 };
           if(direction === 'output') stage.portId = rule.toPortIds?.[0] || rule.toPortId || undefined;
           stages.push(stage);
           commit(); App.selectionInspector?.refresh?.();
@@ -1147,7 +1330,6 @@
             if(previous && previous !== rule.fromPortId) cleanupPort('input', previous);
             App.selectionInspector?.refresh?.();
           });
-          body.appendChild(field('Input from', inputPort));
           const stored = rule.acceptWhen;
           const isCompound = isObject(stored) && (stored.kind === 'all' || stored.kind === 'any');
           const compound = {
@@ -1168,7 +1350,8 @@
           compound.conditions.forEach((conditionSpec, conditionIndex)=>{
             const conditionLine = document.createElement('div'); conditionLine.className = 'entityRuleConditionLine';
             const number = document.createElement('span'); number.className = 'entityRuleConditionNumber'; number.textContent = String(conditionIndex + 1);
-            const condition = select(inputConditions, conditionKind(conditionSpec, 'always')); condition.disabled = running();
+            const storedKind = conditionKind(conditionSpec, 'always');
+            const condition = select(inputConditions, storedKind === 'node-idle' ? 'down-complete' : storedKind); condition.disabled = running();
             condition.addEventListener('change', ()=>{ compound.conditions[conditionIndex] = { kind:condition.value }; persistCompound(); App.selectionInspector?.refresh?.(); });
             const removeCondition = button('×', ()=>{
               compound.conditions.splice(conditionIndex, 1);
@@ -1176,13 +1359,14 @@
               persistCompound(); App.selectionInspector?.refresh?.();
             }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
             removeCondition.disabled = running() || compound.conditions.length <= 1;
-            conditionLine.append(number, condition); appendConditionParameter(conditionLine, conditionSpec, persistCompound); conditionLine.appendChild(removeCondition);
+            conditionLine.append(number, condition); appendConditionParameter(conditionLine, conditionSpec, persistCompound, rule); conditionLine.appendChild(removeCondition);
             conditionList.appendChild(conditionLine);
           });
           conditionsHost.appendChild(conditionList);
           const addCondition = button('+ Add condition', ()=>{ compound.conditions.push({ kind:'always' }); persistCompound(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn entityRuleAddCondition');
           addCondition.disabled = running(); conditionsHost.appendChild(addCondition);
           body.appendChild(field('Acceptance conditions', conditionsHost));
+          body.appendChild(field('Input from', inputPort));
         }else{
           const stored = rule.releaseWhen;
           const isCompound = isObject(stored) && (stored.kind === 'all' || stored.kind === 'any');
@@ -1276,14 +1460,14 @@
           }, 'selectionInspectorBtn entityRuleAddCondition');
           addPort.disabled = running();
           portsHost.appendChild(addPort);
-          body.appendChild(field('Output to', portsHost));
+          body.appendChild(field(simultaneousOutput ? 'Output to (simultaneous)' : 'Output to (first ready)', portsHost));
         }
         ruleCard.appendChild(body); list.appendChild(ruleCard);
       });
       card.section.appendChild(list);
       const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
         const next = kind === 'input'
-          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'node-idle' }, { kind:'space-available' }] }, processStages:[], fromPortId:null }
+          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'down-complete' }, { kind:'space-available' }] }, processStages:[], downStages:[], fromPortId:null }
           : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }, { kind:'downstream-ready' }] }, downStages:[], toPortIds:[], toPortId:null };
         const port = App.createBasicFlowPort?.(node, kind, next);
         if(kind === 'input') next.fromPortId = port?.portId || null;
@@ -1460,7 +1644,9 @@
     Ctor.prototype.renderNode = function(node){
       raw.call(this, node);
       const main = this.root?.querySelector('.selectionInspectorMain');
-      if(!main) return;
+      const side = this.root?.querySelector('.selectionInspectorSidebar');
+      const propsCard = side?.querySelector('.nodePropertiesCard');
+      if(!main || !side) return;
       if(node?.type === 'factory/basic' && typeof App.commonBasicNodeProperties === 'function'){
         const commonPropertyCount = Object.keys(App.commonBasicNodeProperties(node.properties)).length;
         const propertyStat = Array.from(this.root.querySelectorAll('.selectionInspectorStat')).find((entry)=>
@@ -1469,15 +1655,13 @@
         if(propertyValue) propertyValue.textContent = String(commonPropertyCount);
       }
       main.querySelectorAll('.entityTreeCard').forEach((entry)=>entry.remove());
-      const existingCards = Array.from(main.children);
       const tabBar = document.createElement('div'); tabBar.className = 'entityInspectorTabs';
       const panels = {};
       const entityEnabled = node?.type === 'factory/basic';
-      const names = entityEnabled ? ['Basic','Flow','Contents','Advanced'] : ['Basic','Advanced'];
+      const names = entityEnabled ? ['Flow','Contents','Advanced'] : ['Advanced'];
       names.forEach((name)=>{ const panel = document.createElement('div'); panel.className = 'entityInspectorTabPanel'; panel.dataset.tab = name.toLowerCase(); panels[name] = panel; });
-      if(existingCards[0]) panels.Basic.appendChild(existingCards[0]);
-      if(existingCards[1]){
-        const hint = existingCards[1].querySelector('.selectionInspectorHint');
+      if(propsCard){
+        const hint = propsCard.querySelector('.selectionInspectorHint');
         if(hint) hint.textContent = 'Common node settings are saved immediately and used in the next simulation run.';
         const hiddenPropertyLabels = new Set([
           'basicNodeVersion', 'initialContents', 'inputRules', 'outputRules', 'portTimings', 'flowPortSequence', 'selection', 'stateMachine',
@@ -1487,15 +1671,13 @@
           'accepts', 'preset', 'operation', 'sourceKind', 'targetKind', 'itemKind', 'batchMode', 'quantity',
           'relationMode', 'searchDepth', 'autoRelease', 'script', 'scriptDisabled', 'sigEnabled', 'sigExtra'
         ]);
-        for(const field of existingCards[1].querySelectorAll('.selectionInspectorField')){
+        for(const field of propsCard.querySelectorAll('.selectionInspectorField')){
           const label = field.querySelector('.selectionInspectorFieldLabel')?.textContent?.trim();
           const propertyKey = field.dataset.propertyKey || label;
           if(hiddenPropertyLabels.has(label) || /^processTime(?:\d+)?$/.test(propertyKey) || /^downTime(?:\d+)?$/.test(propertyKey)) field.remove();
         }
       }
-      if(basicDerivedNode(node)) panels.Basic.appendChild(renderCycleEditor(node));
-      if(existingCards[1]) panels.Basic.appendChild(existingCards[1]);
-      existingCards.slice(2).forEach((entry)=>panels.Advanced.appendChild(entry));
+      if(basicDerivedNode(node)) side.insertBefore(renderCompactCycleEditor(node), propsCard || null);
       if(entityEnabled){ panels.Flow.appendChild(renderFlowEditor(node)); panels.Contents.appendChild(renderContentsEditor(node)); }
       if(entityEnabled) panels.Advanced.appendChild(renderOperationsEditor(node));
       const state = makeCard('State Machine', 'State Machine remains separate from Input / Output Rules.');
@@ -1514,7 +1696,7 @@
       }, 'selectionInspectorBtn is-primary');
       saveState.disabled = running();
       state.section.append(stateEditor, saveState, stateNotice); panels.Advanced.appendChild(state.card);
-      const active = names.includes(this._entityTab) ? this._entityTab : 'Basic';
+      const active = names.includes(this._entityTab) ? this._entityTab : names[0];
       const activate = (name)=>{ this._entityTab = name; Object.entries(panels).forEach(([key,panel])=>panel.hidden = key !== name); Array.from(tabBar.children).forEach((btn)=>btn.classList.toggle('is-active', btn.dataset.tab === name)); };
       names.forEach((name)=>{ const btn = button(name, ()=>activate(name), 'entityInspectorTab'); btn.dataset.tab = name; tabBar.appendChild(btn); main.appendChild(panels[name]); });
       main.insertBefore(tabBar, main.firstChild); activate(active);
