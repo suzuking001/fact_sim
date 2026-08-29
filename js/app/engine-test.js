@@ -744,7 +744,11 @@ var App = window.App || (window.App = {});
           try{ await effectiveEngine._inFlight; }catch(_e){}
         }else if(simEngine && simEngine !== effectiveEngine && simEngine._inFlight && typeof simEngine._inFlight.then === 'function'){
           try{ await simEngine._inFlight; }catch(_e){}
-        }else{
+        }else if((loops & 15) === 15){
+          // Synchronous engines do not need a browser timer turn after every
+          // simulated step. Yield periodically so the probe stays responsive
+          // without making dt hit the wall-clock limit before the common
+          // simulation-time target used for cross-engine comparison.
           await nextTick();
         }
         simMs = nowSimMs();

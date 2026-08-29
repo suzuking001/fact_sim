@@ -1113,6 +1113,12 @@
         installActionRuntimeMethods(this, null);
         this._runtimePrototype = null;
         this._runtimeConfigured = false;
+        // Generic operation-driven nodes (including synchronized shuttle
+        // stages) do not have a legacy runtime constructor. Their persisted
+        // operations are available only after LiteGraph has configured the
+        // node, so rebuild the plan here instead of retaining the constructor's
+        // default `basic` plan.
+        this._executionPlan = compileExecutionPlan(this);
         return false;
       }
       let temp = null;
@@ -1288,7 +1294,7 @@
       return null;
     }
 
-    _selectFlowInputCandidate(){
+    _selectFlowInputCandidate(context){
       const ruleSlots = (this.properties?.inputRules || []).map((rule)=>portIndexById(this.inputs, rule?.fromPortId)).filter((slot)=>slot >= 0);
       const slots = [...new Set([...ruleSlots, ...(this.inputs || []).map((_port, slot)=>slot)])].filter((slot)=>!isSignalPort(this.inputs?.[slot]));
       this._lastInRefs = Array.isArray(this._lastInRefs) ? this._lastInRefs : [];
@@ -1298,7 +1304,7 @@
         const work = this.getInputData(slot);
         if(!work){ this._lastInRefs[slot] = null; continue; }
         if(typeof work !== 'object' || this._lastInRefs[slot] === work) continue;
-        if(!this._runtimeSelectInputRule(work, slot)) continue;
+        if(!this._runtimeSelectInputRule(work, slot, context)) continue;
         return { work, slot };
       }
       return null;
@@ -1479,6 +1485,12 @@
       if(kind === 'always') return true;
       if(kind === 'available') return !!value;
       if(kind === 'node-idle' || kind === 'down-complete'){
+        if(context?.allowBufferedInput
+          && (this._executionPlan?.behavior || behaviorId(this)) === 'shuttle'
+          && this._state === 'TRANSFER'
+          && !this._incomingPayload){
+          return true;
+        }
         const stateName = text(this._stateName).toLowerCase();
         return this._state === 'IDLE' || stateName === 'idle' || /(?:^|_)idle(?:_|$)/.test(stateName);
       }
@@ -1539,7 +1551,7 @@
       return false;
     }
 
-    _runtimeSelectInputRule(value, slotIndex){
+    _runtimeSelectInputRule(value, slotIndex, context){
       const rules = Array.isArray(this.properties?.inputRules) ? this.properties.inputRules : [];
       if(!rules.length) return { rule:null };
       const input = this.inputs?.[slotIndex];
@@ -1550,13 +1562,13 @@
         const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
         if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise = rule; continue; }
         if(!this._runtimeRuleTargetMatches(candidate, rule)) continue;
-        if(this._runtimeEvaluateCondition(rule.acceptWhen || { kind:'always' }, candidate, { slotIndex })){
+        if(this._runtimeEvaluateCondition(rule.acceptWhen || { kind:'always' }, candidate, { ...(context || {}), slotIndex })){
           this._activeTimingOverride = this._timingOverrideFor(candidate);
           this._activeFlowInputRule = rule;
           return { rule };
         }
       }
-      if(otherwise && this._runtimeEvaluateCondition(otherwise.acceptWhen || { kind:'always' }, candidate, { slotIndex })){
+      if(otherwise && this._runtimeEvaluateCondition(otherwise.acceptWhen || { kind:'always' }, candidate, { ...(context || {}), slotIndex })){
         this._activeTimingOverride = this._timingOverrideFor(candidate);
         this._activeFlowInputRule = otherwise;
         return { rule:otherwise };
@@ -2050,7 +2062,7 @@
 
     _captureShuttleInputDuringTransfer(){
       if(this._incomingPayload) return;
-      const candidate = this._selectFlowInputCandidate?.();
+      const candidate = this._selectFlowInputCandidate?.({ allowBufferedInput:true });
       if(!candidate) return;
       const work = candidate.work;
       const inputSlot = candidate.slot;
