@@ -335,8 +335,8 @@ class LinkAnimator{
     this._visibleHits = [];
     this._hoverAnim = null;
     this._hoverRenderedAt = 0;
-    this._workVisualKeys = new WeakMap();
-    this._nextWorkVisualKey = 1;
+    this._entityVisualKeys = new WeakMap();
+    this._nextEntityVisualKey = 1;
   }
   clear(graph){
     if(!graph){
@@ -560,21 +560,21 @@ class LinkAnimator{
     return isInput ? LiteGraph.LEFT : LiteGraph.RIGHT;
   }
   _entityKey(type, info){
-    if(String(type || '').toLowerCase() !== 'work' || !info) return '';
+    if(!info) return '';
     const entity = info.entity;
     if(entity && (typeof entity === 'object' || typeof entity === 'function')){
-      let key = this._workVisualKeys.get(entity);
+      let key = this._entityVisualKeys.get(entity);
       if(!key){
-        key = `entity:${this._nextWorkVisualKey++}`;
-        this._workVisualKeys.set(entity, key);
+        key = `entity:${this._nextEntityVisualKey++}`;
+        this._entityVisualKeys.set(entity, key);
       }
       return key;
     }
     if(info.instanceId != null && String(info.instanceId)) return `instance:${String(info.instanceId)}`;
     if(info.id == null) return '';
     const id = String(info.id);
-    const workType = String(info.t ?? info.type ?? '');
-    return `${id}\u0000${workType}`;
+    const entityType = String(info.typeId ?? info.t ?? info.type ?? type ?? '');
+    return `${id}\u0000${entityType}`;
   }
 
   _matchesWorkInfo(candidate, info){
@@ -641,23 +641,22 @@ class LinkAnimator{
     const processTimed = Number.isFinite(Number(durationMs)) && Number(durationMs) > 0;
     const entityId = info && info.id != null ? String(info.id) : '';
     const entityType = info ? String(info.t ?? info.type ?? '') : '';
-    if(entityId && String(type).toLowerCase() === 'work'){
-      const entityKey = this._entityKey(type, info);
-      if(processTimed && entityKey){
-        // A later process leg owns the visual for this Work. Remove an older
-        // completed/incoming leg and any WAIT icon before starting the next
-        // link, otherwise the same Work is drawn at IN and OUT simultaneously.
-        this.animations = this.animations.filter((anim)=>{
-          if(!anim || anim.graph !== graph || this._entityKey(anim.type, anim.info) !== entityKey) return true;
-          if(anim.tail) return false;
-          if(anim.linkId === linkId) return true;
-          return !(Number(anim.start) < now);
-        });
-      }
+    const entityKey = this._entityKey(type, info);
+    if(entityKey && (processTimed || String(type).toLowerCase() !== 'work')){
+      // One runtime Entity owns exactly one visual. A new IN/OUT leg replaces
+      // the previous leg and any WAIT icon even when both transitions happen
+      // in the same simulation tick.
+      this.animations = this.animations.filter((anim)=>{
+        if(!anim || anim.graph !== graph || this._entityKey(anim.type, anim.info) !== entityKey) return true;
+        return !anim.tail && anim.linkId === linkId;
+      });
+    }
+    if(entityKey || entityId){
       const existing = this.animations.find((anim)=>{
         if(!anim || anim.tail || anim.graph !== graph || anim.linkId !== linkId || anim.type !== type) return false;
         const activeDuration = anim.duration || defaultDuration;
         if((now - anim.start) >= activeDuration) return false;
+        if(entityKey) return this._entityKey(anim.type, anim.info) === entityKey;
         const activeInfo = anim.info || {};
         return String(activeInfo.id ?? '') === entityId &&
           String(activeInfo.t ?? activeInfo.type ?? '') === entityType;
@@ -697,6 +696,15 @@ class LinkAnimator{
   showPortIcon(graph, linkId, type, info){
     if(!graph || linkId == null) return;
     info = this._withWorkEntity(graph, linkId, type, info, true);
+    const entityKey = this._entityKey(type, info);
+    if(entityKey){
+      // A WAIT icon is the current authoritative location. Remove the prior
+      // transient/tail before publishing it so IN and OUT never overlap.
+      this.animations = this.animations.filter((anim)=>{
+        if(!anim || anim.graph !== graph || this._entityKey(anim.type, anim.info) !== entityKey) return true;
+        return anim.tail && anim.linkId === linkId && anim.type === type;
+      });
+    }
     const existing = this.animations.find(anim=>(
       anim.tail &&
       anim.graph === graph &&
