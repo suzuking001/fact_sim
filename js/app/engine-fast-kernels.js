@@ -293,7 +293,7 @@ var App = window.App || (window.App = {});
           return buildResult(before, invalid, NaN);
         }
         const nextId = (Number(node._counter) || 0) + 1;
-        const WorkCtor = window.Work || function(id, type, typeId){ this.id = id; this.type = type; this.typeId = typeId || ''; this.__flowCategory = 'work'; };
+        const WorkCtor = window.Work || function(id, type, typeId){ this.id = id; this.type = type; this.typeId = typeId || ''; };
         const preview = new WorkCtor(nextId, entry.type, entry.typeId);
         const flowSelection = typeof node._runtimeSelectOutputRule === 'function'
           ? node._runtimeSelectOutputRule(preview, { processComplete:true })

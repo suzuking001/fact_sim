@@ -20,7 +20,7 @@ const EXAMPLE_FILES = {
   carrier: 'sample/carrier.json?v=20260829b',
   pallet_station_demo: 'sample/pallet_station_demo.json?v=20260829b',
   sample_line1: 'sample/sample_line1.json?v=20260829b',
-  sample_line2: 'sample/sample_line2.json?v=20260829c'
+  sample_line2: 'sample/sample_line2.json?v=20260831b'
 };
 
 App._exampleWriteState = App._exampleWriteState || {

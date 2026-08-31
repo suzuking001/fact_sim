@@ -93,7 +93,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
   canAcceptAgv(slotIndex, agv){
     const slot = Number.isFinite(Number(slotIndex)) ? Number(slotIndex) : this._inputSlotsFor('carrier')[0];
     return this._inputSlotsFor('carrier').includes(slot)
-      && !!this._runtimeSelectInputRule?.(agv || { __flowCategory:'carrier' }, slot)
+      && !!this._runtimeSelectInputRule?.(agv || {}, slot)
       && !this._currentAgv && !this._departingAgv;
   }
   canAcceptWorkInput(slotIndex){
@@ -103,7 +103,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     const cap = this._currentAgv.capacity || 0;
     const load = Array.isArray(this._currentAgv.cargo) ? this._currentAgv.cargo.length : 0;
     if(cap <= 0 || load >= cap) return false;
-    return !!this._runtimeSelectInputRule?.({ __flowCategory:'work' }, Number(slotIndex));
+    return !!this._runtimeSelectInputRule?.({}, Number(slotIndex));
   }
 
   _setState(name, kind){
@@ -187,7 +187,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
       this._setState('agv_process','PROCESS');
       const now = simNow();
       this._until = now + Math.max(0,(this.properties.processTime||0)*1000);
-      this._triggerAnim(this._agvInIndex, 'agv', this._until - now, { id:a.id, t:'AGV' });
+      this._triggerAnim(this._agvInIndex, 'agv', this._until - now, { id:a.id, t:a.type || 'AGV', typeId:a.typeId || '', entity:a });
       if(this._until === now) this._handleAgvProcess(now);
     }
   }
@@ -215,7 +215,7 @@ class AGVRouteNode extends LiteGraph.LGraphNode{
     this._setState('agv_process','PROCESS');
     const now = simNow();
     this._until = now + Math.max(0,(this.properties.processTime||0)*1000);
-    this._triggerAnim(this._agvInIndex, 'agv', this._until-now, { id: agv.id, t:'AGV' });
+    this._triggerAnim(this._agvInIndex, 'agv', this._until-now, { id: agv.id, t:agv.type || 'AGV', typeId:agv.typeId || '', entity:agv });
     if(this._until === now) this._handleAgvProcess(now);
   }
 

@@ -23,7 +23,7 @@
 
   function inferKind(entity){
     if(!isObject(entity)) return 'entity';
-    const explicit = entity.entityKind ?? entity.kind ?? entity.meta?.entityKind;
+    const explicit = entity.typeId ?? entity.entityKind ?? entity.kind ?? entity.meta?.entityKind;
     if(explicit) return normalizeKind(explicit);
     if(typeof root.Work === 'function' && entity instanceof root.Work) return 'work';
     if(typeof root.AGV === 'function' && entity instanceof root.AGV) return 'carrier';
@@ -92,9 +92,6 @@
 
       this.entities.set(internalId, entity);
       this.objectIds.set(entity, internalId);
-      try{
-        if(!entity.entityKind) entity.entityKind = kind;
-      }catch(_e){}
       this.revision += 1;
 
       if(opts.scanLegacy !== false) this.syncLegacyTree(entity, opts.mode);
@@ -368,7 +365,7 @@
         const row = {
           internalId: id,
           id: displayId(current, id),
-          kind: inferKind(current),
+          typeId: String(current.typeId || inferKind(current)),
           mode: relation?.mode || 'root',
           capacity: this._capacityFor(current, 'work'),
           children: []

@@ -422,7 +422,7 @@ function initGraph(){
   disposeGraphCanvas(previousCanvas);
   App.graph = new LGraph();
   if(typeof App.restoreEntityModel === 'function'){
-    App.restoreEntityModel(App.graph, { __factSimEntityModel: { schemaVersion: 1, types: [] } }, true);
+    App.restoreEntityModel(App.graph, { __factSimEntityModel: { schemaVersion: 3, types: [] } }, true);
   }
   App.graph.onAfterChange = ()=>{
     if(App.stopGroups && typeof App.stopGroups.onGraphChanged === 'function'){

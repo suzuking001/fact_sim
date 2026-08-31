@@ -1424,12 +1424,12 @@ window.beginGroupPlacement = beginGroupPlacement;
       { key:'presetId', label:'Preset', type:'select', default:'router', options:['router'] }
     ]},
     pack:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Pack', target:'title' },
+      { key:'title', label:'Title', type:'text', default:'Attach', target:'title' },
       { key:'presetId', label:'Preset', type:'select', default:'pack', options:['pack'] },
       { key:'processTime', label:'Handling Time (s)', type:'number', min:0, step:0.1, default:1 }
     ]},
     unpack:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Unpack', target:'title' },
+      { key:'title', label:'Title', type:'text', default:'Detach', target:'title' },
       { key:'presetId', label:'Preset', type:'select', default:'unpack', options:['unpack'] },
       { key:'processTime', label:'Handling Time (s)', type:'number', min:0, step:0.1, default:1 }
     ]},
@@ -1542,7 +1542,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     agvroute:{
       type:'factory/basic',
       props:[
-        { key:'title', label:'Title', type:'text', default:'AGV Route', target:'title' },
+        { key:'title', label:'Title', type:'text', default:'Transport Route', target:'title' },
         { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
         { key:'transportMode', label:'Transport Mode', type:'select', default:'agv', options:['agv'] },
         { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
@@ -1554,7 +1554,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     carrierroute:{
       type:'factory/basic',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Carrier Route', target:'title' },
+        { key:'title', label:'Title', type:'text', default:'Transport Route', target:'title' },
         { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
         { key:'transportMode', label:'Transport Mode', type:'select', default:'carrier', options:['carrier'] },
         { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
@@ -1566,7 +1566,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     station:{
       type:'factory/basic',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Station', target:'title' },
+        { key:'title', label:'Title', type:'text', default:'Store', target:'title' },
         { key:'presetId', label:'Preset', type:'select', default:'station', options:['station'] },
         { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
         { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
@@ -1617,31 +1617,31 @@ window.beginGroupPlacement = beginGroupPlacement;
     buffer:{ label:'Buffer', description:'Hold Entity roots up to a configured node capacity.' },
     conveyor:{ label:'Conveyor', description:'Move an Entity subtree after a configured travel time.' },
     router:{ label:'Router', description:'Route Entities using ordered Output Rules.' },
-    pack:{ label:'Pack', description:'Attach incoming items to a supplied or initially placed Container.' },
-    unpack:{ label:'Unpack', description:'Detach nested items and release the empty Container separately.' },
+    pack:{ label:'Attach', description:'Attach one incoming Entity as a child of another Entity.' },
+    unpack:{ label:'Detach', description:'Detach a nested Entity and release parent and child separately.' },
     basic:{ label:'Basic Node', description:'Start from the common node model and configure rules manually.' },
-    equip:{ label:'Equipment', description:'Process work with standard process / wait / down behavior.' },
+    equip:{ label:'Equipment', description:'Process an Entity with standard process / wait / down behavior.' },
     note:{ label:'Memo', description:'Place text notes on the graph for layout comments and instructions.' },
-    signal:{ label:'Signal', description:'Run signal-only scripts and combine logic without work transport.' },
-    shuttle:{ label:'Shuttle Stage', description:'Synchronize grouped shuttle stages and move one work per stage together.' },
-    merge:{ label:'Merge', description:'Merge matching work IDs from multiple inputs into one output.' },
-    join:{ label:'Join', description:'Pass through the first-arriving work from multiple upstream nodes.' },
-    source:{ label:'Source', description:'Generate work items from a configured sequence.' },
-    entitysource:{ label:'Entity Source', description:'Create one pallet, carrier, container, or ship with an arbitrary initial cargo hierarchy.' },
-    sink:{ label:'Sink', description:'Collect completed work and monitor throughput.' },
-    split:{ label:'Split', description:'Duplicate one work ID into multiple synchronized downstream branches.' },
-    branch:{ label:'Branch', description:'Route work by work type to different output ports.' },
-    agvroute:{ label:'AGV Route', description:'Use the Carrier Route preset in AGV transport mode.' },
-    carrierroute:{ label:'Carrier Route', description:'Transport carriers, work, and pallets along a timed route.' },
-    station:{ label:'Station', description:'Store one pallet, feed work in/out, and hand pallets to carriers.' },
-    transferstation:{ label:'Transfer Station', description:'Load, unload, or transfer any nested entity using intuitive presets.' }
+    signal:{ label:'Signal', description:'Run signal-only scripts and combine logic without Entity transport.' },
+    shuttle:{ label:'Shuttle Stage', description:'Synchronize grouped stages and move one Entity per stage together.' },
+    merge:{ label:'Merge', description:'Merge matching Entity IDs from multiple inputs into one output.' },
+    join:{ label:'Join', description:'Pass through the first-arriving Entity from multiple upstream nodes.' },
+    source:{ label:'Source', description:'Generate Entities from a configured Type sequence.' },
+    entitysource:{ label:'Source', description:'Create an Entity with an arbitrary initial child hierarchy.' },
+    sink:{ label:'Sink', description:'Collect completed Entities and monitor throughput.' },
+    split:{ label:'Split', description:'Duplicate one Entity into multiple synchronized downstream branches.' },
+    branch:{ label:'Branch', description:'Route Entities by Type to different output ports.' },
+    agvroute:{ label:'Transport Route', description:'Transport Entities along a timed route.' },
+    carrierroute:{ label:'Transport Route', description:'Transport Entities along a timed route.' },
+    station:{ label:'Store', description:'Store a root Entity and transfer its children through role-based ports.' },
+    transferstation:{ label:'Transfer', description:'Attach, detach, or transfer any nested Entity.' }
   };
   const QUICK_PICK_KINDS = ['machine', 'buffer', 'router', 'pack', 'unpack', 'source', 'sink', 'basic'];
   const CATEGORY_TABS = [
     { key: 'all', label: 'All' },
     { key: 'core', label: 'Core' },
     { key: 'flow', label: 'Flow' },
-    { key: 'carrier', label: 'Carrier' },
+    { key: 'carrier', label: 'Handling' },
     { key: 'utility', label: 'Utility' }
   ];
   const NODE_CATEGORY = {

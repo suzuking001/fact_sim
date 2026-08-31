@@ -6,7 +6,6 @@ class Work{
     this.id = id;
     this.type = type;
     this.typeId = typeId || '';
-    this.__flowCategory = 'work';
   }
   toString(){ return `ID:${this.id},Type:${this.type}`; }
 }

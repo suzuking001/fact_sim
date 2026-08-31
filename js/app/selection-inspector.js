@@ -726,6 +726,7 @@ var App = window.App || (window.App = {});
     }
 
     renderEntityTreeCard(container, node){
+      if(node?.type === 'factory/basic') return;
       if(!container || !node || typeof App.entityStoreForGraph !== 'function') return;
       const store = App.entityStoreForGraph(this.graph || node.graph);
       if(!store) return;

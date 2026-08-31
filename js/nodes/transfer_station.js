@@ -89,15 +89,14 @@ class TransferStationNode extends LiteGraph.LGraphNode{
   }
 
   _store(){
-    return window.App && typeof window.App.entityStoreForGraph === 'function'
-      ? window.App.entityStoreForGraph(this.graph)
+    return window.App && typeof window.App.runtimeInstancesForGraph === 'function'
+      ? window.App.runtimeInstancesForGraph(this.graph)
       : null;
   }
 
   _kind(entity){
-    return window.App && typeof window.App.inferEntityKind === 'function'
-      ? window.App.inferEntityKind(entity)
-      : String(entity?.entityKind || entity?.kind || 'entity').toLowerCase();
+    const store = this._store();
+    return String(store?.get?.(entity)?.typeId || entity?.typeId || 'entity');
   }
 
   _kindMatches(entity, expected){
@@ -207,25 +206,22 @@ class TransferStationNode extends LiteGraph.LGraphNode{
     if(this._phase !== 'collect' && this._phase !== 'ready') return false;
     if(this._offer || this._releaseQueue.length) return false;
     const op = this._operation();
-    if(op === 'load' && this._targetHost && !this._pendingItem && this._kindMatches(entity || { entityKind:this.properties.itemKind }, this.properties.itemKind)){
-      if(!this._targetHost || !this._kindMatches(entity || { entityKind: this.properties.itemKind }, this.properties.itemKind)) return false;
+    if(op === 'load' && slot === this._itemInIndex && this._targetHost && !this._pendingItem){
       const store = this._store();
       if(!entity || !store) return true;
-      store.register(entity);
-      store.register(this._targetHost);
       return !!store.canAttach(entity, this._targetHost, { mode: this.properties.relationMode }).ok;
     }
-    if(op !== 'load' && !this._sourceHost && (!entity || this._kindMatches(entity, this.properties.sourceKind))) return true;
-    if(op !== 'unload' && !this._targetHost && (!entity || this._kindMatches(entity, this.properties.targetKind))) return true;
+    if(op !== 'load' && slot === this._sourceInIndex && !this._sourceHost) return true;
+    if(op !== 'unload' && slot === this._targetInIndex && !this._targetHost) return true;
     return false;
   }
 
   canAcceptWorkInput(slotIndex, work){
-    return this.canAcceptEntityInput(slotIndex, work || { entityKind: 'work' });
+    return this.canAcceptEntityInput(slotIndex, work || {});
   }
 
   canAcceptPalletInput(slotIndex, pallet){
-    return this.canAcceptEntityInput(slotIndex, pallet || { entityKind: 'pallet' });
+    return this.canAcceptEntityInput(slotIndex, pallet || {});
   }
 
   canAcceptAgv(slotIndex, agv){
@@ -235,7 +231,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
       entity = slotIndex;
       slot = this._operation() === 'load' ? this._targetInIndex : this._sourceInIndex;
     }
-    return this.canAcceptEntityInput(slot, entity || { entityKind: 'carrier' });
+    return this.canAcceptEntityInput(slot, entity || {});
   }
 
   _captureInput(slot){
@@ -261,16 +257,14 @@ class TransferStationNode extends LiteGraph.LGraphNode{
       if(originId != null) this.graph.__dirtyNodeIds.add(originId);
     }
     const store = this._store();
-    if(store) store.register(entity);
+    if(store?.get?.(entity)) store.moveRoot(entity, this.id);
     this._activeInputSlot = slot;
     const op = this._operation();
-    if(op === 'load' && this._targetHost && !this._pendingItem && this._kindMatches(entity, this.properties.itemKind)) this._pendingItem = entity;
-    else if(op !== 'load' && !this._sourceHost && this._kindMatches(entity, this.properties.sourceKind)) this._sourceHost = entity;
-    else if(op !== 'unload' && !this._targetHost && this._kindMatches(entity, this.properties.targetKind)) this._targetHost = entity;
+    if(op === 'load' && slot === this._itemInIndex && this._targetHost && !this._pendingItem) this._pendingItem = entity;
+    else if(op !== 'load' && slot === this._sourceInIndex && !this._sourceHost) this._sourceHost = entity;
+    else if(op !== 'unload' && slot === this._targetInIndex && !this._targetHost) this._targetHost = entity;
     this._payload = entity;
-    this._pendingAgv = this._kind(entity) === 'carrier' ? entity : null;
-    if(this._kind(entity) === 'work') this._lastWorkInRef = entity;
-    if(this._kind(entity) === 'pallet') this._lastPalletInRef = entity;
+    this._pendingAgv = null;
     return entity;
   }
 
@@ -288,9 +282,8 @@ class TransferStationNode extends LiteGraph.LGraphNode{
   _matchingItems(){
     const store = this._store();
     if(!store || !this._sourceHost) return [];
-    const options = this.properties.searchDepth === 'descendants' ? { kind: this.properties.itemKind } : { kind: this.properties.itemKind };
-    if(this.properties.searchDepth === 'descendants') return store.descendantsOf(this._sourceHost, options);
-    return store.childrenOf(this._sourceHost, options);
+    if(this.properties.searchDepth === 'descendants') return store.descendantsOf(this._sourceHost);
+    return store.childrenOf(this._sourceHost);
   }
 
   _batchDone(){
@@ -387,14 +380,7 @@ class TransferStationNode extends LiteGraph.LGraphNode{
         if(!target.canAcceptEntityInput(link.target_slot, entity)) return false;
         continue;
       }
-      const kind = this._kind(entity);
-      if(kind === 'carrier' && typeof target.canAcceptAgv === 'function'){
-        if(!target.canAcceptAgv(link.target_slot, entity)) return false;
-      }else if(kind === 'pallet' && typeof target.canAcceptPalletInput === 'function'){
-        if(!target.canAcceptPalletInput(link.target_slot, entity)) return false;
-      }else if(kind === 'work' && typeof target.canAcceptWorkInput === 'function'){
-        if(!target.canAcceptWorkInput(link.target_slot, entity)) return false;
-      }else if(typeof target._state !== 'undefined' && String(target._state).toUpperCase() !== 'IDLE'){
+      if(typeof target._state !== 'undefined' && String(target._state).toUpperCase() !== 'IDLE'){
         return false;
       }
     }
@@ -532,14 +518,10 @@ class TransferStationNode extends LiteGraph.LGraphNode{
         return;
       }
       if(String(this.properties.batchMode).toLowerCase() === 'until-full'){
-        const probe = { entityKind: this.properties.itemKind, id: '__capacity_probe__' };
         const store = this._store();
-        if(store){
-          store.register(probe, { scanLegacy: false });
-          const canTake = store.canAttach(probe, this._targetHost, { mode: this.properties.relationMode }).ok;
-          store.entities.delete(store.idOf(probe));
-          if(!canTake) this._beginRelease();
-        }
+        const target = store?.get?.(this._targetHost);
+        const type = store?.typeOf?.(target);
+        if(target && type && target.childIds.length >= type.capacity) this._beginRelease();
       }
       return;
     }

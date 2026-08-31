@@ -11,7 +11,7 @@ var App = window.App || (window.App = {});
     carrier: 'sample/carrier.json?v=20260829b',
     pallet_station_demo: 'sample/pallet_station_demo.json?v=20260829b',
     sample_line1: 'sample/sample_line1.json?v=20260829b',
-    sample_line2: 'sample/sample_line2.json?v=20260829c'
+    sample_line2: 'sample/sample_line2.json?v=20260831b'
   };
   const DEFAULTS = {
     suite: 'standard',
@@ -589,6 +589,10 @@ var App = window.App || (window.App = {});
     if(String(baseToken || '') === String(rowToken || '')) return true;
     const a = parseStateToken(baseToken);
     const b = parseStateToken(rowToken);
+    // Generic Entity transport can be idle at different role ports depending
+    // on an engine's final scheduling boundary. The externally meaningful
+    // state is still IDLE, and neither side has active work.
+    if(a.phase === 'IDLE' && b.phase === 'IDLE' && /idle/i.test(a.detail) && /idle/i.test(b.detail)) return true;
     if(String(a.detail || '') !== String(b.detail || '')) return false;
     const activePhases = new Set(['PROCESS', 'DOWN', 'WAIT']);
     return activePhases.has(a.phase) && activePhases.has(b.phase);

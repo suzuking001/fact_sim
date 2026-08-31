@@ -104,7 +104,7 @@ class StationNode extends LiteGraph.LGraphNode{
         workCount = carrier.cargo.length;
       }
       const capacity = Math.max(0, Number(carrier.capacity) || 0);
-      return { id, workCount, capacity };
+      return { id, workCount, capacity, entity:carrier, typeId:carrier.typeId || '', t:carrier.type || carrier.typeId || 'Carrier' };
     }
     return { id: 'pallet', workCount: 0, capacity: 0 };
   }
@@ -200,7 +200,7 @@ class StationNode extends LiteGraph.LGraphNode{
     if(isFinite(slot) && !this._inputSlotsFor('work').includes(slot)) return false;
     if(this._state !== 'IDLE') return false;
     if(!this._pallet) return false;
-    return !this._isFull() && !!this._runtimeSelectInputRule?.({ __flowCategory:'work' }, slot);
+    return !this._isFull() && !!this._runtimeSelectInputRule?.({}, slot);
   }
 
   canAcceptPalletInput(slotIndex){
@@ -208,7 +208,7 @@ class StationNode extends LiteGraph.LGraphNode{
     const allowed = new Set([...this._inputSlotsFor('container'), ...this._inputSlotsFor('carrier')]);
     if(isFinite(slot) && !allowed.has(slot)) return false;
     if(this._state !== 'IDLE') return false;
-    return !this._pallet && !!this._runtimeSelectInputRule?.({ __flowCategory:'container' }, slot);
+    return !this._pallet && !!this._runtimeSelectInputRule?.({}, slot);
   }
 
   _downstreamWorkReady(work){
@@ -317,7 +317,7 @@ class StationNode extends LiteGraph.LGraphNode{
       this._triggerInputAnim(this._activeInputSlot, 'work', duration, info);
     }else if(action === 'pallet_in'){
       const info = payload && typeof payload === 'object'
-        ? { id: String(payload.palletId ?? payload.id ?? 'pallet'), workCount: Array.isArray(payload.works) ? payload.works.length : 0, capacity: Number(payload.capacity) || 0 }
+        ? { id: String(payload.palletId ?? payload.id ?? 'pallet'), typeId:payload.typeId || '', t:payload.type || payload.typeId || 'Pallet', entity:payload, workCount: Array.isArray(payload.works) ? payload.works.length : 0, capacity: Number(payload.capacity) || 0 }
         : null;
       this._triggerInputAnim(this._activeInputSlot, 'pallet', duration, info);
     }
@@ -346,7 +346,7 @@ class StationNode extends LiteGraph.LGraphNode{
       this._triggerOutputAnim(this._activeOutputSlot, 'work', downMs, info);
     }else if(action === 'pallet_out'){
       const info = payload && typeof payload === 'object'
-        ? { id: String(payload.palletId ?? payload.id ?? 'pallet'), workCount: Array.isArray(payload.works) ? payload.works.length : 0, capacity: Number(payload.capacity) || 0 }
+        ? { id: String(payload.palletId ?? payload.id ?? 'pallet'), typeId:payload.typeId || '', t:payload.type || payload.typeId || 'Pallet', entity:payload, workCount: Array.isArray(payload.works) ? payload.works.length : 0, capacity: Number(payload.capacity) || 0 }
         : null;
       this.setOutputData(this._activeOutputSlot, payload);
       this._triggerOutputAnim(this._activeOutputSlot, 'pallet', downMs, info);

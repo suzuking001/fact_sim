@@ -5,7 +5,7 @@ import { FactSimRuntime } from "../fact-sim-runtime.js";
 import { errorMessage, failure, log, success } from "./tool-helpers.js";
 
 const nodeIdSchema = z.union([z.string().min(1), z.number()]);
-const portKindSchema = z.enum(["work", "signal", "carrier", "pallet", "entity"]);
+const portKindSchema = z.enum(["entity", "signal"]);
 const jsonRecordSchema = z.record(z.string(), z.unknown());
 const unknownArraySchema = z.array(z.record(z.string(), z.unknown()));
 type BatchRefs = Map<string, string | number>;
@@ -68,17 +68,37 @@ function summarizeBenchmark(result: Awaited<ReturnType<FactSimRuntime["runBenchm
   };
 }
 
-function summarizeEngineTest(result: Awaited<ReturnType<FactSimRuntime["runEngineTests"]>> | Awaited<ReturnType<FactSimRuntime["getLatestEngineTestReport"]>>) {
+function summarizeEngineTest(
+  result: Awaited<ReturnType<FactSimRuntime["runEngineTests"]>> | Awaited<ReturnType<FactSimRuntime["getLatestEngineTestReport"]>>,
+  includeDetails = false
+) {
   if (!result) {
     return { report: null };
   }
-  return {
+  const summary = {
     ok: result.ok,
     status: result.status,
     startedAt: result.startedAt,
     finishedAt: result.finishedAt,
     engines: result.engines,
     summary: result.summary,
+    issues: [...result.failures, ...result.warnings].map((entry) => ({
+      severity: entry.severity,
+      code: entry.code,
+      engine: entry.engine ?? null,
+      scenario: entry.scenario ?? null,
+      path: entry.path ?? null,
+      nodeId: typeof entry.nodeId === "undefined" ? null : entry.nodeId,
+      message: entry.message,
+      artifacts: entry.artifacts ?? null
+    })),
+    artifactDir: result.artifactDir ?? null,
+    artifactFiles: result.artifactFiles ?? null,
+    mcpHint: result.mcpHint ?? null
+  };
+  if (!includeDetails) return summary;
+  return {
+    ...summary,
     comparisons: result.comparisons,
     results: result.results.map((row) => ({
       engine: row.engine,
@@ -95,21 +115,14 @@ function summarizeEngineTest(result: Awaited<ReturnType<FactSimRuntime["runEngin
       sinkCount: row.metrics.sinkCount,
       failureCount: row.failures.length,
       warningCount: row.warnings.length
-    })),
-    issues: [...result.failures, ...result.warnings].map((entry) => ({
-      severity: entry.severity,
-      code: entry.code,
-      engine: entry.engine ?? null,
-      scenario: entry.scenario ?? null,
-      path: entry.path ?? null,
-      nodeId: typeof entry.nodeId === "undefined" ? null : entry.nodeId,
-      message: entry.message,
-      artifacts: entry.artifacts ?? null
-    })),
-    artifactDir: result.artifactDir ?? null,
-    artifactFiles: result.artifactFiles ?? null,
-    mcpHint: result.mcpHint ?? null
+    }))
   };
+}
+
+function summarizeEditResult(result: unknown, includeDetails = false): unknown {
+  if (includeDetails || !result || typeof result !== "object" || Array.isArray(result)) return result;
+  const { properties: _properties, ...compact } = result as Record<string, unknown>;
+  return compact;
 }
 
 function summarizePorts(result: Awaited<ReturnType<FactSimRuntime["getNodePorts"]>>) {
@@ -316,7 +329,7 @@ async function applyEditOperation(
     toNodeId?: string | number;
     fromSlot?: number;
     toSlot?: number;
-    portKind?: "work" | "signal" | "carrier" | "pallet" | "entity";
+    portKind?: "entity" | "signal";
     allowDuplicate?: boolean;
     linkId?: number;
     removeAllMatches?: boolean;
@@ -899,7 +912,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
   server.registerTool(
     "edit_graph",
     {
-      description: "Add, update, remove, connect, disconnect, or build nodes and links.",
+      description: "Add, update, remove, connect, disconnect, or build nodes and links. Large node properties are omitted by default; set includeDetails=true when needed.",
       inputSchema: {
         action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch", "upsert_entity_type", "remove_entity_type", "set_initial_contents", "set_flow_rules", "apply_template", "migrate_basic"]),
         nodeType: z.string().min(1).optional(),
@@ -934,9 +947,10 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         ,nodeOperations: unknownArraySchema.optional()
         ,inputPolicy: jsonRecordSchema.optional()
         ,templateId: z.string().min(1).optional()
+        ,includeDetails: z.boolean().optional()
       }
     },
-    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref, entityType, typeId, initialContents, inputRules, outputRules, nodeOperations, inputPolicy, templateId }, extra) => {
+    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref, entityType, typeId, initialContents, inputRules, outputRules, nodeOperations, inputPolicy, templateId, includeDetails }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "edit_graph", { action }, async () => {
         if (action === "batch") {
@@ -975,11 +989,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
               fromSlot: typeof current.fromSlot === "number" ? current.fromSlot : undefined,
               toSlot: typeof current.toSlot === "number" ? current.toSlot : undefined,
               portKind:
-                current.portKind === "work" ||
-                current.portKind === "signal" ||
-                current.portKind === "carrier" ||
-                current.portKind === "pallet" ||
-                current.portKind === "entity"
+                current.portKind === "signal" || current.portKind === "entity"
                   ? current.portKind
                   : undefined,
               allowDuplicate: typeof current.allowDuplicate === "boolean" ? current.allowDuplicate : undefined,
@@ -1002,7 +1012,12 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
               ,templateId: typeof current.templateId === "string" ? current.templateId : undefined
             });
             storeBatchRef(refs, currentRef || undefined, result);
-            results.push({ index, action: String(current.action ?? ""), ref: currentRef || null, result });
+            results.push({
+              index,
+              action: String(current.action ?? ""),
+              ref: currentRef || null,
+              result: summarizeEditResult(result, includeDetails === true || current.includeDetails === true)
+            });
           }
           return {
             operationCount: results.length,
@@ -1045,7 +1060,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           ,inputPolicy
           ,templateId
         });
-        return result;
+        return summarizeEditResult(result, includeDetails === true);
       });
     }
   );
@@ -1084,7 +1099,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
   server.registerTool(
     "engine_test",
     {
-      description: "Run engine correctness tests or return the latest engine test report.",
+      description: "Run engine correctness tests or return the latest report. Returns summary and issues by default; set includeDetails=true for every case.",
       inputSchema: {
         action: z.enum(["run", "latest"]),
         engines: z.array(z.string().min(1)).optional(),
@@ -1102,14 +1117,15 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         reruns: z.number().int().nonnegative().optional(),
         stopOnFirstFailure: z.boolean().optional(),
         saveArtifacts: z.boolean().optional(),
-        artifactLabel: z.string().min(1).optional()
+        artifactLabel: z.string().min(1).optional(),
+        includeDetails: z.boolean().optional()
       }
     },
-    async ({ action, engines, includeCurrentGraph, includeExamples, examples, suite, targetSimMs, maxWallMs, realStepMs, maxLoops, seed, seeds, strictFinalParity, reruns, stopOnFirstFailure, saveArtifacts, artifactLabel }, extra) => {
+    async ({ action, engines, includeCurrentGraph, includeExamples, examples, suite, targetSimMs, maxWallMs, realStepMs, maxLoops, seed, seeds, strictFinalParity, reruns, stopOnFirstFailure, saveArtifacts, artifactLabel, includeDetails }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "engine_test", { action }, async () => {
         if (action === "latest") {
-          return summarizeEngineTest(await runtime.getLatestEngineTestReport());
+          return summarizeEngineTest(await runtime.getLatestEngineTestReport(), includeDetails === true);
         }
         return summarizeEngineTest(
           await runtime.runEngineTests({
@@ -1129,7 +1145,8 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
             stopOnFirstFailure,
             saveArtifacts,
             artifactLabel
-          })
+          }),
+          includeDetails === true
         );
       });
     }

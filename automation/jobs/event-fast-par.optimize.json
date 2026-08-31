@@ -20,19 +20,19 @@
     "seeds": [1],
     "includeCurrentGraph": false,
     "strict": true,
-    "reruns": 2,
+    "reruns": 1,
     "stopOnFirstFailure": true
   },
   "runtime": {
     "benchmarkExample": "parallel_benchmark",
     "benchmarkWallMs": 2000,
-    "delegateTimeoutMs": 900000,
+    "delegateTimeoutMs": 480000,
     "promptMode": "compact",
     "scopeMode": "focused",
     "minImprovementPct": 1,
-    "maxIterations": 9999,
-    "minRuntimeHours": 5,
-    "maxNoImprovementIterations": 60
+    "maxIterations": 6,
+    "minRuntimeHours": 0,
+    "maxNoImprovementIterations": 3
   },
   "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json"
 }

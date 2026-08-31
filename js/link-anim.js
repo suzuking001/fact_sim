@@ -34,6 +34,16 @@
     E: '#ff375f',
     F: '#64d2ff'
   };
+  const ENTITY_THEME_STYLES = Object.freeze({
+    blue:   { fill:'#e8f3ff', stroke:'#0a84ff', text:'#075985' },
+    orange: { fill:'#fff1dc', stroke:'#d97706', text:'#7c2d12' },
+    green:  { fill:'#e8f8ed', stroke:'#16833c', text:'#14532d' },
+    purple: { fill:'#f3e8ff', stroke:'#8e35bd', text:'#581c87' },
+    red:    { fill:'#ffe9e7', stroke:'#d92d20', text:'#7f1d1d' },
+    cyan:   { fill:'#e3f8ff', stroke:'#087ea4', text:'#164e63' },
+    yellow: { fill:'#fff8cf', stroke:'#a16207', text:'#713f12' },
+    gray:   { fill:'#eef0f2', stroke:'#63666a', text:'#334155' }
+  });
 
   function hashText(text){
     const raw = String(text || '');
@@ -168,6 +178,155 @@
     ctx.restore();
   }
 
+  function entityTypeDefinition(graph, info, entity){
+    const registry = window.App?.entityModelForGraph?.(graph);
+    if(!registry) return null;
+    const candidate = entity || info?.entity || null;
+    const typeId = candidate?.typeId ?? info?.typeId;
+    const direct = typeId != null ? registry.get?.(typeId) : null;
+    if(direct) return direct;
+    const typeName = String(candidate?.type ?? candidate?.name ?? info?.t ?? info?.type ?? '').trim().toLowerCase();
+    return typeName ? (registry.list?.() || []).find((entry)=>String(entry?.name || '').trim().toLowerCase() === typeName) || null : null;
+  }
+
+  function animatedAppearance(graph, type, info, entity){
+    const definition = entityTypeDefinition(graph, info, entity);
+    const shape = String(definition?.appearance?.shape || 'circle');
+    const colorTheme = String(definition?.appearance?.colorTheme || 'auto');
+    return {
+      shape:['circle','rounded-square','square','triangle','diamond','hexagon'].includes(shape) ? shape : 'circle',
+      theme:ENTITY_THEME_STYLES[colorTheme] || getAnimatedIconTheme(type, info),
+      definition
+    };
+  }
+
+  function beginEntityShape(ctx, shape, x, y, radius){
+    const r = Math.max(1, Number(radius) || 1);
+    ctx.beginPath();
+    if(shape === 'rounded-square'){
+      drawRoundRect(ctx, x - r, y - r, r * 2, r * 2, r * 0.38);
+      return;
+    }
+    if(shape === 'square'){
+      ctx.rect(x - r, y - r, r * 2, r * 2);
+      return;
+    }
+    const points = shape === 'triangle' ? 3 : (shape === 'diamond' ? 4 : (shape === 'hexagon' ? 6 : 0));
+    if(!points){ ctx.arc(x, y, r, 0, Math.PI * 2); return; }
+    for(let index = 0; index < points; index++){
+      const angle = -Math.PI / 2 + (index * Math.PI * 2 / points);
+      const px = x + Math.cos(angle) * r;
+      const py = y + Math.sin(angle) * r;
+      if(index === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
+
+  function drawEntityShape(ctx, appearance, x, y, radius, lineWidth){
+    const width = Math.max(1, Number(lineWidth) || Number(appearance?.theme?.lineWidth) || 2);
+    beginEntityShape(ctx, appearance?.shape || 'circle', x, y, radius);
+    ctx.fillStyle = appearance?.theme?.fill || '#f8fafc';
+    ctx.fill();
+    if(appearance?.theme?.stroke){
+      beginEntityShape(ctx, appearance?.shape || 'circle', x, y, Math.max(1, radius - width * 0.5));
+      ctx.lineWidth = width;
+      ctx.strokeStyle = appearance.theme.stroke;
+      ctx.stroke();
+    }
+  }
+
+  function entityChildren(graph, info, entity){
+    const candidate = entity || info?.entity || null;
+    if(candidate){
+      const runtimeStore = window.App?.runtimeInstancesForGraph?.(graph);
+      const runtimeEntity = runtimeStore?.get?.(candidate);
+      const runtimeId = runtimeEntity?.instanceId;
+      if(runtimeEntity && runtimeId && runtimeStore?.instances?.has?.(String(runtimeId))){
+        return { children:runtimeStore.childrenOf?.(runtimeEntity) || [], store:runtimeStore, known:true };
+      }
+      const legacyKeys = ['contents', 'children', 'cargo', 'pallets', 'works'];
+      const directChildren = [];
+      let hasLegacyCollection = false;
+      for(const key of legacyKeys){
+        if(!Array.isArray(candidate[key])) continue;
+        hasLegacyCollection = true;
+        for(const child of candidate[key]) if(child && typeof child === 'object' && !directChildren.includes(child)) directChildren.push(child);
+      }
+      if(hasLegacyCollection) return { children:directChildren, store:null, known:true };
+      const legacyStore = window.App?.entityStoreForGraph?.(graph);
+      const legacyEntity = legacyStore?.resolve?.(candidate) || candidate;
+      const children = legacyStore?.childrenOf?.(legacyEntity);
+      if(Array.isArray(children)) return { children, store:legacyStore, known:true };
+    }
+    const treeChildren = Array.isArray(info?.tree?.children) ? info.tree.children : (Array.isArray(info?.children) ? info.children : null);
+    return { children:treeChildren || [], store:null, known:Array.isArray(treeChildren) };
+  }
+
+  function childCount(store, entity){
+    if(!entity) return 0;
+    if(store){
+      const children = store.childrenOf?.(entity);
+      return Array.isArray(children) ? children.length : 0;
+    }
+    const unique = [];
+    for(const key of ['contents', 'children', 'cargo', 'pallets', 'works']){
+      for(const child of (Array.isArray(entity[key]) ? entity[key] : [])){
+        if(child && typeof child === 'object' && !unique.includes(child)) unique.push(child);
+      }
+    }
+    return unique.length;
+  }
+
+  function entityDisplayTree(graph, entity, depth = 0, seen = new Set()){
+    if(!entity || typeof entity !== 'object' || depth > 12 || seen.has(entity)) return null;
+    const nextSeen = new Set(seen); nextSeen.add(entity);
+    const definition = entityTypeDefinition(graph, { typeId:entity.typeId, t:entity.type ?? entity.name }, entity);
+    const resolved = entityChildren(graph, { entity }, entity);
+    return {
+      instanceId:String(entity.instanceId || ''),
+      displayId:String(entity.id ?? entity.palletId ?? entity.entityId ?? ''),
+      typeId:String(entity.typeId || ''),
+      name:String(definition?.name || entity.type || entity.name || entity.typeId || 'Entity'),
+      attributes:entity.attributes && typeof entity.attributes === 'object' ? entity.attributes : {},
+      children:resolved.children.map((child)=>entityDisplayTree(graph, child, depth + 1, nextSeen)).filter(Boolean)
+    };
+  }
+
+  function drawEntityBadge(ctx, x, y, text, radius = 6){
+    const label = String(text == null ? '' : text);
+    if(!label) return;
+    const width = Math.max(radius * 2, 5 + label.length * 6);
+    drawRoundRect(ctx, x - width * 0.5, y - radius, width, radius * 2, radius);
+    ctx.fillStyle = 'rgba(15,23,42,.92)'; ctx.fill();
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.max(7, radius + 2)}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, x, y + 0.5);
+  }
+
+  function drawContainedEntities(ctx, graph, info, x, y, parentRadius){
+    const resolved = entityChildren(graph, info, info?.entity);
+    const children = resolved.children;
+    if(children.length){
+      const visible = children.slice(0, 3);
+      const childRadius = Math.max(5, parentRadius * 0.29);
+      const spacing = childRadius * 1.8;
+      visible.forEach((child, index)=>{
+        const childX = x + (index - (visible.length - 1) * 0.5) * spacing;
+        const childY = y + parentRadius * 0.16;
+        const childInfo = { entity:child, typeId:child?.typeId, t:child?.type ?? child?.name };
+        drawEntityShape(ctx, animatedAppearance(graph, 'work', childInfo, child), childX, childY, childRadius, 1.4);
+        const nested = childCount(resolved.store, child);
+        if(nested > 0) drawEntityBadge(ctx, childX + childRadius * 0.68, childY - childRadius * 0.68, nested, 4.2);
+      });
+      if(children.length > visible.length){
+        drawEntityBadge(ctx, x + parentRadius * 0.62, y - parentRadius * 0.58, `+${children.length - visible.length}`, 5.5);
+      }
+      return;
+    }
+    const legacyCount = Math.max(0, Math.floor(Number(info?.workCount) || 0));
+    if(!resolved.known && legacyCount > 0) drawEntityBadge(ctx, x + parentRadius * 0.58, y - parentRadius * 0.58, legacyCount, 5.5);
+  }
+
 class LinkAnimator{
   constructor(){
     this.animations = [];
@@ -211,8 +370,6 @@ class LinkAnimator{
   _treeMatch(tree, type, info){
     if(!tree) return 0;
     const id = String(info?.id ?? '').trim().toLowerCase();
-    const expectedCategory = type === 'agv' ? 'carrier' : (type === 'pallet' ? 'container' : type);
-    const category = String(tree.category || '').toLowerCase();
     let identityScore = 0;
     if(id){
       const displayId = String(tree.displayId ?? '').trim().toLowerCase();
@@ -224,12 +381,18 @@ class LinkAnimator{
     const typeName = String(info?.t ?? info?.type ?? '').trim().toLowerCase();
     if(typeName && (String(tree.name || '').trim().toLowerCase() === typeName || String(tree.typeId || '').trim().toLowerCase() === typeName)) identityScore += 6;
     if(!identityScore) return 0;
-    return identityScore + (category === expectedCategory ? 2 : 0);
+    return identityScore;
   }
   _resolveHoverTree(anim){
     const info = anim?.info || {};
     if(info.tree && typeof info.tree === 'object') return { tree: info.tree, node: null };
     const graph = anim?.graph;
+    if(info.entity && graph){
+      try{
+        const directTree = entityDisplayTree(graph, info.entity);
+        if(directTree) return { tree:directTree, node:null };
+      }catch(_e){}
+    }
     let best = null;
     const visit = (tree, node)=>{
       if(!tree) return;
@@ -246,8 +409,7 @@ class LinkAnimator{
       }catch(_e){}
     }
     if(best) return best;
-    const category = anim?.type === 'agv' ? 'carrier' : (anim?.type === 'pallet' ? 'container' : 'work');
-    const name = String(info.t ?? info.type ?? info.label ?? (category === 'carrier' ? 'Carrier' : category === 'container' ? 'Container' : 'Work'));
+    const name = String(info.t ?? info.type ?? info.label ?? 'Entity');
     return {
       node: null,
       tree: {
@@ -255,7 +417,6 @@ class LinkAnimator{
         displayId: String(info.id ?? ''),
         typeId: String(info.typeId ?? ''),
         name,
-        category,
         attributes: info.attributes && typeof info.attributes === 'object' ? info.attributes : {},
         children: Array.isArray(info.children) ? info.children : []
       }
@@ -311,9 +472,16 @@ class LinkAnimator{
       row.style.setProperty('--entity-hover-depth', String(depth));
       const branch = document.createElement('span');
       branch.textContent = depth ? '└' : '●';
+      const definition = entityTypeDefinition(anim?.graph, { typeId:entry.typeId, t:entry.name }, entry);
+      const marker = document.createElement('span');
+      marker.className = 'factEntityHoverAppearance entityAppearancePreview';
+      marker.dataset.shape = definition?.appearance?.shape || 'circle';
+      marker.dataset.colorTheme = definition?.appearance?.colorTheme || 'auto';
+      marker.setAttribute('aria-hidden', 'true');
+      const glyph = document.createElement('span'); glyph.className = 'entityAppearanceGlyph'; marker.appendChild(glyph);
       const text = document.createElement('span');
       text.textContent = displayLabel(entry);
-      row.append(branch, text);
+      row.append(branch, marker, text);
       treeHost.appendChild(row);
       for(const child of (Array.isArray(entry.children) ? entry.children : [])) appendTree(child, depth + 1);
     };
@@ -408,6 +576,7 @@ class LinkAnimator{
     const workType = String(info.t ?? info.type ?? '');
     return `${id}\u0000${workType}`;
   }
+
   _matchesWorkInfo(candidate, info){
     if(!candidate || typeof candidate !== 'object' || !info) return false;
     const candidateId = candidate.id ?? candidate.instanceId ?? candidate.displayId;
@@ -563,22 +732,19 @@ class LinkAnimator{
       // pass even though the Store already moved the entity downstream. Do not
       // revive a sender-side icon in that short interval.
       try{
-        const store = window.App?.entityStoreForGraph?.(node.graph);
+        const store = window.App?.runtimeInstancesForGraph?.(node.graph) || window.App?.entityStoreForGraph?.(node.graph);
         const stored = store?.get?.(legacyWork);
         if(stored?.locationNodeId != null && String(stored.locationNodeId) !== String(node.id)) return null;
       }catch(_e){}
       return legacyWork;
     }
 
-    // Native Basic Nodes keep their runtime entity in _activeRoot. Only use it
-    // for work entities; carrier/container visuals have their own render paths.
+    // Native Basic Nodes keep their runtime Entity in _activeRoot.
     const activeRoot = node._activeRoot || node._offer?.instance || null;
     if(!activeRoot) return null;
     try{
-      const store = window.App?.entityStoreForGraph?.(node.graph);
-      const instance = store?.get?.(activeRoot) || activeRoot;
-      const category = String(store?.typeOf?.(instance)?.category || instance?.category || '').toLowerCase();
-      return category === 'work' ? instance : null;
+      const store = window.App?.runtimeInstancesForGraph?.(node.graph) || window.App?.entityStoreForGraph?.(node.graph);
+      return store?.get?.(activeRoot) || activeRoot;
     }catch(_e){
       return null;
     }
@@ -809,18 +975,9 @@ class LinkAnimator{
           : this._bezierPoint(start, startDir, end, endDir, t);
       }
       const info = anim.info || {};
-      const iconTheme = getAnimatedIconTheme(anim.type, info);
-      ctx.beginPath();
-      ctx.fillStyle = iconTheme.fill;
-      ctx.arc(x, y, iconRadius, 0, Math.PI * 2);
-      ctx.fill();
-      if(iconTheme.stroke){
-        ctx.beginPath();
-        ctx.lineWidth = iconTheme.lineWidth || 2;
-        ctx.strokeStyle = iconTheme.stroke;
-        ctx.arc(x, y, Math.max(0, iconRadius - (iconTheme.lineWidth || 2) * 0.5), 0, Math.PI * 2);
-        ctx.stroke();
-      }
+      const appearance = animatedAppearance(graph, anim.type, info, info.entity);
+      drawEntityShape(ctx, appearance, x, y, iconRadius, appearance.theme?.lineWidth || 2.5);
+      drawContainedEntities(ctx, graph, info, x, y, iconRadius);
       visibleHits.push({ canvas, anim, x, y, radius: iconRadius + 6 });
       // label
       let label = '';

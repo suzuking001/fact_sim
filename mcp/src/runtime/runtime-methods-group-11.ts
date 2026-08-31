@@ -131,10 +131,9 @@ export function registerRuntimeMethodsGroup11(
 
   (FactSimRuntimeClass.prototype as any).normalizePortKind = function (this: any, portKind: PortKind): PortKind {
       const value = String(portKind ?? "").trim().toLowerCase();
-      if (value === "work" || value === "signal" || value === "carrier" || value === "pallet" || value === "entity") {
-        return value;
-      }
-      throw new Error('portKind must be one of: "work", "signal", "carrier", "pallet", "entity"');
+      if (value === "signal") return "signal";
+      if (value === "entity" || value === "work" || value === "carrier" || value === "pallet") return "entity";
+      throw new Error('portKind must be one of: "entity", "signal"');
     };
 
   (FactSimRuntimeClass.prototype as any).isPortSlotOfKind = function (this: any, slot: { name: string; type: string | null }, portKind: PortKind): boolean {
@@ -152,21 +151,10 @@ export function registerRuntimeMethodsGroup11(
       if (portKind === "signal") {
         return isSignal;
       }
-      if (portKind === "carrier") {
-        return isCarrier || isGenericEntity;
-      }
-      if (portKind === "pallet") {
-        return isPallet || isGenericEntity;
-      }
       if (portKind === "entity") {
         return !isSignal && (isGenericEntity || isCarrier || isPallet || type === "0" || type === "work" || name.includes("work"));
       }
-  
-      // work ports are usually typed as "0" or "work" and should exclude other special channels.
-      if (isSignal || isCarrier || isPallet) {
-        return false;
-      }
-      return isGenericEntity || type === "0" || type === "work" || name.includes("work");
+      return false;
     };
 
   (FactSimRuntimeClass.prototype as any).selectPortSlot = function (this: any, slots: PortKindSlot[], explicitSlot: number | undefined, argName: string): PortKindSlot {

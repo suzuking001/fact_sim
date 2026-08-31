@@ -17,6 +17,10 @@ The nightly job is started from `mcp/`:
 npm run nightly:optimize
 ```
 
+The default token guardrails limit the AI delegate to 6 iterations, stop after 3
+consecutive iterations without improvement, and cap each delegate run at 8 minutes.
+Longer exploration requires explicit command-line overrides.
+
 The optimizer currently targets:
 
 - engine: `event-fast-par`
@@ -43,7 +47,7 @@ flowchart TD
   I --> J{Improved enough?}
   J -->|yes| K[Accept patch and update baseline]
   J -->|no| R
-  K --> L{5 hours passed and no more gains?}
+  K --> L{6 iterations reached or 3 without gains?}
   R --> L
   L -->|no| E
   L -->|yes| Z[Finish session]

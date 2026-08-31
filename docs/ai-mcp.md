@@ -4,6 +4,13 @@
 
 Use the integrated `fact-sim-ai` MCP with as few tool calls and tokens as possible.
 
+`engine_test` returns only its summary plus failures and warnings by default. Full
+per-case results are written to artifacts when `saveArtifacts=true`; request
+`includeDetails=true` only when every successful case is genuinely needed.
+
+`edit_graph` also omits full node `properties` from results by default. Use
+`includeDetails=true` only when the updated configuration must be returned inline.
+
 ## Recommended sequence
 
 1. `prepare_session`

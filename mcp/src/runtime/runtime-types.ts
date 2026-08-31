@@ -411,7 +411,7 @@ export type UpdateNodeOutput = {
   linkCount: number;
 };
 
-export type PortKind = "work" | "signal" | "carrier" | "pallet" | "entity";
+export type PortKind = "entity" | "signal";
 
 export type PortKindSlot = {
   slot: number;

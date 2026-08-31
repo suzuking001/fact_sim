@@ -54,7 +54,7 @@ class EntitySourceNode extends LiteGraph.LGraphNode{
     const normalizedKind = this._normalizeKind(kind);
     const entity = {
       id: String(id || `${normalizedKind}-${Math.random().toString(36).slice(2, 7)}`),
-      entityKind: normalizedKind,
+      typeId: normalizedKind,
       contents: []
     };
     const cap = this._normalizeCapacity(capacity, 0);
@@ -77,8 +77,8 @@ class EntitySourceNode extends LiteGraph.LGraphNode{
   }
 
   _relationMode(parent, child){
-    const parentKind = this._normalizeKind(parent?.entityKind);
-    const childKind = this._normalizeKind(child?.entityKind);
+    const parentKind = this._normalizeKind(parent?.typeId);
+    const childKind = this._normalizeKind(child?.typeId);
     if(parentKind === 'carrier' && childKind === 'pallet') return 'towed';
     if(parentKind === 'carrier') return 'carried';
     if(parentKind === 'ship' && childKind === 'container') return 'loaded';

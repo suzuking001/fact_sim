@@ -46,13 +46,45 @@
     return el;
   }
 
-  function typeOptions(registry, includeCategory, includeOtherwise, includeSequence){
+  const ENTITY_SHAPE_OPTIONS = [
+    ['circle','Circle'], ['rounded-square','Rounded square'], ['square','Square'],
+    ['triangle','Triangle'], ['diamond','Diamond'], ['hexagon','Hexagon']
+  ];
+  const ENTITY_THEME_OPTIONS = [
+    ['auto','Auto'], ['blue','Blue'], ['orange','Orange'], ['green','Green'],
+    ['purple','Purple'], ['red','Red'], ['cyan','Cyan'], ['yellow','Yellow'], ['gray','Gray']
+  ];
+
+  function entityAppearance(value, fallback){
+    return App.normalizeEntityAppearance?.(value, fallback) || {
+      shape:String(value?.shape || fallback?.shape || 'circle'),
+      colorTheme:String(value?.colorTheme || fallback?.colorTheme || 'auto')
+    };
+  }
+
+  function appearancePreview(value, className){
+    const appearance = entityAppearance(value);
+    const preview = document.createElement('span');
+    preview.className = `entityAppearancePreview${className ? ` ${className}` : ''}`;
+    preview.dataset.shape = appearance.shape;
+    preview.dataset.colorTheme = appearance.colorTheme;
+    preview.setAttribute('aria-hidden', 'true');
+    const glyph = document.createElement('span'); glyph.className = 'entityAppearanceGlyph';
+    preview.appendChild(glyph);
+    return preview;
+  }
+
+  function updateAppearancePreview(preview, value){
+    const appearance = entityAppearance(value);
+    preview.dataset.shape = appearance.shape;
+    preview.dataset.colorTheme = appearance.colorTheme;
+  }
+
+  function typeOptions(registry, includeAny, includeOtherwise, includeSequence){
     const out = [];
     if(includeOtherwise) out.push(['otherwise', 'Otherwise']);
-    if(includeSequence) out.push(['sequence', 'Sequence (generate Work)']);
-    if(includeCategory){
-      out.push(['category:work', 'Any Work'], ['category:container', 'Any Container'], ['category:carrier', 'Any Carrier']);
-    }
+    if(includeSequence) out.push(['sequence', 'Sequence (generate Entity)']);
+    if(includeAny) out.push(['any', 'Any Entity']);
     for(const type of registry?.list?.() || []) out.push([`type:${type.typeId}`, type.name]);
     return out;
   }
@@ -61,7 +93,7 @@
     const normalized = App.normalizeEntityTarget ? App.normalizeEntityTarget(target) : target;
     if(normalized?.mode === 'otherwise') return 'otherwise';
     if(normalized?.mode === 'sequence') return 'sequence';
-    if(normalized?.mode === 'category') return `category:${normalized.category}`;
+    if(normalized?.mode === 'any') return 'any';
     return `type:${normalized?.typeId || ''}`;
   }
 
@@ -69,7 +101,7 @@
     const text = String(value || '');
     if(text === 'otherwise') return { mode: 'otherwise' };
     if(text === 'sequence') return { mode: 'sequence' };
-    if(text.startsWith('category:')) return { mode: 'category', category: text.slice(9) };
+    if(text === 'any' || text.startsWith('category:')) return { mode: 'any' };
     return { mode: 'type', typeId: text.replace(/^type:/, '') };
   }
 
@@ -837,11 +869,13 @@
     for(const type of registry.list()){
       const row = document.createElement('div');
       row.className = 'entityTypeRow';
+      const preview = appearancePreview(type.appearance, 'is-list');
+      preview.title = `${type.appearance?.shape || 'circle'} / ${type.appearance?.colorTheme || 'auto'}`;
       const summary = document.createElement('div');
       summary.className = 'entityTypeSummary';
       const name = document.createElement('strong'); name.textContent = type.name;
       const meta = document.createElement('small');
-      meta.textContent = `${type.category}${type.subtype ? ` / ${type.subtype}` : ''} · capacity ${type.capacity}`;
+      meta.textContent = `${type.subtype ? `${type.subtype} · ` : ''}capacity ${type.capacity}`;
       summary.append(name, meta);
       const actions = document.createElement('div'); actions.className = 'entityTypeActions';
       const edit = button('Edit', ()=>openTypeEditor(type), 'selectionInspectorBtn is-muted');
@@ -854,7 +888,7 @@
       }, 'selectionInspectorBtn is-danger');
       edit.disabled = remove.disabled = locked;
       actions.append(edit, remove);
-      row.append(summary, actions);
+      row.append(preview, summary, actions);
       list.appendChild(row);
     }
     host.appendChild(list);
@@ -878,18 +912,49 @@
       wrap.append(span, control); form.appendChild(wrap); return control;
     };
     const name = field('Name', document.createElement('input')); name.value = existing?.name || '';
-    const category = field('Category', select(['work', 'container', 'carrier'], existing?.category || 'work'));
     const subtype = field('Subtype / tag', document.createElement('input')); subtype.value = existing?.subtype || '';
+    const defaultThemes = ENTITY_THEME_OPTIONS.map(([value])=>value).filter((value)=>value !== 'auto');
+    const appearance = entityAppearance(existing?.appearance, {
+      shape:'circle',
+      colorTheme:existing ? 'auto' : defaultThemes[registry.list().length % defaultThemes.length]
+    });
+    const shapeControl = document.createElement('div'); shapeControl.className = 'entityAppearanceShapeControl';
+    const livePreview = appearancePreview(appearance, 'is-editor');
+    const shape = select(ENTITY_SHAPE_OPTIONS, appearance.shape);
+    shape.setAttribute('aria-label', 'Entity shape');
+    shapeControl.append(livePreview, shape); field('Shape', shapeControl);
+    const themeControl = document.createElement('div'); themeControl.className = 'entityAppearanceThemes';
+    themeControl.setAttribute('role', 'radiogroup'); themeControl.setAttribute('aria-label', 'Color theme');
+    let selectedTheme = appearance.colorTheme;
+    const refreshThemes = ()=>{
+      themeControl.querySelectorAll('button').forEach((entry)=>{
+        const active = entry.dataset.colorTheme === selectedTheme;
+        entry.classList.toggle('is-selected', active);
+        entry.setAttribute('aria-checked', active ? 'true' : 'false');
+      });
+      updateAppearancePreview(livePreview, { shape:shape.value, colorTheme:selectedTheme });
+    };
+    ENTITY_THEME_OPTIONS.forEach(([value, label])=>{
+      const option = document.createElement('button'); option.type = 'button'; option.className = 'entityAppearanceTheme';
+      option.dataset.colorTheme = value; option.setAttribute('role', 'radio'); option.setAttribute('aria-label', label); option.title = label;
+      option.append(appearancePreview({ shape:'circle', colorTheme:value }), document.createTextNode(label));
+      option.addEventListener('click', ()=>{ selectedTheme = value; refreshThemes(); });
+      themeControl.appendChild(option);
+    });
+    shape.addEventListener('change', refreshThemes); refreshThemes(); field('Color theme', themeControl);
     const capacity = field('Capacity', document.createElement('input')); capacity.type = 'number'; capacity.min = '0'; capacity.step = '1'; capacity.value = String(existing?.capacity || 0);
     const allowed = field('Allowed contents', document.createElement('select'));
     allowed.multiple = true; allowed.size = Math.min(8, Math.max(3, registry.list().length));
     for(const type of registry.list()){
-      if(existing && type.typeId === existing.typeId) continue;
       const option = document.createElement('option'); option.value = type.typeId; option.textContent = type.name;
       option.selected = !!existing?.allowedContentTypeIds?.includes(type.typeId); allowed.appendChild(option);
     }
     const attrs = field('Default attributes (JSON)', document.createElement('textarea'));
     attrs.value = JSON.stringify(existing?.defaultAttributes || {}, null, 2);
+    const allowedHint = document.createElement('p');
+    allowedHint.className = 'selectionInspectorHint';
+    allowedHint.textContent = 'Leave empty to allow every Entity Type. Capacity 0 disables children.';
+    form.appendChild(allowedHint);
     const error = document.createElement('div'); error.className = 'selectionInspectorNotice is-error';
     const actions = document.createElement('div'); actions.className = 'selectionInspectorActionsRow';
     actions.append(button('Cancel', ()=>modal.remove()), button('Save', ()=>{
@@ -900,11 +965,11 @@
         changed(()=>registry.upsert({
           typeId: existing?.typeId,
           name: name.value,
-          category: category.value,
           subtype: subtype.value,
           capacity: Number(capacity.value),
           allowedContentTypeIds: selected,
-          defaultAttributes: parsed
+          defaultAttributes: parsed,
+          appearance: { shape:shape.value, colorTheme:selectedTheme }
         }));
         modal.remove(); renderTypeManager(); App.selectionInspector?.refresh?.();
       }catch(err){ error.textContent = String(err?.message || err); }
@@ -1043,9 +1108,9 @@
       heading.textContent = 'Sequence order';
       const hint = document.createElement('p');
       hint.className = 'selectionInspectorHint';
-      hint.textContent = 'Generate these Work Types in order, then repeat. Conditions and destinations remain part of this Output Rule.';
+      hint.textContent = 'Generate these Entity Types in order, then repeat. Conditions and destinations remain part of this Output Rule.';
       section.append(heading, hint);
-      const workTypes = (registry?.list?.() || []).filter((entry)=>entry.category === 'work');
+      const entityTypes = registry?.list?.() || [];
       const rows = Array.isArray(sequenceTarget?.entries) ? sequenceTarget.entries : [];
       const list = document.createElement('div');
       list.className = 'entitySourceSequenceList';
@@ -1065,9 +1130,9 @@
         const order = document.createElement('span');
         order.className = 'entitySourceSequenceOrder';
         order.textContent = String(index + 1);
-        const type = select(workTypes.map((candidate)=>[candidate.typeId, candidate.name]), entry.typeId);
-        type.setAttribute('aria-label', `Sequence ${index + 1} Work Type`);
-        type.disabled = running() || !workTypes.length;
+        const type = select(entityTypes.map((candidate)=>[candidate.typeId, candidate.name]), entry.typeId);
+        type.setAttribute('aria-label', `Sequence ${index + 1} Entity Type`);
+        type.disabled = running() || !entityTypes.length;
         type.addEventListener('change', ()=>replaceRows((next)=>{ next[index].typeId = type.value; }));
         const quantityWrap = document.createElement('label');
         quantityWrap.className = 'entitySourceSequenceQuantity';
@@ -1092,12 +1157,12 @@
       });
       if(!rows.length){
         const empty = document.createElement('div'); empty.className = 'selectionInspectorNotice is-error';
-        empty.textContent = 'No sequence entries. This Source will not generate Work.';
+        empty.textContent = 'No sequence entries. This Source will not generate Entities.';
         list.appendChild(empty);
       }
       section.appendChild(list);
-      const add = button('+ Add Work Type', ()=>{
-        if(!workTypes.length){
+      const add = button('+ Add Entity Type', ()=>{
+        if(!entityTypes.length){
           changed(()=>App.ensureSourceSequence?.(node, { createDefault:true }));
           App.refreshEntityTypeManager?.();
           App.selectionInspector?.refresh?.();
@@ -1105,7 +1170,7 @@
         }
         replaceRows((next)=>next.push({
           entryId:App.nextSourceSequenceEntryId?.(next) || `source-sequence-${next.length + 1}`,
-          typeId:workTypes[0].typeId,
+          typeId:entityTypes[0].typeId,
           quantity:1
         }));
       }, 'selectionInspectorBtn is-primary');
@@ -1266,10 +1331,10 @@
         const availableTargets = typeOptions(registry, true, kind === 'output', kind === 'output');
         const targetRows = Array.isArray(rule.targets) && rule.targets.length
           ? rule.targets
-          : [rule.target || { mode:'category', category:'work' }];
+          : [rule.target || { mode:'any' }];
         const persistTargets = ()=>{
           rule.targets = targetRows;
-          rule.target = targetRows[0] || { mode:'category', category:'work' };
+          rule.target = targetRows[0] || { mode:'any' };
           commit();
         };
         const targetsHost = document.createElement('div'); targetsHost.className = 'entityRuleMultiValue';
@@ -1297,7 +1362,7 @@
           });
           const removeTarget = button('×', ()=>{
             targetRows.splice(targetIndex, 1);
-            if(!targetRows.length) targetRows.push({ mode:'category', category:'work' });
+            if(!targetRows.length) targetRows.push({ mode:'any' });
             persistTargets(); App.selectionInspector?.refresh?.();
           }, 'selectionInspectorBtn is-danger entityRuleConditionRemove');
           removeTarget.title = 'Delete target'; removeTarget.disabled = running() || targetRows.length <= 1;
@@ -1306,7 +1371,7 @@
         targetsHost.appendChild(targetList);
         const addTarget = button('+ Add target', ()=>{
           if(targetRows.length === 1 && targetRows[0]?.mode === 'otherwise') targetRows.splice(0, 1);
-          targetRows.push({ mode:'category', category:'work' });
+          targetRows.push({ mode:'any' });
           persistTargets(); App.selectionInspector?.refresh?.();
         }, 'selectionInspectorBtn entityRuleAddCondition');
         addTarget.disabled = running() || targetRows.some((target)=>target?.mode === 'sequence'); targetsHost.appendChild(addTarget);
@@ -1467,7 +1532,7 @@
       card.section.appendChild(list);
       const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
         const next = kind === 'input'
-          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'category', category:'work' }], target:{ mode:'category', category:'work' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'down-complete' }, { kind:'space-available' }] }, processStages:[], downStages:[], fromPortId:null }
+          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'any' }], target:{ mode:'any' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'down-complete' }, { kind:'space-available' }] }, processStages:[], downStages:[], fromPortId:null }
           : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }, { kind:'downstream-ready' }] }, downStages:[], toPortIds:[], toPortId:null };
         const port = App.createBasicFlowPort?.(node, kind, next);
         if(kind === 'input') next.fromPortId = port?.portId || null;

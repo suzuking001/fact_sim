@@ -709,14 +709,11 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     const typeId = String(agv?.typeId || this.properties?.initialCarrierTypeId || '').trim();
     const carrierId = String(agv?.type || agv?.id || '').trim().toLowerCase();
     const entityType = (typeId ? registry?.get?.(typeId) : null)
-      || types.find((entry)=> String(entry?.category || '').toLowerCase() === 'carrier'
-        && String(entry?.name || '').trim().toLowerCase() === carrierId);
+      || types.find((entry)=> String(entry?.name || '').trim().toLowerCase() === carrierId);
     if(entityType && agv){
       if(!agv.meta || typeof agv.meta !== 'object') agv.meta = {};
       agv.typeId = entityType.typeId;
       agv.type = entityType.name;
-      agv.entityKind = 'carrier';
-      agv.__flowCategory = 'carrier';
       const capacity = Math.max(1, Math.round(Number(entityType.capacity) || 1));
       agv.capacity = capacity;
       agv.meta.capacity = capacity;
@@ -897,10 +894,9 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     if(this._initialCarrierSpawned) return;
     if(this._currentAgv || this._departingAgv) return;
     const store = window.App?.runtimeInstancesForGraph?.(this.graph);
-    const initialInstance = store?.rootsAt?.(this.id)?.find((instance)=>{
-      const type = store.typeOf?.(instance);
-      return String(type?.category || instance?.entityKind || '').toLowerCase() === 'carrier';
-    }) || null;
+    const roots = store?.rootsAt?.(this.id) || [];
+    const preferredTypeId = String(this.properties?.initialCarrierTypeId || '').trim();
+    const initialInstance = roots.find((instance)=>String(instance?.typeId || '') === preferredTypeId) || roots[0] || null;
     if(initialInstance){
       const inSlot = this._carrierInputSlots()[0] ?? 0;
       if(this._adoptIncomingAgv(initialInstance, false, 0, inSlot)){
@@ -1190,6 +1186,9 @@ class CarrierRouteNode extends LiteGraph.LGraphNode{
     return {
       kind: 'carrier',
       id: String(carrier.id ?? ''),
+      entity: carrier,
+      typeId: carrier.typeId || '',
+      t: carrier.type || carrier.typeId || 'Carrier',
       workCount,
       capacity,
       palletCount,

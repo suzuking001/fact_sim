@@ -1,27 +1,34 @@
-# Entity階層とBasic Node
+# Entity Type と Basic Node
 
-FACT SIMのモデル編集ではEntity Typeだけを定義し、Runtime InstanceはLoadまたはReset時に自動生成する。
+FACT SIM の移動物はすべて共通の Entity として扱います。`work`、`container`、`carrier` のような固定カテゴリはありません。モデル編集では Entity Type だけを定義し、Flow Rule で `Any Entity` または具体的な Type を選択します。
 
 ## 保存データ
 
-- グラフ直下の `__factSimEntityModel` がモデル内Typeカタログの唯一の定義元。
-- Nodeの `properties.initialContents` にはType、数量、loadと再帰childrenだけを保存する。
-- Runtime Instance、Current Contents、採番器、予約状態は保存しない。
-- 新規保存では実行Nodeを `factory/basic` として保存し、`presetId` が通常UIを決める。
-- 旧Nodeは読込可能。保存前のmigration previewが未知Nodeや損失を検出した場合は保存を中止する。
+- グラフ直下の `__factSimEntityModel` が schema v2 の Type カタログです。
+- Type は `typeId / name / subtype / tags / capacity / allowedContentTypeIds / defaultAttributes / appearance` を持ちます。
+- `appearance.shape` は `circle / rounded-square / square / triangle / diamond / hexagon`、`appearance.colorTheme` は `auto / blue / orange / green / purple / red / cyan / yellow / gray` から選択します。旧グラフは `circle + auto` として読み込まれます。
+- `capacity = 0` の Type は子を持てません。1以上は直接の子の最大数です。
+- `allowedContentTypeIds` が空ならすべての Type を子として許可します。値がある場合だけ許可リストとして働きます。
+- Node の `properties.initialContents` には Type、数量、load、再帰的な children だけを保存します。
+- Runtime Instance や Current Contents は保存しません。Load または Reset 時に再生成します。
 
 ## Runtime
 
-Instanceは `instanceId / typeId / parentId / childIds / locationNodeId / attributes` を持つ。場所を持つのはrootだけで、子の場所は親をたどって導出する。探索はrootから幅優先、同階層では到着順となる。
+Instance は `instanceId / typeId / parentId / childIds / locationNodeId / attributes` を持ちます。すべての Type が親・子のどちらにもなれます。同一 Type の親子も許可されますが、自己参照、循環、capacity 超過、明示された許可Type違反は拒否されます。
 
-ResetはRuntime Storeを破棄し、Node ID順、Initial行順、深さ優先の固定順で再生成する。Stopからの再Startでは再生成しない。
+場所を直接持つのはrootだけです。子の場所は親をたどって導出します。親が移動すると、その子孫も同時に移動します。
 
 ## Flow
 
-Input RuleはTargetとAccept when、Output RuleはTarget、Release when、Toを持つ。Ruleは上から評価し、最初に成立したRuleだけを使う。子孫をInput対象にした場合も到着root全体を受け入れ、Outputで子を選択したときだけdetachする。
+Flow target は次の4種類です。
 
-Custom Conditionは任意JavaScriptではなく、`and / or / not / compare` からなる制約付きJSON ASTを使う。旧scriptはlegacy compatibility actionとしてのみ残す。
+- `any`: 任意の Entity
+- `type`: 指定した `typeId` の Entity
+- `otherwise`: 先行ルールに一致しなかった Entity
+- `sequence`: Source が順番に生成する Entity Type
 
-## MCP
+Input Rule は Target と Accept when、Output Rule は Target、Release when、出力先を持ちます。固定カテゴリによる暗黙の判定は行いません。Attach、Detach、Transport、Store の役割は接続ポートと Flow Rule で決まります。
 
-`graph` は `entity_types / node_contents / flow_rules / validate_entity_model / migration_preview` を提供する。`edit_graph` はType CRUD、Initial Contents、Flow Rule、Preset、Basic移行を扱い、Current ContentsのInstance treeは明示要求時だけ返す。
+## 互換性
+
+schema v1 の `category`、category target、旧port kind、旧専用ノードは読込時にschema v2へ変換されます。再保存されるデータには旧カテゴリを出力しません。

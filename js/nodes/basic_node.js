@@ -13,16 +13,16 @@
     buffer:      { title: 'Buffer', category: 'Storage', entity: true, processTime: 0, downTime: 0, contentCapacity: 10 },
     conveyor:    { title: 'Conveyor', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
     router:      { title: 'Router', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 1 },
-    pack:        { title: 'Pack', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
-    unpack:      { title: 'Unpack', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
+    pack:        { title: 'Attach', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
+    unpack:      { title: 'Detach', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
     source:      { title: 'Source', category: 'System', entity: true, processTime: 0, downTime: 0, contentCapacity: 1000000 },
     sink:        { title: 'Sink', category: 'System', entity: true, processTime: 0, downTime: 0, contentCapacity: 1000000 },
     split:       { title: 'Split', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 1 },
     merge:       { title: 'Merge', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 2 },
     join:        { title: 'Join', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 2 },
     shuttle:     { title: 'Shuttle Stage', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
-    carrier_route:{ title: 'Carrier Route', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
-    station:     { title: 'Station', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
+    carrier_route:{ title: 'Transport Route', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
+    station:     { title: 'Store', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
     transfer:    { title: 'Transfer', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
     signal:      { title: 'Signal', category: 'Utility', entity: false, processTime: 0, downTime: 0, contentCapacity: 0 },
     note:        { title: 'Note', category: 'Utility', entity: false, processTime: 0, downTime: 0, contentCapacity: 0 }
@@ -43,7 +43,7 @@
     merge:        [{ operationId:'merge-1', trigger:'input-accepted', kind:'merge' }],
     join:         [{ operationId:'join-1', trigger:'input-accepted', kind:'join' }],
     shuttle:      [{ operationId:'shuttle-1', trigger:'release', kind:'synchronized-step', groupId:'shuttle-1' }],
-    carrier_route:[{ operationId:'transport-1', trigger:'process', kind:'carrier-transport', routePolicy:'first-ready' }],
+    carrier_route:[{ operationId:'transport-1', trigger:'process', kind:'entity-transport', routePolicy:'first-ready' }],
     station:      [{ operationId:'station-1', trigger:'process', kind:'station-transfer' }],
     transfer:     [{ operationId:'transfer-1', trigger:'process', kind:'transfer' }],
     signal:       [],
@@ -52,7 +52,7 @@
 
   const OPERATION_BEHAVIOR = Object.freeze({
     create:'source', destroy:'sink', clone:'split', merge:'merge', join:'join',
-    'synchronized-step':'shuttle', 'carrier-transport':'carrier_route',
+    'synchronized-step':'shuttle', 'entity-transport':'carrier_route', 'carrier-transport':'carrier_route',
     'station-transfer':'station', transfer:'transfer', attach:'pack', detach:'unpack',
     route:'router', hold:'buffer', process:'machine'
   });
@@ -171,7 +171,8 @@
     const used = new Set();
     for(const [index, raw] of (Array.isArray(rows) ? rows : []).entries()){
       if(!isObject(raw)) continue;
-      const kind = text(raw.kind).toLowerCase();
+      const legacyKind = text(raw.kind).toLowerCase();
+      const kind = legacyKind === 'carrier-transport' ? 'entity-transport' : legacyKind;
       if(!kind) continue;
       let operationId = text(raw.operationId) || `${kind}-${index + 1}`;
       while(used.has(operationId)) operationId = `${kind}-${used.size + 1}`;
@@ -338,11 +339,7 @@
     };
   }
 
-  function defaultEntityCategory(node){
-    const behavior = behaviorId(node);
-    if(behavior === 'carrier_route') return 'carrier';
-    return 'work';
-  }
+  function defaultEntityCategory(_node){ return 'entity'; }
 
   function presetPortCategories(node, presetId, direction, index){
     const id = text(presetId).toLowerCase() || 'basic';
@@ -358,17 +355,10 @@
     return [defaultEntityCategory(node)];
   }
 
-  function targetForCategory(category){
-    return { mode: 'category', category: category || 'work' };
-  }
+  function targetForCategory(_category){ return { mode: 'any' }; }
 
   function targetsForCategories(categories){
-    const unique = [];
-    for(const category of (Array.isArray(categories) ? categories : [categories])){
-      const normalized = text(category).toLowerCase() || 'work';
-      if(!unique.includes(normalized)) unique.push(normalized);
-    }
-    return unique.map(targetForCategory);
+    return [{ mode: 'any' }];
   }
 
   function allConditions(){
@@ -449,12 +439,12 @@
       const itemPort = outputs[0] ? [outputs[0]] : [];
       const containerPort = outputs[1] ? [outputs[1]] : itemPort;
       return [
-        makeOutputRule(presetId, 0, ['work'], allConditions('available', 'downstream-ready'), itemPort),
-        makeOutputRule(presetId, 1, ['container', 'carrier'], allConditions('empty', 'downstream-ready'), containerPort)
+        makeOutputRule(presetId, 0, ['entity'], allConditions('available', 'downstream-ready'), itemPort),
+        makeOutputRule(presetId, 1, ['entity'], allConditions('empty', 'downstream-ready'), containerPort)
       ];
     }
     if(presetId === 'pack'){
-      return [makeOutputRule(presetId, 0, ['container', 'carrier'], allConditions('full', 'downstream-ready'), outputs)];
+      return [makeOutputRule(presetId, 0, ['entity'], allConditions('full', 'downstream-ready'), outputs)];
     }
     if(['station', 'carrier_route', 'transfer'].includes(presetId)){
       return outputs.map((port, index)=>makeOutputRule(
@@ -557,7 +547,7 @@
         }
         entityIndex += 1;
         port.channel = 'entity';
-        port.type = 0;
+        port.type = 'entity';
         port.name = `${direction === 'input' ? 'inPort' : 'outPort'}${entityIndex}`;
       });
     };
@@ -581,22 +571,50 @@
   }
 
   function ruleTargetsCategory(node, rule, category){
-    const wanted = text(category).toLowerCase();
     const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
     return targets.filter(Boolean).some((target)=>{
       const normalized = typeof App.normalizeEntityTarget === 'function' ? App.normalizeEntityTarget(target) : target;
       const mode = text(normalized?.mode).toLowerCase();
-      if(mode === 'otherwise') return true;
-      if(mode === 'category') return text(normalized.category).toLowerCase() === wanted;
-      if(mode !== 'type') return false;
-      const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(node?.graph) : null;
-      return text(registry?.get?.(normalized.typeId)?.category).toLowerCase() === wanted;
+      return mode === 'otherwise' || mode === 'any' || mode === 'type';
     });
+  }
+
+  function entityRoleForLegacyCategory(value){
+    const role = text(value).toLowerCase();
+    if(role === 'work' || role === 'item' || role === 'product') return 'item';
+    if(role === 'carrier' || role === 'agv' || role === 'vehicle') return 'transport';
+    if(role === 'container' || role === 'pallet') return 'attachment';
+    return role === 'entity' ? 'entity' : role;
   }
 
   function flowPortSlotsForCategory(node, direction, category){
     const rows = direction === 'input' ? node?.inputs : node?.outputs;
+    const behavior = behaviorId(node);
+    const legacyRole = text(category).toLowerCase();
+    const entityRole = entityRoleForLegacyCategory(legacyRole);
     const rules = direction === 'input' ? node?.properties?.inputRules : node?.properties?.outputRules;
+    const explicitIds = new Set();
+    for(const rule of (Array.isArray(rules) ? rules : [])){
+      if(entityRoleForLegacyCategory(rule?.entityRole) !== entityRole) continue;
+      if(direction === 'input') explicitIds.add(text(rule?.fromPortId));
+      else for(const portId of (Array.isArray(rule?.toPortIds) ? rule.toPortIds : [rule?.toPortId])) explicitIds.add(text(portId));
+    }
+    const explicitSlots = [];
+    (Array.isArray(rows) ? rows : []).forEach((port, index)=>{
+      if(!port || isSignalPort(port)) return;
+      if(entityRoleForLegacyCategory(port.entityRole) === entityRole || explicitIds.has(text(port.portId))) explicitSlots.push(index);
+    });
+    if(explicitSlots.length) return explicitSlots;
+    const hasExplicitRoles = (Array.isArray(rows) ? rows : []).some((port)=>text(port?.entityRole))
+      || (Array.isArray(rules) ? rules : []).some((rule)=>text(rule?.entityRole));
+    if(hasExplicitRoles && legacyRole !== 'entity') return [];
+    if(['pack', 'unpack', 'station', 'transfer', 'carrier_route'].includes(behavior) && legacyRole !== 'entity'){
+      const roleSlots = [];
+      (Array.isArray(rows) ? rows : []).forEach((port, index)=>{
+        if(port && !isSignalPort(port) && presetPortCategories(node, behavior, direction, index).includes(legacyRole)) roleSlots.push(index);
+      });
+      if(roleSlots.length) return roleSlots;
+    }
     const ids = new Set();
     for(const rule of (Array.isArray(rules) ? rules : [])){
       if(!ruleTargetsCategory(node, rule, category)) continue;
@@ -611,17 +629,7 @@
   }
 
   function targetCategoryForRule(rule){
-    const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
-    const categories = targets.filter(Boolean).map((target)=>{
-      const normalized = typeof App.normalizeEntityTarget === 'function' ? App.normalizeEntityTarget(target) : target;
-      if(text(normalized?.mode).toLowerCase() === 'category') return text(normalized.category).toLowerCase();
-      if(text(normalized?.mode).toLowerCase() === 'type'){
-        const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(rule?.__node?.graph) : null;
-        return text(registry?.get?.(normalized.typeId)?.category).toLowerCase();
-      }
-      return '';
-    }).filter(Boolean);
-    return categories.length && categories.every((category)=>category === categories[0]) ? categories[0] : 'entity';
+    return 'entity';
   }
 
   function ensurePortTimings(node){
@@ -883,12 +891,12 @@
     const existing = requestedId ? (rows || []).find((port)=>text(port?.portId) === requestedId) : null;
     if(existing) return existing;
     const name = text(options?.name) || nextFlowPortName(node, direction, rule || {});
-    if(direction === 'input') node.addInput(name, 0);
-    else node.addOutput(name, 0);
+    if(direction === 'input') node.addInput(name, 'entity');
+    else node.addOutput(name, 'entity');
     const port = rows[rows.length - 1];
     port.portId = requestedId || nextFlowPortId(node, direction);
     port.channel = 'entity';
-    port.type = 0;
+    port.type = 'entity';
     port.flowManaged = true;
     delete port.requiredByPreset;
     ensurePortTimings(node);
@@ -995,7 +1003,7 @@
     if(preset === 'split') return root.SplitNode;
     if(preset === 'merge') return root.MergeNode;
     if(preset === 'join') return root.JoinNode;
-    if(preset === 'carrier_route') return text(operationConfig(node, 'carrier-transport')?.transportMode || properties?.transportMode).toLowerCase() === 'agv'
+    if(preset === 'carrier_route') return text((operationConfig(node, 'entity-transport') || operationConfig(node, 'carrier-transport'))?.transportMode || properties?.transportMode).toLowerCase() === 'agv'
       ? root.AGVRouteNode
       : root.CarrierRouteNode;
     if(preset === 'station') return root.StationNode;
@@ -1039,8 +1047,8 @@
       super();
       this.title = 'Basic Node';
       this.size = [260, 170];
-      this.addInput('inPort1', 0);
-      this.addOutput('outPort1', 0);
+      this.addInput('inPort1', 'entity');
+      this.addOutput('outPort1', 'entity');
       ensurePortIds(this);
       this.properties = {
         basicNodeVersion: 2,
@@ -1120,8 +1128,8 @@
       if(id === 'shuttle' && !this.properties.inputRules.length){
         this.properties.inputRules = [{
           ruleId: 'shuttle-input-1',
-          targets: [{ mode: 'category', category: 'work' }],
-          target: { mode: 'category', category: 'work' },
+          targets: [{ mode: 'any' }],
+          target: { mode: 'any' },
           acceptWhen: { kind:'space-available' },
           fromPortId: this.inputs?.[0]?.portId || 'in-1'
         }];
@@ -1129,8 +1137,8 @@
       if(id === 'shuttle' && !this.properties.outputRules.length){
         this.properties.outputRules = [{
           ruleId: 'shuttle-output-1',
-          targets: [{ mode: 'category', category: 'work' }],
-          target: { mode: 'category', category: 'work' },
+          targets: [{ mode: 'any' }],
+          target: { mode: 'any' },
           releaseWhen: {
             kind: 'all',
             conditions: [
@@ -1161,8 +1169,8 @@
       if(this._runtimePrototype){ ensurePortIds(this); normalizeEntityPorts(this); return; }
       const id = templateId || behaviorId(this);
       const names = defaultPortNames(id);
-      while(this.inputs.length < names.inputs.length) this.addInput(names.inputs[this.inputs.length], 0);
-      while(this.outputs.length < names.outputs.length) this.addOutput(names.outputs[this.outputs.length], 0);
+      while(this.inputs.length < names.inputs.length) this.addInput(names.inputs[this.inputs.length], 'entity');
+      while(this.outputs.length < names.outputs.length) this.addOutput(names.outputs[this.outputs.length], 'entity');
       while(this.inputs.length > names.inputs.length) this.removeInput(this.inputs.length - 1);
       while(this.outputs.length > names.outputs.length) this.removeOutput(this.outputs.length - 1);
       this.inputs.forEach((port, index)=>{ port.name = names.inputs[index]; });
@@ -1223,8 +1231,9 @@
       if(isObject(activeOperation?.config)) Object.assign(this.properties, clone(activeOperation.config, {}));
       if(behaviorId(this) === 'carrier_route'){
         const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(this.graph) : null;
-        const carrierRecipe = (Array.isArray(this.properties?.initialContents) ? this.properties.initialContents : [])
-          .find((recipe)=> text(registry?.get?.(recipe?.typeId)?.category).toLowerCase() === 'carrier');
+        const recipes = Array.isArray(this.properties?.initialContents) ? this.properties.initialContents : [];
+        const preferredTypeId = text(this.properties?.initialCarrierTypeId);
+        const carrierRecipe = recipes.find((recipe)=>text(recipe?.typeId) === preferredTypeId) || recipes[0];
         const carrierType = carrierRecipe ? registry?.get?.(carrierRecipe.typeId) : null;
         if(carrierType){
           // Carrier Route still executes through the proven transport action
@@ -1402,7 +1411,7 @@
       if(!store || !instance) return null;
       const inputRules = Array.isArray(this.properties.inputRules) && this.properties.inputRules.length
         ? this.properties.inputRules
-        : [{ ruleId: 'default-input', target: { mode: 'category', category: store.typeOf(instance)?.category || 'work' }, acceptWhen: { kind: 'space-available' } }];
+        : [{ ruleId: 'default-input', target: { mode: 'any' }, acceptWhen: { kind: 'space-available' } }];
       const selected = App.selectEntityRule(store, this, inputRules, { incomingRoot: instance, nowMs: nowMs() }, 'input');
       if(!selected) return null;
       this._activeFlowInputRule = inputRules.find((rule)=>text(rule?.ruleId) === text(selected.rule?.ruleId)) || selected.rule;
@@ -1428,37 +1437,22 @@
       if(!instance) return false;
       const rules = Array.isArray(this.properties.inputRules) && this.properties.inputRules.length
         ? this.properties.inputRules
-        : [{ ruleId: 'default-input', target: { mode: 'category', category: store.typeOf(instance)?.category || 'work' }, acceptWhen: { kind: 'space-available' } }];
+        : [{ ruleId: 'default-input', target: { mode: 'any' }, acceptWhen: { kind: 'space-available' } }];
       return !!App.selectEntityRule(store, this, rules, { incomingRoot: instance, nowMs: nowMs() }, 'input');
     }
 
     _runtimeValueDescriptor(value){
       const candidate = value && typeof value === 'object' ? value : null;
-      const explicitCategory = text(candidate?.__flowCategory || candidate?.category).toLowerCase();
       const typeId = text(candidate?.typeId);
       const typeName = text(candidate?.type || candidate?.typeName || candidate?.name);
-      let category = explicitCategory;
       let resolvedTypeId = typeId;
       const registry = typeof App.entityModelForGraph === 'function' ? App.entityModelForGraph(this.graph) : null;
       const types = registry?.list?.() || [];
       if(!resolvedTypeId && typeName){
         const row = types.find((entry)=>text(entry?.name).toLowerCase() === typeName.toLowerCase());
-        if(row){
-          resolvedTypeId = text(row.typeId);
-          if(!category) category = text(row.category).toLowerCase();
-        }
+        if(row) resolvedTypeId = text(row.typeId);
       }
-      if(!category && resolvedTypeId){
-        const row = types.find((entry)=>text(entry?.typeId) === resolvedTypeId);
-        if(row) category = text(row.category).toLowerCase();
-      }
-      if(!category){
-        const kind = text(candidate?.entityKind || candidate?.kind || candidate?.subtype).toLowerCase();
-        if(/carrier|agv/.test(kind) || candidate?.carrierId != null || Array.isArray(candidate?.pallets) || Array.isArray(candidate?.cargo)) category = 'carrier';
-        else if(/container|pallet|box|tray/.test(kind) || candidate?.palletId != null || Array.isArray(candidate?.works)) category = 'container';
-      }
-      if(!category) category = 'work';
-      return { category, typeId:resolvedTypeId, typeName };
+      return { typeId:resolvedTypeId, typeName };
     }
 
     _acknowledgeAcceptedInputs(){
@@ -1501,8 +1495,8 @@
       const descriptor = this._runtimeValueDescriptor(value);
       const mode = text(normalized?.mode).toLowerCase();
       if(mode === 'otherwise') return true;
+      if(mode === 'any') return true;
       if(mode === 'sequence') return hasSequenceTarget(this);
-      if(mode === 'category') return descriptor.category === text(normalized?.category).toLowerCase();
       if(mode === 'type'){
         const wanted = text(normalized?.typeId);
         return !!wanted && (descriptor.typeId === wanted || descriptor.typeName.toLowerCase() === wanted.toLowerCase());
@@ -1637,7 +1631,7 @@
       const rules = Array.isArray(this.properties?.inputRules) ? this.properties.inputRules : [];
       if(!rules.length) return { rule:null };
       const input = this.inputs?.[slotIndex];
-      const candidate = value || { __flowCategory:'work' };
+      const candidate = value || {};
       let otherwise = null;
       for(const rule of rules){
         if(rule?.fromPortId && input?.portId && text(rule.fromPortId) !== text(input.portId)) continue;
@@ -1862,7 +1856,7 @@
       return targets.some((target)=>{
         const mode = text(target?.mode).toLowerCase();
         if(!mode || mode === 'otherwise') return true;
-        if(mode === 'category') return text(target.category).toLowerCase() === 'work';
+        if(mode === 'any' || mode === 'category') return true;
         if(mode === 'type'){
           const wanted = text(target.typeId);
           const payloadTypeId = text(this._payload?.typeId);
@@ -1917,8 +1911,8 @@
         ? this.properties.outputRules
         : [{
             ruleId: 'default-shuttle-output',
-            targets: [{ mode: 'category', category: 'work' }],
-            target: { mode: 'category', category: 'work' },
+            targets: [{ mode: 'any' }],
+            target: { mode: 'any' },
             releaseWhen: {
               kind: 'all',
               conditions: [
@@ -2317,13 +2311,14 @@
       if(!store) return;
       for(let index = 0; index < this.inputs.length; index++) this._acceptIncoming(index);
       const roots = store.rootsAt(this.id);
-      const container = roots.find((entry)=>{
-        const category = store.typeOf(entry)?.category;
-        return category === 'container' || category === 'carrier';
-      });
-      const item = roots.find((entry)=>entry !== container);
-      if(container && item){
-        const result = store.attach(item, container);
+      let parent = null;
+      let child = null;
+      for(const candidateParent of roots){
+        const candidateChild = roots.find((entry)=>entry !== candidateParent && store.canAttach(entry, candidateParent).ok);
+        if(candidateChild){ parent = candidateParent; child = candidateChild; break; }
+      }
+      if(parent && child){
+        const result = store.attach(child, parent);
         if(result.ok) this._processComplete = true;
       }
       const output = this._selectOutput();
@@ -2448,22 +2443,34 @@
 
   function inferLegacyTypes(data){
     const model = isObject(data?.__factSimEntityModel)
-      ? clone(data.__factSimEntityModel, { schemaVersion: 1, types: [] })
-      : { schemaVersion: 1, types: [] };
+      ? clone(data.__factSimEntityModel, { schemaVersion: 3, types: [] })
+      : { schemaVersion: 3, types: [] };
     if(!Array.isArray(model.types)) model.types = [];
-    const byKey = new Map(model.types.map((row)=>[`${row.category}:${String(row.name).toLowerCase()}`, row]));
+    const legacyKinds = new Map();
+    model.types = model.types.map((row)=>{
+      const next = clone(row, {});
+      legacyKinds.set(text(next.typeId), text(next.category).toLowerCase());
+      delete next.category;
+      return next;
+    });
+    model.schemaVersion = 3;
+    const byKey = new Map(model.types.map((row)=>[String(row.name).toLowerCase(), row]));
     let sequence = model.types.length;
-    const ensure = (name, category, capacity, subtype)=>{
-      const key = `${category}:${String(name).toLowerCase()}`;
-      if(byKey.has(key)) return byKey.get(key);
+    const ensure = (name, legacyKind, capacity, subtype)=>{
+      const key = String(name).toLowerCase();
+      if(byKey.has(key)){
+        const existing = byKey.get(key);
+        if(!legacyKinds.has(existing.typeId)) legacyKinds.set(existing.typeId, legacyKind);
+        return existing;
+      }
       const row = {
         typeId: `type-${String(name).toLowerCase().replace(/[^a-z0-9_-]+/g, '-') || (++sequence)}`,
-        name, category, subtype: subtype || '', tags: ['migrated'],
-        capacity: category === 'work' ? 0 : Math.max(0, Math.round(Number(capacity) || 0)),
+        name, subtype: subtype || '', tags: ['migrated'],
+        capacity: Math.max(0, Math.round(Number(capacity) || 0)),
         allowedContentTypeIds: [], defaultAttributes: {}
       };
       while(model.types.some((item)=>item.typeId === row.typeId)) row.typeId += `-${++sequence}`;
-      model.types.push(row); byKey.set(key, row); return row;
+      model.types.push(row); byKey.set(key, row); legacyKinds.set(row.typeId, legacyKind); return row;
     };
     const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
     for(const node of nodes){
@@ -2486,11 +2493,11 @@
         ensure(text(props.rootId) || text(props.rootKind) || 'Entity', category, props.capacity || 0, props.rootKind || '');
       }
     }
-    const works = model.types.filter((row)=>row.category === 'work').map((row)=>row.typeId);
+    const works = model.types.filter((row)=>legacyKinds.get(row.typeId) === 'work').map((row)=>row.typeId);
     for(const row of model.types){
-      if(row.category === 'container' && String(row.subtype).toLowerCase() === 'pallet'){
+      if(legacyKinds.get(row.typeId) === 'container' && String(row.subtype).toLowerCase() === 'pallet'){
         for(const typeId of works) if(!row.allowedContentTypeIds.includes(typeId)) row.allowedContentTypeIds.push(typeId);
-      }else if(row.category === 'carrier' && !row.allowedContentTypeIds.length){
+      }else if(legacyKinds.get(row.typeId) === 'carrier' && !row.allowedContentTypeIds.length){
         for(const typeId of works) row.allowedContentTypeIds.push(typeId);
       }
     }
@@ -2570,7 +2577,7 @@
       return props.sourceSequence;
     }
     const names = String(props.sequence || '').split(/[,\n]+/).map(text).filter(Boolean);
-    const fallbackType = (Array.isArray(model?.types) ? model.types : []).find((entry)=>entry?.category === 'work') || null;
+    const fallbackType = (Array.isArray(model?.types) ? model.types : [])[0] || null;
     const rows = [];
     for(const name of names){
       const typeId = typeIdForLegacyName(model, name);
@@ -2685,12 +2692,13 @@
         node.properties.operations = templateOperations(templateId, node.properties);
       }
       if(templateId === 'carrier_route' && (!Array.isArray(node.properties.initialContents) || !node.properties.initialContents.length)){
-        const carrierTypes = data.__factSimEntityModel.types.filter((entry)=>entry.category === 'carrier');
+        const entityTypes = data.__factSimEntityModel.types;
         const initialCarrier = text(node.properties.initialCarrier);
         const agvIds = String(node.properties.agvIds || '').split(/[,\n]+/).map(text).filter(Boolean);
-        const selectedType = carrierTypes.find((entry)=>initialCarrier
+        const selectedType = entityTypes.find((entry)=>initialCarrier
           && (text(entry.typeId).toLowerCase() === initialCarrier.toLowerCase() || text(entry.name).toLowerCase() === initialCarrier.toLowerCase()))
-          || carrierTypes[0];
+          || entityTypes.find((entry)=>text(entry.subtype).toLowerCase() === 'carrier')
+          || entityTypes[0];
         const quantity = agvIds.length || (initialCarrier ? 1 : 0);
         if(selectedType && quantity > 0){
           node.properties.initialContents = [{ typeId:selectedType.typeId, quantity, load:'empty', children:[] }];

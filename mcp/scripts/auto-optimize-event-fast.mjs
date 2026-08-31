@@ -64,9 +64,9 @@ function parseArgs(argv) {
     benchmarkWallMs: 2000,
     delegateTimeoutMs: 900000,
     minImprovementPct: 1,
-    maxIterations: 999,
+    maxIterations: 6,
     minRuntimeHours: 0,
-    maxNoImprovementIterations: 24,
+    maxNoImprovementIterations: 3,
     promptMode: "",
     scopeMode: "",
     statusFile: "",
@@ -217,7 +217,8 @@ function applyProfileDefaults(cli) {
       scopeMode: "focused",
       benchmarkWallMs: 500,
       reruns: 0,
-      maxNoImprovementIterations: 12,
+      maxIterations: 3,
+      maxNoImprovementIterations: 2,
       delegateTimeoutMs: 8 * 60 * 1000,
       engines: focusedEngines
     },
@@ -230,7 +231,11 @@ function applyProfileDefaults(cli) {
     },
     nightly: {
       promptMode: "compact",
-      scopeMode: "focused"
+      scopeMode: "focused",
+      maxIterations: 6,
+      maxNoImprovementIterations: 3,
+      reruns: 1,
+      delegateTimeoutMs: 8 * 60 * 1000
     },
     deep: {
       promptMode: "full",

@@ -206,6 +206,11 @@ function _cloneGraphPayload(data){
 function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
+  if(typeof App.migrateGraphDataToBasic === 'function'){
+    const migration = App.migrateGraphDataToBasic(data);
+    if(migration?.preview?.blocked) throw new Error('Graph contains a node that cannot be migrated to the generic Entity model');
+    if(migration?.data) data = migration.data;
+  }
   const viewState = data.__factSimView || null;
   const hasSavedGraphView = _hasGraphViewState(viewState);
   const opts = options || {};

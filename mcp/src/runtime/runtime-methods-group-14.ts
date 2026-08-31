@@ -9,7 +9,7 @@ export function registerRuntimeMethodsGroup14(
     return page.evaluate(() => {
       const app = (window as any).App;
       const registry = app?.entityModelForGraph?.(app.graph);
-      return { schemaVersion: app?.ENTITY_MODEL_SCHEMA_VERSION ?? 1, types: registry?.list?.() ?? [] };
+      return { schemaVersion: app?.ENTITY_MODEL_SCHEMA_VERSION ?? 3, types: registry?.list?.() ?? [] };
     });
   };
 

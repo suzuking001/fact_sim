@@ -7,9 +7,12 @@
 
   const App = root.App || (root.App = {});
   const MODEL_KEY = '__factSimEntityModel';
-  const SCHEMA_VERSION = 1;
-  const CATEGORIES = new Set(['work', 'container', 'carrier']);
+  const SCHEMA_VERSION = 3;
+  const LEGACY_CATEGORIES = new Set(['work', 'container', 'carrier', 'pallet', 'agv', 'vehicle', 'box', 'tray', 'ship']);
   const LOAD_MODES = new Set(['empty', 'full', 'custom']);
+  const ENTITY_SHAPES = Object.freeze(['circle', 'rounded-square', 'square', 'triangle', 'diamond', 'hexagon']);
+  const ENTITY_COLOR_THEMES = Object.freeze(['auto', 'blue', 'orange', 'green', 'purple', 'red', 'cyan', 'yellow', 'gray']);
+  const NEW_TYPE_COLOR_THEMES = Object.freeze(ENTITY_COLOR_THEMES.filter((theme)=>theme !== 'auto'));
 
   function isObject(value){
     return !!value && typeof value === 'object' && !Array.isArray(value);
@@ -23,17 +26,20 @@
     return String(value == null ? '' : value).trim();
   }
 
-  function normalizeCategory(value){
-    const raw = normalizeText(value).toLowerCase();
-    if(raw === 'agv' || raw === 'vehicle') return 'carrier';
-    if(raw === 'pallet' || raw === 'box' || raw === 'tray' || raw === 'ship') return 'container';
-    return CATEGORIES.has(raw) ? raw : 'work';
-  }
-
-  function normalizeCapacity(value, category){
-    if(category === 'work') return 0;
+  function normalizeCapacity(value){
     const n = Math.round(Number(value));
     return Number.isFinite(n) && n >= 0 ? n : 0;
+  }
+
+  function normalizeAppearance(value, fallback){
+    const source = isObject(value) ? value : {};
+    const defaults = isObject(fallback) ? fallback : {};
+    const requestedShape = normalizeText(source.shape || defaults.shape).toLowerCase();
+    const requestedTheme = normalizeText(source.colorTheme || defaults.colorTheme).toLowerCase();
+    return {
+      shape: ENTITY_SHAPES.includes(requestedShape) ? requestedShape : 'circle',
+      colorTheme: ENTITY_COLOR_THEMES.includes(requestedTheme) ? requestedTheme : 'auto'
+    };
   }
 
   function slug(value){
@@ -59,19 +65,18 @@
 
   function normalizeTypeRecord(raw, fallbackId){
     const source = isObject(raw) ? raw : {};
-    const category = normalizeCategory(source.category);
     const typeId = normalizeText(source.typeId || fallbackId);
     return {
       typeId,
       name: normalizeText(source.name) || typeId || 'Entity',
-      category,
       subtype: normalizeText(source.subtype),
       tags: Array.from(new Set((Array.isArray(source.tags) ? source.tags : [])
         .map(normalizeText).filter(Boolean))),
-      capacity: normalizeCapacity(source.capacity, category),
+      capacity: normalizeCapacity(source.capacity),
       allowedContentTypeIds: Array.from(new Set((Array.isArray(source.allowedContentTypeIds)
         ? source.allowedContentTypeIds : []).map(normalizeText).filter(Boolean))),
-      defaultAttributes: isObject(source.defaultAttributes) ? clone(source.defaultAttributes, {}) : {}
+      defaultAttributes: isObject(source.defaultAttributes) ? clone(source.defaultAttributes, {}) : {},
+      appearance: normalizeAppearance(source.appearance)
     };
   }
 
@@ -80,7 +85,8 @@
       const text = normalizeText(value);
       if(text.toLowerCase() === 'otherwise') return { mode: 'otherwise' };
       if(text.toLowerCase() === 'sequence') return { mode: 'sequence' };
-      if(CATEGORIES.has(text.toLowerCase())) return { mode: 'category', category: text.toLowerCase() };
+      if(text.toLowerCase() === 'any' || text.toLowerCase() === 'entity' || text.toLowerCase() === 'any entity') return { mode: 'any' };
+      if(LEGACY_CATEGORIES.has(text.toLowerCase())) return { mode: 'any' };
       return { mode: 'type', typeId: text };
     }
     const source = isObject(value) ? value : {};
@@ -96,7 +102,7 @@
         } : entry
       ))
     };
-    if(mode === 'category') return { mode: 'category', category: normalizeCategory(source.category) };
+    if(mode === 'any' || mode === 'entity' || mode === 'category') return { mode: 'any' };
     return { mode: 'type', typeId: normalizeText(source.typeId || source.value) };
   }
 
@@ -105,7 +111,7 @@
     const result = [];
     for(const value of source){
       const target = normalizeTarget(value);
-      const key = target.mode === 'type' ? `type:${target.typeId}` : `${target.mode}:${target.category || ''}`;
+      const key = target.mode === 'type' ? `type:${target.typeId}` : target.mode;
       if(!result.some((entry)=>entry.key === key)) result.push({ key, target });
     }
     return result.map((entry)=>entry.target);
@@ -192,7 +198,6 @@
       else if(entryIds.has(entryId)) errors.push({ code:'SOURCE_SEQUENCE_ENTRY_ID_DUPLICATE', nodeId:node?.id ?? null, index, entryId });
       else entryIds.add(entryId);
       if(!typeId || !type) errors.push({ code:'SOURCE_SEQUENCE_TYPE_MISSING', nodeId:node?.id ?? null, index, typeId });
-      else if(type.category !== 'work') errors.push({ code:'SOURCE_SEQUENCE_TYPE_NOT_WORK', nodeId:node?.id ?? null, index, typeId });
       if(!Number.isInteger(quantity) || quantity < 1) errors.push({ code:'SOURCE_SEQUENCE_QUANTITY_INVALID', nodeId:node?.id ?? null, index, quantity:raw?.quantity });
       entries.push({
         entryId,
@@ -239,14 +244,14 @@
       return inspectSourceSequence(node, registry);
     }
     if(options?.createDefault === false) return inspectSourceSequence(node, registry);
-    let workType = registry.list().find((entry)=>entry.category === 'work') || null;
-    if(!workType){
-      workType = registry.upsert({
-        name:'Work A', category:'work', subtype:'', tags:['preset'], capacity:0,
+    let entityType = registry.list()[0] || null;
+    if(!entityType){
+      entityType = registry.upsert({
+        name:'Entity A', subtype:'', tags:['preset'], capacity:0,
         allowedContentTypeIds:[], defaultAttributes:{}
       });
     }
-    target.entries = [{ entryId:'source-sequence-1', typeId:workType.typeId, quantity:1 }];
+    target.entries = [{ entryId:'source-sequence-1', typeId:entityType.typeId, quantity:1 }];
     try{ node.graph?.change?.(); }catch(_e){}
     return inspectSourceSequence(node, registry);
   }
@@ -306,7 +311,11 @@
       const current = requestedId ? this.types.get(requestedId) : null;
       const typeId = current?.typeId || requestedId || this._nextId(raw.name);
       if(current && requestedId !== current.typeId) throw new Error('typeId is immutable');
-      const next = normalizeTypeRecord({ ...(current || {}), ...raw, typeId }, typeId);
+      const defaultAppearance = current?.appearance || (!raw.appearance
+        ? { shape:'circle', colorTheme:NEW_TYPE_COLOR_THEMES[this.types.size % NEW_TYPE_COLOR_THEMES.length] }
+        : null);
+      const next = normalizeTypeRecord({ ...(current || {}), ...raw, typeId,
+        appearance:normalizeAppearance(raw.appearance, defaultAppearance) }, typeId);
       const duplicate = this.list().find((row)=> row.typeId !== typeId && row.name.toLowerCase() === next.name.toLowerCase());
       if(duplicate) throw new Error(`Entity Type name already exists: ${next.name}`);
       this.types.set(typeId, next);
@@ -314,19 +323,18 @@
       return clone(next, next);
     }
 
-    ensureLegacyType(name, category, options){
+    ensureLegacyType(name, _category, options){
       const label = normalizeText(name) || 'Legacy Entity';
-      const wantedCategory = normalizeCategory(category);
-      const found = this.list().find((row)=> row.name === label && row.category === wantedCategory);
+      const found = this.list().find((row)=> row.name === label);
       if(found) return found;
       const opts = isObject(options) ? options : {};
       return this.upsert({
         name: label,
-        category: wantedCategory,
-        subtype: opts.subtype || (wantedCategory === 'container' ? label : ''),
+        subtype: opts.subtype || '',
         capacity: opts.capacity || 0,
         allowedContentTypeIds: opts.allowedContentTypeIds || [],
-        defaultAttributes: opts.defaultAttributes || {}
+        defaultAttributes: opts.defaultAttributes || {},
+        appearance: opts.appearance || { shape:'circle', colorTheme:'auto' }
       });
     }
 
@@ -386,12 +394,10 @@
         const nameKey = row.name.toLowerCase();
         if(names.has(nameKey)) errors.push({ code: 'TYPE_NAME_DUPLICATE', typeId: row.typeId, otherTypeId: names.get(nameKey) });
         else names.set(nameKey, row.typeId);
-        if(!CATEGORIES.has(row.category)) errors.push({ code: 'TYPE_CATEGORY_INVALID', typeId: row.typeId });
-        if(row.category === 'work' && row.capacity !== 0) errors.push({ code: 'WORK_CAPACITY_MUST_BE_ZERO', typeId: row.typeId });
         for(const allowedId of row.allowedContentTypeIds){
           if(!this.types.has(allowedId)) errors.push({ code: 'ALLOWED_TYPE_MISSING', typeId: row.typeId, allowedTypeId: allowedId });
         }
-        if(row.category !== 'work' && row.capacity === 0 && row.allowedContentTypeIds.length){
+        if(row.capacity === 0 && row.allowedContentTypeIds.length){
           warnings.push({ code: 'ZERO_CAPACITY_WITH_ALLOWED_TYPES', typeId: row.typeId });
         }
       }
@@ -446,8 +452,7 @@
         arrivalSequence: ++this.arrivalSequence,
         createdAt: Number(opts.createdAt) || 0,
         id: normalizeText(opts.legacyId) || this._displayId(type, ordinal),
-        type: normalizeText(opts.legacyType) || type.name,
-        entityKind: type.category
+        type: normalizeText(opts.legacyType) || type.name
       };
       this.instances.set(instanceId, instance);
       if(instance.locationNodeId != null) this._addRoot(instance.locationNodeId, instanceId);
@@ -460,6 +465,15 @@
       if(typeof value === 'string' || typeof value === 'number') return this.instances.get(String(value)) || null;
       if(value.instanceId) return this.instances.get(String(value.instanceId)) || value;
       return null;
+    }
+
+    register(value){ return this.get(value); }
+
+    idOf(value){ return this.get(value)?.instanceId || null; }
+
+    labelOf(value){
+      const instance = this.get(value);
+      return instance ? (instance.id || instance.instanceId) : '(missing)';
     }
 
     typeOf(value){
@@ -545,8 +559,8 @@
       if(child.instanceId === parent.instanceId) return { ok: false, reason: 'self-parent' };
       if(this.contains(child, parent)) return { ok: false, reason: 'containment-cycle' };
       const parentType = this.typeOf(parent);
-      if(!parentType || parentType.category === 'work') return { ok: false, reason: 'parent-cannot-contain' };
-      if(!parentType.allowedContentTypeIds.includes(child.typeId)) return { ok: false, reason: 'type-not-allowed' };
+      if(!parentType || parentType.capacity <= 0) return { ok: false, reason: 'parent-cannot-contain' };
+      if(parentType.allowedContentTypeIds.length && !parentType.allowedContentTypeIds.includes(child.typeId)) return { ok: false, reason: 'type-not-allowed' };
       const alreadyHere = child.parentId === parent.instanceId;
       if(!alreadyHere && parent.childIds.length >= parentType.capacity){
         return { ok: false, reason: 'capacity-full', capacity: parentType.capacity, count: parent.childIds.length };
@@ -570,6 +584,14 @@
       if(!check.parent.childIds.includes(child.instanceId)) check.parent.childIds.push(child.instanceId);
       this.revision += 1;
       return { ok: true, child, parent: check.parent };
+    }
+
+    transfer(childValue, sourceValue, targetValue){
+      const child = this.get(childValue);
+      const source = this.get(sourceValue);
+      if(!child) return { ok:false, reason:'instance-not-found' };
+      if(source && child.parentId !== source.instanceId) return { ok:false, reason:'source-parent-mismatch' };
+      return this.attach(child, targetValue);
     }
 
     detach(value){
@@ -635,12 +657,12 @@
     _targetMatches(instance, target){
       const normalized = normalizeTarget(target);
       if(normalized.mode === 'otherwise') return true;
+      if(normalized.mode === 'any') return true;
       // Sequence is a virtual OUTPUT target that creates the next Entity. It
       // never matches an Instance already held by a node.
       if(normalized.mode === 'sequence') return false;
       if(normalized.mode === 'type') return instance.typeId === normalized.typeId;
-      const type = this.typeOf(instance);
-      return !!type && type.category === normalized.category;
+      return false;
     }
 
     findInTree(rootValue, target){
@@ -672,15 +694,14 @@
         errors.push({ code: 'INITIAL_TYPE_MISSING', path, typeId: recipe.typeId });
         return errors;
       }
-      if(type.category === 'work' && recipe.children.length){
-        errors.push({ code: 'WORK_CANNOT_HAVE_CONTENTS', path, typeId: type.typeId });
-      }
       if(recipe.load === 'empty' && recipe.children.length){
         errors.push({ code: 'EMPTY_LOAD_HAS_CHILDREN', path, typeId: type.typeId });
       }
       if(recipe.load === 'full'){
         if(type.capacity <= 0) errors.push({ code: 'FULL_REQUIRES_POSITIVE_CAPACITY', path, typeId: type.typeId });
-        if(type.allowedContentTypeIds.length > 1){
+        if(!recipe.children.length && type.allowedContentTypeIds.length !== 1){
+          errors.push({ code: 'FULL_COMPOSITION_REQUIRED', path, typeId: type.typeId });
+        }else if(recipe.children.length){
           const total = recipe.children.reduce((sum, child)=>sum + child.quantity, 0);
           if(total !== type.capacity) errors.push({ code: 'FULL_COMPOSITION_MUST_EQUAL_CAPACITY', path, typeId: type.typeId, expected: type.capacity, actual: total });
         }
@@ -690,7 +711,7 @@
         if(total > type.capacity) errors.push({ code: 'CUSTOM_COMPOSITION_EXCEEDS_CAPACITY', path, typeId: type.typeId, capacity: type.capacity, actual: total });
       }
       recipe.children.forEach((child, index)=>{
-        if(!type.allowedContentTypeIds.includes(child.typeId)){
+        if(type.allowedContentTypeIds.length && !type.allowedContentTypeIds.includes(child.typeId)){
           errors.push({ code: 'INITIAL_CHILD_TYPE_NOT_ALLOWED', path: `${path}.children[${index}]`, typeId: type.typeId, childTypeId: child.typeId });
         }
         errors.push(...this._validateRecipe(child, `${path}.children[${index}]`));
@@ -777,7 +798,6 @@
           displayId: current.id,
           typeId: current.typeId,
           name: type?.name || current.typeId,
-          category: type?.category || 'work',
           attributes: clone(current.attributes, {}),
           children: this.childrenOf(current).map(build).filter(Boolean)
         };
@@ -806,8 +826,7 @@
       const initialCarrier = normalizeText(transport?.config?.initialCarrier);
       if(!initialCarrier || initialCarrier.toLowerCase() === 'undefined' || initialCarrier.toLowerCase() === 'none') continue;
       const needle = initialCarrier.toLowerCase();
-      const type = types.find((entry)=>entry.category === 'carrier'
-        && (entry.typeId.toLowerCase() === needle || entry.name.toLowerCase() === needle));
+      const type = types.find((entry)=>entry.typeId.toLowerCase() === needle || entry.name.toLowerCase() === needle);
       if(!type) continue;
       props.initialContents = [{ typeId: type.typeId, quantity: 1, load: 'empty', children: [] }];
       migrated += 1;
@@ -852,21 +871,20 @@
     }
 
     const used = new Set();
-    const typeFor = (value, category)=>{
+    const typeFor = (value)=>{
       const direct = registry.get(normalizeText(value?.typeId));
       if(direct) return direct;
       const names = [value?.type, value?.id, value?.carrierId, value?.meta?.carrierId]
         .map((entry)=>normalizeText(entry).toLowerCase()).filter(Boolean);
       return registry.list().find((entry)=>names.includes(entry.typeId.toLowerCase()) || names.includes(entry.name.toLowerCase()))
-        || registry.list().find((entry)=>entry.category === category)
         || null;
     };
-    const categoryFor = (value)=>{
+    const legacyKindFor = (value)=>{
       const explicit = normalizeText(value?.entityKind || value?.kind).toLowerCase();
-      if(CATEGORIES.has(explicit)) return explicit;
+      if(LEGACY_CATEGORIES.has(explicit)) return explicit;
       if(Array.isArray(value?.cargo) || Array.isArray(value?.pallets) || value?.meta?.carrierId) return 'carrier';
       if(Array.isArray(value?.works) || value?.palletId != null) return 'container';
-      return 'work';
+      return 'entity';
     };
     const childrenFor = (value)=>{
       const out = [];
@@ -887,15 +905,14 @@
       used.add(value);
       const runtime = store.get(value);
       if(runtime) return store.tree(runtime);
-      const category = categoryFor(value);
-      const type = typeFor(value, category);
-      const displayId = normalizeText(value.id || value.instanceId || value.palletId) || `${type?.name || category}`;
+      const legacyKind = legacyKindFor(value);
+      const type = typeFor(value);
+      const displayId = normalizeText(value.id || value.instanceId || value.palletId) || `${type?.name || 'Entity'}`;
       return {
-        instanceId: normalizeText(value.instanceId) || `legacy:${category}:${displayId}`,
+        instanceId: normalizeText(value.instanceId) || `legacy:${legacyKind}:${displayId}`,
         displayId,
-        typeId: type?.typeId || `legacy-${category}`,
-        name: type?.name || normalizeText(value.type) || (category === 'carrier' ? 'Carrier' : category === 'container' ? 'Container' : 'Work'),
-        category,
+        typeId: type?.typeId || `legacy-${legacyKind}`,
+        name: type?.name || normalizeText(value.type) || 'Entity',
         attributes: clone(value.attributes || value.meta || {}, {}),
         children: childrenFor(value).map(build).filter(Boolean)
       };
@@ -974,13 +991,12 @@
         return !Number.isFinite(capacity) || capacity < 0 || roots.length < capacity;
       }
       case 'empty':
-        if(instance && type && type.category !== 'work') return instance.childIds.length === 0;
-        return roots.length === 0;
+        return instance ? instance.childIds.length === 0 : roots.length === 0;
       case 'full':
-        return !!instance && !!type && type.category !== 'work' && instance.childIds.length === type.capacity;
+        return !!instance && !!type && type.capacity > 0 && instance.childIds.length >= type.capacity;
       case 'count-reached': {
         const count = Math.max(0, Math.round(Number(spec.count ?? spec.value) || 0));
-        if(instance && type && type.category !== 'work') return instance.childIds.length >= count;
+        if(instance && type) return instance.childIds.length >= count;
         return store.findAtNode(nodeId, ctx.target).length >= count;
       }
       case 'time-elapsed': {
@@ -1089,10 +1105,63 @@
     return g.__factSimRuntimeInstances;
   }
 
+  function migrateLegacyGraphShape(graph){
+    for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
+      node.properties = isObject(node?.properties) ? node.properties : {};
+      const roleForLegacyCategory = (value)=>{
+        const category = normalizeText(value).toLowerCase();
+        if(category === 'work' || category === 'item' || category === 'product') return 'item';
+        if(category === 'carrier' || category === 'agv' || category === 'vehicle') return 'transport';
+        if(category === 'container' || category === 'pallet') return 'attachment';
+        return '';
+      };
+      const migrateRules = (rules, direction)=>{
+        const ports = direction === 'input' ? (node.inputs || []) : (node.outputs || []);
+        const byId = new Map(ports.map((port)=>[normalizeText(port?.portId), port]));
+        const migrated = (Array.isArray(rules) ? rules : []).map((source)=>{
+          if(!isObject(source)) return source;
+          const rule = clone(source, source);
+          const rawTargets = Array.isArray(rule.targets) && rule.targets.length ? rule.targets : [rule.target];
+          const legacyRole = normalizeText(rule.entityRole) || rawTargets
+            .map((target)=>target?.mode === 'category' ? roleForLegacyCategory(target?.category) : '')
+            .find(Boolean) || '';
+          if(legacyRole) rule.entityRole = legacyRole;
+          const portIds = direction === 'input'
+            ? [rule.fromPortId]
+            : (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]);
+          for(const portId of portIds){
+            const port = byId.get(normalizeText(portId));
+            if(port && legacyRole && !normalizeText(port.entityRole)) port.entityRole = legacyRole;
+          }
+          return rule;
+        });
+        return normalizeRules(migrated, direction);
+      };
+      if(Array.isArray(node.properties.inputRules)) node.properties.inputRules = migrateRules(node.properties.inputRules, 'input');
+      if(Array.isArray(node.properties.outputRules)) node.properties.outputRules = migrateRules(node.properties.outputRules, 'output');
+      if(Array.isArray(node.properties.operations)){
+        node.properties.operations = node.properties.operations.map((operation)=>{
+          if(!isObject(operation)) return operation;
+          const next = clone(operation, operation);
+          if(normalizeText(next.kind).toLowerCase() === 'carrier-transport') next.kind = 'entity-transport';
+          return next;
+        });
+      }
+      for(const port of [...(node.inputs || []), ...(node.outputs || [])]){
+        const channel = normalizeText(port?.channel || port?.type).toLowerCase();
+        if(channel === 'signal' || channel === '-1') continue;
+        if(!normalizeText(port.entityRole)) port.entityRole = roleForLegacyCategory(channel) || undefined;
+        port.channel = 'entity';
+        port.type = 'entity';
+      }
+    }
+  }
+
   function restoreEntityModel(graph, data, initialize){
     const g = graph || App.graph;
     if(!g) return null;
     const model = clone(data?.[MODEL_KEY] || data || { schemaVersion: SCHEMA_VERSION, types: [] }, { schemaVersion: SCHEMA_VERSION, types: [] });
+    migrateLegacyGraphShape(g);
     g.__factSimEntityModel = model;
     g.__factSimTypeRegistry = new EntityTypeRegistry(g, model);
     migrateLegacyInitialContents(g, g.__factSimTypeRegistry);
@@ -1140,12 +1209,16 @@
 
   App.ENTITY_MODEL_KEY = MODEL_KEY;
   App.ENTITY_MODEL_SCHEMA_VERSION = SCHEMA_VERSION;
+  App.ENTITY_SHAPES = ENTITY_SHAPES;
+  App.ENTITY_COLOR_THEMES = ENTITY_COLOR_THEMES;
+  App.normalizeEntityAppearance = normalizeAppearance;
   App.EntityTypeRegistry = EntityTypeRegistry;
   App.RuntimeInstanceStore = RuntimeInstanceStore;
   App.entityModelForGraph = entityModelForGraph;
   App.runtimeInstancesForGraph = runtimeInstancesForGraph;
   App.currentContentsForNode = currentContentsForNode;
   App.migrateLegacyInitialContents = migrateLegacyInitialContents;
+  App.migrateLegacyEntityGraphShape = migrateLegacyGraphShape;
   App.restoreEntityModel = restoreEntityModel;
   App.injectEntityModel = injectEntityModel;
   App.initializeEntityRuntime = initializeEntityRuntime;

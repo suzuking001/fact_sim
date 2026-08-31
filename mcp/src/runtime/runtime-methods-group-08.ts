@@ -308,7 +308,7 @@ export function registerRuntimeMethodsGroup08(
     };
 
   (FactSimRuntimeClass.prototype as any).connectWorkPorts = async function (this: any, fromNodeId: string | number, toNodeId: string | number, fromSlot?: number, toSlot?: number, allowDuplicate?: boolean): Promise<ConnectByPortKindOutput> {
-      return this.connectNodesByPortKind(fromNodeId, toNodeId, "work", fromSlot, toSlot, allowDuplicate);
+      return this.connectNodesByPortKind(fromNodeId, toNodeId, "entity", fromSlot, toSlot, allowDuplicate);
     };
 
   (FactSimRuntimeClass.prototype as any).connectSignalPorts = async function (this: any, fromNodeId: string | number, toNodeId: string | number, fromSlot?: number, toSlot?: number, allowDuplicate?: boolean): Promise<ConnectByPortKindOutput> {
@@ -316,11 +316,11 @@ export function registerRuntimeMethodsGroup08(
     };
 
   (FactSimRuntimeClass.prototype as any).connectCarrierPorts = async function (this: any, fromNodeId: string | number, toNodeId: string | number, fromSlot?: number, toSlot?: number, allowDuplicate?: boolean): Promise<ConnectByPortKindOutput> {
-      return this.connectNodesByPortKind(fromNodeId, toNodeId, "carrier", fromSlot, toSlot, allowDuplicate);
+      return this.connectNodesByPortKind(fromNodeId, toNodeId, "entity", fromSlot, toSlot, allowDuplicate);
     };
 
   (FactSimRuntimeClass.prototype as any).connectPalletPorts = async function (this: any, fromNodeId: string | number, toNodeId: string | number, fromSlot?: number, toSlot?: number, allowDuplicate?: boolean): Promise<ConnectByPortKindOutput> {
-      return this.connectNodesByPortKind(fromNodeId, toNodeId, "pallet", fromSlot, toSlot, allowDuplicate);
+      return this.connectNodesByPortKind(fromNodeId, toNodeId, "entity", fromSlot, toSlot, allowDuplicate);
     };
 }
 

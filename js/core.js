@@ -836,9 +836,7 @@ function _buildCompactOverlayModel(node, lines){
     TRANSFER: 'Moving',
     ERROR: 'Check details'
   })[state] || '';
-  const entityLabel = work?.category === 'carrier'
-    ? 'Carrier'
-    : (work?.category === 'container' ? 'Container' : 'Work');
+  const entityLabel = 'Entity';
   const primary = work
     ? (work.id ? (/\s#\d+$/.test(work.id) ? work.id : `${entityLabel} #${work.id}`) : `${entityLabel} in process`)
     : ({
@@ -848,7 +846,7 @@ function _buildCompactOverlayModel(node, lines){
         DOWN: 'Recovering',
         TRANSFER: 'Transferring',
         ERROR: 'Attention required'
-      })[state] || 'No active work';
+      })[state] || 'No active Entity';
   const details = [];
   if(work?.type && !String(work.id || '').startsWith(`${work.type} #`)) details.push(`Type ${work.type}`);
   if(extra) details.push(extra);

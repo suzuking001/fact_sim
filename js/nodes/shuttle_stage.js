@@ -330,7 +330,7 @@ class ShuttleStageNode extends LiteGraph.LGraphNode{
     if(!this.inputs || slotIndex < 0 || slotIndex >= this.inputs.length) return false;
     const inp = this.inputs[slotIndex];
     if(!inp || inp.channel === 'signal') return false;
-    if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule({ entityKind:'work' }, slotIndex)) return false;
+    if(typeof this._runtimeSelectInputRule === 'function' && !this._runtimeSelectInputRule({}, slotIndex)) return false;
     return this._state === 'IDLE' && !this._payload && !this._pendingTransfer;
   }
 

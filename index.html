@@ -46,7 +46,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.13/build/litegraph.min.js"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260829b" />
+  <link rel="stylesheet" href="css/app.css?v=20260901a" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -342,11 +342,10 @@
             <option value="sink">Sink</option>
             <option value="split">Split</option>
             <option value="branch">Branch</option>
-            <option value="agvroute">AGV Route</option>
-            <option value="carrierconfig">Carrier Config</option>
-            <option value="palletcarrierconfig">Pallet Carrier Config</option>
-            <option value="carrierroute">Carrier Route</option>
-            <option value="station">Station</option>
+            <option value="agvroute">Transport Route</option>
+            <option value="carrierroute">Transport Route</option>
+            <option value="station">Store</option>
+            <option value="transferstation">Transfer</option>
             <option value="merge">Merge</option>
             <option value="join">Join</option>
           </select>
@@ -857,34 +856,34 @@ SOFTWARE.
   </div>
 
   <script src="js/app/landing.js?v=20260823k"></script>
-  <script src="js/core.js?v=20260824f"></script>
-    <script src="js/nodes/work.js?v=20260828a"></script>
-  <script src="js/nodes/entity_model.js?v=20260829a"></script>
-  <script src="js/nodes/entity_store.js?v=20260803b"></script>
+  <script src="js/core.js?v=20260831a"></script>
+    <script src="js/nodes/work.js?v=20260831a"></script>
+  <script src="js/nodes/entity_model.js?v=20260901a"></script>
+  <script src="js/nodes/entity_store.js?v=20260831a"></script>
   <script src="js/nodes/sigports.js"></script>
     <script src="js/nodes/menu.js?v=20260828a"></script>
     <script src="js/nodes/ioflip.js?v=20260829b"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js?v=20260823j"></script>
+    <script src="js/link-anim.js?v=20260901a"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js?v=20260824f"></script>
   <script src="js/nodes/note.js?v=20260305a"></script>
   <script src="js/nodes/signal.js?v=20260307c"></script>
   <script src="js/nodes/source.js?v=20260829a"></script>
-  <script src="js/nodes/entity_source.js?v=20260824f"></script>
+  <script src="js/nodes/entity_source.js?v=20260831a"></script>
   <script src="js/nodes/split.js?v=20260829a"></script>
   <script src="js/nodes/branch.js?v=20260824f"></script>
   <script src="js/nodes/merge2.js?v=20260824f"></script>
   <script src="js/nodes/join.js?v=20260824f"></script>
-  <script src="js/nodes/agv_route.js?v=20260824f"></script>
+  <script src="js/nodes/agv_route.js?v=20260831a"></script>
   <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
-    <script src="js/nodes/carrier_route.js?v=20260829a"></script>
+    <script src="js/nodes/carrier_route.js?v=20260831a"></script>
   <script src="js/nodes/carrier_route_ui.js?v=20260824f"></script>
-  <script src="js/nodes/station.js?v=20260824f"></script>
-  <script src="js/nodes/transfer_station.js?v=20260824f"></script>
+  <script src="js/nodes/station.js?v=20260831a"></script>
+  <script src="js/nodes/transfer_station.js?v=20260831a"></script>
   <script src="js/nodes/sink.js?v=20260824f"></script>
-  <script src="js/nodes/basic_node.js?v=20260829j"></script>
+  <script src="js/nodes/basic_node.js?v=20260831b"></script>
   <script src="js/nodes/register.js?v=20260823j"></script>
   <script src="sample/simple.js?v=20260828a"></script>
   <script src="sample/branch.js?v=20260828a"></script>
@@ -893,7 +892,7 @@ SOFTWARE.
   <script src="sample/carrier.js?v=20260829b"></script>
   <script src="sample/pallet_station_demo.js?v=20260829b"></script>
   <script src="sample/sample_line1.js?v=20260829b"></script>
-  <script src="sample/sample_line2.js?v=20260829c"></script>
+  <script src="sample/sample_line2.js?v=20260831b"></script>
   <script src="js/timeline.js?v=20260731a"></script>
   <script src="js/app/state.js?v=20260825b"></script>
   <script src="js/app/background-layout.js?v=20260715a"></script>
@@ -901,7 +900,7 @@ SOFTWARE.
   <script src="js/app/stop-groups.js?v=20260308c"></script>
   <script src="js/app/script-editor.js?v=20260218a"></script>
   <script src="js/app/engine.js?v=20260225d"></script>
-  <script src="js/app/engine-fast-kernels.js?v=20260828a"></script>
+  <script src="js/app/engine-fast-kernels.js?v=20260831a"></script>
   <script src="js/app/engine-fast-compiler.js?v=20260828a"></script>
   <script src="js/app/engine-fast-compat.js?v=20260823j"></script>
   <script src="js/app/engine-fast-runtime.js?v=20260829a"></script>
@@ -913,19 +912,19 @@ SOFTWARE.
 <script src="js/app/engine-fast-par-host.js?v=20260829c"></script>
   <script src="js/app/sim.js?v=20260715a"></script>
 <script src="js/app/benchmark.js?v=20260311a"></script>
-<script src="js/app/engine-test.js?v=20260829b"></script>
+<script src="js/app/engine-test.js?v=20260831b"></script>
   <script src="js/app/history.js?v=20260307a"></script>
   <script src="js/app/selection.js?v=20260715a"></script>
   <script src="js/app/fit.js?v=20260715a"></script>
   <script src="js/app/node-props-panel.js?v=20260829a"></script>
-  <script src="js/app/selection-inspector.js?v=20260829l"></script>
-<script src="js/app/entity-ui.js?v=20260829o"></script>
+  <script src="js/app/selection-inspector.js?v=20260831a"></script>
+<script src="js/app/entity-ui.js?v=20260901a"></script>
   <script src="js/app/timeline-init.js?v=20260321a"></script>
-  <script src="js/app/graph-init.js?v=20260823j"></script>
-  <script src="js/app/examples.js?v=20260828a"></script>
-  <script src="js/app/file-io.js?v=20260829b"></script>
+  <script src="js/app/graph-init.js?v=20260831a"></script>
+  <script src="js/app/examples.js?v=20260831b"></script>
+  <script src="js/app/file-io.js?v=20260831a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
-  <script src="js/app/ui.js?v=20260828a"></script>
+  <script src="js/app/ui.js?v=20260831a"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>
