@@ -1813,13 +1813,13 @@ window.beginGroupPlacement = beginGroupPlacement;
     revealSidebarPanel(document.getElementById(panelId));
   }
 
-  collapsibleIds.forEach((id)=>{
+  function registerCollapsiblePanel(id){
     const panel = document.getElementById(id);
-    if(!panel) return;
+    if(!panel) return false;
     const header = ensureHeaderChrome(panel.querySelector('.panelHeader'));
-    if(!header) return;
+    if(!header) return false;
     setPanelCollapsed(panel, !!collapseState[id]);
-    if(header.__collapseHooked) return;
+    if(header.__collapseHooked) return true;
     const toggle = ()=>{
       if(panel.classList.contains('is-collapsed')){
         if(accordionIds.includes(panel.id)) expandPanelExclusive(panel.id);
@@ -1838,7 +1838,11 @@ window.beginGroupPlacement = beginGroupPlacement;
       toggle();
     });
     header.__collapseHooked = true;
-  });
+    return true;
+  }
+
+  collapsibleIds.forEach(registerCollapsiblePanel);
+  App.registerSidebarCollapsiblePanel = registerCollapsiblePanel;
 
   App.setSidebarPanelCollapsed = function(panelId, collapsed){
     const panel = document.getElementById(panelId);

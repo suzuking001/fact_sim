@@ -955,6 +955,7 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
 #sidebarHeader,
 #sidebar #controls,
 #backgroundPanel,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -1951,7 +1952,7 @@ body.timeline-hidden #timelineRevealHandle{
 }
 
 /* Entity Types / Basic Node inspector */
-.entityTypesPanelBody{ display:grid; gap:10px; padding:10px 12px 14px; }
+.entityTypesPanelBody{ display:grid; gap:10px; padding:0; }
 .entityTypeList{ display:grid; gap:7px; }
 .entityTypeRow{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px; border:1px solid rgba(100,116,139,.18); border-radius:9px; background:rgba(255,255,255,.72); }
 .entityTypeSummary{ display:grid; min-width:0; }
@@ -2120,6 +2121,7 @@ body.timeline-hidden #timelineRevealHandle{
 
 
 /* Add Node + Shortcut panel cards */
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -2135,6 +2137,7 @@ body.timeline-hidden #timelineRevealHandle{
 }
 #sidebar #controls::before,
 #sidebar #fileControls::before,
+#entityTypesPanel::before,
 #addNodePanel::before,
 #addGroupPanel::before,
 #advancedPanel::before,
@@ -2147,6 +2150,7 @@ body.timeline-hidden #timelineRevealHandle{
   background: linear-gradient(90deg, #111111, #666666);
   opacity: 0.6;
 }
+#entityTypesPanel .panelHeader,
 #addNodePanel .panelHeader,
 #addGroupPanel .panelHeader,
 #advancedPanel .panelHeader,
@@ -2535,6 +2539,7 @@ body:not(.sidebar-hidden) #graph{ right: 352px; }
 
 #sidebar #controls,
 #sidebar #fileControls,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -2547,6 +2552,7 @@ body:not(.sidebar-hidden) #graph{ right: 352px; }
 
 #sidebar #controls,
 #sidebar #fileControls,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -2558,6 +2564,7 @@ body:not(.sidebar-hidden) #graph{ right: 352px; }
 
 #sidebar #controls::before,
 #sidebar #fileControls::before,
+#entityTypesPanel::before,
 #addNodePanel::before,
 #addGroupPanel::before,
 #advancedPanel::before,
@@ -2751,6 +2758,7 @@ body:not(.sidebar-hidden) #graph{ right: 352px; }
 #simTime{ color:#111; font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
 
 /* Panel heading icon dots */
+#entityTypesPanel .panelHeader::before,
 #addNodePanel .panelHeader::before,
 #addGroupPanel .panelHeader::before,
 #advancedPanel .panelHeader::before,
@@ -2984,6 +2992,7 @@ body:not(.sidebar-hidden) #graph{
 #sidebarHeader,
 #sidebar #controls,
 #sidebar #fileControls,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -3012,6 +3021,7 @@ body:not(.sidebar-hidden) #graph{
 
 #sidebar #controls::before,
 #sidebar #fileControls::before,
+#entityTypesPanel::before,
 #addNodePanel::before,
 #addGroupPanel::before,
 #advancedPanel::before,
@@ -3024,6 +3034,7 @@ body:not(.sidebar-hidden) #graph{
 
 #controls .panelHeader,
 #fileControls .panelHeader,
+#entityTypesPanel .panelHeader,
 #addNodePanel .panelHeader,
 #addGroupPanel .panelHeader,
 #advancedPanel .panelHeader,
@@ -3714,6 +3725,7 @@ body:not(.sidebar-hidden) #graph{
 #sidebarHeader,
 #sidebar #controls,
 #sidebar #fileControls,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -3733,6 +3745,7 @@ body:not(.sidebar-hidden) #graph{
 #sidebarHeader::after,
 #sidebar #controls::after,
 #sidebar #fileControls::after,
+#entityTypesPanel::after,
 #addNodePanel::after,
 #addGroupPanel::after,
 #advancedPanel::after,
@@ -3774,6 +3787,7 @@ body:not(.sidebar-hidden) #graph{
 
 #controls .panelHeader,
 #fileControls .panelHeader,
+#entityTypesPanel .panelHeader,
 #addNodePanel .panelHeader,
 #addGroupPanel .panelHeader,
 #advancedPanel .panelHeader,
@@ -4189,6 +4203,7 @@ body:not(.sidebar-hidden) #graph{
 #sidebarHeader,
 #sidebar #controls,
 #sidebar #fileControls,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -4443,6 +4458,7 @@ body.landing-choice-ready .landingProgressState{
 /* Sidebar declutter refinement */
 #sidebar #controls,
 #backgroundPanel,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -5208,6 +5224,7 @@ body.tablet-ui #toast{
 #sidebarHeader,
 #sidebar #controls,
 #sidebar #fileControls,
+#entityTypesPanel,
 #addNodePanel,
 #addGroupPanel,
 #advancedPanel,
@@ -5226,6 +5243,7 @@ body.tablet-ui #toast{
 #sidebarHeader::after,
 #sidebar #controls::after,
 #sidebar #fileControls::after,
+#entityTypesPanel::after,
 #addNodePanel::after,
 #addGroupPanel::after,
 #advancedPanel::after,
@@ -5447,6 +5465,7 @@ body.sim-running #selectionInspectorPanel,
 body.sim-running #sidebarHeader,
 body.sim-running #sidebar #controls,
 body.sim-running #sidebar #fileControls,
+body.sim-running #entityTypesPanel,
 body.sim-running #addNodePanel,
 body.sim-running #addGroupPanel,
 body.sim-running #advancedPanel,
@@ -5485,6 +5504,7 @@ body.sim-running #selectionInspectorPanel{
 body.sim-running #sidebarHeader,
 body.sim-running #sidebar #controls,
 body.sim-running #sidebar #fileControls,
+body.sim-running #entityTypesPanel,
 body.sim-running #addNodePanel,
 body.sim-running #addGroupPanel,
 body.sim-running #advancedPanel,
@@ -6098,6 +6118,7 @@ body:not(.mobile-ui):not(.tablet-ui) #sidebarHeader .appBrandText{
 body:not(.mobile-ui):not(.tablet-ui) #sidebar #controls,
 body:not(.mobile-ui):not(.tablet-ui) #sidebar #fileControls,
 body:not(.mobile-ui):not(.tablet-ui) #backgroundPanel,
+body:not(.mobile-ui):not(.tablet-ui) #entityTypesPanel,
 body:not(.mobile-ui):not(.tablet-ui) #addNodePanel,
 body:not(.mobile-ui):not(.tablet-ui) #addGroupPanel,
 body:not(.mobile-ui):not(.tablet-ui) #advancedPanel,
@@ -6110,6 +6131,7 @@ body:not(.mobile-ui):not(.tablet-ui) #shortcutPanel{
 
 body:not(.mobile-ui):not(.tablet-ui) #controls .panelHeader,
 body:not(.mobile-ui):not(.tablet-ui) #fileControls .panelHeader,
+body:not(.mobile-ui):not(.tablet-ui) #entityTypesPanel .panelHeader,
 body:not(.mobile-ui):not(.tablet-ui) #addNodePanel .panelHeader,
 body:not(.mobile-ui):not(.tablet-ui) #addGroupPanel .panelHeader,
 body:not(.mobile-ui):not(.tablet-ui) #advancedPanel .panelHeader,

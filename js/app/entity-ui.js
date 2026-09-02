@@ -983,6 +983,7 @@
     panel.innerHTML = '<div class="panelHeader">Entity Types</div><div id="entityTypesPanelBody" class="entityTypesPanelBody"></div>';
     const anchor = document.getElementById('addNodePanel');
     if(anchor?.parentNode) anchor.parentNode.insertBefore(panel, anchor);
+    App.registerSidebarCollapsiblePanel?.('entityTypesPanel');
     renderTypeManager();
     root.addEventListener?.('factsim:graph-applied', ()=>renderTypeManager());
   }
