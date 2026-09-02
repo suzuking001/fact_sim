@@ -1389,14 +1389,7 @@ window.beginGroupPlacement = beginGroupPlacement;
   const addNodePanel = document.getElementById('addNodePanel');
   const sel = document.getElementById('nodeKindSelect');
   const btn = document.getElementById('btnAddNode');
-  const propsWrap = document.getElementById('addNodeProps');
-  const searchInput = document.getElementById('nodeTypeSearch');
-  const categoryTabsWrap = document.getElementById('nodeCategoryTabs');
-  const quickPicksWrap = document.getElementById('nodeQuickPicks');
-  const browseDetails = document.getElementById('nodeTypeBrowseDetails');
-  const settingsDetails = document.getElementById('nodeSettingsDetails');
-  const descriptionEl = document.getElementById('nodeKindDescription');
-  if(!sel || !btn || !propsWrap) return;
+  if(!sel || !btn) return;
   const NODE_SCHEMAS = {
     machine:{ type:'factory/basic', props:[
       { key:'title', label:'Title', type:'text', default:'Machine', target:'title' },
@@ -1636,268 +1629,32 @@ window.beginGroupPlacement = beginGroupPlacement;
     station:{ label:'Store', description:'Store a root Entity and transfer its children through role-based ports.' },
     transferstation:{ label:'Transfer', description:'Attach, detach, or transfer any nested Entity.' }
   };
-  const QUICK_PICK_KINDS = ['machine', 'buffer', 'router', 'pack', 'unpack', 'source', 'sink', 'basic'];
-  const CATEGORY_TABS = [
-    { key: 'all', label: 'All' },
-    { key: 'core', label: 'Core' },
-    { key: 'flow', label: 'Flow' },
-    { key: 'carrier', label: 'Handling' },
-    { key: 'utility', label: 'Utility' }
-  ];
-  const NODE_CATEGORY = {
-    machine: 'core',
-    inspection: 'core',
-    buffer: 'core',
-    conveyor: 'flow',
-    router: 'flow',
-    pack: 'carrier',
-    unpack: 'carrier',
-    basic: 'utility',
-    equip: 'core',
-    source: 'core',
-    entitysource: 'carrier',
-    sink: 'core',
-    split: 'flow',
-    branch: 'flow',
-    merge: 'flow',
-    join: 'flow',
-    shuttle: 'flow',
-    carrierroute: 'carrier',
-    station: 'carrier',
-    transferstation: 'carrier',
-    agvroute: 'carrier',
-    signal: 'utility',
-    note: 'utility'
-  };
-  let activeCategory = 'all';
-
-  function makeField(def){
-    const wrap = document.createElement('div');
-    wrap.className = 'field';
-    const label = document.createElement('label');
-    label.textContent = def.label || def.key;
-    wrap.appendChild(label);
-    let input;
-    if(def.type === 'textarea'){
-      input = document.createElement('textarea');
-      if(def.rows) input.rows = def.rows;
-      input.value = def.default ?? '';
-    }else if(def.type === 'number'){
-      input = document.createElement('input');
-      input.type = 'number';
-      if(typeof def.step !== 'undefined') input.step = String(def.step);
-      if(typeof def.min !== 'undefined') input.min = String(def.min);
-      if(typeof def.max !== 'undefined') input.max = String(def.max);
-      input.value = def.default ?? 0;
-    }else if(def.type === 'select'){
-      input = document.createElement('select');
-      const options = Array.isArray(def.options) ? def.options : [];
-      options.forEach((entry)=>{
-        const option = document.createElement('option');
-        if(entry && typeof entry === 'object'){
-          option.value = String(entry.value ?? entry.label ?? '');
-          option.textContent = String(entry.label ?? entry.value ?? '');
-        }else{
-          option.value = String(entry ?? '');
-          option.textContent = String(entry ?? '');
-        }
-        input.appendChild(option);
-      });
-      input.value = String(def.default ?? '');
-    }else if(def.type === 'checkbox'){
-      input = document.createElement('input');
-      input.type = 'checkbox';
-      input.checked = !!def.default;
-    }else if(def.type === 'color'){
-      input = document.createElement('input');
-      input.type = 'color';
-      input.value = def.default ?? '#ffffff';
-    }else{
-      input = document.createElement('input');
-      input.type = 'text';
-      input.value = def.default ?? '';
-    }
-    input.dataset.field = def.key;
-    wrap.appendChild(input);
-    return wrap;
-  }
-
   function getNodeMeta(kind){
     return NODE_META[kind] || { label: kind, description: '' };
   }
 
-  function getNodeCategory(kind){
-    return NODE_CATEGORY[kind] || 'utility';
-  }
-
-  function listNodeKinds(filterText){
-    const filter = String(filterText || '').trim().toLowerCase();
-    return Object.keys(NODE_SCHEMAS).filter((kind)=>{
-      if(activeCategory !== 'all' && getNodeCategory(kind) !== activeCategory) return false;
-      if(!filter) return true;
-      const meta = getNodeMeta(kind);
-      const schema = NODE_SCHEMAS[kind];
-      const haystack = [
-        kind,
-        meta.label,
-        meta.description,
-        schema && schema.type
-      ].join(' ').toLowerCase();
-      return haystack.includes(filter);
-    });
-  }
-
-  function renderCategoryTabs(){
-    if(!categoryTabsWrap) return;
-    categoryTabsWrap.innerHTML = '';
-    CATEGORY_TABS.forEach((tab)=>{
-      const btnEl = document.createElement('button');
-      btnEl.type = 'button';
-      btnEl.className = 'categoryTabBtn' + (tab.key === activeCategory ? ' is-active' : '');
-      btnEl.textContent = tab.label;
-      btnEl.setAttribute('role', 'tab');
-      btnEl.setAttribute('aria-selected', tab.key === activeCategory ? 'true' : 'false');
-      btnEl.addEventListener('click', ()=>{
-        activeCategory = tab.key;
-        renderCategoryTabs();
-        if(!rebuildNodeSelect(searchInput?.value || '')) return;
-        renderFields(sel.value || 'equip');
-      });
-      categoryTabsWrap.appendChild(btnEl);
-    });
-  }
-
-  function renderQuickPicks(activeKind){
-    if(!quickPicksWrap) return;
-    quickPicksWrap.innerHTML = '';
-    QUICK_PICK_KINDS.forEach((kind)=>{
-      const meta = getNodeMeta(kind);
-      if(!meta) return;
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'quickPickBtn' + (kind === activeKind ? ' is-active' : '');
-      chip.textContent = meta.label;
-      chip.title = meta.description || meta.label;
-      chip.addEventListener('click', ()=>{
-        if(searchInput) searchInput.value = '';
-        activeCategory = 'all';
-        renderCategoryTabs();
-        rebuildNodeSelect('');
-        sel.value = kind;
-        renderFields(kind);
-      });
-      quickPicksWrap.appendChild(chip);
-    });
-  }
-
-  function rebuildNodeSelect(filterText){
-    const current = sel.value || 'equip';
-    const kinds = listNodeKinds(filterText);
+  function populateNodeSelect(){
+    const kinds = Object.keys(NODE_SCHEMAS);
     sel.innerHTML = '';
-    if(!kinds.length){
-      btn.disabled = true;
-      btn.classList.remove('is-cancel');
-      btn.textContent = 'No Matching Types';
-      propsWrap.innerHTML = '<div class="placeholder">No node types match this filter.</div>';
-      if(descriptionEl) descriptionEl.textContent = 'Try a different search term.';
-      renderQuickPicks('');
-      return false;
-    }
     kinds.forEach((kind)=>{
       const opt = document.createElement('option');
       opt.value = kind;
       opt.textContent = getNodeMeta(kind).label;
       sel.appendChild(opt);
     });
-    btn.disabled = false;
-    sel.value = kinds.includes(current) ? current : kinds[0];
-    return true;
+    sel.value = kinds.includes('equip') ? 'equip' : (kinds[0] || '');
   }
 
   function updateNodeBuilderUi(){
-    const selectedKind = sel.value || 'equip';
-    const meta = getNodeMeta(selectedKind);
     const active = !!(App.placement && App.placement.active && App.placement.kind === 'node');
-    const label = active
-      ? _getPlacementItemLabel('node', App.placement.item)
-      : String(meta.label || 'Node');
     btn.disabled = !sel.options.length;
     btn.classList.toggle('is-cancel', active);
-    btn.textContent = active ? 'Cancel Placement' : `Place ${label}`;
-    if(descriptionEl && !active){
-      descriptionEl.textContent = meta.description || 'Choose a preset. Open settings only when you need custom defaults.';
-    }
-    if(active && settingsDetails) settingsDetails.open = true;
+    btn.textContent = active ? 'Cancel Placement' : 'Place Node';
   }
   App.refreshNodeBuilderUI = updateNodeBuilderUi;
 
-  function syncNodeBuilderDetails(kind){
-    const selectedKind = kind || sel.value || 'equip';
-    const filterText = String(searchInput?.value || '').trim();
-    if(browseDetails){
-      browseDetails.open = !!filterText || !QUICK_PICK_KINDS.includes(selectedKind);
-    }
-    if(settingsDetails){
-      const schema = NODE_SCHEMAS[selectedKind] || NODE_SCHEMAS.equip;
-      const count = Array.isArray(schema?.props) ? schema.props.length : 0;
-      settingsDetails.hidden = count <= 0;
-      const summary = settingsDetails.querySelector('summary');
-      if(summary) summary.textContent = count > 0 ? `Node Settings (${count})` : 'Node Settings';
-    }
-  }
-
-  function renderFields(kind){
-    const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
-    const meta = getNodeMeta(kind);
-    propsWrap.innerHTML = '';
-    const active = !!(App.placement && App.placement.active && App.placement.kind === 'node');
-    if(descriptionEl){
-      descriptionEl.textContent = active
-        ? `Place ${_getPlacementItemLabel('node', App.placement.item)} on the canvas. Right-click or Esc cancels.`
-        : (meta.description || 'Choose a preset. Open settings only when you need custom defaults.');
-    }
-    if(!schema.props || !schema.props.length){
-      const div = document.createElement('div'); div.className='placeholder'; div.textContent='No configurable properties.'; propsWrap.appendChild(div);
-      renderQuickPicks(kind);
-      syncNodeBuilderDetails(kind);
-      updateNodeBuilderUi();
-      return;
-    }
-    schema.props.forEach(def=>{ propsWrap.appendChild(makeField(def)); });
-    renderQuickPicks(kind);
-    syncNodeBuilderDetails(kind);
-    updateNodeBuilderUi();
-  }
-
-  rebuildNodeSelect('');
-  renderCategoryTabs();
-  renderFields(sel.value || 'equip');
-  sel.addEventListener('change', ()=> renderFields(sel.value || 'equip'));
-  if(searchInput){
-    searchInput.addEventListener('input', ()=>{
-      if(!rebuildNodeSelect(searchInput.value)) return;
-      renderFields(sel.value || 'equip');
-    });
-    if(!searchInput.__globalShortcutHooked){
-      window.addEventListener('keydown', (e)=>{
-        const target = e.target;
-        const tag = String(target?.tagName || '').toUpperCase();
-        const isTypingTarget = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable;
-        if(e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTypingTarget){
-          e.preventDefault();
-          if(typeof App.focusSidebarPanel === 'function') App.focusSidebarPanel('addNodePanel');
-          searchInput.focus();
-          searchInput.select();
-          return;
-        }
-        if(e.key === 'Escape' && document.activeElement === searchInput && searchInput.value){
-          searchInput.value = '';
-          if(rebuildNodeSelect('')) renderFields(sel.value || 'equip');
-        }
-      });
-      searchInput.__globalShortcutHooked = true;
-    }
-  }
+  populateNodeSelect();
+  updateNodeBuilderUi();
 
   btn.addEventListener('click', ()=>{
     if(App.placement && App.placement.active && App.placement.kind === 'node'){
@@ -1918,57 +1675,13 @@ window.beginGroupPlacement = beginGroupPlacement;
       const jitterX = Math.floor(Math.random()*60);
       const jitterY = Math.floor(Math.random()*60);
       node.pos = [baseX + jitterX, baseY + jitterY];
-      if(schema.props && schema.props.length){
-        schema.props.forEach(def=>{
-          const el = propsWrap.querySelector(`[data-field="${def.key}"]`);
-          if(!el) return;
-          let val;
-          if(def.type === 'number'){
-            const parsed = parseFloat(el.value);
-            val = isNaN(parsed) ? def.default : parsed;
-          }else if(def.type === 'checkbox'){
-            val = el.checked;
-          }else{
-            val = el.value;
-          }
-          if(def.target === 'title'){
-            if(typeof val === 'string' && val.trim()) node.title = val.trim();
-          }else if(def.apply){
-            def.apply(node, val);
-          }else if(node.type === 'factory/basic' && /^processTime(?:\d+)?$/.test(def.key)){
-            const timings = App.ensureBasicPortTimings?.(node);
-            const index = def.key === 'processTime' ? 0 : Math.max(0, Number(def.key.replace('processTime', '')) - 1);
-            const port = (node.inputs || []).filter((entry)=>entry?.channel !== 'signal')[index];
-            if(port && timings?.inputs?.[port.portId]){
-              const seconds = Math.max(0, Number(val) || 0);
-              timings.inputs[port.portId].processTimeSec = seconds;
-              timings.inputs[port.portId].processStages = [{ stageId:`${port.portId}-process-1`, durationSec:seconds }];
-            }
-          }else if(node.type === 'factory/basic' && /^downTime(?:\d+)?$/.test(def.key)){
-            const timings = App.ensureBasicPortTimings?.(node);
-            const index = def.key === 'downTime' ? 0 : Math.max(0, Number(def.key.replace('downTime', '')) - 1);
-            const port = (node.outputs || []).filter((entry)=>entry?.channel !== 'signal')[index];
-            if(port && timings?.outputs?.[port.portId]) timings.outputs[port.portId].downTimeSec = Math.max(0, Number(val) || 0);
-          }else if(node.type === 'factory/basic' && ['ratio','strictIdMatch','transportMode','outSequence','preset','operation','sourceKind','targetKind','itemKind','batchMode','quantity','relationMode','searchDepth','autoRelease'].includes(def.key)){
-            const operation = Array.isArray(node.properties?.operations) ? node.properties.operations[0] : null;
-            if(operation){ operation.config = operation.config || {}; operation.config[def.key] = val; node.onPropertyChanged?.('operations'); }
-          }else{
-            node.properties = node.properties || {};
-            node.properties[def.key] = val;
-            if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged(def.key);
-          }
-        });
-        // Preset runtime setup can replace the constructor's temporary ports.
-        // Build the standard Flow configuration only after all preset settings
-        // and final ports have been applied.
-        if(node.type === 'factory/basic' && typeof App.ensureBasicTemplateFlowRules === 'function'){
-          App.ensureBasicTemplateFlowRules(node, { force: false, templateId:schema.templateId || kind });
-        }
-        if(schema.flowTemplate === 'sequence' && typeof App.configureBasicSequenceGenerator === 'function'){
-          App.configureBasicSequenceGenerator(node);
-        }
-        if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
+      if(node.type === 'factory/basic' && typeof App.ensureBasicTemplateFlowRules === 'function'){
+        App.ensureBasicTemplateFlowRules(node, { force: false, templateId:schema.templateId || kind });
       }
+      if(schema.flowTemplate === 'sequence' && typeof App.configureBasicSequenceGenerator === 'function'){
+        App.configureBasicSequenceGenerator(node);
+      }
+      if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
       if(typeof window.enforceNodeOverlayMinSize === 'function'){
         try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}
       }
@@ -2002,14 +1715,15 @@ window.beginGroupPlacement = beginGroupPlacement;
   const defaultCollapseState = {
     controls: false,
     backgroundPanel: false,
+    entityTypesPanel: true,
     addNodePanel: true,
     addGroupPanel: true,
     advancedPanel: true,
     shortcutPanel: true,
     fileControls: true
   };
-  const collapsibleIds = ['controls', 'backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
-  const accordionIds = ['backgroundPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
+  const collapsibleIds = ['controls', 'backgroundPanel', 'entityTypesPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
+  const accordionIds = ['backgroundPanel', 'entityTypesPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
   const collapseKey = 'fact_sim_sidebar_panels_v6';
 
   function readCollapseState(){

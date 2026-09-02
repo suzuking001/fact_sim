@@ -323,39 +323,10 @@
     <div id="addNodePanel">
       <div class="panelHeader">Add Node</div>
       <div class="field">
-        <label for="nodeTypeSearch">Search</label>
-        <input id="nodeTypeSearch" type="search" placeholder="Search node types">
+        <label for="nodeKindSelect">Node Type</label>
+        <select id="nodeKindSelect"></select>
       </div>
-      <div id="nodeQuickPicks" class="quick-pick-row" aria-label="Quick node picks"></div>
-      <div id="nodeKindDescription" class="panel-help panel-help-compact">Choose a preset. Open settings only when you need custom defaults.</div>
-      <details id="nodeTypeBrowseDetails" class="panelDetails">
-        <summary>Browse All Types</summary>
-        <div id="nodeCategoryTabs" class="category-tabs" role="tablist" aria-label="Node categories"></div>
-        <div class="field">
-          <label for="nodeKindSelect">Node type</label>
-          <select id="nodeKindSelect">
-            <option value="equip">Equipment</option>
-            <option value="note">Memo</option>
-            <option value="signal">Signal</option>
-            <option value="shuttle">Shuttle Stage</option>
-            <option value="source">Source</option>
-            <option value="sink">Sink</option>
-            <option value="split">Split</option>
-            <option value="branch">Branch</option>
-            <option value="agvroute">Transport Route</option>
-            <option value="carrierroute">Transport Route</option>
-            <option value="station">Store</option>
-            <option value="transferstation">Transfer</option>
-            <option value="merge">Merge</option>
-            <option value="join">Join</option>
-          </select>
-        </div>
-      </details>
-      <details id="nodeSettingsDetails" class="panelDetails">
-        <summary>Node Settings</summary>
-        <div id="addNodeProps" class="propFields"></div>
-      </details>
-      <button id="btnAddNode">Place on Canvas</button>
+      <button id="btnAddNode">Place Node</button>
     </div>
     <div id="addGroupPanel">
       <div class="panelHeader">Add Stop Group</div>
@@ -865,7 +836,7 @@ SOFTWARE.
     <script src="js/nodes/ioflip.js?v=20260829b"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js?v=20260901a"></script>
+    <script src="js/link-anim.js?v=20260901b"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/equipment.js?v=20260824f"></script>
   <script src="js/nodes/note.js?v=20260305a"></script>
@@ -924,7 +895,7 @@ SOFTWARE.
   <script src="js/app/examples.js?v=20260831b"></script>
   <script src="js/app/file-io.js?v=20260831a"></script>
   <script src="js/app/access-counter.js?v=20260307a"></script>
-  <script src="js/app/ui.js?v=20260831a"></script>
+  <script src="js/app/ui.js?v=20260902b"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>
