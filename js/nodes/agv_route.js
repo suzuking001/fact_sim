@@ -1,5 +1,5 @@
 ﻿// AGV Route node (generalised max_load = n)
-// Follows work_node_memo spec: agv_process -> workIn_idle_k/process_k (repeat) -> workOut_wait_k/down_k (repeat) -> agvOut_wait/down -> agvIn_idle
+// State flow: agv_process -> workIn_idle_k/process_k (repeat) -> workOut_wait_k/down_k (repeat) -> agvOut_wait/down -> agvIn_idle
 
 const AGV_ROUTE_DEFAULTS = {
   processTime: 3,

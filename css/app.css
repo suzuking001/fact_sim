@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&family=Poppins:wght@500;700&display=swap');
-
 :root{
   /* Monochrome minimal theme */
   --bg:#f6f6f6;
@@ -1075,31 +1073,6 @@ body:not(.timeline-hidden) #graph{ bottom: var(--timeline-height); }
   color: #111111;
   font-weight: 700;
 }
-#sidebar .accessCounter{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 10px;
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
-  background: #fafafa;
-  color: #2f2f2f;
-  font-size: 12px;
-}
-#sidebar .accessCounter .accessCounterLabel{
-  color: #666666;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-#accessCounterValue{
-  color: #111111;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  font-variant-numeric: tabular-nums;
-  font-size: 12px;
-  font-weight: 700;
-}
-
 /* Speed slider styles */
 .control-group{ display:flex; flex-direction:column; gap:6px; }
 #speedRange{ width:100%; accent-color: var(--accent); }
@@ -3140,11 +3113,6 @@ body:not(.sidebar-hidden) #graph{
   gap: 10px;
 }
 
-#sidebar .accessCounter{
-  background: rgba(250,250,252,0.96);
-  border: 1px solid rgba(17,17,17,0.08);
-}
-
 .simStatusCard{
   background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(249,249,251,0.92));
   border-radius: 16px;
@@ -3960,13 +3928,6 @@ body:not(.sidebar-hidden) #graph{
 
 #sidebar .btn-row{
   gap: 10px;
-}
-
-#sidebar .accessCounter{
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.74);
-  background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(249,250,252,0.74));
-  box-shadow: 0 14px 30px rgba(15,23,42,0.06);
 }
 
 .simStatusCard{
@@ -5232,7 +5193,6 @@ body.tablet-ui #toast{
 #backgroundPanel,
 .quickStartCard,
 .simStatusCard,
-.accessCounter,
 #simTimeHud{
   background:
     linear-gradient(180deg, rgba(255,255,255,0.24), rgba(246,249,253,0.08)),
@@ -5473,7 +5433,6 @@ body.sim-running #shortcutPanel,
 body.sim-running #backgroundPanel,
 body.sim-running .quickStartCard,
 body.sim-running .simStatusCard,
-body.sim-running .accessCounter,
 body.sim-running #simTimeHud,
 body.sim-running #editorRunHud,
 body.sim-running #mobileNav,
@@ -5512,7 +5471,6 @@ body.sim-running #shortcutPanel,
 body.sim-running #backgroundPanel,
 body.sim-running .quickStartCard,
 body.sim-running .simStatusCard,
-body.sim-running .accessCounter,
 body.sim-running #simTimeHud,
 body.sim-running #editorRunHud{
   background: rgba(255,255,255,0.9) !important;
@@ -6348,5 +6306,801 @@ body:not(.mobile-ui):not(.tablet-ui) .editorRunSpeed{
 
   body:not(.mobile-ui):not(.tablet-ui) #timelineHeader .timelineTitle{
     display: none;
+  }
+}
+
+/* ===== 2026 interface refresh: quiet, compact, and legible ===== */
+:root{
+  --ui-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+  --ui-mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --bg: #f5f5f7;
+  --panel-bg: #ffffff;
+  --panel-border: #e5e5ea;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --accent: #0071e3;
+  --accent-2: #0066cc;
+  --input-bg: #ffffff;
+  --input-border: #d2d2d7;
+  --menu-shell-bg: #f5f5f7;
+  --menu-shell-border: #dcdce1;
+  --menu-card-bg: #ffffff;
+  --menu-card-border: #e5e5ea;
+  --menu-text: #1d1d1f;
+  --menu-muted: #6e6e73;
+  --menu-input-bg: #ffffff;
+  --menu-input-border: #d2d2d7;
+  --radius: 12px;
+  --radius-sm: 9px;
+  --shadow: 0 8px 28px rgba(0,0,0,.08);
+  --menu-shadow: 0 1px 2px rgba(0,0,0,.035);
+  --sidebar-width: 312px;
+  --timeline-header: 48px;
+}
+
+html,
+body{
+  background: #ffffff;
+  color: var(--text);
+  font-family: var(--ui-font) !important;
+  font-size: 14px;
+  letter-spacing: -.006em;
+}
+
+body::before{
+  content: none;
+}
+
+button,
+input,
+select,
+textarea{
+  font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+summary{
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible{
+  outline: 3px solid rgba(0,113,227,.22) !important;
+  outline-offset: 1px;
+}
+
+*::-webkit-scrollbar{
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb{
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(60,60,67,.28);
+  background-clip: content-box;
+}
+
+/* Landing: one calm canvas with clear choices, no decorative glass effects. */
+#landing{
+  background: #ffffff;
+}
+
+#landing::before,
+#landing::after{
+  content: none;
+}
+
+.landingShell{
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 12px 0 24px;
+}
+
+.landingTopbar{
+  top: 0;
+  margin-bottom: 8px;
+  padding: 9px 4px;
+  border: 0;
+  border-bottom: 1px solid #eeeeF0;
+  border-radius: 0;
+  background: rgba(255,255,255,.94);
+  box-shadow: none;
+  backdrop-filter: blur(16px) saturate(1.2);
+}
+
+.landingWordmark{
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.landingWordmarkLogo{
+  width: 20px;
+  height: 20px;
+}
+
+.landingNav{
+  gap: 6px;
+}
+
+.landingNav a,
+.landingFooterLinks a{
+  padding: 6px 9px;
+  border-radius: 7px;
+  color: #515154;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.landingNav a:hover,
+.landingFooterLinks a:hover{
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.landingHero{
+  padding: clamp(24px, 5vw, 54px) 0 34px;
+  border: 0;
+  border-bottom: 1px solid #e5e5ea;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.landingHeroGrid{
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, .75fr);
+  gap: clamp(28px, 6vw, 72px);
+  align-items: center;
+}
+
+.landingEyebrow,
+.landingMetricEyebrow,
+.landingSectionKicker{
+  margin-bottom: 8px;
+  color: #6e6e73;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .08em;
+}
+
+#landingTitle{
+  font-size: clamp(48px, 8vw, 78px);
+  font-weight: 700;
+  letter-spacing: -.055em;
+}
+
+.landingSubtitle{
+  margin-top: 8px;
+  color: #3a3a3c;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 550;
+}
+
+.landingBody{
+  margin-top: 14px;
+  max-width: 58ch;
+  color: #515154;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.landingChoicePanel{
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.landingChoicePanel h2{
+  margin-bottom: 12px;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+
+.landingChoiceList{
+  gap: 7px;
+}
+
+.landingChoiceBtn{
+  min-height: 62px;
+  grid-template-columns: 28px minmax(0, 1fr) 20px;
+  gap: 9px;
+  padding: 10px 12px;
+  border-color: #e2e2e7;
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.025);
+}
+
+.landingChoiceBtnPrimary{
+  border-color: rgba(0,113,227,.35);
+  background: #f2f8ff;
+}
+
+.landingChoiceBtn:hover:not(:disabled){
+  transform: none;
+  border-color: rgba(0,113,227,.55);
+  background: #f7fbff;
+  box-shadow: 0 3px 12px rgba(0,113,227,.08);
+}
+
+.landingChoiceCopy{
+  gap: 2px;
+}
+
+.landingChoiceCopy strong{
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.landingChoiceCopy small{
+  color: #6e6e73;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.landingProgressWrap{
+  margin-top: 18px;
+  padding: 11px 12px;
+  border: 1px solid #e5e5ea;
+  border-radius: 10px;
+  background: #fafafa;
+  box-shadow: none;
+}
+
+.landingProgressHead{
+  margin-bottom: 7px;
+}
+
+.landingProgressBar{
+  height: 4px;
+  background: #e5e5ea;
+}
+
+.landingProgressFill{
+  background: #0071e3;
+}
+
+.landingProgressMeta{
+  margin-top: 7px;
+  color: #6e6e73;
+  font-size: 11px;
+}
+
+.landingProgressState{
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: #edf5ff;
+  color: #0066cc;
+}
+
+.landingSection{
+  margin-top: 0;
+  padding: 26px 0;
+  border: 0;
+  border-bottom: 1px solid #e5e5ea;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.landingSectionTitle{
+  max-width: 760px;
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+.landingSectionText,
+.landingCardMini p{
+  color: #515154;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.landingConceptGrid{
+  gap: 20px;
+}
+
+.landingConceptStack,
+.landingGrid{
+  gap: 8px;
+}
+
+.landingCardMini{
+  padding: 13px 14px;
+  border: 1px solid #e5e5ea;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.landingCardMini h3{
+  font-size: 14px;
+}
+
+.landingPills{
+  gap: 6px;
+}
+
+.landingPills span{
+  min-height: 25px;
+  padding: 0 9px;
+  border-color: #d2e7fb;
+  border-radius: 7px;
+  background: #f2f8ff;
+  color: #0066cc;
+}
+
+.landingFooter{
+  padding-top: 18px;
+}
+
+/* Workspace: solid surfaces and dense, predictable controls. */
+#graph{
+  background: #f7f7f8;
+}
+
+#sidebar{
+  width: var(--sidebar-width);
+  gap: 7px;
+  padding: 8px 7px;
+  border-right: 1px solid #dcdce1;
+  background: #f5f5f7;
+  box-shadow: 4px 0 16px rgba(0,0,0,.035);
+  backdrop-filter: none;
+}
+
+#sidebar::before{
+  content: none;
+}
+
+#sidebarHeader,
+#sidebar #controls,
+#sidebar #fileControls,
+#backgroundPanel,
+#entityTypesPanel,
+#addNodePanel,
+#addGroupPanel,
+#advancedPanel,
+#shortcutPanel{
+  gap: 7px;
+  padding: 9px 10px;
+  overflow: visible;
+  border: 1px solid #e1e1e6;
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.025);
+  backdrop-filter: none;
+}
+
+#sidebarHeader::after,
+#sidebar #controls::after,
+#sidebar #fileControls::after,
+#backgroundPanel::after,
+#entityTypesPanel::after,
+#addNodePanel::after,
+#addGroupPanel::after,
+#advancedPanel::after,
+#shortcutPanel::after{
+  content: none;
+}
+
+#sidebarHeader{
+  min-height: 44px;
+  padding: 5px 8px;
+}
+
+#sidebarHeader .appBrandRow{
+  gap: 8px;
+}
+
+#sidebarHeader .appLogo{
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #f5f5f7;
+  box-shadow: none;
+}
+
+#sidebarHeader .appBrandText{
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.panelHeader,
+#sidebar .panelHeader{
+  min-height: 22px;
+  color: #515154;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 22px;
+}
+
+.sidebar-panel-collapsible .panelHeader::after{
+  content: "▾" !important;
+  font-size: 10px;
+}
+
+#sidebar .control-group,
+#sidebar .field{
+  gap: 5px;
+}
+
+#sidebar label,
+#sidebar .fieldHint,
+#sidebar .panel-help,
+#sidebar .group-stop-rate{
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+#sidebar label{
+  color: #515154;
+  font-weight: 600;
+}
+
+#sidebar input,
+#sidebar select,
+#sidebar textarea{
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1d1d1f;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+#sidebar input:focus,
+#sidebar select:focus,
+#sidebar textarea:focus{
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0,113,227,.12);
+}
+
+#sidebar button,
+#fileControls button,
+#entityTypesPanel button,
+#addNodePanel button,
+#addGroupPanel button,
+#advancedPanel button,
+#shortcutPanel button,
+#backgroundPanel button{
+  min-height: 33px;
+  padding: 0 11px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1d1d1f;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+#sidebar button:hover:not(:disabled),
+#fileControls button:hover:not(:disabled),
+#entityTypesPanel button:hover:not(:disabled),
+#addNodePanel button:hover:not(:disabled),
+#addGroupPanel button:hover:not(:disabled),
+#advancedPanel button:hover:not(:disabled),
+#shortcutPanel button:hover:not(:disabled),
+#backgroundPanel button:hover:not(:disabled){
+  border-color: #b8b8bd;
+  background: #f5f5f7;
+  filter: none;
+  transform: none;
+}
+
+#btnAddNode,
+#btnAddGroup,
+#fileControls .button-primary,
+#editorRunHud #btnStart[data-run-state="start"]{
+  border-color: #0071e3 !important;
+  background: #0071e3 !important;
+  color: #ffffff !important;
+}
+
+.simStatusCard,
+.quickStartCard{
+  padding: 8px 9px;
+  border: 1px solid #e5e5ea;
+  border-radius: 9px;
+  background: #fafafa;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.simStatusGrid{
+  gap: 5px;
+}
+
+.simStatusItem strong,
+.realtimeFpsValue,
+.realtimeFactorValue{
+  font-size: 12px;
+}
+
+.panelDetails{
+  border-color: #e5e5ea;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.panelDetails > summary{
+  min-height: 32px;
+  color: #3a3a3c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#sidebarDragRail::before,
+#timelineRevealHandle::before{
+  background: #8e8e93;
+  box-shadow: none;
+}
+
+#editorTopHud{
+  top: 7px;
+  gap: 6px;
+}
+
+#editorTopHud #simTimeHud,
+#editorRunHud{
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 11px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 3px 12px rgba(0,0,0,.07);
+  backdrop-filter: blur(14px);
+}
+
+#editorTopHud #simTimeHud{
+  min-width: 132px;
+  padding: 6px 10px;
+  color: #515154;
+  font-size: 12px;
+}
+
+#simTime{
+  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+#editorRunHud{
+  gap: 5px;
+  padding: 4px;
+}
+
+#editorRunHud #btnStart,
+#editorRunHud #btnReset,
+.editorRunSpeed{
+  min-height: 34px;
+  border-radius: 8px;
+}
+
+#editorRunHud #btnStart,
+#editorRunHud #btnReset{
+  padding: 0 13px !important;
+  font-size: 12px;
+  box-shadow: none !important;
+}
+
+#editorRunHud #btnReset,
+.editorRunSpeed{
+  border-color: #e1e1e6 !important;
+  background: #ffffff !important;
+}
+
+.editorRunSpeed{
+  gap: 6px;
+  padding: 0 9px;
+  box-shadow: none;
+}
+
+.editorRunSpeedLabel{
+  font-size: 10px;
+  letter-spacing: .04em;
+}
+
+#editorRunHud #speedRange{
+  width: 96px;
+  height: 5px;
+  border: 0;
+  background: #d2d2d7;
+}
+
+#editorRunHud #speedRange::-webkit-slider-thumb{
+  width: 15px;
+  height: 15px;
+  margin-top: -5px;
+  border: 1px solid #d2d2d7;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.18);
+}
+
+#timelineDock{
+  border-top: 1px solid #dcdce1;
+  background: #ffffff;
+  box-shadow: 0 -3px 14px rgba(0,0,0,.045);
+  backdrop-filter: none;
+}
+
+#timelineHeader{
+  height: var(--timeline-header);
+  min-height: var(--timeline-header);
+  padding: 5px 8px;
+  border-bottom: 1px solid #e5e5ea;
+  background: #f7f7f8;
+  color: #1d1d1f;
+}
+
+#timelineHeader .timelineTabs{
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid #dcdce1;
+  border-radius: 8px;
+  background: #eeeeF0;
+  box-shadow: none;
+}
+
+#timelineHeader .timelineTab{
+  min-height: 29px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #515154;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#timelineHeader .timelineTab.is-active{
+  border: 0;
+  background: #ffffff;
+  color: #1d1d1f;
+  box-shadow: 0 1px 3px rgba(0,0,0,.11);
+}
+
+#timelineHeader .timelineTitle,
+#timelineHeader .timelineSelection,
+#timelineHeader .timelinePropsMeta{
+  color: #515154;
+  font-size: 11px;
+}
+
+#timelineHeader .timelineBtn{
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid #d2d2d7;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #1d1d1f;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+#timelineHeader .timelineBtn:hover{
+  border-color: #b8b8bd;
+  background: #f5f5f7;
+}
+
+#timelineBody,
+#timelineChartPanel,
+#nodePropsPanel,
+#selectionInspectorPanel,
+.workspacePopoutContent > #timelineChartPanel,
+.workspacePopoutContent > #nodePropsPanel,
+.workspacePopoutContent > #selectionInspectorPanel{
+  background: #ffffff;
+  backdrop-filter: none;
+}
+
+#mobileNav,
+#tabletActionBar{
+  border-color: #dcdce1;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 -2px 12px rgba(0,0,0,.06);
+  backdrop-filter: blur(14px);
+}
+
+body.sim-running #sidebar,
+body.sim-running #timelineDock,
+body.sim-running #sidebarHeader,
+body.sim-running #sidebar #controls,
+body.sim-running #sidebar #fileControls,
+body.sim-running #entityTypesPanel,
+body.sim-running #addNodePanel,
+body.sim-running #addGroupPanel,
+body.sim-running #advancedPanel,
+body.sim-running #shortcutPanel,
+body.sim-running #backgroundPanel,
+body.sim-running .quickStartCard,
+body.sim-running .simStatusCard,
+body.sim-running #simTimeHud,
+body.sim-running #editorRunHud{
+  background: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.035) !important;
+}
+
+@media (max-width: 980px){
+  .landingShell{
+    width: min(100% - 24px, 760px);
+  }
+
+  .landingHeroGrid,
+  .landingConceptGrid{
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+
+@media (max-width: 720px){
+  .landingShell{
+    width: min(100% - 20px, 620px);
+    padding-top: 6px;
+  }
+
+  .landingTopbar{
+    align-items: flex-start;
+  }
+
+  .landingNav{
+    justify-content: flex-end;
+  }
+
+  .landingHero{
+    padding: 26px 0;
+  }
+
+  .landingProgressMeta{
+    align-items: flex-start;
+  }
+
+  body.mobile-ui #editorTopHud,
+  body.tablet-ui #editorTopHud{
+    top: 7px;
+    left: 7px !important;
+    right: 7px;
+  }
+
+  body.mobile-ui #editorTopHud #simTimeHud,
+  body.tablet-ui #editorTopHud #simTimeHud{
+    min-width: 112px;
+  }
+
+  #editorRunHud #speedRange{
+    width: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,
+  *::before,
+  *::after{
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

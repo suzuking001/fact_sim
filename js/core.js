@@ -470,7 +470,7 @@ function _isNodeInspectorDetailHovered(node){
 }
 
 function _shouldShowNodeDetails(node){
-  return _isNodeHovered(node) || _isNodeSelected(node) || _isNodeInspectorDetailHovered(node);
+  return _isNodeSelected(node) || _isNodeInspectorDetailHovered(node);
 }
 
 function _stringifyPropValue(v){

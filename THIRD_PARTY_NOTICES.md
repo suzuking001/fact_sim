@@ -64,25 +64,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
-## 3. Google Fonts
-
-The following font families are loaded from Google Fonts by `css/app.css`:
-
-- Inter
-  - Upstream: https://github.com/rsms/inter
-  - Copyright 2020 The Inter Project Authors
-- JetBrains Mono
-  - Upstream: https://github.com/JetBrains/JetBrainsMono
-  - Copyright 2020 The JetBrains Mono Project Authors
-- Poppins
-  - Upstream: https://github.com/itfoundry/Poppins
-  - Copyright 2020 The Poppins Project Authors
-
-Each font family is licensed under the SIL Open Font License, Version 1.1.
-The complete license text is available from:
-
-- https://openfontlicense.org/open-font-license-official-text/
-- https://github.com/google/fonts/blob/main/ofl/inter/OFL.txt
-- https://github.com/google/fonts/blob/main/ofl/jetbrainsmono/OFL.txt
-- https://github.com/google/fonts/blob/main/ofl/poppins/OFL.txt
