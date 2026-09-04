@@ -151,14 +151,15 @@ class SplitNode extends EquipmentNode{
 
   _flowSplitOutputs(){
     const all = this._workOutputs();
-    const rules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+    const allRules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+    const activeFlowRuleId = String(this._activeFlowRuleId || '').trim();
+    const rules = activeFlowRuleId
+      ? allRules.filter((rule)=>!String(rule?.flowRuleId || '').trim() || String(rule.flowRuleId).trim() === activeFlowRuleId)
+      : allRules;
     if(!rules.length || typeof this._runtimeRuleTargetMatches !== 'function' || typeof this._runtimeRuleOutputSlots !== 'function') return all;
 
-    // A Split is the deliberate exception to the normal "first matching output
-    // rule wins" resolver: every matching destination is a branch of the same
-    // split operation.  Older converted graphs store one rule per physical OUT
-    // port, while new graphs may store all ports in one rule, so support both
-    // representations and keep the operation atomic.
+    // Output rules form an ordered OR set. The first matching ready rule wins;
+    // every port listed inside that one rule is the atomic fan-out set.
     const conditionReady = (condition)=>{
       const spec = condition && typeof condition === 'object' ? condition : { kind:condition };
       const kind = String(spec?.kind || 'available').trim().toLowerCase().replace(/[ _]+/g, '-');
@@ -176,8 +177,7 @@ class SplitNode extends EquipmentNode{
         : true;
     };
     const slots = new Set();
-    let otherwise = null;
-    let selected = false;
+    const otherwise = [];
     const addRule = (rule)=>{
       if(!conditionReady(rule?.releaseWhen || { kind:'available' })) return false;
       this._runtimeRuleOutputSlots(rule).forEach((slot)=>slots.add(slot));
@@ -186,13 +186,15 @@ class SplitNode extends EquipmentNode{
     for(const rule of rules){
       const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
       if(targets.some((target)=>String(target?.mode || '').toLowerCase() === 'otherwise')){
-        otherwise = rule;
+        otherwise.push(rule);
         continue;
       }
       if(!this._runtimeRuleTargetMatches(this._payload, rule)) continue;
-      if(addRule(rule)) selected = true;
+      if(addRule(rule)) return all.filter(({slotIndex})=>slots.has(slotIndex));
     }
-    if(!selected && otherwise) addRule(otherwise);
+    for(const rule of otherwise){
+      if(addRule(rule)) break;
+    }
     return all.filter(({slotIndex})=>slots.has(slotIndex));
   }
 

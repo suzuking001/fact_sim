@@ -428,6 +428,7 @@
       targets,
       target: clone(targets[0], targets[0]),
       releaseWhen: clone(condition, condition),
+      dispatch: ['split', 'shuttle'].includes(presetId) ? 'all-ready' : 'first-match',
       toPortIds,
       toPortId: toPortIds[0] || null
     };
@@ -750,17 +751,100 @@
     node.properties.outputRules = merged;
   }
 
+  // A Flow Rule is the end-to-end unit shown in the editor. Input and Output
+  // entries keep their existing runtime schemas, while flowRuleId links them
+  // into one INPUT -> PROCESS -> OUTPUT -> RECOVERY panel.
+  function ensureFlowRuleGroups(node){
+    if(!node || !isObject(node.properties)) return [];
+    const inputs = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : (node.properties.inputRules = []);
+    const outputs = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : (node.properties.outputRules = []);
+    const rows = [...inputs, ...outputs].filter(isObject);
+    const existing = [];
+    for(const rule of rows){
+      const id = text(rule.flowRuleId);
+      if(id && !existing.includes(id)) existing.push(id);
+    }
+    const fallback = existing[0] || `${behaviorId(node) || 'basic'}-flow-1`;
+    for(const rule of rows){
+      if(!text(rule.flowRuleId)) rule.flowRuleId = fallback;
+    }
+    return [...new Set(rows.map((rule)=>text(rule.flowRuleId)).filter(Boolean))];
+  }
+
+  // Output rules are an ordered OR set: the first ready matching rule wins.
+  // Multiple ports inside one rule are reserved for atomic fan-out runtimes
+  // (Split/Clone and synchronized Shuttle). Older ordinary nodes used a
+  // multi-port rule as "first ready" routing, so expand that representation
+  // into equivalent ordered single-port rules during normalization.
+  function normalizeOutputRuleDispatch(node){
+    if(!node || !isObject(node.properties)) return;
+    const behavior = behaviorId(node);
+    const simultaneous = behavior === 'split' || behavior === 'shuttle';
+    const rows = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : [];
+    const normalized = [];
+    const usedRuleIds = new Set(rows.map((rule)=>text(rule?.ruleId)).filter(Boolean));
+    const uniqueRuleId = (preferred)=>{
+      let candidate = preferred;
+      let suffix = 2;
+      while(usedRuleIds.has(candidate)){ candidate = `${preferred}-${suffix}`; suffix += 1; }
+      usedRuleIds.add(candidate);
+      return candidate;
+    };
+    for(const [ruleIndex, source] of rows.entries()){
+      if(!isObject(source)){ normalized.push(source); continue; }
+      const portIds = [...new Set((Array.isArray(source.toPortIds) && source.toPortIds.length
+        ? source.toPortIds : [source.toPortId]).map(text).filter(Boolean))];
+      if(simultaneous || portIds.length <= 1){
+        source.toPortIds = portIds;
+        source.toPortId = portIds[0] || null;
+        source.dispatch = simultaneous && portIds.length > 1 ? 'all-ready' : 'first-match';
+        normalized.push(source);
+        continue;
+      }
+      const baseRuleId = text(source.ruleId) || `output-rule-${ruleIndex + 1}`;
+      for(const [portIndex, portId] of portIds.entries()){
+        const next = clone(source, {});
+        next.ruleId = portIndex === 0 ? baseRuleId : uniqueRuleId(`${baseRuleId}-route-${portIndex + 1}`);
+        next.dispatch = 'first-match';
+        next.toPortIds = [portId];
+        next.toPortId = portId;
+        if(Array.isArray(next.downStages)){
+          next.downStages = next.downStages.filter((stage)=>!text(stage?.portId) || text(stage.portId) === portId);
+        }
+        normalized.push(next);
+      }
+    }
+    node.properties.outputRules = normalized;
+  }
+
+  function remapConditionStageRef(condition, acceptedKinds, property, stageId){
+    if(!isObject(condition)) return;
+    const kind = text(condition.kind).toLowerCase().replace(/[ _]+/g, '-');
+    if(acceptedKinds.includes(kind) && text(condition[property]) && text(condition[property]) !== 'all'){
+      condition[property] = stageId;
+    }
+    const children = Array.isArray(condition.conditions) ? condition.conditions : (Array.isArray(condition.children) ? condition.children : []);
+    children.forEach((child)=>remapConditionStageRef(child, acceptedKinds, property, stageId));
+    if(isObject(condition.condition)) remapConditionStageRef(condition.condition, acceptedKinds, property, stageId);
+    if(isObject(condition.child)) remapConditionStageRef(condition.child, acceptedKinds, property, stageId);
+  }
+
   function syncFlowRuleTimings(node){
     if(!node || !isObject(node.properties)) return { inputs:{}, outputs:{} };
     ensurePortIds(node);
     pruneSignalFlowRules(node);
     coalesceSplitOutputRules(node);
+    ensureFlowRuleGroups(node);
+    normalizeOutputRuleDispatch(node);
     const timings = ensurePortTimings(node);
     const inputRules = Array.isArray(node.properties.inputRules) ? node.properties.inputRules : [];
     const outputRules = Array.isArray(node.properties.outputRules) ? node.properties.outputRules : [];
     const behavior = behaviorId(node);
     const claimedInputs = new Set();
     const claimedOutputs = new Set();
+    const legacyInputDownStages = inputRules.map((rule)=>Array.isArray(rule?.downStages) && rule.downStages.length
+      ? clone(rule.downStages, [])
+      : null);
 
     for(const [index, rule] of inputRules.entries()){
       if(!isObject(rule)) continue;
@@ -772,19 +856,6 @@
         `${text(rule.ruleId) || `input-rule-${index + 1}`}-process`,
         fallback
       );
-      if(behavior === 'shuttle'){
-        rule.downStages = [];
-      }else{
-        const legacyRule = outputRules[index] || outputRules[0];
-        const legacyStages = Array.isArray(legacyRule?.downStages) && legacyRule.downStages.length ? legacyRule.downStages : null;
-        const fallbackDown = Number(node.properties.downTime) || Object.values(timings.outputs || {})
-          .reduce((maximum, timing)=>Math.max(maximum, Number(timing?.downTimeSec) || 0), 0);
-        rule.downStages = normalizeTimingStages(
-          Array.isArray(rule.downStages) && rule.downStages.length ? rule.downStages : legacyStages,
-          `down-${text(rule.ruleId) || `input-rule-${index + 1}`}`,
-          fallbackDown
-        ).map((stage, stageIndex)=>({ ...stage, name:text(stage.name) || `Down ${stageIndex + 1}` }));
-      }
       if(portId && !claimedInputs.has(portId)){
         claimedInputs.add(portId);
         timings.inputs[portId] = {
@@ -797,7 +868,9 @@
     for(const [index, rule] of outputRules.entries()){
       if(!isObject(rule)) continue;
       const portIds = (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]).map(text).filter(Boolean);
-      if((behavior === 'shuttle' || behavior === 'split') && portIds.length > 1) rule.dispatch = 'all-ready';
+      rule.dispatch = (behavior === 'shuttle' || behavior === 'split') && portIds.length > 1
+        ? 'all-ready'
+        : 'first-match';
       if(behavior === 'shuttle'){
         rule.downStages = [];
         for(const portId of portIds){
@@ -807,7 +880,11 @@
         continue;
       }
       const prefix = `${text(rule.ruleId) || `output-rule-${index + 1}`}-down`;
-      const configuredStages = Array.isArray(rule.downStages) && rule.downStages.length ? rule.downStages : null;
+      // Recovery belongs to the selected Output Rule. Import an old Input
+      // Rule's downStages only when this Output Rule has no recovery data yet.
+      const configuredStages = Array.isArray(rule.downStages) && rule.downStages.length
+        ? rule.downStages
+        : (legacyInputDownStages[index] || legacyInputDownStages[0]);
       if(configuredStages){
         rule.downStages = normalizeTimingStages(configuredStages, prefix, 0);
       }else if(portIds.length){
@@ -832,16 +909,54 @@
       }
     }
 
-    if(behavior !== 'shuttle' && inputRules.length){
-      const defaultDownStages = Array.isArray(inputRules[0]?.downStages) ? inputRules[0].downStages : [];
-      const defaultDownTime = timingStageTotal(defaultDownStages);
-      for(const port of entityFlowPorts(node, 'output')){
-        timings.outputs[port.portId] = {
-          downStages:clone(defaultDownStages, []),
-          downTimeSec:defaultDownTime
+    // Timing belongs to the end-to-end Flow Rule, not to an individual port.
+    // Keep exactly one shared Process time and one shared Recovery time for all
+    // Input/Output entries in the same Flow Rule. Legacy port rows use their
+    // first configured value so existing graphs keep a predictable duration.
+    for(const flowRuleId of ensureFlowRuleGroups(node)){
+      const groupInputs = inputRules.filter((rule)=>text(rule?.flowRuleId) === flowRuleId);
+      const groupOutputs = outputRules.filter((rule)=>text(rule?.flowRuleId) === flowRuleId);
+      if(groupInputs.length){
+        const sourceRule = groupInputs.find((rule)=>Array.isArray(rule?.processStages) && rule.processStages.length) || groupInputs[0];
+        const sourceStage = sourceRule?.processStages?.[0];
+        const firstPortId = text(groupInputs[0]?.fromPortId);
+        const fallback = timings.inputs?.[firstPortId]?.processTimeSec ?? node.properties.processTime;
+        const processStage = {
+          stageId:text(sourceStage?.stageId) || `${flowRuleId}-process`,
+          name:'Process',
+          durationSec:Math.max(0, Number(sourceStage?.durationSec ?? fallback) || 0)
         };
+        for(const rule of groupInputs){
+          rule.processStages = [clone(processStage, processStage)];
+          const portId = text(rule.fromPortId);
+          if(portId) timings.inputs[portId] = { processStages:[clone(processStage, processStage)], processTimeSec:processStage.durationSec };
+        }
+        groupOutputs.forEach((rule)=>remapConditionStageRef(rule?.releaseWhen, ['process-complete'], 'stageId', processStage.stageId));
+      }
+      if(groupOutputs.length && behavior !== 'shuttle'){
+        const sourceRule = groupOutputs.find((rule)=>Array.isArray(rule?.downStages) && rule.downStages.length) || groupOutputs[0];
+        const sourceStage = sourceRule?.downStages?.[0];
+        const firstPortId = text(groupOutputs[0]?.toPortIds?.[0] || groupOutputs[0]?.toPortId);
+        const fallback = timings.outputs?.[firstPortId]?.downTimeSec ?? node.properties.downTime;
+        const recoveryStage = {
+          stageId:text(sourceStage?.stageId) || `${flowRuleId}-recovery`,
+          name:'Recovery',
+          durationSec:Math.max(0, Number(sourceStage?.durationSec ?? fallback) || 0)
+        };
+        for(const rule of groupOutputs){
+          rule.downStages = [clone(recoveryStage, recoveryStage)];
+          const portIds = (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]).map(text).filter(Boolean);
+          for(const portId of portIds){
+            timings.outputs[portId] = { downStages:[clone(recoveryStage, recoveryStage)], downTimeSec:recoveryStage.durationSec };
+          }
+        }
+        groupInputs.forEach((rule)=>remapConditionStageRef(rule?.acceptWhen, ['down-complete','node-idle'], 'downStageId', recoveryStage.stageId));
       }
     }
+
+    // Input Rules no longer own recovery stages. Remove the migrated legacy
+    // field so future edits have a single source of truth.
+    inputRules.forEach((rule)=>{ if(isObject(rule)) delete rule.downStages; });
 
     entityFlowPorts(node, 'input').forEach((port, index)=>{
       const value = Math.max(0, Number(timings.inputs?.[port.portId]?.processTimeSec) || 0);
@@ -1072,6 +1187,7 @@
       this._processComplete = false;
       this._activeFlowInputRule = null;
       this._activeFlowOutputRule = null;
+      this._activeFlowRuleId = null;
       this._payload = null;
       this._currentWork = null;
       this._pendingTransfer = null;
@@ -1364,7 +1480,7 @@
       const override = this._activeTimingOverride;
       const value = direction === 'input' ? override?.processTimeSec : override?.downTimeSec;
       if(Number.isFinite(Number(value))) return Math.max(0, Number(value));
-      const activeRule = direction === 'input' ? this._activeFlowInputRule : (this._activeFlowInputRule || this._activeFlowOutputRule);
+      const activeRule = direction === 'input' ? this._activeFlowInputRule : this._activeFlowOutputRule;
       let stages = direction === 'input' ? activeRule?.processStages : activeRule?.downStages;
       if(direction === 'output' && Array.isArray(stages)){
         const portId = text(this.outputs?.[slotIndex]?.portId);
@@ -1415,6 +1531,7 @@
       const selected = App.selectEntityRule(store, this, inputRules, { incomingRoot: instance, nowMs: nowMs() }, 'input');
       if(!selected) return null;
       this._activeFlowInputRule = inputRules.find((rule)=>text(rule?.ruleId) === text(selected.rule?.ruleId)) || selected.rule;
+      this._activeFlowRuleId = text(this._activeFlowInputRule?.flowRuleId) || null;
       this._lastInputRefs[slotIndex] = value;
       store.moveRoot(instance, this.id);
       instance.attributes.__arrivedAtMs = nowMs();
@@ -1628,32 +1745,50 @@
     }
 
     _runtimeSelectInputRule(value, slotIndex, context){
-      const rules = Array.isArray(this.properties?.inputRules) ? this.properties.inputRules : [];
+      if(this._activeFlowRuleId && this._state === 'IDLE' && !this._cycleActive
+        && !this._payload && !this._currentWork && !this._activeRoot
+        && !this._offer && !this._pendingTransfer){
+        this._activeFlowInputRule = null;
+        this._activeFlowOutputRule = null;
+        this._activeFlowRuleId = null;
+      }
+      const allRules = Array.isArray(this.properties?.inputRules) ? this.properties.inputRules : [];
+      const activeFlowRuleId = text(this._activeFlowRuleId);
+      const rules = activeFlowRuleId
+        ? allRules.filter((rule)=>!text(rule?.flowRuleId) || text(rule.flowRuleId) === activeFlowRuleId)
+        : allRules;
       if(!rules.length) return { rule:null };
       const input = this.inputs?.[slotIndex];
       const candidate = value || {};
-      let otherwise = null;
+      const otherwise = [];
       for(const rule of rules){
         if(rule?.fromPortId && input?.portId && text(rule.fromPortId) !== text(input.portId)) continue;
         const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
-        if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise = rule; continue; }
+        if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise.push(rule); continue; }
         if(!this._runtimeRuleTargetMatches(candidate, rule)) continue;
         if(this._runtimeEvaluateCondition(rule.acceptWhen || { kind:'always' }, candidate, { ...(context || {}), slotIndex })){
           this._activeTimingOverride = this._timingOverrideFor(candidate);
           this._activeFlowInputRule = rule;
+          this._activeFlowRuleId = text(rule.flowRuleId) || this._activeFlowRuleId || null;
           return { rule };
         }
       }
-      if(otherwise && this._runtimeEvaluateCondition(otherwise.acceptWhen || { kind:'always' }, candidate, { ...(context || {}), slotIndex })){
+      for(const rule of otherwise){
+        if(!this._runtimeEvaluateCondition(rule.acceptWhen || { kind:'always' }, candidate, { ...(context || {}), slotIndex })) continue;
         this._activeTimingOverride = this._timingOverrideFor(candidate);
-        this._activeFlowInputRule = otherwise;
-        return { rule:otherwise };
+        this._activeFlowInputRule = rule;
+        this._activeFlowRuleId = text(rule.flowRuleId) || this._activeFlowRuleId || null;
+        return { rule };
       }
       return null;
     }
 
     _runtimeSelectOutputRule(value, context){
-      const rules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+      const allRules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+      const activeFlowRuleId = text(this._activeFlowRuleId);
+      const rules = activeFlowRuleId
+        ? allRules.filter((rule)=>!text(rule?.flowRuleId) || text(rule.flowRuleId) === activeFlowRuleId)
+        : allRules;
       if(!rules.length){
         const slots = typeof App.basicEntityPortSlots === 'function'
           ? App.basicEntityPortSlots(this, 'output')
@@ -1662,7 +1797,7 @@
             .map(({ slot })=>slot);
         return slots.length ? { rule:null, slots, slot:slots[0] } : null;
       }
-      let otherwise = null;
+      const otherwise = [];
       const evaluate = (rule)=>{
         const slots = this._runtimeRuleOutputSlots(rule);
         const ctx = { ...(context || {}), slots };
@@ -1670,16 +1805,21 @@
         const readySlot = slots.find((slot)=>this._runtimePortReady(slot, value));
         const selected = { rule, slots, slot:Number.isInteger(readySlot) ? readySlot : (slots[0] ?? -1) };
         this._activeFlowOutputRule = rule;
+        this._activeFlowRuleId = text(rule.flowRuleId) || this._activeFlowRuleId || null;
         return selected;
       };
       for(const rule of rules){
         const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target];
-        if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise = rule; continue; }
+        if(targets.some((target)=>text(target?.mode).toLowerCase() === 'otherwise')){ otherwise.push(rule); continue; }
         if(!this._runtimeRuleTargetMatches(value, rule)) continue;
         const selected = evaluate(rule);
         if(selected) return selected;
       }
-      return otherwise ? evaluate(otherwise) : null;
+      for(const rule of otherwise){
+        const selected = evaluate(rule);
+        if(selected) return selected;
+      }
+      return null;
     }
 
     _canAcceptRuntimePayload(slotIndex, payload){
@@ -1907,8 +2047,13 @@
     }
 
     _selectShuttleOutputRule(context){
-      const rules = Array.isArray(this.properties?.outputRules) && this.properties.outputRules.length
-        ? this.properties.outputRules
+      const allRules = Array.isArray(this.properties?.outputRules) ? this.properties.outputRules : [];
+      const activeFlowRuleId = text(this._activeFlowRuleId);
+      const scopedRules = activeFlowRuleId
+        ? allRules.filter((rule)=>!text(rule?.flowRuleId) || text(rule.flowRuleId) === activeFlowRuleId)
+        : allRules;
+      const rules = scopedRules.length
+        ? scopedRules
         : [{
             ruleId: 'default-shuttle-output',
             targets: [{ mode: 'any' }],
@@ -1935,6 +2080,7 @@
         const resolvedContext = { ...context, downstreamReady: allReady };
         if(this._evaluateShuttleOutputCondition(rule?.releaseWhen, resolvedContext)){
           this._activeFlowOutputRule = rule;
+          this._activeFlowRuleId = text(rule.flowRuleId) || this._activeFlowRuleId || null;
           return { rule, slots, slot:slots[0] ?? -1, downstreamReady:allReady };
         }
       }
@@ -2258,6 +2404,7 @@
         this._stateName = 'idle';
         this._activeFlowInputRule = null;
         this._activeFlowOutputRule = null;
+        this._activeFlowRuleId = null;
       }
       return true;
     }
@@ -2265,8 +2412,13 @@
     _selectOutput(){
       const store = this._store();
       if(!store) return null;
-      const rules = Array.isArray(this.properties.outputRules) && this.properties.outputRules.length
-        ? this.properties.outputRules
+      const allRules = Array.isArray(this.properties.outputRules) ? this.properties.outputRules : [];
+      const activeFlowRuleId = text(this._activeFlowRuleId);
+      const scopedRules = activeFlowRuleId
+        ? allRules.filter((rule)=>!text(rule?.flowRuleId) || text(rule.flowRuleId) === activeFlowRuleId)
+        : allRules;
+      const rules = scopedRules.length
+        ? scopedRules
         : [{ ruleId: 'default-output', targets:[{ mode:'otherwise' }], target: { mode: 'otherwise' }, releaseWhen: { kind: 'available' }, toPortIds:[this.outputs?.[0]?.portId], toPortId: this.outputs?.[0]?.portId }];
       const selected = App.selectEntityRule(store, this, rules, {
         nowMs: nowMs(),
@@ -2282,6 +2434,7 @@
       }, 'output');
       if(!selected) return null;
       this._activeFlowOutputRule = (this.properties.outputRules || []).find((rule)=>text(rule?.ruleId) === text(selected.rule?.ruleId)) || selected.rule;
+      this._activeFlowRuleId = text(this._activeFlowOutputRule?.flowRuleId) || this._activeFlowRuleId || null;
       const slots = this._ruleOutputPortIds(selected.rule)
         .map((portId)=>portIndexById(this.outputs, portId))
         .filter((slot)=>slot >= 0);
@@ -2352,6 +2505,7 @@
         this._stateName = 'idle';
         this._activeFlowInputRule = null;
         this._activeFlowOutputRule = null;
+        this._activeFlowRuleId = null;
       }
       for(let index = 0; index < this.inputs.length; index++) this._acceptIncoming(index);
       const store = this._store();
@@ -2768,6 +2922,7 @@
   App.BASIC_ACTION_REGISTRY = ACTION_REGISTRY;
   App.compileBasicExecutionPlan = compileExecutionPlan;
   App.ensureBasicPortTimings = ensurePortTimings;
+  App.ensureFlowRuleGroups = ensureFlowRuleGroups;
   App.syncFlowRuleTimings = syncFlowRuleTimings;
   App.normalizeBasicEntityPorts = normalizeEntityPorts;
   App.basicEntityPortSlots = entityPortSlots;

@@ -29,7 +29,7 @@
   <script src="js/vendor/litegraph.min.js?v=0.7.13"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260903a" />
+  <link rel="stylesheet" href="css/app.css?v=20260905a" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -41,133 +41,122 @@
         <span>FACT SIM</span>
       </a>
       <nav class="landingNav" aria-label="Landing sections">
-        <a href="#landingConcept">Concept</a>
-        <a href="#landingFeatures">Features</a>
-        <a href="#landingGithub">GitHub</a>
+        <a href="#landingFlow">How it works</a>
+        <a href="#landingUseCases">Use cases</a>
+        <a href="#landingGithub">GitHub <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
 
     <section class="landingHero">
       <div class="landingHeroGrid">
         <div class="landingHeroMain">
-          <p class="landingEyebrow">Browser-Based Industrial Simulation</p>
-          <h1 id="landingTitle">FACT SIM</h1>
-          <p class="landingSubtitle">Real World Discrete Event Simulation</p>
+          <p class="landingEyebrow"><span class="landingLiveDot" aria-hidden="true"></span> Live discrete-event simulation</p>
+          <h1 id="landingTitle">See the whole flow.<br><span>Fix the slow part.</span></h1>
           <p class="landingBody">
-            Model factories, production lines, AGVs, logistics, hospitals, and other real-world
-            systems as discrete events with second-level precision.
+            Connect the process, press run, and watch work move. Queues and bottlenecks reveal
+            themselves before they become expensive real-world problems.
           </p>
-          <div class="landingProgressWrap">
+
+          <div class="landingQuickFlow" aria-label="Model, run, and improve">
+            <span><b aria-hidden="true">01</b> Model</span>
+            <i aria-hidden="true">→</i>
+            <span><b aria-hidden="true">02</b> Run</span>
+            <i aria-hidden="true">→</i>
+            <span><b aria-hidden="true">03</b> Improve</span>
+          </div>
+
+          <div class="landingChoicePanel">
+            <div class="landingChoiceHead">
+              <div>
+                <p class="landingMetricEyebrow">Start here</p>
+                <h2 id="landingChoiceTitle">Explore it your way</h2>
+              </div>
+              <span class="landingNoInstall">No install</span>
+            </div>
+            <div class="landingChoiceList">
+              <button id="landingSampleBtn" class="landingChoiceBtn landingChoiceBtnPrimary" type="button" data-landing-action="sample" disabled aria-disabled="true">
+                <span class="landingChoiceIcon" aria-hidden="true">▶</span>
+                <span class="landingChoiceCopy"><strong>Open the live sample</strong><small>Sample Line 2 · ready to run</small></span>
+                <span class="landingChoiceArrow" aria-hidden="true">→</span>
+              </button>
+              <button id="landingNewBtn" class="landingChoiceBtn" type="button" data-landing-action="new" disabled aria-disabled="true">
+                <span class="landingChoiceIcon" aria-hidden="true">＋</span>
+                <span class="landingChoiceCopy"><strong>Build a new model</strong><small>Start with Source → Equipment → Sink</small></span>
+                <span class="landingChoiceArrow" aria-hidden="true">→</span>
+              </button>
+              <button id="landingFileBtn" class="landingChoiceBtn" type="button" data-landing-action="file" disabled aria-disabled="true">
+                <span class="landingChoiceIcon" aria-hidden="true">↑</span>
+                <span class="landingChoiceCopy"><strong>Open your model</strong><small>Load a saved FACT SIM JSON file</small></span>
+                <span class="landingChoiceArrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="landingProgressWrap" aria-live="polite">
             <div class="landingProgressHead">
-              <span id="landingProgressLabel" class="landingProgressStatus">Loading simulator assets...</span>
+              <span id="landingProgressLabel" class="landingProgressStatus">Loading the live sample…</span>
               <span id="landingProgressValue">0%</span>
             </div>
             <div id="landingProgressBar" class="landingProgressBar" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <div id="landingProgressFill" class="landingProgressFill"></div>
             </div>
             <div class="landingProgressMeta">
-              <span id="landingProgressHint">Preparing the browser runtime, UI, and simulation modules.</span>
-              <span id="landingProgressState" class="landingProgressState">Booting</span>
+              <span id="landingProgressHint">Preparing the model and simulation engine.</span>
+              <span id="landingProgressState" class="landingProgressState">Starting</span>
             </div>
           </div>
         </div>
-        <aside class="landingHeroAside" aria-labelledby="landingChoiceTitle">
-          <div class="landingChoicePanel">
-            <p class="landingMetricEyebrow">Get Started</p>
-            <h2 id="landingChoiceTitle">What would you like to do?</h2>
-            <div class="landingChoiceList">
-              <button id="landingSampleBtn" class="landingChoiceBtn landingChoiceBtnPrimary" type="button" data-landing-action="sample" disabled aria-disabled="true">
-                <span class="landingChoiceNumber">01</span>
-                <span class="landingChoiceCopy"><strong>Try a Sample</strong><small>Open Sample Line 2</small></span>
-                <span class="landingChoiceArrow" aria-hidden="true">→</span>
-              </button>
-              <button id="landingNewBtn" class="landingChoiceBtn" type="button" data-landing-action="new" disabled aria-disabled="true">
-                <span class="landingChoiceNumber">02</span>
-                <span class="landingChoiceCopy"><strong>Create New</strong><small>Start with Source → Equipment → Sink</small></span>
-                <span class="landingChoiceArrow" aria-hidden="true">→</span>
-              </button>
-              <button id="landingFileBtn" class="landingChoiceBtn" type="button" data-landing-action="file" disabled aria-disabled="true">
-                <span class="landingChoiceNumber">03</span>
-                <span class="landingChoiceCopy"><strong>Open a File</strong><small>Load a saved JSON graph</small></span>
-                <span class="landingChoiceArrow" aria-hidden="true">→</span>
-              </button>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </section>
 
-    <section id="landingConcept" class="landingSection landingSectionConcept">
-      <div class="landingSectionHead">
-        <h2 class="landingSectionTitle">The world moves through events and state transitions.</h2>
-      </div>
-      <div class="landingConceptGrid">
-        <div class="landingConceptMain">
-          <p class="landingSectionLead">“The world can be represented by state transitions and events.”</p>
-          <p class="landingSectionText">
-            Factories, robots, cars, AGVs, and people are all systems of connected events.
-            FACT SIM models this structure directly so you can validate decisions before deployment.
-          </p>
-          <div class="landingPills">
-            <span>Factories</span>
-            <span>Robots</span>
-            <span>Cars</span>
-            <span>AGVs</span>
-            <span>People</span>
+        <div class="landingLiveViewport" role="img" aria-label="A live Sample Line 2 simulation runs in the background.">
+          <div class="landingLiveChrome">
+            <span class="landingWindowDots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="landingLiveName">Sample Line 2</span>
+            <span class="landingLiveBadge"><i aria-hidden="true"></i> LIVE</span>
+          </div>
+          <div class="landingSignal landingSignalWork"><span aria-hidden="true">●</span><strong>Work moves</strong><small>between connected nodes</small></div>
+          <div class="landingSignal landingSignalQueue"><span aria-hidden="true">▥</span><strong>Queues appear</strong><small>where capacity falls short</small></div>
+          <div class="landingLiveCaption">
+            <strong>This is not a mockup.</strong>
+            <span>The sample behind this page is running in the real simulation engine.</span>
           </div>
         </div>
-        <div class="landingConceptStack">
-          <article class="landingCardMini">
-            <h3>States</h3>
-            <p>Idle, process, wait, down, blocked, reserved, occupied.</p>
-          </article>
-          <article class="landingCardMini">
-            <h3>Events</h3>
-            <p>Arrivals, handoffs, releases, merges, splits, routing, downtime.</p>
-          </article>
-          <article class="landingCardMini">
-            <h3>Decisions</h3>
-            <p>Validate the reason a line meets takt or fails before equipment is purchased.</p>
-          </article>
-        </div>
       </div>
     </section>
 
-    <section id="landingFeatures" class="landingSection">
+    <section id="landingFlow" class="landingSection landingFlowSection">
       <div class="landingSectionHead">
-        <h2 class="landingSectionTitle">Built for analysis, not presentation-only animation.</h2>
+        <p class="landingSectionKicker">From question to answer</p>
+        <h2 class="landingSectionTitle">Three steps. One visual workspace.</h2>
       </div>
-      <div class="landingGrid landingGrid3">
-        <article class="landingCardMini"><h3>Node-Based Modeling</h3><p>Build systems visually using a graph model.</p></article>
-        <article class="landingCardMini"><h3>Discrete-Event Engine</h3><p>Simulate state transitions and event timing accurately.</p></article>
-        <article class="landingCardMini"><h3>Second-Level Precision</h3><p>Analyze process flow with practical temporal resolution.</p></article>
-        <article class="landingCardMini"><h3>Browser Native</h3><p>Run instantly with no installation or license server.</p></article>
-        <article class="landingCardMini"><h3>Lightweight</h3><p>Fast iteration on everyday laptops and workstations.</p></article>
-        <article class="landingCardMini"><h3>Open Source</h3><p>Transparent architecture for extension and audit.</p></article>
+      <div class="landingStepRail">
+        <article class="landingStep"><span class="landingStepNumber">01</span><span class="landingStepIcon" aria-hidden="true">⌁</span><div><h3>Draw the flow</h3><p>Connect sources, equipment, routes, and sinks.</p></div></article>
+        <span class="landingStepArrow" aria-hidden="true">→</span>
+        <article class="landingStep"><span class="landingStepNumber">02</span><span class="landingStepIcon" aria-hidden="true">▶</span><div><h3>Run the model</h3><p>Watch items, queues, downtime, and handoffs change.</p></div></article>
+        <span class="landingStepArrow" aria-hidden="true">→</span>
+        <article class="landingStep"><span class="landingStepNumber">03</span><span class="landingStepIcon" aria-hidden="true">◎</span><div><h3>Find the constraint</h3><p>Compare throughput, utilization, and waiting time.</p></div></article>
       </div>
     </section>
 
-    <section id="landingUseCases" class="landingSection">
+    <section id="landingUseCases" class="landingSection landingUseSection">
       <div class="landingSectionHead">
-        <h2 class="landingSectionTitle">Model real systems with discrete-event logic.</h2>
+        <p class="landingSectionKicker">One engine, many systems</p>
+        <h2 class="landingSectionTitle">If it has flow, waits, or shared resources, you can model it.</h2>
       </div>
-      <div class="landingGrid landingGrid2">
-        <article class="landingCardMini"><h3>Factory Production Lines</h3><p>Validate takt, throughput, and bottleneck risk early.</p></article>
-        <article class="landingCardMini"><h3>AGV Logistics</h3><p>Evaluate route, carrier, and handoff synchronization.</p></article>
-        <article class="landingCardMini"><h3>Traffic Simulation</h3><p>Explore event-based flow behavior under constraints.</p></article>
-        <article class="landingCardMini"><h3>Hospital Patient Flow</h3><p>Model arrivals, queues, and resource allocation.</p></article>
+      <div class="landingUseGrid">
+        <article><span aria-hidden="true">⚙</span><strong>Production lines</strong><small>Takt · throughput · downtime</small></article>
+        <article><span aria-hidden="true">◇</span><strong>AGV & logistics</strong><small>Routes · handoffs · capacity</small></article>
+        <article><span aria-hidden="true">⇄</span><strong>Warehouses</strong><small>Arrivals · buffers · dispatch</small></article>
+        <article><span aria-hidden="true">＋</span><strong>Patient flow</strong><small>Queues · rooms · resources</small></article>
       </div>
     </section>
 
     <section id="landingGithub" class="landingSection landingSectionGithub">
-      <div class="landingSectionHead">
-        <h2 class="landingSectionTitle">Open source, inspectable, and easy to extend.</h2>
+      <div>
+        <p class="landingSectionKicker">Open source</p>
+        <h2 class="landingSectionTitle">Inspect it. Extend it. Make it fit your operation.</h2>
+        <p class="landingSectionText">The model, engine, and interface are open for you to audit and adapt.</p>
       </div>
-      <p class="landingSectionText">
-        FACT SIM is built as an open platform for industrial and operational simulation.
-        Explore the code, open issues, fork the modeler, and adapt it for your own domain.
-      </p>
-      <a class="landingInlineLink" href="https://github.com/suzuking001/fact_sim" target="_blank" rel="noopener">Explore Repository</a>
+      <a class="landingInlineLink" href="https://github.com/suzuking001/fact_sim" target="_blank" rel="noopener">View on GitHub <span aria-hidden="true">↗</span></a>
     </section>
 
     <footer class="landingFooter">
@@ -800,13 +789,13 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260823k"></script>
+  <script src="js/app/landing.js?v=20260905a"></script>
   <script src="js/core.js?v=20260903a"></script>
     <script src="js/nodes/work.js?v=20260831a"></script>
-  <script src="js/nodes/entity_model.js?v=20260901a"></script>
+  <script src="js/nodes/entity_model.js?v=20260904e"></script>
   <script src="js/nodes/entity_store.js?v=20260831a"></script>
   <script src="js/nodes/sigports.js"></script>
-    <script src="js/nodes/menu.js?v=20260828a"></script>
+    <script src="js/nodes/menu.js?v=20260904a"></script>
     <script src="js/nodes/ioflip.js?v=20260829b"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
@@ -815,11 +804,11 @@ SOFTWARE.
   <script src="js/nodes/equipment.js?v=20260824f"></script>
   <script src="js/nodes/note.js?v=20260305a"></script>
   <script src="js/nodes/signal.js?v=20260307c"></script>
-  <script src="js/nodes/source.js?v=20260829a"></script>
+  <script src="js/nodes/source.js?v=20260904e"></script>
   <script src="js/nodes/entity_source.js?v=20260831a"></script>
-  <script src="js/nodes/split.js?v=20260829a"></script>
+  <script src="js/nodes/split.js?v=20260904e"></script>
   <script src="js/nodes/branch.js?v=20260824f"></script>
-  <script src="js/nodes/merge2.js?v=20260824f"></script>
+  <script src="js/nodes/merge2.js?v=20260904a"></script>
   <script src="js/nodes/join.js?v=20260824f"></script>
   <script src="js/nodes/agv_route.js?v=20260831a"></script>
   <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
@@ -828,7 +817,7 @@ SOFTWARE.
   <script src="js/nodes/station.js?v=20260831a"></script>
   <script src="js/nodes/transfer_station.js?v=20260831a"></script>
   <script src="js/nodes/sink.js?v=20260824f"></script>
-  <script src="js/nodes/basic_node.js?v=20260831b"></script>
+  <script src="js/nodes/basic_node.js?v=20260904g"></script>
   <script src="js/nodes/register.js?v=20260823j"></script>
   <script src="sample/simple.js?v=20260828a"></script>
   <script src="sample/branch.js?v=20260828a"></script>
@@ -861,10 +850,10 @@ SOFTWARE.
   <script src="js/app/history.js?v=20260307a"></script>
   <script src="js/app/selection.js?v=20260715a"></script>
   <script src="js/app/fit.js?v=20260715a"></script>
-  <script src="js/app/node-props-panel.js?v=20260829a"></script>
-  <script src="js/app/selection-inspector.js?v=20260831a"></script>
-<script src="js/app/entity-ui.js?v=20260902a"></script>
-  <script src="js/app/timeline-init.js?v=20260321a"></script>
+  <script src="js/app/node-props-panel.js?v=20260904a"></script>
+  <script src="js/app/selection-inspector.js?v=20260904b"></script>
+  <script src="js/app/entity-ui.js?v=20260905b"></script>
+  <script src="js/app/timeline-init.js?v=20260904a"></script>
   <script src="js/app/graph-init.js?v=20260831a"></script>
   <script src="js/app/examples.js?v=20260831b"></script>
   <script src="js/app/file-io.js?v=20260831a"></script>

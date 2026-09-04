@@ -26,6 +26,7 @@
   let progress = 0;
   let progressTarget = 8;
   let pollHandle = 0;
+  let previewRunning = false;
   const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   function setStatus(label, hint, state){
@@ -50,6 +51,32 @@
     });
   }
 
+  function startLandingPreview(){
+    if(previewRunning || reduceMotion || body.classList.contains('landing-hidden')) return;
+    if(!window.App || !App.graph || !App.canvas) return;
+    previewRunning = true;
+    body.classList.add('landing-preview-running');
+
+    window.setTimeout(()=>{
+      if(body.classList.contains('landing-hidden')) return;
+      try{ window.dispatchEvent(new Event('resize')); }catch(_e){}
+      try{
+        if(typeof window.fitToScreen === 'function') window.fitToScreen({ silent:true });
+        const ds = App.canvas && App.canvas.ds;
+        if(ds && Array.isArray(ds.offset) && window.innerWidth >= 780){
+          const scale = Math.max(.001, Number(ds.scale) || 1);
+          ds.offset[0] += Math.min(210, window.innerWidth * .13) / scale;
+        }
+        if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
+      }catch(_e){}
+      try{
+        if(typeof window.startSimulation === 'function') window.startSimulation();
+      }catch(err){
+        console.warn('Landing live preview could not be started.', err);
+      }
+    }, 180);
+  }
+
   function focusEditorChrome(){
     const firstFocus = document.getElementById('sidebarDragRail') || document.getElementById('btnStart');
     if(firstFocus && typeof firstFocus.focus === 'function'){
@@ -60,7 +87,7 @@
   function revealApp(options){
     const opts = options || {};
     body.classList.add('landing-hidden');
-    body.classList.remove('landing-choice-pending', 'landing-choice-ready');
+    body.classList.remove('landing-choice-pending', 'landing-choice-ready', 'landing-preview-running');
     appRoot.setAttribute('aria-hidden', 'false');
     window.requestAnimationFrame(()=>{
       window.requestAnimationFrame(()=>{
@@ -109,11 +136,12 @@
     body.classList.add('landing-choice-ready');
     body.classList.remove('landing-choice-pending');
     setStatus(
-      'Ready',
-      'Choose how you would like to begin.',
-      'Choose an option'
+      'The live sample is ready',
+      'Sample Line 2 is running behind this page.',
+      'Live demo'
     );
     setActionsEnabled(true);
+    startLandingPreview();
     return true;
   }
 
@@ -124,6 +152,8 @@
   }
 
   function stopCurrentSimulation(){
+    previewRunning = false;
+    body.classList.remove('landing-preview-running');
     try{
       if(typeof window.stopSimulation === 'function') window.stopSimulation();
     }catch(_e){}
@@ -236,6 +266,7 @@
       'Error'
     );
     setActionsEnabled(true);
+    startLandingPreview();
   }
 
   function handleStartupError(err){
@@ -270,7 +301,7 @@
       if(!pendingFileOpen) return;
       if(!fileInput.files || !fileInput.files.length){
         pendingFileOpen = false;
-        setStatus('Ready', 'Choose how you would like to begin.', 'Choose an option');
+        setStatus('The live sample is ready', 'Sample Line 2 is running behind this page.', 'Live demo');
         return;
       }
       opening = true;
@@ -279,7 +310,7 @@
     }, true);
     fileInput.addEventListener('cancel', ()=>{
       pendingFileOpen = false;
-      setStatus('Ready', 'Choose how you would like to begin.', 'Choose an option');
+      setStatus('The live sample is ready', 'Sample Line 2 is running behind this page.', 'Live demo');
       setActionsEnabled(true);
     });
   }
@@ -308,7 +339,7 @@
       if(!pendingFileOpen || opening) return;
       if(fileInput && fileInput.files && fileInput.files.length) return;
       pendingFileOpen = false;
-      setStatus('Ready', 'Choose how you would like to begin.', 'Choose an option');
+      setStatus('The live sample is ready', 'Sample Line 2 is running behind this page.', 'Live demo');
       setActionsEnabled(true);
     }, 220);
   });
@@ -331,7 +362,7 @@
   }
 
   setProgress(0);
-  setStatus('Preparing the simulator...', 'Loading the editor so you can choose how to begin.', 'Starting');
+  setStatus('Loading the live sample…', 'Preparing the model and simulation engine.', 'Starting');
   window.requestAnimationFrame(tick);
   scheduleReadyPoll();
 

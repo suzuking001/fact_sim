@@ -443,7 +443,9 @@ var App = window.App || (window.App = {});
       return true;
     }
 
-    openNode(node, activate, highlight){
+    openNode(node, activate, highlight, options){
+      const opts = isObjectLike(options) ? options : {};
+      if(opts.tab) this._entityTab = String(opts.tab);
       if(!this.setNode(node)) return false;
       if(App.canvas) App.canvas.selected_group = null;
       if(activate && typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
@@ -452,7 +454,12 @@ var App = window.App || (window.App = {});
           if(App.canvas && typeof App.canvas.selectNode === 'function') App.canvas.selectNode(node);
         }catch(_e){}
       }
+      if(opts.popout && typeof App.openWorkspacePopout === 'function') App.openWorkspacePopout('inspector');
       return true;
+    }
+
+    openNodeDetails(node, highlight){
+      return this.openNode(node, true, highlight, { tab:'Flow', popout:true });
     }
 
     setGroup(group){
@@ -518,7 +525,7 @@ var App = window.App || (window.App = {});
             if(typeof canvas.selectNode === 'function') canvas.selectNode(node);
           }catch(_e){}
           canvas.selected_group = null;
-          this.openNode(node, true, false);
+          this.openNodeDetails(node, false);
           return;
         }
         const groupAction = canvas.__factGroupInspectorAction;
@@ -544,7 +551,7 @@ var App = window.App || (window.App = {});
             if(typeof canvas.selectNode === 'function') canvas.selectNode(detailNode);
           }catch(_e){}
           canvas.selected_group = null;
-          this.openNode(detailNode, true, false);
+          this.openNodeDetails(detailNode, false);
           return;
         }
         const node = (canvas.graph && typeof canvas.graph.getNodeOnPos === 'function')
@@ -574,6 +581,7 @@ var App = window.App || (window.App = {});
     }
 
     renderEmpty(){
+      delete this.root.dataset.entityTab;
       this.root.innerHTML = '<div class="selectionInspectorEmpty"><h3>Details</h3><p>Select a node or group to edit it in one consistent place.</p><p>Right click, use Open Details, or double click the hover card action to jump here directly.</p></div>';
     }
 
@@ -898,6 +906,7 @@ var App = window.App || (window.App = {});
     }
 
     renderGroup(group){
+      delete this.root.dataset.entityTab;
       const meta = getGroupMeta(group);
       const bounds = getGroupBounds(group);
       const rate = groupRate(group);

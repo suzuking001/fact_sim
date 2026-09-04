@@ -163,6 +163,8 @@ class SourceNode extends LiteGraph.LGraphNode{
     }
     this._pendingWork = null;
     this._pendingOutputSlot = null;
+    this._activeFlowOutputRule = null;
+    this._activeFlowRuleId = null;
     if(Number.isInteger(slot) && slot >= 0) this.setOutputData(slot, null);
     return true;
   }

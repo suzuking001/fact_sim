@@ -1033,6 +1033,7 @@
       const targets = normalizeTargets(source.targets, source.target);
       const base = {
         ruleId: normalizeText(source.ruleId) || `${kind}-rule-${index + 1}`,
+        flowRuleId: normalizeText(source.flowRuleId) || null,
         targets,
         target: targets[0]
       };
@@ -1042,6 +1043,7 @@
         base.processStages = normalizeTimingStages(source.processStages, `${base.ruleId}-process`);
       }else{
         base.releaseWhen = normalizeCondition(source.releaseWhen, 'available');
+        base.dispatch = normalizeText(source.dispatch) || 'first-match';
         const sourcePortIds = Array.isArray(source.toPortIds) && source.toPortIds.length ? source.toPortIds : [source.toPortId];
         base.toPortIds = [...new Set(sourcePortIds.map((entry)=>normalizeText(entry)).filter(Boolean))];
         base.toPortId = base.toPortIds[0] || null;

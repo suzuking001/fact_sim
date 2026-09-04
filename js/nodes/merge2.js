@@ -209,10 +209,19 @@ class MergeNode extends EquipmentNode{
     this._currentWork = w;
     this._lastInRefBySlot[slot] = w;
 
-    const isFirst = (this._nextSlotCursor === 0);
+    // A Merge Flow Rule has one Process phase. Collect every required Input
+    // first; only the final accepted Input starts that shared Process time.
+    if(this._nextSlotCursor < this._activeSlots.length - 1){
+      this._nextSlotCursor++;
+      this._state = 'IDLE';
+      this._currentWork = null;
+      this._until = now;
+      return true;
+    }
+
     const sec = typeof this._flowTiming === 'function'
       ? this._flowTiming('input', slot)
-      : (isFirst ? this.properties.processTime : (this.properties.processTime2 || this.properties.processTime));
+      : this.properties.processTime;
     const durationMs = Math.max(0, sec * 1000);
     this._state = 'PROCESS';
     this._until = now + durationMs;

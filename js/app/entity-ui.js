@@ -33,6 +33,12 @@
     return el;
   }
 
+  function confirmAction(element, message){
+    const ownerWindow = element?.ownerDocument?.defaultView || root;
+    if(typeof ownerWindow.confirm !== 'function') return true;
+    return ownerWindow.confirm(message) !== false;
+  }
+
   function select(options, value){
     const el = document.createElement('select');
     el.className = 'selectionInspectorSelect';
@@ -189,36 +195,21 @@
   }
 
   function conditionTimingKeys(node, direction, inputRules, outputRules){
-    if(direction === 'input'){
-      const stages = inputRules.flatMap((rule, ruleIndex)=>{
-        const ruleId = String(rule?.ruleId || `input-rule-${ruleIndex + 1}`);
-        return (Array.isArray(rule?.processStages) ? rule.processStages : []).map((stage, stageIndex)=>({
-          ruleId,
-          stage,
-          stageId:String(stage?.stageId || `processStages-${stageIndex + 1}`)
-        }));
-      });
-      const conditions = outputRules.flatMap((rule)=>flowConditionLeaves(rule?.releaseWhen, new Set(['process-complete'])));
-      return conditions.map((condition, conditionIndex)=>{
-        const selected = stages.find((entry)=>condition.stageId && entry.stageId === String(condition.stageId))
-          || stages[conditionIndex]
-          || stages[0];
-        return selected ? `@rule:input:${encodeURIComponent(selected.ruleId)}:${encodeURIComponent(selected.stageId)}` : null;
-      }).filter(Boolean);
-    }
+    const isProcess = direction === 'input';
+    const rules = isProcess ? inputRules : outputRules;
+    const property = isProcess ? 'processStages' : 'downStages';
+    const keyDirection = isProcess ? 'input' : 'down';
     const keys = [];
-    inputRules.forEach((rule, ruleIndex)=>{
-      const ruleId = String(rule?.ruleId || `down-rule-${ruleIndex + 1}`);
-      const stages = Array.isArray(rule?.downStages) ? rule.downStages : [];
-      const conditions = flowConditionLeaves(rule?.acceptWhen, new Set(['node-idle','down-complete']));
-      conditions.forEach((condition, conditionIndex)=>{
-        const selected = stages.find((stage)=>condition.downStageId && String(stage?.stageId || '') === String(condition.downStageId))
-          || stages[conditionIndex]
-          || stages[0];
-        if(!selected) return;
-        const stageId = String(selected.stageId || `downStages-${conditionIndex + 1}`);
-        keys.push(`@rule:down:${encodeURIComponent(ruleId)}:${encodeURIComponent(stageId)}`);
-      });
+    const seenGroups = new Set();
+    rules.forEach((rule, ruleIndex)=>{
+      const ruleId = String(rule?.ruleId || `${keyDirection}-rule-${ruleIndex + 1}`);
+      const groupId = String(rule?.flowRuleId || `${keyDirection}:${ruleId}`);
+      if(seenGroups.has(groupId)) return;
+      seenGroups.add(groupId);
+      const stage = Array.isArray(rule?.[property]) ? rule[property][0] : null;
+      if(!stage) return;
+      const stageId = String(stage.stageId || `${groupId}-${isProcess ? 'process' : 'recovery'}`);
+      keys.push(`@rule:${keyDirection}:${encodeURIComponent(ruleId)}:${encodeURIComponent(stageId)}`);
     });
     return keys;
   }
@@ -311,7 +302,17 @@
       node.onPropertyChanged?.(key);
       return;
     }
-    const { direction, portId, stageId } = parseCycleTimingKey(key);
+    const parsed = parseCycleTimingKey(key);
+    if(parsed.source === 'rule'){
+      const descriptor = cycleTimingDescriptor(node, key);
+      if(descriptor.stage){
+        descriptor.stage.durationSec = seconds;
+        App.syncFlowRuleTimings?.(node);
+        node.onPropertyChanged?.(parsed.direction === 'input' ? 'inputRules' : 'outputRules');
+      }
+      return;
+    }
+    const { direction, portId, stageId } = parsed;
     const timings = App.ensureBasicPortTimings?.(node) || node.properties.portTimings;
     if(direction === 'input'){
       const timing = timings.inputs[portId] = { ...(timings.inputs[portId] || {}) };
@@ -993,11 +994,14 @@
     const behavior = App.basicNodeBehavior?.(node) || 'basic';
     const registry = App.entityModelForGraph?.(App.graph || node.graph);
     const wrapper = document.createElement('div');
+    wrapper.className = 'entityFlowEditor';
     const guide = document.createElement('aside');
     guide.className = 'entityFlowGuide';
     guide.innerHTML = behavior === 'shuttle'
-      ? '<strong>Flow controls the synchronized shuttle cycle.</strong><span><b>Process</b> is configured on Input Rules. Shuttle stages advance together when <b>Process complete</b>, <b>Shuttle group process complete</b>, and the selected downstream condition are satisfied. Shuttle stages do not use Down / recovery.</span>'
-      : '<strong>Flow controls the complete Entity cycle.</strong><span>Select <b>Process complete</b> or <b>Down complete (Idle)</b> to edit its time directly in the condition row. <b>Capacity available (Not full)</b> checks Node Capacity; <b>Downstream ready</b> checks whether the next Node can accept the Entity.</span>';
+      ? '<strong>Each panel is one complete Flow Rule.</strong><span>Rules are evaluated from top to bottom. Each Rule has one Process time, followed by its Output. Multiple ports in one Output transfer together. Shuttle Rules do not use Recovery.</span>'
+      : behavior === 'merge'
+        ? '<strong>Each panel is one complete Flow Rule.</strong><span>All required Inputs are accepted in port order, then the Rule runs one Process time, its Output, and one Recovery time. Rules are ordered OR alternatives.</span>'
+        : '<strong>Each panel is one complete Flow Rule.</strong><span>Rules are ordered OR alternatives. Each selected Rule runs one Process time and one Recovery time; these times do not depend on the number of ports.</span>';
     wrapper.appendChild(guide);
     const inputConditions = [['always','Always'],['down-complete','Down complete (Idle)'],['space-available','Capacity available (Not full)'],['empty','Empty'],['not-full','Not full'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
     const outputConditions = [['available','Available'],['process-complete','Process complete'],['shuttle-group-idle','Shuttle group process complete (Idle)'],['full','Full'],['empty','Empty'],['count-reached','Count reached'],['time-elapsed','Time elapsed'],['downstream-ready','Downstream ready'],['attribute-condition','Attribute condition'],['custom-condition','Custom']];
@@ -1009,55 +1013,10 @@
       return host;
     };
     const conditionKind = (condition, fallback)=>isObject(condition) ? (condition.kind || fallback) : (condition || fallback);
-    const downStages = ()=>{
-      const inputStages = (node.properties?.inputRules || []).flatMap((rule)=>Array.isArray(rule?.downStages) ? rule.downStages : []);
-      return inputStages.length ? inputStages : (node.properties?.outputRules || []).flatMap((rule)=>Array.isArray(rule?.downStages) ? rule.downStages : []);
-    };
-    const appendSeconds = (host, label, stage, commit, linkedStages)=>{
-      if(!stage) return;
-      const stagesToUpdate = Array.isArray(linkedStages) && linkedStages.length ? linkedStages : [stage];
-      const wrap = document.createElement('label'); wrap.className = 'entityRuleInlineTime';
-      const caption = document.createElement('span'); caption.textContent = label;
-      const input = document.createElement('input'); input.type = 'number'; input.min = '0'; input.step = '0.1';
-      input.value = formatSeconds(stage.durationSec); input.disabled = running(); input.setAttribute('aria-label', `${label} seconds`);
-      const unit = document.createElement('small'); unit.textContent = 's';
-      const notifyCycle = (seconds, preview)=>root.dispatchEvent(new CustomEvent('factsim:cycle-timing-change', {
-        detail:{ nodeId:node?.id, stageId:String(stage.stageId || ''), seconds, preview }
-      }));
-      input.addEventListener('input', ()=>notifyCycle(Math.max(0, Number(input.value) || 0), true));
-      input.addEventListener('change', ()=>{
-        const seconds = Math.max(0, Number(input.value) || 0);
-        stagesToUpdate.forEach((linkedStage)=>{ linkedStage.durationSec = seconds; });
-        input.value = formatSeconds(seconds);
-        commit();
-        notifyCycle(seconds, false);
-      });
-      wrap.append(caption, input, unit); host.appendChild(wrap);
-    };
     const appendConditionParameter = (host, condition, commit, timingRule)=>{
       const kind = conditionKind(condition, 'available');
-      if(kind === 'process-complete'){
-        const processConditions = (node.properties?.outputRules || []).flatMap((rule)=>flowConditionLeaves(rule?.releaseWhen, new Set(['process-complete'])));
-        const conditionIndex = Math.max(0, processConditions.indexOf(condition));
-        const linkedStages = (node.properties?.inputRules || []).map((rule)=>{
-          const stages = Array.isArray(rule?.processStages) ? rule.processStages : [];
-          return stages.find((stage)=>condition.stageId && String(stage?.stageId) === String(condition.stageId))
-            || stages[conditionIndex]
-            || stages[0]
-            || null;
-        }).filter(Boolean);
-        appendSeconds(host, 'Process time', linkedStages[0] || null, commit, linkedStages);
-      }else if(kind === 'node-idle' || kind === 'down-complete'){
-        const ruleStages = Array.isArray(timingRule?.downStages) ? timingRule.downStages : [];
-        const availableStages = ruleStages.length ? ruleStages : downStages();
-        const downConditions = flowConditionLeaves(timingRule?.acceptWhen, new Set(['node-idle','down-complete']));
-        const conditionIndex = Math.max(0, downConditions.indexOf(condition));
-        const selectedStage = availableStages.find((stage)=>String(stage?.stageId) === String(condition.downStageId || ''))
-          || availableStages[conditionIndex]
-          || availableStages[0]
-          || null;
-        appendSeconds(host, 'Down time', selectedStage, commit);
-      }else if(kind === 'shuttle-group-idle'){
+      if(kind === 'process-complete' || kind === 'node-idle' || kind === 'down-complete') return;
+      if(kind === 'shuttle-group-idle'){
         const parameter = document.createElement('input');
         parameter.type = 'text'; parameter.className = 'selectionInspectorInput';
         parameter.value = String(condition.groupId || 'shuttle-1');
@@ -1210,18 +1169,24 @@
       root.setTimeout(updateRuntime, 0);
       host.appendChild(section);
     };
-    const renderRules = (kind)=>{
+    const renderRules = (kind, flowRuleId)=>{
       const key = kind === 'input' ? 'inputRules' : 'outputRules';
       const simultaneousOutput = behavior === 'shuttle' || behavior === 'split';
       const card = makeCard(kind === 'input' ? 'INPUT' : 'OUTPUT', kind === 'input'
-        ? 'What the node accepts. Descendants are searched automatically.'
+        ? (behavior === 'merge' ? 'Inputs are accepted in port order inside this Flow Rule.' : 'Input entries are evaluated from top to bottom inside this Flow Rule.')
         : simultaneousOutput
-          ? 'Rules are evaluated from top to bottom. Ports listed in one Output Rule transfer simultaneously when every selected downstream is ready. Use separate rules for alternative routing.'
-          : 'Rules are evaluated from top to bottom. Multiple ports in one rule are alternative destinations; the first ready port is selected.');
-      const rows = Array.isArray(node.properties?.[key]) ? node.properties[key] : [];
+          ? 'Output entries are ordered alternatives. Ports inside the selected entry transfer simultaneously when every downstream is ready.'
+          : 'Output entries are evaluated from top to bottom; the first matching entry selects one destination.');
+      card.card.classList.add('entityFlowPhase', `is-${kind}`);
+      const timingCard = makeCard(kind === 'input' ? 'PROCESS' : 'RECOVERY', kind === 'input'
+        ? 'One Process time for this Flow Rule.'
+        : 'One Down / Recovery time for this Flow Rule.');
+      timingCard.card.classList.add('entityFlowPhase', kind === 'input' ? 'is-process' : 'is-recovery');
+      const allRows = Array.isArray(node.properties?.[key]) ? node.properties[key] : (node.properties[key] = []);
+      const rows = allRows.filter((rule)=>String(rule?.flowRuleId || '') === String(flowRuleId || ''));
       const list = document.createElement('div'); list.className = 'entityRuleList';
       const commit = ()=>changed(()=>{
-        node.properties[key] = rows;
+        node.properties[key] = allRows;
         node.onPropertyChanged?.(key);
         App.syncBasicFlowPorts?.(node, { dirty:false });
         App.syncFlowRuleTimings?.(node);
@@ -1230,70 +1195,31 @@
       const renderTimingStages = (rule, direction)=>{
         const isProcess = direction === 'input';
         const property = isProcess ? 'processStages' : 'downStages';
-        const label = isProcess ? 'Process stages' : 'Down / recovery stages';
+        const label = isProcess ? 'Process time' : 'Down / recovery time';
         const hint = isProcess
-          ? 'Sequential processing after this Input Rule accepts an Entity.'
-          : 'Recovery after the accepted Entity is transferred. Input remains blocked until all Down stages finish.';
+          ? 'Runs once after this Flow Rule has accepted its required Input.'
+          : 'Runs once after this Flow Rule has transferred its Output.';
         const host = document.createElement('div'); host.className = 'entityRuleTimingStages';
         const explanation = document.createElement('small'); explanation.className = 'entityRuleTimingHint'; explanation.textContent = hint;
         const stages = Array.isArray(rule[property]) ? rule[property] : (rule[property] = []);
-        const list = document.createElement('div'); list.className = 'entityRuleTimingStageList';
-        const uniqueStageId = ()=>{
-          const prefix = `${rule.ruleId || direction}-${isProcess ? 'process' : 'down'}`;
-          let index = stages.length + 1;
-          let candidate = `${prefix}-${index}`;
-          const used = new Set(stages.map((stage)=>String(stage?.stageId || '')));
-          while(used.has(candidate)){ index += 1; candidate = `${prefix}-${index}`; }
-          return candidate;
-        };
-        stages.forEach((stage, stageIndex)=>{
-          const row = document.createElement('div'); row.className = 'entityRuleTimingStageRow';
-          const order = document.createElement('span'); order.className = 'entityRuleConditionNumber'; order.textContent = String(stageIndex + 1);
-          const name = document.createElement('input'); name.type = 'text'; name.value = stage.name || `${isProcess ? 'Process' : 'Down'} ${stageIndex + 1}`;
-          name.setAttribute('aria-label', `${label} ${stageIndex + 1} name`); name.disabled = running();
-          name.addEventListener('change', ()=>{ stage.name = String(name.value || '').trim() || `${isProcess ? 'Process' : 'Down'} ${stageIndex + 1}`; commit(); });
-          const durationWrap = document.createElement('label'); durationWrap.className = 'entityRuleTimingDuration';
-          const duration = document.createElement('input'); duration.type = 'number'; duration.min = '0'; duration.step = '0.1'; duration.value = formatSeconds(stage.durationSec);
-          duration.setAttribute('aria-label', `${label} ${stageIndex + 1} seconds`); duration.disabled = running();
-          duration.addEventListener('change', ()=>{ stage.durationSec = Math.max(0, Number(duration.value) || 0); duration.value = formatSeconds(stage.durationSec); commit(); });
-          const unit = document.createElement('small'); unit.textContent = 's'; durationWrap.append(duration, unit);
-          let outputPort = null;
-          if(direction === 'output'){
-            const selectedPortIds = (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]).filter(Boolean);
-            const outputOptions = [['', 'All selected outputs'], ...selectedPortIds.map((portId)=>[
-              portId,
-              (node.outputs || []).find((port)=>port?.portId === portId)?.name || portId
-            ])];
-            outputPort = select(outputOptions, stage.portId || '');
-            outputPort.classList.add('entityRuleTimingPort');
-            outputPort.setAttribute('aria-label', `${label} ${stageIndex + 1} output port`);
-            outputPort.disabled = running();
-            outputPort.addEventListener('change', ()=>{
-              if(outputPort.value) stage.portId = outputPort.value;
-              else delete stage.portId;
-              commit();
-            });
-          }
-          const controls = document.createElement('div'); controls.className = 'entityRuleControls';
-          const up = button('↑', ()=>{ if(stageIndex > 0){ stages.splice(stageIndex - 1, 0, stages.splice(stageIndex, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
-          const down = button('↓', ()=>{ if(stageIndex < stages.length - 1){ stages.splice(stageIndex + 1, 0, stages.splice(stageIndex, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
-          const remove = button('×', ()=>{ stages.splice(stageIndex, 1); commit(); App.selectionInspector?.refresh?.(); }, 'selectionInspectorBtn is-danger');
-          up.disabled = running() || stageIndex === 0; down.disabled = running() || stageIndex === stages.length - 1; remove.disabled = running() || stages.length <= 1;
-          controls.append(up, down, remove);
-          row.append(order, name);
-          if(outputPort) row.appendChild(outputPort);
-          row.append(durationWrap, controls);
-          list.appendChild(row);
+        const stage = stages[0] || (stages[0] = {
+          stageId:`${rule.flowRuleId || rule.ruleId || direction}-${isProcess ? 'process' : 'recovery'}`,
+          name:isProcess ? 'Process' : 'Recovery',
+          durationSec:0
         });
-        host.append(explanation, list);
-        const add = button(`+ Add ${isProcess ? 'Process' : 'Down'} stage`, ()=>{
-          const stage = { stageId:uniqueStageId(), name:`${isProcess ? 'Process' : 'Down'} ${stages.length + 1}`, durationSec:0 };
-          if(direction === 'output') stage.portId = rule.toPortIds?.[0] || rule.toPortId || undefined;
-          stages.push(stage);
-          commit(); App.selectionInspector?.refresh?.();
-        }, 'selectionInspectorBtn entityRuleAddCondition');
-        add.disabled = running(); host.appendChild(add);
-        return field(label, host, 'is-wide entityRuleTimingField');
+        stages.splice(1);
+        delete stage.portId;
+        const durationWrap = document.createElement('label'); durationWrap.className = 'entityRuleTimingDuration entityRuleTimingSingle';
+        const duration = document.createElement('input'); duration.type = 'number'; duration.min = '0'; duration.step = '0.1'; duration.value = formatSeconds(stage.durationSec);
+        duration.setAttribute('aria-label', `${label} seconds`); duration.disabled = running();
+        duration.addEventListener('change', ()=>{
+          stage.durationSec = Math.max(0, Number(duration.value) || 0);
+          duration.value = formatSeconds(stage.durationSec);
+          commit();
+        });
+        const unit = document.createElement('small'); unit.textContent = 's';
+        durationWrap.append(duration, unit); host.append(explanation, durationWrap);
+        return field(label, host, 'is-wide entityRuleTimingField entityRuleTimingSingleField');
       };
       const referencesOutside = (direction, portId, excludedRule, excludedIndex)=>{
         if(!portId) return false;
@@ -1303,26 +1229,37 @@
           return ids.some((value, valueIndex)=>value === portId && (candidate !== excludedRule || valueIndex !== excludedIndex));
         });
       };
-      const confirmPortRelease = (direction, portId, excludedRule, excludedIndex)=>{
+      const confirmPortRelease = (direction, portId, excludedRule, excludedIndex, ownerElement)=>{
         if(!portId || referencesOutside(direction, portId, excludedRule, excludedIndex)) return true;
         const ports = direction === 'input' ? node.inputs : node.outputs;
         const port = (ports || []).find((candidate)=>candidate?.portId === portId);
         if(!port || !port.flowManaged) return true;
         const linkCount = direction === 'input' ? (port.link == null ? 0 : 1) : (Array.isArray(port.links) ? port.links.length : 0);
-        return !linkCount || root.confirm?.(`Delete ${port.name || portId} and its ${linkCount} connected link${linkCount === 1 ? '' : 's'}?`) !== false;
+        return !linkCount || confirmAction(ownerElement, `Delete ${port.name || portId} and its ${linkCount} connected link${linkCount === 1 ? '' : 's'}?`);
       };
       const cleanupPort = (direction, portId)=>App.removeOrphanBasicFlowPort?.(node, direction, portId, { confirmLinked:true });
       rows.forEach((rule, index)=>{
         const ruleCard = document.createElement('article'); ruleCard.className = 'entityRuleCard';
         const header = document.createElement('div'); header.className = 'entityRuleHeader';
-        const title = document.createElement('strong'); title.className = 'entityRuleTitle'; title.textContent = `Rule ${index + 1}`;
+        const title = document.createElement('strong'); title.className = 'entityRuleTitle'; title.textContent = `${kind === 'input' ? 'Input' : 'Output'} ${index + 1}`;
         const controls = document.createElement('div'); controls.className = 'entityRuleControls';
-        const up = button('↑', ()=>{ if(index > 0){ rows.splice(index - 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
-        const down = button('↓', ()=>{ if(index < rows.length - 1){ rows.splice(index + 1, 0, rows.splice(index, 1)[0]); commit(); App.selectionInspector?.refresh?.(); } });
+        const move = (offset)=>{
+          const other = rows[index + offset];
+          if(!other) return;
+          const currentIndex = allRows.indexOf(rule);
+          const otherIndex = allRows.indexOf(other);
+          if(currentIndex < 0 || otherIndex < 0) return;
+          [allRows[currentIndex], allRows[otherIndex]] = [allRows[otherIndex], allRows[currentIndex]];
+          commit(); App.selectionInspector?.refresh?.();
+        };
+        const up = button('↑', ()=>move(-1));
+        const down = button('↓', ()=>move(1));
         const remove = button('×', ()=>{
           const portIds = kind === 'input' ? [rule.fromPortId] : (Array.isArray(rule.toPortIds) ? rule.toPortIds.slice() : [rule.toPortId]);
-          if(!portIds.every((portId, portIndex)=>confirmPortRelease(kind, portId, rule, portIndex))) return;
-          rows.splice(index, 1); commit(); portIds.forEach((portId)=>cleanupPort(kind, portId)); App.selectionInspector?.refresh?.();
+          if(!portIds.every((portId, portIndex)=>confirmPortRelease(kind, portId, rule, portIndex, remove))) return;
+          const rowIndex = allRows.indexOf(rule);
+          if(rowIndex >= 0) allRows.splice(rowIndex, 1);
+          commit(); portIds.forEach((portId)=>cleanupPort(kind, portId)); App.selectionInspector?.refresh?.();
         }, 'selectionInspectorBtn is-danger');
         up.title = 'Move rule up'; down.title = 'Move rule down'; remove.title = 'Delete rule';
         up.disabled = running() || index === 0; down.disabled = running() || index === rows.length - 1; remove.disabled = running();
@@ -1387,7 +1324,7 @@
           inputPort.disabled = running();
           inputPort.addEventListener('change', ()=>{
             const previous = rule.fromPortId;
-            if(!confirmPortRelease('input', previous, rule, 0)){ inputPort.value = previous || ''; return; }
+            if(!confirmPortRelease('input', previous, rule, 0, inputPort)){ inputPort.value = previous || ''; return; }
             if(inputPort.value === '__new__'){
               const port = App.createBasicFlowPort?.(node, 'input', rule);
               if(port) rule.fromPortId = port.portId;
@@ -1499,7 +1436,7 @@
             to.disabled = running();
             to.addEventListener('change', ()=>{
               const previous = portRows[portIndex];
-              if(!confirmPortRelease('output', previous, rule, portIndex)){ to.value = previous || ''; return; }
+              if(!confirmPortRelease('output', previous, rule, portIndex, to)){ to.value = previous || ''; return; }
               if(to.value === '__new__'){
                 const port = App.createBasicFlowPort?.(node, 'output', rule);
                 if(port) portRows[portIndex] = port.portId;
@@ -1510,7 +1447,7 @@
             });
             const removePort = button('×', ()=>{
               const previous = portRows[portIndex];
-              if(!confirmPortRelease('output', previous, rule, portIndex)) return;
+              if(!confirmPortRelease('output', previous, rule, portIndex, removePort)) return;
               portRows.splice(portIndex, 1);
               if(!portRows.length && ports[0]) portRows.push(ports[0][0]);
               persistPorts(); cleanupPort('output', previous); App.selectionInspector?.refresh?.();
@@ -1519,32 +1456,128 @@
             portLine.append(number, to, removePort); portList.appendChild(portLine);
           });
           portsHost.appendChild(portList);
-          const addPort = button('+ Add output', ()=>{
-            const port = App.createBasicFlowPort?.(node, 'output', rule);
-            if(port) portRows.push(port.portId);
-            persistPorts(); App.selectionInspector?.refresh?.();
-          }, 'selectionInspectorBtn entityRuleAddCondition');
-          addPort.disabled = running();
-          portsHost.appendChild(addPort);
-          body.appendChild(field(simultaneousOutput ? 'Output to (simultaneous)' : 'Output to (first ready)', portsHost));
+          if(simultaneousOutput){
+            const addPort = button('+ Add simultaneous output', ()=>{
+              const port = App.createBasicFlowPort?.(node, 'output', rule);
+              if(port) portRows.push(port.portId);
+              persistPorts(); App.selectionInspector?.refresh?.();
+            }, 'selectionInspectorBtn entityRuleAddCondition');
+            addPort.disabled = running();
+            portsHost.appendChild(addPort);
+          }
+          body.appendChild(field(simultaneousOutput ? 'Output to (all simultaneous)' : 'Output to', portsHost));
         }
         ruleCard.appendChild(body); list.appendChild(ruleCard);
       });
       card.section.appendChild(list);
-      const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'} Rule`, ()=>{
+      const add = button(`Add ${kind === 'input' ? 'Input' : 'Output'}`, ()=>{
         const next = kind === 'input'
-          ? { ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'any' }], target:{ mode:'any' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'down-complete' }, { kind:'space-available' }] }, processStages:[], downStages:[], fromPortId:null }
-          : { ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }, { kind:'downstream-ready' }] }, downStages:[], toPortIds:[], toPortId:null };
+          ? { flowRuleId, ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'any' }], target:{ mode:'any' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'down-complete' }, { kind:'space-available' }] }, processStages:[], fromPortId:null }
+          : { flowRuleId, ruleId:`output-rule-${Date.now()}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }, { kind:'downstream-ready' }] }, dispatch:simultaneousOutput ? 'all-ready' : 'first-match', downStages:[], toPortIds:[], toPortId:null };
         const port = App.createBasicFlowPort?.(node, kind, next);
         if(kind === 'input') next.fromPortId = port?.portId || null;
         else{ next.toPortIds = port ? [port.portId] : []; next.toPortId = port?.portId || null; }
-        rows.push(next);
+        allRows.push(next);
         commit(); App.selectionInspector?.refresh?.();
       }, 'selectionInspectorBtn is-primary');
-      add.disabled = running(); card.section.appendChild(add); wrapper.appendChild(card.card);
+      add.disabled = running(); card.section.appendChild(add);
+      if(rows[0]){
+        const timingBody = document.createElement('div'); timingBody.className = 'entityFlowTimingBody';
+        timingBody.appendChild(renderTimingStages(rows[0], kind));
+        timingCard.section.appendChild(timingBody);
+      }
+      return { rules:card.card, timing:timingCard.card };
     };
-    if(!App.basicNodeHasSequenceTarget?.(node) && behavior !== 'source') renderRules('input');
-    if(behavior !== 'sink') renderRules('output');
+    const flowRuleIds = App.ensureFlowRuleGroups?.(node) || [];
+    const ruleList = document.createElement('div'); ruleList.className = 'entityFlowRulePanelList';
+    const reorderGroups = (orderedIds)=>{
+      for(const key of ['inputRules', 'outputRules']){
+        const rows = Array.isArray(node.properties?.[key]) ? node.properties[key] : [];
+        const grouped = orderedIds.flatMap((flowRuleId)=>rows.filter((rule)=>String(rule?.flowRuleId || '') === flowRuleId));
+        const unknown = rows.filter((rule)=>!orderedIds.includes(String(rule?.flowRuleId || '')));
+        node.properties[key] = [...grouped, ...unknown];
+      }
+    };
+    flowRuleIds.forEach((flowRuleId, flowRuleIndex)=>{
+      const panel = document.createElement('article'); panel.className = 'entityFlowRulePanel';
+      panel.dataset.flowRuleId = flowRuleId;
+      const panelHeader = document.createElement('header'); panelHeader.className = 'entityFlowRulePanelHeader';
+      const heading = document.createElement('div'); heading.className = 'entityFlowRulePanelHeading';
+      const title = document.createElement('strong'); title.textContent = `Flow Rule ${flowRuleIndex + 1}`;
+      const badge = document.createElement('span'); badge.className = 'entityFlowRuleOrBadge'; badge.textContent = 'OR';
+      const summary = document.createElement('small'); summary.textContent = 'INPUT, PROCESS, OUTPUT and RECOVERY in this panel stay linked for one cycle.';
+      heading.append(title, badge, summary);
+      const panelControls = document.createElement('div'); panelControls.className = 'entityRuleControls';
+      const moveGroup = (offset)=>{
+        const nextIndex = flowRuleIndex + offset;
+        if(nextIndex < 0 || nextIndex >= flowRuleIds.length) return;
+        const ordered = flowRuleIds.slice();
+        [ordered[flowRuleIndex], ordered[nextIndex]] = [ordered[nextIndex], ordered[flowRuleIndex]];
+        changed(()=>{ reorderGroups(ordered); node.onPropertyChanged?.('inputRules'); node.onPropertyChanged?.('outputRules'); });
+        App.selectionInspector?.refresh?.();
+      };
+      const up = button('↑', ()=>moveGroup(-1)); up.title = 'Move Flow Rule up'; up.disabled = running() || flowRuleIndex === 0;
+      const down = button('↓', ()=>moveGroup(1)); down.title = 'Move Flow Rule down'; down.disabled = running() || flowRuleIndex === flowRuleIds.length - 1;
+      const remove = button('×', ()=>{
+        if(!confirmAction(remove, `Delete Flow Rule ${flowRuleIndex + 1} and its managed ports?`)) return;
+        const inputRows = (node.properties.inputRules || []).filter((rule)=>String(rule?.flowRuleId || '') === flowRuleId);
+        const outputRows = (node.properties.outputRules || []).filter((rule)=>String(rule?.flowRuleId || '') === flowRuleId);
+        const inputPortIds = inputRows.map((rule)=>rule.fromPortId).filter(Boolean);
+        const outputPortIds = outputRows.flatMap((rule)=>Array.isArray(rule.toPortIds) ? rule.toPortIds : [rule.toPortId]).filter(Boolean);
+        changed(()=>{
+          node.properties.inputRules = (node.properties.inputRules || []).filter((rule)=>String(rule?.flowRuleId || '') !== flowRuleId);
+          node.properties.outputRules = (node.properties.outputRules || []).filter((rule)=>String(rule?.flowRuleId || '') !== flowRuleId);
+          node.onPropertyChanged?.('inputRules'); node.onPropertyChanged?.('outputRules');
+        });
+        inputPortIds.forEach((portId)=>App.removeOrphanBasicFlowPort?.(node, 'input', portId, { confirmLinked:true }));
+        outputPortIds.forEach((portId)=>App.removeOrphanBasicFlowPort?.(node, 'output', portId, { confirmLinked:true }));
+        App.selectionInspector?.refresh?.();
+      }, 'selectionInspectorBtn is-danger');
+      remove.title = 'Delete Flow Rule'; remove.disabled = running();
+      panelControls.append(up, down, remove); panelHeader.append(heading, panelControls); panel.appendChild(panelHeader);
+
+      const phases = [];
+      if(!App.basicNodeHasSequenceTarget?.(node) && behavior !== 'source'){
+        const input = renderRules('input', flowRuleId);
+        phases.push(input.rules);
+        if(behavior !== 'sink') phases.push(input.timing);
+      }
+      if(behavior !== 'sink'){
+        const output = renderRules('output', flowRuleId);
+        phases.push(output.rules);
+        if(behavior !== 'shuttle' && behavior !== 'source') phases.push(output.timing);
+      }
+      const scroller = document.createElement('div'); scroller.className = 'entityFlowPipelineScroller'; scroller.tabIndex = 0;
+      scroller.setAttribute('role', 'region'); scroller.setAttribute('aria-label', `Flow Rule ${flowRuleIndex + 1} pipeline`);
+      const pipeline = document.createElement('div'); pipeline.className = 'entityFlowPipeline';
+      phases.forEach((phase, index)=>{
+        if(index){
+          const arrow = document.createElement('div'); arrow.className = 'entityFlowArrow';
+          arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '→'; pipeline.appendChild(arrow);
+        }
+        pipeline.appendChild(phase);
+      });
+      scroller.appendChild(pipeline); panel.appendChild(scroller); ruleList.appendChild(panel);
+    });
+    wrapper.appendChild(ruleList);
+    const addFlowRule = button('+ Add Flow Rule', ()=>{
+      const flowRuleId = `flow-rule-${Date.now()}`;
+      const addInput = behavior !== 'source' && !App.basicNodeHasSequenceTarget?.(node);
+      const addOutput = behavior !== 'sink';
+      changed(()=>{
+        if(addInput){
+          const rule = { flowRuleId, ruleId:`input-rule-${Date.now()}`, targets:[{ mode:'any' }], target:{ mode:'any' }, acceptWhen:behavior === 'shuttle' ? { kind:'space-available' } : { kind:'all', conditions:[{ kind:'down-complete' }, { kind:'space-available' }] }, processStages:[], fromPortId:null };
+          const port = App.createBasicFlowPort?.(node, 'input', rule); rule.fromPortId = port?.portId || null; node.properties.inputRules.push(rule);
+        }
+        if(addOutput){
+          const rule = { flowRuleId, ruleId:`output-rule-${Date.now() + 1}`, targets:[{ mode:'otherwise' }], target:{ mode:'otherwise' }, releaseWhen:{ kind:'all', conditions:[{ kind:'available' }, { kind:'downstream-ready' }] }, dispatch:(behavior === 'split' || behavior === 'shuttle') ? 'all-ready' : 'first-match', downStages:[], toPortIds:[], toPortId:null };
+          const port = App.createBasicFlowPort?.(node, 'output', rule); rule.toPortIds = port ? [port.portId] : []; rule.toPortId = port?.portId || null; node.properties.outputRules.push(rule);
+        }
+        node.onPropertyChanged?.('inputRules'); node.onPropertyChanged?.('outputRules');
+      });
+      App.selectionInspector?.refresh?.();
+    }, 'selectionInspectorBtn is-primary entityFlowAddRule');
+    addFlowRule.disabled = running(); wrapper.appendChild(addFlowRule);
     return wrapper;
   }
 
@@ -1763,7 +1796,7 @@
       saveState.disabled = running();
       state.section.append(stateEditor, saveState, stateNotice); panels.Advanced.appendChild(state.card);
       const active = names.includes(this._entityTab) ? this._entityTab : names[0];
-      const activate = (name)=>{ this._entityTab = name; Object.entries(panels).forEach(([key,panel])=>panel.hidden = key !== name); Array.from(tabBar.children).forEach((btn)=>btn.classList.toggle('is-active', btn.dataset.tab === name)); };
+      const activate = (name)=>{ this._entityTab = name; if(this.root) this.root.dataset.entityTab = name.toLowerCase(); Object.entries(panels).forEach(([key,panel])=>panel.hidden = key !== name); Array.from(tabBar.children).forEach((btn)=>btn.classList.toggle('is-active', btn.dataset.tab === name)); };
       names.forEach((name)=>{ const btn = button(name, ()=>activate(name), 'entityInspectorTab'); btn.dataset.tab = name; tabBar.appendChild(btn); main.appendChild(panels[name]); });
       main.insertBefore(tabBar, main.firstChild); activate(active);
     };

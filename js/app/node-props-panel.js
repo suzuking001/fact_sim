@@ -198,9 +198,12 @@ var App = window.App || (window.App = {});
 
     _openInspector(row){
       if(!row?.node) return false;
+      if(App.selectionInspector && typeof App.selectionInspector.openNodeDetails === 'function'){
+        App.selectionInspector.openNodeDetails(row.node, true);
+        return true;
+      }
       if(App.selectionInspector && typeof App.selectionInspector.openNode === 'function'){
-        App.selectionInspector.openNode(row.node, true, true);
-        if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
+        App.selectionInspector.openNode(row.node, true, true, { tab:'Flow', popout:true });
         return true;
       }
       return false;

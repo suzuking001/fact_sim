@@ -354,7 +354,7 @@ function initTimeline(){
       try{ existing.popup.focus(); }catch(_e){}
       return true;
     }
-    const popup = window.open('', `factsim-workspace-${view}`, 'popup=yes,width=1280,height=760');
+    const popup = window.open('', `factsim-workspace-${view}`, 'popup=yes,width=1440,height=860');
     if(!popup){
       if(typeof App.showToast === 'function') App.showToast('Popup window was blocked');
       return false;

@@ -119,8 +119,11 @@ function resolveMenuEvent(menuRef, fallbackEvent){
 }
 
 function openInspectorForNode(node){
+  if(window.App?.selectionInspector?.openNodeDetails){
+    return window.App.selectionInspector.openNodeDetails(node, true);
+  }
   if(window.App?.selectionInspector?.openNode){
-    return window.App.selectionInspector.openNode(node, true, true);
+    return window.App.selectionInspector.openNode(node, true, true, { tab:'Flow', popout:true });
   }
   return false;
 }
