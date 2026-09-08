@@ -1,0 +1,19 @@
+{
+  "nestedRuntime": true,
+  "sharedConditions": true,
+  "pruning": true,
+  "cycles": true,
+  "legacyAliases": true,
+  "projection": {
+    "before": 11,
+    "after": 5
+  },
+  "toggleRoundtrip": true,
+  "undoRedo": true,
+  "jsonRoundtrip": true,
+  "orphanRecovery": true,
+  "inlineComposition": true,
+  "legacyEditing": true,
+  "narrow": true,
+  "errors": []
+}

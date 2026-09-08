@@ -1,0 +1,239 @@
+/* Details shares the workspace palette, including when adopted into a popout. */
+#selectionInspectorPanel{
+  container-type:inline-size;
+  container-name:details;
+  color:#202123;
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:#fafafb;
+}
+#selectionInspectorPanel .selectionInspectorLayout{
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  align-items:start;
+  padding:18px;
+  gap:20px;
+}
+#selectionInspectorPanel .selectionInspectorSidebar{ display:flex; gap:12px; }
+#selectionInspectorPanel .selectionInspectorMain{ gap:16px; }
+#selectionInspectorPanel :is(.selectionInspectorCard,.entityFlowRulePanel){
+  border:1px solid #e4e4e8;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:none;
+}
+#selectionInspectorPanel .selectionInspectorHeader{
+  align-items:center;
+  padding:15px 16px;
+  border-bottom:0;
+  background:transparent;
+}
+#selectionInspectorPanel .selectionInspectorEyebrow{ margin:0; font-size:14px; font-weight:650; letter-spacing:0; text-transform:none; color:#202123; }
+#selectionInspectorPanel .selectionInspectorSubtitle{ margin:4px 0 0; font-size:12px; color:#73757c; }
+#selectionInspectorPanel .selectionInspectorPill{ padding:5px 9px; font-size:12px; background:#f1f1f4; color:#64666e; }
+#selectionInspectorPanel .nodeDetailsTitleField{ margin:0 16px 12px; }
+#selectionInspectorPanel .nodeDetailsTitleInput{ font-size:19px; font-weight:650; background:#fff; }
+#selectionInspectorPanel .selectionInspectorSection{ padding:16px; border-color:#ececef; }
+#selectionInspectorPanel :is(.selectionInspectorSectionTitle,.entityFlowGuide h3){
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 14px;
+  font-size:16px;
+  line-height:1.4;
+  font-weight:650;
+  letter-spacing:0;
+}
+#selectionInspectorPanel :is(.selectionInspectorFieldLabel,.entityRuleFieldLabel){
+  font-size:13px;
+  font-weight:550;
+  line-height:1.4;
+  text-transform:none;
+  letter-spacing:0;
+  color:#656770;
+}
+#selectionInspectorPanel :is(.selectionInspectorFields,.entityRuleBody){ gap:14px; }
+#selectionInspectorPanel .selectionInspectorSidebar .selectionInspectorFields{ grid-template-columns:1fr; }
+#selectionInspectorPanel :is(.selectionInspectorField,.entityRuleField){ gap:7px; min-width:0; }
+#selectionInspectorPanel :is(input,select,textarea){
+  box-sizing:border-box;
+  min-width:0;
+  min-height:42px;
+  padding:9px 11px;
+  border:1px solid #dcdde3;
+  border-radius:9px;
+  background:#fafafb;
+  color:#24262a;
+  font-family:inherit;
+  font-size:15px;
+  line-height:1.4;
+  box-shadow:none;
+}
+#selectionInspectorPanel input[type="checkbox"]{ width:20px; height:20px; min-height:20px; padding:0; accent-color:#24262a; }
+#selectionInspectorPanel :is(textarea,.entityAdvancedPreview){ font:13px/1.65 ui-monospace,Consolas,monospace; }
+#selectionInspectorPanel :is(input,select,textarea):focus{ border-color:#8795a6; outline:0; box-shadow:0 0 0 3px #e7ecf2; }
+#selectionInspectorPanel :is(button,summary,[tabindex]):focus-visible{ outline:3px solid #70859b; outline-offset:3px; }
+#selectionInspectorPanel button{
+  min-height:38px;
+  padding:8px 12px;
+  border:1px solid #dedee4 !important;
+  border-radius:9px !important;
+  background:#fff !important;
+  color:#292b30 !important;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:550;
+  line-height:1.35;
+  box-shadow:none !important;
+  transform:none;
+}
+#selectionInspectorPanel button::before,
+#selectionInspectorPanel button::after{ content:none; }
+#selectionInspectorPanel button:hover:not(:disabled){ background:#f0f0f3 !important; border-color:#bfc2ca !important; filter:none; transform:none; }
+#selectionInspectorPanel button.is-primary{ background:#24262a !important; border-color:#24262a !important; color:#fff !important; }
+#selectionInspectorPanel button.is-primary:hover:not(:disabled){ background:#41444a !important; }
+#selectionInspectorPanel button.is-danger{ background:#fff !important; border-color:#ecd9d7 !important; color:#ad3a32 !important; }
+#selectionInspectorPanel button.is-danger:hover:not(:disabled){ background:#fff0ee !important; }
+#selectionInspectorPanel button:disabled{ opacity:.4; cursor:not-allowed; }
+#selectionInspectorPanel .detailsIcon{ display:inline-flex; flex:0 0 22px; width:22px; height:22px; margin-right:2px; color:inherit; }
+#selectionInspectorPanel .detailsIcon svg{ width:22px; height:22px; }
+#selectionInspectorPanel .detailsHelpSource{ display:none !important; }
+#selectionInspectorPanel button.detailsHelp{
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 25px;
+  width:25px;
+  height:25px;
+  min-height:25px;
+  margin-left:auto;
+  padding:0;
+  border:1px solid #dedee4;
+  border-radius:50% !important;
+  background:#fff;
+  color:#777a82;
+  font-size:12px;
+  font-weight:600;
+}
+#selectionInspectorPanel .detailsSecondary > summary{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:44px;
+  padding:0 16px;
+  cursor:pointer;
+  list-style:none;
+  font-size:14px;
+  font-weight:550;
+  color:#656770;
+}
+#selectionInspectorPanel .detailsSecondary > summary::-webkit-details-marker{ display:none; }
+#selectionInspectorPanel .detailsSecondary > summary::after{ content:'+'; margin-left:auto; font-size:19px; font-weight:400; }
+#selectionInspectorPanel .detailsSecondary[open] > summary::after{ content:'−'; }
+#selectionInspectorPanel .detailsSecondary[open] > summary{ border-bottom:1px solid #eaeaf0; }
+#selectionInspectorPanel .selectionInspectorStatGrid{ gap:12px; padding:14px 16px; }
+#selectionInspectorPanel .selectionInspectorStat{ padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+#selectionInspectorPanel .selectionInspectorStatLabel{ font-size:12px; text-transform:none; letter-spacing:0; }
+#selectionInspectorPanel .selectionInspectorStatValue{ font-size:14px; }
+#selectionInspectorPanel .entityCycleTimingPanel{ background:#f6f6f8; border:0; }
+#selectionInspectorPanel :is(.entityCycleTimingRow,.entityCycleTimingRow strong,.entityCycleTimingHeading strong,.entityCycleTimingHeading span){ font-size:13px; text-transform:none; letter-spacing:0; }
+#selectionInspectorPanel .entityInspectorTabs{
+  display:flex;
+  flex-wrap:wrap;
+  align-self:flex-start;
+  gap:4px;
+  padding:4px;
+  border:0;
+  border-radius:12px;
+  background:#eeeef2;
+}
+#selectionInspectorPanel .entityInspectorTab{ display:flex; align-items:center; gap:7px; border:0 !important; padding:9px 15px; background:transparent !important; font-size:15px; }
+#selectionInspectorPanel .entityInspectorTab.is-active{ color:#202123 !important; background:#fff !important; box-shadow:0 1px 3px #20212310 !important; }
+#selectionInspectorPanel .entityFlowGuide{ display:block; padding:0; margin:0 0 16px; border:0; background:transparent; }
+#selectionInspectorPanel .entityFlowGuide h3{ margin:0; }
+#selectionInspectorPanel .entityFlowRulePanelHeader{ padding:12px 14px; gap:12px; border-color:#e7e7ec; background:#fafafb; }
+#selectionInspectorPanel .entityFlowRulePanelHeading{ flex:1; gap:10px; }
+#selectionInspectorPanel .entityFlowRulePanelHeading strong{ font-size:15px; }
+#selectionInspectorPanel .entityFlowRuleOrBadge{ color:#696b74; background:#ebebf0; font-size:11px; }
+#selectionInspectorPanel .entityFlowRulePanel:only-child .entityFlowRuleOrBadge{ display:none; }
+#selectionInspectorPanel .entityRuleControls{ display:flex; gap:4px; flex-shrink:0; }
+#selectionInspectorPanel .entityRuleControls button{ min-width:32px; min-height:32px; padding:3px 8px; border-color:transparent !important; background:transparent !important; font-size:17px; }
+#selectionInspectorPanel .entityFlowPipelineScroller{ padding:14px; }
+#selectionInspectorPanel .entityFlowPipeline{ gap:0; align-items:flex-start; }
+#selectionInspectorPanel .entityFlowPhase{ flex:1 0 300px; min-width:300px; border:0; border-radius:0; background:transparent; }
+#selectionInspectorPanel .entityFlowPhase.is-output{ flex-basis:320px; min-width:320px; }
+#selectionInspectorPanel .entityFlowPhase:is(.is-process,.is-recovery){ flex:0 0 150px; min-width:150px; }
+#selectionInspectorPanel .entityFlowPhase .selectionInspectorSection{ padding:8px; gap:12px; }
+#selectionInspectorPanel .entityFlowPhase .selectionInspectorSectionTitle{ margin-bottom:12px; text-transform:capitalize; flex-wrap:wrap; }
+#selectionInspectorPanel .entityFlowPhase .entityRuleBody{ display:grid; grid-template-columns:minmax(0,1fr); padding:12px; gap:16px; }
+#selectionInspectorPanel .entityRuleCard{ border:1px solid #e4e4e9; border-radius:11px; background:#fff; box-shadow:none; }
+#selectionInspectorPanel .entityRuleHeader{ padding:8px 12px; border-color:#ededf1; background:#f7f7f9; }
+#selectionInspectorPanel .entityRuleTitle{ font-size:14px; font-weight:550; }
+#selectionInspectorPanel .entityRuleConditionJoin{ font-size:13px; font-weight:500; color:#71737b; }
+#selectionInspectorPanel :is(.entityRuleConditionLine,.entityRuleMultiValueLine){ flex-wrap:nowrap; gap:6px; }
+#selectionInspectorPanel :is(.entityRuleConditionLine,.entityRuleMultiValueLine) select{ width:0; flex:1 1 0; }
+#selectionInspectorPanel .entityRuleConditionLine:has(input){ flex-wrap:wrap; }
+#selectionInspectorPanel .entityRuleConditionLine input{ flex:1 1 100%; }
+#selectionInspectorPanel .entityRuleConditionNumber{ flex:0 0 18px; width:18px; height:18px; font-size:11px; background:transparent; color:#8b8d95; }
+#selectionInspectorPanel :is(.entityRuleConditionLine,.entityRuleMultiValueLine) button{ flex:0 0 28px; min-height:32px; padding:2px; border:0 !important; background:transparent !important; color:#7f8189 !important; }
+#selectionInspectorPanel :is(.entityRuleAddCondition,.entityRuleAddTarget){ min-height:32px; padding:4px 2px; border:0 !important; color:#606773 !important; background:transparent !important; text-align:left; font-size:13px; }
+#selectionInspectorPanel .entityFlowTimingBody{ padding:0; }
+#selectionInspectorPanel .entityRuleTimingSingle{ padding:2px 8px; width:100%; border-radius:10px; border-color:#dcdde3; background:#fafafb; }
+#selectionInspectorPanel .entityRuleTimingSingle input{ min-height:44px; padding:6px 0; border:0; background:transparent; font-size:21px; font-weight:600; box-shadow:none; }
+#selectionInspectorPanel .entityRuleTimingSingle small{ font-size:14px; }
+#selectionInspectorPanel .entityFlowArrow{ flex:0 0 16px; width:16px; color:#9a9da6; font-size:17px; }
+#selectionInspectorPanel .entityFlowArrow::before,
+#selectionInspectorPanel .entityFlowArrow::after{ content:none; }
+#selectionInspectorPanel .entityFlowAddRule{ margin-top:14px; }
+#selectionInspectorPanel .entitySourceSequenceInline{ padding:12px; border-color:#e5e5eb; background:#f8f8fa; }
+#selectionInspectorPanel .entitySourceSequenceRow{ grid-template-columns:24px minmax(0,1fr); padding:8px; background:#fff; }
+#selectionInspectorPanel :is(.entitySourceSequenceQuantity,.entitySourceSequenceRow .entityRuleControls){ grid-column:2; }
+#selectionInspectorPanel .entitySourceSequenceQuantity{ font-size:12px; }
+#selectionInspectorPanel :is(.selectionInspectorNotice,.entityCurrentSummary,.entityCurrentInstances){ font-size:14px; line-height:1.6; }
+#selectionInspectorPanel .selectionInspectorNotice{ padding:10px 12px; border-radius:9px; background:#f3f3f6; }
+#selectionInspectorPanel .selectionInspectorNotice:empty{ display:none; }
+#selectionInspectorPanel .selectionInspectorNotice.is-error{ color:#a52f29; background:#fff0ee; }
+#selectionInspectorPanel .selectionInspectorEmpty{ border:0; background:transparent; box-shadow:none; padding:22px; }
+#selectionInspectorPanel .selectionInspectorEmpty h3{ display:flex; align-items:center; gap:8px; font-size:21px; }
+#selectionInspectorPanel .selectionInspectorEmpty p{ font-size:15px; color:#73757d; }
+.detailsTooltip{
+  position:fixed;
+  z-index:15000;
+  box-sizing:border-box;
+  width:max-content;
+  max-width:min(320px,calc(100vw - 24px));
+  max-height:calc(100vh - 24px);
+  overflow:auto;
+  padding:14px 17px;
+  border:1px solid #3e4148;
+  border-radius:12px;
+  color:#fff;
+  background:#25272b;
+  box-shadow:0 10px 30px #14161a26;
+  font:14px/1.6 'Segoe UI',system-ui,sans-serif;
+  white-space:pre-line;
+}
+.detailsTooltip[hidden]{ display:none; }
+/* Keep Flow's process direction and all settings reachable in narrow docks. */
+@container details (max-width:900px){
+  #selectionInspectorPanel .selectionInspectorLayout{ grid-template-columns:minmax(0,1fr); gap:16px; padding:14px; }
+  #selectionInspectorPanel .selectionInspectorSidebar{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  #selectionInspectorPanel .selectionInspectorSidebar .selectionInspectorFields{ grid-template-columns:1fr; }
+}
+@container details (max-width:500px){
+  #selectionInspectorPanel .selectionInspectorSidebar{ grid-template-columns:1fr; }
+  #selectionInspectorPanel .entityInspectorTab{ padding:9px 10px; font-size:14px; }
+  #selectionInspectorPanel .entityFlowPhase{ flex-basis:280px; min-width:280px; }
+  #selectionInspectorPanel .entityFlowPhase.is-output{ flex-basis:300px; min-width:300px; }
+  #selectionInspectorPanel .entityFlowPhase:is(.is-process,.is-recovery){ flex-basis:145px; min-width:145px; }
+  #selectionInspectorPanel :is(input,select,textarea){ font-size:16px; }
+}
+.workspacePopoutContent > #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorLayout{ grid-template-columns:230px minmax(0,1fr); }
+.workspacePopoutContent > #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorSidebar{ display:flex; }
+.workspacePopoutHeader{ padding:16px 22px; border-bottom:1px solid #e5e5ea; background:#fff; box-shadow:none; }
+.workspacePopoutEyebrow{ display:none; }
+.workspacePopoutTitle{ font-size:23px; letter-spacing:-.03em; }
+.workspacePopoutMeta{ color:#73757c; font-size:14px; }
+.workspacePopoutActions .timelineBtn{ min-height:40px; padding:8px 14px; border:1px solid #dedee4 !important; border-radius:10px !important; background:#fff !important; color:#292b30 !important; font-size:14px; box-shadow:none !important; }
+@container details (max-width:900px){
+  .workspacePopoutContent > #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorLayout{ grid-template-columns:1fr; }
+  .workspacePopoutContent > #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorSidebar{ display:grid; }
+}

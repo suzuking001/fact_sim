@@ -29,7 +29,10 @@
   <script src="js/vendor/litegraph.min.js?v=0.7.13"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260905a" />
+  <link rel="stylesheet" href="css/app.css?v=20260905b" />
+  <link rel="stylesheet" href="css/workspace.css?v=20260905c" />
+  <link rel="stylesheet" href="css/details.css?v=20260905a" />
+  <link rel="stylesheet" href="css/flow-view.css?v=20260909a" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -81,7 +84,7 @@
               </button>
               <button id="landingNewBtn" class="landingChoiceBtn" type="button" data-landing-action="new" disabled aria-disabled="true">
                 <span class="landingChoiceIcon" aria-hidden="true">＋</span>
-                <span class="landingChoiceCopy"><strong>Build a new model</strong><small>Start with Source → Equipment → Sink</small></span>
+                <span class="landingChoiceCopy"><strong>Build a new model</strong><small>Start with Sequence Source → Equipment → Sink</small></span>
                 <span class="landingChoiceArrow" aria-hidden="true">→</span>
               </button>
               <button id="landingFileBtn" class="landingChoiceBtn" type="button" data-landing-action="file" disabled aria-disabled="true">
@@ -173,8 +176,8 @@
 <div id="editorTopHud" aria-label="Simulation quick controls">
   <div id="simTimeHud">Time: <span id="simTime">0.00 s</span></div>
   <div id="editorRunHud">
-    <button id="btnStart" type="button" data-run-state="start" aria-pressed="false">▶ Start</button>
-    <button id="btnReset" type="button">↺ Reset</button>
+    <button id="btnStart" type="button" data-run-state="start" aria-pressed="false">Start</button>
+    <button id="btnReset" type="button">Reset</button>
     <div class="editorRunSpeed">
       <span class="editorRunSpeedLabel">Speed</span>
       <input type="range" id="speedRange" value="2" min="0" max="12" step="1" aria-label="Simulation speed">
@@ -188,6 +191,7 @@
       <div class="appBrandRow">
         <img class="appLogo" src="img/fact_sim_logo.png" alt="fact sim logo">
         <span class="appBrandText">FACT_SIM</span>
+        <button id="workspaceHelp" type="button" aria-label="Quick guide" data-help="Choose an example or add nodes to build a flow. Press Start to simulate. Select a node and open Details to edit it. Scroll to zoom; drag the canvas to pan.">?</button>
       </div>
     </div>
     <div id="controls">
@@ -204,12 +208,15 @@
           <option value="sample_line1">Sample Line1</option>
           <option value="sample_line2">Sample Line2</option>
         </select>
-        <div class="fieldHint">Start with a sample model if this is your first time.</div>
-        <div class="btn-row exampleSaveActions">
-          <button id="btnLinkExampleFolder" type="button">Link Sample Folder</button>
-          <button id="btnOverwriteExample" type="button">Overwrite Example</button>
-        </div>
-        <div id="exampleSaveHint" class="fieldHint">Save the current graph back into the selected example files.</div>
+        <div id="exampleIntroHint" class="fieldHint">Start with a sample model, or choose Add Node to build your own flow.</div>
+        <details class="panelDetails exampleFileDetails">
+          <summary>Sample files</summary>
+          <div class="btn-row exampleSaveActions">
+            <button id="btnLinkExampleFolder" type="button">Link Sample Folder</button>
+            <button id="btnOverwriteExample" type="button">Overwrite Example</button>
+          </div>
+          <div id="exampleSaveHint" class="fieldHint">Save the current graph back into the selected example files.</div>
+        </details>
       </div>
       <div id="simStatusCard" class="simStatusCard" aria-live="polite">
         <div class="simStatusHead">
@@ -295,8 +302,16 @@
     <div id="addNodePanel">
       <div class="panelHeader">Add Node</div>
       <div class="field">
-        <label for="nodeKindSelect">Node Type</label>
-        <select id="nodeKindSelect"></select>
+        <label id="nodeKindPickerLabel" for="nodeKindPickerTrigger">Node Type</label>
+        <select id="nodeKindSelect" hidden aria-hidden="true" tabindex="-1"></select>
+        <div id="nodeKindPicker" class="nodeKindPicker">
+          <button id="nodeKindPickerTrigger" class="nodeKindPickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="nodeKindPickerLabel nodeKindPickerValue">
+            <span id="nodeKindPickerIcon" class="nodeKindPickerIcon" aria-hidden="true"></span>
+            <span id="nodeKindPickerValue" class="nodeKindPickerValue">Equipment</span>
+            <span class="nodeKindPickerChevron" aria-hidden="true">⌄</span>
+          </button>
+          <div id="nodeKindPickerList" class="nodeKindPickerList" role="listbox" aria-labelledby="nodeKindPickerLabel" hidden></div>
+        </div>
       </div>
       <button id="btnAddNode">Place Node</button>
     </div>
@@ -795,7 +810,7 @@ SOFTWARE.
   <script src="js/nodes/entity_model.js?v=20260904e"></script>
   <script src="js/nodes/entity_store.js?v=20260831a"></script>
   <script src="js/nodes/sigports.js"></script>
-    <script src="js/nodes/menu.js?v=20260904a"></script>
+    <script src="js/nodes/menu.js?v=20260905a"></script>
     <script src="js/nodes/ioflip.js?v=20260829b"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
@@ -817,8 +832,9 @@ SOFTWARE.
   <script src="js/nodes/station.js?v=20260831a"></script>
   <script src="js/nodes/transfer_station.js?v=20260831a"></script>
   <script src="js/nodes/sink.js?v=20260824f"></script>
-  <script src="js/nodes/basic_node.js?v=20260904g"></script>
+  <script src="js/nodes/basic_node.js?v=20260906a"></script>
   <script src="js/nodes/register.js?v=20260823j"></script>
+  <script src="js/app/node-catalog.js?v=20260905a"></script>
   <script src="sample/simple.js?v=20260828a"></script>
   <script src="sample/branch.js?v=20260828a"></script>
   <script src="sample/parallel_benchmark.js?v=20260828a"></script>
@@ -846,18 +862,25 @@ SOFTWARE.
 <script src="js/app/engine-fast-par-host.js?v=20260829c"></script>
   <script src="js/app/sim.js?v=20260715a"></script>
 <script src="js/app/benchmark.js?v=20260311a"></script>
-<script src="js/app/engine-test.js?v=20260831b"></script>
+  <script src="js/app/engine-test.js?v=20260831b"></script>
+  <script src="js/app/flow-program.js?v=20260906b"></script>
   <script src="js/app/history.js?v=20260307a"></script>
   <script src="js/app/selection.js?v=20260715a"></script>
   <script src="js/app/fit.js?v=20260715a"></script>
   <script src="js/app/node-props-panel.js?v=20260904a"></script>
-  <script src="js/app/selection-inspector.js?v=20260904b"></script>
-  <script src="js/app/entity-ui.js?v=20260905b"></script>
+  <script src="js/app/selection-inspector.js?v=20260905a"></script>
+  <script src="js/app/flow-view-model.js?v=20260905b"></script>
+  <script src="js/app/flow-conditions.js?v=20260909a"></script>
+  <script src="js/app/flow-view.js?v=20260909a"></script>
+  <script src="js/app/flow-program-editor.js?v=20260909a"></script>
+  <script src="js/app/entity-ui.js?v=20260906a"></script>
   <script src="js/app/timeline-init.js?v=20260904a"></script>
   <script src="js/app/graph-init.js?v=20260831a"></script>
   <script src="js/app/examples.js?v=20260831b"></script>
-  <script src="js/app/file-io.js?v=20260831a"></script>
-  <script src="js/app/ui.js?v=20260902c"></script>
+  <script src="js/app/file-io.js?v=20260905a"></script>
+  <script src="js/app/workspace-ui.js?v=20260905c"></script>
+  <script src="js/app/ui.js?v=20260905c"></script>
+  <script src="js/app/details-ui.js?v=20260905a"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

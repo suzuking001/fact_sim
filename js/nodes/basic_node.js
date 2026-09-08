@@ -15,13 +15,13 @@
     router:      { title: 'Router', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 1 },
     pack:        { title: 'Attach', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
     unpack:      { title: 'Detach', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
-    source:      { title: 'Source', category: 'System', entity: true, processTime: 0, downTime: 0, contentCapacity: 1000000 },
+    source:      { title: 'Sequence Source', category: 'System', entity: true, processTime: 0, downTime: 0, contentCapacity: 1000000 },
     sink:        { title: 'Sink', category: 'System', entity: true, processTime: 0, downTime: 0, contentCapacity: 1000000 },
     split:       { title: 'Split', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 1 },
     merge:       { title: 'Merge', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 2 },
     join:        { title: 'Join', category: 'Flow Control', entity: true, processTime: 0, downTime: 0, contentCapacity: 2 },
     shuttle:     { title: 'Shuttle Stage', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
-    carrier_route:{ title: 'Transport Route', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
+    carrier_route:{ title: 'Carrier Route', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 1 },
     station:     { title: 'Store', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
     transfer:    { title: 'Transfer', category: 'Handling', entity: true, processTime: 1, downTime: 0, contentCapacity: 2 },
     signal:      { title: 'Signal', category: 'Utility', entity: false, processTime: 0, downTime: 0, contentCapacity: 0 },
@@ -197,6 +197,7 @@
       operations: normalizeOperations(source.operations),
       flipIO: source.flipIO === true
     };
+    if(isObject(source.flowProgram)) result.flowProgram = clone(source.flowProgram, {});
     if(Number.isFinite(Number(source.flowPortSequence))) result.flowPortSequence = Math.max(0, Math.round(Number(source.flowPortSequence)));
     return result;
   }
@@ -2769,6 +2770,41 @@
     return props;
   }
 
+  function migrateLegacyDefaultTitle(node, originalType, templateId){
+    const currentTitle = typeof node?.title === 'string' ? node.title : '';
+    const type = text(originalType).toLowerCase();
+    const behavior = templateId && templateId !== 'basic' ? templateId : behaviorId(node);
+    if(currentTitle === 'Source' && behavior === 'source'){
+      const entityMode = type === 'factory/entitysource'
+        || text(node?.properties?.sourceMode).toLowerCase() === 'entity';
+      node.title = entityMode ? 'Entity Source' : 'Sequence Source';
+      return;
+    }
+    if(currentTitle !== 'Transport Route' || behavior !== 'carrier_route') return;
+    const transportOperation = (Array.isArray(node?.properties?.operations) ? node.properties.operations : [])
+      .find((operation)=>['entity-transport', 'carrier-transport'].includes(text(operation?.kind).toLowerCase()));
+    const mode = type === 'factory/agvroute'
+      ? 'agv'
+      : type === 'factory/carrierroute'
+        ? 'carrier'
+        : text(transportOperation?.config?.transportMode || node?.properties?.transportMode).toLowerCase();
+    node.title = mode === 'agv' ? 'AGV Route' : 'Carrier Route';
+  }
+
+  function migrateLegacyDefaultTitles(data){
+    const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
+    for(const node of nodes){
+      if(!node || !node.type) continue;
+      node.properties = isObject(node.properties) ? node.properties : {};
+      const originalType = node.type;
+      const templateId = text(node.properties.presetId).toLowerCase()
+        || TYPE_TO_PRESET[originalType]
+        || (hasSequenceTarget(node) ? 'source' : 'basic');
+      migrateLegacyDefaultTitle(node, originalType, templateId);
+    }
+    return data;
+  }
+
   function migrateGraphDataToBasic(source, options){
     const data = clone(source, null);
     if(!data) throw new Error('Graph data is not serializable');
@@ -2796,6 +2832,7 @@
       const templateId = text(node.properties.presetId).toLowerCase()
         || TYPE_TO_PRESET[originalType]
         || (hasSequenceTarget(node) ? 'source' : 'basic');
+      migrateLegacyDefaultTitle(node, originalType, templateId);
 
       if(templateId === 'note' || templateId === 'signal'){
         node.type = `factory/${templateId}`;
@@ -2899,6 +2936,7 @@
 
   App.BASIC_NODE_TEMPLATES = PRESETS;
   App.BASIC_NODE_TYPE_TEMPLATE_MAP = TYPE_TO_PRESET;
+  App.migrateLegacyDefaultTitles = migrateLegacyDefaultTitles;
   App.inferEntityModelFromGraph = inferLegacyTypes;
   App.ensureBasicNodePortIds = ensurePortIds;
   App.ensureBasicTemplateFlowRules = ensurePresetFlowRules;

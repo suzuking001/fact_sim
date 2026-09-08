@@ -1,0 +1,113 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {FactSimRuntime} from '../dist/fact-sim-runtime.js';
+const repoRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+const runtime=new FactSimRuntime({repoRoot,preferredPort:0});
+const errors=[];
+try{
+  const page=await runtime.ensureReady();page.on('pageerror',e=>errors.push(e.message));
+  const result=await page.evaluate(()=>{
+    const A=window.App,F=A.FlowProgram;
+    function fixture(){
+      const g=new LGraph(),source=new LGraphNode('Input fixture');source.addOutput('A',0);source.addOutput('B',0);g.add(source);
+      const equipment=LiteGraph.createNode('factory/basic');g.add(equipment);equipment.applyTemplate('machine');
+      equipment.addInput('B',0);equipment.inputs[1].portId='in-2';equipment.inputs[1].channel='entity';
+      const sink=new LGraphNode('Output fixture');sink.addInput('In',0);sink.received=[];sink.canAcceptWorkInput=()=>true;g.add(sink);
+      source.connect(0,equipment,0);source.connect(1,equipment,1);equipment.connect(0,sink,0);
+      sink.onExecute=()=>{const work=sink.getInputData(0);if(work && !sink.received.includes(work)){sink.received.push(work);equipment.acknowledgeEntityOutput(work,sink.id,0);}};
+      const kinds=['start','input','process','input','output','recovery','output','end'];
+      const config=[{}, {portId:equipment.inputs[0].portId},{seconds:.1},{portId:'in-2'},{portId:equipment.outputs[0].portId},{seconds:.05},{portId:equipment.outputs[0].portId},{}];
+      const program={version:1,enabled:true,nodes:kinds.map((kind,i)=>({id:i+1,kind,config:config[i],pos:[i*270,60]})),links:kinds.slice(1).map((_,i)=>({from:i+1,output:0,to:i+2,input:0}))};
+      equipment.properties.flowProgram=program;F.bind(equipment);
+      source.setOutputData(0,new Work(1,'A','type-a'));source.setOutputData(1,new Work(2,'A','type-a'));
+      const step=time=>{window.setSimTime(time);equipment.onExecute();sink.onExecute();};
+      return {g,source,equipment,sink,program,step};
+    }
+    let f=fixture();
+    const validation=F.validate(f.program,f.equipment);if(validation.length)throw new Error(validation.join(' / '));
+    f.step(0);const before=f.equipment._lastInRefs[1]===undefined;
+    f.step(99);if(f.equipment._lastInRefs[1])throw new Error('Second input arrived before Process');
+    f.step(100);const after=!!f.equipment._lastInRefs[1];
+    f.step(101);f.step(151);f.step(152);
+    if(f.sink.received.length!==2)throw new Error('Two outputs were not acknowledged');
+    const serial=f.g.serialize();if(!serial.nodes.find(n=>n.id===f.equipment.id).properties.flowProgram)throw new Error('Flow missing from JSON');
+    const fallback=A.createSimEngine('event-fast-par',f.g).runtimeMode;
+    const loaded=new LGraph();loaded.configure(serial);
+    const persisted=loaded.getNodeById(f.equipment.id)?.properties.flowProgram;
+    if(JSON.stringify(persisted)!==JSON.stringify(f.program))throw new Error('Program did not round trip');
+    f=fixture();
+    const order=[1,2,4,3,5,6,7,8];f.program.links=order.slice(1).map((id,i)=>({from:order[i],output:0,to:id,input:0}));
+    f.step(0);const rewired=!!f.equipment._lastInRefs[1];
+    if(!rewired)throw new Error('Rewiring did not change execution order');
+    // Parallel timers must join at max duration, not their sum.
+    f=fixture();f.program.nodes=[{id:1,kind:'start',config:{}},{id:2,kind:'parallel',config:{}},{id:3,kind:'process',config:{seconds:.1}},{id:4,kind:'process',config:{seconds:.2}},{id:5,kind:'join',config:{}},{id:6,kind:'end',config:{}}];
+    f.program.links=[{from:1,output:0,to:2,input:0},{from:2,output:0,to:3,input:0},{from:2,output:1,to:4,input:0},{from:3,output:0,to:5,input:0},{from:4,output:0,to:5,input:1},{from:5,output:0,to:6,input:0}];
+    f.step(0);f.step(100);if(!f.equipment._flowRun.tasks.length)throw new Error('AND completed too early');f.step(200);
+    if(f.equipment._flowRun.tasks.length)throw new Error('AND did not join parallel timers');
+    const engineGraph=new LGraph(),engineNode=LiteGraph.createNode('factory/basic');engineGraph.add(engineNode);engineNode.applyTemplate('machine');
+    engineNode.properties.flowProgram=copy(f.program);engineNode.onPropertyChanged('flowProgram');
+    window.setSimTime(0);const engine=A.createHeadlessSimRunner('event-fast-par',engineGraph.serialize());engine.update(1000);
+    if(engine.runtimeMode!=='fallback-flow-dt' || !engine.graph.getNodeById(engineNode.id)._flowRun.cycle)throw new Error('Serialized headless execution failed');
+    engineNode.properties.flowProgram.enabled=false;engineNode.onPropertyChanged('flowProgram');
+    if(engineNode.canAcceptWorkInput?.__flowMethod || engineNode.acknowledgeEntityOutput?.__flowMethod)throw new Error('Legacy methods were not restored');
+    // NOT(empty) AND (available OR always) controls the real branch.
+    f=fixture();
+    f.program.nodes=[{id:1,kind:'start',config:{}},{id:2,kind:'input',config:{portId:f.equipment.inputs[0].portId}},{id:3,kind:'branch',config:{}},{id:4,kind:'destroy',config:{}},{id:5,kind:'end',config:{}},{id:6,kind:'end',config:{}},{id:7,kind:'test',config:{test:'empty'}},{id:8,kind:'not',config:{}},{id:9,kind:'test',config:{test:'available'}},{id:10,kind:'test',config:{test:'always'}},{id:11,kind:'or',config:{}},{id:12,kind:'and',config:{}}];
+    f.program.links=[[1,0,2,0],[2,0,3,0],[3,0,4,0],[4,0,5,0],[3,1,6,0],[7,0,8,0],[9,0,11,0],[10,0,11,1],[8,0,12,0],[11,0,12,1],[12,0,3,1]].map(([from,output,to,input])=>({from,output,to,input}));
+    if(F.validate(f.program,f.equipment).length)throw new Error('Condition graph invalid');
+    f.step(0);if(f.equipment._flowRun.completed!==1)throw new Error('Nested condition true branch failed');
+    f.program.nodes.find(n=>n.id===7).config.test='available';delete f.equipment._flowRun;
+    f.step(0);if(f.equipment._flowRun.completed!==0 || f.equipment._flowRun.works.length!==1)throw new Error('Nested condition false branch failed');
+    const cyclic=copy(f.program);cyclic.nodes=[{id:1,kind:'start',config:{}},{id:2,kind:'merge',config:{}},{id:3,kind:'end',config:{}}];cyclic.links=[{from:1,output:0,to:2,input:0},{from:2,output:0,to:2,input:1}];
+    const rejected=F.validate(cyclic,f.equipment).length>0;
+    function copy(value){return JSON.parse(JSON.stringify(value));}
+    window.setSimTime(0);
+    return {before,after,rewired,outputs:2,fallback,json:true,parallelJoin:true,conditions:true,headless:true,legacyRestore:true,rejected};
+  });
+  assert(result.before && result.after && result.rewired && result.rejected);assert.equal(result.fallback,'fallback-flow-dt');
+  console.log('Runtime:',result);
+  await page.evaluate(()=>{const A=window.App,n=A.graph._nodes.find(n=>A.FlowViewModel.runtime(n)==='machine');A.selectionInspector.setNode(n);const panel=document.getElementById('selectionInspectorPanel');window.__flowProgramDockParent=panel.parentElement;document.body.append(panel);panel.style.cssText='display:block;position:fixed;inset:0;overflow:auto;z-index:99999;background:white';window.__flowProgramTestNode=n.id;});
+  await page.getByRole('button',{name:'配線編集 · 実行 Flow を作成',exact:true}).click();
+  assert.equal(await page.locator('.flowProgram').count(),1);
+  await page.locator('.flowProgram canvas').waitFor({state:'visible'});
+  await page.getByRole('button',{name:'全体表示',exact:true}).click();
+  // Change the real cable destination, then undo the incomplete draft.
+  const ports=await page.evaluate(()=>{
+    const v=document.querySelector('.flowProgram').flowView.view,process=v.graph.getNodeById(3),output=v.graph.getNodeById(5);
+    const rect=v.canvas.getBoundingClientRect();
+    const convert=point=>({x:rect.left+(point[0]+v.ds.offset[0])*v.ds.scale,y:rect.top+(point[1]+v.ds.offset[1])*v.ds.scale});
+    return {start:convert(process.getConnectionPos(false,0)),end:convert(output.getConnectionPos(true,0))};
+  });
+  await page.mouse.move(ports.start.x,ports.start.y);await page.mouse.down();await page.mouse.move(ports.end.x,ports.end.y,{steps:15});await page.mouse.up();
+  assert.equal(await page.evaluate(()=>document.querySelector('.flowProgram').flowView.program.links.some(l=>l.from===3 && l.to===5)),true);
+  await page.getByRole('button',{name:'元に戻す',exact:true}).click();
+  assert.equal(await page.evaluate(()=>document.querySelector('.flowProgram').flowView.program.links.some(l=>l.from===4 && l.to===5)),true);
+  await page.getByRole('button',{name:'Flow を適用',exact:true}).click();
+  await page.waitForFunction(()=>App.graph.getNodeById(window.__flowProgramTestNode).properties.flowProgram?.enabled===true);
+  await page.evaluate(()=>window.undo());
+  assert.equal(await page.evaluate(()=>!!App.graph.getNodeById(window.__flowProgramTestNode).properties.flowProgram?.enabled),false);
+  await page.evaluate(()=>window.redo());
+  assert.equal(await page.evaluate(()=>App.graph.getNodeById(window.__flowProgramTestNode).properties.flowProgram?.enabled),true);
+  await page.evaluate(()=>{const v=document.querySelector('.flowProgram').flowView.view;v.ds.scale=1;v.ds.offset.set([-30,60]);v.draw(true,true);});
+  await fs.mkdir(path.join(repoRoot,'tmp'),{recursive:true});await page.screenshot({path:path.join(repoRoot,'tmp','flow-program.png'),fullPage:true});
+  const popupPromise=page.waitForEvent('popup');
+  await page.evaluate(()=>{const panel=document.getElementById('selectionInspectorPanel');window.__flowProgramDockParent.append(panel);panel.style.cssText='';App.setTimelineDockView('inspector');App.openWorkspacePopout('inspector');});
+  const popup=await popupPromise;
+  await popup.waitForFunction(()=>document.querySelector('.flowProgram')?.flowView?.view?.canvas?.ownerDocument===document);
+  await popup.getByRole('button',{name:'全体表示',exact:true}).click();
+  const start=await popup.evaluate(()=>{const v=document.querySelector('.flowProgram').flowView.view,n=v.graph.getNodeById(3),r=v.canvas.getBoundingClientRect();return {x:r.left+(n.pos[0]+90+v.ds.offset[0])*v.ds.scale,y:r.top+(n.pos[1]-12+v.ds.offset[1])*v.ds.scale,pos:n.pos[0],scale:v.ds.scale,frame:v.frame};});
+  await popup.mouse.move(start.x,start.y);await popup.mouse.down();await popup.mouse.move(start.x+80,start.y+40,{steps:24});await popup.mouse.up();
+  const drag=await popup.evaluate(()=>{const v=document.querySelector('.flowProgram').flowView.view;return {pos:v.graph.getNodeById(3).pos[0],frame:v.frame,bg:v.bgctx.canvas===v.bgcanvas};});
+  assert(Math.abs(drag.pos-start.pos-80/start.scale)<4);assert(drag.frame-start.frame>=12);assert(drag.bg);
+  await page.evaluate(()=>App.closeWorkspacePopout('inspector'));
+  await page.evaluate(()=>{const panel=document.getElementById('selectionInspectorPanel');document.body.append(panel);panel.style.cssText='display:block;position:fixed;inset:0;overflow:auto;z-index:99999;background:white';});
+  await page.setViewportSize({width:390,height:844});
+  await page.getByLabel('時間（秒）',{exact:true}).scrollIntoViewIfNeeded();
+  assert(await page.getByLabel('時間（秒）',{exact:true}).isVisible());
+  const narrow=await page.evaluate(()=>{const p=document.getElementById('selectionInspectorPanel');return p.scrollWidth<=p.clientWidth+2;});assert(narrow);
+  result.popupDrag=true;result.narrow=true;
+  assert.deepEqual(errors,[]);
+  await fs.mkdir(path.join(repoRoot,'artifacts','flow-program'),{recursive:true});await fs.writeFile(path.join(repoRoot,'artifacts','flow-program','validation.json'),JSON.stringify({result,errors},null,2));
+}finally{await runtime.close();}

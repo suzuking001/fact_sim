@@ -1,0 +1,677 @@
+{
+  "counts": {
+    "machine": 70,
+    "carrier_route": 30,
+    "shuttle": 5,
+    "merge": 10,
+    "split": 2,
+    "router": 1,
+    "sink": 1,
+    "join": 1,
+    "source": 1
+  },
+  "nodes": [
+    {
+      "id": 7,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 16,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 10,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 4,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 26,
+      "behavior": "shuttle",
+      "runtime": "shuttle"
+    },
+    {
+      "id": 27,
+      "behavior": "shuttle",
+      "runtime": "shuttle"
+    },
+    {
+      "id": 28,
+      "behavior": "shuttle",
+      "runtime": "shuttle"
+    },
+    {
+      "id": 29,
+      "behavior": "shuttle",
+      "runtime": "shuttle"
+    },
+    {
+      "id": 30,
+      "behavior": "shuttle",
+      "runtime": "shuttle"
+    },
+    {
+      "id": 33,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 34,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 35,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 36,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 37,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 38,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 39,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 42,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 43,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 44,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 45,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 47,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 48,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 49,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 50,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 51,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 52,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 54,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 55,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 56,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 57,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 58,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 59,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 60,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 62,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 63,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 65,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 67,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 32,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 120,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 127,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 128,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 129,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 130,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 125,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 126,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 124,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 110,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 107,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 123,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 61,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 133,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 134,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 135,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 136,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 137,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 138,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 139,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 140,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 141,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 142,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 143,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 144,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 145,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 146,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 147,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 148,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 149,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 150,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 151,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 152,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 153,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 154,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 155,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 156,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 157,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 158,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 159,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 160,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 162,
+      "behavior": "merge",
+      "runtime": "MergeNode"
+    },
+    {
+      "id": 166,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 169,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 170,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 172,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 173,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 174,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 175,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 176,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 177,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 178,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 179,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 163,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 165,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 168,
+      "behavior": "split",
+      "runtime": "SplitNode"
+    },
+    {
+      "id": 117,
+      "behavior": "split",
+      "runtime": "SplitNode"
+    },
+    {
+      "id": 181,
+      "behavior": "router",
+      "runtime": "BranchNode"
+    },
+    {
+      "id": 3,
+      "behavior": "sink",
+      "runtime": "SinkNode"
+    },
+    {
+      "id": 161,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 6,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 64,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 24,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 23,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 17,
+      "behavior": "join",
+      "runtime": "JoinNode"
+    },
+    {
+      "id": 13,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 182,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 184,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 185,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 186,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 2,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 187,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 183,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 191,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 190,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 192,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 14,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 21,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 193,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 11,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 188,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 189,
+      "behavior": "carrier_route",
+      "runtime": "CarrierRouteNode"
+    },
+    {
+      "id": 121,
+      "behavior": "machine",
+      "runtime": "EquipmentNode"
+    },
+    {
+      "id": 116,
+      "behavior": "source",
+      "runtime": "SourceNode"
+    }
+  ],
+  "allViews": 121,
+  "edit": {
+    "initial": 2,
+    "saved": 2.7,
+    "undone": 2,
+    "redone": 2.7,
+    "loaded": 2.7
+  },
+  "conditions": {
+    "logicalTree": true,
+    "comparison": 24,
+    "locked": true
+  },
+  "target": {
+    "mode": "type",
+    "typeId": "type-carrier-1"
+  },
+  "narrow": {
+    "width": 390,
+    "scrollWidth": 390,
+    "editorReachable": true
+  },
+  "drag": {
+    "pos": [
+      530,
+      219,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "frame": 44,
+    "backgroundMatches": true,
+    "linePixels": 779,
+    "framesDuringDrag": 29
+  },
+  "parity": {
+    "closed": {
+      "hash": 1671961489,
+      "activeLinks": 10750,
+      "transitions": 364,
+      "completed": 0,
+      "simMs": 240000
+    },
+    "opened": {
+      "hash": 1671961489,
+      "activeLinks": 10750,
+      "transitions": 364,
+      "completed": 0,
+      "simMs": 240000
+    }
+  },
+  "errors": []
+}

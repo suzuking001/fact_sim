@@ -215,7 +215,6 @@
   }
 
   function cycleTimingKeys(node, direction){
-    App.syncFlowRuleTimings?.(node);
     if(direction === 'down' && App.basicNodeBehavior?.(node) === 'shuttle') return [];
     const inputRules = Array.isArray(node?.properties?.inputRules) ? node.properties.inputRules : [];
     const outputRules = Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : [];
@@ -232,7 +231,6 @@
       });
     });
     if(ruleKeys.length) return ruleKeys;
-    App.ensureBasicPortTimings?.(node);
     const ports = direction === 'input' ? node?.inputs : node?.outputs;
     const signalPattern = direction === 'input' ? /^sigIn/i : /^sigOut/i;
     const entityPorts = (ports || []).filter((port)=>port?.portId && port?.channel !== 'signal' && !signalPattern.test(String(port.name || '')));
@@ -286,7 +284,7 @@
     const descriptor = cycleTimingDescriptor(node, key);
     if(descriptor.source === 'rule') return Math.max(0, Number(descriptor.stage?.durationSec) || 0);
     const { direction, portId, stageId } = descriptor;
-    const timings = App.ensureBasicPortTimings?.(node) || node.properties?.portTimings || {};
+    const timings = node.properties?.portTimings || {};
     if(direction === 'input'){
       const timing = timings.inputs?.[portId] || {};
       const stage = (timing.processStages || []).find((entry)=>String(entry?.stageId) === stageId);
@@ -1764,7 +1762,7 @@
         if(hint) hint.textContent = 'Common node settings are saved immediately and used in the next simulation run.';
         const hiddenPropertyLabels = new Set([
           'basicNodeVersion', 'initialContents', 'inputRules', 'outputRules', 'portTimings', 'flowPortSequence', 'selection', 'stateMachine',
-          'inputPolicy', 'operations', 'presetId', 'Preset', 'sourceSequence', 'sequence', 'migratedCarrierConfigs',
+          'inputPolicy', 'operations', 'flowProgram', 'presetId', 'Preset', 'sourceSequence', 'sequence', 'migratedCarrierConfigs',
           'ratio', 'strictIdMatch', 'stageIndex', 'shuttleGroupId', 'initialCarrier', 'agvIds', 'agvCapacity',
           'palletWorkCapacity', 'transportMode', 'outSequence', 'sourceMode', 'rootKind', 'rootId', 'capacity',
           'accepts', 'preset', 'operation', 'sourceKind', 'targetKind', 'itemKind', 'batchMode', 'quantity',
@@ -1776,9 +1774,8 @@
           if(hiddenPropertyLabels.has(label) || /^processTime(?:\d+)?$/.test(propertyKey) || /^downTime(?:\d+)?$/.test(propertyKey)) field.remove();
         }
       }
-      if(basicDerivedNode(node)) side.insertBefore(renderCompactCycleEditor(node), propsCard || null);
-      if(entityEnabled){ panels.Flow.appendChild(renderFlowEditor(node)); panels.Contents.appendChild(renderContentsEditor(node)); }
-      if(entityEnabled) panels.Advanced.appendChild(renderOperationsEditor(node));
+      if(basicDerivedNode(node) && !entityEnabled) side.insertBefore(renderCompactCycleEditor(node), propsCard || null);
+      if(entityEnabled) panels.Flow.appendChild(App.createFlowView(node));
       const state = makeCard('State Machine', 'State Machine remains separate from Input / Output Rules.');
       const stateEditor = document.createElement('textarea');
       stateEditor.className = 'selectionInspectorTextarea entityAdvancedEditor';
@@ -1796,9 +1793,25 @@
       saveState.disabled = running();
       state.section.append(stateEditor, saveState, stateNotice); panels.Advanced.appendChild(state.card);
       const active = names.includes(this._entityTab) ? this._entityTab : names[0];
-      const activate = (name)=>{ this._entityTab = name; if(this.root) this.root.dataset.entityTab = name.toLowerCase(); Object.entries(panels).forEach(([key,panel])=>panel.hidden = key !== name); Array.from(tabBar.children).forEach((btn)=>btn.classList.toggle('is-active', btn.dataset.tab === name)); };
+      const activate = (name)=>{
+        // These legacy editors normalize their data on construction. Build them
+        // only when requested; opening the read-only Flow must not change data.
+        if(entityEnabled && name === 'Contents' && !panels.Contents.childElementCount) panels.Contents.appendChild(renderContentsEditor(node));
+        if(entityEnabled && name === 'Advanced' && !panels.Advanced.dataset.operationsReady){
+          panels.Advanced.prepend(renderOperationsEditor(node)); panels.Advanced.dataset.operationsReady = 'true';
+        }
+        this._entityTab = name;
+        if(this.root) this.root.dataset.entityTab = name.toLowerCase();
+        Object.entries(panels).forEach(([key,panel])=>panel.hidden = key !== name);
+        Array.from(tabBar.children).forEach((btn)=>btn.classList.toggle('is-active', btn.dataset.tab === name));
+      };
       names.forEach((name)=>{ const btn = button(name, ()=>activate(name), 'entityInspectorTab'); btn.dataset.tab = name; tabBar.appendChild(btn); main.appendChild(panels[name]); });
       main.insertBefore(tabBar, main.firstChild); activate(active);
+      if(entityEnabled){
+        const settings = document.createElement('details'); settings.className = 'flowNodeSettings';
+        const summary = document.createElement('summary'); summary.textContent = `Node settings · #${node.id}`;
+        side.replaceWith(settings); settings.append(summary, side);
+      }
     };
   }
 

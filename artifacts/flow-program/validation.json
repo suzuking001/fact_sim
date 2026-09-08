@@ -1,0 +1,18 @@
+{
+  "result": {
+    "before": true,
+    "after": true,
+    "rewired": true,
+    "outputs": 2,
+    "fallback": "fallback-flow-dt",
+    "json": true,
+    "parallelJoin": true,
+    "conditions": true,
+    "headless": true,
+    "legacyRestore": true,
+    "rejected": true,
+    "popupDrag": true,
+    "narrow": true
+  },
+  "errors": []
+}

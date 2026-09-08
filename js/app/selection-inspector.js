@@ -1081,6 +1081,7 @@ var App = window.App || (window.App = {});
 
     refresh(){
       if(!this.root) return;
+      this.root.querySelectorAll('.flowView').forEach(view=>view.flowView?.dispose());
       this.root.innerHTML = '';
       const node = this.currentNode();
       if(node) return this.renderNode(node);

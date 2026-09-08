@@ -1,0 +1,93 @@
+/* An independent canvas and a keyboard/touch-accessible inspector. */
+.flowProgramOpen{margin-bottom:12px}
+.flowProgram .flowViewToolbar>strong{font-size:22px}
+.flowProgram .flowViewToolbar>span{font-size:13px;color:#697786}
+.flowProgram .flowViewControls{width:100%}
+.flowProgram .flowViewControls select{max-width:220px}
+.flowProgramHelp{margin-top:14px;font-size:14px;color:#657582}
+.flowProgramHelp summary{cursor:pointer}
+.flowConditionEditor{flex:1 1 100%;min-width:0;width:100%;box-sizing:border-box;border-top:1px solid #e0e5eb;padding-top:12px}
+.flowConditionEditor h4{margin:0 0 8px;color:#344659;font-size:16px}
+.flowConditionSummary{margin:0 0 12px;padding:10px 12px;background:#f3f6fa;border-radius:8px;overflow-wrap:anywhere;color:#46576b;font-size:14px}
+.flowConditionRow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;min-width:0;padding:12px;border:1px solid #dfe5ed;border-radius:10px;background:#fff;box-sizing:border-box}
+.flowConditionChildren{display:grid;gap:10px;flex:1 1 100%;min-width:0;padding-left:clamp(0px,1vw,12px);border-left:3px solid #d8dfed}
+.flowConditionRow .flowViewField{min-width:0;flex:1 1 150px;max-width:100%}
+.flowConditionRow input,.flowConditionRow select,.flowConditionRow textarea{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.flowConditionRow textarea{min-height:100px}
+.flowConditionActions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex:1 1 100%;min-width:0}
+.flowConditionActions button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.flowConditionChildren .flowConditionChildren .flowConditionChildren{padding-left:0;border-left:0}
+.flowConditionChildren .flowConditionChildren .flowConditionChildren .flowConditionRow{padding:8px 0;border-left:0;border-right:0}
+.flowConditionMore{min-width:0;color:#63758b;font-size:13px}
+.flowConditionMore>summary{cursor:pointer;padding:7px 0}
+.flowConditionMore>button{margin:4px;max-width:100%;white-space:normal}
+.flowConditionError{flex:1 1 100%;color:#a8443b;font-size:14px;margin:0;overflow-wrap:anywhere}
+.flowConditionError:empty{display:none}
+.flowConditionShared{flex:1 1 100%;color:#665087;background:#f6f0fb;border-radius:6px;padding:8px;font-size:13px;margin:0;overflow-wrap:anywhere}
+.flowViewControls button[aria-pressed="true"]{background:#e8eef7;border-color:#819abb}
+#selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorLayout{grid-template-columns:minmax(0,1fr);gap:12px}
+#selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorSidebar{display:grid;grid-template-columns:minmax(180px,1fr) minmax(160px,1fr);gap:12px}
+#selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorSidebar .entityCycleCard{display:none}
+#selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorMain{min-width:0}
+.workspacePopoutContent #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorLayout{display:grid;grid-template-columns:minmax(0,1fr);padding:18px;gap:12px}
+.workspacePopoutContent #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorSidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.flowView{--flow-border:#e0e5eb;color:#26303b;min-width:0;font:16px/1.5 'Segoe UI',system-ui,sans-serif}
+.flowNodeSettings{border:1px solid #e0e5eb;border-radius:12px;min-width:0;background:white}
+.flowNodeSettings>summary{cursor:pointer;padding:12px 16px;color:#677582;font-size:14px;font-weight:550}
+.flowNodeSettings>.selectionInspectorSidebar{padding:0 12px 12px}
+.flowViewToolbar,.flowViewBrand,.flowViewControls,.flowViewNavigation,.flowViewLegend{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.flowViewToolbar{justify-content:space-between;padding:4px 0 14px}
+.flowViewBrand strong{font-size:23px;letter-spacing:.1em}
+.flowViewRuntime{color:#78838e;font-size:12px}
+.flowViewIcon svg{width:30px;height:30px;display:block}
+.flowViewControls{gap:6px}
+.flowViewLive{padding:10px 14px;margin-bottom:12px;border:1px solid var(--flow-border);border-radius:10px;background:#fff;font-size:14px;color:#536473}
+.flowViewNavigation{justify-content:space-between;margin-bottom:10px}
+#selectionInspectorPanel .flowViewPicker{width:min(100%,380px);font-size:15px;background:#fff}
+.flowViewLegend{font-size:12px;gap:16px;color:#677582}
+.flowViewLegend span:before{content:'';display:inline-block;width:23px;margin-right:6px;vertical-align:middle;border-top:2px dashed #526171}
+.flowViewLegend .is-work:before{border-top:3px solid #27877c}
+.flowViewLegend .is-condition:before{border-top:2px dotted #9b779f}
+.flowViewViewport{position:relative;width:100%;height:560px;min-height:360px;max-height:75vh;overflow:hidden;border:1px solid var(--flow-border);border-radius:14px;background:#f8fafb;resize:vertical}
+.flowViewCanvas{display:block;width:100%;height:100%;touch-action:none;outline-offset:-4px!important}
+.flowViewTooltip{position:absolute;z-index:5;max-width:280px;pointer-events:none;background:#26303b;color:white;padding:12px 14px;border-radius:10px;box-shadow:0 6px 18px #24303b20;font-size:13px;line-height:1.6}
+.flowViewTooltip[hidden]{display:none}
+.flowViewEditor{margin-top:14px;border:1px solid var(--flow-border);border-radius:12px;background:white}
+.flowViewEditor>summary{cursor:pointer;padding:14px 16px;font-size:17px;font-weight:600}
+.flowViewEditorBody{display:flex;align-items:flex-end;flex-wrap:wrap;gap:14px;padding:0 16px 18px}
+.flowViewSelectionHelp{flex:1 0 100%;margin:0;color:#71808d;font-size:14px}
+.flowSettingHelp,.flowSettingMore{flex:1 0 100%;min-width:0;font-size:14px;color:#617181}
+.flowSettingHelp>summary,.flowSettingMore>summary{cursor:pointer;padding:8px 0}
+.flowSettingHelp>p{line-height:1.7;margin:4px 0 12px;overflow-wrap:anywhere}
+.flowSettingMore{border-top:1px solid #e0e5eb;padding-top:4px}
+.flowSettingMore .flowViewComposition{padding:8px 0}
+.flowSequenceRows{flex:1 1 100%;min-width:0;display:grid;gap:12px}
+.flowSequenceRow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;padding:12px;border:1px solid #e0e5eb;border-radius:10px}
+.flowSequenceRow .flowViewField{min-width:100px}
+.flowSequenceRow input,.flowSequenceRow select{width:100%;box-sizing:border-box}
+.flowViewTargetRow .flowViewField>select{flex:0 0 auto;min-height:42px}
+.flowSettingChildren{display:flex;flex-wrap:wrap;gap:8px;flex:1 0 100%;min-width:0}
+.flowViewField{display:flex;flex-direction:column;gap:7px;min-width:150px;flex:1 1 180px;color:#6a7784;font-size:14px}
+.flowViewTargets{flex:1 1 100%;display:grid;gap:10px}
+.flowViewTargetRow{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.flowViewTargetRow select{flex:1 1 180px}
+.flowViewTargetRow textarea{flex:1 1 100%;min-height:130px}
+.flowViewGroup,.flowViewReadOnly{font-size:12px;color:#697786;padding:5px 10px;background:#f2f5f7;border-radius:20px}
+.flowViewJumpLinks,.flowViewComposition{display:flex;flex-wrap:wrap;gap:8px;flex-basis:100%}
+.flowViewNotice{min-height:25px;font-size:13px;padding-top:8px;color:#287769}
+.flowViewNotice.is-error{color:#a8443b}
+.flowViewHelp{position:relative;font-size:14px}
+.flowViewHelp>summary{display:grid;place-items:center;list-style:none;width:32px;height:32px;border:1px solid var(--flow-border);border-radius:50%;cursor:pointer}
+.flowViewHelp>div{display:none;position:absolute;z-index:8;right:0;top:38px;width:260px;background:#26303b;color:white;padding:15px;border-radius:10px;box-shadow:0 6px 18px #24303b20}
+.flowViewHelp[open]>div,.flowViewHelp:hover>div,.flowViewHelp:focus-within>div{display:block}
+#selectionInspectorPanel .flowView input,#selectionInspectorPanel .flowView select{font-size:16px}
+#selectionInspectorPanel .flowView button:disabled{opacity:.45;cursor:not-allowed}
+@container details (max-width:600px){
+  #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorSidebar{grid-template-columns:minmax(0,1fr)}
+  .workspacePopoutContent #selectionInspectorPanel[data-entity-tab="flow"] .selectionInspectorSidebar{grid-template-columns:minmax(0,1fr)}
+  .flowViewToolbar{align-items:flex-start}
+  .flowViewControls{width:100%;order:3}
+  .flowViewViewport{height:470px}
+  .flowViewRuntime{display:none}
+  .flowViewLegend{font-size:11px}
+}

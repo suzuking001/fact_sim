@@ -1,246 +1,42 @@
-# fact_sim Agent Notes
+﻿# fact_sim Agent Notes
 
-## 基本方針
+## 探索と読み込み
 
-`fact_sim` の作業では、手元のブラウザ操作よりも統合 MCP サーバー `fact-sim-ai` を優先してください。特に次の作業は MCP を第一候補にします。
+- 対象ファイルが分かる場合は直接確認する。不明なら [機能別案内](docs/code-map.md) の該当行から探索を始める。
+- `rg` は関連ディレクトリ・ファイルに限定し、不足時や依存関係の確認が必要な場合だけ範囲を広げる。
+- 大きなファイルはシンボルを検索して必要範囲を読む。全ファイル一覧・全文・既読内容を理由なく繰り返し取得しない。
+- `artifacts/`、`tmp/`、`js/vendor/`、`mcp/node_modules/`、`mcp/dist/`、画像・サンプルは通常のコード探索から外し、作業に必要な場合だけ読む。除外はアクセス禁止ではない。
+- 夜間運用・Engine Test オプション・example 保存・プロンプト例は [運用手順](docs/agent-operations.md) の必要な節だけ読む。
+- テスト・MCP の結果は要約と失敗箇所を優先し、詳細ログはファイルに保存する。raw JSON や export を求められていない限り返答は簡潔にする。
+- PowerShell で日本語文書を読むときは `-Encoding UTF8` を指定する。
+- 機能の追加・移動で入口が変わった場合は機能別案内の該当行だけ更新する。
 
-- example グラフの読込、確認、切替
-- 一定時間のシミュレーション実行
-- KPI、ボトルネック、benchmark、graph overview の取得
-- ノードやリンクの追加、更新、接続、削除
-- blueprint からの小規模グラフ生成
-- graph JSON、HTML、snapshot、CSV の export
+## MCP 優先
 
-UI や見た目そのものを確認する必要がある場合だけ、ブラウザ自動操作を使います。
+- example 読込、シミュレーション、KPI・ボトルネック・benchmark・graph overview、グラフ編集、blueprint 生成、export は統合 MCP `fact-sim-ai` を第一候補にする。UI・見た目の確認が必要な場合だけブラウザ自動操作を使う。
+- 推奨順は `prepare_session` → `run_report` → `graph` → `edit_graph` → `metrics` → `optimize`。必要なツールだけ使う。
+- 再現性のある実行は `simulate(action="run_for")`、単発評価は `run_report`、生成と検証は `build_blueprint_report` を優先する。
+- グラフ変更は `edit_graph(action="batch")` と `ref` + `$name` 参照を優先する。古いプロンプトの legacy alias が利用可能ならそのまま使う。
 
-## 推奨ツール順
+## 自動修正・自動最適化の保護範囲
 
-1. `prepare_session`
-2. `run_report`
-3. `graph`
-4. `edit_graph`
-5. `metrics`
-6. `optimize`
+- `dt`、`event (heap)`、`js/app/engine.js` は原則変更しない。無関係な UI / docs / sample も編集しない。
+- 原則編集可能なのは `js/app/engine-fast*`、`js/app/engine-test.js`、`mcp/scripts/auto-*`、`mcp/src/runtime/*` のうち自動最適化・engine test に直接関係する部分。
+- 性能改善の対象は `event-fast` / `event-fast-worker` / `event-fast-par`。夜間最適化の既定対象は `event-fast-par`。
 
-## 重要な保護対象
+## 検証
 
-自動修正や自動最適化では、次のエンジンは保護対象です。原則として変更しません。
+1. 変更した JS / TS の `node --check`。
+2. `mcp/` で `npm run check`。
+3. engine / parity に関わる変更は `Engine Test quick`。`dt` を基準に全 engine・全 example の completion / visible work-flow / node 状態遷移 / timing chart / strict final parity を比較する。
+4. 夜間最適化や MCP 変更は `mcp/` で `npm run build`。
 
-- `dt`
-- `event (heap)`
+- 性能改善を主張する場合は benchmark を取り、改善率を明示する。
+- `index.html`・script version・worker・`event-fast*`・`engine-test` を変更したら runtime を再読み込みして検証する。UI と MCP の不一致や古い page の疑いがある場合も同様。古い runtime は false failure や古い benchmark の原因になる。
+- 必須検証が通った後の再実行は、新しい変更・失敗・未解決の懸念がある場合に行う。
 
-性能改善の主対象は次です。
+## 出力先
 
-- `event-fast`
-- `event-fast-worker`
-- `event-fast-par`
-
-夜間最適化の既定対象は **`event-fast-par`** です。
-
-## 自動最適化で触ってよい範囲
-
-自動修正・自動最適化では、原則として次の範囲だけを編集対象にします。
-
-- `js/app/engine-fast*`
-- `js/app/engine-test.js`
-- `mcp/scripts/auto-*`
-- `mcp/src/runtime/*` のうち、自動最適化や engine test に直接関係する部分
-
-次は原則として編集しません。
-
-- `js/app/engine.js`
-- `dt`
-- `event (heap)`
-- unrelated な UI / docs / sample データ
-
-## 効率のよい使い方
-
-- 再現性が必要な確認では、`start` / `stop` ではなく `simulate` の `action="run_for"` を使う
-- 単発評価は `run_report` を優先する
-- graph 作成と検証をまとめるときは `build_blueprint_report` を使う
-- graph 変更は `edit_graph` の `action="batch"` と `ref` + `$name` 参照を優先する
-- raw JSON や export ファイルを求められていない限り、返答は簡潔にする
-
-## エンジンテスト運用
-
-`Engine Test` は `dt` を基準に、全 engine・全 example を比較する前提です。主な確認対象は次です。
-
-- completion parity
-- visible work-flow parity
-- node 状態遷移 parity
-- timing chart parity
-- strict final parity
-
-利用可能な suite:
-
-- `quick`
-- `standard`
-- `soak`
-
-追加オプション:
-
-- `seeds`
-- `strictFinalParity`
-- `saveArtifacts`
-- `reruns`
-- `stopOnFirstFailure`
-
-artifact 保存先:
-
-- `artifacts/engine-test/<timestamp>__<label>/`
-
-## 最低限の検証
-
-変更後は、少なくとも次を確認します。
-
-1. 変更した JS / TS の `node --check`
-2. `cd mcp && npm run check`
-3. engine や parity に関わる変更なら `Engine Test quick`
-4. 夜間最適化や MCP 変更なら `cd mcp && npm run build`
-
-性能改善を主張する場合は、追加で benchmark を取り、改善率を明示します。
-
-## 夜間ジョブ / 自動最適化
-
-夜間ジョブの入口は `mcp/` 配下の npm script です。
-
-```bash
-cd mcp
-npm run nightly
-```
-
-自動 patch を含む夜間修正ループ:
-
-```bash
-cd mcp
-npm run nightly:auto-patch
-```
-
-benchmark 主導の夜間最適化:
-
-```bash
-cd mcp
-npm run nightly:optimize
-```
-
-`nightly:optimize` は次を自動で回します。
-
-1. `quick` engine test
-2. `standard` engine test
-3. benchmark baseline 取得
-4. optimization request 生成
-5. patch delegate 実行
-6. 再度 `quick`
-7. 再度 `standard`
-8. benchmark 再実行
-9. 改善時のみ patch 採用、悪化時は revert
-
-自動最適化 artifact 保存先:
-
-- `artifacts/auto-optimize/<timestamp>__<label>/`
-
-最新ステータス:
-
-- `artifacts/auto-optimize/latest-event-fast-par-status.json`
-- `artifacts/auto-optimize/latest-event-fast-par-status.md`
-
-## リアルタイム監視
-
-夜間ジョブの進捗監視は次で行えます。
-
-```bash
-cd mcp
-npm run watch:auto-optimize
-```
-
-Windows では root のバッチも使えます。
-
-```bat
-scripts/watch_event_fast_par_status.bat
-```
-
-監視画面には次が出ます。
-
-- session id
-- current status
-- baseline / best / improvement %
-- latest iteration
-- recent files
-- stdout / stderr 末尾
-
-## runtime 再起動が必要なケース
-
-次のときは、browser runtime や MCP runtime を再読み込みしてから検証します。
-
-- `index.html` や script version を変更したとき
-- worker / `event-fast*` / `engine-test` のコードを変更したとき
-- UI の結果と MCP の結果が食い違うとき
-- `engine_test` や `benchmark` が古い page を掴んでいる疑いがあるとき
-
-この repo では、古い runtime が残って false failure や古い benchmark を返すことがあります。
-
-## example の上書き保存
-
-静的サイト運用でも、**Chrome 系ブラウザ + localhost** であれば `File System Access API` を使って example を上書き保存できます。
-
-条件:
-
-- `scripts/start_fact_sim_server.bat` などで `http://127.0.0.1:8123/` から開く
-- Chrome / Edge を使う
-- 初回に `Link Sample Folder` で `sample` フォルダへの権限を与える
-
-保存対象:
-
-- `sample/<example>.json`
-- `sample/<example>.js`
-
-`file://` 直開きでは保存できません。
-
-## 一時ファイルの置き場所
-
-検証用スクリーンショットや一時的な確認用画像は `tmp/` に置きます。root 直下には置きません。
-
-恒久的に残す出力は `artifacts/` に保存します。対象は次です。
-
-- engine test artifact
-- auto optimize artifact
-- benchmark / report / export の保存物
-
-## 推奨プロンプト例
-
-- `Use fact-sim-ai MCP to load sample_line1, run 3000ms in dt mode, and return KPI + bottleneck summary.`
-- `Use fact-sim-ai MCP to add an equipment node after node 12 and connect work ports.`
-- `Use fact-sim-ai MCP to build a small blueprint, run 1000ms, and report throughput.`
-- `Use fact-sim-ai MCP to run engine_test in standard suite with saveArtifacts=true and summarize failures only.`
-- `Use fact-sim-ai MCP to benchmark event-fast-par on parallel_benchmark and compare it with the latest baseline.`
-
-## プロンプトテンプレート
-
-- quick scenario check  
-  `Use fact-sim-ai MCP. Prepare session with example=<name>, mode=<dt|event>, reset=true. Then run_report for <wallMs> ms and return KPI, top <N> bottlenecks, and a short conclusion.`
-
-- graph patch + verify  
-  `Use fact-sim-ai MCP. Apply edit_graph batch operations with ref names, then run_report for <wallMs> ms and tell me whether throughput improved.`
-
-- blueprint build + verify  
-  `Use fact-sim-ai MCP. Build the graph from a blueprint with build_blueprint_report, run for <wallMs> ms, and return node/link counts, KPI, and bottleneck summary.`
-
-- engine test  
-  `Use fact-sim-ai MCP. Run engine_test with suite=<quick|standard|soak>, seeds=<...>, strictFinalParity=<true|false>, saveArtifacts=true, and summarize only failures and warnings.`
-
-- overnight optimization status  
-  `Read artifacts/auto-optimize/latest-event-fast-par-status.json and summarize current improvement %, iteration, status, and whether the delegate is making progress.`
-
-- export workflow  
-  `Use fact-sim-ai MCP. Save the current graph JSON, snapshot PNG, and embedded HTML, then return only the saved paths.`
-
-- legacy prompt fallback  
-  `If an older prompt uses load_example / run_simulation_for / get_kpi_summary, use the legacy alias tools instead of rewriting the workflow manually.`
-
-## 関連ドキュメント
-
-- `docs/quick-reference-ja.md`
-- `docs/ai-mcp.md`
-- `docs/research.md`
-- `docs/overnight-auto-optimize.md`
-- `docs/overnight-auto-optimize-ja.md`
+- 一時スクリーンショット・確認画像は `tmp/`。root 直下には置かない。
+- 恒久的な test / optimization / benchmark / report / export は `artifacts/`。
+- 夜間進捗はまず `artifacts/auto-optimize/latest-event-fast-par-status.json` を読み、必要時だけ該当 iteration のログを調べる。

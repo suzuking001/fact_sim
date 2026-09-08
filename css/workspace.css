@@ -1,0 +1,276 @@
+/* FACT SIM workspace — generous typography, quiet surfaces, connected-dot icons.
+   Kept separate from canvas/engine styles and the landing page. */
+:root{
+  --sidebar-width: 340px;
+  --timeline-header: 64px;
+  --workspace-ink: #202123;
+  --workspace-muted: #686a70;
+  --workspace-line: #e8e8eb;
+}
+#appRoot #sidebar{
+  padding: 20px 16px;
+  gap: 6px;
+  background: #fbfbfc !important;
+  border-right: 1px solid var(--workspace-line);
+  box-shadow: none !important;
+  font-family: var(--ui-font), 'Segoe UI', sans-serif;
+}
+#appRoot #sidebarHeader{
+  flex-shrink: 0;
+  height: 66px;
+  min-height: 66px;
+  padding: 0 8px 16px;
+  margin-bottom: 8px;
+  border: 0;
+  border-bottom: 1px solid var(--workspace-line);
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#appRoot #sidebarHeader .appBrandRow{ width:100%; gap:12px; justify-content:flex-start; }
+#appRoot #sidebarHeader .appLogo{
+  width: 47px;
+  height: 36px;
+  padding: 0;
+  object-fit: contain;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  mix-blend-mode: multiply;
+}
+#appRoot #sidebarHeader .appBrandText{ font-size:21px; font-weight:750; letter-spacing:.035em; }
+#appRoot #sidebar #workspaceHelp{
+  width:30px;
+  height:30px;
+  min-height:30px;
+  flex:0 0 30px;
+  margin-left:auto;
+  padding:0;
+  border-radius:50%;
+  color:var(--workspace-muted);
+  font-size:15px;
+}
+#appRoot :where(#sidebar) > :is(#controls, #addNodePanel, #entityTypesPanel, #addGroupPanel, #backgroundPanel, #advancedPanel, #shortcutPanel, #fileControls){
+  flex-shrink:0;
+  padding:12px;
+  gap:14px;
+  border:1px solid var(--workspace-line);
+  border-radius:18px;
+  background:#fff !important;
+  box-shadow:none !important;
+  margin:0;
+}
+#appRoot #sidebar > div::before{ content:none; }
+#appRoot #sidebar > .sidebar-panel-collapsible.is-collapsed{
+  padding:9px 12px;
+  border-color:transparent;
+  background:transparent !important;
+}
+#appRoot #sidebar > .sidebar-panel-collapsible.is-collapsed:hover{
+  border-color:var(--workspace-line);
+  background:#fff !important;
+}
+#appRoot #sidebar .panelHeader{
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+  min-height:38px;
+  margin:0;
+  padding:0;
+  gap:12px;
+  font-size:17px;
+  line-height:1.3;
+  text-transform:none;
+  letter-spacing:-.02em;
+  border:0;
+  color:var(--workspace-ink);
+}
+#appRoot #sidebar .panelHeader::before{ content:none; }
+#appRoot #sidebar .panelHeader::after{
+  content:"" !important;
+  width:6px;
+  height:6px;
+  flex:0 0 6px;
+  margin:0 4px 3px auto;
+  border:solid #85868b;
+  border-width:0 1.5px 1.5px 0;
+  transform:rotate(45deg);
+  background:none;
+}
+#appRoot #sidebar .is-collapsed .panelHeader::after{ transform:rotate(-45deg); margin-bottom:0; }
+#appRoot #sidebar .panelHeaderLabel{ color:inherit; font-weight:650; letter-spacing:inherit; }
+#appRoot .panelHeaderMeta{ display:none; }
+.workspacePanelIcon{
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  border-radius:10px;
+  background:#f2f2f4;
+  color:#161719;
+}
+.workspaceIcon{ display:block; width:25px; height:25px; }
+.workspaceIcon circle{ fill:currentColor; stroke:none; }
+#appRoot #sidebar .control-group,
+#appRoot #sidebar .field{ gap:8px; }
+#appRoot #sidebar label{ font-size:14px; font-weight:550; line-height:1.4; color:var(--workspace-muted); }
+#appRoot #sidebar :is(input, select, textarea){
+  min-height:44px;
+  padding:9px 12px;
+  border:1px solid #dedee3;
+  border-radius:11px;
+  background:#fafafb;
+  font-family:inherit;
+  font-size:15px;
+  color:var(--workspace-ink);
+  box-shadow:none;
+}
+#appRoot #sidebar input[type="checkbox"]{ width:20px; height:20px; min-height:20px; padding:0; accent-color:#202123; }
+#appRoot #sidebar input[type="range"]{ padding:0; min-height:24px; accent-color:#202123; }
+#appRoot #sidebar button{
+  min-height:42px;
+  padding:8px 12px;
+  border-radius:11px;
+  border:1px solid #dedee3;
+  background:#fff;
+  color:var(--workspace-ink);
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+  line-height:1.35;
+  box-shadow:none !important;
+}
+#appRoot #sidebar button:hover:not(:disabled){ background:#f0f0f3; border-color:#c6c7cd; }
+#appRoot :is(button, [role="button"], select, input, summary):focus-visible{
+  outline:3px solid #70859b;
+  outline-offset:3px;
+}
+#appRoot #sidebar :is(input,select,textarea):focus{ border-color:#8c8f99; box-shadow:0 0 0 3px #e8ebef; }
+#appRoot #sidebar :is(#btnAddNode, #btnAddGroup),
+#appRoot #editorRunHud #btnStart{
+  min-height:46px;
+  border-color:#202123 !important;
+  background:#202123 !important;
+  color:#fff !important;
+}
+#appRoot #sidebar :is(#btnAddNode, #btnAddGroup):hover,
+#appRoot #editorRunHud #btnStart:hover{ background:#3d4045 !important; }
+#appRoot #sidebar :is(#btnAddNode, #btnAddGroup).is-cancel{
+  border-color:#e5c8c6 !important;
+  background:#fcf0ef !important;
+  color:#a6342d !important;
+}
+#appRoot .workspaceIconButton::before{
+  content:"" !important;
+  display:inline-block;
+  position:static;
+  width:21px;
+  height:21px;
+  flex:0 0 21px;
+  margin:0 8px 0 0;
+  vertical-align:middle;
+  transform:none;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:currentColor;
+  -webkit-mask:var(--workspace-icon) center / contain no-repeat;
+  mask:var(--workspace-icon) center / contain no-repeat;
+}
+#appRoot #btnStart[data-run-state="stop"]::before{
+  -webkit-mask-image:var(--workspace-stop-icon);
+  mask-image:var(--workspace-stop-icon);
+}
+#appRoot #sidebar .workspaceHelpSource{ display:none !important; }
+#appRoot #sidebar .panelDetails{ border:0; border-radius:10px; background:#f6f6f8; }
+#appRoot #sidebar .panelDetails > summary{ min-height:38px; padding:8px 10px; font-size:14px; font-weight:550; }
+#appRoot #sidebar .exampleFileDetails{ margin-top:0; background:transparent; }
+#appRoot #sidebar .exampleFileDetails > summary{ padding:4px 0; min-height:30px; color:var(--workspace-muted); }
+#appRoot #sidebar .exampleSaveActions{ display:grid; grid-template-columns:1fr 1fr; margin-top:8px; gap:8px; }
+#appRoot #sidebar .fieldHint{ font-size:13px; line-height:1.5; }
+#appRoot #sidebar .simStatusCard{ padding:12px; border:0; border-radius:12px; background:#f6f6f8 !important; box-shadow:none !important; }
+#appRoot .simStatusHead{ gap:8px; flex-wrap:wrap; }
+#appRoot .simStatusBadge{ font-size:11px; letter-spacing:.04em; }
+#appRoot .simStatusEngine{ min-width:0; font-size:11px; overflow:hidden; text-overflow:ellipsis; }
+#appRoot .simStatusGrid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 10px; margin-top:12px; }
+/* Speed is in the run bar; render FPS remains in Performance. */
+#appRoot .simStatusItem:nth-child(1),
+#appRoot .simStatusItem:nth-child(3){ display:none; }
+#appRoot .simStatusLabel{ font-size:11px; letter-spacing:.04em; color:var(--workspace-muted); }
+#appRoot .simStatusItem strong{ font-size:16px; font-weight:600; color:var(--workspace-ink); }
+#appRoot #sidebar .nodeKindPickerTrigger{ grid-template-columns:30px minmax(0,1fr) 18px; min-height:50px; padding:9px 12px; background:#fafafb; }
+#appRoot :is(.nodeKindPickerValue,.nodeKindPickerOptionLabel){ font-size:15px; }
+#appRoot #sidebar .nodeKindPickerOption{ min-height:46px; }
+#appRoot #sidebar .nodeKindPickerOption:is(.is-selected,:hover,:focus-visible){ color:#202123; background:#eeeeF1; border-color:#dddde2; }
+#appRoot #sidebar .nodeKindPicker.is-open .nodeKindPickerTrigger{ color:#202123; border-color:#8c8f99; box-shadow:0 0 0 3px #e8ebef !important; }
+#appRoot #sidebar .group-stop-rate{ font-size:14px; color:#575b62; background:#f3f3f6; border:0; }
+#appRoot .projectActionsGrid{ gap:8px; }
+#appRoot #sidebar .projectActionsGrid button{ font-size:13px; padding:9px 6px; }
+#appRoot #sidebar .shortcut-action{ font-size:14px; }
+#appRoot #sidebar .shortcut-key{ font-size:12px; }
+#appRoot #editorTopHud{ top:16px; gap:10px; }
+#appRoot #editorTopHud #simTimeHud{
+  min-width:148px;
+  padding:15px 18px;
+  border-radius:16px;
+  font-size:13px;
+  background:#fff !important;
+  box-shadow:0 5px 22px #20212308 !important;
+}
+#appRoot #simTime{ font-size:19px; font-weight:650; }
+#appRoot #editorRunHud{ padding:5px; gap:5px; border-radius:17px; background:#fff !important; box-shadow:0 5px 22px #20212308 !important; }
+#appRoot #editorRunHud :is(#btnStart,#btnReset){ min-height:46px; padding:0 17px !important; font-size:15px; border-radius:12px; }
+#appRoot #editorRunHud #btnReset{ border:1px solid #e2e2e7 !important; box-shadow:none !important; }
+#appRoot #editorRunHud button::after{ content:none; }
+#appRoot .editorRunSpeed{ min-height:44px; border:0; padding:0 12px; }
+#appRoot .editorRunSpeedLabel{ font-size:12px; text-transform:none; }
+#appRoot #speedFactor{ font-size:14px; }
+#appRoot #timelineDock{ border-color:var(--workspace-line); box-shadow:0 -6px 30px #20212305; }
+#appRoot #timelineHeader{ padding:8px 16px; background:#fff; gap:12px; }
+#appRoot #timelineHeader .timelineTitle{ display:none; }
+#appRoot #timelineHeader .timelineTabs{ padding:4px; gap:3px; border:0; border-radius:13px; background:#f1f1f4; }
+#appRoot #timelineHeader .timelineTab{ min-height:38px; padding:0 13px; font-size:15px; border-radius:10px; }
+#appRoot #timelineHeader .timelineTab.is-active{ color:#1d1e21; background:#fff; }
+#appRoot #timelineHeader .timelineBtn{ min-height:36px; padding:0 11px; border-radius:9px; font-size:13px; }
+#appRoot #timelineHeader :is(.timelineSelection,.timelinePropsMeta){ font-size:13px; }
+#appRoot :is(#nodePropsTable,.selectionInspectorCard){ font-size:14px; }
+#workspaceTooltip{
+  position:fixed;
+  z-index:10000;
+  box-sizing:border-box;
+  width:max-content;
+  max-width:min(300px,calc(100vw - 24px));
+  max-height:calc(100dvh - 24px);
+  overflow:auto;
+  padding:14px 17px;
+  border:1px solid #3e4148;
+  border-radius:13px;
+  background:#25272b;
+  color:#fff;
+  box-shadow:0 10px 30px #14161a26;
+  font:400 14px/1.6 'Segoe UI',system-ui,sans-serif;
+  white-space:pre-line;
+  overflow-wrap:anywhere;
+}
+#workspaceTooltip[hidden]{ display:none; }
+@media(max-width:1150px){
+  #appRoot #timelineHeader .timelineSelection{ display:none; }
+  #appRoot #timelineHeader{ padding-inline:8px; gap:6px; }
+  #appRoot #timelineHeader .timelineTab{ padding-inline:9px; }
+  #appRoot #timelineHeader .timelineBtn{ padding-inline:8px; }
+}
+@media(max-width:760px){
+  :root{ --timeline-header:64px; }
+  #appRoot #sidebar{ padding:14px 12px; }
+  #appRoot #editorTopHud{ top:8px; gap:6px; flex-wrap:wrap; }
+  #appRoot #editorTopHud #simTimeHud{ min-width:106px; padding:10px 12px; }
+  #appRoot #simTime{ font-size:16px; }
+  #appRoot #editorRunHud{ flex-wrap:wrap; }
+  #appRoot #editorRunHud :is(#btnStart,#btnReset){ min-height:42px; padding-inline:12px !important; }
+  #appRoot .editorRunSpeed{ min-height:38px; padding-inline:7px; }
+  #appRoot #editorRunHud #speedRange{ width:60px; }
+  #appRoot #timelineHeader .timelineTab{ font-size:14px; padding-inline:10px; }
+  #appRoot #timelineHeader .workspaceIconButton::before{ display:none; }
+  #appRoot #sidebar :is(input,select,textarea){ font-size:16px; }
+}

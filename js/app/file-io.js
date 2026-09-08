@@ -137,6 +137,9 @@ function _serializeGraph(graph){
   const targetGraph = graph || App.graph;
   if(!targetGraph) throw new Error('graph is not initialized');
   const serialized = targetGraph.serialize();
+  if(typeof App.migrateLegacyDefaultTitles === 'function'){
+    App.migrateLegacyDefaultTitles(serialized);
+  }
   if(typeof App.injectEntityModel === 'function'){
     App.injectEntityModel(serialized, targetGraph);
   }

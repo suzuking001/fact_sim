@@ -1388,6 +1388,11 @@ window.beginGroupPlacement = beginGroupPlacement;
 (function(){
   const addNodePanel = document.getElementById('addNodePanel');
   const sel = document.getElementById('nodeKindSelect');
+  const picker = document.getElementById('nodeKindPicker');
+  const pickerTrigger = document.getElementById('nodeKindPickerTrigger');
+  const pickerList = document.getElementById('nodeKindPickerList');
+  const pickerIcon = document.getElementById('nodeKindPickerIcon');
+  const pickerValue = document.getElementById('nodeKindPickerValue');
   const btn = document.getElementById('btnAddNode');
   if(!sel || !btn) return;
   const NODE_SCHEMAS = {
@@ -1490,7 +1495,7 @@ window.beginGroupPlacement = beginGroupPlacement;
       type:'factory/basic',
       flowTemplate:'sequence',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Source', target:'title' }
+        { key:'title', label:'Title', type:'text', default:'Sequence Source', target:'title' }
       ]
     },
     entitysource:{
@@ -1535,7 +1540,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     agvroute:{
       type:'factory/basic',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Transport Route', target:'title' },
+        { key:'title', label:'Title', type:'text', default:'AGV Route', target:'title' },
         { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
         { key:'transportMode', label:'Transport Mode', type:'select', default:'agv', options:['agv'] },
         { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
@@ -1547,7 +1552,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     carrierroute:{
       type:'factory/basic',
       props:[
-        { key:'title', label:'Title', type:'text', default:'Transport Route', target:'title' },
+        { key:'title', label:'Title', type:'text', default:'Carrier Route', target:'title' },
         { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
         { key:'transportMode', label:'Transport Mode', type:'select', default:'carrier', options:['carrier'] },
         { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
@@ -1619,13 +1624,13 @@ window.beginGroupPlacement = beginGroupPlacement;
     shuttle:{ label:'Shuttle Stage', description:'Synchronize grouped stages and move one Entity per stage together.' },
     merge:{ label:'Merge', description:'Merge matching Entity IDs from multiple inputs into one output.' },
     join:{ label:'Join', description:'Pass through the first-arriving Entity from multiple upstream nodes.' },
-    source:{ label:'Source', description:'Generate Entities from a configured Type sequence.' },
-    entitysource:{ label:'Source', description:'Create an Entity with an arbitrary initial child hierarchy.' },
+    source:{ label:'Sequence Source', description:'Generate Entities from a configured Type sequence.' },
+    entitysource:{ label:'Entity Source', description:'Create an Entity with an arbitrary initial child hierarchy.' },
     sink:{ label:'Sink', description:'Collect completed Entities and monitor throughput.' },
     split:{ label:'Split', description:'Duplicate one Entity into multiple synchronized downstream branches.' },
     branch:{ label:'Branch', description:'Route Entities by Type to different output ports.' },
-    agvroute:{ label:'Transport Route', description:'Transport Entities along a timed route.' },
-    carrierroute:{ label:'Transport Route', description:'Transport Entities along a timed route.' },
+    agvroute:{ label:'AGV Route', description:'Transport Entities along a timed route.' },
+    carrierroute:{ label:'Carrier Route', description:'Transport Entities along a timed route.' },
     station:{ label:'Store', description:'Store a root Entity and transfer its children through role-based ports.' },
     transferstation:{ label:'Transfer', description:'Attach, detach, or transfer any nested Entity.' }
   };
@@ -1633,16 +1638,151 @@ window.beginGroupPlacement = beginGroupPlacement;
     return NODE_META[kind] || { label: kind, description: '' };
   }
 
+  function nodeCatalog(){
+    const catalog = Array.isArray(App.NODE_CREATION_CATALOG) ? App.NODE_CREATION_CATALOG : [];
+    return catalog.length
+      ? catalog
+      : Object.keys(NODE_SCHEMAS).map((kind)=>({ kind, label:getNodeMeta(kind).label }));
+  }
+
   function populateNodeSelect(){
-    const kinds = Object.keys(NODE_SCHEMAS);
+    const catalog = nodeCatalog();
     sel.innerHTML = '';
-    kinds.forEach((kind)=>{
+    catalog.forEach((item)=>{
       const opt = document.createElement('option');
-      opt.value = kind;
-      opt.textContent = getNodeMeta(kind).label;
+      opt.value = item.kind;
+      opt.textContent = item.label;
       sel.appendChild(opt);
     });
+    const kinds = catalog.map((item)=>item.kind);
     sel.value = kinds.includes('equip') ? 'equip' : (kinds[0] || '');
+  }
+
+  function pickerOptions(){
+    return pickerList ? Array.from(pickerList.querySelectorAll('[role="option"]')) : [];
+  }
+
+  function selectedCatalogItem(){
+    return App.getNodeCreationItem?.(sel.value)
+      || nodeCatalog().find((item)=>item.kind === sel.value)
+      || nodeCatalog()[0]
+      || null;
+  }
+
+  function updatePickerSelection(){
+    const item = selectedCatalogItem();
+    if(!item) return;
+    if(pickerValue) pickerValue.textContent = item.label;
+    if(pickerIcon){
+      pickerIcon.innerHTML = typeof App.nodeIconSvg === 'function'
+        ? App.nodeIconSvg(item.kind, { className:'factNodeTypeIcon' })
+        : '';
+    }
+    pickerOptions().forEach((option)=>{
+      const selected = option.dataset.kind === item.kind;
+      option.setAttribute('aria-selected', selected ? 'true' : 'false');
+      option.classList.toggle('is-selected', selected);
+    });
+  }
+
+  function setPickerOpen(open, focusIndex){
+    if(!picker || !pickerTrigger || !pickerList) return;
+    const next = !!open;
+    picker.classList.toggle('is-open', next);
+    pickerTrigger.setAttribute('aria-expanded', next ? 'true' : 'false');
+    pickerList.hidden = !next;
+    if(!next) return;
+    const options = pickerOptions();
+    const selectedIndex = Math.max(0, options.findIndex((option)=>option.dataset.kind === sel.value));
+    const index = Number.isInteger(focusIndex) ? Math.max(0, Math.min(options.length - 1, focusIndex)) : selectedIndex;
+    if(options[index]){
+      options[index].focus({ preventScroll:true });
+      options[index].scrollIntoView({ block:'nearest' });
+    }
+  }
+
+  function chooseNodeKind(kind, returnFocus){
+    if(!Array.from(sel.options).some((option)=>option.value === kind)) return;
+    sel.value = kind;
+    updatePickerSelection();
+    sel.dispatchEvent(new Event('change', { bubbles:true }));
+    setPickerOpen(false);
+    if(returnFocus !== false) pickerTrigger?.focus();
+  }
+
+  function movePickerFocus(event, delta){
+    const options = pickerOptions();
+    if(!options.length) return;
+    const current = Math.max(0, options.indexOf(document.activeElement));
+    const index = delta === -Infinity
+      ? 0
+      : delta === Infinity
+        ? options.length - 1
+        : (current + delta + options.length) % options.length;
+    event.preventDefault();
+    options[index].focus();
+    options[index].scrollIntoView({ block:'nearest' });
+  }
+
+  function buildNodePicker(){
+    if(!picker || !pickerTrigger || !pickerList) return;
+    pickerList.innerHTML = '';
+    nodeCatalog().forEach((item, index)=>{
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.id = `nodeKindOption-${item.kind}`;
+      option.className = 'nodeKindPickerOption';
+      option.dataset.kind = item.kind;
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', 'false');
+      option.innerHTML = [
+        '<span class="nodeKindPickerOptionIcon" aria-hidden="true">',
+        typeof App.nodeIconSvg === 'function' ? App.nodeIconSvg(item.kind, { className:'factNodeTypeIcon' }) : '',
+        '</span>',
+        `<span class="nodeKindPickerOptionLabel">${item.label}</span>`
+      ].join('');
+      option.addEventListener('click', ()=>chooseNodeKind(item.kind, true));
+      option.addEventListener('keydown', (event)=>{
+        if(event.key === 'ArrowDown') return movePickerFocus(event, 1);
+        if(event.key === 'ArrowUp') return movePickerFocus(event, -1);
+        if(event.key === 'Home') return movePickerFocus(event, -Infinity);
+        if(event.key === 'End') return movePickerFocus(event, Infinity);
+        if(event.key === 'Enter' || event.key === ' '){
+          event.preventDefault();
+          chooseNodeKind(option.dataset.kind, true);
+        }else if(event.key === 'Escape'){
+          event.preventDefault();
+          setPickerOpen(false);
+          pickerTrigger.focus();
+        }else if(event.key === 'Tab'){
+          setPickerOpen(false);
+        }
+      });
+      pickerList.appendChild(option);
+      if(index === 0) option.tabIndex = 0;
+    });
+    updatePickerSelection();
+
+    pickerTrigger.addEventListener('click', ()=>{
+      setPickerOpen(pickerTrigger.getAttribute('aria-expanded') !== 'true');
+    });
+    pickerTrigger.addEventListener('keydown', (event)=>{
+      if(event.key === 'ArrowDown' || event.key === 'ArrowUp'){
+        event.preventDefault();
+        const options = pickerOptions();
+        const selectedIndex = Math.max(0, options.findIndex((option)=>option.dataset.kind === sel.value));
+        setPickerOpen(true, event.key === 'ArrowDown' ? selectedIndex : Math.max(0, selectedIndex - 1));
+      }else if(event.key === 'Enter' || event.key === ' '){
+        event.preventDefault();
+        setPickerOpen(pickerTrigger.getAttribute('aria-expanded') !== 'true');
+      }else if(event.key === 'Escape'){
+        setPickerOpen(false);
+      }
+    });
+    document.addEventListener('pointerdown', (event)=>{
+      if(pickerTrigger.getAttribute('aria-expanded') === 'true' && !picker.contains(event.target)) setPickerOpen(false);
+    });
+    sel.addEventListener('change', updatePickerSelection);
   }
 
   function updateNodeBuilderUi(){
@@ -1654,6 +1794,7 @@ window.beginGroupPlacement = beginGroupPlacement;
   App.refreshNodeBuilderUI = updateNodeBuilderUi;
 
   populateNodeSelect();
+  buildNodePicker();
   updateNodeBuilderUi();
 
   btn.addEventListener('click', ()=>{
@@ -1665,9 +1806,11 @@ window.beginGroupPlacement = beginGroupPlacement;
     try{
       const kind = sel.value || 'equip';
       const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
-      const node = LiteGraph.createNode(schema.type);
+      const node = typeof App.createNodeFromCatalog === 'function'
+        ? App.createNodeFromCatalog(kind)
+        : LiteGraph.createNode(schema.type);
       if(!node) return;
-      if(node.type === 'factory/basic' && typeof App.applyBasicTemplate === 'function'){
+      if(typeof App.createNodeFromCatalog !== 'function' && node.type === 'factory/basic' && typeof App.applyBasicTemplate === 'function'){
         App.applyBasicTemplate(node, schema.templateId || kind);
       }
       // Position near top-left with slight offset to avoid perfect overlap
@@ -1678,7 +1821,7 @@ window.beginGroupPlacement = beginGroupPlacement;
       if(node.type === 'factory/basic' && typeof App.ensureBasicTemplateFlowRules === 'function'){
         App.ensureBasicTemplateFlowRules(node, { force: false, templateId:schema.templateId || kind });
       }
-      if(schema.flowTemplate === 'sequence' && typeof App.configureBasicSequenceGenerator === 'function'){
+      if(typeof App.createNodeFromCatalog !== 'function' && schema.flowTemplate === 'sequence' && typeof App.configureBasicSequenceGenerator === 'function'){
         App.configureBasicSequenceGenerator(node);
       }
       if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true,true);
@@ -1714,7 +1857,7 @@ window.beginGroupPlacement = beginGroupPlacement;
   if(!sidebar) return;
   const defaultCollapseState = {
     controls: false,
-    backgroundPanel: false,
+    backgroundPanel: true,
     entityTypesPanel: true,
     addNodePanel: true,
     addGroupPanel: true,
@@ -1771,6 +1914,13 @@ window.beginGroupPlacement = beginGroupPlacement;
     const meta = document.createElement('span');
     meta.className = 'panelHeaderMeta';
     meta.hidden = true;
+    if(typeof App.workspaceIconSvg === 'function'){
+      const icon = document.createElement('span');
+      icon.className = 'workspacePanelIcon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = App.workspaceIconSvg(header.parentElement.id);
+      header.appendChild(icon);
+    }
     header.appendChild(label);
     header.appendChild(meta);
     header.__labelEl = label;
@@ -1949,7 +2099,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
     if(typeof App.updateAdaptiveRenderMode === 'function') App.updateAdaptiveRenderMode();
     if(btnStart){
-      btnStart.textContent = running ? '■ Stop' : '▶ Start';
+      btnStart.textContent = running ? 'Stop' : 'Start';
       btnStart.dataset.runState = running ? 'stop' : 'start';
       btnStart.setAttribute('aria-pressed', running ? 'true' : 'false');
       btnStart.setAttribute('aria-label', running ? 'Stop simulation' : 'Start simulation');

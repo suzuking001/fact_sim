@@ -607,15 +607,17 @@ window.runNodeMutation = runNodeMutation;
       return false;
     }
 
-    const templates = window.App?.BASIC_NODE_TEMPLATES || {};
-    const nodes = Object.entries(templates).map(([templateId, template])=>({
-      templateId,
-      title: template?.title || templateId,
-      category: template?.category || ''
-    })).sort((a, b)=>{
-      const categoryOrder = String(a.category).localeCompare(String(b.category));
-      return categoryOrder || String(a.title).localeCompare(String(b.title));
-    });
+    const catalog = Array.isArray(window.App?.NODE_CREATION_CATALOG)
+      ? window.App.NODE_CREATION_CATALOG
+      : [];
+    const nodes = catalog.length
+      ? catalog
+      : Object.entries(window.App?.BASIC_NODE_TEMPLATES || {}).map(([templateId, template])=>({
+          kind: templateId,
+          templateId,
+          label: template?.title || templateId,
+          nodeType: templateId === 'note' || templateId === 'signal' ? `factory/${templateId}` : 'factory/basic'
+        }));
 
     if(!nodes.length){
       if(typeof rawOnMenuAdd === 'function') return rawOnMenuAdd.apply(this, arguments);
@@ -623,23 +625,32 @@ window.runNodeMutation = runNodeMutation;
     }
 
     const menuItems = nodes.map((preset)=>({
-      value: preset.templateId,
-      content: preset.title,
+      value: preset.kind,
+      content: [
+        '<span class="factNodeMenuOption">',
+        typeof window.App?.nodeIconSvg === 'function'
+          ? window.App.nodeIconSvg(preset.kind, { className:'factNodeTypeIcon' })
+          : '',
+        `<span class="factNodeMenuOptionLabel">${preset.label}</span>`,
+        '</span>'
+      ].join(''),
       has_submenu: false,
       callback: (item, _opt, _ctx, menuRef)=>{
         const ev = resolveMenuEvent(menuRef, event);
         const pos = syncCanvasMouse(canvas, ev) || [0, 0];
         try{
           if(typeof graph.beforeChange === 'function') graph.beforeChange();
-          const templateId = String(item.value || 'basic').toLowerCase();
-          const nodeType = templateId === 'note' || templateId === 'signal' ? `factory/${templateId}` : 'factory/basic';
-          const node = LiteGraph.createNode(nodeType);
+          const kind = String(item.value || 'basic').toLowerCase();
+          const fallbackPreset = nodes.find((candidate)=>candidate.kind === kind) || preset;
+          const node = typeof window.App?.createNodeFromCatalog === 'function'
+            ? window.App.createNodeFromCatalog(kind)
+            : LiteGraph.createNode(fallbackPreset.nodeType || 'factory/basic');
           if(node){
-            if(nodeType === 'factory/basic' && typeof window.App?.applyBasicTemplate === 'function'){
-              window.App.applyBasicTemplate(node, templateId);
+            if(typeof window.App?.createNodeFromCatalog !== 'function' && node.type === 'factory/basic' && typeof window.App?.applyBasicTemplate === 'function'){
+              window.App.applyBasicTemplate(node, fallbackPreset.templateId || kind);
             }
-            if(nodeType === 'factory/basic' && typeof window.App?.ensureBasicTemplateFlowRules === 'function'){
-              window.App.ensureBasicTemplateFlowRules(node, { force: true, templateId });
+            if(typeof window.App?.createNodeFromCatalog !== 'function' && node.type === 'factory/basic' && typeof window.App?.ensureBasicTemplateFlowRules === 'function'){
+              window.App.ensureBasicTemplateFlowRules(node, { force: true, templateId:fallbackPreset.templateId || kind });
             }
             if(typeof window.enforceNodeOverlayMinSize === 'function'){
               try{ window.enforceNodeOverlayMinSize(node); }catch(_e){}
@@ -655,7 +666,7 @@ window.runNodeMutation = runNodeMutation;
     }));
 
     const win = canvas.getCanvasWindow ? canvas.getCanvasWindow() : window;
-    new LiteGraph.ContextMenu(menuItems, { event, parentMenu }, win);
+    new LiteGraph.ContextMenu(menuItems, { event, parentMenu, allow_html:true }, win);
     return false;
   };
 
