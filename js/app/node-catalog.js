@@ -37,24 +37,13 @@
     ['buffer', 'Buffer', 'buffer', 'buffer'],
     ['conveyor', 'Conveyor', 'conveyor', 'conveyor'],
     ['router', 'Router', 'router', 'router'],
-    ['pack', 'Attach', 'pack', 'pack'],
-    ['unpack', 'Detach', 'unpack', 'unpack'],
+    ['pack', 'Palletizing', 'pack', 'pack'],
+    ['unpack', 'DePalletizing', 'unpack', 'unpack'],
     ['basic', 'Basic Node', 'basic', 'basic'],
-    ['equip', 'Equipment', 'machine', 'equipment'],
     ['note', 'Memo', 'note', 'note', 'factory/note'],
-    ['signal', 'Signal', 'signal', 'signal', 'factory/signal'],
     ['shuttle', 'Shuttle Stage', 'shuttle', 'shuttle'],
-    ['merge', 'Merge', 'merge', 'merge'],
-    ['join', 'Join', 'join', 'join'],
-    ['source', 'Sequence Source', 'source', 'sequence_source', 'factory/basic', 'sequence-source'],
-    ['entitysource', 'Entity Source', 'source', 'entity_source', 'factory/basic', 'entity-source'],
+    ['source', 'Source', 'source', 'sequence_source', 'factory/basic', 'sequence-source'],
     ['sink', 'Sink', 'sink', 'sink'],
-    ['split', 'Split', 'split', 'split'],
-    ['branch', 'Branch', 'router', 'branch'],
-    ['agvroute', 'AGV Route', 'carrier_route', 'agv_route', 'factory/basic', 'agv-route'],
-    ['carrierroute', 'Carrier Route', 'carrier_route', 'carrier_route', 'factory/basic', 'carrier-route'],
-    ['station', 'Store', 'station', 'station'],
-    ['transferstation', 'Transfer', 'transfer', 'transfer']
   ];
 
   const CATALOG = Object.freeze(rows.map((row)=>Object.freeze({
@@ -83,41 +72,14 @@
     return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"${hidden}>${ICONS[iconKey] || ICONS.basic}</svg>`;
   }
 
-  function setOperationVariant(node, key, value){
-    const operations = Array.isArray(node?.properties?.operations) ? node.properties.operations : [];
-    const operation = operations[0];
-    if(!operation) return;
-    operation.config = operation.config && typeof operation.config === 'object' ? operation.config : {};
-    operation.config[key] = value;
-  }
-
-  function applyVariant(node, item){
-    if(!node || !item || node.type !== 'factory/basic') return;
-    if(item.variant === 'sequence-source'){
-      App.configureBasicSequenceGenerator?.(node);
-      return;
-    }
-    if(item.variant === 'entity-source'){
-      node.properties.sourceMode = 'entity';
-      return;
-    }
-    if(item.variant === 'agv-route' || item.variant === 'carrier-route'){
-      const mode = item.variant === 'agv-route' ? 'agv' : 'carrier';
-      node.properties.transportMode = mode;
-      setOperationVariant(node, 'transportMode', mode);
-      App.ensureBasicTemplateFlowRules?.(node, { force:true, templateId:item.templateId });
-    }
-  }
-
   function createNodeFromCatalog(kind){
-    const item = itemFor(kind) || itemFor('equip');
+    const item = itemFor(kind) || itemFor('basic');
     if(!item || !root.LiteGraph) return null;
     const node = root.LiteGraph.createNode(item.nodeType);
     if(!node) return null;
     if(node.type === 'factory/basic'){
       App.applyBasicTemplate?.(node, item.templateId);
-      applyVariant(node, item);
-      App.ensureBasicTemplateFlowRules?.(node, { force:false, templateId:item.templateId });
+
     }
     node.title = item.label;
     return node;

@@ -1,0 +1,51 @@
+{
+  "entityTypesBefore": 32,
+  "entityTypesAfter": [
+    "workA",
+    "workB",
+    "carryer1",
+    "carryer2"
+  ],
+  "syntaxChecks": "passed",
+  "npmCheck": "passed",
+  "npmBuild": "passed",
+  "runtimeTests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "sampleTests": {
+    "passed": 8,
+    "failed": 0,
+    "simulatedSecondsPerSample": 1200
+  },
+  "engineTest": {
+    "suite": "quick",
+    "cases": 40,
+    "engines": [
+      "dt",
+      "event",
+      "event-fast",
+      "event-fast-worker",
+      "event-fast-par"
+    ],
+    "sampleLine2Issues": [],
+    "existingStrictParityIssues": 18,
+    "baselineIssueKeysMatch": true,
+    "affectedExamples": [
+      "branch",
+      "pallet_station_demo",
+      "sample_line1"
+    ]
+  },
+  "ui": {
+    "localUrl": "http://127.0.0.1:8124/",
+    "checked": [
+      "four Entity Types",
+      "start/stop",
+      "node state display",
+      "link movement and labels",
+      "timeline",
+      "node 117 Round robin with six outputs"
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "last_node_id": 12,
-  "last_link_id": 14,
+  "last_node_id": 13,
+  "last_link_id": 15,
   "nodes": [
     {
       "id": 2,
@@ -10,8 +10,8 @@
         322.70013427734375
       ],
       "size": [
-        169.60000610351562,
-        46
+        230,
+        110
       ],
       "order": 3,
       "inputs": [
@@ -21,18 +21,14 @@
           "link": 11,
           "slot_index": 0,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "inPort2",
           "type": "entity",
-          "link": 14,
+          "link": 15,
           "portId": "in-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -46,9 +42,7 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "outPort2",
@@ -59,215 +53,275 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "title": "Carrier Route IN",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
+            },
+            {
+              "id": "inPort2",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-2"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                205
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1350,
+                30
+              ]
+            },
+            {
+              "id": "outPort2",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-2"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1080,
+                30
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 1.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "dePalletizing1",
+              "kind": "DePalletizing",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "parentOutPort"
+                },
+                {
+                  "id": "childOutPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
+            },
+            {
+              "id": "entityRouter1",
+              "kind": "entityRouter",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1",
+                  "typeId": "anyType"
+                }
+              ],
+              "pos": [
+                810,
+                30
+              ]
+            },
+            {
+              "id": "palletizing1",
+              "kind": "Palletizing",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "parentInPort"
+                },
+                {
+                  "id": "childInPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                810,
+                205
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0.3
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                1080,
+                205
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "dePalletizing1",
+              "input": "inPort"
+            },
+            {
+              "from": "dePalletizing1",
+              "output": "childOutPort",
+              "to": "entityRouter1",
+              "input": "inPort1"
+            },
+            {
+              "from": "entityRouter1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "dePalletizing1",
+              "output": "parentOutPort",
+              "to": "palletizing1",
+              "input": "parentInPort"
+            },
+            {
+              "from": "inPort2",
+              "output": "outPort",
+              "to": "palletizing1",
+              "input": "childInPort"
+            },
+            {
+              "from": "palletizing1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 2,
+            "outPort": 2,
+            "process": 1,
+            "dePalletizing": 1,
+            "entityRouter": 1,
+            "palletizing": 1,
+            "recovery": 1
+          }
+        },
         "initialContents": [
           {
             "typeId": "type-carrier-in",
             "quantity": 1,
-            "load": "empty",
-            "children": []
-          }
-        ],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
+            "load": "custom",
+            "children": [
               {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "transport",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 1
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 0.3
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-input-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-2",
-            "entityRole": "attachment",
-            "processStages": [
-              {
-                "stageId": "in-2-process-1",
-                "name": "Process 1",
-                "durationSec": 1
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-2-1",
-                "name": "Down 1",
-                "durationSec": 0.3
+                "typeId": "type-pallet-4",
+                "quantity": 1,
+                "load": "custom",
+                "children": [
+                  {
+                    "typeId": "type-a",
+                    "quantity": 4,
+                    "load": "empty",
+                    "children": []
+                  }
+                ]
               }
             ]
           }
         ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "transport",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 0.3,
-                "portId": "out-1"
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-output-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-2"
-            ],
-            "toPortId": "out-2",
-            "entityRole": "attachment",
-            "downStages": [
-              {
-                "stageId": "migrated-output-2-down-1",
-                "name": "Down 1",
-                "durationSec": 0.3,
-                "portId": "out-2"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
-                {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 1
-                }
-              ],
-              "processTimeSec": 1
-            },
-            "in-2": {
-              "processStages": [
-                {
-                  "stageId": "in-2-process-1",
-                  "name": "Process 1",
-                  "durationSec": 1
-                }
-              ],
-              "processTimeSec": 1
-            }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 0.3
-                }
-              ],
-              "downTimeSec": 0.3
-            },
-            "out-2": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 0.3
-                }
-              ],
-              "downTimeSec": 0.3
-            }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
-          ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "transport-1",
-            "trigger": "process",
-            "kind": "entity-transport",
-            "config": {
-              "transportMode": "carrier",
-              "outSequence": ""
-            }
-          }
-        ],
-        "flipIO": false
+        "flipIO": false,
+        "initialFlowNodeId": "inPort1"
       }
     },
     {
@@ -278,8 +332,8 @@
         320
       ],
       "size": [
-        169.60000610351562,
-        46
+        230,
+        110
       ],
       "flags": {
         "collapsed": false
@@ -291,18 +345,14 @@
           "type": "entity",
           "link": 5,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "inPort2",
           "type": "entity",
           "link": null,
           "portId": "in-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -316,219 +366,132 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "outPort2",
           "type": "entity",
-          "links": null,
+          "links": [],
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "title": "Transport Route",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
-        "initialContents": [],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
             },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "transport",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-input-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-2",
-            "entityRole": "attachment",
-            "processStages": [
-              {
-                "stageId": "in-2-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-2-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          }
-        ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "transport",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
                 "portId": "out-1"
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-output-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-2"
-            ],
-            "toPortId": "out-2",
-            "entityRole": "attachment",
-            "downStages": [
-              {
-                "stageId": "migrated-output-2-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
-                "portId": "out-2"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
+              },
+              "inputs": [
                 {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
             },
-            "in-2": {
-              "processStages": [
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5.0
+              },
+              "inputs": [
                 {
-                  "stageId": "in-2-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
             }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            },
-            "out-2": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
           ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "transport-1",
-            "trigger": "process",
-            "kind": "entity-transport",
-            "config": {
-              "transportMode": "carrier",
-              "outSequence": ""
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
             }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
           }
-        ],
-        "flipIO": false
+        },
+        "initialContents": [],
+        "flipIO": false,
+        "initialFlowNodeId": "inPort1"
       }
     },
     {
@@ -539,8 +502,8 @@
         652
       ],
       "size": [
-        169.60000610351562,
-        46
+        230,
+        110
       ],
       "flags": {
         "collapsed": false
@@ -552,18 +515,14 @@
           "type": "entity",
           "link": 8,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "inPort2",
           "type": "entity",
           "link": null,
           "portId": "in-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -577,219 +536,132 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "outPort2",
           "type": "entity",
-          "links": null,
+          "links": [],
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "title": "Transport Route",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
-        "initialContents": [],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
             },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "transport",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-input-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-2",
-            "entityRole": "attachment",
-            "processStages": [
-              {
-                "stageId": "in-2-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-2-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          }
-        ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "transport",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
                 "portId": "out-1"
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-output-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-2"
-            ],
-            "toPortId": "out-2",
-            "entityRole": "attachment",
-            "downStages": [
-              {
-                "stageId": "migrated-output-2-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
-                "portId": "out-2"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
+              },
+              "inputs": [
                 {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
             },
-            "in-2": {
-              "processStages": [
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5.0
+              },
+              "inputs": [
                 {
-                  "stageId": "in-2-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
             }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            },
-            "out-2": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
           ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "transport-1",
-            "trigger": "process",
-            "kind": "entity-transport",
-            "config": {
-              "transportMode": "carrier",
-              "outSequence": ""
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
             }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
           }
-        ],
-        "flipIO": true
+        },
+        "initialContents": [],
+        "flipIO": true,
+        "initialFlowNodeId": "inPort1"
       }
     },
     {
@@ -800,8 +672,8 @@
         652
       ],
       "size": [
-        169.60000610351562,
-        46
+        230,
+        110
       ],
       "flags": {
         "collapsed": false
@@ -813,18 +685,14 @@
           "type": "entity",
           "link": 9,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "inPort2",
           "type": "entity",
           "link": null,
           "portId": "in-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -838,219 +706,132 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "outPort2",
           "type": "entity",
-          "links": null,
+          "links": [],
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "title": "Transport Route",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
-        "initialContents": [],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
             },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "transport",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-input-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-2",
-            "entityRole": "attachment",
-            "processStages": [
-              {
-                "stageId": "in-2-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-2-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          }
-        ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "transport",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
                 "portId": "out-1"
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-output-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-2"
-            ],
-            "toPortId": "out-2",
-            "entityRole": "attachment",
-            "downStages": [
-              {
-                "stageId": "migrated-output-2-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
-                "portId": "out-2"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
+              },
+              "inputs": [
                 {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
             },
-            "in-2": {
-              "processStages": [
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5.0
+              },
+              "inputs": [
                 {
-                  "stageId": "in-2-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
             }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            },
-            "out-2": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
           ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "transport-1",
-            "trigger": "process",
-            "kind": "entity-transport",
-            "config": {
-              "transportMode": "carrier",
-              "outSequence": ""
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
             }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
           }
-        ],
-        "flipIO": true
+        },
+        "initialContents": [],
+        "flipIO": true,
+        "initialFlowNodeId": "inPort1"
       }
     },
     {
@@ -1061,8 +842,8 @@
         662
       ],
       "size": [
-        169.60000610351562,
-        46
+        230,
+        110
       ],
       "flags": {
         "collapsed": false
@@ -1074,18 +855,14 @@
           "type": "entity",
           "link": 10,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "inPort2",
           "type": "entity",
           "link": null,
           "portId": "in-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -1099,219 +876,132 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "outPort2",
           "type": "entity",
-          "links": null,
+          "links": [],
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "title": "Transport Route",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
-        "initialContents": [],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
             },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "transport",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-input-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-2",
-            "entityRole": "attachment",
-            "processStages": [
-              {
-                "stageId": "in-2-process-1",
-                "name": "Process 1",
-                "durationSec": 5
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-2-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          }
-        ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "transport",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
                 "portId": "out-1"
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-output-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-2"
-            ],
-            "toPortId": "out-2",
-            "entityRole": "attachment",
-            "downStages": [
-              {
-                "stageId": "migrated-output-2-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
-                "portId": "out-2"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
+              },
+              "inputs": [
                 {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
             },
-            "in-2": {
-              "processStages": [
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5.0
+              },
+              "inputs": [
                 {
-                  "stageId": "in-2-process-1",
-                  "name": "Process 1",
-                  "durationSec": 5
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 5
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
             }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            },
-            "out-2": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
-                }
-              ],
-              "downTimeSec": 3
-            }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
           ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "transport-1",
-            "trigger": "process",
-            "kind": "entity-transport",
-            "config": {
-              "transportMode": "carrier",
-              "outSequence": ""
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
             }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
           }
-        ],
-        "flipIO": true
+        },
+        "initialContents": [],
+        "flipIO": true,
+        "initialFlowNodeId": "inPort1"
       }
     },
     {
@@ -1322,8 +1012,8 @@
         338.4256286621094
       ],
       "size": [
-        169.60000610351562,
-        46
+        230,
+        110
       ],
       "order": 4,
       "inputs": [
@@ -1332,18 +1022,14 @@
           "type": "entity",
           "link": 6,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "inPort2",
           "type": "entity",
           "link": null,
           "portId": "in-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -1357,227 +1043,154 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "transport"
+          "channel": "entity"
         },
         {
           "name": "outPort2",
           "type": "entity",
-          "links": null,
+          "links": [],
           "slot_index": 1,
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "title": "Carrier Route OUT",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 1.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0.3
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
+          }
+        },
         "initialContents": [
           {
             "typeId": "type-carrier-out",
             "quantity": 1,
-            "load": "empty",
-            "children": []
-          }
-        ],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
+            "load": "custom",
+            "children": [
               {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "transport",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 1
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 0.3
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-input-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-2",
-            "entityRole": "attachment",
-            "processStages": [
-              {
-                "stageId": "in-2-process-1",
-                "name": "Process 1",
-                "durationSec": 1
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-2-1",
-                "name": "Down 1",
-                "durationSec": 0.3
+                "typeId": "type-pallet-4",
+                "quantity": 2,
+                "load": "custom",
+                "children": [
+                  {
+                    "typeId": "type-a",
+                    "quantity": 4,
+                    "load": "empty",
+                    "children": []
+                  }
+                ]
               }
             ]
           }
         ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "transport",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 0.3,
-                "portId": "out-1"
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-output-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-2"
-            ],
-            "toPortId": "out-2",
-            "entityRole": "attachment",
-            "downStages": [
-              {
-                "stageId": "migrated-output-2-down-1",
-                "name": "Down 1",
-                "durationSec": 0.3,
-                "portId": "out-2"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
-                {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 1
-                }
-              ],
-              "processTimeSec": 1
-            },
-            "in-2": {
-              "processStages": [
-                {
-                  "stageId": "in-2-process-1",
-                  "name": "Process 1",
-                  "durationSec": 1
-                }
-              ],
-              "processTimeSec": 1
-            }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 0.3
-                }
-              ],
-              "downTimeSec": 0.3
-            },
-            "out-2": {
-              "downStages": [
-                {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 0.3
-                }
-              ],
-              "downTimeSec": 0.3
-            }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
-          ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "transport-1",
-            "trigger": "process",
-            "kind": "entity-transport",
-            "config": {
-              "transportMode": "carrier",
-              "outSequence": ""
-            }
-          }
-        ],
-        "flipIO": false
+        "flipIO": false,
+        "initialFlowNodeId": "inPort1"
       }
     },
     {
@@ -1588,8 +1201,8 @@
         43
       ],
       "size": [
-        152.8000030517578,
-        46
+        230,
+        110
       ],
       "order": 5,
       "inputs": [
@@ -1598,18 +1211,14 @@
           "type": "entity",
           "link": 1,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "item"
+          "channel": "entity"
         },
         {
           "name": "inPort2",
           "type": "entity",
           "link": 2,
           "portId": "in-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -1622,9 +1231,7 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "item"
+          "channel": "entity"
         },
         {
           "name": "outPort2",
@@ -1635,204 +1242,254 @@
           "__lastSet": null,
           "__animToken": null,
           "portId": "out-2",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "attachment"
+          "channel": "entity"
         }
       ],
       "title": "Store",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
-        "initialContents": [],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
             },
-            "acceptWhen": {
-              "kind": "space-available"
+            {
+              "id": "inPort2",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-2"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                205
+              ]
             },
-            "fromPortId": "in-1",
-            "entityRole": "item",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 1
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 1
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-input-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-2",
-            "entityRole": "attachment",
-            "processStages": [
-              {
-                "stageId": "in-2-process-1",
-                "name": "Process 1",
-                "durationSec": 1
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-2-1",
-                "name": "Down 1",
-                "durationSec": 1
-              }
-            ]
-          }
-        ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "item",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 1,
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
                 "portId": "out-1"
-              }
-            ]
-          },
-          {
-            "ruleId": "migrated-output-2",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1080,
+                30
+              ]
             },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-2"
-            ],
-            "toPortId": "out-2",
-            "entityRole": "attachment",
-            "downStages": [
-              {
-                "stageId": "migrated-output-2-down-1",
-                "name": "Down 1",
-                "durationSec": 1,
+            {
+              "id": "outPort2",
+              "kind": "outPort",
+              "config": {
                 "portId": "out-2"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
+              },
+              "inputs": [
                 {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 1
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 1
+              "outputs": [],
+              "pos": [
+                1350,
+                30
+              ]
             },
-            "in-2": {
-              "processStages": [
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 1.0
+              },
+              "inputs": [
                 {
-                  "stageId": "in-2-process-1",
-                  "name": "Process 1",
-                  "durationSec": 1
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 1
-            }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
+              "outputs": [
                 {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 1
+                  "id": "outPort"
                 }
               ],
-              "downTimeSec": 1
+              "pos": [
+                270,
+                30
+              ]
             },
-            "out-2": {
-              "downStages": [
+            {
+              "id": "dePalletizing1",
+              "kind": "DePalletizing",
+              "config": {},
+              "inputs": [
                 {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 1
+                  "id": "inPort"
                 }
               ],
-              "downTimeSec": 1
+              "outputs": [
+                {
+                  "id": "parentOutPort"
+                },
+                {
+                  "id": "childOutPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
+            },
+            {
+              "id": "entityRouter1",
+              "kind": "entityRouter",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1",
+                  "typeId": "anyType"
+                }
+              ],
+              "pos": [
+                810,
+                30
+              ]
+            },
+            {
+              "id": "palletizing1",
+              "kind": "Palletizing",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "parentInPort"
+                },
+                {
+                  "id": "childInPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                810,
+                205
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 1.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                1080,
+                205
+              ]
             }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
           ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "station-1",
-            "trigger": "process",
-            "kind": "station-transfer"
+          "links": [
+            {
+              "from": "inPort2",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "dePalletizing1",
+              "input": "inPort"
+            },
+            {
+              "from": "dePalletizing1",
+              "output": "childOutPort",
+              "to": "entityRouter1",
+              "input": "inPort1"
+            },
+            {
+              "from": "entityRouter1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "dePalletizing1",
+              "output": "parentOutPort",
+              "to": "palletizing1",
+              "input": "parentInPort"
+            },
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "palletizing1",
+              "input": "childInPort"
+            },
+            {
+              "from": "palletizing1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort2",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 2,
+            "outPort": 2,
+            "process": 1,
+            "dePalletizing": 1,
+            "entityRouter": 1,
+            "palletizing": 1,
+            "recovery": 1
           }
-        ],
-        "flipIO": true
+        },
+        "initialContents": [],
+        "flipIO": true,
+        "initialFlowNodeId": "inPort2"
       }
     },
     {
@@ -1843,8 +1500,8 @@
         62.45530319213867
       ],
       "size": [
-        140,
-        26
+        230,
+        110
       ],
       "order": 2,
       "inputs": [],
@@ -1864,112 +1521,37 @@
       ],
       "title": "Source",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
+        "basicNodeVersion": 3,
+        "role": "source",
+        "flow": {
+          "version": 2,
+          "nodes": [],
+          "links": [],
+          "counters": {}
+        },
         "initialContents": [],
-        "inputRules": [],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "sequence",
-                "entries": [
-                  {
-                    "entryId": "source-sequence-1",
-                    "typeId": "type-a",
-                    "quantity": 1
-                  },
-                  {
-                    "entryId": "source-sequence-2",
-                    "typeId": "type-b",
-                    "quantity": 1
-                  },
-                  {
-                    "entryId": "source-sequence-3",
-                    "typeId": "type-c",
-                    "quantity": 1
-                  }
-                ]
-              }
-            ],
-            "target": {
-              "mode": "sequence",
-              "entries": [
-                {
-                  "entryId": "source-sequence-1",
-                  "typeId": "type-a",
-                  "quantity": 1
-                },
-                {
-                  "entryId": "source-sequence-2",
-                  "typeId": "type-b",
-                  "quantity": 1
-                },
-                {
-                  "entryId": "source-sequence-3",
-                  "typeId": "type-c",
-                  "quantity": 1
-                }
-              ]
+        "flipIO": false,
+        "source": {
+          "entries": [
+            {
+              "typeId": "type-a",
+              "count": 1,
+              "children": []
             },
-            "releaseWhen": {
-              "kind": "available"
+            {
+              "typeId": "type-b",
+              "count": 1,
+              "children": []
             },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 0,
-                "portId": "out-1"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {},
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "migrated-output-1-down-1",
-                  "name": "Down 1",
-                  "durationSec": 0,
-                  "portId": "out-1"
-                }
-              ],
-              "downTimeSec": 0
+            {
+              "typeId": "type-c",
+              "count": 1,
+              "children": []
             }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
           ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "create-1",
-            "trigger": "release",
-            "kind": "create"
-          }
-        ],
-        "flipIO": false
+          "intervalSec": 0,
+          "repeat": true
+        }
       }
     },
     {
@@ -1980,8 +1562,8 @@
         35
       ],
       "size": [
-        140,
-        26
+        230,
+        110
       ],
       "order": 6,
       "inputs": [
@@ -1998,127 +1580,15 @@
       "outputs": [],
       "title": "Sink",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "flow": {
+          "version": 2,
+          "nodes": [],
+          "links": [],
+          "counters": {}
+        },
         "initialContents": [],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "acceptWhen": {
-              "kind": "always"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "item",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 0
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 0
-              }
-            ]
-          }
-        ],
-        "outputRules": [
-          {
-            "ruleId": "basic-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "all",
-              "conditions": [
-                {
-                  "kind": "process-complete"
-                },
-                {
-                  "kind": "downstream-ready"
-                }
-              ]
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "downStages": [
-              {
-                "stageId": "basic-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 0,
-                "portId": "out-1"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
-                {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 0
-                }
-              ],
-              "processTimeSec": 0
-            }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
-                {
-                  "stageId": "basic-output-1-down-1",
-                  "name": "Down 1",
-                  "durationSec": 0,
-                  "portId": "out-1"
-                }
-              ],
-              "downTimeSec": 0
-            }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
-          ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "destroy-1",
-            "trigger": "input-accepted",
-            "kind": "destroy"
-          }
-        ],
         "flipIO": true
       }
     },
@@ -2130,8 +1600,8 @@
         48
       ],
       "size": [
-        140,
-        50
+        230,
+        110
       ],
       "order": 11,
       "inputs": [
@@ -2140,9 +1610,7 @@
           "type": "entity",
           "link": 12,
           "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "item"
+          "channel": "entity"
         }
       ],
       "outputs": [
@@ -2154,126 +1622,269 @@
           ],
           "slot_index": 0,
           "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "item"
+          "channel": "entity"
         }
       ],
       "title": "Equipment",
       "properties": {
-        "basicNodeVersion": 2,
-        "contentCapacity": 1,
-        "initialContents": [],
-        "inputRules": [
-          {
-            "ruleId": "migrated-input-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
             },
-            "acceptWhen": {
-              "kind": "space-available"
-            },
-            "fromPortId": "in-1",
-            "entityRole": "item",
-            "processStages": [
-              {
-                "stageId": "in-1-process-1",
-                "name": "Process 1",
-                "durationSec": 2
-              }
-            ],
-            "downStages": [
-              {
-                "stageId": "down-migrated-input-1-1",
-                "name": "Down 1",
-                "durationSec": 3
-              }
-            ]
-          }
-        ],
-        "outputRules": [
-          {
-            "ruleId": "migrated-output-1",
-            "targets": [
-              {
-                "mode": "any"
-              }
-            ],
-            "target": {
-              "mode": "any"
-            },
-            "releaseWhen": {
-              "kind": "process-complete"
-            },
-            "toPortIds": [
-              "out-1"
-            ],
-            "toPortId": "out-1",
-            "entityRole": "item",
-            "downStages": [
-              {
-                "stageId": "migrated-output-1-down-1",
-                "name": "Down 1",
-                "durationSec": 3,
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
                 "portId": "out-1"
-              }
-            ]
-          }
-        ],
-        "portTimings": {
-          "inputs": {
-            "in-1": {
-              "processStages": [
+              },
+              "inputs": [
                 {
-                  "stageId": "in-1-process-1",
-                  "name": "Process 1",
-                  "durationSec": 2
+                  "id": "inPort"
                 }
               ],
-              "processTimeSec": 2
-            }
-          },
-          "outputs": {
-            "out-1": {
-              "downStages": [
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 2.0
+              },
+              "inputs": [
                 {
-                  "stageId": "down-migrated-input-1-1",
-                  "name": "Down 1",
-                  "durationSec": 3
+                  "id": "inPort"
                 }
               ],
-              "downTimeSec": 3
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
             }
-          }
-        },
-        "inputPolicy": {
-          "mode": "first",
-          "requiredPortIds": [],
-          "match": null
-        },
-        "selection": "first-available",
-        "stateMachine": {
-          "initialState": "IDLE",
-          "states": [
-            "IDLE",
-            "PROCESS",
-            "WAIT",
-            "DOWN"
           ],
-          "transitions": []
-        },
-        "operations": [
-          {
-            "operationId": "process-1",
-            "trigger": "process",
-            "kind": "process"
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
           }
-        ],
+        },
+        "initialContents": [],
+        "flipIO": true
+      }
+    },
+    {
+      "id": 13,
+      "type": "factory/basic",
+      "pos": [
+        394.0,
+        203.0
+      ],
+      "size": [
+        230,
+        110
+      ],
+      "order": 11,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 14,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            15
+          ],
+          "slot_index": 0,
+          "portId": "out-1",
+          "channel": "entity"
+        }
+      ],
+      "title": "Returned pallet buffer",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
+          }
+        },
+        "initialContents": [],
         "flipIO": true
       }
     }
@@ -2363,9 +1974,17 @@
       14,
       6,
       1,
+      13,
+      0,
+      0
+    ],
+    [
+      15,
+      13,
+      0,
       2,
       1,
-      0
+      "entity"
     ]
   ],
   "groups": [],
@@ -2387,7 +2006,7 @@
     }
   },
   "__factSimEntityModel": {
-    "schemaVersion": 2,
+    "schemaVersion": 3,
     "types": [
       {
         "typeId": "type-pallet-4",
@@ -2464,5 +2083,10 @@
         "defaultAttributes": {}
       }
     ]
+  },
+  "__factSimFormat": 2,
+  "extra": {
+    "syncroGroups": [],
+    "syncroGroupSequence": 0
   }
 }

@@ -191,7 +191,7 @@ function summarizeBottlenecks(result: Awaited<ReturnType<FactSimRuntime["getBott
       bottleneckScore: Number(row.bottleneckScore.toFixed(4)),
       processRatio: Number(row.processRatio.toFixed(4)),
       waitRatio: Number(row.waitRatio.toFixed(4)),
-      downRatio: Number(row.downRatio.toFixed(4)),
+      recoveryRatio: Number(row.recoveryRatio.toFixed(4)),
       idleRatio: Number(row.idleRatio.toFixed(4))
     }))
   };
@@ -343,10 +343,7 @@ async function applyEditOperation(
     entityType?: Record<string, unknown>;
     typeId?: string;
     initialContents?: unknown[];
-    inputRules?: unknown[];
-    outputRules?: unknown[];
-    nodeOperations?: unknown[];
-    inputPolicy?: Record<string, unknown>;
+    flow?: Record<string, unknown>;
     templateId?: string;
   }
 ) {
@@ -377,10 +374,7 @@ async function applyEditOperation(
     ,entityType
     ,typeId
     ,initialContents
-    ,inputRules
-    ,outputRules
-    ,nodeOperations
-    ,inputPolicy
+    ,flow
     ,templateId
   } = operation;
 
@@ -455,15 +449,16 @@ async function applyEditOperation(
       if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=set_initial_contents");
       if (!Array.isArray(initialContents)) throw new Error("initialContents is required when action=set_initial_contents");
       return runtime.setNodeInitialContents(resolveBatchNodeId(nodeId, refs) as string | number, initialContents);
-    case "set_flow_rules":
-      if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=set_flow_rules");
-      return runtime.setNodeFlowRules(resolveBatchNodeId(nodeId, refs) as string | number, inputRules, outputRules, nodeOperations, inputPolicy);
+    case "set_flow":
+      if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=set_flow");
+      return runtime.setNodeFlow(resolveBatchNodeId(nodeId, refs) as string | number, flow ?? {});
+    case "add_syncro_group":
+      if (!title) throw new Error("title is required as the SyncroGroup name.");
+      return runtime.addSyncroGroup(title);
     case "apply_template":
       if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=apply_template");
       if (!templateId) throw new Error("templateId is required when action=apply_template");
       return runtime.applyBasicTemplate(resolveBatchNodeId(nodeId, refs) as string | number, templateId);
-    case "migrate_basic":
-      return runtime.migrateCurrentGraphToBasic();
     default:
       throw new Error(`Unsupported action: ${String(action)}`);
   }
@@ -809,9 +804,9 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           "validate_json"
           ,"entity_types"
           ,"node_contents"
-          ,"flow_rules"
+          ,"flow"
           ,"validate_entity_model"
-          ,"migration_preview"
+          
         ]),
         graphJson: z.string().min(2).optional(),
         filePath: z.string().min(1).optional(),
@@ -895,13 +890,11 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           case "node_contents":
             if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=node_contents");
             return runtime.getNodeContents(nodeId, includeInstances);
-          case "flow_rules":
-            if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=flow_rules");
-            return runtime.getNodeFlowRules(nodeId);
+          case "flow":
+            if (typeof nodeId === "undefined") throw new Error("nodeId is required when action=flow");
+            return runtime.getNodeFlow(nodeId);
           case "validate_entity_model":
             return runtime.validateEntityModel();
-          case "migration_preview":
-            return runtime.previewEntityMigration();
           default:
             throw new Error(`Unsupported action: ${String(action)}`);
         }
@@ -914,7 +907,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
     {
       description: "Add, update, remove, connect, disconnect, or build nodes and links. Large node properties are omitted by default; set includeDetails=true when needed.",
       inputSchema: {
-        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch", "upsert_entity_type", "remove_entity_type", "set_initial_contents", "set_flow_rules", "apply_template", "migrate_basic"]),
+        action: z.enum(["add", "update", "remove", "connect", "disconnect", "build", "batch", "upsert_entity_type", "remove_entity_type", "set_initial_contents", "set_flow", "apply_template", "add_syncro_group"]),
         nodeType: z.string().min(1).optional(),
         title: z.string().optional(),
         x: z.number().optional(),
@@ -942,15 +935,12 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         ,entityType: jsonRecordSchema.optional()
         ,typeId: z.string().min(1).optional()
         ,initialContents: unknownArraySchema.optional()
-        ,inputRules: unknownArraySchema.optional()
-        ,outputRules: unknownArraySchema.optional()
-        ,nodeOperations: unknownArraySchema.optional()
-        ,inputPolicy: jsonRecordSchema.optional()
+        ,flow: jsonRecordSchema.optional()
         ,templateId: z.string().min(1).optional()
         ,includeDetails: z.boolean().optional()
       }
     },
-    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref, entityType, typeId, initialContents, inputRules, outputRules, nodeOperations, inputPolicy, templateId, includeDetails }, extra) => {
+    async ({ action, nodeType, title, x, y, properties, mergeProperties, nodeId, fromNodeId, toNodeId, fromSlot, toSlot, portKind, allowDuplicate, linkId, removeAllMatches, nodes, edges, clearExisting, originX, originY, xPitch, yPitch, operations, ref, entityType, typeId, initialContents, flow, templateId, includeDetails }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "edit_graph", { action }, async () => {
         if (action === "batch") {
@@ -1005,10 +995,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
               ,entityType: current.entityType && typeof current.entityType === "object" ? current.entityType as Record<string, unknown> : undefined
               ,typeId: typeof current.typeId === "string" ? current.typeId : undefined
               ,initialContents: Array.isArray(current.initialContents) ? current.initialContents : undefined
-              ,inputRules: Array.isArray(current.inputRules) ? current.inputRules : undefined
-              ,outputRules: Array.isArray(current.outputRules) ? current.outputRules : undefined
-              ,nodeOperations: Array.isArray(current.nodeOperations) ? current.nodeOperations : undefined
-              ,inputPolicy: current.inputPolicy && typeof current.inputPolicy === "object" ? current.inputPolicy as Record<string, unknown> : undefined
+              ,flow: current.flow && typeof current.flow === "object" ? current.flow as Record<string, unknown> : undefined
               ,templateId: typeof current.templateId === "string" ? current.templateId : undefined
             });
             storeBatchRef(refs, currentRef || undefined, result);
@@ -1054,10 +1041,7 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
           ,entityType
           ,typeId
           ,initialContents
-          ,inputRules
-          ,outputRules
-          ,nodeOperations
-          ,inputPolicy
+          ,flow
           ,templateId
         });
         return summarizeEditResult(result, includeDetails === true);
@@ -1180,15 +1164,15 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
         minSampleSec: z.number().positive().optional(),
         maxNodesPerIteration: z.number().int().positive().optional(),
         processReductionRatio: z.number().positive().optional(),
-        downReductionRatio: z.number().positive().optional(),
+        recoveryReductionRatio: z.number().positive().optional(),
         minProcessTime: z.number().nonnegative().optional(),
-        minDownTime: z.number().nonnegative().optional(),
+        minRecoveryTime: z.number().nonnegative().optional(),
         minDistance: z.number().nonnegative().optional(),
         forbiddenAdjacency: z.array(z.string().min(1)).optional(),
         paramGrid: jsonRecordSchema.optional()
       }
     },
-    async ({ action, taktSec, objectiveWeights, graphJson, candidates, wallMs, objective, topK, maxSuggestions, iterations, runWallMs, bottleneckTopN, minSampleSec, maxNodesPerIteration, processReductionRatio, downReductionRatio, minProcessTime, minDownTime, minDistance, forbiddenAdjacency, paramGrid }, extra) => {
+    async ({ action, taktSec, objectiveWeights, graphJson, candidates, wallMs, objective, topK, maxSuggestions, iterations, runWallMs, bottleneckTopN, minSampleSec, maxNodesPerIteration, processReductionRatio, recoveryReductionRatio, minProcessTime, minRecoveryTime, minDistance, forbiddenAdjacency, paramGrid }, extra) => {
       const requestId = String(extra.requestId);
       return invokeTool(requestId, "optimize", { action }, async () => {
         switch (action) {
@@ -1220,9 +1204,9 @@ export function registerAiTools(server: McpServer, runtime: FactSimRuntime): voi
               minSampleSec,
               maxNodesPerIteration,
               processReductionRatio,
-              downReductionRatio,
+              recoveryReductionRatio,
               minProcessTime,
-              minDownTime
+              minRecoveryTime
             });
           case "validate_layout":
             return runtime.validateLayoutRules(minDistance, forbiddenAdjacency);

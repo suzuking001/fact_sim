@@ -1,0 +1,73 @@
+[
+  {
+    "sample": "simple",
+    "nodeCount": 4,
+    "changes": []
+  },
+  {
+    "sample": "branch",
+    "nodeCount": 6,
+    "changes": []
+  },
+  {
+    "sample": "parallel_benchmark",
+    "nodeCount": 32,
+    "changes": []
+  },
+  {
+    "sample": "shuttle_line5",
+    "nodeCount": 7,
+    "changes": [
+      "Shuttle 2 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 3 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 4 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 5 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 6 starts with one Entity for strict all-member synchronization."
+    ]
+  },
+  {
+    "sample": "carrier",
+    "nodeCount": 14,
+    "changes": [
+      "Merge 17 now fills a capacity-2 Assembly parent supplied by an explicit Source."
+    ]
+  },
+  {
+    "sample": "pallet_station_demo",
+    "nodeCount": 10,
+    "changes": []
+  },
+  {
+    "sample": "sample_line1",
+    "nodeCount": 63,
+    "changes": [
+      "Merge 26 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 32 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 36 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 42 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 17 now fills a capacity-2 Assembly parent supplied by an explicit Source."
+    ]
+  },
+  {
+    "sample": "sample_line2",
+    "nodeCount": 132,
+    "changes": [
+      "Shuttle 26 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 27 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 28 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 29 starts with one Entity for strict all-member synchronization.",
+      "Shuttle 30 starts with one Entity for strict all-member synchronization.",
+      "Merge 45 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 50 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 56 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 60 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 65 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 144 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 148 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 153 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 157 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 162 now fills a capacity-2 Assembly parent supplied by an explicit Source.",
+      "Merge 17 now fills a capacity-2 Assembly parent supplied by an explicit Source."
+    ]
+  }
+]

@@ -176,7 +176,7 @@
     window.initGraph();
 
     const nodes = Array.isArray(App.graph && App.graph._nodes) ? App.graph._nodes : [];
-    const equipment = nodes.find((node)=> node && node.type === 'factory/basic' && App.basicNodeBehavior?.(node) === 'machine');
+    const equipment = nodes.find((node)=> node && node.type === 'factory/basic' && node.properties.role === 'equipment');
     const sink = LiteGraph.createNode('factory/basic');
     if(sink){
       App.applyBasicTemplate?.(sink, 'sink');

@@ -228,7 +228,8 @@ var App = window.App || (window.App = {});
 
   function buildLocalGraphData(graphData, nodeIds){
     const idSet = new Set(Array.isArray(nodeIds) ? nodeIds.map((id)=> Number(id)) : []);
-    const data = stripStopGroupExtra(graphData);
+    const data = cloneJson(graphData);
+    if(data.__flowRuntime){const r=data.__flowRuntime;r.nodes=r.nodes.filter(n=>idSet.has(Number(n.id)));r.instances=r.instances.filter(e=>{let root=e;const seen=new Set();while(root.parentId){if(seen.has(root.instanceId))throw new Error("Entity hierarchy contains a cycle.");seen.add(root.instanceId);root=data.__flowRuntime.instances.find(i=>i.instanceId===root.parentId);if(!root)throw new Error("Entity parent is missing.");}return idSet.has(Number(root.locationNodeId));});r.completed=r.completed.filter(e=>idSet.has(Number(e.sinkNodeId)));}
     data.nodes = (Array.isArray(data.nodes) ? data.nodes : []).filter((node)=> idSet.has(Number(node && node.id)));
     data.links = (Array.isArray(data.links) ? data.links : []).filter((row)=>{
       if(Array.isArray(row)){
@@ -236,7 +237,7 @@ var App = window.App || (window.App = {});
       }
       return idSet.has(Number(row && row.origin_id)) && idSet.has(Number(row && row.target_id));
     });
-    data.groups = [];
+
     return data;
   }
 
@@ -301,37 +302,17 @@ var App = window.App || (window.App = {});
       };
     }
 
-    if(compiled.nodeCount < MIN_PAR_NODE_COUNT){
-      return {
-        canParallelize: false,
-        fallbackMode: 'event-fast-worker',
-        reason: 'graph-too-small',
-        graphData,
-        compiledMeta: compiled.meta || {},
-        fallbackProfile
-      };
-    }
-
     const requestedPartitionCount = Math.max(
       1,
       Math.floor(Number(options && options.partitionCount) || getDefaultPartitionCount(compiled.nodeCount))
     );
-    if(requestedPartitionCount < 2){
-      return {
-        canParallelize: false,
-        fallbackMode: 'event-fast-worker',
-        reason: 'single-partition',
-        graphData,
-        compiledMeta: compiled.meta || {},
-        fallbackProfile
-      };
-    }
-
     const adjacency = buildUndirectedAdjacency(compiled);
+    const members=new Map();
+    Array.from(compiled.nodeIds).forEach((id,index)=>{const node=graph.getNodeById(id);for(const item of node.properties?.flow?.nodes || [])if(item.kind==='syncroJudgment'){const list=members.get(item.config.groupId) || [];list.push(index);members.set(item.config.groupId,list);}});
+    if(graph._groups?.length)members.set('stop-groups',Array.from({length:compiled.nodeCount},(_,i)=>i));
+    for(const list of members.values())for(let i=1;i<list.length;i++){adjacency[list[0]].push(list[i]);adjacency[list[i]].push(list[0]);}
     const components = buildConnectedComponents(adjacency);
-    const assignment = components.length > 1
-      ? assignDisconnectedComponents(components, requestedPartitionCount, compiled.nodeCount)
-      : assignConnectedGraph(compiled, adjacency, requestedPartitionCount);
+    const assignment = assignDisconnectedComponents(components, requestedPartitionCount, compiled.nodeCount);
     const { cutEdges, byPartition } = buildCutEdges(graph, compiled, assignment.partitionIdByNode);
     const cutRatio = cutEdges.length / Math.max(1, compiled.edgeCount || 1);
 
@@ -355,17 +336,6 @@ var App = window.App || (window.App = {});
       byPartition,
       cutEdges.length === 0
     );
-    if(partitions.length < 2){
-      return {
-        canParallelize: false,
-        fallbackMode: 'event-fast-worker',
-        reason: 'effective-single-partition',
-        graphData,
-        compiledMeta: compiled.meta || {},
-        fallbackProfile
-      };
-    }
-
     return {
       canParallelize: true,
       graphData,

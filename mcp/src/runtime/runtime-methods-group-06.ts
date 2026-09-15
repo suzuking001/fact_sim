@@ -212,9 +212,9 @@ export function registerRuntimeMethodsGroup06(
       const normalizedMinSampleSec = this.sanitizeNumberOption(options?.minSampleSec, 1, 0);
       const normalizedMaxNodesPerIteration = this.sanitizeIntegerOption(options?.maxNodesPerIteration, 2, 1, 10);
       const normalizedProcessReductionRatio = this.sanitizeNumberOption(options?.processReductionRatio, 0.12, 0.01, 0.8);
-      const normalizedDownReductionRatio = this.sanitizeNumberOption(options?.downReductionRatio, 0.2, 0.01, 0.8);
+      const normalizedRecoveryReductionRatio = this.sanitizeNumberOption(options?.recoveryReductionRatio, 0.2, 0.01, 0.8);
       const normalizedMinProcessTime = this.sanitizeNumberOption(options?.minProcessTime, 0.2, 0);
-      const normalizedMinDownTime = this.sanitizeNumberOption(options?.minDownTime, 0.1, 0);
+      const normalizedMinRecoveryTime = this.sanitizeNumberOption(options?.minRecoveryTime, 0.1, 0);
   
       const warnings: string[] = [];
       const baselineRun = await this.runSimulationFor(normalizedRunWallMs, undefined, true, false);
@@ -292,38 +292,25 @@ export function registerRuntimeMethodsGroup06(
               ? (nodeAs.properties as Record<string, unknown>)
               : {};
   
-          const patch: Record<string, unknown> = {};
-          const processKeys = ["processTime", "processTime2"];
-          for (const key of processKeys) {
-            const current = Number(props[key]);
-            if (!Number.isFinite(current) || current <= normalizedMinProcessTime) continue;
-            const nextValue = this.roundNumber(
-              Math.max(normalizedMinProcessTime, current * (1 - normalizedProcessReductionRatio)),
-              4
-            );
-            if (nextValue < current) {
-              patch[key] = nextValue;
-            }
+          const flow = structuredClone(props.flow) as {version?: number; nodes?: {kind: string; config: {seconds?: number}}[]} | undefined;
+          if (flow?.version !== 2) continue;
+          let changed = false;
+          for (const item of flow.nodes || []) {
+            if (!['process', 'recovery'].includes(item.kind)) continue;
+            const current = Number(item.config.seconds);
+            const minimum = item.kind === 'process' ? normalizedMinProcessTime : normalizedMinRecoveryTime;
+            const ratio = item.kind === 'process' ? normalizedProcessReductionRatio : normalizedRecoveryReductionRatio;
+            if (!Number.isFinite(current) || current <= minimum) continue;
+            item.config.seconds = this.roundNumber(Math.max(minimum, current * (1 - ratio)), 4);
+            changed ||= item.config.seconds !== current;
           }
-  
-          const downCurrent = Number(props.downTime);
-          if (Number.isFinite(downCurrent) && downCurrent > normalizedMinDownTime) {
-            const nextDown = this.roundNumber(
-              Math.max(normalizedMinDownTime, downCurrent * (1 - normalizedDownReductionRatio)),
-              4
-            );
-            if (nextDown < downCurrent) {
-              patch.downTime = nextDown;
-            }
-          }
-  
-          if (!Object.keys(patch).length) continue;
-          await this.updateNode(nodeId, undefined, patch, true);
+          if (!changed) continue;
+          await this.updateNode(nodeId, undefined, {flow}, true);
           changedNodeIds.push(nodeId);
         }
   
         if (!changedNodeIds.length) {
-          warnings.push('iteration ' + iteration + ': candidate nodes had no tunable properties (processTime/processTime2/downTime).');
+          warnings.push('iteration ' + iteration + ': candidate nodes had no tunable Process or Recovery nodes in Flow.');
           break;
         }
   

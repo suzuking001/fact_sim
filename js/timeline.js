@@ -1,11 +1,11 @@
-// Timeline chart for node states (process/wait/down/idle)
+// Timeline chart for node states (process/wait/recovery/idle)
 (function(){
   function getTimelinePalette(){
     return {
       stateColors: {
         process: '#2ecc71',
         wait: '#f39c12',
-        down: '#3498db',
+        recovery: '#3498db',
         idle: '#f1c40f',
         other: '#9ca3af'
       },
@@ -545,7 +545,7 @@
       s = String(s).toLowerCase();
       if(s.indexOf('process') === 0) return 'process';
       if(s.indexOf('wait') === 0) return 'wait';
-      if(s.indexOf('down') === 0) return 'down';
+      if(s.indexOf('recovery') === 0) return 'recovery';
       if(s.indexOf('idle') === 0) return 'idle';
       return 'other';
     }
@@ -765,10 +765,10 @@
         if(e <= s) continue;
         const dur = e - s;
         const state = String(seg.state || 'other').toLowerCase();
-        if(state === 'process' || state === 'down'){
+        if(state === 'process' || state === 'recovery'){
           activeSec += dur;
         }
-        if(state === 'process' || state === 'down' || state === 'wait' || state === 'idle'){
+        if(state === 'process' || state === 'recovery' || state === 'wait' || state === 'idle'){
           loadSec += dur;
         }
       }

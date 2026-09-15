@@ -1,4 +1,4 @@
-﻿// Graph initialization
+// Graph initialization
 
 var App = window.App || (window.App = {});
 
@@ -495,7 +495,7 @@ function initGraph(){
   resize();
   // Place initial nodes lower so they don't hide under menus
   const src = LiteGraph.createNode('factory/basic');
-  if(typeof App.configureBasicSequenceGenerator === 'function') App.configureBasicSequenceGenerator(src);
+  App.applyBasicTemplate(src, 'source');
   src.title = 'Source';
   src.pos=[60,180];
   const eq = LiteGraph.createNode('factory/basic');

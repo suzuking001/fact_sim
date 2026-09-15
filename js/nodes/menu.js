@@ -1,25 +1,5 @@
 // Right-click menu helpers (script/properties/signals)
 
-function defaultScript(){
-  return `// work: Work object (work.id, work.type, etc.)
-// signalArr: array of sigIn values
-
-if(work.type === 'A'){
-  this.properties.processTime = 5.0;
-  this.properties.downTime = 3.0;
-}else if(work.type === 'B'){
-  this.properties.processTime = 4.0;
-  this.properties.downTime = 2.0;
-}else{
-  // default
-  this.properties.processTime = 10.0;
-  this.properties.downTime = 2.0;
-}
-
-// Return true to accept this work item into PROCESS
-return true;`;
-}
-
 function runNodeMutation(node, mutator){
   if(typeof mutator !== 'function') return;
   const graph = node && node.graph;
@@ -273,7 +253,6 @@ function menuMixin(cls){
   };
 }
 
-window.defaultScript = defaultScript;
 window.menuMixin = menuMixin;
 window.runNodeMutation = runNodeMutation;
 

@@ -1,4 +1,4 @@
-﻿// Timeline chart init and wiring
+// Timeline chart init and wiring
 
 var App = window.App || (window.App = {});
 
@@ -143,25 +143,6 @@ function initTimeline(){
       }
     });
   }
-  const inspectorRefreshBtn = document.getElementById('selectionInspectorRefreshBtn');
-  if(inspectorRefreshBtn){
-    inspectorRefreshBtn.addEventListener('click', ()=>{
-      if(App.selectionInspector && typeof App.selectionInspector.refresh === 'function'){
-        App.selectionInspector.refresh();
-        if(typeof App.showToast === 'function') App.showToast('Details refreshed');
-      }
-    });
-  }
-  const inspectorClearBtn = document.getElementById('selectionInspectorClearBtn');
-  if(inspectorClearBtn){
-    inspectorClearBtn.addEventListener('click', ()=>{
-      if(App.selectionInspector && typeof App.selectionInspector.clear === 'function'){
-        App.selectionInspector.clear(true);
-        if(typeof App.showToast === 'function') App.showToast('Details cleared');
-      }
-    });
-  }
-
   const popoutStates = {};
   const popupConfigs = {
     chart: {

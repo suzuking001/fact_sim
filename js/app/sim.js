@@ -23,6 +23,8 @@ App.setStateLegendVisible = setStateLegendVisible;
 
 function startSimulation(){
   if(!App.graph) return;
+  const flowErrors=App.FlowModel.graphErrors(App.graph);
+  if(flowErrors.length){App.showToast?.(flowErrors[0]);throw new Error(flowErrors.join('\n'));}
   if(typeof window.isSimRunning === 'function' && window.isSimRunning()) return;
   if(typeof App.runtimeInstancesForGraph === 'function' && !App.graph.__factSimRuntimeInstances){
     App.initializeEntityRuntime(App.graph);

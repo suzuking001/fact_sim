@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const PAR_MODE = 'event-fast-par';
-  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260829b';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260915minimal';
   const MAX_FLUSH_ROUNDS = 16;
 
   function cloneJson(value){
@@ -25,7 +25,7 @@ var App = window.App || (window.App = {});
 
   function serializeGraphData(graphOrData){
     if(graphOrData && typeof graphOrData.serialize === 'function'){
-      if(typeof App.serializeGraphData === 'function') return cloneJson(App.serializeGraphData(graphOrData));
+      if(typeof App.serializeGraphData === 'function') return App.FlowRuntime.capture(graphOrData,App.serializeGraphData(graphOrData));
       const data = graphOrData.serialize();
       return (typeof App.compactGraphData === 'function') ? App.compactGraphData(data) : data;
     }
@@ -50,6 +50,7 @@ var App = window.App || (window.App = {});
     if(typeof configureGraphClock === 'function'){
       try{ configureGraphClock(graph); }catch(_e){}
     }
+    App.FlowRuntime.restore(graph,data);
     return graph;
   }
 
@@ -265,6 +266,7 @@ var App = window.App || (window.App = {});
       }
       applyRuntimeNodeStates(graph, graphData);
       applyRuntimeLinkStates(graph, graphData);
+      App.FlowRuntime.restore(graph,graphData);
       graph.status = LGraph.STATUS_RUNNING;
       graph.last_update_time = LiteGraph.getTime();
       if(App.timelineChart){
@@ -315,6 +317,8 @@ var App = window.App || (window.App = {});
         nodes[index] = nodeData;
       }
     }
+    const runtimes=snapshots.map(s=>s.flowRuntime).filter(Boolean);
+    if(runtimes.length)merged.__flowRuntime={time:Math.max(...runtimes.map(r=>r.time)),instances:runtimes.flatMap(r=>r.instances),typeSequences:[...runtimes.flatMap(r=>r.typeSequences).reduce((map,[key,value])=>map.set(key,Math.max(map.get(key) || 0,value)),new Map())],arrivalSequence:Math.max(...runtimes.map(r=>r.arrivalSequence)),completed:runtimes.flatMap(r=>r.completed),nodes:runtimes.flatMap(r=>r.nodes)};
     merged.nodes = nodes;
     merged.__factSimRuntimeNodes = buildRuntimeNodeStates(snapshots);
     merged.__factSimRuntimeLinks = buildRuntimeLinkStates(snapshots);

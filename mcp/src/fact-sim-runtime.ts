@@ -296,15 +296,14 @@ export interface FactSimRuntime {
   suggestTopologyImprovements(graphJson: string, maxSuggestions?: number): Promise<TopologyImprovementOutput>;
   listEntityTypes(): Promise<Record<string, unknown>>;
   getNodeContents(nodeId: string | number, includeInstances?: boolean): Promise<Record<string, unknown>>;
-  getNodeFlowRules(nodeId: string | number): Promise<Record<string, unknown>>;
+  getNodeFlow(nodeId: string | number): Promise<Record<string, unknown>>;
+  addSyncroGroup(name: string): Promise<Record<string, unknown>>;
   validateEntityModel(): Promise<Record<string, unknown>>;
-  previewEntityMigration(): Promise<Record<string, unknown>>;
   upsertEntityType(entityType: Record<string, unknown>): Promise<Record<string, unknown>>;
   removeEntityType(typeId: string): Promise<Record<string, unknown>>;
   setNodeInitialContents(nodeId: string | number, initialContents: unknown[]): Promise<Record<string, unknown>>;
-  setNodeFlowRules(nodeId: string | number, inputRules?: unknown[], outputRules?: unknown[], nodeOperations?: unknown[], inputPolicy?: Record<string, unknown>): Promise<Record<string, unknown>>;
+  setNodeFlow(nodeId: string | number, flow: Record<string, unknown>): Promise<Record<string, unknown>>;
   applyBasicTemplate(nodeId: string | number, templateId: string): Promise<Record<string, unknown>>;
-  migrateCurrentGraphToBasic(): Promise<Record<string, unknown>>;
   close(): Promise<void>;
 }
 

@@ -1,12 +1,449 @@
-(function(){
-  var root = (typeof window !== "undefined") ? window : globalThis;
-  root.EXAMPLES = root.EXAMPLES || {};
-  var base64 = 'ewogICJsYXN0X25vZGVfaWQiOiA0LAogICJsYXN0X2xpbmtfaWQiOiAzLAogICJub2RlcyI6IFsKICAgIHsKICAgICAgImlkIjogMSwKICAgICAgInR5cGUiOiAiZmFjdG9yeS9iYXNpYyIsCiAgICAgICJwb3MiOiBbCiAgICAgICAgNjAsCiAgICAgICAgMjAwCiAgICAgIF0sCiAgICAgICJ0aXRsZSI6ICJTb3VyY2UiLAogICAgICAicHJvcGVydGllcyI6IHsKICAgICAgICAiYmFzaWNOb2RlVmVyc2lvbiI6IDIsCiAgICAgICAgImNvbnRlbnRDYXBhY2l0eSI6IDEsCiAgICAgICAgImluaXRpYWxDb250ZW50cyI6IFtdLAogICAgICAgICJpbnB1dFJ1bGVzIjogW10sCiAgICAgICAgIm91dHB1dFJ1bGVzIjogWwogICAgICAgICAgewogICAgICAgICAgICAicnVsZUlkIjogInNvdXJjZS1vdXRwdXQtMSIsCiAgICAgICAgICAgICJ0YXJnZXRzIjogWwogICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJtb2RlIjogInNlcXVlbmNlIiwKICAgICAgICAgICAgICAgICJlbnRyaWVzIjogWwogICAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgImVudHJ5SWQiOiAic291cmNlLXNlcXVlbmNlLTEiLAogICAgICAgICAgICAgICAgICAgICJ0eXBlSWQiOiAidHlwZS1hIiwKICAgICAgICAgICAgICAgICAgICAicXVhbnRpdHkiOiAxCiAgICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAiZW50cnlJZCI6ICJzb3VyY2Utc2VxdWVuY2UtMiIsCiAgICAgICAgICAgICAgICAgICAgInR5cGVJZCI6ICJ0eXBlLWIiLAogICAgICAgICAgICAgICAgICAgICJxdWFudGl0eSI6IDEKICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgXQogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgInRhcmdldCI6IHsKICAgICAgICAgICAgICAibW9kZSI6ICJzZXF1ZW5jZSIsCiAgICAgICAgICAgICAgImVudHJpZXMiOiBbCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICJlbnRyeUlkIjogInNvdXJjZS1zZXF1ZW5jZS0xIiwKICAgICAgICAgICAgICAgICAgInR5cGVJZCI6ICJ0eXBlLWEiLAogICAgICAgICAgICAgICAgICAicXVhbnRpdHkiOiAxCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAiZW50cnlJZCI6ICJzb3VyY2Utc2VxdWVuY2UtMiIsCiAgICAgICAgICAgICAgICAgICJ0eXBlSWQiOiAidHlwZS1iIiwKICAgICAgICAgICAgICAgICAgInF1YW50aXR5IjogMQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgIF0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgInJlbGVhc2VXaGVuIjogewogICAgICAgICAgICAgICJraW5kIjogImFsbCIsCiAgICAgICAgICAgICAgImNvbmRpdGlvbnMiOiBbCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICJraW5kIjogImF2YWlsYWJsZSIKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICJraW5kIjogImRvd25zdHJlYW0tcmVhZHkiCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgXQogICAgICAgICAgICB9LAogICAgICAgICAgICAidG9Qb3J0SWRzIjogWwogICAgICAgICAgICAgICJvdXQtMSIKICAgICAgICAgICAgXSwKICAgICAgICAgICAgInRvUG9ydElkIjogIm91dC0xIiwKICAgICAgICAgICAgImRvd25TdGFnZXMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgInN0YWdlSWQiOiAic291cmNlLW91dHB1dC0xLWRvd24tMSIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJEb3duIDEiLAogICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMCwKICAgICAgICAgICAgICAgICJwb3J0SWQiOiAib3V0LTEiCiAgICAgICAgICAgICAgfQogICAgICAgICAgICBdCiAgICAgICAgICB9CiAgICAgICAgXSwKICAgICAgICAicG9ydFRpbWluZ3MiOiB7CiAgICAgICAgICAiaW5wdXRzIjoge30sCiAgICAgICAgICAib3V0cHV0cyI6IHsKICAgICAgICAgICAgIm91dC0xIjogewogICAgICAgICAgICAgICJkb3duU3RhZ2VzIjogWwogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAic3RhZ2VJZCI6ICJzb3VyY2Utb3V0cHV0LTEtZG93bi0xIiwKICAgICAgICAgICAgICAgICAgIm5hbWUiOiAiRG93biAxIiwKICAgICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMCwKICAgICAgICAgICAgICAgICAgInBvcnRJZCI6ICJvdXQtMSIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICBdLAogICAgICAgICAgICAgICJkb3duVGltZVNlYyI6IDAKICAgICAgICAgICAgfQogICAgICAgICAgfQogICAgICAgIH0sCiAgICAgICAgImlucHV0UG9saWN5IjogewogICAgICAgICAgIm1vZGUiOiAiZmlyc3QiLAogICAgICAgICAgInJlcXVpcmVkUG9ydElkcyI6IFtdLAogICAgICAgICAgIm1hdGNoIjogbnVsbAogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGlvbiI6ICJmaXJzdC1hdmFpbGFibGUiLAogICAgICAgICJzdGF0ZU1hY2hpbmUiOiB7CiAgICAgICAgICAiaW5pdGlhbFN0YXRlIjogIklETEUiLAogICAgICAgICAgInN0YXRlcyI6IFsKICAgICAgICAgICAgIklETEUiLAogICAgICAgICAgICAiUFJPQ0VTUyIsCiAgICAgICAgICAgICJXQUlUIiwKICAgICAgICAgICAgIkRPV04iCiAgICAgICAgICBdLAogICAgICAgICAgInRyYW5zaXRpb25zIjogW10KICAgICAgICB9LAogICAgICAgICJvcGVyYXRpb25zIjogWwogICAgICAgICAgewogICAgICAgICAgICAib3BlcmF0aW9uSWQiOiAiY3JlYXRlLTEiLAogICAgICAgICAgICAidHJpZ2dlciI6ICJyZWxlYXNlIiwKICAgICAgICAgICAgImtpbmQiOiAiY3JlYXRlIgogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgImZsaXBJTyI6IGZhbHNlCiAgICAgIH0sCiAgICAgICJpbnB1dHMiOiBbXSwKICAgICAgIm91dHB1dHMiOiBbCiAgICAgICAgewogICAgICAgICAgIm5hbWUiOiAib3V0UG9ydDEiLAogICAgICAgICAgInR5cGUiOiAiZW50aXR5IiwKICAgICAgICAgICJsaW5rcyI6IFsKICAgICAgICAgICAgMQogICAgICAgICAgXSwKICAgICAgICAgICJwb3J0SWQiOiAib3V0LTEiLAogICAgICAgICAgImNoYW5uZWwiOiAiZW50aXR5IiwKICAgICAgICAgICJmbG93TWFuYWdlZCI6IHRydWUKICAgICAgICB9CiAgICAgIF0KICAgIH0sCiAgICB7CiAgICAgICJpZCI6IDIsCiAgICAgICJ0eXBlIjogImZhY3RvcnkvYmFzaWMiLAogICAgICAicG9zIjogWwogICAgICAgIDM2MCwKICAgICAgICAyMDAKICAgICAgXSwKICAgICAgInRpdGxlIjogIkVxdWlwbWVudCIsCiAgICAgICJwcm9wZXJ0aWVzIjogewogICAgICAgICJiYXNpY05vZGVWZXJzaW9uIjogMiwKICAgICAgICAiY29udGVudENhcGFjaXR5IjogMSwKICAgICAgICAiaW5pdGlhbENvbnRlbnRzIjogW10sCiAgICAgICAgImlucHV0UnVsZXMiOiBbCiAgICAgICAgICB7CiAgICAgICAgICAgICJydWxlSWQiOiAibWFjaGluZS1pbnB1dC0xIiwKICAgICAgICAgICAgInRhcmdldHMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgIm1vZGUiOiAiYW55IgogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgInRhcmdldCI6IHsKICAgICAgICAgICAgICAibW9kZSI6ICJhbnkiCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJhY2NlcHRXaGVuIjogewogICAgICAgICAgICAgICJraW5kIjogInNwYWNlLWF2YWlsYWJsZSIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImZyb21Qb3J0SWQiOiAiaW4tMSIsCiAgICAgICAgICAgICJlbnRpdHlSb2xlIjogIml0ZW0iLAogICAgICAgICAgICAicHJvY2Vzc1N0YWdlcyI6IFsKICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAic3RhZ2VJZCI6ICJpbi0xLXByb2Nlc3MtMSIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJQcm9jZXNzIDEiLAogICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMQogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgImRvd25TdGFnZXMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgInN0YWdlSWQiOiAiZG93bi1tYWNoaW5lLWlucHV0LTEtMSIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJEb3duIDEiLAogICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMwogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgIm91dHB1dFJ1bGVzIjogWwogICAgICAgICAgewogICAgICAgICAgICAicnVsZUlkIjogIm1hY2hpbmUtb3V0cHV0LTEiLAogICAgICAgICAgICAidGFyZ2V0cyI6IFsKICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAibW9kZSI6ICJhbnkiCiAgICAgICAgICAgICAgfQogICAgICAgICAgICBdLAogICAgICAgICAgICAidGFyZ2V0IjogewogICAgICAgICAgICAgICJtb2RlIjogImFueSIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgInJlbGVhc2VXaGVuIjogewogICAgICAgICAgICAgICJraW5kIjogImFsbCIsCiAgICAgICAgICAgICAgImNvbmRpdGlvbnMiOiBbCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICJraW5kIjogInByb2Nlc3MtY29tcGxldGUiCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAia2luZCI6ICJkb3duc3RyZWFtLXJlYWR5IgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgIF0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgInRvUG9ydElkcyI6IFsKICAgICAgICAgICAgICAib3V0LTEiCiAgICAgICAgICAgIF0sCiAgICAgICAgICAgICJ0b1BvcnRJZCI6ICJvdXQtMSIsCiAgICAgICAgICAgICJlbnRpdHlSb2xlIjogIml0ZW0iLAogICAgICAgICAgICAiZG93blN0YWdlcyI6IFsKICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAic3RhZ2VJZCI6ICJtYWNoaW5lLW91dHB1dC0xLWRvd24tMSIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJEb3duIDEiLAogICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMywKICAgICAgICAgICAgICAgICJwb3J0SWQiOiAib3V0LTEiCiAgICAgICAgICAgICAgfQogICAgICAgICAgICBdCiAgICAgICAgICB9CiAgICAgICAgXSwKICAgICAgICAicG9ydFRpbWluZ3MiOiB7CiAgICAgICAgICAiaW5wdXRzIjogewogICAgICAgICAgICAiaW4tMSI6IHsKICAgICAgICAgICAgICAicHJvY2Vzc1N0YWdlcyI6IFsKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgInN0YWdlSWQiOiAiaW4tMS1wcm9jZXNzLTEiLAogICAgICAgICAgICAgICAgICAibmFtZSI6ICJQcm9jZXNzIDEiLAogICAgICAgICAgICAgICAgICAiZHVyYXRpb25TZWMiOiAxCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgXSwKICAgICAgICAgICAgICAicHJvY2Vzc1RpbWVTZWMiOiAxCiAgICAgICAgICAgIH0KICAgICAgICAgIH0sCiAgICAgICAgICAib3V0cHV0cyI6IHsKICAgICAgICAgICAgIm91dC0xIjogewogICAgICAgICAgICAgICJkb3duU3RhZ2VzIjogWwogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAic3RhZ2VJZCI6ICJkb3duLW1hY2hpbmUtaW5wdXQtMS0xIiwKICAgICAgICAgICAgICAgICAgIm5hbWUiOiAiRG93biAxIiwKICAgICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgIF0sCiAgICAgICAgICAgICAgImRvd25UaW1lU2VjIjogMwogICAgICAgICAgICB9CiAgICAgICAgICB9CiAgICAgICAgfSwKICAgICAgICAiaW5wdXRQb2xpY3kiOiB7CiAgICAgICAgICAibW9kZSI6ICJmaXJzdCIsCiAgICAgICAgICAicmVxdWlyZWRQb3J0SWRzIjogW10sCiAgICAgICAgICAibWF0Y2giOiBudWxsCiAgICAgICAgfSwKICAgICAgICAic2VsZWN0aW9uIjogImZpcnN0LWF2YWlsYWJsZSIsCiAgICAgICAgInN0YXRlTWFjaGluZSI6IHsKICAgICAgICAgICJpbml0aWFsU3RhdGUiOiAiSURMRSIsCiAgICAgICAgICAic3RhdGVzIjogWwogICAgICAgICAgICAiSURMRSIsCiAgICAgICAgICAgICJQUk9DRVNTIiwKICAgICAgICAgICAgIldBSVQiLAogICAgICAgICAgICAiRE9XTiIKICAgICAgICAgIF0sCiAgICAgICAgICAidHJhbnNpdGlvbnMiOiBbXQogICAgICAgIH0sCiAgICAgICAgIm9wZXJhdGlvbnMiOiBbCiAgICAgICAgICB7CiAgICAgICAgICAgICJvcGVyYXRpb25JZCI6ICJwcm9jZXNzLTEiLAogICAgICAgICAgICAidHJpZ2dlciI6ICJwcm9jZXNzIiwKICAgICAgICAgICAgImtpbmQiOiAicHJvY2VzcyIKICAgICAgICAgIH0KICAgICAgICBdLAogICAgICAgICJmbGlwSU8iOiBmYWxzZQogICAgICB9LAogICAgICAiaW5wdXRzIjogWwogICAgICAgIHsKICAgICAgICAgICJuYW1lIjogImluUG9ydDEiLAogICAgICAgICAgInR5cGUiOiAiZW50aXR5IiwKICAgICAgICAgICJsaW5rIjogMSwKICAgICAgICAgICJwb3J0SWQiOiAiaW4tMSIsCiAgICAgICAgICAiY2hhbm5lbCI6ICJlbnRpdHkiLAogICAgICAgICAgImZsb3dNYW5hZ2VkIjogdHJ1ZSwKICAgICAgICAgICJlbnRpdHlSb2xlIjogIml0ZW0iCiAgICAgICAgfQogICAgICBdLAogICAgICAib3V0cHV0cyI6IFsKICAgICAgICB7CiAgICAgICAgICAibmFtZSI6ICJvdXRQb3J0MSIsCiAgICAgICAgICAidHlwZSI6ICJlbnRpdHkiLAogICAgICAgICAgImxpbmtzIjogWwogICAgICAgICAgICAyCiAgICAgICAgICBdLAogICAgICAgICAgInBvcnRJZCI6ICJvdXQtMSIsCiAgICAgICAgICAiY2hhbm5lbCI6ICJlbnRpdHkiLAogICAgICAgICAgImZsb3dNYW5hZ2VkIjogdHJ1ZSwKICAgICAgICAgICJlbnRpdHlSb2xlIjogIml0ZW0iCiAgICAgICAgfQogICAgICBdCiAgICB9LAogICAgewogICAgICAiaWQiOiAzLAogICAgICAidHlwZSI6ICJmYWN0b3J5L2Jhc2ljIiwKICAgICAgInBvcyI6IFsKICAgICAgICA2NjAsCiAgICAgICAgMjAwCiAgICAgIF0sCiAgICAgICJ0aXRsZSI6ICJFcXVpcG1lbnQiLAogICAgICAicHJvcGVydGllcyI6IHsKICAgICAgICAiYmFzaWNOb2RlVmVyc2lvbiI6IDIsCiAgICAgICAgImNvbnRlbnRDYXBhY2l0eSI6IDEsCiAgICAgICAgImluaXRpYWxDb250ZW50cyI6IFtdLAogICAgICAgICJpbnB1dFJ1bGVzIjogWwogICAgICAgICAgewogICAgICAgICAgICAicnVsZUlkIjogIm1hY2hpbmUtaW5wdXQtMSIsCiAgICAgICAgICAgICJ0YXJnZXRzIjogWwogICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJtb2RlIjogImFueSIKICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0sCiAgICAgICAgICAgICJ0YXJnZXQiOiB7CiAgICAgICAgICAgICAgIm1vZGUiOiAiYW55IgogICAgICAgICAgICB9LAogICAgICAgICAgICAiYWNjZXB0V2hlbiI6IHsKICAgICAgICAgICAgICAia2luZCI6ICJzcGFjZS1hdmFpbGFibGUiCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJmcm9tUG9ydElkIjogImluLTEiLAogICAgICAgICAgICAiZW50aXR5Um9sZSI6ICJpdGVtIiwKICAgICAgICAgICAgInByb2Nlc3NTdGFnZXMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgInN0YWdlSWQiOiAiaW4tMS1wcm9jZXNzLTEiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAiUHJvY2VzcyAxIiwKICAgICAgICAgICAgICAgICJkdXJhdGlvblNlYyI6IDEKICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0sCiAgICAgICAgICAgICJkb3duU3RhZ2VzIjogWwogICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJzdGFnZUlkIjogImRvd24tbWFjaGluZS1pbnB1dC0xLTEiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAiRG93biAxIiwKICAgICAgICAgICAgICAgICJkdXJhdGlvblNlYyI6IDMKICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0KICAgICAgICAgIH0KICAgICAgICBdLAogICAgICAgICJvdXRwdXRSdWxlcyI6IFsKICAgICAgICAgIHsKICAgICAgICAgICAgInJ1bGVJZCI6ICJtYWNoaW5lLW91dHB1dC0xIiwKICAgICAgICAgICAgInRhcmdldHMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgIm1vZGUiOiAiYW55IgogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgInRhcmdldCI6IHsKICAgICAgICAgICAgICAibW9kZSI6ICJhbnkiCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJyZWxlYXNlV2hlbiI6IHsKICAgICAgICAgICAgICAia2luZCI6ICJhbGwiLAogICAgICAgICAgICAgICJjb25kaXRpb25zIjogWwogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAia2luZCI6ICJwcm9jZXNzLWNvbXBsZXRlIgogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgImtpbmQiOiAiZG93bnN0cmVhbS1yZWFkeSIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICBdCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJ0b1BvcnRJZHMiOiBbCiAgICAgICAgICAgICAgIm91dC0xIgogICAgICAgICAgICBdLAogICAgICAgICAgICAidG9Qb3J0SWQiOiAib3V0LTEiLAogICAgICAgICAgICAiZW50aXR5Um9sZSI6ICJpdGVtIiwKICAgICAgICAgICAgImRvd25TdGFnZXMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgInN0YWdlSWQiOiAibWFjaGluZS1vdXRwdXQtMS1kb3duLTEiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAiRG93biAxIiwKICAgICAgICAgICAgICAgICJkdXJhdGlvblNlYyI6IDMsCiAgICAgICAgICAgICAgICAicG9ydElkIjogIm91dC0xIgogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgInBvcnRUaW1pbmdzIjogewogICAgICAgICAgImlucHV0cyI6IHsKICAgICAgICAgICAgImluLTEiOiB7CiAgICAgICAgICAgICAgInByb2Nlc3NTdGFnZXMiOiBbCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICJzdGFnZUlkIjogImluLTEtcHJvY2Vzcy0xIiwKICAgICAgICAgICAgICAgICAgIm5hbWUiOiAiUHJvY2VzcyAxIiwKICAgICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgIF0sCiAgICAgICAgICAgICAgInByb2Nlc3NUaW1lU2VjIjogMQogICAgICAgICAgICB9CiAgICAgICAgICB9LAogICAgICAgICAgIm91dHB1dHMiOiB7CiAgICAgICAgICAgICJvdXQtMSI6IHsKICAgICAgICAgICAgICAiZG93blN0YWdlcyI6IFsKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgInN0YWdlSWQiOiAiZG93bi1tYWNoaW5lLWlucHV0LTEtMSIsCiAgICAgICAgICAgICAgICAgICJuYW1lIjogIkRvd24gMSIsCiAgICAgICAgICAgICAgICAgICJkdXJhdGlvblNlYyI6IDMKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICBdLAogICAgICAgICAgICAgICJkb3duVGltZVNlYyI6IDMKICAgICAgICAgICAgfQogICAgICAgICAgfQogICAgICAgIH0sCiAgICAgICAgImlucHV0UG9saWN5IjogewogICAgICAgICAgIm1vZGUiOiAiZmlyc3QiLAogICAgICAgICAgInJlcXVpcmVkUG9ydElkcyI6IFtdLAogICAgICAgICAgIm1hdGNoIjogbnVsbAogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGlvbiI6ICJmaXJzdC1hdmFpbGFibGUiLAogICAgICAgICJzdGF0ZU1hY2hpbmUiOiB7CiAgICAgICAgICAiaW5pdGlhbFN0YXRlIjogIklETEUiLAogICAgICAgICAgInN0YXRlcyI6IFsKICAgICAgICAgICAgIklETEUiLAogICAgICAgICAgICAiUFJPQ0VTUyIsCiAgICAgICAgICAgICJXQUlUIiwKICAgICAgICAgICAgIkRPV04iCiAgICAgICAgICBdLAogICAgICAgICAgInRyYW5zaXRpb25zIjogW10KICAgICAgICB9LAogICAgICAgICJvcGVyYXRpb25zIjogWwogICAgICAgICAgewogICAgICAgICAgICAib3BlcmF0aW9uSWQiOiAicHJvY2Vzcy0xIiwKICAgICAgICAgICAgInRyaWdnZXIiOiAicHJvY2VzcyIsCiAgICAgICAgICAgICJraW5kIjogInByb2Nlc3MiCiAgICAgICAgICB9CiAgICAgICAgXSwKICAgICAgICAiZmxpcElPIjogZmFsc2UKICAgICAgfSwKICAgICAgImlucHV0cyI6IFsKICAgICAgICB7CiAgICAgICAgICAibmFtZSI6ICJpblBvcnQxIiwKICAgICAgICAgICJ0eXBlIjogImVudGl0eSIsCiAgICAgICAgICAibGluayI6IDIsCiAgICAgICAgICAicG9ydElkIjogImluLTEiLAogICAgICAgICAgImNoYW5uZWwiOiAiZW50aXR5IiwKICAgICAgICAgICJmbG93TWFuYWdlZCI6IHRydWUsCiAgICAgICAgICAiZW50aXR5Um9sZSI6ICJpdGVtIgogICAgICAgIH0KICAgICAgXSwKICAgICAgIm91dHB1dHMiOiBbCiAgICAgICAgewogICAgICAgICAgIm5hbWUiOiAib3V0UG9ydDEiLAogICAgICAgICAgInR5cGUiOiAiZW50aXR5IiwKICAgICAgICAgICJsaW5rcyI6IFsKICAgICAgICAgICAgMwogICAgICAgICAgXSwKICAgICAgICAgICJwb3J0SWQiOiAib3V0LTEiLAogICAgICAgICAgImNoYW5uZWwiOiAiZW50aXR5IiwKICAgICAgICAgICJmbG93TWFuYWdlZCI6IHRydWUsCiAgICAgICAgICAiZW50aXR5Um9sZSI6ICJpdGVtIgogICAgICAgIH0KICAgICAgXQogICAgfSwKICAgIHsKICAgICAgImlkIjogNCwKICAgICAgInR5cGUiOiAiZmFjdG9yeS9iYXNpYyIsCiAgICAgICJwb3MiOiBbCiAgICAgICAgOTYwLAogICAgICAgIDIwMAogICAgICBdLAogICAgICAidGl0bGUiOiAiU2luayIsCiAgICAgICJwcm9wZXJ0aWVzIjogewogICAgICAgICJiYXNpY05vZGVWZXJzaW9uIjogMiwKICAgICAgICAiY29udGVudENhcGFjaXR5IjogMSwKICAgICAgICAiaW5pdGlhbENvbnRlbnRzIjogW10sCiAgICAgICAgImlucHV0UnVsZXMiOiBbCiAgICAgICAgICB7CiAgICAgICAgICAgICJydWxlSWQiOiAic2luay1pbnB1dC0xIiwKICAgICAgICAgICAgInRhcmdldHMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgIm1vZGUiOiAiYW55IgogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgInRhcmdldCI6IHsKICAgICAgICAgICAgICAibW9kZSI6ICJhbnkiCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJhY2NlcHRXaGVuIjogewogICAgICAgICAgICAgICJraW5kIjogImFsd2F5cyIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImZyb21Qb3J0SWQiOiAiaW4tMSIsCiAgICAgICAgICAgICJlbnRpdHlSb2xlIjogIml0ZW0iLAogICAgICAgICAgICAicHJvY2Vzc1N0YWdlcyI6IFsKICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAic3RhZ2VJZCI6ICJpbi0xLXByb2Nlc3MtMSIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJQcm9jZXNzIDEiLAogICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMAogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgImRvd25TdGFnZXMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgInN0YWdlSWQiOiAiZG93bi1zaW5rLWlucHV0LTEtMSIsCiAgICAgICAgICAgICAgICAibmFtZSI6ICJEb3duIDEiLAogICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMAogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgIm91dHB1dFJ1bGVzIjogWwogICAgICAgICAgewogICAgICAgICAgICAicnVsZUlkIjogImJhc2ljLW91dHB1dC0xIiwKICAgICAgICAgICAgInRhcmdldHMiOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgIm1vZGUiOiAiYW55IgogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgInRhcmdldCI6IHsKICAgICAgICAgICAgICAibW9kZSI6ICJhbnkiCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJyZWxlYXNlV2hlbiI6IHsKICAgICAgICAgICAgICAia2luZCI6ICJhbGwiLAogICAgICAgICAgICAgICJjb25kaXRpb25zIjogWwogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAia2luZCI6ICJwcm9jZXNzLWNvbXBsZXRlIgogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgImtpbmQiOiAiZG93bnN0cmVhbS1yZWFkeSIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICBdCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJ0b1BvcnRJZHMiOiBbCiAgICAgICAgICAgICAgIm91dC0xIgogICAgICAgICAgICBdLAogICAgICAgICAgICAidG9Qb3J0SWQiOiAib3V0LTEiLAogICAgICAgICAgICAiZG93blN0YWdlcyI6IFsKICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAic3RhZ2VJZCI6ICJiYXNpYy1vdXRwdXQtMS1kb3duLTEiLAogICAgICAgICAgICAgICAgIm5hbWUiOiAiRG93biAxIiwKICAgICAgICAgICAgICAgICJkdXJhdGlvblNlYyI6IDAsCiAgICAgICAgICAgICAgICAicG9ydElkIjogIm91dC0xIgogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgInBvcnRUaW1pbmdzIjogewogICAgICAgICAgImlucHV0cyI6IHsKICAgICAgICAgICAgImluLTEiOiB7CiAgICAgICAgICAgICAgInByb2Nlc3NTdGFnZXMiOiBbCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICJzdGFnZUlkIjogImluLTEtcHJvY2Vzcy0xIiwKICAgICAgICAgICAgICAgICAgIm5hbWUiOiAiUHJvY2VzcyAxIiwKICAgICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMAogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgIF0sCiAgICAgICAgICAgICAgInByb2Nlc3NUaW1lU2VjIjogMAogICAgICAgICAgICB9CiAgICAgICAgICB9LAogICAgICAgICAgIm91dHB1dHMiOiB7CiAgICAgICAgICAgICJvdXQtMSI6IHsKICAgICAgICAgICAgICAiZG93blN0YWdlcyI6IFsKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgInN0YWdlSWQiOiAiYmFzaWMtb3V0cHV0LTEtZG93bi0xIiwKICAgICAgICAgICAgICAgICAgIm5hbWUiOiAiRG93biAxIiwKICAgICAgICAgICAgICAgICAgImR1cmF0aW9uU2VjIjogMCwKICAgICAgICAgICAgICAgICAgInBvcnRJZCI6ICJvdXQtMSIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICBdLAogICAgICAgICAgICAgICJkb3duVGltZVNlYyI6IDAKICAgICAgICAgICAgfQogICAgICAgICAgfQogICAgICAgIH0sCiAgICAgICAgImlucHV0UG9saWN5IjogewogICAgICAgICAgIm1vZGUiOiAiZmlyc3QiLAogICAgICAgICAgInJlcXVpcmVkUG9ydElkcyI6IFtdLAogICAgICAgICAgIm1hdGNoIjogbnVsbAogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGlvbiI6ICJmaXJzdC1hdmFpbGFibGUiLAogICAgICAgICJzdGF0ZU1hY2hpbmUiOiB7CiAgICAgICAgICAiaW5pdGlhbFN0YXRlIjogIklETEUiLAogICAgICAgICAgInN0YXRlcyI6IFsKICAgICAgICAgICAgIklETEUiLAogICAgICAgICAgICAiUFJPQ0VTUyIsCiAgICAgICAgICAgICJXQUlUIiwKICAgICAgICAgICAgIkRPV04iCiAgICAgICAgICBdLAogICAgICAgICAgInRyYW5zaXRpb25zIjogW10KICAgICAgICB9LAogICAgICAgICJvcGVyYXRpb25zIjogWwogICAgICAgICAgewogICAgICAgICAgICAib3BlcmF0aW9uSWQiOiAiZGVzdHJveS0xIiwKICAgICAgICAgICAgInRyaWdnZXIiOiAiaW5wdXQtYWNjZXB0ZWQiLAogICAgICAgICAgICAia2luZCI6ICJkZXN0cm95IgogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgImZsaXBJTyI6IGZhbHNlCiAgICAgIH0sCiAgICAgICJpbnB1dHMiOiBbCiAgICAgICAgewogICAgICAgICAgIm5hbWUiOiAiaW5Qb3J0MSIsCiAgICAgICAgICAidHlwZSI6ICJlbnRpdHkiLAogICAgICAgICAgImxpbmsiOiAzLAogICAgICAgICAgInBvcnRJZCI6ICJpbi0xIiwKICAgICAgICAgICJjaGFubmVsIjogImVudGl0eSIsCiAgICAgICAgICAiZmxvd01hbmFnZWQiOiB0cnVlLAogICAgICAgICAgImVudGl0eVJvbGUiOiAiaXRlbSIKICAgICAgICB9CiAgICAgIF0sCiAgICAgICJvdXRwdXRzIjogW10KICAgIH0KICBdLAogICJsaW5rcyI6IFsKICAgIFsKICAgICAgMSwKICAgICAgMSwKICAgICAgMCwKICAgICAgMiwKICAgICAgMCwKICAgICAgMAogICAgXSwKICAgIFsKICAgICAgMiwKICAgICAgMiwKICAgICAgMCwKICAgICAgMywKICAgICAgMCwKICAgICAgMAogICAgXSwKICAgIFsKICAgICAgMywKICAgICAgMywKICAgICAgMCwKICAgICAgNCwKICAgICAgMCwKICAgICAgMAogICAgXQogIF0sCiAgImdyb3VwcyI6IFtdLAogICJ2ZXJzaW9uIjogMC40LAogICJfX2ZhY3RTaW1FbnRpdHlNb2RlbCI6IHsKICAgICJzY2hlbWFWZXJzaW9uIjogMiwKICAgICJ0eXBlcyI6IFsKICAgICAgewogICAgICAgICJ0eXBlSWQiOiAidHlwZS1hIiwKICAgICAgICAibmFtZSI6ICJBIiwKICAgICAgICAic3VidHlwZSI6ICIiLAogICAgICAgICJ0YWdzIjogWwogICAgICAgICAgIm1pZ3JhdGVkIgogICAgICAgIF0sCiAgICAgICAgImNhcGFjaXR5IjogMCwKICAgICAgICAiYWxsb3dlZENvbnRlbnRUeXBlSWRzIjogW10sCiAgICAgICAgImRlZmF1bHRBdHRyaWJ1dGVzIjoge30KICAgICAgfSwKICAgICAgewogICAgICAgICJ0eXBlSWQiOiAidHlwZS1iIiwKICAgICAgICAibmFtZSI6ICJCIiwKICAgICAgICAic3VidHlwZSI6ICIiLAogICAgICAgICJ0YWdzIjogWwogICAgICAgICAgIm1pZ3JhdGVkIgogICAgICAgIF0sCiAgICAgICAgImNhcGFjaXR5IjogMCwKICAgICAgICAiYWxsb3dlZENvbnRlbnRUeXBlSWRzIjogW10sCiAgICAgICAgImRlZmF1bHRBdHRyaWJ1dGVzIjoge30KICAgICAgfQogICAgXQogIH0KfQo=';
-  var binary = atob(base64);
-  var bytes = new Uint8Array(binary.length);
-  for(var i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  var json = (typeof TextDecoder === "function")
-    ? new TextDecoder("utf-8").decode(bytes)
-    : decodeURIComponent(Array.prototype.map.call(bytes, function(value){ return "%" + value.toString(16).padStart(2, "0"); }).join(""));
-  root.EXAMPLES["simple"] = JSON.parse(json);
-})();
+(function(root){root.EXAMPLES=root.EXAMPLES || {};root.EXAMPLES["simple"]={
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "factory/basic",
+      "pos": [
+        60,
+        200
+      ],
+      "title": "Source",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "source",
+        "flow": {
+          "version": 2,
+          "nodes": [],
+          "links": [],
+          "counters": {}
+        },
+        "initialContents": [],
+        "flipIO": false,
+        "source": {
+          "entries": [
+            {
+              "typeId": "type-a",
+              "count": 1,
+              "children": []
+            },
+            {
+              "typeId": "type-b",
+              "count": 1,
+              "children": []
+            }
+          ],
+          "intervalSec": 0,
+          "repeat": true
+        }
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            1
+          ],
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "size": [
+        230,
+        110
+      ]
+    },
+    {
+      "id": 2,
+      "type": "factory/basic",
+      "pos": [
+        360,
+        200
+      ],
+      "title": "Equipment",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 1.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
+          }
+        },
+        "initialContents": [],
+        "flipIO": false
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 1,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            2
+          ],
+          "portId": "out-1",
+          "channel": "entity"
+        }
+      ],
+      "size": [
+        230,
+        110
+      ]
+    },
+    {
+      "id": 3,
+      "type": "factory/basic",
+      "pos": [
+        660,
+        200
+      ],
+      "title": "Equipment",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                0,
+                30
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                810,
+                30
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 1.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                270,
+                30
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3.0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                540,
+                30
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1
+          }
+        },
+        "initialContents": [],
+        "flipIO": false
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 2,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            3
+          ],
+          "portId": "out-1",
+          "channel": "entity"
+        }
+      ],
+      "size": [
+        230,
+        110
+      ]
+    },
+    {
+      "id": 4,
+      "type": "factory/basic",
+      "pos": [
+        960,
+        200
+      ],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "flow": {
+          "version": 2,
+          "nodes": [],
+          "links": [],
+          "counters": {}
+        },
+        "initialContents": [],
+        "flipIO": false
+      },
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 3,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true,
+          "entityRole": "item"
+        }
+      ],
+      "outputs": [],
+      "size": [
+        230,
+        110
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      0
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      0
+    ]
+  ],
+  "groups": [],
+  "version": 0.4,
+  "__factSimEntityModel": {
+    "schemaVersion": 3,
+    "types": [
+      {
+        "typeId": "type-a",
+        "name": "A",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      },
+      {
+        "typeId": "type-b",
+        "name": "B",
+        "subtype": "",
+        "tags": [
+          "migrated"
+        ],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {}
+      }
+    ]
+  },
+  "__factSimFormat": 2,
+  "extra": {
+    "syncroGroups": [],
+    "syncroGroupSequence": 0
+  }
+};})(typeof window!=="undefined" ? window : globalThis);

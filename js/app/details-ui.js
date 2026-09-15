@@ -74,22 +74,11 @@
   }
   function decorate(panel){
     const doc = panel.ownerDocument;
-    panel.querySelectorAll('.entityFlowGuide:not([data-details-ready])').forEach((guide)=>{
-      guide.dataset.detailsReady = 'true';
-      const copy = Array.from(guide.children).map((child)=>child.textContent.trim()).join(' ');
-      guide.textContent = '';
-      const heading = doc.createElement('h3');
-      heading.textContent = 'Flow rules';
-      guide.appendChild(heading);
-      icon(heading, 'flow');
-      help(heading, copy, 'Flow rules');
-    });
-    panel.querySelectorAll('.selectionInspectorHint:not([data-details-ready]), .entityRuleTimingHint:not([data-details-ready]), .entityFlowRulePanelHeading > small:not([data-details-ready])').forEach((hint)=>{
+    panel.querySelectorAll('.selectionInspectorHint:not([data-details-ready])').forEach((hint)=>{
       if(!hint.textContent.trim()) return;
       // Put help on a section heading, never inside a form label.
       const section = hint.closest('.selectionInspectorSection');
-      const heading = section?.querySelector(':scope > .selectionInspectorSectionTitle')
-        || hint.closest('.entityFlowRulePanelHeading');
+      const heading = section?.querySelector(':scope > .selectionInspectorSectionTitle');
       if(!heading) return;
       hint.dataset.detailsReady = 'true';
       help(heading, hint.textContent.trim(), heading.firstChild?.textContent?.trim() || 'Settings');
@@ -102,23 +91,9 @@
       const summary = doc.createElement('summary'); summary.textContent = 'Node info';
       stats.before(fold); fold.append(summary, stats);
     });
-    panel.querySelectorAll('.entityCycleCard:not([data-details-ready])').forEach((card)=>{
-      card.dataset.detailsReady = 'true';
-      const section = card.querySelector('.selectionInspectorSection');
-      if(!section) return;
-      const fold = doc.createElement('details'); fold.className = 'detailsSecondary detailsCycle';
-      const summary = doc.createElement('summary'); summary.textContent = 'Cycle overview';
-      icon(summary, 'reset');
-      card.appendChild(fold); fold.append(summary, section);
-    });
-    panel.querySelectorAll('.entityFlowPhase .selectionInspectorSectionTitle').forEach((heading)=>{
-      const phase = heading.closest('.entityFlowPhase');
-      const key = phase.classList.contains('is-input') ? 'types' : phase.classList.contains('is-output') ? 'export' : phase.classList.contains('is-process') ? 'play' : 'reset';
-      icon(heading, key);
-    });
     panel.querySelectorAll('.entityInspectorTab:not([data-details-ready])').forEach((button)=>{
       button.dataset.detailsReady = 'true';
-      icon(button, {Flow:'flow', Contents:'types', Advanced:'tools'}[button.dataset.tab]);
+      icon(button, {flow:'flow', contents:'types', advanced:'tools'}[button.dataset.tab]);
     });
     panel.querySelectorAll('button[title]:not([aria-label])').forEach((button)=>{
       button.setAttribute('aria-label', button.title);

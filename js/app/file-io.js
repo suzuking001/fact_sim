@@ -1,4 +1,4 @@
-﻿// Save / Load handlers + URL share helpers
+// Save / Load handlers + URL share helpers
 
 var App = window.App || (window.App = {});
 
@@ -137,9 +137,7 @@ function _serializeGraph(graph){
   const targetGraph = graph || App.graph;
   if(!targetGraph) throw new Error('graph is not initialized');
   const serialized = targetGraph.serialize();
-  if(typeof App.migrateLegacyDefaultTitles === 'function'){
-    App.migrateLegacyDefaultTitles(serialized);
-  }
+  serialized.__factSimFormat=2;
   if(typeof App.injectEntityModel === 'function'){
     App.injectEntityModel(serialized, targetGraph);
   }
@@ -209,11 +207,7 @@ function _cloneGraphPayload(data){
 function _applyGraphData(data, options){
   if(!App.graph) throw new Error('graph is not initialized');
   if(!data || typeof data !== 'object') throw new Error('invalid graph payload');
-  if(typeof App.migrateGraphDataToBasic === 'function'){
-    const migration = App.migrateGraphDataToBasic(data);
-    if(migration?.preview?.blocked) throw new Error('Graph contains a node that cannot be migrated to the generic Entity model');
-    if(migration?.data) data = migration.data;
-  }
+  App.assertFlowFileFormat(data);
   const viewState = data.__factSimView || null;
   const hasSavedGraphView = _hasGraphViewState(viewState);
   const opts = options || {};
@@ -231,9 +225,6 @@ function _applyGraphData(data, options){
     }
   }
   const source = String(opts.source || '').toLowerCase();
-  if(!data.__factSimEntityModel && typeof App.inferEntityModelFromGraph === 'function'){
-    data.__factSimEntityModel = App.inferEntityModelFromGraph(data);
-  }
   if(source === 'share'){
     const scriptedNodes = _findScriptedNodes(data);
     if(scriptedNodes.length){
@@ -258,7 +249,6 @@ function _applyGraphData(data, options){
   App.history.lock = true;
   try{
     App.graph.clear();
-    if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
     App.graph.configure(data);
     if(typeof App.restoreEntityModel === 'function'){
       App.restoreEntityModel(App.graph, data, true);
@@ -436,10 +426,6 @@ App.serializeGraphDataForSave = function(){
   const raw = _serializeGraph();
   if(typeof App.prepareSerializedGraphForSave !== 'function') return raw;
   const result = App.prepareSerializedGraphForSave(raw);
-  if(result?.preview?.blocked){
-    const first = result.preview.warnings?.[0];
-    throw new Error(`Basic Node migration is blocked${first?.type ? ` by ${first.type}` : ''}`);
-  }
   return result?.data || raw;
 };
 

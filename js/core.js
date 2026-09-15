@@ -723,7 +723,7 @@ const NODE_STATE_PALETTE = Object.freeze({
   IDLE:    { title: '#fbefbe', body: '#fffdf3', accent: '#f1c40f', ink: '#7a5b00' },
   PROCESS: { title: '#d6f5e3', body: '#f4fcf8', accent: '#2ecc71', ink: '#117a45' },
   WAIT:    { title: '#fee8c7', body: '#fff8ee', accent: '#f39c12', ink: '#9a5800' },
-  DOWN:    { title: '#d8ecfb', body: '#f4fafe', accent: '#3498db', ink: '#17699e' },
+  RECOVERY:    { title: '#d8ecfb', body: '#f4fafe', accent: '#3498db', ink: '#17699e' },
   ERROR:   { title: '#ffd9df', body: '#fff4f6', accent: '#dc4c64', ink: '#b4233c' }
 });
 
@@ -791,7 +791,7 @@ function _compactOverlayExtra(lines){
   const rows = [];
   for(const [index, raw] of (Array.isArray(lines) ? lines : []).entries()){
     const text = String(raw || '').trim();
-    if(!text || /^(?:state|work|remain|proc(?:ess)?|down|sig)\s*(?:\(|:)/i.test(text)) continue;
+    if(!text || /^(?:state|work|remain|proc(?:ess)?|recovery|sig)\s*(?:\(|:)/i.test(text)) continue;
     if(/^tip\s*:/i.test(text) || /^properties\s*:?$/i.test(text) || /^-\s+/.test(text)) continue;
     const normalized = text.replace(/^shuttle\s+group\s*:/i, 'Group ').replace(/^([^:]{1,18}):\s*/, '$1 ');
     if(!normalized || rows.some((row)=>row.text === normalized)) continue;
@@ -821,10 +821,10 @@ function _buildCompactOverlayModel(node, lines){
   const until = Number(node && node._until);
   const remainingSec = isFinite(until) ? Math.max(0, until - now) / 1000 : 0;
   const processSec = Number(node?.properties?.processTime);
-  const downSec = Number(node?.properties?.downTime);
+  const recoverySec = Number(node?.properties?.recoveryTime);
   const activeDuration = state === 'PROCESS'
     ? (isFinite(processSec) ? Math.max(0, processSec) : 0)
-    : (state === 'DOWN' && isFinite(downSec) ? Math.max(0, downSec) : 0);
+    : (state === 'RECOVERY' && isFinite(recoverySec) ? Math.max(0, recoverySec) : 0);
   const progress = activeDuration > 0
     ? _overlayClamp(1 - (remainingSec / activeDuration), 0, 1)
     : (state === 'WAIT' ? 1 : 0);
@@ -832,7 +832,7 @@ function _buildCompactOverlayModel(node, lines){
     IDLE: 'Available',
     PROCESS: _formatCompactSeconds(remainingSec),
     WAIT: 'Output ready',
-    DOWN: _formatCompactSeconds(remainingSec),
+    RECOVERY: _formatCompactSeconds(remainingSec),
     TRANSFER: 'Moving',
     ERROR: 'Check details'
   })[state] || '';
@@ -843,7 +843,7 @@ function _buildCompactOverlayModel(node, lines){
         IDLE: 'Ready for input',
         PROCESS: 'Processing',
         WAIT: 'Waiting for output',
-        DOWN: 'Recovering',
+        RECOVERY: 'Recovering',
         TRANSFER: 'Transferring',
         ERROR: 'Attention required'
       })[state] || 'No active Entity';
@@ -901,7 +901,7 @@ function _scoreCompactOverlayLine(text){
   if(/^work\s*:/.test(s)) return 1;
   if(/^remain/.test(s)) return 2;
   if(/^(?:shuttle\s+)?group\s*:/.test(s)) return 2;
-  if(/^proc/.test(s) || /^process/.test(s) || /^down/.test(s)) return 3;
+  if(/^proc/.test(s) || /^process/.test(s) || /^recovery/.test(s)) return 3;
   if(/^tph/.test(s) || /^ratio/.test(s) || /^downstream/.test(s) || /^next/.test(s) || /^(?:contents|queue|inputs?|routes?|pallet|received)\b/.test(s)) return 4;
   if(/^sig/.test(s)) return 8;
   if(/^properties/.test(s)) return 20;
@@ -941,11 +941,11 @@ function _buildFallbackOverlayLines(node){
   }
 
   const proc = Number(node && node.properties && node.properties.processTime);
-  const down = Number(node && node.properties && node.properties.downTime);
-  if(isFinite(proc) || isFinite(down)){
+  const recovery = Number(node && node.properties && node.properties.recoveryTime);
+  if(isFinite(proc) || isFinite(recovery)){
     const procText = isFinite(proc) ? proc : 0;
-    const downText = isFinite(down) ? down : 0;
-    lines.push(`Proc(s): ${procText}  Down(s): ${downText}`);
+    const recoveryText = isFinite(recovery) ? recovery : 0;
+    lines.push(`Proc(s): ${procText}  Recovery(s): ${recoveryText}`);
   }
 
   const sigEnabled = !!(node && node.properties && node.properties.sigEnabled);
@@ -1133,22 +1133,22 @@ function _nodeHoverCycleEntries(node, prefix){
 
 function _buildNodeHoverCycleModel(node){
   const process = _nodeHoverCycleEntries(node, 'processTime');
-  const down = _nodeHoverCycleEntries(node, 'downTime');
+  const recovery = _nodeHoverCycleEntries(node, 'recoveryTime');
   const processTotal = process.reduce((sum, entry)=>sum + entry.value, 0);
-  const downTotal = down.reduce((sum, entry)=>sum + entry.value, 0);
-  const total = processTotal + downTotal;
+  const recoveryTotal = recovery.reduce((sum, entry)=>sum + entry.value, 0);
+  const total = processTotal + recoveryTotal;
   if(total <= 0) return null;
   const processColors = ['#30d158','#18b94f','#0f9f43','#67d986'];
-  const downColors = ['#0a84ff','#3a9cff','#006edc','#69b6ff'];
+  const recoveryColors = ['#0a84ff','#3a9cff','#006edc','#69b6ff'];
   return {
     process,
-    down,
+    recovery,
     processTotal,
-    downTotal,
+    recoveryTotal,
     total,
     segments:[
       ...process.map((entry, index)=>({ ...entry, kind:'process', color:processColors[index % processColors.length] })),
-      ...down.map((entry, index)=>({ ...entry, kind:'down', color:downColors[index % downColors.length] }))
+      ...recovery.map((entry, index)=>({ ...entry, kind:'recovery', color:recoveryColors[index % recoveryColors.length] }))
     ]
   };
 }
@@ -1219,7 +1219,7 @@ function _drawNodeHoverCycle(ctx, model, x, y, width, unit){
       ctx.fillText(_trimOverlayText(ctx, detail, legendWidth - (25 * unit)), legendX + (17 * unit), top + (22 * unit), legendWidth - (25 * unit));
     };
     drawLegend('PROCESS', model.processTotal, model.process, y + (3 * unit), '#16843a', 'rgba(48,209,88,0.09)');
-    drawLegend('DOWN', model.downTotal, model.down, y + (38 * unit), '#0969c8', 'rgba(10,132,255,0.09)');
+    drawLegend('RECOVERY', model.recoveryTotal, model.recovery, y + (38 * unit), '#0969c8', 'rgba(10,132,255,0.09)');
   }finally{
     ctx.restore();
   }
@@ -1247,12 +1247,12 @@ function _drawHoverDetailBox(ctx, node, lines, x, margin){
   const cycleModel = _buildNodeHoverCycleModel(node);
   const runtimeRows = _buildNodeHoverRuntimeRows(lines).filter((row)=>{
     if(!cycleModel) return true;
-    return !/^(?:proc(?:ess)?|down)(?:\d+|n)?(?:\(s\))?$/i.test(String(row.label || ''));
+    return !/^(?:proc(?:ess)?|recovery)(?:\d+|n)?(?:\(s\))?$/i.test(String(row.label || ''));
   });
   const propertyModel = _buildNodeHoverPropertyRows(node);
   const propertyRows = propertyModel.rows.filter((row)=>{
     if(!cycleModel) return true;
-    return !/^(?:processTime|downTime)\d*$/i.test(String(row.key || ''));
+    return !/^(?:processTime|recoveryTime)\d*$/i.test(String(row.key || ''));
   });
   const headerHeight = 42 * unit;
   const sectionLabelHeight = 14 * unit;

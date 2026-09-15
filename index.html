@@ -32,7 +32,7 @@
   <link rel="stylesheet" href="css/app.css?v=20260905b" />
   <link rel="stylesheet" href="css/workspace.css?v=20260905c" />
   <link rel="stylesheet" href="css/details.css?v=20260905a" />
-  <link rel="stylesheet" href="css/flow-view.css?v=20260909a" />
+  <link rel="stylesheet" href="css/flow-view.css?v=20260914flow2" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -134,7 +134,7 @@
       <div class="landingStepRail">
         <article class="landingStep"><span class="landingStepNumber">01</span><span class="landingStepIcon" aria-hidden="true">⌁</span><div><h3>Draw the flow</h3><p>Connect sources, equipment, routes, and sinks.</p></div></article>
         <span class="landingStepArrow" aria-hidden="true">→</span>
-        <article class="landingStep"><span class="landingStepNumber">02</span><span class="landingStepIcon" aria-hidden="true">▶</span><div><h3>Run the model</h3><p>Watch items, queues, downtime, and handoffs change.</p></div></article>
+        <article class="landingStep"><span class="landingStepNumber">02</span><span class="landingStepIcon" aria-hidden="true">▶</span><div><h3>Run the model</h3><p>Watch items, queues, recovery time, and handoffs change.</p></div></article>
         <span class="landingStepArrow" aria-hidden="true">→</span>
         <article class="landingStep"><span class="landingStepNumber">03</span><span class="landingStepIcon" aria-hidden="true">◎</span><div><h3>Find the constraint</h3><p>Compare throughput, utilization, and waiting time.</p></div></article>
       </div>
@@ -146,7 +146,7 @@
         <h2 class="landingSectionTitle">If it has flow, waits, or shared resources, you can model it.</h2>
       </div>
       <div class="landingUseGrid">
-        <article><span aria-hidden="true">⚙</span><strong>Production lines</strong><small>Takt · throughput · downtime</small></article>
+        <article><span aria-hidden="true">⚙</span><strong>Production lines</strong><small>Takt · throughput · recovery time</small></article>
         <article><span aria-hidden="true">◇</span><strong>AGV & logistics</strong><small>Routes · handoffs · capacity</small></article>
         <article><span aria-hidden="true">⇄</span><strong>Warehouses</strong><small>Arrivals · buffers · dispatch</small></article>
         <article><span aria-hidden="true">＋</span><strong>Patient flow</strong><small>Queues · rooms · resources</small></article>
@@ -321,7 +321,7 @@
         <label for="groupKindSelect">Pattern</label>
         <select id="groupKindSelect"></select>
       </div>
-      <div id="groupStopRate" class="group-stop-rate">Downtime: -</div>
+      <div id="groupStopRate" class="group-stop-rate">Recovery time: -</div>
       <div id="groupKindDescription" class="panel-help panel-help-compact">Choose a pattern. Open settings only when timing needs tuning.</div>
       <details id="groupSettingsDetails" class="panelDetails">
         <summary>Pattern Settings</summary>
@@ -329,6 +329,7 @@
       </details>
       <button id="btnAddGroup">Draw on Canvas</button>
     </div>
+    <div id="addSyncroGroupPanel"><div class="panelHeader">Add SyncroGroup</div><input id="syncroGroupName" aria-label="SyncroGroup name" placeholder="Group name"><button id="btnAddSyncroGroup">Add SyncroGroup</button><div id="syncroGroupsList" class="flowSyncGroups"></div></div>
     <div id="advancedPanel">
       <div class="panelHeader">Performance</div>
       <div class="control-group">
@@ -469,7 +470,7 @@
     <span class="stateLegendItem"><span class="stateLegendDot is-idle" aria-hidden="true"></span>IDLE</span>
     <span class="stateLegendItem"><span class="stateLegendDot is-process" aria-hidden="true"></span>PROCESS</span>
     <span class="stateLegendItem"><span class="stateLegendDot is-wait" aria-hidden="true"></span>WAIT</span>
-    <span class="stateLegendItem"><span class="stateLegendDot is-down" aria-hidden="true"></span>DOWN</span>
+    <span class="stateLegendItem"><span class="stateLegendDot is-recovery" aria-hidden="true"></span>RECOVERY</span>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
   <!-- Timing Chart Dock -->
@@ -497,8 +498,6 @@
         <button id="timelinePropsPopoutBtn" class="timelineBtn">Pop Out</button>
       </div>
       <div id="timelineInspectorActions" class="timelineActions">
-        <button id="selectionInspectorRefreshBtn" class="timelineBtn">Refresh</button>
-        <button id="selectionInspectorClearBtn" class="timelineBtn">Clear</button>
         <button id="timelineInspectorPopoutBtn" class="timelineBtn">Pop Out</button>
       </div>
     </div>
@@ -804,37 +803,24 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260905a"></script>
+  <script src="js/app/landing.js?v=20260914flow2"></script>
   <script src="js/core.js?v=20260903a"></script>
-    <script src="js/nodes/work.js?v=20260831a"></script>
-  <script src="js/nodes/entity_model.js?v=20260904e"></script>
-  <script src="js/nodes/entity_store.js?v=20260831a"></script>
+    <script src="js/nodes/work.js?v=20260914flow2"></script>
+  <script src="js/nodes/entity_model.js?v=20260914flow2"></script>
   <script src="js/nodes/sigports.js"></script>
-    <script src="js/nodes/menu.js?v=20260905a"></script>
-    <script src="js/nodes/ioflip.js?v=20260829b"></script>
+    <script src="js/nodes/menu.js?v=20260914flow2"></script>
+    <script src="js/nodes/ioflip.js?v=20260914flow2"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js?v=20260901b"></script>
+    <script src="js/link-anim.js?v=20260915minimal"></script>
     <script src="js/vendor/lz-string.min.js"></script>
-  <script src="js/nodes/equipment.js?v=20260824f"></script>
-  <script src="js/nodes/note.js?v=20260305a"></script>
-  <script src="js/nodes/signal.js?v=20260307c"></script>
-  <script src="js/nodes/source.js?v=20260904e"></script>
-  <script src="js/nodes/entity_source.js?v=20260831a"></script>
-  <script src="js/nodes/split.js?v=20260904e"></script>
-  <script src="js/nodes/branch.js?v=20260824f"></script>
-  <script src="js/nodes/merge2.js?v=20260904a"></script>
-  <script src="js/nodes/join.js?v=20260824f"></script>
-  <script src="js/nodes/agv_route.js?v=20260831a"></script>
-  <script src="js/nodes/agv_route_ui.js?v=20260220a"></script>
-    <script src="js/nodes/carrier_route.js?v=20260831a"></script>
-  <script src="js/nodes/carrier_route_ui.js?v=20260824f"></script>
-  <script src="js/nodes/station.js?v=20260831a"></script>
-  <script src="js/nodes/transfer_station.js?v=20260831a"></script>
-  <script src="js/nodes/sink.js?v=20260824f"></script>
-  <script src="js/nodes/basic_node.js?v=20260906a"></script>
-  <script src="js/nodes/register.js?v=20260823j"></script>
-  <script src="js/app/node-catalog.js?v=20260905a"></script>
+  <script src="js/nodes/note.js?v=20260914flow2"></script>
+  <script src="js/nodes/signal.js?v=20260914flow2"></script>
+  <script src="js/app/flow-model.js?v=20260915minimal"></script>
+  <script src="js/app/flow-runtime.js?v=20260915minimal"></script>
+  <script src="js/nodes/basic_node.js?v=20260915minimal"></script>
+  <script src="js/nodes/register.js?v=20260914flow2"></script>
+  <script src="js/app/node-catalog.js?v=20260914flow2"></script>
   <script src="sample/simple.js?v=20260828a"></script>
   <script src="sample/branch.js?v=20260828a"></script>
   <script src="sample/parallel_benchmark.js?v=20260828a"></script>
@@ -842,45 +828,41 @@ SOFTWARE.
   <script src="sample/carrier.js?v=20260829b"></script>
   <script src="sample/pallet_station_demo.js?v=20260829b"></script>
   <script src="sample/sample_line1.js?v=20260829b"></script>
-  <script src="sample/sample_line2.js?v=20260831b"></script>
+  <script src="sample/sample_line2.js?v=20260915minimal"></script>
   <script src="js/timeline.js?v=20260731a"></script>
-  <script src="js/app/state.js?v=20260825b"></script>
-  <script src="js/app/background-layout.js?v=20260715a"></script>
-  <script src="js/app/graph-links.js?v=20260301a"></script>
-  <script src="js/app/stop-groups.js?v=20260308c"></script>
-  <script src="js/app/script-editor.js?v=20260218a"></script>
-  <script src="js/app/engine.js?v=20260225d"></script>
-  <script src="js/app/engine-fast-kernels.js?v=20260831a"></script>
-  <script src="js/app/engine-fast-compiler.js?v=20260828a"></script>
-  <script src="js/app/engine-fast-compat.js?v=20260823j"></script>
-  <script src="js/app/engine-fast-runtime.js?v=20260829a"></script>
-  <script src="js/app/engine-fast-mode.js?v=20260308d"></script>
-  <script src="js/app/engine-fast-worker-protocol.js?v=20260310b"></script>
-<script src="js/app/engine-fast-worker-host.js?v=20260829c"></script>
-  <script src="js/app/engine-fast-par-protocol.js?v=20260311b"></script>
-  <script src="js/app/engine-fast-par-partitioner.js?v=20260315b"></script>
-<script src="js/app/engine-fast-par-host.js?v=20260829c"></script>
-  <script src="js/app/sim.js?v=20260715a"></script>
-<script src="js/app/benchmark.js?v=20260311a"></script>
-  <script src="js/app/engine-test.js?v=20260831b"></script>
-  <script src="js/app/flow-program.js?v=20260906b"></script>
-  <script src="js/app/history.js?v=20260307a"></script>
-  <script src="js/app/selection.js?v=20260715a"></script>
-  <script src="js/app/fit.js?v=20260715a"></script>
-  <script src="js/app/node-props-panel.js?v=20260904a"></script>
-  <script src="js/app/selection-inspector.js?v=20260905a"></script>
-  <script src="js/app/flow-view-model.js?v=20260905b"></script>
-  <script src="js/app/flow-conditions.js?v=20260909a"></script>
-  <script src="js/app/flow-view.js?v=20260909a"></script>
-  <script src="js/app/flow-program-editor.js?v=20260909a"></script>
-  <script src="js/app/entity-ui.js?v=20260906a"></script>
-  <script src="js/app/timeline-init.js?v=20260904a"></script>
-  <script src="js/app/graph-init.js?v=20260831a"></script>
-  <script src="js/app/examples.js?v=20260831b"></script>
-  <script src="js/app/file-io.js?v=20260905a"></script>
-  <script src="js/app/workspace-ui.js?v=20260905c"></script>
-  <script src="js/app/ui.js?v=20260905c"></script>
-  <script src="js/app/details-ui.js?v=20260905a"></script>
+  <script src="js/app/state.js?v=20260914flow2"></script>
+  <script src="js/app/background-layout.js?v=20260914flow2"></script>
+  <script src="js/app/graph-links.js?v=20260914flow2"></script>
+  <script src="js/app/stop-groups.js?v=20260914flow2"></script>
+  <script src="js/app/script-editor.js?v=20260914flow2"></script>
+  <script src="js/app/engine.js?v=20260914flow2"></script>
+  <script src="js/app/engine-fast-kernels.js?v=20260914flow2"></script>
+  <script src="js/app/engine-fast-compiler.js?v=20260914flow2"></script>
+  <script src="js/app/engine-fast-compat.js?v=20260914flow2"></script>
+  <script src="js/app/engine-fast-runtime.js?v=20260914flow2"></script>
+  <script src="js/app/engine-fast-mode.js?v=20260914flow2"></script>
+  <script src="js/app/engine-fast-worker-protocol.js?v=20260914flow2"></script>
+<script src="js/app/engine-fast-worker-host.js?v=20260915minimal"></script>
+  <script src="js/app/engine-fast-par-protocol.js?v=20260914flow2"></script>
+  <script src="js/app/engine-fast-par-partitioner.js?v=20260914flow2"></script>
+<script src="js/app/engine-fast-par-host.js?v=20260915minimal"></script>
+  <script src="js/app/sim.js?v=20260914flow2"></script>
+<script src="js/app/benchmark.js?v=20260914flow2"></script>
+  <script src="js/app/engine-test.js?v=20260915minimal"></script>
+  <script src="js/app/history.js?v=20260914flow2"></script>
+  <script src="js/app/selection.js?v=20260914flow2"></script>
+  <script src="js/app/fit.js?v=20260914flow2"></script>
+  <script src="js/app/node-props-panel.js?v=20260914flow2"></script>
+  <script src="js/app/selection-inspector.js?v=20260914flow2"></script>
+  <script src="js/app/flow-view.js?v=20260915minimal"></script>
+  <script src="js/app/entity-ui.js?v=20260914flow2"></script>
+  <script src="js/app/timeline-init.js?v=20260914flow2"></script>
+  <script src="js/app/graph-init.js?v=20260914flow2"></script>
+  <script src="js/app/examples.js?v=20260915minimal"></script>
+  <script src="js/app/file-io.js?v=20260914flow2"></script>
+  <script src="js/app/workspace-ui.js?v=20260914flow2"></script>
+  <script src="js/app/ui.js?v=20260914flow2"></script>
+  <script src="js/app/details-ui.js?v=20260914flow2"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

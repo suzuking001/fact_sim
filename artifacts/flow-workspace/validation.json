@@ -1,0 +1,23 @@
+{
+  "currentBehaviorCoverage": {
+    "machine": 70,
+    "carrier_route": 30,
+    "shuttle": 5,
+    "merge": 10,
+    "split": 2,
+    "router": 1,
+    "sink": 1,
+    "join": 1,
+    "source": 1
+  },
+  "inlineDraft": true,
+  "undoRedo": true,
+  "apply": true,
+  "jsonRoundtrip": true,
+  "locked": true,
+  "resetRequired": true,
+  "conflict": true,
+  "transportTiming": true,
+  "customProgramInline": true,
+  "errors": []
+}

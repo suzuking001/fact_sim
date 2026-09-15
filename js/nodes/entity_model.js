@@ -1,4 +1,4 @@
-// Canonical FACT SIM entity type, runtime instance, contents, and rule model.
+// Canonical FACT SIM entity type, runtime instance, and contents model.
 // Model data is persisted. Runtime instances are deliberately graph-local and
 // are rebuilt from node Initial Contents whenever a graph is loaded or reset.
 
@@ -8,7 +8,6 @@
   const App = root.App || (root.App = {});
   const MODEL_KEY = '__factSimEntityModel';
   const SCHEMA_VERSION = 3;
-  const LEGACY_CATEGORIES = new Set(['work', 'container', 'carrier', 'pallet', 'agv', 'vehicle', 'box', 'tray', 'ship']);
   const LOAD_MODES = new Set(['empty', 'full', 'custom']);
   const ENTITY_SHAPES = Object.freeze(['circle', 'rounded-square', 'square', 'triangle', 'diamond', 'hexagon']);
   const ENTITY_COLOR_THEMES = Object.freeze(['auto', 'blue', 'orange', 'green', 'purple', 'red', 'cyan', 'yellow', 'gray']);
@@ -80,76 +79,6 @@
     };
   }
 
-  function normalizeTarget(value){
-    if(typeof value === 'string'){
-      const text = normalizeText(value);
-      if(text.toLowerCase() === 'otherwise') return { mode: 'otherwise' };
-      if(text.toLowerCase() === 'sequence') return { mode: 'sequence' };
-      if(text.toLowerCase() === 'any' || text.toLowerCase() === 'entity' || text.toLowerCase() === 'any entity') return { mode: 'any' };
-      if(LEGACY_CATEGORIES.has(text.toLowerCase())) return { mode: 'any' };
-      return { mode: 'type', typeId: text };
-    }
-    const source = isObject(value) ? value : {};
-    const mode = normalizeText(source.mode || source.kind).toLowerCase();
-    if(mode === 'otherwise') return { mode: 'otherwise' };
-    if(mode === 'sequence') return {
-      mode: 'sequence',
-      entries:(Array.isArray(source.entries) ? source.entries : []).map((entry)=>(
-        isObject(entry) ? {
-          entryId:normalizeText(entry.entryId),
-          typeId:normalizeText(entry.typeId),
-          quantity:Number(entry.quantity)
-        } : entry
-      ))
-    };
-    if(mode === 'any' || mode === 'entity' || mode === 'category') return { mode: 'any' };
-    return { mode: 'type', typeId: normalizeText(source.typeId || source.value) };
-  }
-
-  function normalizeTargets(values, fallback){
-    const source = Array.isArray(values) && values.length ? values : [fallback];
-    const result = [];
-    for(const value of source){
-      const target = normalizeTarget(value);
-      const key = target.mode === 'type' ? `type:${target.typeId}` : target.mode;
-      if(!result.some((entry)=>entry.key === key)) result.push({ key, target });
-    }
-    return result.map((entry)=>entry.target);
-  }
-
-  function normalizeCondition(value, fallback){
-    if(typeof value === 'string') return { kind: normalizeText(value).toLowerCase().replace(/[ _-]+/g, '-') };
-    const source = isObject(value) ? clone(value, {}) : {};
-    source.kind = normalizeText(source.kind || fallback || 'always').toLowerCase().replace(/[ _-]+/g, '-');
-    if(source.kind === 'all' || source.kind === 'any'){
-      const rows = Array.isArray(source.conditions) ? source.conditions : (Array.isArray(source.children) ? source.children : []);
-      source.conditions = rows.map((entry)=>normalizeCondition(entry, 'always'));
-      delete source.children;
-    }else if(source.kind === 'not'){
-      source.condition = normalizeCondition(source.condition || source.child, 'always');
-      delete source.child;
-    }
-    return source;
-  }
-
-  function normalizeTimingStages(rows, prefix){
-    const result = [];
-    const used = new Set();
-    for(const [index, raw] of (Array.isArray(rows) ? rows : []).entries()){
-      if(!isObject(raw)) continue;
-      let stageId = normalizeText(raw.stageId) || `${prefix}-${index + 1}`;
-      while(used.has(stageId)) stageId = `${prefix}-${used.size + 1}`;
-      used.add(stageId);
-      result.push({
-        stageId,
-        name:normalizeText(raw.name) || `${prefix.startsWith('down') ? 'Down' : 'Process'} ${result.length + 1}`,
-        durationSec:Math.max(0, Number(raw.durationSec) || 0),
-        ...(normalizeText(raw.portId) ? { portId:normalizeText(raw.portId) } : {})
-      });
-    }
-    return result;
-  }
-
   function normalizeRecipe(raw){
     const source = isObject(raw) ? raw : {};
     const load = normalizeText(source.load || 'empty').toLowerCase();
@@ -159,101 +88,6 @@
       load: LOAD_MODES.has(load) ? load : 'empty',
       children: (Array.isArray(source.children) ? source.children : []).map(normalizeRecipe)
     };
-  }
-
-  function nextSourceSequenceEntryId(rows){
-    const used = new Set((Array.isArray(rows) ? rows : []).map((entry)=>normalizeText(entry?.entryId)).filter(Boolean));
-    let index = 1;
-    while(used.has(`source-sequence-${index}`)) index += 1;
-    return `source-sequence-${index}`;
-  }
-
-  function sourceSequenceTarget(node){
-    for(const rule of (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : [])){
-      const targets = Array.isArray(rule?.targets) && rule.targets.length ? rule.targets : [rule?.target].filter(Boolean);
-      const target = targets.find((entry)=>normalizeText(entry?.mode || entry?.kind || entry).toLowerCase() === 'sequence');
-      if(target) return target;
-    }
-    return null;
-  }
-
-  function sourceSequenceRows(node){
-    const target = sourceSequenceTarget(node);
-    return Array.isArray(target?.entries) ? target.entries : [];
-  }
-
-  function inspectSourceSequence(node, registryOverride){
-    const registry = registryOverride || entityModelForGraph(node?.graph || App.graph);
-    const rows = sourceSequenceRows(node);
-    const errors = [];
-    const entries = [];
-    const entryIds = new Set();
-    if(!rows.length) errors.push({ code:'SOURCE_SEQUENCE_EMPTY', nodeId:node?.id ?? null });
-    rows.forEach((raw, index)=>{
-      const entryId = normalizeText(raw?.entryId);
-      const typeId = normalizeText(raw?.typeId);
-      const quantity = Number(raw?.quantity);
-      const type = registry?.get?.(typeId) || null;
-      if(!entryId) errors.push({ code:'SOURCE_SEQUENCE_ENTRY_ID_REQUIRED', nodeId:node?.id ?? null, index });
-      else if(entryIds.has(entryId)) errors.push({ code:'SOURCE_SEQUENCE_ENTRY_ID_DUPLICATE', nodeId:node?.id ?? null, index, entryId });
-      else entryIds.add(entryId);
-      if(!typeId || !type) errors.push({ code:'SOURCE_SEQUENCE_TYPE_MISSING', nodeId:node?.id ?? null, index, typeId });
-      if(!Number.isInteger(quantity) || quantity < 1) errors.push({ code:'SOURCE_SEQUENCE_QUANTITY_INVALID', nodeId:node?.id ?? null, index, quantity:raw?.quantity });
-      entries.push({
-        entryId,
-        typeId,
-        quantity,
-        typeName:type?.name || ''
-      });
-    });
-    return { ok:errors.length === 0, nodeId:node?.id ?? null, entries, errors };
-  }
-
-  function normalizeSourceSequence(rows, registry, nodeId){
-    const used = new Set();
-    const normalized = (Array.isArray(rows) ? rows : []).map((raw, index)=>{
-      let entryId = normalizeText(raw?.entryId);
-      if(!entryId || used.has(entryId)){
-        entryId = nextSourceSequenceEntryId(Array.from(used).map((value)=>({ entryId:value })));
-      }
-      used.add(entryId);
-      return {
-        entryId,
-        typeId:normalizeText(raw?.typeId),
-        quantity:Number(raw?.quantity)
-      };
-    });
-    const probe = { id:nodeId ?? null, graph:registry?.graph || null, properties:{ outputRules:[{ targets:[{ mode:'sequence', entries:normalized }] }] } };
-    const validation = inspectSourceSequence(probe, registry);
-    if(!validation.ok){
-      const error = new Error(`Invalid Source Sequence: ${validation.errors.map((entry)=>entry.code).join(', ')}`);
-      error.validation = validation;
-      throw error;
-    }
-    return normalized;
-  }
-
-  function ensureSourceSequence(node, options){
-    if(!node) return { ok:false, errors:[{ code:'SOURCE_NODE_REQUIRED' }] };
-    node.properties = isObject(node.properties) ? node.properties : {};
-    const registry = entityModelForGraph(node.graph || App.graph);
-    if(!registry) return { ok:false, errors:[{ code:'GRAPH_REQUIRED', nodeId:node.id ?? null }] };
-    const target = sourceSequenceTarget(node);
-    if(!target) return { ok:false, errors:[{ code:'SOURCE_SEQUENCE_TARGET_REQUIRED', nodeId:node.id ?? null }] };
-    if(sourceSequenceRows(node).length){
-      return inspectSourceSequence(node, registry);
-    }
-    if(options?.createDefault === false) return inspectSourceSequence(node, registry);
-    let entityType = registry.list()[0] || null;
-    if(!entityType){
-      entityType = registry.upsert({
-        name:'Entity A', subtype:'', tags:['preset'], capacity:0,
-        allowedContentTypeIds:[], defaultAttributes:{}
-      });
-    }
-    target.entries = [{ entryId:'source-sequence-1', typeId:entityType.typeId, quantity:1 }];
-    try{ node.graph?.change?.(); }catch(_e){}
-    return inspectSourceSequence(node, registry);
   }
 
   class EntityTypeRegistry{
@@ -309,6 +143,8 @@
       const raw = isObject(value) ? value : {};
       const requestedId = normalizeText(raw.typeId);
       const current = requestedId ? this.types.get(requestedId) : null;
+      if(Object.prototype.hasOwnProperty.call(raw,'capacity') && (!Number.isInteger(Number(raw.capacity)) || Number(raw.capacity)<0 || raw.capacity===''))throw new Error('Capacity must be a whole number of zero or more.');
+      if(current && (raw.capacity!==undefined && Number(raw.capacity)!==current.capacity || raw.allowedContentTypeIds && JSON.stringify(raw.allowedContentTypeIds)!==JSON.stringify(current.allowedContentTypeIds)) && [...(this.graph?.__factSimRuntimeInstances?.instances.values() || [])].some(e=>e.typeId===current.typeId))throw new Error('Reset and empty the affected Entities before changing capacity or allowed contents.');
       const typeId = current?.typeId || requestedId || this._nextId(raw.name);
       if(current && requestedId !== current.typeId) throw new Error('typeId is immutable');
       const defaultAppearance = current?.appearance || (!raw.appearance
@@ -354,19 +190,8 @@
       for(const node of nodes){
         const props = isObject(node?.properties) ? node.properties : {};
         walkRecipe(props.initialContents, node.id, 'initialContents');
-        sourceSequenceRows(node).forEach((entry, index)=>{
-          if(normalizeText(entry?.typeId) === id) refs.push({ kind:'node', id:node.id, field:`outputRules.sequence.entries[${index}].typeId` });
-        });
-        for(const key of ['inputRules', 'outputRules']){
-          (Array.isArray(props[key]) ? props[key] : []).forEach((rule, index)=>{
-            const targets = normalizeTargets(rule?.targets, rule?.target);
-            targets.forEach((target, targetIndex)=>{
-              if(target.mode === 'type' && target.typeId === id){
-                refs.push({ kind: 'node', id: node.id, field: `${key}[${index}].targets[${targetIndex}]` });
-              }
-            });
-          });
-        }
+        walkRecipe(props.source?.entries,node.id,'source.entries');
+        for(const item of props.flow?.nodes || [])for(const port of item.outputs || [])if(port.typeId===id)refs.push({kind:'node',id:node.id,field:`flow.${item.id}.${port.id}`});
       }
       return refs;
     }
@@ -438,10 +263,11 @@
     create(typeId, options){
       const type = this.registry.get(typeId);
       if(!type) throw new Error(`Unknown Entity Type: ${typeId}`);
-      const ordinal = (this.typeSequences.get(type.typeId) || 0) + 1;
-      this.typeSequences.set(type.typeId, ordinal);
-      const instanceId = `${type.typeId}:${ordinal}`;
       const opts = isObject(options) ? options : {};
+      const owner=opts.creationNodeId ?? opts.locationNodeId ?? 'local',sequenceKey=`${type.typeId}@${owner}`;
+      const ordinal = (this.typeSequences.get(sequenceKey) || 0) + 1;
+      this.typeSequences.set(sequenceKey, ordinal);
+      const instanceId = `${type.typeId}:${owner}:${ordinal}`;
       const instance = {
         instanceId,
         typeId: type.typeId,
@@ -654,39 +480,6 @@
       return { ok: true, destroyed: rows.length, summary };
     }
 
-    _targetMatches(instance, target){
-      const normalized = normalizeTarget(target);
-      if(normalized.mode === 'otherwise') return true;
-      if(normalized.mode === 'any') return true;
-      // Sequence is a virtual OUTPUT target that creates the next Entity. It
-      // never matches an Instance already held by a node.
-      if(normalized.mode === 'sequence') return false;
-      if(normalized.mode === 'type') return instance.typeId === normalized.typeId;
-      return false;
-    }
-
-    findInTree(rootValue, target){
-      const rootInstance = this.get(rootValue);
-      if(!rootInstance) return [];
-      const out = [];
-      const queue = [rootInstance];
-      const seen = new Set();
-      while(queue.length){
-        const current = queue.shift();
-        if(!current || seen.has(current.instanceId)) continue;
-        seen.add(current.instanceId);
-        if(this._targetMatches(current, target)) out.push(current);
-        queue.push(...this.childrenOf(current));
-      }
-      return out;
-    }
-
-    findAtNode(nodeId, target){
-      const out = [];
-      for(const rootInstance of this.rootsAt(nodeId)) out.push(...this.findInTree(rootInstance, target));
-      return out;
-    }
-
     _validateRecipe(recipe, path){
       const errors = [];
       const type = this.registry.get(recipe.typeId);
@@ -739,7 +532,7 @@
       if(!type) throw new Error(`Unknown Entity Type: ${recipe.typeId}`);
       const created = [];
       for(let index = 0; index < recipe.quantity; index++){
-        const instance = this.create(type.typeId, { locationNodeId: parent ? null : locationNodeId });
+        const instance = this.create(type.typeId, { locationNodeId: parent ? null : locationNodeId, creationNodeId:locationNodeId });
         created.push(instance);
         if(parent){
           const attached = this.attach(instance, parent);
@@ -815,279 +608,6 @@
     }
   }
 
-  function migrateLegacyInitialContents(graph, registry){
-    let migrated = 0;
-    const types = registry?.list?.() || [];
-    for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
-      const props = isObject(node?.properties) ? node.properties : null;
-      if(!props || (Array.isArray(props.initialContents) && props.initialContents.length)) continue;
-      const transport = (Array.isArray(props.operations) ? props.operations : []).find((operation)=>normalizeText(operation?.kind).toLowerCase() === 'carrier-transport');
-      if(!transport) continue;
-      const initialCarrier = normalizeText(transport?.config?.initialCarrier);
-      if(!initialCarrier || initialCarrier.toLowerCase() === 'undefined' || initialCarrier.toLowerCase() === 'none') continue;
-      const needle = initialCarrier.toLowerCase();
-      const type = types.find((entry)=>entry.typeId.toLowerCase() === needle || entry.name.toLowerCase() === needle);
-      if(!type) continue;
-      props.initialContents = [{ typeId: type.typeId, quantity: 1, load: 'empty', children: [] }];
-      migrated += 1;
-    }
-    return migrated;
-  }
-
-  function currentContentsForNode(node, options){
-    const graph = node?.graph || App.graph;
-    const store = runtimeInstancesForGraph(graph);
-    if(!node || !store) return { summary: [], instances: [] };
-    const registry = store.registry;
-    const includeInstances = options?.includeInstances !== false;
-    const candidates = [];
-    const push = (value)=>{
-      if(!value || typeof value !== 'object') return;
-      if(!candidates.includes(value)) candidates.push(value);
-    };
-    try{
-      if(typeof node.getEntityRoots === 'function'){
-        for(const value of (node.getEntityRoots() || [])) push(value);
-      }
-    }catch(_e){}
-    [
-      node._activeRoot, node._currentAgv, node._departingAgv, node._pallet,
-      node._payload, node._currentWork, node._pendingWork, node._pendingTransfer,
-      node._sourceHost, node._targetHost, node._palletOffer, node._workOffer
-    ].forEach(push);
-    [node._worksBySlot, node._recv, node._workQueue, node._palletQueue].forEach((rows)=>{
-      if(Array.isArray(rows)) rows.forEach(push);
-    });
-
-    const legacyRoots = candidates.filter((value)=>!store.get(value));
-    if(!legacyRoots.length){
-      if(node._initialCarrierSpawned === true && App.basicNodeBehavior?.(node) === 'carrier_route'){
-        return { summary: [], instances: [] };
-      }
-      return {
-        summary: store.summaryAt(node.id),
-        instances: includeInstances ? store.treesAt(node.id) : []
-      };
-    }
-
-    const used = new Set();
-    const typeFor = (value)=>{
-      const direct = registry.get(normalizeText(value?.typeId));
-      if(direct) return direct;
-      const names = [value?.type, value?.id, value?.carrierId, value?.meta?.carrierId]
-        .map((entry)=>normalizeText(entry).toLowerCase()).filter(Boolean);
-      return registry.list().find((entry)=>names.includes(entry.typeId.toLowerCase()) || names.includes(entry.name.toLowerCase()))
-        || null;
-    };
-    const legacyKindFor = (value)=>{
-      const explicit = normalizeText(value?.entityKind || value?.kind).toLowerCase();
-      if(LEGACY_CATEGORIES.has(explicit)) return explicit;
-      if(Array.isArray(value?.cargo) || Array.isArray(value?.pallets) || value?.meta?.carrierId) return 'carrier';
-      if(Array.isArray(value?.works) || value?.palletId != null) return 'container';
-      return 'entity';
-    };
-    const childrenFor = (value)=>{
-      const out = [];
-      const append = (rows)=>{
-        if(!Array.isArray(rows)) return;
-        for(const child of rows){
-          if(child && typeof child === 'object' && !out.includes(child)) out.push(child);
-        }
-      };
-      append(value?.children);
-      append(value?.pallets);
-      append(value?.cargo);
-      append(value?.works);
-      return out;
-    };
-    const build = (value)=>{
-      if(!value || typeof value !== 'object' || used.has(value)) return null;
-      used.add(value);
-      const runtime = store.get(value);
-      if(runtime) return store.tree(runtime);
-      const legacyKind = legacyKindFor(value);
-      const type = typeFor(value);
-      const displayId = normalizeText(value.id || value.instanceId || value.palletId) || `${type?.name || 'Entity'}`;
-      return {
-        instanceId: normalizeText(value.instanceId) || `legacy:${legacyKind}:${displayId}`,
-        displayId,
-        typeId: type?.typeId || `legacy-${legacyKind}`,
-        name: type?.name || normalizeText(value.type) || 'Entity',
-        attributes: clone(value.attributes || value.meta || {}, {}),
-        children: childrenFor(value).map(build).filter(Boolean)
-      };
-    };
-    const trees = [];
-    for(const value of legacyRoots){
-      const tree = build(value);
-      if(tree) trees.push(tree);
-    }
-    const counts = new Map();
-    const countTree = (tree)=>{
-      if(!tree) return;
-      const key = tree.typeId || tree.name;
-      const current = counts.get(key) || { typeId: tree.typeId, name: tree.name, quantity: 0 };
-      current.quantity += 1;
-      counts.set(key, current);
-      for(const child of (tree.children || [])) countTree(child);
-    };
-    trees.forEach(countTree);
-    return {
-      summary: Array.from(counts.values()).sort((a, b)=>a.name.localeCompare(b.name)),
-      instances: includeInstances ? trees : []
-    };
-  }
-
-  function valueAtPath(source, path){
-    const parts = Array.isArray(path) ? path : normalizeText(path).split('.').filter(Boolean);
-    let current = source;
-    for(const key of parts){
-      if(current == null) return undefined;
-      current = current[key];
-    }
-    return current;
-  }
-
-  function compareAttribute(actual, operator, expected){
-    switch(normalizeText(operator || 'eq').toLowerCase()){
-      case 'ne': case '!=': return actual !== expected;
-      case 'gt': case '>': return Number(actual) > Number(expected);
-      case 'gte': case '>=': return Number(actual) >= Number(expected);
-      case 'lt': case '<': return Number(actual) < Number(expected);
-      case 'lte': case '<=': return Number(actual) <= Number(expected);
-      case 'contains': return Array.isArray(actual) ? actual.includes(expected) : String(actual ?? '').includes(String(expected ?? ''));
-      case 'exists': return typeof actual !== 'undefined';
-      case 'eq': case '==': case '===': default: return actual === expected;
-    }
-  }
-
-  function evaluateExpression(expression, instance, type){
-    if(!isObject(expression)) return false;
-    const op = normalizeText(expression.op || expression.kind).toLowerCase();
-    const rows = Array.isArray(expression.children) ? expression.children : [];
-    if(op === 'and') return rows.length > 0 && rows.every((row)=>evaluateExpression(row, instance, type));
-    if(op === 'or') return rows.some((row)=>evaluateExpression(row, instance, type));
-    if(op === 'not') return !evaluateExpression(expression.child || rows[0], instance, type);
-    if(op === 'compare' || op === 'attribute'){
-      const source = expression.source === 'type' ? type : instance?.attributes;
-      return compareAttribute(valueAtPath(source, expression.path), expression.operator, expression.value);
-    }
-    return false;
-  }
-
-  function evaluateCondition(store, node, instance, condition, context){
-    const spec = normalizeCondition(condition, 'always');
-    const nodeId = node?.id;
-    const roots = store.rootsAt(nodeId);
-    const type = store.typeOf(instance);
-    const ctx = isObject(context) ? context : {};
-    switch(spec.kind){
-      case 'all': return spec.conditions.length > 0 && spec.conditions.every((entry)=>evaluateCondition(store, node, instance, entry, ctx));
-      case 'any': return spec.conditions.some((entry)=>evaluateCondition(store, node, instance, entry, ctx));
-      case 'not': return !evaluateCondition(store, node, instance, spec.condition, ctx);
-      case 'always': case 'available': return !!instance;
-      case 'space-available': case 'not-full': {
-        const capacity = Number(node?.properties?.contentCapacity);
-        return !Number.isFinite(capacity) || capacity < 0 || roots.length < capacity;
-      }
-      case 'empty':
-        return instance ? instance.childIds.length === 0 : roots.length === 0;
-      case 'full':
-        return !!instance && !!type && type.capacity > 0 && instance.childIds.length >= type.capacity;
-      case 'count-reached': {
-        const count = Math.max(0, Math.round(Number(spec.count ?? spec.value) || 0));
-        if(instance && type) return instance.childIds.length >= count;
-        return store.findAtNode(nodeId, ctx.target).length >= count;
-      }
-      case 'time-elapsed': {
-        const elapsedMs = Math.max(0, Number(spec.ms ?? (Number(spec.seconds) * 1000)) || 0);
-        const now = Number(ctx.nowMs) || 0;
-        const arrivedAt = Number(instance?.attributes?.__arrivedAtMs ?? instance?.createdAt) || 0;
-        return now - arrivedAt >= elapsedMs;
-      }
-      case 'downstream-ready': return ctx.downstreamReady !== false;
-      case 'node-idle': case 'down-complete': {
-        const stateName = normalizeText(node?._stateName).toLowerCase();
-        return node?._state === 'IDLE' || stateName === 'idle' || /(?:^|_)idle(?:_|$)/.test(stateName);
-      }
-      case 'process-complete': {
-        if(!ctx.processComplete) return false;
-        const stageId = normalizeText(spec.stageId);
-        if(!stageId || stageId === 'all') return true;
-        return (Array.isArray(ctx.activeProcessStageIds) ? ctx.activeProcessStageIds : []).includes(stageId);
-      }
-      case 'shuttle-group-idle': return !!ctx.shuttleGroupIdle;
-      case 'attribute-condition': {
-        const source = spec.source === 'type' ? type : instance?.attributes;
-        return compareAttribute(valueAtPath(source, spec.path), spec.operator, spec.value);
-      }
-      case 'custom': case 'custom-condition':
-        return evaluateExpression(spec.expression || spec.ast, instance, type);
-      default: return false;
-    }
-  }
-
-  function normalizeRules(rows, kind){
-    return (Array.isArray(rows) ? rows : []).map((raw, index)=>{
-      const source = isObject(raw) ? raw : {};
-      const targets = normalizeTargets(source.targets, source.target);
-      const base = {
-        ruleId: normalizeText(source.ruleId) || `${kind}-rule-${index + 1}`,
-        flowRuleId: normalizeText(source.flowRuleId) || null,
-        targets,
-        target: targets[0]
-      };
-      if(kind === 'input'){
-        base.acceptWhen = normalizeCondition(source.acceptWhen, 'always');
-        base.fromPortId = normalizeText(source.fromPortId) || null;
-        base.processStages = normalizeTimingStages(source.processStages, `${base.ruleId}-process`);
-      }else{
-        base.releaseWhen = normalizeCondition(source.releaseWhen, 'available');
-        base.dispatch = normalizeText(source.dispatch) || 'first-match';
-        const sourcePortIds = Array.isArray(source.toPortIds) && source.toPortIds.length ? source.toPortIds : [source.toPortId];
-        base.toPortIds = [...new Set(sourcePortIds.map((entry)=>normalizeText(entry)).filter(Boolean))];
-        base.toPortId = base.toPortIds[0] || null;
-        base.downStages = normalizeTimingStages(source.downStages, `${base.ruleId}-down`);
-      }
-      return base;
-    });
-  }
-
-  function selectRule(store, node, rules, context, kind){
-    const normalized = normalizeRules(rules, kind);
-    const nodeId = node?.id;
-    const conditionContext = (rule, instance)=>{
-      const resolved = { ...context, target: rule.target, rule };
-      if(typeof context?.resolveDownstreamReady === 'function'){
-        resolved.downstreamReady = !!context.resolveDownstreamReady(rule, instance);
-      }
-      return resolved;
-    };
-    for(const rule of normalized){
-      const targets = Array.isArray(rule.targets) && rule.targets.length ? rule.targets : [rule.target];
-      const explicitTargets = targets.filter((target)=>target.mode !== 'otherwise');
-      for(const target of explicitTargets){
-        const candidates = context?.incomingRoot
-          ? store.findInTree(context.incomingRoot, target)
-          : store.findAtNode(nodeId, target);
-        for(const instance of candidates){
-          const condition = kind === 'input' ? rule.acceptWhen : rule.releaseWhen;
-          const resolvedRule = { ...rule, target };
-          if(evaluateCondition(store, node, instance, condition, conditionContext(resolvedRule, instance))){
-            return { rule: resolvedRule, instance };
-          }
-        }
-      }
-      if(targets.some((target)=>target.mode === 'otherwise')){
-        const roots = store.rootsAt(nodeId);
-        const candidate = roots[0] || null;
-        const condition = kind === 'input' ? rule.acceptWhen : rule.releaseWhen;
-        if(evaluateCondition(store, node, candidate, condition, conditionContext(rule, candidate))) return { rule, instance: candidate };
-      }
-    }
-    return null;
-  }
-
   function entityModelForGraph(graph){
     const g = graph || App.graph;
     if(!g) return null;
@@ -1107,66 +627,14 @@
     return g.__factSimRuntimeInstances;
   }
 
-  function migrateLegacyGraphShape(graph){
-    for(const node of (Array.isArray(graph?._nodes) ? graph._nodes : [])){
-      node.properties = isObject(node?.properties) ? node.properties : {};
-      const roleForLegacyCategory = (value)=>{
-        const category = normalizeText(value).toLowerCase();
-        if(category === 'work' || category === 'item' || category === 'product') return 'item';
-        if(category === 'carrier' || category === 'agv' || category === 'vehicle') return 'transport';
-        if(category === 'container' || category === 'pallet') return 'attachment';
-        return '';
-      };
-      const migrateRules = (rules, direction)=>{
-        const ports = direction === 'input' ? (node.inputs || []) : (node.outputs || []);
-        const byId = new Map(ports.map((port)=>[normalizeText(port?.portId), port]));
-        const migrated = (Array.isArray(rules) ? rules : []).map((source)=>{
-          if(!isObject(source)) return source;
-          const rule = clone(source, source);
-          const rawTargets = Array.isArray(rule.targets) && rule.targets.length ? rule.targets : [rule.target];
-          const legacyRole = normalizeText(rule.entityRole) || rawTargets
-            .map((target)=>target?.mode === 'category' ? roleForLegacyCategory(target?.category) : '')
-            .find(Boolean) || '';
-          if(legacyRole) rule.entityRole = legacyRole;
-          const portIds = direction === 'input'
-            ? [rule.fromPortId]
-            : (Array.isArray(rule.toPortIds) && rule.toPortIds.length ? rule.toPortIds : [rule.toPortId]);
-          for(const portId of portIds){
-            const port = byId.get(normalizeText(portId));
-            if(port && legacyRole && !normalizeText(port.entityRole)) port.entityRole = legacyRole;
-          }
-          return rule;
-        });
-        return normalizeRules(migrated, direction);
-      };
-      if(Array.isArray(node.properties.inputRules)) node.properties.inputRules = migrateRules(node.properties.inputRules, 'input');
-      if(Array.isArray(node.properties.outputRules)) node.properties.outputRules = migrateRules(node.properties.outputRules, 'output');
-      if(Array.isArray(node.properties.operations)){
-        node.properties.operations = node.properties.operations.map((operation)=>{
-          if(!isObject(operation)) return operation;
-          const next = clone(operation, operation);
-          if(normalizeText(next.kind).toLowerCase() === 'carrier-transport') next.kind = 'entity-transport';
-          return next;
-        });
-      }
-      for(const port of [...(node.inputs || []), ...(node.outputs || [])]){
-        const channel = normalizeText(port?.channel || port?.type).toLowerCase();
-        if(channel === 'signal' || channel === '-1') continue;
-        if(!normalizeText(port.entityRole)) port.entityRole = roleForLegacyCategory(channel) || undefined;
-        port.channel = 'entity';
-        port.type = 'entity';
-      }
-    }
-  }
-
   function restoreEntityModel(graph, data, initialize){
     const g = graph || App.graph;
     if(!g) return null;
     const model = clone(data?.[MODEL_KEY] || data || { schemaVersion: SCHEMA_VERSION, types: [] }, { schemaVersion: SCHEMA_VERSION, types: [] });
-    migrateLegacyGraphShape(g);
+
     g.__factSimEntityModel = model;
     g.__factSimTypeRegistry = new EntityTypeRegistry(g, model);
-    migrateLegacyInitialContents(g, g.__factSimTypeRegistry);
+
     g.__factSimRuntimeInstances = new RuntimeInstanceStore(g, g.__factSimTypeRegistry);
     if(initialize !== false) g.__factSimRuntimeInstances.initializeFromGraph();
     return g.__factSimTypeRegistry;
@@ -1174,6 +642,7 @@
 
   function injectEntityModel(serialized, graph){
     if(!serialized || typeof serialized !== 'object') return serialized;
+    serialized.__factSimFormat=2;
     const registry = entityModelForGraph(graph);
     serialized[MODEL_KEY] = registry ? registry.serialize() : { schemaVersion: SCHEMA_VERSION, types: [] };
     return serialized;
@@ -1183,30 +652,33 @@
     const g = graph || App.graph;
     if(!g) return { ok: false, errors: [{ code: 'GRAPH_REQUIRED' }] };
     const registry = entityModelForGraph(g);
-    migrateLegacyInitialContents(g, registry);
+
     g.__factSimRuntimeInstances = new RuntimeInstanceStore(g, registry);
     return g.__factSimRuntimeInstances.initializeFromGraph();
   }
 
-  function validateEntityModel(graph){
-    const g = graph || App.graph;
-    const registry = entityModelForGraph(g);
-    if(!registry) return { ok: false, errors: [{ code: 'GRAPH_REQUIRED' }], warnings: [] };
-    const result = registry.validate();
-    const store = new RuntimeInstanceStore(g, registry);
-    const nodes = Array.isArray(g?._nodes) ? g._nodes : [];
-    for(const node of nodes){
-      const validation = store.validateInitialContents(node);
-      result.errors.push(...validation.errors.map((entry)=>({ ...entry, nodeId: node.id })));
-      const hasSequenceTarget = (Array.isArray(node?.properties?.outputRules) ? node.properties.outputRules : [])
-        .some((rule)=>normalizeTargets(rule?.targets, rule?.target).some((target)=>target.mode === 'sequence'));
-      if(hasSequenceTarget){
-        const sourceValidation = inspectSourceSequence(node, registry);
-        result.errors.push(...sourceValidation.errors);
-      }
+  function currentContentsForNode(node, options){
+    const store=runtimeInstancesForGraph(node?.graph || App.graph);
+    return node && store ? {summary:store.summaryAt(node.id),instances:options?.includeInstances===false ? [] : store.treesAt(node.id)} : {summary:[],instances:[]};
+  }
+  function validateSource(node){
+    const config=node.properties.source,errors=[],store=runtimeInstancesForGraph(node.graph);
+    if(!config || !Array.isArray(config.entries) || !config.entries.length)return ['Add at least one Source Entity.'];
+    if(!Number.isFinite(config.intervalSec) || config.intervalSec<0)errors.push('Source interval must be zero or more seconds.');
+    function recipe(row){
+      const quantity=row.count ?? row.quantity ?? 1;
+      if(!Number.isInteger(quantity) || quantity<1)errors.push('Source quantity must be a positive integer.');
+      return {typeId:row.typeId,quantity,load:row.children?.length ? 'custom' : 'empty',children:(row.children || []).map(recipe)};
     }
-    result.ok = result.errors.length === 0;
-    return result;
+    config.entries.forEach((row,index)=>errors.push(...store._validateRecipe(recipe(row),`Source entry ${index+1}`).map(error=>`${error.path}: ${error.code.replaceAll('_',' ').toLowerCase()}.`)));
+    return errors;
+  }
+  function validateEntityModel(graph){
+    const g=graph || App.graph,registry=entityModelForGraph(g);
+    if(!registry)return {ok:false,errors:[{code:'GRAPH_REQUIRED'}],warnings:[]};
+    const result=registry.validate();
+    result.errors.push(...(App.FlowModel?.graphErrors(g) || []).map(message=>({code:'INVALID_FLOW',message})));
+    result.ok=result.errors.length===0;return result;
   }
 
   App.ENTITY_MODEL_KEY = MODEL_KEY;
@@ -1219,24 +691,11 @@
   App.entityModelForGraph = entityModelForGraph;
   App.runtimeInstancesForGraph = runtimeInstancesForGraph;
   App.currentContentsForNode = currentContentsForNode;
-  App.migrateLegacyInitialContents = migrateLegacyInitialContents;
-  App.migrateLegacyEntityGraphShape = migrateLegacyGraphShape;
   App.restoreEntityModel = restoreEntityModel;
   App.injectEntityModel = injectEntityModel;
   App.initializeEntityRuntime = initializeEntityRuntime;
   App.validateEntityModel = validateEntityModel;
+  App.validateSource = validateSource;
   App.normalizeEntityRecipe = normalizeRecipe;
-  App.nextSourceSequenceEntryId = nextSourceSequenceEntryId;
-  App.inspectSourceSequence = inspectSourceSequence;
-  App.normalizeSourceSequence = normalizeSourceSequence;
-  App.ensureSourceSequence = ensureSourceSequence;
-  App.sourceSequenceTarget = sourceSequenceTarget;
-  App.sourceSequenceRows = sourceSequenceRows;
-  App.normalizeEntityRules = normalizeRules;
-  App.selectEntityRule = selectRule;
-  App.evaluateEntityCondition = evaluateCondition;
-  App.evaluateEntityExpression = evaluateExpression;
-  App.normalizeEntityTarget = normalizeTarget;
-  App.normalizeEntityTargets = normalizeTargets;
   App.resetRuntimeInstances = initializeEntityRuntime;
 })(typeof self !== 'undefined' ? self : window);

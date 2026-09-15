@@ -20,7 +20,7 @@ const EXAMPLE_FILES = {
   carrier: 'sample/carrier.json?v=20260829b',
   pallet_station_demo: 'sample/pallet_station_demo.json?v=20260829b',
   sample_line1: 'sample/sample_line1.json?v=20260829b',
-  sample_line2: 'sample/sample_line2.json?v=20260831b'
+  sample_line2: 'sample/sample_line2.json?v=20260915minimal'
 };
 
 App._exampleWriteState = App._exampleWriteState || {
@@ -310,17 +310,7 @@ async function overwriteSelectedExample(){
   if(typeof App.serializeGraphData !== 'function'){
     throw new Error('Graph serialization is not available.');
   }
-  let preview = null;
-  if(typeof App.previewBasicNodeMigration === 'function'){
-    preview = App.previewBasicNodeMigration(App.serializeGraphData());
-    if(preview.blocked){
-      throw new Error(`Migration blocked: ${preview.warnings.map((row)=>row.type || row.code).join(', ')}`);
-    }
-  }
-  const migrationText = preview && (preview.convertedNodeCount || preview.removedConfigNodeCount)
-    ? `\n\nMigration: ${preview.convertedNodeCount} node(s) to Basic Node, ${preview.removedConfigNodeCount} config node(s) absorbed, ${preview.generatedTypeCount} Entity Type(s).`
-    : '';
-  const confirmed = window.confirm(`Overwrite "${key}" with the current graph? This updates both the JSON file and the bundled JS fallback.${migrationText}`);
+  const confirmed = window.confirm(`Overwrite "${key}" with the current graph? This updates both the JSON file and the bundled JS fallback.`);
   if(!confirmed) return false;
   const context = await linkExampleFolder(false);
   const payload = cloneExampleData(typeof App.serializeGraphDataForSave === 'function'
@@ -467,7 +457,6 @@ function applyExampleData(data){
     App.history.lock = true;
     try{
       App.graph.clear();
-      if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
       App.graph.configure(payload);
       if(typeof App.restoreEntityModel === 'function'){
         App.restoreEntityModel(App.graph, payload, true);

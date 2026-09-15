@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "mode": "native",
+      "values": [
+        20,
+        30
+      ],
+      "processUntil": 20000,
+      "state": "DOWN",
+      "recoveryDuration": 30000
+    },
+    {
+      "mode": "program",
+      "values": [
+        20,
+        30
+      ],
+      "processUntil": 20000,
+      "state": "DOWN",
+      "recoveryDuration": 30000
+    }
+  ],
+  "errors": []
+}

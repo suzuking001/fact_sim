@@ -15,16 +15,16 @@ window.NODES_CONFIG = {
   equipment: {
     // Default process/down times (seconds)
     processTimeSec: 2,
-    downTimeSec: 3,
+    recoveryTimeSec: 3,
   },
   agvRoute: {
     processTimeSec: 3,
-    downTimeSec: 0.5,
+    recoveryTimeSec: 0.5,
     agvCapacity: 2,
   },
   carrierRoute: {
     processTimeSec: 3,
-    downTimeSec: 0.5,
+    recoveryTimeSec: 0.5,
     initialCarrierId: '',
     outSequence: '',
   },
@@ -38,7 +38,7 @@ window.NODES_CONFIG = {
   },
   station: {
     processTimeSec: 2,
-    downTimeSec: 3,
+    recoveryTimeSec: 3,
     palletWorkCapacity: 6
   },
   // Backward compatibility key (old name).

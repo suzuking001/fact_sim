@@ -4,6 +4,13 @@ export function registerRuntimeMethodsGroup14(
   FactSimRuntimeClass: typeof FactSimRuntime,
   _helpers: Record<string, unknown>
 ): void {
+  (FactSimRuntimeClass.prototype as any).addSyncroGroup = async function (this: any, name: string) {
+    const page = await this.ensureReady();
+    return page.evaluate((name: string) => {
+      const app=(window as any).App;
+      return app.FlowModel.addSyncroGroup(app.graph,name);
+    },name);
+  };
   (FactSimRuntimeClass.prototype as any).listEntityTypes = async function (this: any) {
     const page = await this.ensureReady();
     return page.evaluate(() => {
@@ -33,21 +40,14 @@ export function registerRuntimeMethodsGroup14(
     }, { requestedNodeId: nodeId, requestedInstances: includeInstances === true });
   };
 
-  (FactSimRuntimeClass.prototype as any).getNodeFlowRules = async function (this: any, nodeId: string | number) {
+  (FactSimRuntimeClass.prototype as any).getNodeFlow = async function (this: any, nodeId: string | number) {
     const page = await this.ensureReady();
-    return page.evaluate((requestedNodeId: any) => {
-      const app = (window as any).App;
-      const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
-      if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
-      return {
-        nodeId: node.id,
-        behavior: app?.basicNodeBehavior?.(node) ?? "basic",
-        selection: node.properties?.selection ?? "first-available",
-        inputPolicy: node.properties?.inputPolicy ?? { mode:"first", requiredPortIds:[], match:null },
-        operations: Array.isArray(node.properties?.operations) ? node.properties.operations : [],
-        inputRules: Array.isArray(node.properties?.inputRules) ? node.properties.inputRules : [],
-        outputRules: Array.isArray(node.properties?.outputRules) ? node.properties.outputRules : []
-      };
+    return page.evaluate((id: any) => {
+      const app = (window as any).App, node = app.graph.getNodeById(id);
+      if (!node) throw new Error(`Node not found: ${id}`);
+      return { nodeId: node.id, role: node.properties.role, flow: node.properties.flow,
+        source: node.properties.source, errors: app.FlowModel.validate(node.properties.flow, node),
+        syncroGroups: app.graph.extra?.syncroGroups || [] };
     }, nodeId);
   };
 
@@ -60,16 +60,7 @@ export function registerRuntimeMethodsGroup14(
     });
   };
 
-  (FactSimRuntimeClass.prototype as any).previewEntityMigration = async function (this: any) {
-    const page = await this.ensureReady();
-    return page.evaluate(() => {
-      const app = (window as any).App;
-      if(typeof app?.serializeGraphData !== "function" || typeof app?.previewBasicNodeMigration !== "function") {
-        throw new Error("Migration preview API is unavailable");
-      }
-      return app.previewBasicNodeMigration(app.serializeGraphData());
-    });
-  };
+
 
   (FactSimRuntimeClass.prototype as any).upsertEntityType = async function (this: any, entityType: Record<string, unknown>) {
     const page = await this.ensureReady();
@@ -77,7 +68,10 @@ export function registerRuntimeMethodsGroup14(
       const app = (window as any).App;
       const registry = app?.entityModelForGraph?.(app.graph);
       if(!registry) throw new Error("Entity Type registry is unavailable");
+      app.FlowModel.pause();
+      app.graph.beforeChange?.();
       const result = registry.upsert(requestedType);
+      app.graph.afterChange?.();
       app?.refreshEntityTypeManager?.();
       return result;
     }, entityType);
@@ -89,7 +83,10 @@ export function registerRuntimeMethodsGroup14(
       const app = (window as any).App;
       const registry = app?.entityModelForGraph?.(app.graph);
       if(!registry) throw new Error("Entity Type registry is unavailable");
+      app.FlowModel.pause();
+      app.graph.beforeChange?.();
       const removed = registry.remove(requestedTypeId);
+      app.graph.afterChange?.();
       app?.refreshEntityTypeManager?.();
       return { typeId: requestedTypeId, removed };
     }, typeId);
@@ -97,60 +94,33 @@ export function registerRuntimeMethodsGroup14(
 
   (FactSimRuntimeClass.prototype as any).setNodeInitialContents = async function (this: any, nodeId: string | number, initialContents: unknown[]) {
     const page = await this.ensureReady();
-    return page.evaluate(({ requestedNodeId, requestedContents }: any) => {
-      const app = (window as any).App;
-      const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
-      if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
-      node.properties = node.properties || {};
-      node.properties.initialContents = requestedContents.map((row: any)=>app.normalizeEntityRecipe(row));
-      const store = app.runtimeInstancesForGraph(app.graph);
-      const validation = store.validateInitialContents(node);
-      if(!validation.ok) throw new Error(JSON.stringify(validation.errors));
+    return page.evaluate(({ id, contents }: any) => {
+      const app = (window as any).App, node = app.graph.getNodeById(id);
+      if (!node) throw new Error(`Node not found: ${id}`);
+      app.FlowModel.pause();
+      const recipes = contents.map((row: any) => app.normalizeEntityRecipe(row));
+      const validation = app.runtimeInstancesForGraph(app.graph).validateInitialContents({ properties: { initialContents: recipes } });
+      if (!validation.ok) throw new Error(JSON.stringify(validation.errors));
+      app.graph.beforeChange?.();
+      node.properties.initialContents = recipes;
       node.__initialContentsDirty = true;
+      app.graph.afterChange?.();
       node.setDirtyCanvas?.(true, true);
-      return { nodeId: node.id, initialContents: node.properties.initialContents, resetRequired: true };
-    }, { requestedNodeId: nodeId, requestedContents: initialContents });
+      return { nodeId: node.id, initialContents: recipes, resetRequired: true };
+    }, { id: nodeId, contents: initialContents });
   };
 
-  (FactSimRuntimeClass.prototype as any).setNodeFlowRules = async function (this: any, nodeId: string | number, inputRules?: unknown[], outputRules?: unknown[], nodeOperations?: unknown[], inputPolicy?: Record<string, unknown>) {
+  (FactSimRuntimeClass.prototype as any).setNodeFlow = async function (this: any, nodeId: string | number, flow: Record<string, unknown>) {
     const page = await this.ensureReady();
-    return page.evaluate(({ requestedNodeId, requestedInput, requestedOutput, requestedOperations, requestedInputPolicy }: any) => {
-      const app = (window as any).App;
-      const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
-      if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
-      node.properties = node.properties || {};
-      if(Array.isArray(requestedInput)){
-        node.properties.inputRules = app.normalizeEntityRules(requestedInput, "input");
-        node.onPropertyChanged?.('inputRules');
-      }
-      if(Array.isArray(requestedOutput)){
-        node.properties.outputRules = app.normalizeEntityRules(requestedOutput, "output");
-        node.onPropertyChanged?.('outputRules');
-      }
-      if(Array.isArray(requestedOperations)){
-        node.properties.operations = app.normalizeBasicOperations(requestedOperations);
-        node.onPropertyChanged?.('operations');
-      }
-      if(requestedInputPolicy && typeof requestedInputPolicy === 'object') node.properties.inputPolicy = requestedInputPolicy;
-      const sync = typeof app.syncBasicFlowPorts === "function"
-        ? app.syncBasicFlowPorts(node, { dirty:false })
-        : { created:[], warnings:["Flow port synchronization is unavailable"] };
-      app.syncFlowRuleTimings?.(node);
-      node.setDirtyCanvas?.(true, true);
-      return {
-        nodeId: node.id,
-        behavior: app.basicNodeBehavior?.(node) || 'basic',
-        inputPolicy: node.properties.inputPolicy,
-        operations: node.properties.operations || [],
-        inputRules: node.properties.inputRules || [],
-        outputRules: node.properties.outputRules || [],
-        inputs: (node.inputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged })),
-        outputs: (node.outputs || []).map((port: any)=>({ portId:port.portId, name:port.name, channel:port.channel || 'entity', flowManaged:!!port.flowManaged })),
-        portTimings: node.properties.portTimings || { inputs:{}, outputs:{} },
-        createdPorts: sync.created || [],
-        warnings: sync.warnings || []
-      };
-    }, { requestedNodeId: nodeId, requestedInput: inputRules, requestedOutput: outputRules, requestedOperations: nodeOperations, requestedInputPolicy: inputPolicy });
+    return page.evaluate(({ id, flow }: any) => {
+      const app = (window as any).App, node = app.graph.getNodeById(id);
+      if (!node) throw new Error(`Node not found: ${id}`);
+      if (!flow || flow.version !== 2 || !Array.isArray(flow.nodes) || !Array.isArray(flow.links))
+        throw new Error("A version 2 Flow with nodes and links is required.");
+      const errors = app.FlowModel.commit(node, flow);
+      app.selectionInspector?.refresh?.();
+      return { nodeId: node.id, flow: node.properties.flow, errors };
+    }, { id: nodeId, flow });
   };
 
   (FactSimRuntimeClass.prototype as any).applyBasicTemplate = async function (this: any, nodeId: string | number, templateId: string) {
@@ -160,7 +130,10 @@ export function registerRuntimeMethodsGroup14(
       const node = app?.graph?.getNodeById?.(requestedNodeId) ?? app?.graph?.getNodeById?.(Number(requestedNodeId));
       if(!node) throw new Error(`Node not found: ${requestedNodeId}`);
       if(typeof node.applyTemplate !== "function") throw new Error("Node is not a Basic Node");
+      app.FlowModel.pause();
+      app.graph.beforeChange?.();
       node.applyTemplate(requestedTemplate, false);
+      app.graph.afterChange?.();
       node.setDirtyCanvas?.(true, true);
       const serialized = typeof node.serialize === "function" ? node.serialize() : null;
       return {
@@ -173,15 +146,5 @@ export function registerRuntimeMethodsGroup14(
     }, { requestedNodeId: nodeId, requestedTemplate: templateId });
   };
 
-  (FactSimRuntimeClass.prototype as any).migrateCurrentGraphToBasic = async function (this: any) {
-    const page = await this.ensureReady();
-    return page.evaluate(() => {
-      const app = (window as any).App;
-      const current = app.serializeGraphData();
-      const result = app.prepareSerializedGraphForSave(current);
-      if(result.preview?.blocked) return result.preview;
-      app.applyGraphData(result.data, { source: "migration", captureInitialState: false, fitViewport: false });
-      return result.preview;
-    });
-  };
+
 }

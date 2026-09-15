@@ -10,11 +10,11 @@
 | 全体 UI・画面切替 | `js/app/ui.js`, `js/app/workspace-ui.js` | `js/app/landing.js`, `css/app.css`, `css/workspace.css` |
 | 選択・プロパティ・詳細 | `js/app/selection-inspector.js`, `js/app/details-ui.js` | `js/app/selection.js`, `js/app/node-props-panel.js`, `css/details.css` |
 | Entity・内容物・型 | `js/app/entity-ui.js`, `js/nodes/entity_model.js` | `js/nodes/basic_node.js`, `js/nodes/entity_source.js`, `js/nodes/entity_store.js`, `docs/entity-model-ja.md`, `docs/entity-hierarchy-ja.md` |
-| フロー表示 | `js/app/flow-view.js`, `js/app/flow-view-model.js` | `js/app/flow-conditions.js`（条件設定・要約・通常表示）、`css/flow-view.css`, `docs/flow-view-ja.md` |
+| フロー表示・標準処理の設定下書き | `js/app/flow-view.js`, `js/app/flow-view-model.js` | `js/app/flow-conditions.js`（条件設定・要約・通常表示）、`css/flow-view.css`, `docs/flow-view-ja.md` |
 | フロープログラム | `js/app/flow-program.js`, `js/app/flow-program-editor.js` | `js/app/flow-conditions.js`（既存条件グラフの編集・共通条件）、`docs/flow-program-ja.md` |
 | ノード定義・追加メニュー | `js/nodes/<対象ノード>.js`, `js/app/node-catalog.js` | `js/nodes/register.js`, `js/nodes/menu.js`, `js/nodes-config.js` |
 | リンク・編集履歴・表示位置 | `js/app/graph-links.js`, `js/app/history.js` | `js/app/fit.js`, `js/app/background-layout.js` |
-| 保存・読込・example | `js/app/file-io.js`, `js/app/examples.js` | `sample/<対象example>.json`, `sample/<対象example>.js` |
+| 保存・読込・example | `js/app/file-io.js`, `js/app/examples.js` | `sample/<対象example>.json`, `sample/<対象example>.js`, `docs/sample-line2-ja.md`（4型の構成・分岐設定） |
 | シミュレーション操作・基準 engine | `js/app/sim.js`, `js/app/engine.js` | `js/app/stop-groups.js`。自動最適化では基準 engine を変更しない |
 | event-fast 共通 | `js/app/engine-fast-runtime.js`, `js/app/engine-fast-mode.js` | `js/app/engine-fast-compiler.js`, `js/app/engine-fast-kernels.js`, `js/app/engine-fast-compat.js` |
 | event-fast-worker | `js/app/engine-fast-worker-host.js`, `js/app/engine-fast-worker.js` | `js/app/engine-fast-worker-protocol.js`, event-fast 共通 |

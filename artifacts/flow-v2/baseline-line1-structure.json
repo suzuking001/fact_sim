@@ -1,0 +1,2562 @@
+﻿[
+    {
+        "id":  8,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  42,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          8
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  9,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  8,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          9
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  11,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          10
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  13,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  10,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          11
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  14,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  11,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          12
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  15,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  12,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          14
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  22,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          17
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  25,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  17,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          18
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  24,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  18,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          19
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  23,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  19,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          20
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  27,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  21,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          22
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  12,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          21
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  28,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  24,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          23
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  29,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          24
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  26,
+        "operations":  [
+                           {
+                               "operationId":  "merge-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "merge"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  20,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  23,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          25
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  30,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  26,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          27
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  31,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  25,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          28
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  32,
+        "operations":  [
+                           {
+                               "operationId":  "merge-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "merge"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  27,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  28,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          29
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  34,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  29,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          30
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  33,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  30,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          31
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  10,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  9,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          32
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  35,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  31,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          33
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  36,
+        "operations":  [
+                           {
+                               "operationId":  "merge-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "merge"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  32,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  33,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          34
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  39,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  34,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          35
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  37,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  35,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          36
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  38,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  36,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          37
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  4,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  2,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "sigIn0",
+                           "type":  "string",
+                           "link":  43,
+                           "portId":  "in-2",
+                           "channel":  "signal",
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "sigIn1",
+                           "type":  "string",
+                           "link":  44,
+                           "portId":  "in-3",
+                           "channel":  "signal",
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "sigIn2",
+                           "type":  "string",
+                           "link":  null,
+                           "portId":  "in-4",
+                           "channel":  "signal",
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          3
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "sigOut0",
+                            "type":  "string",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "signal",
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "sigOut1",
+                            "type":  "string",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-3",
+                            "channel":  "signal",
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "sigOut2",
+                            "type":  "string",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-4",
+                            "channel":  "signal",
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  5,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  4,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          5
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  6,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  5,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          39
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  43,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          40
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  44,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  40,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          41
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  42,
+        "operations":  [
+                           {
+                               "operationId":  "merge-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "merge"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  39,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  41,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          42
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  40,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  37,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          45
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  2,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  1,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "sigIn0",
+                           "type":  "string",
+                           "link":  null,
+                           "portId":  "in-2",
+                           "channel":  "signal",
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "sigIn1",
+                           "type":  "string",
+                           "link":  null,
+                           "portId":  "in-3",
+                           "channel":  "signal",
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          2
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "sigOut0",
+                            "type":  "string",
+                            "links":  [
+                                          43
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "signal",
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "sigOut1",
+                            "type":  "string",
+                            "links":  [
+                                          44
+                                      ],
+                            "slot_index":  2,
+                            "__animToken":  null,
+                            "portId":  "out-3",
+                            "channel":  "signal",
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  3,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  3,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          4
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  45,
+        "operations":  [
+                           {
+                               "operationId":  "destroy-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "destroy"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  45,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  54,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          55
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  52,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  55,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          52
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  53,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  53,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          54
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  55,
+        "operations":  [
+                           {
+                               "operationId":  "destroy-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "destroy"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  54,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  51,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  46,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          49
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  48,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  49,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          50
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  1,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          1
+                                      ],
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  50,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  52,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  51,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          48
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  46,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  50,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          51
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  66,
+        "operations":  [
+                           {
+                               "operationId":  "destroy-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "destroy"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  56,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  63,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  57,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          56
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  61,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  60,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          61
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  64,
+        "operations":  [
+                           {
+                               "operationId":  "process-1",
+                               "trigger":  "process",
+                               "kind":  "process"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  63,
+                           "slot_index":  0,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          62
+                                      ],
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  57,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  64,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          65
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  56,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "slot_index":  0,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  58,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          59
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  60,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  59,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          60
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  65,
+        "operations":  [
+                           {
+                               "operationId":  "create-1",
+                               "trigger":  "release",
+                               "kind":  "create"
+                           }
+                       ],
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          63
+                                      ],
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  59,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  65,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          57
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          58
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  47,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  47,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          53
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          46
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  62,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  62,
+                           "slot_index":  0,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  61,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          64
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  17,
+        "operations":  [
+                           {
+                               "operationId":  "merge-1",
+                               "trigger":  "input-accepted",
+                               "kind":  "merge"
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  14,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  22,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  [
+                                          26
+                                      ],
+                            "slot_index":  0,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    },
+    {
+        "id":  49,
+        "operations":  [
+                           {
+                               "operationId":  "transport-1",
+                               "trigger":  "process",
+                               "kind":  "entity-transport",
+                               "config":  {
+                                              "transportMode":  "agv"
+                                          }
+                           }
+                       ],
+        "inputs":  [
+                       {
+                           "name":  "inPort1",
+                           "type":  "entity",
+                           "link":  null,
+                           "portId":  "in-1",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "item"
+                       },
+                       {
+                           "name":  "inPort2",
+                           "type":  "entity",
+                           "link":  48,
+                           "portId":  "in-2",
+                           "channel":  "entity",
+                           "flowManaged":  true,
+                           "entityRole":  "transport"
+                       }
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "outPort1",
+                            "type":  "entity",
+                            "links":  null,
+                            "__animToken":  null,
+                            "portId":  "out-1",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "item"
+                        },
+                        {
+                            "name":  "outPort2",
+                            "type":  "entity",
+                            "links":  [
+                                          47
+                                      ],
+                            "slot_index":  1,
+                            "__animToken":  null,
+                            "portId":  "out-2",
+                            "channel":  "entity",
+                            "flowManaged":  true,
+                            "entityRole":  "transport"
+                        }
+                    ],
+        "initialContents":  [
+
+                            ]
+    }
+]

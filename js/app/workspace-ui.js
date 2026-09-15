@@ -24,7 +24,7 @@
     controls: ['flow', 'Choose a model and check the simulation status.'],
     addNodePanel: ['add', 'Choose a node type, then place it on the canvas. Esc cancels placement.'],
     entityTypesPanel: ['types', 'Define the items and resources that move through your model.'],
-    addGroupPanel: ['group', 'Draw a group around nodes that share a downtime pattern.'],
+    addGroupPanel: ['group', 'Draw a group around nodes that share a recovery time pattern.'],
     backgroundPanel: ['image', 'Add a floor plan and align the model over it.'],
     advancedPanel: ['performance', 'Adjust the simulation engine, rendering, and diagnostics.'],
     shortcutPanel: ['tools', 'Arrange the graph, undo edits, and find keyboard shortcuts.'],

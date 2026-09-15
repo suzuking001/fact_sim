@@ -1,4 +1,4 @@
-﻿// UI wiring (controls, modals, sidebar, title editor, add node panel)
+// UI wiring (controls, modals, sidebar, title editor, add node panel)
 
 var App = window.App || (window.App = {});
 
@@ -544,7 +544,7 @@ if(renderFpsSelect){
     return defs.find((d)=> d.key === key) || defs[0];
   };
 
-  const formatDowntimeEstimate = (meta)=>{
+  const formatRecoveryTimeEstimate = (meta)=>{
     try{
       const pct = App.stopGroups.estimateStopRatePercent(meta.type, meta.props);
       return `${pct.toFixed(1)}%`;
@@ -583,12 +583,12 @@ if(renderFpsSelect){
   const updateStopRate = ()=>{
     try{
       const meta = readMeta();
-      const rateText = formatDowntimeEstimate(meta);
+      const rateText = formatRecoveryTimeEstimate(meta);
       rateEl.dataset.rateText = rateText;
-      rateEl.textContent = `Downtime: ${rateText}`;
+      rateEl.textContent = `Recovery time: ${rateText}`;
     }catch(_e){
       rateEl.dataset.rateText = '-';
-      rateEl.textContent = 'Downtime: -';
+      rateEl.textContent = 'Recovery time: -';
     }
   };
 
@@ -1395,244 +1395,20 @@ window.beginGroupPlacement = beginGroupPlacement;
   const pickerValue = document.getElementById('nodeKindPickerValue');
   const btn = document.getElementById('btnAddNode');
   if(!sel || !btn) return;
-  const NODE_SCHEMAS = {
-    machine:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Machine', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'machine', options:['machine'] },
-      { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
-      { key:'contentCapacity', label:'Capacity', type:'number', min:1, step:1, default:1 }
-    ]},
-    inspection:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Inspection', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'inspection', options:['inspection'] },
-      { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 }
-    ]},
-    buffer:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Buffer', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'buffer', options:['buffer'] },
-      { key:'contentCapacity', label:'Capacity', type:'number', min:1, step:1, default:10 }
-    ]},
-    conveyor:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Conveyor', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'conveyor', options:['conveyor'] },
-      { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:1 }
-    ]},
-    router:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Router', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'router', options:['router'] }
-    ]},
-    pack:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Attach', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'pack', options:['pack'] },
-      { key:'processTime', label:'Handling Time (s)', type:'number', min:0, step:0.1, default:1 }
-    ]},
-    unpack:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Detach', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'unpack', options:['unpack'] },
-      { key:'processTime', label:'Handling Time (s)', type:'number', min:0, step:0.1, default:1 }
-    ]},
-    basic:{ type:'factory/basic', props:[
-      { key:'title', label:'Title', type:'text', default:'Basic Node', target:'title' },
-      { key:'presetId', label:'Preset', type:'select', default:'basic', options:['basic'] },
-      { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:0 },
-      { key:'contentCapacity', label:'Capacity', type:'number', min:1, step:1, default:1 }
-    ]},
-    equip:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Equipment', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'machine', options:['machine'] },
-        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
-        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
-      ]
-    },
-    note:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Memo', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'note', options:['note'] },
-        { key:'text', label:'Text', type:'textarea', rows:6, default:'Equipment memo...' },
-        { key:'fontSize', label:'Font Size (px)', type:'number', min:10, max:64, step:1, default:13 },
-        { key:'backgroundColor', label:'Background Color', type:'color', default:'#f8fafc' },
-        { key:'textColor', label:'Text Color', type:'color', default:'#0f172a' }
-      ]
-    },
-    signal:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Signal', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'signal', options:['signal'] }
-      ]
-    },
-    shuttle:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Shuttle Stage', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'shuttle', options:['shuttle'] },
-        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 }
-      ]
-    },
-    merge:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Merge', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'merge', options:['merge'] },
-        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
-        { key:'processTime2', label:'Process Time N (s)', type:'number', min:0, step:0.1, default:2 },
-        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
-      ]
-    },
-    join:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Join', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'join', options:['join'] },
-        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:5 },
-        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:6 }
-      ]
-    },
-    source:{
-      type:'factory/basic',
-      flowTemplate:'sequence',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Sequence Source', target:'title' }
-      ]
-    },
-    entitysource:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Entity Source', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'source', options:['source'] },
-        { key:'sourceMode', label:'Source Mode', type:'select', default:'entity', options:['entity'] },
-        { key:'rootKind', label:'Root Kind', type:'select', default:'container', options:['pallet', 'carrier', 'container', 'ship'] },
-        { key:'rootId', label:'Root ID', type:'text', default:'Container-1' },
-        { key:'capacity', label:'Child Capacity', type:'number', min:0, step:1, default:20 },
-        { key:'accepts', label:'Accepted Kinds', type:'text', default:'pallet' },
-        { key:'initialContents', label:'Initial Hierarchy Paths', type:'textarea', rows:5, default:'pallet:P-1[6]/work:W-1\npallet:P-1[6]/work:W-2' }
-      ]
-    },
-    sink:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Sink', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'sink', options:['sink'] }
-      ]
-    },
-    split:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Split', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'split', options:['split'] },
-        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
-        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
-        { key:'ratio', label:'Ratio (0-1)', type:'number', min:0, max:1, step:0.1, default:0.5 }
-      ]
-    },
-    branch:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Branch', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'router', options:['router'] },
-        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
-        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 }
-      ]
-    },
-    agvroute:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'AGV Route', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
-        { key:'transportMode', label:'Transport Mode', type:'select', default:'agv', options:['agv'] },
-        { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
-        { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
-        { key:'agvCapacity', label:'AGV Capacity', type:'number', min:1, step:1, default:2 },
-        { key:'agvIds', label:'Initial AGV IDs', type:'textarea', default:'AGV-1,AGV-2' }
-      ]
-    },
-    carrierroute:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Carrier Route', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'carrier_route', options:['carrier_route'] },
-        { key:'transportMode', label:'Transport Mode', type:'select', default:'carrier', options:['carrier'] },
-        { key:'processTime', label:'Travel Time (s)', type:'number', min:0, step:0.1, default:3 },
-        { key:'downTime', label:'Dispatch Delay (s)', type:'number', min:0, step:0.1, default:0.5 },
-        { key:'initialCarrier', label:'Initial Carrier ID', type:'text', default:'' },
-        { key:'outSequence', label:'Carrier OUT Sequence (1-based, comma)', type:'textarea', default:'' }
-      ]
-    },
-    station:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Store', target:'title' },
-        { key:'presetId', label:'Preset', type:'select', default:'station', options:['station'] },
-        { key:'processTime', label:'Process Time (s)', type:'number', min:0, step:0.1, default:2 },
-        { key:'downTime', label:'Down Time (s)', type:'number', min:0, step:0.1, default:3 },
-        { key:'palletWorkCapacity', label:'Pallet Work Capacity', type:'number', min:1, step:1, default:6 }
-      ]
-    },
-    transferstation:{
-      type:'factory/basic',
-      props:[
-        { key:'title', label:'Title', type:'text', default:'Transfer Station', target:'title' },
-        { key:'presetId', label:'Node Preset', type:'select', default:'transfer', options:['transfer'] },
-        { key:'preset', label:'Preset', type:'select', default:'work_to_pallet', options:[
-          { value:'work_to_pallet', label:'Work → Pallet' },
-          { value:'work_to_carrier', label:'Work → Carrier' },
-          { value:'pallet_to_agv', label:'Pallet → AGV' },
-          { value:'pallet_to_container', label:'Pallet → Container' },
-          { value:'container_to_ship', label:'Container → Ship' },
-          { value:'unload_one', label:'Unload one' },
-          { value:'unload_all', label:'Unload all' },
-          { value:'transfer_one', label:'Transfer one' },
-          { value:'custom', label:'Custom' }
-        ]},
-        { key:'processTime', label:'Handling Time (s)', type:'number', min:0, step:0.1, default:1 },
-        { key:'downTime', label:'Handoff Time (s)', type:'number', min:0, step:0.1, default:0.2 },
-        { key:'quantity', label:'Quantity', type:'number', min:1, step:1, default:1 }
-      ]
-    }
-  };
-
-  const NODE_TEMPLATE_IDS = {
-    equip:'machine', branch:'router', entitysource:'source', agvroute:'carrier_route',
-    carrierroute:'carrier_route', transferstation:'transfer'
-  };
-  Object.entries(NODE_SCHEMAS).forEach(([kind, schema])=>{
-    schema.templateId = NODE_TEMPLATE_IDS[kind] || kind;
-    if(kind === 'note' || kind === 'signal') schema.type = `factory/${kind}`;
-    if(kind !== 'note' && kind !== 'signal'){
-      const titleField = (Array.isArray(schema.props) ? schema.props : []).find((field)=>field.key === 'title');
-      schema.props = [titleField || { key:'title', label:'Title', type:'text', default:'Basic Node', target:'title' }];
-    }else if(Array.isArray(schema.props)){
-      schema.props = schema.props.filter((field)=>field.key !== 'presetId');
-    }
-  });
-
+  const NODE_SCHEMAS = Object.fromEntries(App.NODE_CREATION_CATALOG.map(item=>[item.kind,{type:item.nodeType,templateId:item.templateId,props:[]} ]));
   const NODE_META = {
-    machine:{ label:'Machine', description:'Process a selected Entity using shared Input / Output Rules.' },
-    inspection:{ label:'Inspection', description:'Inspect an Entity and update runtime attributes for routing.' },
-    buffer:{ label:'Buffer', description:'Hold Entity roots up to a configured node capacity.' },
-    conveyor:{ label:'Conveyor', description:'Move an Entity subtree after a configured travel time.' },
-    router:{ label:'Router', description:'Route Entities using ordered Output Rules.' },
-    pack:{ label:'Attach', description:'Attach one incoming Entity as a child of another Entity.' },
-    unpack:{ label:'Detach', description:'Detach a nested Entity and release parent and child separately.' },
-    basic:{ label:'Basic Node', description:'Start from the common node model and configure rules manually.' },
-    equip:{ label:'Equipment', description:'Process an Entity with standard process / wait / down behavior.' },
-    note:{ label:'Memo', description:'Place text notes on the graph for layout comments and instructions.' },
-    signal:{ label:'Signal', description:'Run signal-only scripts and combine logic without Entity transport.' },
-    shuttle:{ label:'Shuttle Stage', description:'Synchronize grouped stages and move one Entity per stage together.' },
-    merge:{ label:'Merge', description:'Merge matching Entity IDs from multiple inputs into one output.' },
-    join:{ label:'Join', description:'Pass through the first-arriving Entity from multiple upstream nodes.' },
-    source:{ label:'Sequence Source', description:'Generate Entities from a configured Type sequence.' },
-    entitysource:{ label:'Entity Source', description:'Create an Entity with an arbitrary initial child hierarchy.' },
-    sink:{ label:'Sink', description:'Collect completed Entities and monitor throughput.' },
-    split:{ label:'Split', description:'Duplicate one Entity into multiple synchronized downstream branches.' },
-    branch:{ label:'Branch', description:'Route Entities by Type to different output ports.' },
-    agvroute:{ label:'AGV Route', description:'Transport Entities along a timed route.' },
-    carrierroute:{ label:'Carrier Route', description:'Transport Entities along a timed route.' },
-    station:{ label:'Store', description:'Store a root Entity and transfer its children through role-based ports.' },
-    transferstation:{ label:'Transfer', description:'Attach, detach, or transfer any nested Entity.' }
+    machine:{description:'Process one Entity at a time. Edit its timing in Details / Flow.'},
+    inspection:{description:'A timed inspection step. Configure the Flow in Details.'},
+    buffer:{description:'Hold an Entity until the destination can accept it.'},
+    conveyor:{description:'A timed transport step. Configure the Flow in Details.'},
+    router:{description:'Route each Entity to its matching Type output.'},
+    pack:{description:'Receive a parent, fill its remaining capacity, and release the loaded parent.'},
+    unpack:{description:'Deliver all direct children before releasing the empty parent.'},
+    basic:{description:'Build a Flow using ports, timed operations and routing.'},
+    note:{description:'Add a note to the layout.'},
+    shuttle:{description:'Wait for every member of a named SyncroGroup before moving together.'},
+    source:{description:'Generate Entities from the sequence in Contents.'},
+    sink:{description:'Record completed Entities.'}
   };
   function getNodeMeta(kind){
     return NODE_META[kind] || { label: kind, description: '' };
@@ -1804,8 +1580,8 @@ window.beginGroupPlacement = beginGroupPlacement;
       return;
     }
     try{
-      const kind = sel.value || 'equip';
-      const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.equip;
+      const kind = sel.value || 'basic';
+      const schema = NODE_SCHEMAS[kind] || NODE_SCHEMAS.basic;
       const node = typeof App.createNodeFromCatalog === 'function'
         ? App.createNodeFromCatalog(kind)
         : LiteGraph.createNode(schema.type);
@@ -1818,9 +1594,6 @@ window.beginGroupPlacement = beginGroupPlacement;
       const jitterX = Math.floor(Math.random()*60);
       const jitterY = Math.floor(Math.random()*60);
       node.pos = [baseX + jitterX, baseY + jitterY];
-      if(node.type === 'factory/basic' && typeof App.ensureBasicTemplateFlowRules === 'function'){
-        App.ensureBasicTemplateFlowRules(node, { force: false, templateId:schema.templateId || kind });
-      }
       if(typeof App.createNodeFromCatalog !== 'function' && schema.flowTemplate === 'sequence' && typeof App.configureBasicSequenceGenerator === 'function'){
         App.configureBasicSequenceGenerator(node);
       }
@@ -2068,7 +1841,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     }else{
       const groupLabel = getSelectedOptionLabel(groupKindSelect, 'Stop Group');
       const rateText = String(groupStopRate?.dataset?.rateText || '')
-        || String(groupStopRate?.textContent || '').replace(/^Downtime:\s*/i, '').trim();
+        || String(groupStopRate?.textContent || '').replace(/^Recovery time:\s*/i, '').trim();
       setPanelMeta('addGroupPanel', rateText && rateText !== '-' ? `${groupLabel} · ${rateText} down` : groupLabel);
     }
 

@@ -481,11 +481,11 @@ export type BottleneckNodeReport = {
   totalDurationSec: number;
   processSec: number;
   waitSec: number;
-  downSec: number;
+  recoverySec: number;
   idleSec: number;
   processRatio: number;
   waitRatio: number;
-  downRatio: number;
+  recoveryRatio: number;
   idleRatio: number;
   bottleneckScore: number;
 };

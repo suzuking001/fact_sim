@@ -69,10 +69,10 @@ var App = window.App || (window.App = {});
   function hasTimedState(node){
     if(!node) return false;
     const state = String(node._state || '').toUpperCase();
-    if(state === 'PROCESS' || state === 'DOWN') return true;
+    if(state === 'PROCESS' || state === 'RECOVERY') return true;
     const stateName = String(node._stateName || '').toLowerCase();
     if(stateName.indexOf('process') >= 0) return true;
-    if(stateName.indexOf('down') >= 0) return true;
+    if(stateName.indexOf('recovery') >= 0) return true;
     return false;
   }
 

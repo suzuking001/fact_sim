@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Round robin reuses one Entity Type and preserves its next destination under backpressure and restore",
+    "ok": true
+  },
+  {
+    "name": "Process and Recovery hold one cycle, apply active edits at the same time",
+    "ok": true
+  },
+  {
+    "name": "Zero and decimal seconds complete at their exact deadlines",
+    "ok": true
+  },
+  {
+    "name": "Router type priority, blocked dedicated output, anyType and missing route",
+    "ok": true
+  },
+  {
+    "name": "Palletizing waits for parent, accepts two compatible children and preserves hierarchy",
+    "ok": true
+  },
+  {
+    "name": "Partial and full parents fill only remaining capacity",
+    "ok": true
+  },
+  {
+    "name": "DePalletizing waits for child delivery and retains grandchildren",
+    "ok": true
+  },
+  {
+    "name": "Invalid topology is visible and edits holding an Entity are rejected",
+    "ok": true
+  },
+  {
+    "name": "Snapshot restore preserves Entity identity, links, hierarchy and deadlines",
+    "ok": true
+  },
+  {
+    "name": "SyncroGroup includes empty members and releases all members atomically",
+    "ok": true
+  },
+  {
+    "name": "SyncroGroup permits atomic circular transfers into simultaneously vacated equipment",
+    "ok": true
+  },
+  {
+    "name": "Router falls back only for an unmatched type and reports missing routes",
+    "ok": true
+  },
+  {
+    "name": "Multiple inputs choose FIFO, with input-port order for simultaneous offers",
+    "ok": true
+  },
+  {
+    "name": "Animation uses active Process and Recovery deadlines across edits and multiple stages",
+    "ok": true
+  },
+  {
+    "name": "IDs never reuse deleted numbers; old files are rejected",
+    "ok": true
+  }
+]

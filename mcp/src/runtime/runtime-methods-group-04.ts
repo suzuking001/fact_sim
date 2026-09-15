@@ -100,7 +100,7 @@ export function registerRuntimeMethodsGroup04(
           type: string | null;
           processSec: number;
           waitSec: number;
-          downSec: number;
+          recoverySec: number;
           idleSec: number;
         }
       >();
@@ -128,7 +128,7 @@ export function registerRuntimeMethodsGroup04(
             type: null,
             processSec: 0,
             waitSec: 0,
-            downSec: 0,
+            recoverySec: 0,
             idleSec: 0
           };
   
@@ -136,8 +136,8 @@ export function registerRuntimeMethodsGroup04(
           bucket.processSec += duration;
         } else if (state.includes("wait")) {
           bucket.waitSec += duration;
-        } else if (state.includes("down")) {
-          bucket.downSec += duration;
+        } else if (state.includes("recovery")) {
+          bucket.recoverySec += duration;
         } else {
           bucket.idleSec += duration;
         }
@@ -149,16 +149,16 @@ export function registerRuntimeMethodsGroup04(
       let totalObservedSec = 0;
   
       for (const bucket of buckets.values()) {
-        const total = bucket.processSec + bucket.waitSec + bucket.downSec + bucket.idleSec;
+        const total = bucket.processSec + bucket.waitSec + bucket.recoverySec + bucket.idleSec;
         if (total < minDuration) continue;
         totalObservedSec += total;
   
         const processRatio = total > 0 ? bucket.processSec / total : 0;
         const waitRatio = total > 0 ? bucket.waitSec / total : 0;
-        const downRatio = total > 0 ? bucket.downSec / total : 0;
+        const recoveryRatio = total > 0 ? bucket.recoverySec / total : 0;
         const idleRatio = total > 0 ? bucket.idleSec / total : 0;
   
-        const bottleneckScore = total * (processRatio * 1.0 + waitRatio * 0.8 + downRatio * 0.45);
+        const bottleneckScore = total * (processRatio * 1.0 + waitRatio * 0.8 + recoveryRatio * 0.45);
   
         mapped.push({
           nodeId: bucket.nodeId,
@@ -167,11 +167,11 @@ export function registerRuntimeMethodsGroup04(
           totalDurationSec: Number(total.toFixed(3)),
           processSec: Number(bucket.processSec.toFixed(3)),
           waitSec: Number(bucket.waitSec.toFixed(3)),
-          downSec: Number(bucket.downSec.toFixed(3)),
+          recoverySec: Number(bucket.recoverySec.toFixed(3)),
           idleSec: Number(bucket.idleSec.toFixed(3)),
           processRatio: Number(processRatio.toFixed(4)),
           waitRatio: Number(waitRatio.toFixed(4)),
-          downRatio: Number(downRatio.toFixed(4)),
+          recoveryRatio: Number(recoveryRatio.toFixed(4)),
           idleRatio: Number(idleRatio.toFixed(4)),
           bottleneckScore: Number(bottleneckScore.toFixed(3))
         });

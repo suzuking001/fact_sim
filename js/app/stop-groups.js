@@ -332,9 +332,9 @@ var App = window.App || (window.App = {});
   function hasTimedState(node){
     if(!node) return false;
     const state = String(node._state || '').toUpperCase();
-    if(state === 'PROCESS' || state === 'DOWN') return true;
+    if(state === 'PROCESS' || state === 'RECOVERY') return true;
     const stateName = String(node._stateName || '').toLowerCase();
-    return stateName.indexOf('process') >= 0 || stateName.indexOf('down') >= 0;
+    return stateName.indexOf('process') >= 0 || stateName.indexOf('recovery') >= 0;
   }
 
   function patchNodeExecution(node){
@@ -671,8 +671,8 @@ var App = window.App || (window.App = {});
 
   function describeType(type){
     const key = normalizeType(type);
-    if(key === 'random_stop') return 'Randomized shared downtime using interval and duration distributions.';
-    if(key === 'scheduled_stop') return 'Fixed shared downtime for breaks, planned stops, and recurring pauses.';
+    if(key === 'random_stop') return 'Randomized shared recovery time using interval and duration distributions.';
+    if(key === 'scheduled_stop') return 'Fixed shared recovery time for breaks, planned stops, and recurring pauses.';
     return 'Shared stop behavior applied to nodes inside this group.';
   }
 

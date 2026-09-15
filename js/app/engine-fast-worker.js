@@ -42,14 +42,14 @@
 
 if(work.type === 'A'){
   this.properties.processTime = 5.0;
-  this.properties.downTime = 3.0;
+  this.properties.recoveryTime = 3.0;
 }else if(work.type === 'B'){
   this.properties.processTime = 4.0;
-  this.properties.downTime = 2.0;
+  this.properties.recoveryTime = 2.0;
 }else{
   // default
   this.properties.processTime = 10.0;
-  this.properties.downTime = 2.0;
+  this.properties.recoveryTime = 2.0;
 }
 
 // Return true to accept this work item into PROCESS
@@ -124,23 +124,12 @@ return true;`;
       '../nodes-config.js',
       '../nodes/work.js?v=20260828a',
       '../nodes/entity_model.js?v=20260831b',
-      '../nodes/entity_store.js?v=20260831a',
       '../nodes/sigports.js',
-      '../nodes/equipment.js?v=20260824f',
       '../nodes/note.js',
       '../nodes/signal.js',
-      '../nodes/source.js?v=20260829a',
-      '../nodes/entity_source.js?v=20260831a',
-      '../nodes/split.js?v=20260829a',
-      '../nodes/branch.js?v=20260824f',
-      '../nodes/merge2.js?v=20260824f',
-      '../nodes/join.js?v=20260824f',
-      '../nodes/agv_route.js?v=20260824f',
-      '../nodes/carrier_route.js?v=20260829a',
-      '../nodes/station.js?v=20260824f',
-      '../nodes/transfer_station.js?v=20260824f',
-      '../nodes/sink.js?v=20260824f',
-      '../nodes/basic_node.js?v=20260831b',
+      'flow-model.js?v=20260915minimal',
+      'flow-runtime.js?v=20260915minimal',
+      '../nodes/basic_node.js?v=20260915minimal',
       '../nodes/register.js',
       'graph-links.js',
       'stop-groups.js',
@@ -170,6 +159,7 @@ return true;`;
       root.App.stopGroups.restoreSerializedData(nextGraph, payload, false);
     }
     configureGraphClock(nextGraph);
+    root.App.FlowRuntime.restore(nextGraph,payload);
     return nextGraph;
   }
 
@@ -206,7 +196,7 @@ return true;`;
     applySeed(seed);
     lastGraphData = cloneJson(graphData);
     graph = buildGraph(lastGraphData);
-    setSimTime(0);
+    setSimTime(Number(lastGraphData?.__flowRuntime?.time) || 0);
     engine = new root.App.EventFastEngine(graph, Object.assign({}, engineOptions || {}));
     if(engine && typeof engine.reset === 'function') engine.reset();
     return {
@@ -265,7 +255,7 @@ return true;`;
 
   function snapshotGraphData(targetGraph){
     if(!targetGraph) return null;
-    const data = targetGraph.serialize();
+    const data = root.App.FlowRuntime.capture(targetGraph,targetGraph.serialize());
     data.__factSimRuntimeNodes = collectRuntimeNodeStates(targetGraph);
     data.__factSimRuntimeLinks = collectRuntimeLinkStates(targetGraph);
     return data;

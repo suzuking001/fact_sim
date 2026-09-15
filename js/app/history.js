@@ -70,7 +70,6 @@ function applySnapshot(snap){
   try{
     const data = JSON.parse(snap);
     App.graph.clear();
-    if(typeof App.resetEntityStore === 'function') App.resetEntityStore(App.graph);
     App.graph.configure(data);
     if(typeof App.restoreEntityModel === 'function') App.restoreEntityModel(App.graph, data, true);
     if(typeof window.normalizeGraphOverlaySizes === 'function'){

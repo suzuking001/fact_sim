@@ -141,6 +141,9 @@ export function registerRuntimeMethodsGroup08(
           }
   
           if (requestedProperties && typeof requestedProperties === "object" && !Array.isArray(requestedProperties)) {
+            if (node.type === 'factory/basic' && ['source','sink'].includes(requestedProperties.role)) {
+              (node as any).applyTemplate(requestedProperties.role);
+            }
             node.properties = {
               ...(node.properties ?? {}),
               ...(requestedProperties as Record<string, unknown>)
@@ -154,7 +157,10 @@ export function registerRuntimeMethodsGroup08(
             if (titleRaw) node.title = titleRaw;
           }
   
+          (app as any).FlowModel.pause();
+          (app.graph as any).beforeChange?.();
           app.graph.add(node);
+          (app.graph as any).afterChange?.();
           if (app.canvas && typeof app.canvas.draw === "function") {
             app.canvas.draw(true, true);
           }

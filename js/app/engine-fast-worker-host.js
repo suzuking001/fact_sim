@@ -2,11 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const WORKER_MODE = 'event-fast-worker';
-  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260829b';
-  const UNSAFE_BASIC_OPERATIONS = new Set([
-    'carrier-transport',
-    'synchronized-step'
-  ]);
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260915minimal';
 
   function cloneJson(value){
     try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }
@@ -55,7 +51,7 @@ var App = window.App || (window.App = {});
   function serializeGraphForWorker(graphOrData){
     if(graphOrData && typeof graphOrData.serialize === 'function'){
       if(typeof App.serializeGraphData === 'function'){
-        return cloneJson(App.serializeGraphData(graphOrData));
+        return App.FlowRuntime.capture(graphOrData,App.serializeGraphData(graphOrData));
       }
       const data = graphOrData.serialize();
       if(App.stopGroups && typeof App.stopGroups.injectSerializedData === 'function'){
@@ -80,6 +76,7 @@ var App = window.App || (window.App = {});
     if(typeof configureGraphClock === 'function'){
       try{ configureGraphClock(graph); }catch(_e){}
     }
+    App.FlowRuntime.restore(graph,data);
     return graph;
   }
 
@@ -199,7 +196,7 @@ var App = window.App || (window.App = {});
     const data = graph.serialize();
     data.__factSimRuntimeNodes = collectRuntimeNodeStates(graph);
     data.__factSimRuntimeLinks = collectRuntimeLinkStates(graph);
-    return data;
+    return App.FlowRuntime.capture(graph,data);
   }
   function applyRuntimeNodeStates(graph, graphData){
     if(!graph || typeof graph.getNodeById !== 'function') return;
@@ -256,13 +253,7 @@ var App = window.App || (window.App = {});
   }
 
   function hasUnsafeWorkerTypes(graphData){
-    const nodes = Array.isArray(graphData && graphData.nodes) ? graphData.nodes : [];
-    for(const node of nodes){
-      const type = String(node && node.type || '').toLowerCase();
-      const operations = Array.isArray(node?.properties?.operations) ? node.properties.operations : [];
-      if(type === 'factory/basic' && operations.some((operation)=>UNSAFE_BASIC_OPERATIONS.has(String(operation?.kind || '').toLowerCase()))) return true;
-    }
-    return false;
+    return (graphData.nodes || []).some(node=>node.type==='factory/basic' && node.properties?.flow?.version!==2);
   }
 
   function inspectFastWorkerSupport(graphOrData){
@@ -364,6 +355,7 @@ var App = window.App || (window.App = {});
       }
       applyRuntimeNodeStates(graph, graphData);
       applyRuntimeLinkStates(graph, graphData);
+      App.FlowRuntime.restore(graph,graphData);
       graph.status = LGraph.STATUS_RUNNING;
       graph.last_update_time = LiteGraph.getTime();
       if(App.timelineChart){

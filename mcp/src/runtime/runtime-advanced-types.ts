@@ -41,9 +41,9 @@ export type OptimizeLineOptions = {
   minSampleSec?: number;
   maxNodesPerIteration?: number;
   processReductionRatio?: number;
-  downReductionRatio?: number;
+  recoveryReductionRatio?: number;
   minProcessTime?: number;
-  minDownTime?: number;
+  minRecoveryTime?: number;
 };
 
 export type ObjectiveWeights = {

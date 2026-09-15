@@ -1,0 +1,196 @@
+[
+  {
+    "name": "simple",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 4,
+        "count": 298,
+        "lastAt": 1196000
+      }
+    ],
+    "created": 301,
+    "completed": 298,
+    "active": 3,
+    "unusedEquipment": [],
+    "palletizingChecks": 0,
+    "observedTransferLinks": 2
+  },
+  {
+    "name": "branch",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 5,
+        "count": 241,
+        "lastAt": 1199000
+      },
+      {
+        "id": 6,
+        "count": 239,
+        "lastAt": 1195000
+      }
+    ],
+    "created": 483,
+    "completed": 480,
+    "active": 3,
+    "unusedEquipment": [],
+    "palletizingChecks": 0,
+    "observedTransferLinks": 3
+  },
+  {
+    "name": "shuttle_line5",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 7,
+        "count": 666,
+        "lastAt": 1198800
+      }
+    ],
+    "created": 672,
+    "completed": 666,
+    "active": 6,
+    "unusedEquipment": [],
+    "palletizingChecks": 0,
+    "observedTransferLinks": 5
+  },
+  {
+    "name": "carrier",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 3,
+        "count": 78,
+        "lastAt": 1199600
+      }
+    ],
+    "created": 247,
+    "completed": 234,
+    "active": 13,
+    "unusedEquipment": [],
+    "palletizingChecks": 9772,
+    "observedTransferLinks": 15
+  },
+  {
+    "name": "pallet_station_demo",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 7,
+        "count": 201,
+        "lastAt": 1197900
+      }
+    ],
+    "created": 218,
+    "completed": 201,
+    "active": 17,
+    "unusedEquipment": [],
+    "palletizingChecks": 6473,
+    "observedTransferLinks": 9
+  },
+  {
+    "name": "sample_line1",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 45,
+        "count": 49,
+        "lastAt": 1187000
+      },
+      {
+        "id": 55,
+        "count": 47,
+        "lastAt": 1196000
+      },
+      {
+        "id": 66,
+        "count": 39,
+        "lastAt": 1173000
+      }
+    ],
+    "created": 738,
+    "completed": 621,
+    "active": 117,
+    "unusedEquipment": [],
+    "palletizingChecks": 965,
+    "observedTransferLinks": 47
+  },
+  {
+    "name": "sample_line2",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 3,
+        "count": 7,
+        "lastAt": 1032400
+      }
+    ],
+    "created": 309,
+    "completed": 51,
+    "active": 258,
+    "unusedEquipment": [],
+    "palletizingChecks": 175503,
+    "observedTransferLinks": 129
+  },
+  {
+    "name": "parallel_benchmark",
+    "ok": true,
+    "simulatedSeconds": 1200,
+    "sinks": [
+      {
+        "id": 4,
+        "count": 298,
+        "lastAt": 1196000
+      },
+      {
+        "id": 8,
+        "count": 298,
+        "lastAt": 1196000
+      },
+      {
+        "id": 12,
+        "count": 298,
+        "lastAt": 1196000
+      },
+      {
+        "id": 16,
+        "count": 298,
+        "lastAt": 1196000
+      },
+      {
+        "id": 20,
+        "count": 298,
+        "lastAt": 1196000
+      },
+      {
+        "id": 24,
+        "count": 298,
+        "lastAt": 1196000
+      },
+      {
+        "id": 28,
+        "count": 298,
+        "lastAt": 1196000
+      },
+      {
+        "id": 32,
+        "count": 298,
+        "lastAt": 1196000
+      }
+    ],
+    "created": 2408,
+    "completed": 2384,
+    "active": 24,
+    "unusedEquipment": [],
+    "palletizingChecks": 0,
+    "observedTransferLinks": 16
+  }
+]

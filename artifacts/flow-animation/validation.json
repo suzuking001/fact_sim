@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "mode": "native",
+      "before": {
+        "duration": 2000,
+        "positions": [
+          297.3046875,
+          517.6953125
+        ],
+        "state": "DOWN",
+        "count": 1
+      },
+      "after": {
+        "duration": 20000,
+        "positions": [
+          297.3046875,
+          517.6953125
+        ],
+        "state": "DOWN",
+        "count": 1
+      }
+    },
+    {
+      "mode": "program",
+      "before": {
+        "duration": 2000,
+        "positions": [
+          192.62858527905155,
+          22.371414720948433
+        ],
+        "state": "WAIT",
+        "count": 1
+      },
+      "after": {
+        "duration": 20000,
+        "positions": [
+          192.62858527905155,
+          22.371414720948433
+        ],
+        "state": "WAIT",
+        "count": 1
+      }
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,16 @@
+{
+  "typeTiming": true,
+  "postOutputRecovery": true,
+  "zeroAndFallback": true,
+  "json": true,
+  "branchAndParallel": true,
+  "nativeTiming": true,
+  "invalidRejected": true,
+  "guidedInsertion": true,
+  "multipleConditions": true,
+  "connectionPicker": true,
+  "typedTimeUI": true,
+  "nativeTimeUI": true,
+  "narrow": true,
+  "errors": []
+}
