@@ -1,5 +1,29 @@
 [
   {
+    "name": "Recovery starts at downstream acceptance, never during downstream waiting",
+    "ok": true
+  },
+  {
+    "name": "Upstream recovery and downstream process overlap from exactly the same transfer",
+    "ok": true
+  },
+  {
+    "name": "Join waits for every completion input and Fork fires all branches at the transfer time",
+    "ok": true
+  },
+  {
+    "name": "A competing upstream that loses downstream admission does not start recovery",
+    "ok": true
+  },
+  {
+    "name": "Recovery survives snapshot, active retiming and a Reset starts ready",
+    "ok": true
+  },
+  {
+    "name": "Recovery feedback validates and lays out finitely, but unrestricted cycles are rejected",
+    "ok": true
+  },
+  {
     "name": "Round robin reuses one Entity Type and preserves its next destination under backpressure and restore",
     "ok": true
   },

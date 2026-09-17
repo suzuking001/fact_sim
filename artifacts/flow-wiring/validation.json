@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-17",
+  "changes": [
+    "Bidirectional drag and two-click wiring",
+    "Atomic reconnection; cancellation preserves existing links",
+    "Preview and target highlight",
+    "Wire selection and Delete/Backspace/context disconnect",
+    "No implicit simulation start on idle Flow edit",
+    "Fit on dock resize and return from Pop Out"
+  ],
+  "tests": {
+    "wiring": { "passed": 9, "total": 9, "report": "artifacts/flow-v2/wiring-tests.json" },
+    "runtime": { "passed": 21, "total": 21, "report": "artifacts/flow-v2/runtime-tests.json" },
+    "engineQuick": { "passed": 40, "failureCount": 0, "strictFinalParity": true, "report": "artifacts/flow-wiring/engine_test.json" },
+    "syntax": true,
+    "mcpTypecheck": true
+  },
+  "visual": {
+    "previousHttpReview": "Sample Line2, Join/Fork Add menu and Recovery progress were visually inspected through http://127.0.0.1:8124 before the wiring changes. Dock fitting was verified after its fix.",
+    "wiringChanges": "Event-handler unit tests passed using a DOM double. Real pointer/visual verification remains pending because browser transport closed and the native Computer Use pipe is unavailable."
+  }
+}

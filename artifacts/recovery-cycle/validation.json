@@ -1,0 +1,147 @@
+{
+  "date": "2026-09-16",
+  "scope": "Join/Fork and transfer-start Recovery",
+  "syntax": {
+    "checkedFiles": 21,
+    "passed": true
+  },
+  "mcpTypecheck": true,
+  "mcpBuild": true,
+  "runtimeTests": {
+    "passed": 21,
+    "total": 21
+  },
+  "sampleRuns": {
+    "passed": 8,
+    "total": 8,
+    "simulationSeconds": 1200
+  },
+  "quick": {
+    "targetSimMs": 10000,
+    "summary": {
+      "passed": 40,
+      "warned": 0,
+      "failed": 0,
+      "passedCases": 40,
+      "warnedCases": 0,
+      "failedCases": 0,
+      "caseCount": 40,
+      "failureCount": 0,
+      "warningCount": 0,
+      "engineCount": 5,
+      "suite": "quick",
+      "seedCount": 1,
+      "exampleCount": 8,
+      "includesCurrentGraph": false,
+      "stoppedEarly": false,
+      "reruns": 0,
+      "stopOnFirstFailure": false
+    }
+  },
+  "standard": {
+    "targetSimMs": 30000,
+    "summary": {
+      "passed": 40,
+      "warned": 0,
+      "failed": 10,
+      "passedCases": 40,
+      "warnedCases": 0,
+      "failedCases": 0,
+      "caseCount": 40,
+      "failureCount": 10,
+      "warningCount": 0,
+      "engineCount": 5,
+      "suite": "standard",
+      "seedCount": 1,
+      "exampleCount": 8,
+      "includesCurrentGraph": false,
+      "stoppedEarly": false,
+      "reruns": 0,
+      "stopOnFirstFailure": false
+    },
+    "remainingIssues": [
+      {
+        "code": "FINAL_STATE_DELTA",
+        "engine": "event",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_ENTITY_SET_DELTA",
+        "engine": "event",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "engine": "event",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_STATE_DELTA",
+        "engine": "event-fast",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_ENTITY_SET_DELTA",
+        "engine": "event-fast",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "engine": "event-fast",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_STATE_DELTA",
+        "engine": "event-fast-worker",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_STATE_DELTA",
+        "engine": "event-fast-par",
+        "scenario": "branch",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "engine": "event",
+        "scenario": "pallet_station_demo",
+        "alsoPresentBeforeChange": true
+      },
+      {
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "engine": "event-fast",
+        "scenario": "pallet_station_demo",
+        "alsoPresentBeforeChange": true
+      }
+    ],
+    "newIssueSignatures": []
+  },
+  "sampleLine2": {
+    "migratedEquipment": 119,
+    "strictParityQuickAndStandard": true,
+    "entityTypes": [
+      "workA",
+      "workB",
+      "carryer1",
+      "carryer2"
+    ]
+  },
+  "ui": {
+    "status": "not visually verified",
+    "reason": "Browser security policy rejected navigation to the local file URL. Add options and feedback wiring were checked in source and runtime tests."
+  },
+  "references": [
+    "artifacts/flow-v2/runtime-tests.json",
+    "artifacts/flow-v2/sample-tests.json",
+    "artifacts/recovery-cycle/engine_test.json",
+    "artifacts/recovery-cycle-standard/engine_test.json",
+    "artifacts/minimal-entities/engine_test.json"
+  ]
+}

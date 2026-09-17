@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-17",
+  "requestedBehavior": "Duplicate one work into all six physical Fork outputs simultaneously.",
+  "cause": "Fork outputs after the first were incorrectly forced to completion-signal channels.",
+  "result": {
+    "screenshotTopologyValid": true,
+    "workCopies": 6,
+    "newRootInstances": 5,
+    "distinctInstanceIds": true,
+    "contentsAndAttributesDeepCopied": true,
+    "partialOutputWhileBlocked": false,
+    "copiesCreatedWhileBlocked": false,
+    "recoveryStartsAtSimultaneousTransfer": true
+  },
+  "checks": {
+    "fanout": { "passed": 9, "total": 9, "includesDtEventEventFast": true },
+    "existingRuntime": { "passed": 21, "total": 21 },
+    "status": { "passed": 5, "total": 5 },
+    "wiring": { "passed": 12, "total": 12 },
+    "sampleRuns": { "passed": 8, "total": 8, "simulationSeconds": 1200 },
+    "engineQuick": { "passed": 40, "failureCount": 0, "strictFinalParity": true },
+    "javascriptSyntax": true,
+    "mcpTypecheck": true
+  },
+  "visualVerification": "The screenshot topology was reproduced in the model/runtime tests. Browser interaction remains unavailable; no new visual verification is claimed."
+}

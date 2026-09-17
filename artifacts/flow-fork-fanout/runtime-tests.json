@@ -1,0 +1,38 @@
+[
+  {
+    "name": "The user screenshot validates, with six work branches and a Recovery signal",
+    "ok": true
+  },
+  {
+    "name": "One root becomes six distinct instances at one timestamp; Recovery starts then",
+    "ok": true
+  },
+  {
+    "name": "One blocked destination prevents every output, every copy and Recovery",
+    "ok": true
+  },
+  {
+    "name": "All downstream Process timers start together with upstream Recovery",
+    "ok": true
+  },
+  {
+    "name": "Nested contents are deep copies with independent IDs, parents and attributes",
+    "ok": true
+  },
+  {
+    "name": "A blocked fanout survives snapshot/restore without extra instances or lost readiness",
+    "ok": true
+  },
+  {
+    "name": "Recovery may use the first Fork port; output ordering does not define its channel",
+    "ok": true
+  },
+  {
+    "name": "Repeated evaluation while blocked does not allocate copies or advance sequences",
+    "ok": true
+  },
+  {
+    "name": "dt, event and event-fast produce six copies at the same transfer time",
+    "ok": true
+  }
+]

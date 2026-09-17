@@ -57,8 +57,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -74,15 +74,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -95,15 +95,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -116,8 +116,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -125,27 +170,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -258,8 +323,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -275,8 +340,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -292,8 +357,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -309,8 +374,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                30
+                1836,
+                16
               ]
             },
             {
@@ -326,8 +391,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                205
+                1836,
+                176
               ]
             },
             {
@@ -349,15 +414,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -370,8 +435,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -392,8 +457,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -413,9 +478,10 @@
                 }
               ],
               "pos": [
-                1080,
-                30
-              ]
+                926,
+                516
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -437,8 +503,52 @@
                 }
               ],
               "pos": [
-                1350,
-                30
+                1576,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -458,8 +568,8 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -476,12 +586,12 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -496,6 +606,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -504,7 +632,9 @@
             "entityRouter": 2,
             "process": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -634,8 +764,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -651,8 +781,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -668,8 +798,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -685,8 +815,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                30
+                1836,
+                16
               ]
             },
             {
@@ -702,8 +832,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                205
+                1836,
+                176
               ]
             },
             {
@@ -725,15 +855,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 1.0
+                "seconds": 1
               },
               "inputs": [
                 {
@@ -746,8 +876,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -768,8 +898,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -789,9 +919,10 @@
                 }
               ],
               "pos": [
-                1080,
-                30
-              ]
+                926,
+                516
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -813,8 +944,52 @@
                 }
               ],
               "pos": [
-                1350,
-                30
+                1576,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -834,8 +1009,8 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -852,12 +1027,12 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -872,6 +1047,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -880,7 +1073,9 @@
             "entityRouter": 2,
             "process": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -1001,8 +1196,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -1018,8 +1213,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -1035,8 +1230,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -1052,8 +1247,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -1075,15 +1270,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 1.0
+                "seconds": 1
               },
               "inputs": [
                 {
@@ -1096,8 +1291,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -1117,9 +1312,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -1141,8 +1337,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -1162,18 +1402,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -1188,6 +1428,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -1195,7 +1453,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -1265,8 +1525,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -1282,15 +1542,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -1303,8 +1563,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -1324,9 +1584,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -1345,8 +1606,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -1354,26 +1659,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -1381,7 +1704,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -1450,8 +1775,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -1467,15 +1792,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -1488,8 +1813,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -1509,9 +1834,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -1530,8 +1856,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -1539,26 +1909,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -1566,7 +1954,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -1635,8 +2025,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -1652,15 +2042,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 20.0
+                "seconds": 20
               },
               "inputs": [
                 {
@@ -1673,8 +2063,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -1694,9 +2084,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -1715,8 +2106,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -1724,26 +2159,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -1751,7 +2204,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -1820,8 +2275,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -1837,15 +2292,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -1858,8 +2313,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -1879,9 +2334,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -1900,8 +2356,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -1909,26 +2409,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -1936,7 +2454,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -2005,8 +2525,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -2022,15 +2542,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -2043,8 +2563,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -2064,9 +2584,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -2085,8 +2606,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -2094,26 +2659,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -2121,7 +2704,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -2189,8 +2774,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -2206,15 +2791,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -2227,15 +2812,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -2248,8 +2833,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -2257,27 +2887,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -2387,8 +3037,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -2404,8 +3054,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -2421,8 +3071,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -2438,8 +3088,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -2464,15 +3114,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -2485,15 +3135,15 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -2506,8 +3156,53 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -2533,20 +3228,38 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -2554,7 +3267,9 @@
             "outPort": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -2616,8 +3331,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -2633,15 +3348,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -2654,15 +3369,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -2675,8 +3390,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -2684,27 +3444,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -2766,8 +3546,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -2783,15 +3563,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -2804,15 +3584,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -2825,8 +3605,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -2834,27 +3659,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -2916,8 +3761,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -2933,15 +3778,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -2954,15 +3799,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -2975,8 +3820,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -2984,27 +3874,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -3066,8 +3976,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -3083,15 +3993,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -3104,15 +4014,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -3125,8 +4035,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -3134,27 +4089,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -3216,8 +4191,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -3233,15 +4208,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -3254,15 +4229,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -3275,8 +4250,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -3284,27 +4304,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -3366,8 +4406,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -3383,15 +4423,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -3404,15 +4444,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -3425,8 +4465,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -3434,27 +4519,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -3516,8 +4621,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -3533,15 +4638,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -3554,15 +4659,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -3575,8 +4680,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -3584,27 +4734,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -3666,8 +4836,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -3683,15 +4853,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -3704,15 +4874,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -3725,8 +4895,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -3734,27 +4949,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -3830,8 +5065,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -3847,8 +5082,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -3864,8 +5099,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -3881,8 +5116,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -3903,8 +5138,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -3926,15 +5161,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -3947,15 +5182,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -3968,8 +5203,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -4001,20 +5281,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -4023,7 +5321,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -4088,8 +5388,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -4105,15 +5405,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -4126,15 +5426,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -4147,8 +5447,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -4156,27 +5501,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -4241,8 +5606,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -4258,15 +5623,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -4279,15 +5644,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -4300,8 +5665,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -4309,27 +5719,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -4391,8 +5821,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -4408,15 +5838,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -4429,15 +5859,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -4450,8 +5880,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -4459,27 +5934,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -4555,8 +6050,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -4572,8 +6067,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -4589,8 +6084,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -4606,8 +6101,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -4628,8 +6123,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -4651,15 +6146,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -4672,15 +6167,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -4693,8 +6188,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -4726,20 +6266,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -4748,7 +6306,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -4810,8 +6370,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -4827,15 +6387,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -4848,15 +6408,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -4869,8 +6429,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -4878,27 +6483,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -4960,8 +6585,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -4977,15 +6602,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -4998,15 +6623,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -5019,8 +6644,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -5028,27 +6698,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -5110,8 +6800,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -5127,15 +6817,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -5148,15 +6838,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -5169,8 +6859,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -5178,27 +6913,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -5260,8 +7015,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -5277,15 +7032,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -5298,15 +7053,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -5319,8 +7074,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -5328,27 +7128,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -5424,8 +7244,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -5441,8 +7261,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -5458,8 +7278,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -5475,8 +7295,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -5497,8 +7317,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -5520,15 +7340,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -5541,15 +7361,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -5562,8 +7382,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -5595,20 +7460,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -5617,7 +7500,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -5679,8 +7564,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -5696,15 +7581,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -5717,15 +7602,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -5738,8 +7623,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -5747,27 +7677,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -5829,8 +7779,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -5846,15 +7796,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -5867,15 +7817,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -5888,8 +7838,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -5897,27 +7892,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -5979,8 +7994,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -5996,15 +8011,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -6017,15 +8032,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -6038,8 +8053,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -6047,27 +8107,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -6146,8 +8226,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -6163,8 +8243,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -6180,8 +8260,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -6197,8 +8277,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -6219,8 +8299,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -6242,15 +8322,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -6263,15 +8343,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -6284,8 +8364,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -6317,20 +8442,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -6339,7 +8482,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -6401,8 +8546,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -6418,15 +8563,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -6439,15 +8584,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -6460,8 +8605,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -6469,27 +8659,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -6551,8 +8761,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -6568,15 +8778,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -6589,15 +8799,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -6610,8 +8820,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -6619,27 +8874,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -6715,8 +8990,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -6732,8 +9007,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -6749,8 +9024,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -6766,8 +9041,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -6788,8 +9063,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -6811,15 +9086,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -6832,15 +9107,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -6853,8 +9128,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -6886,20 +9206,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -6908,7 +9246,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -6970,8 +9310,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -6987,15 +9327,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -7008,15 +9348,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -7029,8 +9369,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -7038,27 +9423,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -7158,8 +9563,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -7175,8 +9580,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -7192,8 +9597,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                205
+                1316,
+                176
               ]
             },
             {
@@ -7209,15 +9614,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                380
+                1316,
+                336
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -7230,15 +9635,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 1.0
+                "seconds": 1
               },
               "inputs": [
                 {
@@ -7251,9 +9656,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                536,
+                516
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter1",
@@ -7279,8 +9685,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -7288,18 +9738,18 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter1",
               "input": "inPort1"
             },
@@ -7320,6 +9770,24 @@
               "output": "outPort3",
               "to": "outPort3",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -7327,7 +9795,9 @@
             "outPort": 3,
             "process": 1,
             "recovery": 1,
-            "entityRouter": 1
+            "entityRouter": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -7390,8 +9860,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -7407,15 +9877,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -7428,15 +9898,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -7449,8 +9919,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -7458,27 +9973,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -7543,8 +10078,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -7560,15 +10095,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -7581,15 +10116,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -7602,8 +10137,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -7611,27 +10191,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -7693,8 +10293,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -7710,15 +10310,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -7731,15 +10331,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -7752,8 +10352,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -7761,27 +10406,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -7843,8 +10508,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -7860,15 +10525,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -7881,15 +10546,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -7902,8 +10567,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -7911,27 +10621,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -7993,8 +10723,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -8010,15 +10740,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -8031,15 +10761,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -8052,8 +10782,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -8061,27 +10836,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -8178,8 +10973,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -8195,8 +10990,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -8212,8 +11007,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -8229,15 +11024,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -8250,8 +11045,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -8272,8 +11067,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -8292,8 +11087,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -8314,15 +11109,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -8335,8 +11130,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -8344,8 +11184,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -8380,14 +11220,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -8397,7 +11255,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -8498,8 +11358,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -8515,8 +11375,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -8532,8 +11392,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -8549,15 +11409,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -8570,8 +11430,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -8592,8 +11452,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -8612,8 +11472,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -8634,15 +11494,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -8655,8 +11515,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -8664,8 +11569,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -8700,14 +11605,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -8717,7 +11640,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -8826,8 +11751,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -8843,8 +11768,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -8860,8 +11785,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -8877,15 +11802,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -8898,8 +11823,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -8920,8 +11845,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -8940,8 +11865,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -8962,15 +11887,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -8983,8 +11908,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -8992,8 +11962,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -9028,14 +11998,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -9045,7 +12033,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -9146,8 +12136,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -9163,8 +12153,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -9180,8 +12170,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -9197,15 +12187,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -9218,8 +12208,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -9240,8 +12230,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -9260,8 +12250,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -9282,15 +12272,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -9303,8 +12293,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -9312,8 +12347,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -9348,14 +12383,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -9365,7 +12418,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -9470,8 +12525,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -9487,8 +12542,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -9504,8 +12559,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -9521,15 +12576,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -9542,8 +12597,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -9564,8 +12619,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -9584,8 +12639,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -9606,15 +12661,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -9627,8 +12682,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -9636,8 +12736,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -9672,14 +12772,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -9689,7 +12807,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -9787,8 +12907,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -9804,8 +12924,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -9821,8 +12941,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -9838,15 +12958,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -9859,8 +12979,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -9881,8 +13001,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -9901,8 +13021,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -9923,15 +13043,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -9944,8 +13064,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -9953,8 +13118,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -9989,14 +13154,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -10006,7 +13189,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -10068,8 +13253,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -10085,15 +13270,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 20.0
+                "seconds": 20
               },
               "inputs": [
                 {
@@ -10106,15 +13291,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -10127,8 +13312,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -10136,27 +13366,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -10256,8 +13506,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -10273,8 +13523,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -10290,8 +13540,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                205
+                1316,
+                176
               ]
             },
             {
@@ -10307,15 +13557,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                380
+                1316,
+                336
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -10328,8 +13578,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -10349,9 +13599,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                536,
+                516
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter1",
@@ -10377,8 +13628,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -10386,18 +13681,18 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter1",
               "input": "inPort1"
             },
@@ -10418,6 +13713,24 @@
               "output": "outPort3",
               "to": "outPort3",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -10425,7 +13738,9 @@
             "outPort": 3,
             "process": 1,
             "recovery": 1,
-            "entityRouter": 1
+            "entityRouter": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -10487,8 +13802,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -10504,15 +13819,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -10525,15 +13840,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -10546,8 +13861,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -10555,27 +13915,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -10685,8 +14065,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -10702,8 +14082,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -10719,8 +14099,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -10736,8 +14116,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -10762,15 +14142,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -10783,15 +14163,15 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -10804,8 +14184,53 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -10831,20 +14256,38 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -10852,7 +14295,9 @@
             "outPort": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -10914,8 +14359,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -10931,15 +14376,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -10952,15 +14397,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -10973,8 +14418,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -10982,27 +14472,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -11064,8 +14574,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -11081,15 +14591,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -11102,15 +14612,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -11123,8 +14633,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -11132,27 +14687,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -11214,8 +14789,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -11231,15 +14806,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -11252,15 +14827,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -11273,8 +14848,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -11282,27 +14902,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -11364,8 +15004,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -11381,15 +15021,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -11402,15 +15042,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -11423,8 +15063,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -11432,27 +15117,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -11514,8 +15219,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -11531,15 +15236,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -11552,15 +15257,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -11573,8 +15278,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -11582,27 +15332,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -11664,8 +15434,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -11681,15 +15451,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -11702,15 +15472,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -11723,8 +15493,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -11732,27 +15547,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -11814,8 +15649,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -11831,15 +15666,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -11852,15 +15687,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -11873,8 +15708,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -11882,27 +15762,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -11964,8 +15864,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -11981,15 +15881,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -12002,15 +15902,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -12023,8 +15923,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -12032,27 +15977,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -12128,8 +16093,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -12145,8 +16110,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -12162,8 +16127,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -12179,8 +16144,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -12201,8 +16166,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -12224,15 +16189,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -12245,15 +16210,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -12266,8 +16231,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -12299,20 +16309,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -12321,7 +16349,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -12383,8 +16413,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -12400,15 +16430,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -12421,15 +16451,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -12442,8 +16472,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -12451,27 +16526,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -12533,8 +16628,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -12550,15 +16645,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -12571,15 +16666,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -12592,8 +16687,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -12601,27 +16741,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -12683,8 +16843,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -12700,15 +16860,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -12721,15 +16881,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -12742,8 +16902,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -12751,27 +16956,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -12847,8 +17072,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -12864,8 +17089,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -12881,8 +17106,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -12898,8 +17123,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -12920,8 +17145,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -12943,15 +17168,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -12964,15 +17189,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -12985,8 +17210,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -13018,20 +17288,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -13040,7 +17328,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -13102,8 +17392,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -13119,15 +17409,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -13140,15 +17430,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -13161,8 +17451,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -13170,27 +17505,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -13252,8 +17607,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -13269,15 +17624,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -13290,15 +17645,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -13311,8 +17666,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -13320,27 +17720,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -13402,8 +17822,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -13419,15 +17839,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -13440,15 +17860,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -13461,8 +17881,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -13470,27 +17935,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -13552,8 +18037,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -13569,15 +18054,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -13590,15 +18075,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -13611,8 +18096,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -13620,27 +18150,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -13716,8 +18266,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -13733,8 +18283,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -13750,8 +18300,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -13767,8 +18317,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -13789,8 +18339,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -13812,15 +18362,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -13833,15 +18383,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -13854,8 +18404,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -13887,20 +18482,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -13909,7 +18522,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -13974,8 +18589,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -13991,15 +18606,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -14012,15 +18627,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -14033,8 +18648,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -14042,27 +18702,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -14127,8 +18807,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -14144,15 +18824,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -14165,15 +18845,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -14186,8 +18866,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -14195,27 +18920,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -14277,8 +19022,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -14294,15 +19039,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -14315,15 +19060,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -14336,8 +19081,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -14345,27 +19135,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -14441,8 +19251,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -14458,8 +19268,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -14475,8 +19285,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -14492,8 +19302,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -14514,8 +19324,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -14537,15 +19347,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -14558,15 +19368,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -14579,8 +19389,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -14612,20 +19467,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -14634,7 +19507,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -14696,8 +19571,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -14713,15 +19588,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 20.0
+                "seconds": 20
               },
               "inputs": [
                 {
@@ -14734,15 +19609,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -14755,8 +19630,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -14764,27 +19684,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -14846,8 +19786,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -14863,15 +19803,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -14884,15 +19824,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -14905,8 +19845,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -14914,27 +19899,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -14996,8 +20001,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -15013,15 +20018,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -15034,15 +20039,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -15055,8 +20060,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -15064,27 +20114,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -15160,8 +20230,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -15177,8 +20247,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -15194,8 +20264,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -15211,8 +20281,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -15233,8 +20303,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -15256,15 +20326,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -15277,15 +20347,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -15298,8 +20368,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -15331,20 +20446,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -15353,7 +20486,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -15454,8 +20589,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -15471,8 +20606,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -15488,8 +20623,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -15505,15 +20640,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -15526,8 +20661,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -15548,8 +20683,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -15568,8 +20703,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -15590,15 +20725,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -15611,8 +20746,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -15620,8 +20800,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -15656,14 +20836,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -15673,7 +20871,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -15743,8 +20943,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -15760,15 +20960,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -15781,15 +20981,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -15802,8 +21002,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -15811,27 +21056,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -15893,8 +21158,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -15910,15 +21175,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -15931,15 +21196,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -15952,8 +21217,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -15961,27 +21271,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -16078,8 +21408,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -16095,8 +21425,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -16112,8 +21442,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -16129,15 +21459,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -16150,8 +21480,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -16172,8 +21502,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -16192,8 +21522,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -16214,15 +21544,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -16235,8 +21565,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -16244,8 +21619,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -16280,14 +21655,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -16297,7 +21690,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -16399,8 +21794,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -16416,8 +21811,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -16433,8 +21828,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -16450,15 +21845,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -16471,8 +21866,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -16493,8 +21888,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -16513,8 +21908,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -16535,15 +21930,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -16556,8 +21951,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -16565,8 +22005,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -16601,14 +22041,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -16618,7 +22076,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -16716,8 +22176,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -16733,8 +22193,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -16750,8 +22210,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -16767,15 +22227,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -16788,8 +22248,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -16810,8 +22270,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -16830,8 +22290,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -16852,15 +22312,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -16873,8 +22333,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -16882,8 +22387,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -16918,14 +22423,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -16935,7 +22458,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -17036,8 +22561,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -17053,8 +22578,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -17070,8 +22595,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -17087,15 +22612,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -17108,8 +22633,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -17130,8 +22655,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -17150,8 +22675,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -17172,15 +22697,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -17193,8 +22718,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -17202,8 +22772,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -17238,14 +22808,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -17255,7 +22843,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -17325,8 +22915,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -17342,15 +22932,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -17363,15 +22953,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -17384,8 +22974,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -17393,27 +23028,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -17475,8 +23130,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -17492,15 +23147,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -17513,15 +23168,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -17534,8 +23189,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -17543,27 +23243,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -17625,8 +23345,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -17642,15 +23362,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -17663,15 +23383,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -17684,8 +23404,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -17693,27 +23458,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -17775,8 +23560,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -17792,15 +23577,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -17813,15 +23598,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -17834,8 +23619,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -17843,27 +23673,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -17924,8 +23774,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -17941,15 +23791,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -17962,15 +23812,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -17983,8 +23833,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -17992,27 +23887,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -18110,8 +24025,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -18127,8 +24042,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -18144,8 +24059,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -18161,15 +24076,15 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -18182,8 +24097,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -18204,8 +24119,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -18224,8 +24139,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -18246,15 +24161,15 @@
                 }
               ],
               "pos": [
-                810,
-                205
+                1056,
+                176
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -18267,8 +24182,53 @@
                 }
               ],
               "pos": [
-                1080,
-                205
+                796,
+                356
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -18276,8 +24236,8 @@
             {
               "from": "inPort2",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -18312,14 +24272,32 @@
             {
               "from": "palletizing1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort2",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -18329,7 +24307,9 @@
             "dePalletizing": 1,
             "entityRouter": 1,
             "palletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -18451,8 +24431,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -18468,8 +24448,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -18485,8 +24465,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                205
+                1316,
+                176
               ]
             },
             {
@@ -18502,8 +24482,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                380
+                1316,
+                336
               ]
             },
             {
@@ -18519,8 +24499,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                555
+                1316,
+                496
               ]
             },
             {
@@ -18536,8 +24516,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                730
+                1316,
+                656
               ]
             },
             {
@@ -18553,15 +24533,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                905
+                1316,
+                816
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -18574,15 +24554,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -18595,9 +24575,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                536,
+                996
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter1",
@@ -18637,8 +24618,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -18646,18 +24671,18 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter1",
               "input": "inPort1"
             },
@@ -18696,6 +24721,24 @@
               "output": "outPort6",
               "to": "outPort6",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -18703,7 +24746,9 @@
             "outPort": 6,
             "process": 1,
             "recovery": 1,
-            "entityRouter": 1
+            "entityRouter": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -18825,8 +24870,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -18842,8 +24887,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -18859,8 +24904,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                205
+                1316,
+                176
               ]
             },
             {
@@ -18876,8 +24921,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                380
+                1316,
+                336
               ]
             },
             {
@@ -18893,8 +24938,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                555
+                1316,
+                496
               ]
             },
             {
@@ -18910,8 +24955,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                730
+                1316,
+                656
               ]
             },
             {
@@ -18927,15 +24972,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                905
+                1316,
+                816
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -18948,15 +24993,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -18969,9 +25014,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                536,
+                996
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter1",
@@ -19011,8 +25057,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -19020,18 +25110,18 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter1",
               "input": "inPort1"
             },
@@ -19070,6 +25160,24 @@
               "output": "outPort6",
               "to": "outPort6",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -19077,7 +25185,9 @@
             "outPort": 6,
             "process": 1,
             "recovery": 1,
-            "entityRouter": 1
+            "entityRouter": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -19155,8 +25265,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -19176,8 +25286,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -19197,9 +25307,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                536,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter1",
@@ -19221,8 +25332,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                176
               ]
             },
             {
@@ -19238,8 +25349,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -19255,8 +25366,52 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                190
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -19264,18 +25419,18 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter1",
               "input": "inPort1"
             },
@@ -19290,6 +25445,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -19297,7 +25470,9 @@
             "entityRouter": 3,
             "outPort": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -19397,8 +25572,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -19414,15 +25589,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -19435,15 +25610,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -19456,8 +25631,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -19465,27 +25685,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -19548,8 +25788,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -19565,15 +25805,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -19586,15 +25826,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -19607,8 +25847,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -19616,27 +25901,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -19697,8 +26002,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -19714,15 +26019,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -19735,15 +26040,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -19756,8 +26061,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -19765,27 +26115,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -19848,8 +26218,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -19865,15 +26235,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -19886,15 +26256,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -19907,8 +26277,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -19916,27 +26331,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -19998,8 +26433,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -20015,15 +26450,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -20036,15 +26471,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -20057,8 +26492,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -20066,27 +26546,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -20161,8 +26661,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -20178,8 +26678,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -20195,8 +26695,8 @@
                 }
               ],
               "pos": [
-                0,
-                380
+                16,
+                336
               ]
             },
             {
@@ -20212,8 +26712,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -20234,8 +26734,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                16
               ]
             },
             {
@@ -20257,15 +26757,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -20278,15 +26778,15 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 6.0
+                "seconds": 6
               },
               "inputs": [
                 {
@@ -20299,8 +26799,53 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1056,
+                516
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                16
               ]
             }
           ],
@@ -20332,20 +26877,38 @@
             {
               "from": "palletizing1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -20354,7 +26917,9 @@
             "palletizing": 1,
             "entityRouter": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -20468,8 +27033,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -20485,8 +27050,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -20502,8 +27067,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -20519,8 +27084,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -20542,15 +27107,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 1.0
+                "seconds": 1
               },
               "inputs": [
                 {
@@ -20563,8 +27128,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -20584,9 +27149,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -20608,8 +27174,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -20629,18 +27239,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -20655,6 +27265,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -20662,7 +27290,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -20760,8 +27390,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -20777,8 +27407,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -20794,8 +27424,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -20811,8 +27441,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -20834,15 +27464,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -20855,8 +27485,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -20876,9 +27506,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -20900,8 +27531,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -20921,18 +27596,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -20947,6 +27622,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -20954,7 +27647,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -21052,8 +27747,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -21069,8 +27764,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -21086,8 +27781,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -21103,8 +27798,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -21126,15 +27821,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -21147,8 +27842,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -21168,9 +27863,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -21192,8 +27888,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -21213,18 +27953,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -21239,6 +27979,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -21246,7 +28004,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -21344,8 +28104,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -21361,8 +28121,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -21378,8 +28138,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -21395,8 +28155,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -21418,15 +28178,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -21439,8 +28199,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -21460,9 +28220,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -21484,8 +28245,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -21505,18 +28310,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -21531,6 +28336,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -21538,7 +28361,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -21636,8 +28461,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -21653,8 +28478,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -21670,8 +28495,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -21687,8 +28512,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -21710,15 +28535,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -21731,8 +28556,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -21752,9 +28577,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -21776,8 +28602,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -21797,18 +28667,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -21823,6 +28693,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -21830,7 +28718,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -21965,8 +28855,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -21982,8 +28872,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -21999,8 +28889,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                30
+                1836,
+                16
               ]
             },
             {
@@ -22016,8 +28906,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                205
+                1836,
+                176
               ]
             },
             {
@@ -22033,8 +28923,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                380
+                1836,
+                336
               ]
             },
             {
@@ -22050,8 +28940,8 @@
               ],
               "outputs": [],
               "pos": [
-                1620,
-                555
+                1836,
+                496
               ]
             },
             {
@@ -22073,15 +28963,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 1.0
+                "seconds": 1
               },
               "inputs": [
                 {
@@ -22094,8 +28984,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -22116,8 +29006,8 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
@@ -22136,8 +29026,8 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -22160,8 +29050,8 @@
                 }
               ],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -22181,9 +29071,10 @@
                 }
               ],
               "pos": [
-                1080,
-                205
-              ]
+                926,
+                676
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter4",
@@ -22205,8 +29096,52 @@
                 }
               ],
               "pos": [
-                1350,
-                205
+                1576,
+                336
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1316,
+                176
               ]
             }
           ],
@@ -22226,8 +29161,8 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
@@ -22262,12 +29197,12 @@
             {
               "from": "dePalletizing1",
               "output": "parentOutPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter4",
               "input": "inPort1"
             },
@@ -22282,6 +29217,24 @@
               "output": "outPort2",
               "to": "outPort4",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -22290,7 +29243,9 @@
             "entityRouter": 4,
             "process": 1,
             "dePalletizing": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -22388,8 +29343,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -22405,8 +29360,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -22422,8 +29377,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -22439,8 +29394,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -22462,15 +29417,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -22483,8 +29438,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -22504,9 +29459,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -22528,8 +29484,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -22549,18 +29549,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -22575,6 +29575,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -22582,7 +29600,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -22680,8 +29700,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -22697,8 +29717,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -22714,8 +29734,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -22731,8 +29751,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -22754,15 +29774,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -22775,8 +29795,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -22796,9 +29816,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -22820,8 +29841,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -22841,18 +29906,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -22867,6 +29932,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -22874,7 +29957,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -22972,8 +30057,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -22989,8 +30074,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -23006,8 +30091,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -23023,8 +30108,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -23046,15 +30131,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -23067,8 +30152,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -23088,9 +30173,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -23112,8 +30198,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -23133,18 +30263,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -23159,6 +30289,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -23166,7 +30314,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -23264,8 +30414,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -23281,8 +30431,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -23298,8 +30448,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -23315,8 +30465,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -23338,15 +30488,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -23359,8 +30509,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -23380,9 +30530,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -23404,8 +30555,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -23425,18 +30620,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -23451,6 +30646,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -23458,7 +30671,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -23563,8 +30778,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -23580,8 +30795,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -23597,8 +30812,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -23614,8 +30829,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -23637,15 +30852,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -23658,8 +30873,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -23679,9 +30894,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -23703,8 +30919,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -23724,18 +30984,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -23750,6 +31010,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -23757,7 +31035,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -23821,8 +31101,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -23838,15 +31118,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -23859,15 +31139,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -23880,8 +31160,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -23889,27 +31214,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -23974,8 +31319,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -23991,15 +31336,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 4.0
+                "seconds": 4
               },
               "inputs": [
                 {
@@ -24012,15 +31357,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 2.0
+                "seconds": 2
               },
               "inputs": [
                 {
@@ -24033,8 +31378,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -24042,27 +31432,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -24159,8 +31569,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -24176,8 +31586,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -24193,8 +31603,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -24210,8 +31620,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -24233,15 +31643,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -24254,8 +31664,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -24275,9 +31685,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -24299,8 +31710,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -24320,18 +31775,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -24346,6 +31801,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -24353,7 +31826,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -24467,8 +31942,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -24484,8 +31959,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -24501,8 +31976,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -24518,8 +31993,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -24541,15 +32016,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 1.0
+                "seconds": 1
               },
               "inputs": [
                 {
@@ -24562,8 +32037,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -24583,9 +32058,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -24607,8 +32083,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -24628,18 +32148,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -24654,6 +32174,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -24661,7 +32199,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -24766,8 +32306,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -24783,8 +32323,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -24800,8 +32340,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -24817,8 +32357,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -24840,15 +32380,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -24861,8 +32401,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -24882,9 +32422,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -24906,8 +32447,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -24927,18 +32512,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -24953,6 +32538,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -24960,7 +32563,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -25058,8 +32663,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -25075,8 +32680,8 @@
                 }
               ],
               "pos": [
-                0,
-                205
+                16,
+                176
               ]
             },
             {
@@ -25092,8 +32697,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                30
+                1576,
+                16
               ]
             },
             {
@@ -25109,8 +32714,8 @@
               ],
               "outputs": [],
               "pos": [
-                1350,
-                205
+                1576,
+                176
               ]
             },
             {
@@ -25132,15 +32737,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                276,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -25153,8 +32758,8 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                796,
+                16
               ]
             },
             {
@@ -25174,9 +32779,10 @@
                 }
               ],
               "pos": [
-                810,
-                30
-              ]
+                796,
+                356
+              ],
+              "flipIO": true
             },
             {
               "id": "entityRouter2",
@@ -25198,8 +32804,52 @@
                 }
               ],
               "pos": [
-                1080,
-                30
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -25219,18 +32869,18 @@
             {
               "from": "entityRouter1",
               "output": "outPort1",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
-              "to": "recovery1",
+              "to": "fork1",
               "input": "inPort"
             },
             {
-              "from": "recovery1",
-              "output": "outPort",
+              "from": "fork1",
+              "output": "outPort1",
               "to": "entityRouter2",
               "input": "inPort1"
             },
@@ -25245,6 +32895,24 @@
               "output": "outPort2",
               "to": "outPort2",
               "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -25252,7 +32920,9 @@
             "outPort": 2,
             "entityRouter": 2,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -25322,8 +32992,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -25339,15 +33009,15 @@
               ],
               "outputs": [],
               "pos": [
-                810,
-                30
+                1056,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 5.0
+                "seconds": 5
               },
               "inputs": [
                 {
@@ -25360,15 +33030,15 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
               "id": "recovery1",
               "kind": "recovery",
               "config": {
-                "seconds": 3.0
+                "seconds": 3
               },
               "inputs": [
                 {
@@ -25381,8 +33051,53 @@
                 }
               ],
               "pos": [
-                540,
-                30
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
               ]
             }
           ],
@@ -25390,27 +33105,47 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
             "inPort": 1,
             "outPort": 1,
             "process": 1,
-            "recovery": 1
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [],
@@ -25938,8 +33673,8 @@
       "type": "factory/basic",
       "title": "carryer2 Source",
       "pos": [
-        7638.0,
-        1817.0
+        7638,
+        1817
       ],
       "size": [
         230,

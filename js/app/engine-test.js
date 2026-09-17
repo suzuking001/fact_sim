@@ -4,14 +4,14 @@ var App = window.App || (window.App = {});
   const DEFAULT_EXAMPLES = [];
   const EXAMPLE_ALIASES = { agv_config: 'carrier', carrier_config: 'carrier' };
   const EXAMPLE_FILES = {
-    simple: 'sample/simple.json?v=20260828a',
-    branch: 'sample/branch.json?v=20260828a',
-    parallel_benchmark: 'sample/parallel_benchmark.json?v=20260828a',
-    shuttle_line5: 'sample/shuttle_line5.json?v=20260828a',
-    carrier: 'sample/carrier.json?v=20260829b',
-    pallet_station_demo: 'sample/pallet_station_demo.json?v=20260829b',
-    sample_line1: 'sample/sample_line1.json?v=20260829b',
-    sample_line2: 'sample/sample_line2.json?v=20260915minimal'
+    simple: 'sample/simple.json?v=20260916recovery',
+    branch: 'sample/branch.json?v=20260916recovery',
+    parallel_benchmark: 'sample/parallel_benchmark.json?v=20260916recovery',
+    shuttle_line5: 'sample/shuttle_line5.json?v=20260916recovery',
+    carrier: 'sample/carrier.json?v=20260916recovery',
+    pallet_station_demo: 'sample/pallet_station_demo.json?v=20260916recovery',
+    sample_line1: 'sample/sample_line1.json?v=20260916recovery',
+    sample_line2: 'sample/sample_line2.json?v=20260916recovery'
   };
   const DEFAULTS = {
     suite: 'standard',

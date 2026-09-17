@@ -6,13 +6,13 @@
     "sinks": [
       {
         "id": 4,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       }
     ],
     "created": 301,
-    "completed": 298,
-    "active": 3,
+    "completed": 300,
+    "active": 1,
     "unusedEquipment": [],
     "palletizingChecks": 0,
     "observedTransferLinks": 2
@@ -25,17 +25,17 @@
       {
         "id": 5,
         "count": 241,
-        "lastAt": 1199000
+        "lastAt": 1196000
       },
       {
         "id": 6,
-        "count": 239,
-        "lastAt": 1195000
+        "count": 240,
+        "lastAt": 1197000
       }
     ],
     "created": 483,
-    "completed": 480,
-    "active": 3,
+    "completed": 481,
+    "active": 2,
     "unusedEquipment": [],
     "palletizingChecks": 0,
     "observedTransferLinks": 3
@@ -65,15 +65,15 @@
     "sinks": [
       {
         "id": 3,
-        "count": 78,
-        "lastAt": 1199600
+        "count": 81,
+        "lastAt": 1185300
       }
     ],
-    "created": 247,
-    "completed": 234,
+    "created": 256,
+    "completed": 243,
     "active": 13,
     "unusedEquipment": [],
-    "palletizingChecks": 9772,
+    "palletizingChecks": 9667,
     "observedTransferLinks": 15
   },
   {
@@ -83,16 +83,16 @@
     "sinks": [
       {
         "id": 7,
-        "count": 201,
-        "lastAt": 1197900
+        "count": 240,
+        "lastAt": 1199000
       }
     ],
-    "created": 218,
-    "completed": 201,
-    "active": 17,
+    "created": 258,
+    "completed": 240,
+    "active": 18,
     "unusedEquipment": [],
-    "palletizingChecks": 6473,
-    "observedTransferLinks": 9
+    "palletizingChecks": 7530,
+    "observedTransferLinks": 10
   },
   {
     "name": "sample_line1",
@@ -101,25 +101,25 @@
     "sinks": [
       {
         "id": 45,
-        "count": 49,
-        "lastAt": 1187000
-      },
-      {
-        "id": 55,
-        "count": 47,
+        "count": 51,
         "lastAt": 1196000
       },
       {
+        "id": 55,
+        "count": 66,
+        "lastAt": 1187000
+      },
+      {
         "id": 66,
-        "count": 39,
-        "lastAt": 1173000
+        "count": 66,
+        "lastAt": 1193000
       }
     ],
-    "created": 738,
-    "completed": 621,
-    "active": 117,
+    "created": 796,
+    "completed": 693,
+    "active": 103,
     "unusedEquipment": [],
-    "palletizingChecks": 965,
+    "palletizingChecks": 470,
     "observedTransferLinks": 47
   },
   {
@@ -130,14 +130,14 @@
       {
         "id": 3,
         "count": 7,
-        "lastAt": 1032400
+        "lastAt": 965000
       }
     ],
-    "created": 309,
+    "created": 311,
     "completed": 51,
-    "active": 258,
+    "active": 260,
     "unusedEquipment": [],
-    "palletizingChecks": 175503,
+    "palletizingChecks": 178890,
     "observedTransferLinks": 129
   },
   {
@@ -147,48 +147,48 @@
     "sinks": [
       {
         "id": 4,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       },
       {
         "id": 8,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       },
       {
         "id": 12,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       },
       {
         "id": 16,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       },
       {
         "id": 20,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       },
       {
         "id": 24,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       },
       {
         "id": 28,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       },
       {
         "id": 32,
-        "count": 298,
-        "lastAt": 1196000
+        "count": 300,
+        "lastAt": 1198000
       }
     ],
     "created": 2408,
-    "completed": 2384,
-    "active": 24,
+    "completed": 2400,
+    "active": 8,
     "unusedEquipment": [],
     "palletizingChecks": 0,
     "observedTransferLinks": 16

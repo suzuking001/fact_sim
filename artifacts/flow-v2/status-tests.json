@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Process elapsed/remaining and completion condition follow actual simulation time",
+    "ok": true
+  },
+  {
+    "name": "Recovery remains idle while Fork is blocked, then starts at actual transfer",
+    "ok": true
+  },
+  {
+    "name": "Join shows first-cycle readiness and each Recovery completion condition",
+    "ok": true
+  },
+  {
+    "name": "Completed timing and firing history survive snapshot and clear on Reset",
+    "ok": true
+  },
+  {
+    "name": "Synchronization displays all group members, without changing simulation state",
+    "ok": true
+  }
+]

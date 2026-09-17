@@ -83,8 +83,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -100,8 +100,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -121,8 +121,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -142,9 +142,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -163,8 +164,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -172,26 +217,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -199,7 +262,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -264,8 +329,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -281,8 +346,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -302,8 +367,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -323,9 +388,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -344,8 +410,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -353,26 +463,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -380,7 +508,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -445,8 +575,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -462,15 +592,15 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
               "id": "process1",
               "kind": "process",
               "config": {
-                "seconds": 1.0
+                "seconds": 1
               },
               "inputs": [
                 {
@@ -483,8 +613,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -504,9 +634,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -525,8 +656,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -534,26 +709,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -561,7 +754,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -626,8 +821,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -643,8 +838,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -664,8 +859,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -685,9 +880,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -706,8 +902,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -715,26 +955,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -742,7 +1000,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [
@@ -807,8 +1067,8 @@
                 }
               ],
               "pos": [
-                0,
-                30
+                16,
+                16
               ]
             },
             {
@@ -824,8 +1084,8 @@
               ],
               "outputs": [],
               "pos": [
-                1080,
-                30
+                1316,
+                16
               ]
             },
             {
@@ -845,8 +1105,8 @@
                 }
               ],
               "pos": [
-                270,
-                30
+                536,
+                16
               ]
             },
             {
@@ -866,9 +1126,10 @@
                 }
               ],
               "pos": [
-                540,
-                30
-              ]
+                666,
+                196
+              ],
+              "flipIO": true
             },
             {
               "id": "syncroJudgment1",
@@ -887,8 +1148,52 @@
                 }
               ],
               "pos": [
-                810,
-                30
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
               ]
             }
           ],
@@ -896,26 +1201,44 @@
             {
               "from": "inPort1",
               "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort1"
             },
             {
               "from": "process1",
               "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
               "to": "recovery1",
               "input": "inPort"
             },
             {
               "from": "recovery1",
               "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "outPort1",
-              "input": "inPort"
+              "to": "join1",
+              "input": "inPort2"
             }
           ],
           "counters": {
@@ -923,7 +1246,9 @@
             "outPort": 1,
             "process": 1,
             "recovery": 1,
-            "syncroJudgment": 1
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
           }
         },
         "initialContents": [

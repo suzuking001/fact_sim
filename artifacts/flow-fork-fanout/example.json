@@ -1,0 +1,1022 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            7
+          ],
+          "portId": "out-1",
+          "channel": "entity"
+        }
+      ],
+      "title": "Source",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "source",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                30,
+                60
+              ]
+            }
+          ],
+          "links": [],
+          "counters": {
+            "outPort": 1
+          }
+        },
+        "source": {
+          "entries": [
+            {
+              "typeId": "a",
+              "count": 1
+            }
+          ],
+          "repeat": false,
+          "intervalSec": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 126
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 7,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            1
+          ],
+          "portId": "out-1",
+          "channel": "entity"
+        },
+        {
+          "name": "outPort2",
+          "type": "entity",
+          "links": [
+            2
+          ],
+          "portId": "out-2",
+          "channel": "entity"
+        },
+        {
+          "name": "outPort3",
+          "type": "entity",
+          "links": [
+            3
+          ],
+          "portId": "out-3",
+          "channel": "entity"
+        },
+        {
+          "name": "outPort4",
+          "type": "entity",
+          "links": [
+            4
+          ],
+          "portId": "out-4",
+          "channel": "entity"
+        },
+        {
+          "name": "outPort5",
+          "type": "entity",
+          "links": [
+            5
+          ],
+          "portId": "out-5",
+          "channel": "entity"
+        },
+        {
+          "name": "outPort6",
+          "type": "entity",
+          "links": [
+            6
+          ],
+          "portId": "out-6",
+          "channel": "entity"
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "fork2",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                },
+                {
+                  "id": "outPort3"
+                },
+                {
+                  "id": "outPort4"
+                },
+                {
+                  "id": "outPort5"
+                },
+                {
+                  "id": "outPort6"
+                }
+              ],
+              "pos": [
+                1056,
+                16
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 3
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                996
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                16
+              ]
+            },
+            {
+              "id": "outPort2",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-2"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                176
+              ]
+            },
+            {
+              "id": "outPort3",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-3"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                336
+              ]
+            },
+            {
+              "id": "outPort4",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-4"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                496
+              ]
+            },
+            {
+              "id": "outPort5",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-5"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                656
+              ]
+            },
+            {
+              "id": "outPort6",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-6"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                816
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort1"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "fork2",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            },
+            {
+              "from": "fork2",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork2",
+              "output": "outPort2",
+              "to": "outPort2",
+              "input": "inPort"
+            },
+            {
+              "from": "fork2",
+              "output": "outPort3",
+              "to": "outPort3",
+              "input": "inPort"
+            },
+            {
+              "from": "fork2",
+              "output": "outPort4",
+              "to": "outPort4",
+              "input": "inPort"
+            },
+            {
+              "from": "fork2",
+              "output": "outPort5",
+              "to": "outPort5",
+              "input": "inPort"
+            },
+            {
+              "from": "fork2",
+              "output": "outPort6",
+              "to": "outPort6",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "join": 1,
+            "process": 1,
+            "fork": 2,
+            "recovery": 1,
+            "outPort": 6
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 1,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                30,
+                60
+              ]
+            }
+          ],
+          "links": [],
+          "counters": {
+            "inPort": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 2,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                30,
+                60
+              ]
+            }
+          ],
+          "links": [],
+          "counters": {
+            "inPort": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 3,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                30,
+                60
+              ]
+            }
+          ],
+          "links": [],
+          "counters": {
+            "inPort": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 4,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                30,
+                60
+              ]
+            }
+          ],
+          "links": [],
+          "counters": {
+            "inPort": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 5,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                30,
+                60
+              ]
+            }
+          ],
+          "links": [],
+          "counters": {
+            "inPort": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "factory/basic",
+      "pos": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0
+      },
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 6,
+          "portId": "in-1",
+          "channel": "entity"
+        }
+      ],
+      "outputs": [],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                30,
+                60
+              ]
+            }
+          ],
+          "links": [],
+          "counters": {
+            "inPort": 1
+          }
+        }
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "entity"
+    ],
+    [
+      2,
+      2,
+      1,
+      4,
+      0,
+      "entity"
+    ],
+    [
+      3,
+      2,
+      2,
+      5,
+      0,
+      "entity"
+    ],
+    [
+      4,
+      2,
+      3,
+      6,
+      0,
+      "entity"
+    ],
+    [
+      5,
+      2,
+      4,
+      7,
+      0,
+      "entity"
+    ],
+    [
+      6,
+      2,
+      5,
+      8,
+      0,
+      "entity"
+    ],
+    [
+      7,
+      1,
+      0,
+      2,
+      0,
+      "entity"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "syncroGroups": []
+  },
+  "version": 0.4,
+  "__factSimFormat": 2,
+  "__factSimEntityModel": {
+    "schemaVersion": 3,
+    "types": [
+      {
+        "typeId": "a",
+        "name": "A",
+        "subtype": "",
+        "tags": [],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {},
+        "appearance": {
+          "shape": "circle",
+          "colorTheme": "auto"
+        }
+      },
+      {
+        "typeId": "b",
+        "name": "B",
+        "subtype": "",
+        "tags": [],
+        "capacity": 0,
+        "allowedContentTypeIds": [],
+        "defaultAttributes": {},
+        "appearance": {
+          "shape": "circle",
+          "colorTheme": "auto"
+        }
+      },
+      {
+        "typeId": "parent",
+        "name": "Parent",
+        "subtype": "",
+        "tags": [],
+        "capacity": 2,
+        "allowedContentTypeIds": [
+          "a",
+          "b",
+          "box"
+        ],
+        "defaultAttributes": {},
+        "appearance": {
+          "shape": "circle",
+          "colorTheme": "auto"
+        }
+      },
+      {
+        "typeId": "box",
+        "name": "Box",
+        "subtype": "",
+        "tags": [],
+        "capacity": 1,
+        "allowedContentTypeIds": [
+          "a"
+        ],
+        "defaultAttributes": {},
+        "appearance": {
+          "shape": "circle",
+          "colorTheme": "auto"
+        }
+      }
+    ]
+  }
+}

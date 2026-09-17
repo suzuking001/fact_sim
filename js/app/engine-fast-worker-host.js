@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const WORKER_MODE = 'event-fast-worker';
-  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260915minimal';
+  const WORKER_URL = 'js/app/engine-fast-worker.js?v=20260917fanout';
 
   function cloneJson(value){
     try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return value; }

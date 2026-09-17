@@ -1,0 +1,70 @@
+[
+  {
+    "name": "Dragging replaces an occupied output and input in one commit",
+    "ok": true
+  },
+  {
+    "name": "Shift input-to-output drag supports changing the source",
+    "ok": true
+  },
+  {
+    "name": "Two-click wiring and keyboard port activation both work",
+    "ok": true
+  },
+  {
+    "name": "A preview appears while dragging; a blank drop preserves all existing wires",
+    "ok": true
+  },
+  {
+    "name": "Esc, pointer cancellation and invalid direction never remove original connections",
+    "ok": true
+  },
+  {
+    "name": "Selected wire Delete and a port context click disconnect the intended wire",
+    "ok": true
+  },
+  {
+    "name": "Active work and Recovery keep the reset guard without losing wires",
+    "ok": true
+  },
+  {
+    "name": "Editing an idle Flow with initial work does not start processing or lock further edits",
+    "ok": true
+  },
+  {
+    "name": "A temporarily incomplete edit can be repaired and the Join/Fork cycle runs normally",
+    "ok": true
+  },
+  {
+    "name": "Dragging an occupied input reconnects its existing wire to a new input",
+    "ok": true
+  },
+  {
+    "name": "Dragging a wire itself reconnects its destination",
+    "ok": true
+  },
+  {
+    "name": "Dropping near a compatible port snaps to it without requiring a direct hit",
+    "ok": true
+  },
+  {
+    "name": "Removing added Join/Fork ports deletes only their wires and re-add uses a fresh ID",
+    "ok": true
+  },
+  {
+    "name": "Router ports can shrink to one per side, clearing connections and preserving other port IDs",
+    "ok": true
+  },
+  {
+    "name": "Fixed ports and minimum Join/Fork ports cannot be removed",
+    "ok": true
+  },
+  {
+    "name": "Port removal during Process or Recovery preserves the flow and requests Reset",
+    "ok": true
+  },
+  {
+    "name": "Context menu stays inside the editor when opened at its bottom right corner",
+    "ok": true
+  }
+]

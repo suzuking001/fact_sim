@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-17",
+  "changes": [
+    "Main-canvas-style state headers and round edge ports",
+    "28px connection snapping, wire dragging and input-end reconnection",
+    "Expand Flow, 100% view and zoom controls",
+    "Read-only elapsed time, remaining time and condition status in Flow nodes",
+    "Completion and firing history retained by simulation snapshots"
+  ],
+  "checks": {
+    "wiring": { "passed": 12, "total": 12, "report": "artifacts/flow-v2/wiring-tests.json" },
+    "status": { "passed": 5, "total": 5, "report": "artifacts/flow-v2/status-tests.json" },
+    "runtime": { "passed": 21, "total": 21, "report": "artifacts/flow-v2/runtime-tests.json" },
+    "engineQuick": { "passed": 40, "failureCount": 0, "strictFinalParity": true, "report": "artifacts/flow-node-ui/engine_test.json" },
+    "javascriptSyntax": true,
+    "mcpTypecheck": true
+  },
+  "visualVerification": {
+    "status": "pending",
+    "reason": "Browser tool transport closed; the native Computer Use pipe remains unavailable. Event-handler tests use a DOM double and do not replace real browser pointer and visual checks."
+  }
+}

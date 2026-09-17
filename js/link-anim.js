@@ -5,7 +5,7 @@
   function sample(graph,time=Number(root.simNow?.()) || 0){
     const byEntity=new Map();
     for(const node of graph?._nodes || [])for(const visual of node._flowRuntime?.visuals || []){
-      const r=node._flowRuntime,cell=r.cells.find(c=>c.id===visual.cellId && c.entity.instanceId===visual.entityId),active=cell?.visualId===visual.id && cell.startedAt!==undefined ? cell : null;
+      const r=node._flowRuntime,cell=visual.signal ? r.signals?.find(c=>c.id===visual.cellId && c.visualId===visual.id) : r.cells.find(c=>c.id===visual.cellId && c.entity.instanceId===visual.entityId),active=cell?.visualId===visual.id && cell.startedAt!==undefined ? cell : null;
       if(!cell)continue;
       const history=visual.history || [],phases=visual.phaseNodes || [],finished=new Set(history.map(p=>p.nodeId));
       const completed=history.reduce((sum,p)=>sum+Math.max(0,p.until-p.startedAt),0),remaining=phases.filter(id=>!finished.has(id)).reduce((sum,id)=>sum+(node.properties.flow.nodes.find(n=>n.id===id)?.config.seconds || 0)*1000,0),elapsed=active ? Math.max(0,Math.min(active.until-active.startedAt,time-active.startedAt)) : 0,total=completed+remaining;

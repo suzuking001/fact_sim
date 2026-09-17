@@ -13,6 +13,12 @@ carryer2 は複数の結合箇所でも同じ型を使います。型と実物�
 
 Source は workA / workB を交互に生成します。入口の設備 #181 は公開版に合わせて Process 5秒・Recovery 3秒で型別に分岐し、#117 / #168 はそれぞれのワークを6出力へ順番に振り分けます。
 
+## 設備のサイクル
+
+119設備の Flow は `inPort → Join → Process → Fork → outPort` と、`Fork → Recovery → Join` の戻り接続を使います。Recovery は後工程が実際に受け取った時刻に始まり、完了するまで前工程から次のワークを受け取りません。初回は Recovery 完了済みで開始します。
+
+入口 #181 では受け取りから5秒後に搬送できれば、その時点から3秒間 Recovery が進みます。後工程が詰まっていれば搬送開始まで Recovery も待ちます。接続の編集方法は [Process / Recovery と Join / Fork](flow-cycle-ja.md) を参照してください。
+
 ## 分岐先を増やす
 
 Details → Flow の `entityRouter` で分岐方法を選べます。

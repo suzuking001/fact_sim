@@ -1,0 +1,17 @@
+{
+  "scenario": "User screenshot: inPort -> Join -> Process -> Fork1 -> Fork2 -> six outPorts; Fork1 -> Recovery -> Join",
+  "errors": [
+    "outPort2: completion signals must connect to Join, Fork, Process or Recovery.",
+    "outPort3: completion signals must connect to Join, Fork, Process or Recovery.",
+    "outPort4: completion signals must connect to Join, Fork, Process or Recovery.",
+    "outPort5: completion signals must connect to Join, Fork, Process or Recovery.",
+    "outPort6: completion signals must connect to Join, Fork, Process or Recovery."
+  ],
+  "signalOutPorts": [
+    "outPort2",
+    "outPort3",
+    "outPort4",
+    "outPort5",
+    "outPort6"
+  ]
+}
