@@ -10,8 +10,8 @@
 | 全体 UI・画面切替 | `js/app/ui.js`, `js/app/workspace-ui.js` | `js/app/landing.js`, `css/app.css`, `css/workspace.css` |
 | 選択・プロパティ・詳細 | `js/app/selection-inspector.js`, `js/app/details-ui.js` | `js/app/selection.js`, `js/app/node-props-panel.js`, `css/details.css` |
 | Entity・内容物・型 | `js/app/entity-ui.js`, `js/nodes/entity_model.js` | `js/nodes/basic_node.js`, `js/nodes/entity_source.js`, `js/nodes/entity_store.js`, `docs/entity-model-ja.md`, `docs/entity-hierarchy-ja.md` |
-| Flow 設定・Add メニュー・配線のドラッグ編集 | `js/app/flow-view.js`, `js/app/flow-model.js` | `css/flow-view.css`, `docs/flow-cycle-ja.md`（Join / Fork・接続操作）、`mcp/scripts/test-flow-v2-wiring.cjs` |
-| Flow 実行・搬送・Recovery・Fork の複製出力 | `js/app/flow-runtime.js` | `js/nodes/basic_node.js`, `js/link-anim.js`, `mcp/scripts/test-flow-v2-runtime.cjs`, `mcp/scripts/test-flow-v2-fanout.cjs` |
+| Flow 設定・Add メニュー・配線のドラッグ編集 | `js/app/flow-view.js`, `js/app/flow-model.js` | `js/app/sim.js`（開始後の編集時に実行状態を初期化）、`css/flow-view.css`, `docs/flow-cycle-ja.md`（Join / Fork・接続操作）、`mcp/scripts/test-flow-v2-wiring.cjs` |
+| Flow 実行・搬送・Recovery・Fork の複製出力・Joinでの同一Type/ID合流 | `js/app/flow-runtime.js` | `js/nodes/basic_node.js`, `js/link-anim.js`, `mcp/scripts/test-flow-v2-runtime.cjs`, `mcp/scripts/test-flow-v2-fanout.cjs`, `mcp/scripts/test-flow-v2-join.cjs` |
 | Flow ノード内の状態・条件成立・経過時間 | `js/app/flow-status.js` | `js/app/flow-view.js`, `mcp/scripts/test-flow-v2-status.cjs` |
 | ノード定義・追加メニュー | `js/nodes/<対象ノード>.js`, `js/app/node-catalog.js` | `js/nodes/register.js`, `js/nodes/menu.js`, `js/nodes-config.js` |
 | リンク・編集履歴・表示位置 | `js/app/graph-links.js`, `js/app/history.js` | `js/app/fit.js`, `js/app/background-layout.js` |

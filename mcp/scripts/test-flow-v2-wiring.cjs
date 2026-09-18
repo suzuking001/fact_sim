@@ -7,6 +7,7 @@ class Element {
  replaceChildren(...els){this.children=[];this.append(...els);}
  setAttribute(k,v){this.attributes[k]=String(v);if(k==='class')this.className=String(v);}
  addEventListener(k,fn){this.events[k]=fn;}
+ setCustomValidity(message){this.validationMessage=message;}
  focus(){this.ownerDocument.activeElement=this;}
  setPointerCapture(id){this.capture=id;}
  hasPointerCapture(id){return this.capture===id;}
@@ -19,11 +20,12 @@ class Element {
  remove(){if(this.parentElement)this.parentElement.children=this.parentElement.children.filter(c=>c!==this);}
 }
 const frames=[];
-global.document={createElement(tag){return new Element(tag,this);},createElementNS(ns,tag){return new Element(tag,this);},elementFromPoint(){return this.dropTarget;}};
+global.document={getElementById(){return null;},createElement(tag){return new Element(tag,this);},createElementNS(ns,tag){return new Element(tag,this);},elementFromPoint(){return this.dropTarget;}};
 global.ResizeObserver=class{observe(){}disconnect(){}};
 global.requestAnimationFrame=fn=>frames.push(fn);
 vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/flow-status.js'),'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/flow-view.js'),'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/sim.js'),'utf8'));
 const walk=e=>[e,...e.children.flatMap(walk)];
 const event=(target,extra={})=>({target,button:0,detail:1,pointerId:1,clientX:0,clientY:0,preventDefault(){},stopPropagation(){},...extra});
 function editor(kind='basic',setup=()=>{}){const g=graph(),n=node(g,kind);setup(n);const host=App.createFlowView(n);return {g,n,host,port:(id,direction,p)=>walk(host).find(e=>e.classList.contains('flowPort')&&e.dataset.nodeId===id&&e.dataset.direction===direction&&(!p||e.dataset.portId===p)),notice:()=>walk(host).find(e=>e.classList.contains('flowNotice')).textContent};}
@@ -51,8 +53,18 @@ test('Esc, pointer cancellation and invalid direction never remove original conn
 test('Selected wire Delete and a port context click disconnect the intended wire',()=>{
  for(const method of ['selected','port']){const e=editor(),count=e.n.properties.flow.links.length;if(method==='selected'){tap(e.port('inPort1','outputs'));e.host.events.keydown(event(e.host,{key:'Escape'}));const hit=walk(e.host).find(x=>x.classList.contains('flowWireHit'));tap(hit);e.host.events.keydown(event(e.host,{key:'Delete'}));}else e.port('process1','inputs').oncontextmenu(event(e.host));assert.equal(e.n.properties.flow.links.length,count-1);}
 });
-test('Active work and Recovery keep the reset guard without losing wires',()=>{
- const e=editor(),s=source(e.g,'a',1),sink=node(e.g,'sink');s.connect(0,e.n,0);e.n.connect(0,sink,0);for(const time of [0,2000]){at(e.g,time);const before=JSON.stringify(e.n.properties.flow.links);dragPort(e.port('inPort1','outputs'),e.port('process1','inputs'));assert.equal(JSON.stringify(e.n.properties.flow.links),before);assert.match(e.notice(),/Reset/);}
+test('Wiring after Process, Recovery or completion resets the run and can be repaired and restarted',()=>{
+ for(const time of [0,2000,10000]){
+  const e=editor(),s=source(e.g,'a',1),sink=node(e.g,'sink');s.connect(0,e.n,0);e.n.connect(0,sink,0);at(e.g,0);if(time>0)at(e.g,2000);if(time>2000)at(e.g,time);
+  const inputId=e.n.inputs[0].portId,outputId=e.n.outputs[0].portId;
+  dragPort(e.port('inPort1','outputs'),e.port('process1','inputs'));
+  assert(e.n.properties.flow.links.some(l=>l.from==='inPort1'&&l.to==='process1'));assert.match(e.notice(),/reset to 0 s/);
+  assert.equal(simNow(),0);assert.equal(s._sent,0);assert.equal(sink._recv.length,0);assert.equal(App.FlowRuntime.isActive(e.n),false);
+  assert.equal(e.g.getNodeById(e.n.id),e.n);assert.equal(e.n.inputs[0].portId,inputId);assert.equal(e.n.outputs[0].portId,outputId);
+  assert.equal(App.runtimeInstancesForGraph(e.g).instances.size,0);
+  dragPort(e.port('inPort1','outputs'),e.port('join1','inputs','inPort1'));dragPort(e.port('join1','outputs'),e.port('process1','inputs'));
+  assert.deepEqual(App.FlowModel.validate(e.n.properties.flow,e.n),[]);at(e.g,0);at(e.g,2000);assert.equal(sink._recv.length,1);assert.equal(sink._recv[0].t,2000);
+ }
 });
 test('Editing an idle Flow with initial work does not start processing or lock further edits',()=>{
  const e=editor();App.runtimeInstancesForGraph(e.g).create('a',{locationNodeId:e.n.id});const modified=App.FlowModel.clone(e.n.properties.flow);modified.nodes.find(n=>n.kind==='process').config.seconds=4;App.FlowModel.commit(e.n,modified);assert.equal(App.FlowRuntime.isActive(e.n),false);const next=App.FlowModel.clone(modified);next.links=[];App.FlowModel.commit(e.n,next);assert.equal(App.FlowRuntime.isActive(e.n),false);assert.equal(App.runtimeInstancesForGraph(e.g).rootsAt(e.n.id).length,1);
@@ -99,13 +111,39 @@ test('Router ports can shrink to one per side, clearing connections and preservi
 test('Fixed ports and minimum Join/Fork ports cannot be removed',()=>{
  const e=editor();for(const id of ['inPort1','outPort1','process1','recovery1','join1','fork1'])for(const label of ['Remove inPort','Remove outPort'])assert(menuAction(e,id,label).disabled,`${id}: ${label}`);
 });
-test('Port removal during Process or Recovery preserves the flow and requests Reset',()=>{
+test('Port removal during Process or Recovery resets the run and removes the port',()=>{
+ for(const time of [0,2000]){
  const e=editor('basic',n=>{
   const f=n.properties.flow,j=f.nodes.find(n=>n.kind==='join'),fork=f.nodes.find(n=>n.kind==='fork'),r=App.FlowModel.add(f,'recovery',{seconds:5});
   j.inputs.push({id:'inPort3'});fork.outputs.push({id:'outPort3'});App.FlowModel.connect(f,fork,r,2);App.FlowModel.connect(f,r,j,0,2);
  });
  const s=source(e.g,'a',1),sink=node(e.g,'sink');s.connect(0,e.n,0);e.n.connect(0,sink,0);
- for(const time of [0,2000]){at(e.g,time);const before=JSON.stringify(e.n.properties.flow);menuAction(e,'fork1','Remove outPort').onclick();assert.equal(JSON.stringify(e.n.properties.flow),before);assert.match(e.notice(),/Reset/);}
+ at(e.g,0);at(e.g,time);menuAction(e,'fork1','Remove outPort').onclick();assert.equal(e.n.properties.flow.nodes.find(n=>n.id==='fork1').outputs.length,2);assert.match(e.notice(),/reset to 0 s/);assert.equal(simNow(),0);assert.equal(App.FlowRuntime.isActive(e.n),false);
+ }
+});
+test('Cancelled, invalid and unchanged wiring preserve runtime; moving and timing edits do too',()=>{
+ for(const action of ['cancel','same-node','same-connection','move','time']){
+  const e=editor(),s=source(e.g,'a',1),sink=node(e.g,'sink');s.connect(0,e.n,0);e.n.connect(0,sink,0);at(e.g,0);at(e.g,500);
+  const runtime=e.n._flowRuntime,instances=App.runtimeInstancesForGraph(e.g),before=JSON.stringify(e.n.properties.flow.links);
+  if(action==='cancel'){const p=e.port('process1','outputs');p.onpointerdown(event(p));p.closest('.flowViewport').onpointermove(event(p,{clientX:100,clientY:200}));e.host.events.keydown(event(e.host,{key:'Escape'}));}
+  else if(action==='same-node')dragPort(e.port('process1','outputs'),e.port('process1','inputs'));
+  else if(action==='same-connection')dragPort(e.port('process1','outputs'),e.port('fork1','inputs'));
+  else if(action==='move'){const header=walk(e.host).find(x=>x.classList.contains('flowNodeHeader'));header.onpointerdown(event(header));header.onpointermove(event(header,{clientX:50,clientY:30}));header.onpointerup();}
+  else{const input=walk(e.host).find(x=>x.attributes['aria-label']==='process1 seconds');input.value='5';input.onchange();assert.equal(runtime.cells[0].until,5000);}
+  assert.equal(e.n._flowRuntime,runtime,action);assert.equal(App.runtimeInstancesForGraph(e.g),instances);assert.equal(simNow(),500);assert.equal(JSON.stringify(e.n.properties.flow.links),before);
+ }
+});
+test('Wiring while running stops the engine, restores Initial Contents and clears output data',()=>{
+ const e=editor(),s=source(e.g,'a',1),sink=node(e.g,'sink');s.connect(0,e.n,0);e.n.connect(0,sink,0);
+ e.n.properties.initialContents=[{typeId:'a',quantity:1,load:'empty',children:[]}];App.initializeEntityRuntime(e.g);at(e.g,0);at(e.g,500);
+ let running=true,stopped=0;const originalRunning=global.isSimRunning,originalStop=global.stopSimLoop;
+ global.isSimRunning=()=>running;global.stopSimLoop=()=>{running=false;};App.engine={stop(){stopped++;}};
+ try{dragPort(e.port('inPort1','outputs'),e.port('process1','inputs'));assert.equal(running,false);assert.equal(stopped,1);assert.equal(App.engine,null);assert.equal(App.runtimeInstancesForGraph(e.g).rootsAt(e.n.id).length,1);assert(e.g._nodes.every(n=>(n.outputs||[]).every(p=>p._data==null)));assert(Object.values(e.g.links).every(l=>l.data==null));}
+ finally{global.isSimRunning=originalRunning;global.stopSimLoop=originalStop;}
+});
+test('Boundary port deletion after Start updates the same equipment and disconnects external links',()=>{
+ const e=editor(),s=source(e.g,'a',1);s.connect(0,e.n,0);at(e.g,0);
+ menuAction(e,'inPort1','Delete').onclick();assert.equal(e.n.inputs.length,0);assert.equal(s.outputs[0].links?.length||0,0);assert(!e.n.properties.flow.nodes.some(n=>n.id==='inPort1'));assert.equal(e.g.getNodeById(e.n.id),e.n);assert.equal(simNow(),0);
 });
 test('Context menu stays inside the editor when opened at its bottom right corner',()=>{
  const e=editor(),card=walk(e.host).find(x=>x.dataset.flowId==='fork1');card.oncontextmenu(event(card,{clientX:1399,clientY:499}));

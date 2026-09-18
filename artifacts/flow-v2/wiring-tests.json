@@ -24,7 +24,7 @@
     "ok": true
   },
   {
-    "name": "Active work and Recovery keep the reset guard without losing wires",
+    "name": "Wiring after Process, Recovery or completion resets the run and can be repaired and restarted",
     "ok": true
   },
   {
@@ -60,7 +60,19 @@
     "ok": true
   },
   {
-    "name": "Port removal during Process or Recovery preserves the flow and requests Reset",
+    "name": "Port removal during Process or Recovery resets the run and removes the port",
+    "ok": true
+  },
+  {
+    "name": "Cancelled, invalid and unchanged wiring preserve runtime; moving and timing edits do too",
+    "ok": true
+  },
+  {
+    "name": "Wiring while running stops the engine, restores Initial Contents and clears output data",
+    "ok": true
+  },
+  {
+    "name": "Boundary port deletion after Start updates the same equipment and disconnects external links",
     "ok": true
   },
   {

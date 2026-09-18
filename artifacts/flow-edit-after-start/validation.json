@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-18",
+  "suites": {
+    "wiring": {
+      "passed": 20,
+      "total": 20,
+      "failures": []
+    },
+    "runtime": {
+      "passed": 21,
+      "total": 21,
+      "failures": []
+    },
+    "status": {
+      "passed": 5,
+      "total": 5,
+      "failures": []
+    },
+    "fanout": {
+      "passed": 9,
+      "total": 9,
+      "failures": []
+    }
+  },
+  "engineQuick": {
+    "passed": 40,
+    "warned": 0,
+    "failed": 0,
+    "passedCases": 40,
+    "warnedCases": 0,
+    "failedCases": 0,
+    "caseCount": 40,
+    "failureCount": 0,
+    "warningCount": 0,
+    "engineCount": 5,
+    "suite": "quick",
+    "seedCount": 1,
+    "exampleCount": 8,
+    "includesCurrentGraph": false,
+    "stoppedEarly": false,
+    "reruns": 0,
+    "stopOnFirstFailure": false
+  },
+  "browser": {
+    "url": "http://127.0.0.1:8124/index.html",
+    "sample": "Simple",
+    "verified": [
+      "Start then connect Fork output1 to Recovery by two-click wiring: simulation stopped and reset to 0 s",
+      "Connect Fork output2 to outPort: validation cleared",
+      "Start edited Flow: reached 21 s with live Process and Recovery status",
+      "Paused run: drag Fork output2 onto Recovery input; reset to 0 s and connection changed",
+      "Reconnect Fork output1 to outPort: validation cleared"
+    ]
+  },
+  "checks": [
+    "node --check: flow-view.js, sim.js, test-flow-v2-wiring.cjs",
+    "npm run check",
+    "git diff --check"
+  ]
+}

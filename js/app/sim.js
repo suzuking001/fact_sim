@@ -40,7 +40,6 @@ function startSimulation(){
   App.graph.status = LGraph.STATUS_RUNNING;
   App.graph.starttime = LiteGraph.getTime();
   App.graph.last_update_time = App.graph.starttime;
-  App.graph.sendEventToAllNodes('onStart');
 
   window.startSimLoop((simDeltaMs)=>{
     if(App.engine && typeof App.engine.update === 'function'){
@@ -73,3 +72,33 @@ function stopSimulation(){
     if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
   }catch(_e){}
 }
+
+// Keep graph/node identities and the open Flow editor while clearing a run.
+// Reconfiguring the graph here would leave the editor pointing at old nodes.
+App.resetSimulationForFlowEdit = function(graph){
+  if(!graph || graph!==App.graph) throw new Error('The Flow belongs to a different graph. Reopen its editor.');
+  const nodes=graph._nodes || [];
+  const hasRun=(Number(window.simNow?.()) || 0)>0 || nodes.some(n=>n._flowRuntime?.checked || App.FlowRuntime?.isActive(n) || n._sent || n._recv?.length);
+  if(!hasRun) return false;
+  stopSimulation();
+  if(typeof window.resetSimClock==='function') window.resetSimClock();
+  else window.setSimTime?.(0);
+  configureGraphClock(graph);
+  App.stopGroups?.clearRuntimeState?.();
+  for(const node of nodes){
+    if(node.type!=='factory/basic') continue;
+    delete node._flowRuntime;
+    node._state='IDLE';node._stateName='idle';node._until=0;
+    node._payload=null;node._currentWork=null;node._sent=0;
+    if(node.properties.role==='sink') node._recv=[];
+    for(const output of node.outputs || []) output._data=null;
+    window.applyNodeStateTheme?.(node,'IDLE');
+  }
+  for(const link of Object.values(graph.links || {})){link.data=null;link._last_time=0;}
+  App.initializeEntityRuntime(graph);
+  App.clearRuntimeVisualState?.(graph);
+  graph.__outputDirty=false;graph.__dirtyNodeIds=null;
+  App.timelineChart?.reset?.();
+  App.timelineChart?.capture?.();
+  return true;
+};

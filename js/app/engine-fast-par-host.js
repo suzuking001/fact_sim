@@ -2,7 +2,7 @@ var App = window.App || (window.App = {});
 
 (function(){
   const PAR_MODE = 'event-fast-par';
-  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260917fanout';
+  const PAR_WORKER_URL = 'js/app/engine-fast-par-worker.js?v=20260918join';
   const MAX_FLUSH_ROUNDS = 16;
 
   function cloneJson(value){

@@ -1,0 +1,50 @@
+[
+  {
+    "name": "The screenshot accepts two work inputs and retains the Recovery feedback",
+    "ok": true
+  },
+  {
+    "name": "Matching Type and ID merge to input 1, independent of input arrival order",
+    "ok": true
+  },
+  {
+    "name": "Different IDs of the same Type wait without consuming either work",
+    "ok": true
+  },
+  {
+    "name": "Equal display IDs from different Types do not merge",
+    "ok": true
+  },
+  {
+    "name": "Downstream blocking does not start Recovery or consume the same copy twice",
+    "ok": true
+  },
+  {
+    "name": "Three work inputs wait for the third matching copy",
+    "ok": true
+  },
+  {
+    "name": "Fork copies preserve display ID and unique instance IDs, including repeated direct Join deliveries",
+    "ok": true
+  },
+  {
+    "name": "Fork branches joining inside one Flow are work paths, not completion signals",
+    "ok": true
+  },
+  {
+    "name": "Reuniting copied contents keeps input 1 contents and consumes the duplicate subtree",
+    "ok": true
+  },
+  {
+    "name": "Join displays both work identities and a mismatch without advancing simulation",
+    "ok": true
+  },
+  {
+    "name": "A waiting Join survives snapshot/restore and still merges into the first input",
+    "ok": true
+  },
+  {
+    "name": "dt, event and event-fast match on Fork-to-Join output IDs, timing and counts",
+    "ok": true
+  }
+]

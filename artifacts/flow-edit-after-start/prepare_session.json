@@ -1,0 +1,20 @@
+{
+  "loaded": {
+    "example": "sample_line2",
+    "nodeCount": 131
+  },
+  "modeResult": {
+    "previousMode": "event",
+    "mode": "event-fast",
+    "restarted": false
+  },
+  "speedResult": null,
+  "status": {
+    "running": false,
+    "mode": "event-fast",
+    "simTimeMs": 0,
+    "fastestMode": false,
+    "nodeCount": 131,
+    "linkCount": 177
+  }
+}

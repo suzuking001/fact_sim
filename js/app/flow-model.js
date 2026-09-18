@@ -20,12 +20,12 @@
     let number=Number(flow.counters[prefix]) || 0,id;
     do{id=prefix+(++number);}while(flow.nodes.some(n=>n.id===id));flow.counters[prefix]=number;
     const item={id,kind,config:{...(def.timed ? {seconds:0} : {}),...config},inputs:def.inputs.map(id=>({id})),outputs:def.outputs.map(id=>({id,...(def.dynamic ? {typeId:'anyType'} : {})})),pos:pos || [30+flow.nodes.length*260,60]};
-    flow.nodes.push(item);return item;
+    flow.nodes.push(item);invalidateFlowCaches(flow);return item;
   }
   function connect(flow,from,to,output=0,input=0){
     const a=typeof from==='string' ? flow.nodes.find(n=>n.id===from) : from,b=typeof to==='string' ? flow.nodes.find(n=>n.id===to) : to;
     if(!a?.outputs[output] || !b?.inputs[input])throw new Error('The selected port does not exist.');
-    flow.links.push({from:a.id,output:a.outputs[output].id,to:b.id,input:b.inputs[input].id});
+    flow.links.push({from:a.id,output:a.outputs[output].id,to:b.id,input:b.inputs[input].id});invalidateFlowCaches(flow);
   }
   function rewire(flow,a,b){
     if(!a || !b || a.direction===b.direction)throw new Error('Connect an output port to an input port.');
@@ -36,7 +36,7 @@
     const link={from:from.id,output:output.portId,to:to.id,input:input.portId};
     // Replace occupied endpoints only once both ends have been chosen.
     flow.links=flow.links.filter(l=>!(l.from===link.from && l.output===link.output) && !(l.to===link.to && l.input===link.input));
-    flow.links.push(link);return link;
+    flow.links.push(link);invalidateFlowCaches(flow);return link;
   }
   function validate(flow,node){
     if(flow?.version!==2 || !Array.isArray(flow.nodes) || !Array.isArray(flow.links))return ['Unsupported Flow format. Open a Flow v2 file.'];
@@ -79,7 +79,6 @@
       const target=nodes.get(link.to);
       if(target?.kind==='recovery' && !signals.has(link))errors.push(`${target.id}: connect Recovery to a Fork completion output, then return it to Join.`);
       if(signals.has(link) && ['inPort','outPort','entityRouter','Palletizing','DePalletizing','syncroJudgment'].includes(target?.kind))errors.push(`${link.to}: completion signals must connect to Join, Fork, Process or Recovery.`);
-      if(target?.kind==='join' && target.inputs.findIndex(p=>p.id===link.input)>0 && !signals.has(link))errors.push(`${target.id}: additional inputs accept completion signals. Use Palletizing to combine Entities.`);
     }
     const reachable=new Set();function visit(id,path){if(path.has(id)){errors.push(`${id}: only Recovery feedback into a Join is supported.`);return;}if(reachable.has(id))return;reachable.add(id);const next=new Set(path);next.add(id);for(const l of flow.links.filter(l=>l.from===id && !feedback.has(l)))visit(l.to,next);}
     for(const item of flow.nodes.filter(n=>n.kind==='inPort'))visit(item.id,new Set());
@@ -87,12 +86,25 @@
     if(!flow.nodes.length)errors.push('Add an inPort and an outPort to begin.');
     return [...new Set(errors)];
   }
+  // signalLinks/feedbackLinks derive purely from a flow's node/link topology
+  // and are consulted on every transfer evaluation (canAccept, runJoin,
+  // joinReady, transferForkGroup, readyPath). During the t=0 start burst every
+  // node executes at once, so recomputing these O(n^2) traversals per call used
+  // to stall the main thread for seconds. Cache the result on the flow object
+  // and invalidate precisely where the draft is mutated; the committed runtime
+  // flow is never mutated in place, so the cache stays correct.
+  function invalidateFlowCaches(flow){
+    if(!flow || typeof flow!=='object')return;
+    flow.__signalCache=null;
+    flow.__feedbackCache=null;
+  }
   function signalLinks(flow){
+    if(flow && flow.__signalCache instanceof Set)return flow.__signalCache;
     const signals=new Set(),nodes=new Map(flow.nodes.map(n=>[n.id,n]));
     function reachesWork(link,seen=new Set()){
       const n=nodes.get(link.to);if(!n || seen.has(n.id))return false;
       if(n.kind==='outPort')return true;
-      if(n.kind==='recovery' || n.kind==='join' && link.input!==n.inputs[0]?.id)return false;
+      if(n.kind==='recovery')return false;
       const next=new Set(seen);next.add(n.id);
       return flow.links.filter(l=>l.from===n.id).some(l=>reachesWork(l,next));
     }
@@ -103,13 +115,15 @@
       for(const link of flow.links){const n=nodes.get(link.from);if(!n)continue;const incoming=flow.links.find(l=>l.to===n.id && l.input===n.inputs?.[0]?.id);if(incoming && signals.has(incoming))signals.add(link);}
       if(signals.size===before)break;
     }
+    flow.__signalCache=signals;
     return signals;
   }
   function feedbackLinks(flow){
+    if(flow && Array.isArray(flow.__feedbackCache))return flow.__feedbackCache;
     const nodes=new Map(flow.nodes.map(n=>[n.id,n])),signals=signalLinks(flow);
     // A recovery return starts ready on Reset; every later token is produced
     // by a real transfer. The Entity input still gates every cycle, even at 0 s.
-    return flow.links.filter(link=>{
+    const result=flow.links.filter(link=>{
       const from=nodes.get(link.from),to=nodes.get(link.to);
       if(from?.kind!=='recovery' || to?.kind!=='join' || !signals.has(link) || to.inputs.findIndex(p=>p.id===link.input)<1)return false;
       const dataInput=flow.links.find(l=>l.to===to.id && l.input===to.inputs[0].id);
@@ -117,6 +131,8 @@
       const visited=new Set();function reaches(id){if(id===from.id)return true;if(visited.has(id))return false;visited.add(id);return flow.links.filter(l=>l.from===id && l!==link).some(l=>reaches(l.to));}
       return reaches(to.id);
     });
+    flow.__feedbackCache=result;
+    return result;
   }
   function addRecoveryCycle(flow){
     // Upgrade the former serial cycle without changing any equipment ports,
@@ -137,7 +153,7 @@
         if(syncOut){before[0].to=next.id;before[0].input=next.inputs[0].id;after[0].from=fork.id;after[0].output=fork.outputs[0].id;after[0].to=syncOut.to;after[0].input=syncOut.input;syncOut.to=fork.id;syncOut.input=fork.inputs[0].id;}
       }else{after[0].from=fork.id;after[0].output=fork.outputs[0].id;}
       connect(flow,fork,recovery,1);
-      if(index>0)join.inputs.push({id:'inPort'+(index+2)});
+      if(index>0){join.inputs.push({id:'inPort'+(index+2)});invalidateFlowCaches(flow);}
       connect(flow,recovery,join,0,index+1);
     }
     layout(flow);return true;
@@ -150,7 +166,7 @@
     if(kind==='pack' || kind==='merge'){
       const pack=add(flow,'Palletizing');connect(flow,first,pack);if(entry[1])connect(flow,entry[1],pack,0,1);first=pack;
     }else if(entry.length>1){
-      const router=add(flow,'entityRouter');while(router.inputs.length<entry.length)router.inputs.push({id:'inPort'+(router.inputs.length+1)});entry.forEach((n,i)=>connect(flow,n,router,0,i));first=router;
+      const router=add(flow,'entityRouter');while(router.inputs.length<entry.length){router.inputs.push({id:'inPort'+(router.inputs.length+1)});invalidateFlowCaches(flow);}entry.forEach((n,i)=>connect(flow,n,router,0,i));first=router;
     }
     if(kind==='unpack'){
       const unpack=add(flow,'DePalletizing');connect(flow,first,unpack);connect(flow,unpack,exit[0]);if(exit[1])connect(flow,unpack,exit[1],1);layout(flow);return flow;
@@ -194,8 +210,9 @@
     if(changed && node._flowRuntime){node._flowRuntime.signals=[];node._flowRuntime.flowActivity={};node._flowRuntime.forkStatus={};delete node._flowRuntime.controlInitialized;}
     if(App.FlowRuntime?.isActive(node))App.FlowRuntime.retime(node);
     else if(node._flowRuntime){node._flowRuntime.checked=false;node._flowRuntime.error='';}
+    invalidateFlowCaches(node.properties.flow);
     node.graph?.change?.();node.graph?.afterChange?.();root.flushHistory?.();node.setDirtyCanvas?.(true,true);
-    return validate(flow,node);
+    return validate(node.properties.flow,node);
   }
-  App.FlowModel={definitions,clone,empty,add,connect,rewire,validate,template,layout,graphErrors,pause,commit,addSyncroGroup,signalLinks,feedbackLinks,addRecoveryCycle};
+  App.FlowModel={definitions,clone,empty,add,connect,rewire,validate,template,layout,graphErrors,pause,commit,addSyncroGroup,signalLinks,feedbackLinks,addRecoveryCycle,invalidateFlowCaches};
 })(typeof window==='undefined' ? globalThis : window);

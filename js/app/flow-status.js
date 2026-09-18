@@ -21,7 +21,13 @@
       const initial=!r.controlInitialized ? App.FlowModel.feedbackLinks(node.properties.flow) : [];
       let count=0;
       for(const p of item.inputs){const ready=here.some(c=>c.input===p.id) || initial.some(l=>l.to===item.id && l.input===p.id);result.inputs[p.id]=ready;if(ready)count++;row(p.id,ready ? 'Ready' : 'Waiting',ready);}
-      result.state=count===item.inputs.length ? 'READY' : 'WAIT';row('All inputs',`${count} / ${item.inputs.length}`,count===item.inputs.length);
+      const workInputs=App.FlowRuntime.joinWorkInputs(node,item),works=workInputs.map(p=>here.find(c=>c.input===p.id)?.entity);
+      const matching=workInputs.length<2 || works.every(e=>App.FlowRuntime.sameWork(e,works[0]));
+      result.state=count===item.inputs.length && matching ? 'READY' : 'WAIT';row('All inputs',`${count} / ${item.inputs.length}`,count===item.inputs.length);
+      if(workInputs.length>1){
+        workInputs.forEach((p,i)=>row(p.id+' work',works[i] ? `${works[i].type} / ${works[i].id}` : 'Waiting'));
+        row('Type / ID match',matching ? 'Matched' : works.every(Boolean) ? 'Mismatch' : 'Waiting for matching work',matching);
+      }
     }else if(item.kind==='fork'){
       const offer=(r.offers || []).find(o=>o.forkId===item.id),fired=last?.firedAt!==undefined,group=r.forkStatus?.[item.id],waiting=!!cell || !!group?.waiting;
       result.state=waiting ? 'WAIT' : fired ? 'DONE' : 'IDLE';

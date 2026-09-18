@@ -11,7 +11,37 @@
     const r=runtime(node);r.signals ||= [];if(r.controlInitialized)return;r.controlInitialized=true;
     for(const link of App.FlowModel.feedbackLinks(flow(node)))r.signals.push({id:++r.sequence,nodeId:link.to,input:link.input,initial:true});
   }
-  function joinReady(node,item){return item.inputs.slice(1).every(p=>runtime(node).signals?.some(c=>c.nodeId===item.id && c.input===p.id));}
+  function sameWork(a,b){return !!a && !!b && a.typeId===b.typeId && a.id===b.id;}
+  function joinWorkInputs(node,item){
+    const signals=App.FlowModel.signalLinks(flow(node));
+    return item.inputs.filter(p=>flow(node).links.some(l=>l.to===item.id && l.input===p.id && !signals.has(l)));
+  }
+  function joinSignalsReady(node,item){
+    const work=new Set(joinWorkInputs(node,item).map(p=>p.id));
+    return item.inputs.filter(p=>!work.has(p.id)).every(p=>runtime(node).signals?.some(c=>c.nodeId===item.id && c.input===p.id));
+  }
+  function joinReady(node,item){
+    const r=runtime(node),inputs=joinWorkInputs(node,item),cells=inputs.map(p=>r.cells.find(c=>c.nodeId===item.id && c.input===p.id));
+    return joinSignalsReady(node,item) && cells.every(c=>c && sameWork(c.entity,cells[0]?.entity));
+  }
+  function runJoin(node,cell,item){
+    const inputs=joinWorkInputs(node,item);if(cell.input!==inputs[0]?.id || !joinReady(node,item))return false;
+    const r=runtime(node),others=r.cells.filter(c=>c!==cell && c.nodeId===item.id);
+    if(!move(node,cell))return false;
+    // Input 1 represents the reunited work. Other copies are consumed once,
+    // with their copied contents; this is not an additional sink completion.
+    for(const other of others)store(node).destroy(other.entity);
+    r.cells=r.cells.filter(c=>!others.includes(c));r.signals=r.signals.filter(c=>c.nodeId!==item.id);
+    r.merged=(r.merged || 0)+others.length;mark(node);return true;
+  }
+  // Find the next work Join and the input reserved by a work on this path.
+  function assemblyTargets(node,id,input,seen=new Set()){
+    if(seen.has(id))return [];const item=spec(node,id);if(!item)return [];
+    if(item.kind==='join' && joinWorkInputs(node,item).length>1)return [{id,input}];
+    if(['outPort','Palletizing','DePalletizing','recovery'].includes(item.kind))return [];
+    const next=new Set(seen);next.add(id);const signals=App.FlowModel.signalLinks(flow(node));
+    return flow(node).links.filter(l=>l.from===id && !signals.has(l)).flatMap(l=>assemblyTargets(node,l.to,l.input,next));
+  }
   function mark(node){runtime(node).revision=(runtime(node).revision || 0)+1;if(!node.graph)return;node.graph.__outputDirty=true;node.graph.__dirtyNodeIds ||= new Set();node.graph.__dirtyNodeIds.add(node.id);for(const input of node.inputs || []){const link=node.graph.links[input.link];if(link)node.graph.__dirtyNodeIds.add(link.origin_id);}}
   function outgoing(node,item,port=0){return flow(node).links.find(l=>l.from===item.id && l.output===item.outputs[port]?.id);}
   function routerPort(node,item,cell){
@@ -42,6 +72,11 @@
   }
   function batchInputAllowed(node,entry,entity){
     const r=runtime(node);
+    const targets=assemblyTargets(node,entry.id);
+    if(targets.length && r.cells.length && !r.offers.length){
+      const shared=targets.find(target=>r.cells.every(c=>sameWork(c.entity,entity) && assemblyTargets(node,c.nodeId,c.input).some(other=>other.id===target.id && other.input!==target.input)));
+      if(shared)return true;
+    }
     // The parent opens a batch. Further admissions must lead to its child input.
     let childPath=false;const visited=new Set();function reaches(id){if(visited.has(id))return false;visited.add(id);const item=spec(node,id);if(!item)return false;
       return flow(node).links.filter(l=>l.from===id).some(l=>{const target=spec(node,l.to);if(target?.kind==='Palletizing'){if(l.input!==target.inputs[1].id)return false;childPath=true;return r.cells.some(c=>c.nodeId===target.id && c.input===target.inputs[0].id && store(node).canAttach(entity,c.entity).ok && store(node).childrenOf(c.entity).length+r.cells.filter(other=>other!==c).length<store(node).typeOf(c.entity).capacity);}return target && !['outPort','DePalletizing'].includes(target.kind) && reaches(target.id);});}
@@ -58,7 +93,7 @@
     // In particular, recovery cannot be hidden by buffering a new work at Join.
     const visited=new Set();function readyPath(item){
       if(!item || visited.has(item.id))return true;visited.add(item.id);
-      if(item.kind==='join')return joinReady(node,item);
+      if(item.kind==='join')return joinSignalsReady(node,item);
       if(['process','recovery','outPort','fork'].includes(item.kind))return true;
       const links=item.kind==='entityRouter' && entity ? [outgoing(node,item,routerPort(node,item,{entity}))].filter(Boolean) : flow(node).links.filter(l=>l.from===item.id);
       return links.every(l=>readyPath(spec(node,l.to)));
@@ -125,7 +160,7 @@
     return null;
   }
   function cloneEntityTree(node,entity){
-    const s=store(node),copy=s.create(entity.typeId,{locationNodeId:node.id,creationNodeId:node.id,createdAt:now(),attributes:App.FlowModel.clone(entity.attributes || {})});
+    const s=store(node),copy=s.create(entity.typeId,{locationNodeId:node.id,creationNodeId:node.id,createdAt:now(),legacyId:entity.id,legacyType:entity.type,attributes:App.FlowModel.clone(entity.attributes || {})});
     for(const child of s.childrenOf(entity)){const cloned=cloneEntityTree(node,child),attached=s.attach(cloned,copy);if(!attached.ok)throw new Error(attached.reason);}
     return copy;
   }
@@ -144,12 +179,20 @@
     return visit(item,new Set()) ? {leaves,forks:[...new Set(forks)],choices} : null;
   }
   function transferForkGroup(node,cell,plan){
-    const r=runtime(node),reserved=new Set(),targets=[];let ready=0;
-    for(const leaf of plan.leaves){
+    const r=runtime(node),reserved=new Map(),targets=[];let ready=0;
+    try{for(const leaf of plan.leaves){
       const links=node.outputs[leaf.slot]?.links || [],link=links.length===1 && node.graph.links[links[0]],receiver=link && node.graph.getNodeById(link.target_id);
-      const available=!!receiver && (receiver.properties.role==='sink' || !reserved.has(receiver.id)) && receiver.canAcceptEntityInput?.(link.target_slot,cell.entity);
-      if(available){ready++;if(receiver.properties.role!=='sink')reserved.add(receiver.id);}targets.push({...leaf,link,receiver});
-    }
+      const available=!!receiver && receiver.canAcceptEntityInput?.(link.target_slot,cell.entity);
+      if(available){
+        ready++;
+        if(receiver.properties.role!=='sink'){
+          const rr=runtime(receiver),entry=flow(receiver).nodes.find(n=>n.kind==='inPort' && n.config.portId===receiver.inputs[link.target_slot]?.portId);
+          if(!reserved.has(receiver))reserved.set(receiver,rr.cells);
+          rr.cells=[...rr.cells,{nodeId:entry.id,input:'',entity:cell.entity}];
+        }
+      }
+      targets.push({...leaf,link,receiver});
+    }}finally{for(const [receiver,cells] of reserved)runtime(receiver).cells=cells;}
     const controlsReady=plan.forks.every(f=>branchesFree(node,f));
     r.forkStatus ||= {};for(const f of plan.forks)r.forkStatus[f.id]={waiting:true,ready,total:targets.length};
     if(ready!==targets.length || !controlsReady){r.reason=`Waiting for all Fork outputs (${ready}/${targets.length} ready).`;return false;}
@@ -291,7 +334,7 @@
         if(!r.cells.includes(cell))continue;const item=spec(node,cell.nodeId);if(!item){r.error='Flow node is missing. Reset the simulation.';break;}
         if(item.kind==='inPort')progress=move(node,cell) || progress;
         else if(item.kind==='join'){
-          if(cell.input===item.inputs[0].id && joinReady(node,item) && move(node,cell)){r.signals=r.signals.filter(c=>c.nodeId!==item.id);progress=true;}
+          progress=runJoin(node,cell,item) || progress;
         }else if(item.kind==='fork')progress=runFork(node,cell,item) || progress;
         else if(item.kind==='process' || item.kind==='recovery'){
           if(cell.startedAt===undefined){cell.startedAt=now();cell.until=now()+item.config.seconds*1000;startVisual(node,cell,item);}
@@ -332,5 +375,5 @@
   function restore(graph,data){const snapshot=data?.__flowRuntime;if(!snapshot)return;const s=App.runtimeInstancesForGraph(graph);s.clear();s.instances=new Map(snapshot.instances.map(e=>[e.instanceId,e]));s.typeSequences=new Map(snapshot.typeSequences);s.arrivalSequence=snapshot.arrivalSequence;s.completed=snapshot.completed;for(const e of s.instances.values())if(e.parentId===null && e.locationNodeId!=null)s._addRoot(e.locationNodeId,e.instanceId);
     for(const row of snapshot.nodes){const node=graph.getNodeById(row.id);if(!node)continue;node._flowRuntime=row.runtime;node._recv=row.recv;node._sent=row.sent;for(const c of node._flowRuntime?.cells || [])c.entity=s.get(c.entity);for(const o of node._flowRuntime?.offers || [])o.entity=s.get(o.entity);row.outputs.forEach((e,i)=>node.setOutputData(i,e ? s.get(e) : null));node._state=row.state;node._stateName=row.stateName;node._until=row.until;node._payload=node._flowRuntime?.cells[0]?.entity || null;node._currentWork=node._payload;root.applyNodeStateTheme?.(node,node._state);}s.revision++;
   }
-  App.FlowRuntime={runtime,execute,canAccept,acknowledge,retime,eventUntil,updateState,capture,restore,activeCells,isActive};
+  App.FlowRuntime={runtime,execute,canAccept,acknowledge,retime,eventUntil,updateState,capture,restore,activeCells,isActive,joinWorkInputs,sameWork};
 })(typeof window==='undefined' ? globalThis : window);
