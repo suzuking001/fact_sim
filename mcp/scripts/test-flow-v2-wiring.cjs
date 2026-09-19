@@ -149,4 +149,14 @@ test('Context menu stays inside the editor when opened at its bottom right corne
  const e=editor(),card=walk(e.host).find(x=>x.dataset.flowId==='fork1');card.oncontextmenu(event(card,{clientX:1399,clientY:499}));
  const menu=walk(e.host).find(x=>x.classList.contains('flowContext'));assert.equal(menu.style.left,'1170px');assert.equal(menu.style.top,'360px');assert.equal(menu.style.maxHeight,'500px');assert.equal(menu.style.overflowY,'auto');
 });
+test('Flow editor shows the same Start checks on open, refresh and edit',()=>{
+ const e=editor('basic',n=>{n.properties.initialContents=[{typeId:'missing',quantity:1,load:'empty',children:[]}];});
+ const first=App.FlowModel.graphErrors(e.g)[0];assert(first);assert(e.notice().includes(first));
+ e.n.properties.initialContents=[];
+ const check=walk(e.host).find(x=>x.tagName==='BUTTON'&&x.textContent==='Check Start');check.onclick();
+ assert.match(e.notice(),/Start check: no errors/);
+ e.n.properties.initialContents=[{typeId:'missing',quantity:1,load:'empty',children:[]}];
+ const input=walk(e.host).find(x=>x.attributes['aria-label']==='process1 seconds');input.value='4';input.onchange();
+ assert(e.notice().includes(first));
+});
 fs.mkdirSync(path.join(root,'artifacts/flow-v2'),{recursive:true});fs.writeFileSync(path.join(root,'artifacts/flow-v2/wiring-tests.json'),JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results));if(results.some(r=>!r.ok))process.exitCode=1;

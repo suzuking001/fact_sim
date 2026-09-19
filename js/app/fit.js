@@ -3,9 +3,11 @@
 var App = window.App || (window.App = {});
 
 function fitToScreen(){
-  const silent = !!(arguments[0] && arguments[0].silent);
+  const options = arguments[0] || {};
+  const silent = !!options.silent;
   if(!App.canvas || !App.graph) return;
-  if(!App.graph._nodes || App.graph._nodes.length === 0){
+  const nodes = Array.isArray(options.nodes) ? options.nodes : App.graph._nodes;
+  if(!nodes || nodes.length === 0){
     try{
       if(App.canvas.ds && App.canvas.ds.reset) App.canvas.ds.reset();
       App.canvas.setDirty(true,true);
@@ -14,7 +16,7 @@ function fitToScreen(){
   }
   const b = new Float32Array(4);
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  for(const n of App.graph._nodes){
+  for(const n of nodes){
     if(!n) continue;
     if(typeof n.getBounding === 'function'){
       n.getBounding(b);
@@ -41,6 +43,7 @@ function fitToScreen(){
   const w = Math.max(1, maxX - minX);
   const h = Math.max(1, maxY - minY);
   let scale = Math.min((cw - margin * 2) / w, (ch - margin * 2) / h);
+  if(Number.isFinite(options.maxScale)) scale = Math.min(scale, options.maxScale);
   if(App.canvas.ds){
     if(App.canvas.ds.max_scale) scale = Math.min(scale, App.canvas.ds.max_scale);
     if(App.canvas.ds.min_scale && scale < App.canvas.ds.min_scale){
@@ -59,6 +62,29 @@ function fitToScreen(){
   App.canvas.setDirty(true,true);
   if(!silent) App.showToast('Fit to screen');
 }
+
+// Show where work enters a large sample instead of an idle middle section.
+function focusSimulationStart(){
+  if(!App.graph || !App.canvas) return false;
+  const sources = (App.graph._nodes || []).filter(node=>
+    node?.properties?.role === 'source' && node.properties.source?.entries?.length &&
+    Number.isFinite(Number(node.pos?.[0])));
+  if(!sources.length) return false;
+  const source = sources.reduce((best, node)=> node.pos[0] < best.pos[0] ? node : best);
+  const nodes = [source];
+  let current = source;
+  for(let depth = 0; depth < 2; depth++){
+    const linkId = (current.outputs || []).flatMap(output=>output?.links || [])[0];
+    const link = App.graph.links?.[linkId];
+    const next = link && App.graph.getNodeById(link.target_id);
+    if(!next || nodes.includes(next)) break;
+    nodes.push(next);
+    current = next;
+  }
+  fitToScreen({ silent:true, nodes, maxScale:1 });
+  return true;
+}
+App.focusSimulationStart = focusSimulationStart;
 
 function _isPositionedNode(node){
   return !!(node && node.pos && typeof node.pos[0] !== 'undefined' && typeof node.pos[1] !== 'undefined');

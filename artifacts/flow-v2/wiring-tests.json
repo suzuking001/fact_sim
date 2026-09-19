@@ -78,5 +78,9 @@
   {
     "name": "Context menu stays inside the editor when opened at its bottom right corner",
     "ok": true
+  },
+  {
+    "name": "Flow editor shows the same Start checks on open, refresh and edit",
+    "ok": true
   }
 ]

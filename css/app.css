@@ -1289,7 +1289,6 @@ body.timeline-hidden #stateLegend{
 .stateLegendDot.is-process{ background: #2ecc71; }
 .stateLegendDot.is-wait{ background: #f39c12; }
 .stateLegendDot.is-recovery{ background: #3498db; }
-
 body.mobile-ui #stateLegend{
   gap: 9px;
   bottom: calc(min(58vh, 460px) + var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 10px);
@@ -2783,6 +2782,8 @@ body:not(.sidebar-hidden) #graph{ right: 352px; }
 #sidebar .exampleSaveActions > button{
   flex: 1 1 140px;
   min-width: 0;
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .simStatusCard{
@@ -5304,6 +5305,42 @@ body.sidebar-hidden #editorTopHud{
   box-shadow: 0 8px 18px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.78);
 }
 
+.editorRunSpeedBody{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.editorRunSpeedControl{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editorRunRealtime{
+  color: rgba(60,60,67,0.72);
+  font: 600 11px/1.2 'Inter', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.editorRunRealtime strong{
+  color: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.editorRunRuntimeDivider{
+  margin: 0 4px;
+  color: rgba(60,60,67,0.42);
+}
+
+.editorRunEngine{
+  color: rgba(60,60,67,0.78);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600;
+}
+
 .editorRunSpeedLabel{
   color: rgba(29,29,31,0.52);
   font-size: 11px;
@@ -5392,6 +5429,12 @@ body.tablet-ui #editorRunHud #speedRange{
   flex: 1 1 110px;
   width: auto;
   min-width: 72px;
+}
+
+body.mobile-ui .editorRunSpeedBody,
+body.tablet-ui .editorRunSpeedBody{
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 body.mobile-ui .editorRunSpeedLabel{

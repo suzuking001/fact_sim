@@ -5,6 +5,8 @@ var App = window.App || (window.App = {});
 (function(){
   const DT_STEP_LIMIT = 200;
   const DT_SETTLE_LIMIT = 5;
+  const DT_LIVE_FRAME_BUDGET_MS = 8;
+  const DT_LIVE_BACKLOG_STEPS = 10;
   const EVENT_LOOP_LIMIT = 500;
   const EVENT_SAME_TIME_LIMIT = 64;
   const DIRTY_EXEC_LIMIT = 2500;
@@ -37,8 +39,6 @@ var App = window.App || (window.App = {});
 
   function settleGraph(graph, limit){
     if(!graph) return;
-    graph.__outputDirty = false;
-    graph.runStep(0, !graph.catch_errors);
     let settle = 0;
     while(graph.__outputDirty && settle++ < limit){
       graph.__outputDirty = false;
@@ -471,7 +471,11 @@ var App = window.App || (window.App = {});
       if(!isFinite(delta) || delta <= 0) return;
 
       const dtMs = ((typeof window.getSimDtSec === 'function') ? window.getSimDtSec() : 0.1) * 1000;
-      this.accumMs += delta;
+      const live = graph === App.graph && typeof window.isSimRunning === 'function' && window.isSimRunning();
+      // A speed the CPU cannot sustain must not leave seconds of stale work
+      // queued up after the user slows down or stops the simulation.
+      this.accumMs = Math.min(this.accumMs + delta, dtMs * (live ? DT_LIVE_BACKLOG_STEPS : DT_STEP_LIMIT));
+      const startedAt = live ? performance.now() : 0;
 
       let steps = 0;
       let timelineCaptured = false;
@@ -492,9 +496,9 @@ var App = window.App || (window.App = {});
         timelineCaptured = true;
         this.accumMs -= dtMs;
         steps++;
+        if(live && (performance.now() - startedAt) >= DT_LIVE_FRAME_BUDGET_MS) break;
       }
 
-      if(steps === DT_STEP_LIMIT) this.accumMs = 0;
       if(timelineCaptured) drawTimeline();
     }
   }

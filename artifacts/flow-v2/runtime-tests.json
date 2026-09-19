@@ -80,6 +80,14 @@
     "ok": true
   },
   {
+    "name": "Entity waits at its output port when downstream cannot accept it",
+    "ok": true
+  },
+  {
+    "name": "Entity waits at the selected output of a multi-output router",
+    "ok": true
+  },
+  {
     "name": "IDs never reuse deleted numbers; old files are rejected",
     "ok": true
   }

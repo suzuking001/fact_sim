@@ -7,8 +7,15 @@
   App.createFlowView=function(node){
     const host=element('section','flowEditor'),toolbar=element('div','flowToolbar'),viewport=element('div','flowViewport'),scene=element('div','flowScene'),notice=element('div','flowNotice');
     notice.setAttribute('role','status');host.tabIndex=-1;host.append(toolbar,viewport,notice);viewport.append(scene);
-    if(node.properties.role==='sink'){notice.textContent='Entities delivered here are recorded as completed.';return host;}
-    if(node.properties.role==='source'){notice.textContent='Set the Entity sequence in Contents. Source generates one Entity when the destination is ready.';return host;}
+    const wiringHint='Drag between the round ports to connect. Drag an existing wire or its input end to reconnect. Esc cancels.';
+    const hint=node.properties.role==='sink' ? 'Entities delivered here are recorded as completed.' : node.properties.role==='source' ? 'Set the Entity sequence in Contents. Source generates one Entity when the destination is ready.' : wiringHint;
+    function showChecks(message='',editError=false){
+      const errors=model.graphErrors(node.graph);
+      notice.textContent=[message,errors.length ? `Start check: ${errors.length} error(s)\n${errors.join('\n')}` : `Start check: no errors. ${hint}`].filter(Boolean).join('\n');
+      notice.classList.toggle('is-error',editError || !!errors.length);
+    }
+    toolbar.append(button('Check Start',()=>showChecks()));
+    if(node.properties.role==='sink' || node.properties.role==='source'){showChecks();return host;}
     let flow=model.clone(node.properties.flow),zoom=1,pan=[16,16],pending=null,menu=null,drag=null,autoFit=true,connectionDrag=null,pointer=null,selectedLink=null;
     const elements=new Map(),ports=new Map(),progress=new Map(),liveViews=new Map();let svg,snapTarget=null,boundaryEdits=[];
     const selection=options(Object.entries(model.definitions).map(([id,d])=>[id,d.label]),'process');selection.setAttribute('aria-label','Flow node type');
@@ -27,17 +34,16 @@
         const changed=topology(previous)!==topology(flow);
         const reset=changed && App.resetSimulationForFlowEdit(node.graph);
         for(const apply of boundaryEdits)apply();
-        const errors=model.commit(node,flow),message=reset ? 'Flow changed. Simulation reset to 0 s; Start runs the edited Flow.' : '';
-        notice.textContent=[message,errors.join(' ') || wiringHint].filter(Boolean).join(' ');notice.classList.toggle('is-error',!!errors.length);
+        model.commit(node,flow);const message=reset ? 'Flow changed. Simulation reset to 0 s; Start runs the edited Flow.' : '';
+        showChecks(message);
         if(reset)App.showToast?.(message);
         if(render)draw();
       }
-      catch(error){flow=previous;notice.textContent=error.message;notice.classList.add('is-error');if(render)draw();}
+      catch(error){flow=previous;showChecks(error.message,true);if(render)draw();}
     }
     function portKey(id,direction,port){return `${id}/${direction}/${port}`;}
-    const wiringHint='Drag between the round ports to connect. Drag an existing wire or its input end to reconnect. Esc cancels.';
     function endpoint(dot){return {nodeId:dot.dataset.nodeId,direction:dot.dataset.direction,portId:dot.dataset.portId};}
-    function cancelConnection(){pending=null;pointer=null;connectionDrag=null;snapTarget=null;notice.textContent=model.validate(flow,node).join(' ') || wiringHint;drawLinks();}
+    function cancelConnection(){pending=null;pointer=null;connectionDrag=null;snapTarget=null;showChecks();drawLinks();}
     function choosePort(end){
       model.pause();
       selectedLink=null;
@@ -177,6 +183,6 @@
       }
       if(resized){if(autoFit)fit();drawLinks();}requestAnimationFrame(update);
     }
-    draw();notice.textContent=model.validate(flow,node).join(' ') || wiringHint;requestAnimationFrame(()=>{fit();drawLinks();update();});return host;
+    draw();showChecks();requestAnimationFrame(()=>{fit();drawLinks();update();});return host;
   };
 })(window);

@@ -124,5 +124,22 @@ test('Animation uses active Process and Recovery deadlines across edits and mult
  at(g,20000);at(g,22000);assert.equal(WorkLinkAnimator.sample(g).length,1);assert.equal(WorkLinkAnimator.sample(g)[0].progress,22/24);at(g,24000);at(g,25000);const row=WorkLinkAnimator.sample(g)[0];assert.equal(row.linkId,m.outputs[0].links[0]);assert.equal(row.progress,1/3);
  const recoveryEdit=App.FlowModel.clone(m.properties.flow);recoveryEdit.nodes.find(n=>n.kind==='recovery').config.seconds=20;App.FlowModel.commit(m,recoveryEdit);assert.equal(WorkLinkAnimator.sample(g)[0].progress,1/20);assert.equal(m._until,44000);at(g,44000);assert.equal(WorkLinkAnimator.sample(g).length,0);assert.equal(sink._recv[0].t,24000);
 });
+test('Entity waits at its output port when downstream cannot accept it',()=>{
+ const g=graph(),s=source(g,'a',1),m=node(g),sink=node(g,'sink');s.connect(0,m,0);m.connect(0,sink,0);times(m,2,0);
+ sink.canAcceptEntityInput=()=>false;at(g,0);
+ const canvas={graph:g};const moving=WorkLinkAnimator.sample(g).find(row=>row.nodeId===m.id);
+ assert.equal(moving.waitingOutputSlot,undefined);
+ at(g,2000);const waiting=WorkLinkAnimator.sample(g).find(row=>row.nodeId===m.id);
+ assert.equal(m._state,'WAIT');assert.equal(waiting.waitingOutputSlot,0);
+ assert.deepEqual(WorkLinkAnimator.position(canvas,waiting),m.getConnectionPos(false,0));
+});
+test('Entity waits at the selected output of a multi-output router',()=>{
+ const g=graph(),s=source(g,'b',1),m=node(g,'router'),left=node(g,'sink'),right=node(g,'sink');s.connect(0,m,0);m.connect(0,left,0);m.connect(1,right,0);times(m,2,0);
+ const router=m.properties.flow.nodes.find(item=>item.kind==='entityRouter');router.outputs[0].typeId='a';router.outputs[1].typeId='b';
+ right.canAcceptEntityInput=()=>false;at(g,0);at(g,2000);
+ const waiting=WorkLinkAnimator.sample(g).find(row=>row.nodeId===m.id);
+ assert.equal(waiting.waitingOutputSlot,1);
+ assert.deepEqual(WorkLinkAnimator.position({graph:g},waiting),m.getConnectionPos(false,1));
+});
 test('IDs never reuse deleted numbers; old files are rejected',()=>{const f=App.FlowModel.empty();assert.equal(App.FlowModel.add(f,'process').id,'process1');f.nodes=[];assert.equal(App.FlowModel.add(f,'process').id,'process2');assert.throws(()=>App.assertFlowFileFormat({nodes:[]}),/Unsupported file format/);});
 fs.mkdirSync(path.join(root,'artifacts/flow-v2'),{recursive:true});fs.writeFileSync(path.join(root,'artifacts/flow-v2/runtime-tests.json'),JSON.stringify(results,null,2));console.log(JSON.stringify(results.map(r=>r.ok ? {name:r.name,ok:true} : r)));if(results.some(r=>!r.ok))process.exitCode=1;

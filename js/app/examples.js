@@ -191,6 +191,11 @@ async function resolveSampleDirectoryContext(rootHandle){
   if(!rootHandle || rootHandle.kind !== 'directory'){
     throw new Error('Select the project root or the sample folder.');
   }
+  const selectedName = String(rootHandle.name || '').trim();
+  const normalizedName = selectedName.toLowerCase();
+  if(normalizedName !== 'fact_sim' && normalizedName !== 'sample'){
+    throw new Error(`Invalid folder "${selectedName || '(unnamed)'}". Choose a folder named "fact_sim" or "sample".`);
+  }
   const sampleSentinels = ['simple.js', 'sample_line2.js', 'simple.json', 'sample_line2.json'];
   if(await directoryContainsAny(rootHandle, sampleSentinels)){
     return { rootHandle, sampleHandle: rootHandle, pathKind: 'sample' };
@@ -236,18 +241,26 @@ async function getExampleWriteContext(forcePrompt){
     if(granted) return state;
   }
   let rootHandle = null;
+  let startInHandle = state.rootHandle || null;
   if(!forcePrompt){
     rootHandle = await loadStoredExampleRootHandle();
+  }
+  if(!startInHandle){
+    startInHandle = rootHandle || (forcePrompt ? await loadStoredExampleRootHandle() : null);
   }
   if(rootHandle){
     const granted = await queryDirectoryPermission(rootHandle);
     if(!granted) rootHandle = null;
   }
   if(!rootHandle){
-    rootHandle = await window.showDirectoryPicker({
+    const pickerOptions = {
       id: 'fact-sim-example-root',
       mode: 'readwrite'
-    });
+    };
+    if(startInHandle && startInHandle.kind === 'directory'){
+      pickerOptions.startIn = startInHandle;
+    }
+    rootHandle = await window.showDirectoryPicker(pickerOptions);
     const granted = await queryDirectoryPermission(rootHandle);
     if(!granted){
       throw new Error('Write permission was not granted.');
@@ -263,31 +276,24 @@ async function getExampleWriteContext(forcePrompt){
 }
 
 function updateExampleSaveUi(){
-  const btnLink = document.getElementById('btnLinkExampleFolder');
   const btnOverwrite = document.getElementById('btnOverwriteExample');
   const hint = document.getElementById('exampleSaveHint');
   const sel = document.getElementById('exampleSelect');
   const key = resolveExampleKey(sel && sel.value);
   const supported = supportsExampleOverwrite();
-  const linked = !!(App._exampleWriteState && App._exampleWriteState.rootHandle && App._exampleWriteState.sampleHandle);
-  if(btnLink){
-    btnLink.disabled = !supported;
-    btnLink.textContent = linked ? 'Relink Sample Folder' : 'Link Sample Folder';
-    btnLink.title = supported ? 'Choose the repo root or sample folder for example overwrite.' : 'Requires File System Access API on localhost or HTTPS.';
-  }
   if(btnOverwrite){
     btnOverwrite.disabled = !supported || !key;
-    btnOverwrite.title = key ? 'Overwrite the selected example with the current graph.' : 'Choose an example first.';
+    btnOverwrite.title = key
+      ? 'Choose the fact_sim project root or sample folder, then overwrite the selected example.'
+      : 'Choose an example first.';
   }
   if(hint){
     if(!supported){
       hint.innerHTML = 'Overwrite Example requires a Chromium browser on <strong>localhost</strong> or <strong>HTTPS</strong>.';
     }else if(!key){
-      hint.textContent = 'Choose an example first, then link the sample folder and overwrite it.';
-    }else if(linked){
-      hint.textContent = `Ready to overwrite ${key}.json and ${key}.js with the current graph.`;
+      hint.textContent = 'Choose an example first, then overwrite it with the current graph.';
     }else{
-      hint.textContent = 'Link the fact_sim sample folder once, then overwrite the selected example.';
+      hint.textContent = 'Each overwrite asks for the fact_sim project root or sample folder.';
     }
   }
 }
@@ -312,7 +318,7 @@ async function overwriteSelectedExample(){
   }
   const confirmed = window.confirm(`Overwrite "${key}" with the current graph? This updates both the JSON file and the bundled JS fallback.`);
   if(!confirmed) return false;
-  const context = await linkExampleFolder(false);
+  const context = await linkExampleFolder(true);
   const payload = cloneExampleData(typeof App.serializeGraphDataForSave === 'function'
     ? App.serializeGraphDataForSave()
     : App.serializeGraphData());
@@ -425,7 +431,7 @@ function makeExample(kind){
   const isFileProtocol = String(window.location?.protocol || '').toLowerCase() === 'file:';
   if(isFileProtocol && data){
     // file:// cannot fetch local JSON in many browsers; use bundled JS examples.
-    if(_isLatestGraphLoadToken(token)) applyExampleData(data);
+    if(_isLatestGraphLoadToken(token)) applyExampleData(data, key);
     return Promise.resolve(true);
   }
   const file = EXAMPLE_FILES[key] || `sample/${key}.json`;
@@ -433,13 +439,13 @@ function makeExample(kind){
     return loadExampleFromFile(file, key, data, token);
   }
   if(data){
-    if(_isLatestGraphLoadToken(token)) applyExampleData(data);
+    if(_isLatestGraphLoadToken(token)) applyExampleData(data, key);
     return Promise.resolve(true);
   }
   return Promise.resolve(false);
 }
 
-function applyExampleData(data){
+function applyExampleData(data, key){
   if(!App.graph) return;
   let payload = data;
   try{
@@ -452,6 +458,7 @@ function applyExampleData(data){
   }
   if(typeof App.applyGraphData === 'function'){
     App.applyGraphData(payload, { source: 'example' });
+    if(key === 'sample_line2') App.focusSimulationStart?.();
   }else{
     stopSimulation();
     App.history.lock = true;
@@ -498,7 +505,7 @@ function loadExampleFromFile(path, key, fallbackData, token){
     .then(r=>{ if(!r.ok) throw new Error(`Load failed: ${r.status}`); return r.json(); })
     .then(data=>{
       if(!_isLatestGraphLoadToken(token)) return false;
-      applyExampleData(data);
+      applyExampleData(data, key);
       return true;
     })
     .catch(err=>{
@@ -506,7 +513,7 @@ function loadExampleFromFile(path, key, fallbackData, token){
       const fallback = fallbackData || (window.EXAMPLES && window.EXAMPLES[resolveExampleKey(key)]);
       if(fallback){
         console.warn(`[examples] fallback to embedded data for "${key}"`, err);
-        applyExampleData(fallback);
+        applyExampleData(fallback, key);
         return true;
       }
       alert('Failed to load JSON');
@@ -517,7 +524,6 @@ function loadExampleFromFile(path, key, fallbackData, token){
 
 function initExamples(){
   const sel = document.getElementById('exampleSelect');
-  const btnLink = document.getElementById('btnLinkExampleFolder');
   const btnOverwrite = document.getElementById('btnOverwriteExample');
   if(sel){
     sel.addEventListener('change', e=>{
@@ -528,17 +534,6 @@ function initExamples(){
         }catch(_e){}
       });
       updateExampleSaveUi();
-    });
-  }
-  if(btnLink){
-    btnLink.addEventListener('click', ()=>{
-      linkExampleFolder(true).then(()=>{
-        if(typeof App.showToast === 'function') App.showToast('Sample folder linked');
-      }).catch((err)=>{
-        if(err && err.name === 'AbortError') return;
-        console.error(err);
-        if(typeof App.showToast === 'function') App.showToast(err && err.message ? err.message : 'Failed to link sample folder');
-      });
     });
   }
   if(btnOverwrite){

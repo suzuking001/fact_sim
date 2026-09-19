@@ -27,7 +27,27 @@
   let progressTarget = 8;
   let pollHandle = 0;
   let previewRunning = false;
+  let previewPreviousSpeedLevel = null;
+  const LANDING_PREVIEW_SPEED_LEVEL = 5; // 8x in core.js SPEED_LEVELS
   const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  function applyLandingPreviewSpeed(){
+    const range = document.getElementById('speedRange');
+    if(!range) return;
+    if(previewPreviousSpeedLevel === null) previewPreviousSpeedLevel = range.value;
+    range.value = String(LANDING_PREVIEW_SPEED_LEVEL);
+    range.dispatchEvent(new Event('input', { bubbles:true }));
+  }
+
+  function restoreSimulationSpeed(){
+    if(previewPreviousSpeedLevel === null) return;
+    const range = document.getElementById('speedRange');
+    const previousLevel = previewPreviousSpeedLevel;
+    previewPreviousSpeedLevel = null;
+    if(!range) return;
+    range.value = previousLevel;
+    range.dispatchEvent(new Event('input', { bubbles:true }));
+  }
 
   function setStatus(label, hint, state){
     if(progressLabel && label) progressLabel.textContent = label;
@@ -70,8 +90,12 @@
         if(App.canvas && typeof App.canvas.draw === 'function') App.canvas.draw(true, true);
       }catch(_e){}
       try{
+        applyLandingPreviewSpeed();
         if(typeof window.startSimulation === 'function') window.startSimulation();
       }catch(err){
+        previewRunning = false;
+        body.classList.remove('landing-preview-running');
+        restoreSimulationSpeed();
         console.warn('Landing live preview could not be started.', err);
       }
     }, 180);
@@ -86,6 +110,7 @@
 
   function revealApp(options){
     const opts = options || {};
+    restoreSimulationSpeed();
     body.classList.add('landing-hidden');
     body.classList.remove('landing-choice-pending', 'landing-choice-ready', 'landing-preview-running');
     appRoot.setAttribute('aria-hidden', 'false');
@@ -157,6 +182,7 @@
     try{
       if(typeof window.stopSimulation === 'function') window.stopSimulation();
     }catch(_e){}
+    restoreSimulationSpeed();
   }
 
   function markStarterGraphApplied(){

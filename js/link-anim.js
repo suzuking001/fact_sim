@@ -2,6 +2,24 @@
 (function(root){
   'use strict';
   const colors={blue:'#0a84ff',orange:'#d97706',green:'#16833c',purple:'#8e35bd',red:'#d92d20',cyan:'#087ea4',yellow:'#a16207',gray:'#63666a'};
+  function waitingOutputSlot(node,cell){
+    const flow=node.properties?.flow,items=new Map((flow?.nodes || []).map(item=>[item.id,item]));
+    const signals=root.App.FlowModel.signalLinks(flow),seen=new Set();let item=items.get(cell.nodeId);
+    while(item && !seen.has(item.id)){
+      seen.add(item.id);
+      if(item.kind==='outPort')return node.outputs.findIndex(port=>port.portId===item.config.portId);
+      if(item.id!==cell.nodeId && !['fork','entityRouter'].includes(item.kind))return -1;
+      let port=0;
+      if(item.kind==='entityRouter'){
+        port=item.config.dispatch==='round-robin' ? (node._flowRuntime.routerCursors?.[item.id] || 0)%item.outputs.length : item.outputs.findIndex(output=>output.typeId===cell.entity.typeId);
+        if(port<0)port=item.outputs.findIndex(output=>output.typeId==='anyType');
+      }
+      const links=flow.links.filter(link=>link.from===item.id && !signals.has(link));
+      const link=item.kind==='fork' ? links[0] : links.find(link=>link.output===item.outputs[port]?.id);
+      item=items.get(link?.to);
+    }
+    return -1;
+  }
   function sample(graph,time=Number(root.simNow?.()) || 0){
     const byEntity=new Map();
     for(const node of graph?._nodes || [])for(const visual of node._flowRuntime?.visuals || []){
@@ -11,6 +29,13 @@
       const completed=history.reduce((sum,p)=>sum+Math.max(0,p.until-p.startedAt),0),remaining=phases.filter(id=>!finished.has(id)).reduce((sum,id)=>sum+(node.properties.flow.nodes.find(n=>n.id===id)?.config.seconds || 0)*1000,0),elapsed=active ? Math.max(0,Math.min(active.until-active.startedAt,time-active.startedAt)) : 0,total=completed+remaining;
       const start=history[0]?.startedAt ?? active?.startedAt ?? time,until=active?.until ?? history.at(-1)?.until ?? time;
       const row={...visual,graph,nodeId:node.id,start,until,progress:total>0 ? Math.max(0,Math.min(1,(completed+elapsed)/total)) : 1,waiting:!active || time>=until};
+      if(!visual.signal && row.progress===1){
+        const held=r.cells.find(candidate=>candidate.id===visual.cellId && candidate.entity.instanceId===visual.entityId);
+        const offer=r.offers?.find(candidate=>candidate.cellId===visual.cellId && candidate.entity.instanceId===visual.entityId);
+        if(offer || held && (held.ready || ['fork','outPort','entityRouter'].includes(node.properties.flow.nodes.find(item=>item.id===held.nodeId)?.kind))){
+          const slot=offer?.slot ?? waitingOutputSlot(node,held);if(slot>=0)row.waitingOutputSlot=slot;
+        }
+      }
       const previous=byEntity.get(visual.entityId);if(!previous || start>=previous.start)byEntity.set(visual.entityId,row);
     }
     const store=root.App.runtimeInstancesForGraph(graph);
@@ -24,6 +49,7 @@
   function shape(ctx,x,y,r,kind){ctx.beginPath();if(kind==='square' || kind==='rounded-square'){ctx.roundRect(x-r,y-r,r*2,r*2,kind==='rounded-square' ? r*.35 : 0);return;}const count={triangle:3,diamond:4,hexagon:6}[kind];if(!count){ctx.arc(x,y,r,0,Math.PI*2);return;}for(let i=0;i<count;i++){const a=-Math.PI/2+i*Math.PI*2/count;i ? ctx.lineTo(x+r*Math.cos(a),y+r*Math.sin(a)) : ctx.moveTo(x+r*Math.cos(a),y+r*Math.sin(a));}ctx.closePath();}
   function position(canvas,row){const graph=canvas.graph;
     if(row.stationary){const node=graph.getNodeById(row.nodeId);if(!node)return null;const offer=node._flowRuntime?.offers.find(o=>o.entity.instanceId===row.entityId);return node.outputs?.length ? node.getConnectionPos(false,offer?.slot || 0) : [node.pos[0]+node.size[0]/2,node.pos[1]];}
+    if(row.waitingOutputSlot!==undefined){const node=graph.getNodeById(row.nodeId);return node?.getConnectionPos(false,row.waitingOutputSlot) || null;}
     const link=graph.links[row.linkId];if(!link)return null;const from=graph.getNodeById(link.origin_id),to=graph.getNodeById(link.target_id);if(!from || !to)return null;const a=from.getConnectionPos(false,link.origin_slot),b=to.getConnectionPos(true,link.target_slot),outDir=from.outputs[link.origin_slot]?.dir || (from.properties.flipIO ? LiteGraph.LEFT : LiteGraph.RIGHT),inDir=to.inputs[link.target_slot]?.dir || (to.properties.flipIO ? LiteGraph.RIGHT : LiteGraph.LEFT);
     return canvas.computeConnectionPoint ? canvas.computeConnectionPoint(a,b,row.progress,outDir,inDir) : [a[0]+(b[0]-a[0])*row.progress,a[1]+(b[1]-a[1])*row.progress];
   }

@@ -40,10 +40,20 @@ function startSimulation(){
   App.graph.status = LGraph.STATUS_RUNNING;
   App.graph.starttime = LiteGraph.getTime();
   App.graph.last_update_time = App.graph.starttime;
+  App.graph.sendEventToAllNodes('onStart');
 
   window.startSimLoop((simDeltaMs)=>{
     if(App.engine && typeof App.engine.update === 'function'){
+      const beforeMs = (typeof window.simNow === 'function') ? window.simNow() : NaN;
       App.engine.update(simDeltaMs);
+      const afterMs = (typeof window.simNow === 'function') ? window.simNow() : NaN;
+      if(afterMs !== beforeMs && App.canvas && !App.isRenderSuppressed?.()){
+        // LiteGraph can leave the canvas clean while entity positions advance.
+        // Render the new state now; otherwise it may only appear on Stop's
+        // forced draw or on an unrelated node change several seconds later.
+        App.canvas.setDirty(true, true);
+        App.canvas.draw();
+      }
     }
   });
   setStateLegendVisible(true);

@@ -1610,14 +1610,9 @@ window.beginGroupPlacement = beginGroupPlacement;
   const sidebar = document.getElementById('sidebar');
   const exampleSelect = document.getElementById('exampleSelect');
   const renderFpsSelect = document.getElementById('renderFpsSelect');
-  const speedFactor = document.getElementById('speedFactor');
   const realtimeFactor = document.getElementById('realtimeFactorValue');
-  const simStatusBadge = document.getElementById('simStatusBadge');
   const simStatusEngine = document.getElementById('simStatusEngine');
-  const simStatusSpeed = document.getElementById('simStatusSpeed');
-  const simStatusRender = document.getElementById('simStatusRender');
   const simStatusRealtime = document.getElementById('simStatusRealtime');
-  const simStatusSelection = document.getElementById('simStatusSelection');
   const addNodePanel = document.getElementById('addNodePanel');
   const addGroupPanel = document.getElementById('addGroupPanel');
   const btnAddNode = document.getElementById('btnAddNode');
@@ -1878,29 +1873,11 @@ window.beginGroupPlacement = beginGroupPlacement;
       btnStart.setAttribute('aria-label', running ? 'Stop simulation' : 'Start simulation');
       btnStart.title = running ? 'Stop simulation' : 'Start simulation';
     }
-    if(simStatusBadge){
-      simStatusBadge.textContent = running ? 'Running' : 'Stopped';
-      simStatusBadge.classList.toggle('is-running', running);
-    }
     if(simStatusEngine && simModeSelect){
       const label = simModeSelect.options[simModeSelect.selectedIndex]?.textContent || simModeSelect.value || '--';
       simStatusEngine.textContent = label;
     }
-    if(simStatusSpeed) simStatusSpeed.textContent = (speedFactor?.textContent || '--').replace(/^0?\.?/, (m)=> m);
-    if(simStatusRender){
-      const configuredFps = (typeof App.getRenderFps === 'function') ? App.getRenderFps() : (Number(renderFpsSelect?.value) || 60);
-      const effectiveFps = (typeof App.getEffectiveRenderFps === 'function') ? App.getEffectiveRenderFps() : configuredFps;
-      const visualMode = (typeof App.getVisualPerformanceMode === 'function') ? App.getVisualPerformanceMode() : 'normal';
-      simStatusRender.textContent = effectiveFps < configuredFps
-        ? `${configuredFps}/${effectiveFps} FPS · ${visualMode}`
-        : `${configuredFps} FPS${visualMode !== 'normal' ? ` · ${visualMode}` : ''}`;
-    }
     if(simStatusRealtime) simStatusRealtime.textContent = realtimeFactor?.textContent || '--';
-    if(simStatusSelection){
-      const selectedMap = App.canvas && App.canvas.selected_nodes ? App.canvas.selected_nodes : null;
-      const count = selectedMap ? Object.keys(selectedMap).length : 0;
-      simStatusSelection.textContent = count ? `${count} node${count === 1 ? '' : 's'}` : 'None';
-    }
     updateOverviewQuickTip();
     updateSidebarSummaries();
   }

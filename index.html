@@ -29,7 +29,7 @@
   <script src="js/vendor/litegraph.min.js?v=0.7.13"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260905b" />
+  <link rel="stylesheet" href="css/app.css?v=20260919developermenu" />
   <link rel="stylesheet" href="css/workspace.css?v=20260905c" />
   <link rel="stylesheet" href="css/details.css?v=20260905a" />
   <link rel="stylesheet" href="css/flow-view.css?v=20260917fanout" />
@@ -180,8 +180,17 @@
     <button id="btnReset" type="button">Reset</button>
     <div class="editorRunSpeed">
       <span class="editorRunSpeedLabel">Speed</span>
-      <input type="range" id="speedRange" value="2" min="0" max="12" step="1" aria-label="Simulation speed">
-      <span id="speedFactor">1.0x</span>
+      <div class="editorRunSpeedBody">
+        <div class="editorRunSpeedControl">
+          <input type="range" id="speedRange" value="2" min="0" max="12" step="1" aria-label="Simulation speed">
+          <span id="speedFactor">1.0x</span>
+        </div>
+        <span class="editorRunRealtime">
+          Realtime <strong id="simStatusRealtime">--</strong>
+          <span class="editorRunRuntimeDivider" aria-hidden="true">·</span>
+          <span id="simStatusEngine" class="editorRunEngine">dt (0.1s fixed)</span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -195,7 +204,7 @@
       </div>
     </div>
     <div id="controls">
-      <div class="panelHeader">Simulation</div>
+      <div class="panelHeader">Example</div>
       <div class="control-group">
         <label for="exampleSelect">Example</label>
         <select id="exampleSelect" title="Examples">
@@ -210,48 +219,12 @@
         </select>
         <div id="exampleIntroHint" class="fieldHint">Start with a sample model, or choose Add Node to build your own flow.</div>
         <details class="panelDetails exampleFileDetails">
-          <summary>Sample files</summary>
+          <summary>Developer menu</summary>
           <div class="btn-row exampleSaveActions">
-            <button id="btnLinkExampleFolder" type="button">Link Sample Folder</button>
             <button id="btnOverwriteExample" type="button">Overwrite Example</button>
           </div>
-          <div id="exampleSaveHint" class="fieldHint">Save the current graph back into the selected example files.</div>
+          <div id="exampleSaveHint" class="fieldHint">Each overwrite asks for the fact_sim project root or sample folder.</div>
         </details>
-      </div>
-      <div id="simStatusCard" class="simStatusCard" aria-live="polite">
-        <div class="simStatusHead">
-          <span id="simStatusBadge" class="simStatusBadge">Stopped</span>
-          <span id="simStatusEngine" class="simStatusEngine">dt (0.1s fixed)</span>
-        </div>
-        <div class="simStatusGrid">
-          <div class="simStatusItem">
-            <span class="simStatusLabel">Render</span>
-            <strong id="simStatusRender">60 FPS</strong>
-          </div>
-          <div class="simStatusItem">
-            <span class="simStatusLabel">Realtime</span>
-            <strong id="simStatusRealtime">--</strong>
-          </div>
-          <div class="simStatusItem">
-            <span class="simStatusLabel">Speed</span>
-            <strong id="simStatusSpeed">1x</strong>
-          </div>
-          <div class="simStatusItem">
-            <span class="simStatusLabel">Selection</span>
-            <strong id="simStatusSelection">0 nodes</strong>
-          </div>
-        </div>
-      </div>
-      <div class="sidebarMetaFooter">
-        <div class="quickStartCard" aria-live="polite">
-          <div class="quickStartTitle">Getting Started</div>
-          <ol class="quickStartSteps">
-            <li>Choose an example.</li>
-            <li>Press <strong>Start</strong>.</li>
-            <li>Read <strong>Timeline</strong> or <strong>Details</strong>.</li>
-          </ol>
-          <div id="overviewQuickTip" class="quickStartHint">Choose an example, then press Start.</div>
-        </div>
       </div>
     </div>
     <div id="backgroundPanel">
@@ -803,8 +776,8 @@ SOFTWARE.
   </div>
   </div>
 
-  <script src="js/app/landing.js?v=20260914flow2"></script>
-  <script src="js/core.js?v=20260903a"></script>
+  <script src="js/app/landing.js?v=20260919preview8x"></script>
+  <script src="js/core.js?v=20260919dtstart"></script>
     <script src="js/nodes/work.js?v=20260914flow2"></script>
   <script src="js/nodes/entity_model.js?v=20260914flow2"></script>
   <script src="js/nodes/sigports.js"></script>
@@ -812,11 +785,11 @@ SOFTWARE.
     <script src="js/nodes/ioflip.js?v=20260914flow2"></script>
     <script src="js/litegraph-fliplabels.js"></script>
     <script src="js/work-highlight.js"></script>
-    <script src="js/link-anim.js?v=20260916recovery"></script>
+    <script src="js/link-anim.js?v=20260919waitoutput"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/note.js?v=20260914flow2"></script>
   <script src="js/nodes/signal.js?v=20260914flow2"></script>
-  <script src="js/app/flow-model.js?v=20260918join"></script>
+  <script src="js/app/flow-model.js?v=20260919cachelinks"></script>
   <script src="js/app/flow-runtime.js?v=20260918join"></script>
   <script src="js/nodes/basic_node.js?v=20260916recovery"></script>
   <script src="js/nodes/register.js?v=20260914flow2"></script>
@@ -835,7 +808,7 @@ SOFTWARE.
   <script src="js/app/graph-links.js?v=20260914flow2"></script>
   <script src="js/app/stop-groups.js?v=20260914flow2"></script>
   <script src="js/app/script-editor.js?v=20260914flow2"></script>
-  <script src="js/app/engine.js?v=20260914flow2"></script>
+  <script src="js/app/engine.js?v=20260919dtbudget"></script>
   <script src="js/app/engine-fast-kernels.js?v=20260914flow2"></script>
   <script src="js/app/engine-fast-compiler.js?v=20260914flow2"></script>
   <script src="js/app/engine-fast-compat.js?v=20260914flow2"></script>
@@ -846,12 +819,12 @@ SOFTWARE.
   <script src="js/app/engine-fast-par-protocol.js?v=20260914flow2"></script>
   <script src="js/app/engine-fast-par-partitioner.js?v=20260914flow2"></script>
 <script src="js/app/engine-fast-par-host.js?v=20260918join"></script>
-  <script src="js/app/sim.js?v=20260918flowedit"></script>
+  <script src="js/app/sim.js?v=20260919liveredraw"></script>
 <script src="js/app/benchmark.js?v=20260914flow2"></script>
   <script src="js/app/engine-test.js?v=20260916recovery"></script>
   <script src="js/app/history.js?v=20260914flow2"></script>
   <script src="js/app/selection.js?v=20260914flow2"></script>
-  <script src="js/app/fit.js?v=20260914flow2"></script>
+  <script src="js/app/fit.js?v=20260919sourcefocus2"></script>
   <script src="js/app/node-props-panel.js?v=20260914flow2"></script>
   <script src="js/app/selection-inspector.js?v=20260914flow2"></script>
   <script src="js/app/flow-status.js?v=20260918join"></script>
@@ -859,10 +832,10 @@ SOFTWARE.
   <script src="js/app/entity-ui.js?v=20260914flow2"></script>
   <script src="js/app/timeline-init.js?v=20260914flow2"></script>
   <script src="js/app/graph-init.js?v=20260914flow2"></script>
-  <script src="js/app/examples.js?v=20260916recovery"></script>
+  <script src="js/app/examples.js?v=20260919folderstart"></script>
   <script src="js/app/file-io.js?v=20260914flow2"></script>
-  <script src="js/app/workspace-ui.js?v=20260914flow2"></script>
-  <script src="js/app/ui.js?v=20260914flow2"></script>
+  <script src="js/app/workspace-ui.js?v=20260919example"></script>
+  <script src="js/app/ui.js?v=20260919example"></script>
   <script src="js/app/details-ui.js?v=20260914flow2"></script>
   <script src="js/app.js?v=20260213"></script>
 

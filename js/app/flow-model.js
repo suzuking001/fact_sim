@@ -119,7 +119,9 @@
     return signals;
   }
   function feedbackLinks(flow){
-    if(flow && Array.isArray(flow.__feedbackCache))return flow.__feedbackCache;
+    // Serialized/reset flows may contain a copied cache whose link objects no
+    // longer belong to flow.links. Recompute it before validating cycles.
+    if(flow && Array.isArray(flow.__feedbackCache) && flow.__feedbackCache.every(link=>flow.links.includes(link)))return flow.__feedbackCache;
     const nodes=new Map(flow.nodes.map(n=>[n.id,n])),signals=signalLinks(flow);
     // A recovery return starts ready on Reset; every later token is produced
     // by a real transfer. The Entity input still gates every cycle, even at 0 s.

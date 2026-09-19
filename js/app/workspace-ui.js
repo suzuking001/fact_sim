@@ -3,6 +3,7 @@
   'use strict';
   const App = window.App || (window.App = {});
   const paths = {
+    example: '<path d="M5 3h10l4 4v14H5zM15 3v5h5M8 12h8M8 16h6"/><circle cx="8" cy="8" r="1.5"/>',
     flow: '<circle cx="4" cy="12" r="2.3"/><path d="M6 12c6 0 7-7 13-8M6 12c6 0 7 7 13 8M12 12c3 0 5-1 8-1"/><circle cx="20" cy="4" r="2"/><circle cx="20" cy="20" r="2"/><circle cx="21" cy="11" r="1.3"/>',
     add: '<circle cx="4" cy="12" r="2.3"/><path d="M6 12c5 0 6-7 12-7M6 12c5 0 6 7 12 7M17 10v6m-3-3h6"/><circle cx="19" cy="5" r="1.8"/><circle cx="19" cy="19" r="1.8"/>',
     group: '<circle cx="4" cy="7" r="2"/><circle cx="4" cy="17" r="2"/><path d="M6 7c4 0 4 5 8 5M6 17c4 0 4-5 8-5M16 6v12m4-12v12"/>',
@@ -21,7 +22,7 @@
     details: '<path d="M7 5h14M7 12h14M7 19h14"/><circle cx="4" cy="5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="19" r="1.5"/>'
   };
   const panels = {
-    controls: ['flow', 'Choose a model and check the simulation status.'],
+    controls: ['example', 'Choose an example model or manage its sample files.'],
     addNodePanel: ['add', 'Choose a node type, then place it on the canvas. Esc cancels placement.'],
     entityTypesPanel: ['types', 'Define the items and resources that move through your model.'],
     addGroupPanel: ['group', 'Draw a group around nodes that share a recovery time pattern.'],

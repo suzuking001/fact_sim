@@ -46,6 +46,7 @@
 #selectionInspectorPanel .flowNode .flowTime input{flex:1;width:65px;min-width:40px}.flowTimeLabel{font-size:11px;color:#697c90}
 .flowWire{vector-effect:non-scaling-stroke}.flowWireHit{stroke-width:20}.flowEditor:focus{outline:none}
 .flowZoomReadout{font:11px ui-monospace,monospace;min-width:38px;text-align:center;color:#58708b}
+.flowNotice{max-height:120px;white-space:pre-line}
 #selectionInspectorPanel .flowEditor.is-expanded{position:fixed;inset:12px;z-index:10000;width:auto;height:auto;box-sizing:border-box;padding:12px;border:1px solid #a9bbd0;border-radius:9px;background:#f7f9fc;box-shadow:0 0 0 20px #26344b66,0 8px 40px #152b4f44}
 #selectionInspectorPanel .flowEditor.is-expanded .flowViewport{min-height:0}
 @media(max-width:760px){.flowToolbar{flex-wrap:wrap}.flowToolbar select{flex-basis:130px}#selectionInspectorPanel .flowEditor.is-expanded{inset:4px;padding:6px}}

@@ -272,7 +272,7 @@ function startSimLoop(stepFn){
   if(simRunning) return;
   simRunning = true;
   try{ window.dispatchEvent(new CustomEvent('factsim:run-state-changed', { detail:{ running:true } })); }catch(_e){}
-  lastRealMs = 0;
+  lastRealMs = wallNowMs();
   lastUiUpdateMs = 0;
   resetRealtimeFactorSamples();
   pushRealtimeFactorSample();
@@ -301,7 +301,6 @@ function startSimLoop(stepFn){
       simRafId = window.requestAnimationFrame(tick);
       return;
     }
-    if(!lastRealMs) lastRealMs = ts;
     let delta = ts - lastRealMs;
     if(delta < 0) delta = 0;
     lastRealMs = ts;
