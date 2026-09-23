@@ -26,8 +26,11 @@
   }
   function runJoin(node,cell,item){
     const inputs=joinWorkInputs(node,item);if(cell.input!==inputs[0]?.id || !joinReady(node,item))return false;
-    const r=runtime(node),others=r.cells.filter(c=>c!==cell && c.nodeId===item.id);
+    const r=runtime(node),others=r.cells.filter(c=>c!==cell && c.nodeId===item.id),joinedLink=others.findLast(other=>other.incomingLink!=null)?.incomingLink;
     if(!move(node,cell))return false;
+    // A multi-work Join starts the next processing segment from the connection
+    // that supplied the joined work, while input 1 remains the surviving Entity.
+    if(joinedLink!=null)cell.incomingLink=joinedLink;
     // Input 1 represents the reunited work. Other copies are consumed once,
     // with their copied contents; this is not an additional sink completion.
     for(const other of others)store(node).destroy(other.entity);
@@ -82,16 +85,13 @@
       return flow(node).links.filter(l=>l.from===id).some(l=>{const target=spec(node,l.to);if(target?.kind==='Palletizing'){if(l.input!==target.inputs[1].id)return false;childPath=true;return r.cells.some(c=>c.nodeId===target.id && c.input===target.inputs[0].id && store(node).canAttach(entity,c.entity).ok && store(node).childrenOf(c.entity).length+r.cells.filter(other=>other!==c).length<store(node).typeOf(c.entity).capacity);}return target && !['outPort','DePalletizing'].includes(target.kind) && reaches(target.id);});}
     const availableChild=reaches(entry.id);return !r.cells.length && !r.offers.length ? !childPath : availableChild;
   }
-  // A Join is ready to open a work input once its siblings have delivered
-  // cells for the arriving entity: signals present, work cells buffered.
+  // Input 1 opens a work Join. Later work inputs remain upstream until that
+  // primary work has arrived, and must carry the same Type / display ID.
   function joinSiblingsReady(node,item,incomingInput,entity){
     if(!joinSignalsReady(node,item))return false;
-    for(const p of joinWorkInputs(node,item)){
-      if(p.id===incomingInput)continue;
-      const cell=runtime(node).cells.find(c=>c.nodeId===item.id && c.input===p.id);
-      if(!cell || (entity && !sameWork(cell.entity,entity)))return false;
-    }
-    return true;
+    const primary=joinWorkInputs(node,item)[0];if(!primary || incomingInput===primary.id)return true;
+    const cell=runtime(node).cells.find(c=>c.nodeId===item.id && c.input===primary.id);
+    return !!cell && (!entity || sameWork(cell.entity,entity));
   }
   function canAccept(node,slot,entity){
     const entry=flow(node)?.nodes.find(n=>n.kind==='inPort' && n.config.portId===node.inputs?.[slot]?.portId);
@@ -255,7 +255,13 @@
   }
   function startVisual(node,cell,item){
     const r=runtime(node),path=[];let cursor=item,linkId=cell.incomingLink;
-    while(cursor && !path.includes(cursor)){path.push(cursor);const port=cursor.kind==='entityRouter' ? routerPort(node,cursor,cell) : 0;const link=outgoing(node,cursor,port);cursor=link && spec(node,link.to);}
+    while(cursor && !path.includes(cursor)){
+      path.push(cursor);
+      // A work Join admits another Entity through a different equipment input.
+      // The following timed work therefore belongs to a new connection visual.
+      if(cursor!==item && cursor.kind==='join' && joinWorkInputs(node,cursor).length>1)break;
+      const port=cursor.kind==='entityRouter' ? routerPort(node,cursor,cell) : 0,link=outgoing(node,cursor,port);cursor=link && spec(node,link.to);
+    }
     if(item.kind==='recovery'){linkId=null;const end=path.find(n=>n.kind==='outPort');if(end){const slot=node.outputs.findIndex(p=>p.portId===end.config.portId),id=node.outputs[slot]?.links?.[0],link=node.graph.links[id];if(link && node.graph.getNodeById(link.target_id)?.properties.role==='sink')linkId=id;}}
     if(linkId==null)return;
     let visual=r.visuals.findLast(v=>v.entityId===cell.entity.instanceId && v.linkId===linkId && v.cellId===cell.id);

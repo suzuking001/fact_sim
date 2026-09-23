@@ -1,6 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {root,graph,node,source,at,App}=require('./flow-v2-test-harness.cjs');
 vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/flow-status.js'),'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(root,'js/link-anim.js'),'utf8'));
 const model=App.FlowModel,results=[];
 function test(name,fn){try{fn();results.push({name,ok:true});}catch(e){results.push({name,ok:false,error:e.stack});}}
 function equipment(g){
@@ -31,6 +32,13 @@ test('Matching Type and ID merge to input 1, independent of input arrival order'
   assert.equal(e.m._flowRuntime.merged,1);assert.equal(App.runtimeInstancesForGraph(e.g).completed.length,1);assert.equal(App.runtimeInstancesForGraph(e.g).instances.size,0);
   assert.equal(e.m._flowRuntime.signals.find(c=>c.nodeId===e.recovery.id).startedAt,5000);
  }
+});
+test('Input 2 waits for Process 1, then Process 2 animates on the input 2 connection',()=>{
+ const e=setup();e.p2.config.seconds=5;const firstLink=e.s1.outputs[0].links[0],secondLink=e.s2.outputs[0].links[0];
+ at(e.g,0);assert.equal(e.s2._sent||0,0);assert.equal(e.m._flowRuntime.cells[0].nodeId,e.p1.id);assert.equal(WorkLinkAnimator.sample(e.g).find(row=>row.entityId===`a:${e.s1.id}:1`).linkId,firstLink);
+ at(e.g,1999);assert.equal(e.s2._sent||0,0);assert.equal(e.m._flowRuntime.cells[0].nodeId,e.p1.id);assert(Math.abs(WorkLinkAnimator.sample(e.g).find(row=>row.entityId===`a:${e.s1.id}:1`).progress-1999/2000)<1e-9);
+ at(e.g,2000);const active=e.m._flowRuntime.cells[0],moving=WorkLinkAnimator.sample(e.g).find(row=>row.entityId===`a:${e.s1.id}:1`);assert.equal(e.s2._sent,1);assert.equal(active.nodeId,e.p2.id);assert.equal(active.startedAt,2000);assert.equal(active.until,7000);assert.equal(moving.linkId,secondLink);assert.equal(moving.progress,0);
+ at(e.g,4500);const halfway=WorkLinkAnimator.sample(e.g).find(row=>row.entityId===`a:${e.s1.id}:1`);assert.equal(halfway.linkId,secondLink);assert.equal(halfway.progress,.5);
 });
 test('Different IDs of the same Type wait without consuming either work',()=>{
  const e=setup(),s=App.runtimeInstancesForGraph(e.g);s.destroy(s.create('a',{creationNodeId:e.s2.id}));at(e.g,0);at(e.g,2000);at(e.g,9000);
