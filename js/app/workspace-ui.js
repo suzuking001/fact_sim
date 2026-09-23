@@ -7,6 +7,7 @@
     flow: '<circle cx="4" cy="12" r="2.3"/><path d="M6 12c6 0 7-7 13-8M6 12c6 0 7 7 13 8M12 12c3 0 5-1 8-1"/><circle cx="20" cy="4" r="2"/><circle cx="20" cy="20" r="2"/><circle cx="21" cy="11" r="1.3"/>',
     add: '<circle cx="4" cy="12" r="2.3"/><path d="M6 12c5 0 6-7 12-7M6 12c5 0 6 7 12 7M17 10v6m-3-3h6"/><circle cx="19" cy="5" r="1.8"/><circle cx="19" cy="19" r="1.8"/>',
     group: '<circle cx="4" cy="7" r="2"/><circle cx="4" cy="17" r="2"/><path d="M6 7c4 0 4 5 8 5M6 17c4 0 4-5 8-5M16 6v12m4-12v12"/>',
+    syncro: '<path d="M20 11a8 8 0 0 0-14.7-4.4L4 9M4 5v4h4M4 13a8 8 0 0 0 14.7 4.4L20 15M20 19v-4h-4"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><path d="M10.5 12h3"/>',
     image: '<path d="M4 6h16v14H4zM4 16c5 0 5-6 9-6 3 0 4 5 7 5"/><circle cx="8" cy="9" r="1.5"/><circle cx="4" cy="6" r="1.8"/>',
     types: '<circle cx="4" cy="12" r="2"/><path d="M6 12c4 0 4-6 8-6M6 12c4 0 4 6 8 6"/><circle cx="17" cy="6" r="3"/><path d="M14 15h6v6h-6z"/>',
     performance: '<circle cx="4" cy="17" r="2"/><path d="M6 17c6 0 5-10 12-10M10 20v-5m5 5v-8m5 8V4"/><circle cx="19" cy="6" r="2"/>',
@@ -25,7 +26,8 @@
     controls: ['example', 'Choose an example model or manage its sample files.'],
     addNodePanel: ['add', 'Choose a node type, then place it on the canvas. Esc cancels placement.'],
     entityTypesPanel: ['types', 'Define the items and resources that move through your model.'],
-    addGroupPanel: ['group', 'Draw a group around nodes that share a recovery time pattern.'],
+    addGroupPanel: ['group', 'Manage stop groups and their shared recovery time settings.'],
+    addSyncroGroupPanel: ['syncro', 'Create a synchronization group for nodes that must move together.'],
     backgroundPanel: ['image', 'Add a floor plan and align the model over it.'],
     advancedPanel: ['performance', 'Adjust the simulation engine, rendering, and diagnostics.'],
     shortcutPanel: ['tools', 'Arrange the graph, undo edits, and find keyboard shortcuts.'],
@@ -53,7 +55,6 @@
     helpSource('exampleIntroHint', '#exampleSelect');
     helpSource('simModeHint', '#simModeSelect');
     helpSource('bgLayoutEmptyState', '#bgLayoutLoadBtn');
-    helpSource('groupKindDescription', '#groupKindSelect');
     helpSource('overviewQuickTip', '#workspaceHelp');
     sidebar.querySelector('.sidebarMetaFooter')?.classList.add('workspaceHelpSource');
     for(const [id, [, description]] of Object.entries(panels)){
@@ -80,7 +81,9 @@
     document.getElementById('btnStart')?.style.setProperty('--workspace-stop-icon', iconUrl('stop'));
     for(const id of ['btnAddNode', 'btnAddGroup']){
       const button = document.getElementById(id);
-      if(button) button.dataset.help = 'Click to begin placing on the canvas. Press Esc to cancel.';
+      if(button) button.dataset.help = id === 'btnAddGroup'
+        ? 'Create a stop group, configure it, then place it on the canvas.'
+        : 'Click to begin placing on the canvas. Press Esc to cancel.';
     }
 
     const tooltip = document.createElement('div');

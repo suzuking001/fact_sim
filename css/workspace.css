@@ -6,14 +6,26 @@
   --workspace-ink: #202123;
   --workspace-muted: #686a70;
   --workspace-line: #e8e8eb;
+  --workspace-menu-surface: rgba(255,255,255,.58);
+  --workspace-menu-surface-strong: rgba(255,255,255,.7);
+  --workspace-menu-line: rgba(255,255,255,.62);
 }
 #appRoot #sidebar{
   padding: 20px 16px;
   gap: 6px;
-  background: #fbfbfc !important;
-  border-right: 1px solid var(--workspace-line);
-  box-shadow: none !important;
+  background: rgba(248,250,253,.88) !important;
+  border-right: 1px solid rgba(255,255,255,.66);
+  box-shadow: 14px 0 42px rgba(31,41,55,.07) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.16);
+  backdrop-filter: blur(22px) saturate(1.16);
   font-family: var(--ui-font), 'Segoe UI', sans-serif;
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))){
+  #appRoot #sidebar{
+    background:
+      linear-gradient(180deg, rgba(250,252,255,.28), rgba(241,246,252,.1)),
+      rgba(255,255,255,.08) !important;
+  }
 }
 #appRoot #sidebarHeader{
   flex-shrink: 0;
@@ -39,25 +51,33 @@
   mix-blend-mode: multiply;
 }
 #appRoot #sidebarHeader .appBrandText{ font-size:21px; font-weight:750; letter-spacing:.035em; }
-#appRoot #sidebar #workspaceHelp{
+#appRoot #sidebar :is(#workspaceHelp, #btnAbout){
   width:30px;
   height:30px;
   min-height:30px;
-  flex:0 0 30px;
-  margin-left:auto;
   padding:0;
   border-radius:50%;
   color:var(--workspace-muted);
   font-size:15px;
 }
-#appRoot :where(#sidebar) > :is(#controls, #addNodePanel, #entityTypesPanel, #addGroupPanel, #backgroundPanel, #advancedPanel, #shortcutPanel, #fileControls){
+#appRoot #sidebar #workspaceHelp{ flex:0 0 30px; margin-left:auto; }
+#appRoot #sidebar #btnAbout{
+  flex:0 0 30px;
+  font-family:Georgia, serif;
+  font-size:16px;
+  font-weight:700;
+}
+#appRoot :where(#sidebar) > :is(#controls, #addNodePanel, #entityTypesPanel, #addGroupPanel, #addSyncroGroupPanel, #backgroundPanel, #advancedPanel, #shortcutPanel, #fileControls){
   flex-shrink:0;
   padding:12px;
   gap:14px;
-  border:1px solid var(--workspace-line);
+  border:1px solid var(--workspace-menu-line);
   border-radius:18px;
-  background:#fff !important;
-  box-shadow:none !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.58), rgba(248,250,253,.4)) !important;
+  box-shadow:0 8px 24px rgba(31,41,55,.045), inset 0 1px 0 rgba(255,255,255,.72) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  backdrop-filter: blur(14px) saturate(1.08);
   margin:0;
 }
 #appRoot #sidebar > div::before{ content:none; }
@@ -67,8 +87,8 @@
   background:transparent !important;
 }
 #appRoot #sidebar > .sidebar-panel-collapsible.is-collapsed:hover{
-  border-color:var(--workspace-line);
-  background:#fff !important;
+  border-color:var(--workspace-menu-line);
+  background:rgba(255,255,255,.52) !important;
 }
 #appRoot #sidebar .panelHeader{
   display:flex;
@@ -107,7 +127,7 @@
   height:36px;
   flex:0 0 36px;
   border-radius:10px;
-  background:#f2f2f4;
+  background:rgba(242,242,244,.7);
   color:#161719;
 }
 .workspaceIcon{ display:block; width:25px; height:25px; }
@@ -120,7 +140,7 @@
   padding:9px 12px;
   border:1px solid #dedee3;
   border-radius:11px;
-  background:#fafafb;
+  background:var(--workspace-menu-surface);
   font-family:inherit;
   font-size:15px;
   color:var(--workspace-ink);
@@ -133,7 +153,7 @@
   padding:8px 12px;
   border-radius:11px;
   border:1px solid #dedee3;
-  background:#fff;
+  background:var(--workspace-menu-surface-strong);
   color:var(--workspace-ink);
   font-family:inherit;
   font-size:14px;
@@ -141,7 +161,7 @@
   line-height:1.35;
   box-shadow:none !important;
 }
-#appRoot #sidebar button:hover:not(:disabled){ background:#f0f0f3; border-color:#c6c7cd; }
+#appRoot #sidebar button:hover:not(:disabled){ background:rgba(255,255,255,.92); border-color:#c6c7cd; }
 #appRoot :is(button, [role="button"], select, input, summary):focus-visible{
   outline:3px solid #70859b;
   outline-offset:3px;
@@ -160,6 +180,57 @@
   border-color:#e5c8c6 !important;
   background:#fcf0ef !important;
   color:#a6342d !important;
+}
+#appRoot .syncroGroupPanelBody{ display:grid; gap:10px; }
+#appRoot .flowSyncGroups{ display:grid; gap:7px; font-size:14px; }
+#appRoot .syncroGroupRow{
+  display:flex;
+  align-items:center;
+  min-width:0;
+  gap:10px;
+  padding:9px 11px;
+  border:1px solid #e4e4e8;
+  border-radius:11px;
+  background:rgba(250,250,251,.64);
+}
+#appRoot .syncroGroupMarker{
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  border-radius:9px;
+  background:rgba(240,240,243,.7);
+  color:#404247;
+}
+#appRoot .syncroGroupMarker .workspaceIcon{ width:20px; height:20px; }
+#appRoot .syncroGroupName{
+  min-width:0;
+  overflow:hidden;
+  color:var(--workspace-ink);
+  font-size:14px;
+  font-weight:650;
+  line-height:1.35;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#appRoot .syncroGroupAddRow{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+#appRoot #sidebar .syncroGroupAddRow #syncroGroupName{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:38px;
+  padding:7px 10px;
+  font-size:14px;
+}
+#appRoot #sidebar .syncroGroupAddRow #btnAddSyncroGroup{
+  min-height:38px;
+  padding:7px 15px;
 }
 #appRoot .workspaceIconButton::before{
   content:"" !important;
@@ -183,13 +254,17 @@
   mask-image:var(--workspace-stop-icon);
 }
 #appRoot #sidebar .workspaceHelpSource{ display:none !important; }
-#appRoot #sidebar .panelDetails{ border:0; border-radius:10px; background:#f6f6f8; }
+#appRoot #sidebar .panelDetails{ border:0; border-radius:10px; background:rgba(246,246,248,.52); }
 #appRoot #sidebar .panelDetails > summary{ min-height:38px; padding:8px 10px; font-size:14px; font-weight:550; }
 #appRoot #sidebar .exampleFileDetails{ margin-top:0; background:transparent; }
 #appRoot #sidebar .exampleFileDetails > summary{ padding:4px 0; min-height:30px; color:var(--workspace-muted); }
 #appRoot #sidebar .exampleSaveActions{ display:grid; grid-template-columns:1fr 1fr; margin-top:8px; gap:8px; }
+#appRoot #sidebar .nodeDefinitionDetails{ margin-top:2px; }
+#appRoot #sidebar .nodeDefinitionActions{ display:grid; grid-template-columns:1fr 1fr; gap:8px; padding-top:8px; }
+#appRoot #sidebar .nodeDefinitionActions button:first-child{ grid-column:1 / -1; }
+#appRoot #sidebar .nodeDefinitionActions button{ min-width:0; padding-inline:8px; font-size:12px; }
 #appRoot #sidebar .fieldHint{ font-size:13px; line-height:1.5; }
-#appRoot #sidebar .simStatusCard{ padding:12px; border:0; border-radius:12px; background:#f6f6f8 !important; box-shadow:none !important; }
+#appRoot #sidebar .simStatusCard{ padding:12px; border:0; border-radius:12px; background:rgba(246,246,248,.52) !important; box-shadow:none !important; }
 #appRoot .simStatusHead{ gap:8px; flex-wrap:wrap; }
 #appRoot .simStatusBadge{ font-size:11px; letter-spacing:.04em; }
 #appRoot .simStatusEngine{ min-width:0; font-size:11px; overflow:hidden; text-overflow:ellipsis; }
@@ -199,41 +274,101 @@
 #appRoot .simStatusItem:nth-child(3){ display:none; }
 #appRoot .simStatusLabel{ font-size:11px; letter-spacing:.04em; color:var(--workspace-muted); }
 #appRoot .simStatusItem strong{ font-size:16px; font-weight:600; color:var(--workspace-ink); }
-#appRoot #sidebar .nodeKindPickerTrigger{ grid-template-columns:30px minmax(0,1fr) 18px; min-height:50px; padding:9px 12px; background:#fafafb; }
+#appRoot #sidebar .nodeKindPickerTrigger{ grid-template-columns:30px minmax(0,1fr) 18px; min-height:50px; padding:9px 12px; background:var(--workspace-menu-surface-strong); }
 #appRoot :is(.nodeKindPickerValue,.nodeKindPickerOptionLabel){ font-size:15px; }
 #appRoot #sidebar .nodeKindPickerOption{ min-height:46px; }
 #appRoot #sidebar .nodeKindPickerOption:is(.is-selected,:hover,:focus-visible){ color:#202123; background:#eeeeF1; border-color:#dddde2; }
 #appRoot #sidebar .nodeKindPicker.is-open .nodeKindPickerTrigger{ color:#202123; border-color:#8c8f99; box-shadow:0 0 0 3px #e8ebef !important; }
-#appRoot #sidebar .group-stop-rate{ font-size:14px; color:#575b62; background:#f3f3f6; border:0; }
+#appRoot #sidebar .group-stop-rate{ font-size:14px; color:#575b62; background:rgba(243,243,246,.62); border:0; }
 #appRoot .projectActionsGrid{ gap:8px; }
 #appRoot #sidebar .projectActionsGrid button{ font-size:13px; padding:9px 6px; }
 #appRoot #sidebar .shortcut-action{ font-size:14px; }
 #appRoot #sidebar .shortcut-key{ font-size:12px; }
+body.sim-running #appRoot #addSyncroGroupPanel{
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
 #appRoot #editorTopHud{ top:16px; gap:10px; }
 #appRoot #editorTopHud #simTimeHud{
   min-width:148px;
   padding:15px 18px;
   border-radius:16px;
   font-size:13px;
-  background:#fff !important;
-  box-shadow:0 5px 22px #20212308 !important;
+  border-color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.08) !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:blur(8px) saturate(1.05);
+  backdrop-filter:blur(8px) saturate(1.05);
+  text-shadow:0 1px 2px rgba(255,255,255,.96), 0 0 8px rgba(255,255,255,.72);
 }
 #appRoot #simTime{ font-size:19px; font-weight:650; }
-#appRoot #editorRunHud{ padding:5px; gap:5px; border-radius:17px; background:#fff !important; box-shadow:0 5px 22px #20212308 !important; }
+#appRoot #editorRunHud{
+  padding:5px;
+  gap:5px;
+  border-radius:17px;
+  border-color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.08) !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:blur(8px) saturate(1.05);
+  backdrop-filter:blur(8px) saturate(1.05);
+}
 #appRoot #editorRunHud :is(#btnStart,#btnReset){ min-height:46px; padding:0 17px !important; font-size:15px; border-radius:12px; }
-#appRoot #editorRunHud #btnReset{ border:1px solid #e2e2e7 !important; box-shadow:none !important; }
+#appRoot #editorRunHud #btnReset,
+#appRoot .editorRunSpeed{
+  border:1px solid rgba(255,255,255,.42) !important;
+  background:rgba(255,255,255,.18) !important;
+  box-shadow:none !important;
+}
 #appRoot #editorRunHud button::after{ content:none; }
 #appRoot .editorRunSpeed{ min-height:44px; border:0; padding:0 12px; }
 #appRoot .editorRunSpeedLabel{ font-size:12px; text-transform:none; }
 #appRoot #speedFactor{ font-size:14px; }
-#appRoot #timelineDock{ border-color:var(--workspace-line); box-shadow:0 -6px 30px #20212305; }
-#appRoot #timelineHeader{ padding:8px 16px; background:#fff; gap:12px; }
+#appRoot #timelineDock{
+  border-color:rgba(255,255,255,.58);
+  background:rgba(248,250,253,.28);
+  box-shadow:0 -8px 28px rgba(31,41,55,.04);
+  -webkit-backdrop-filter:blur(20px) saturate(1.1);
+  backdrop-filter:blur(20px) saturate(1.1);
+}
+#appRoot #timelineHeader{
+  padding:8px 16px;
+  border-bottom-color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.14);
+  gap:12px;
+}
 #appRoot #timelineHeader .timelineTitle{ display:none; }
-#appRoot #timelineHeader .timelineTabs{ padding:4px; gap:3px; border:0; border-radius:13px; background:#f1f1f4; }
+#appRoot #timelineHeader .timelineTabs{ padding:4px; gap:3px; border:1px solid rgba(255,255,255,.44); border-radius:13px; background:rgba(241,241,244,.22); }
 #appRoot #timelineHeader .timelineTab{ min-height:38px; padding:0 13px; font-size:15px; border-radius:10px; }
-#appRoot #timelineHeader .timelineTab.is-active{ color:#1d1e21; background:#fff; }
-#appRoot #timelineHeader .timelineBtn{ min-height:36px; padding:0 11px; border-radius:9px; font-size:13px; }
+#appRoot #timelineHeader .timelineTab.is-active{ color:#1d1e21; background:rgba(255,255,255,.48); }
+#appRoot #timelineHeader .timelineBtn{ min-height:36px; padding:0 11px; border-radius:9px; border-color:rgba(255,255,255,.56); background:rgba(255,255,255,.38); font-size:13px; }
 #appRoot #timelineHeader :is(.timelineSelection,.timelinePropsMeta){ font-size:13px; }
+#appRoot :is(#timelineBody,#timelineChartPanel,#nodePropsPanel,#selectionInspectorPanel){
+  background:rgba(255,255,255,.12);
+  -webkit-backdrop-filter:blur(10px) saturate(1.04);
+  backdrop-filter:blur(10px) saturate(1.04);
+}
+#appRoot #timelineCanvas{ background:rgba(255,255,255,.08); }
+#appRoot #stateLegend{
+  border-color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.08);
+  box-shadow:none;
+  -webkit-backdrop-filter:blur(8px) saturate(1.04);
+  backdrop-filter:blur(8px) saturate(1.04);
+  text-shadow:0 1px 2px rgba(255,255,255,.96), 0 0 8px rgba(255,255,255,.72);
+}
+body.sim-running #appRoot :is(#timelineDock,#editorRunHud,#simTimeHud){
+  background:rgba(255,255,255,.08) !important;
+  box-shadow:none !important;
+}
+body.sim-running #appRoot #timelineDock{
+  background:rgba(248,250,253,.28) !important;
+}
+body.sim-running #appRoot :is(#timelineBody,#timelineChartPanel,#nodePropsPanel,#selectionInspectorPanel){
+  background:rgba(255,255,255,.12) !important;
+}
+body.sim-running.performance-adaptive #appRoot #timelineHeader{
+  background:rgba(255,255,255,.14) !important;
+}
 #appRoot :is(#nodePropsTable,.selectionInspectorCard){ font-size:14px; }
 #workspaceTooltip{
   position:fixed;

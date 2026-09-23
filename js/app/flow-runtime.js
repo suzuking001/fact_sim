@@ -38,7 +38,7 @@
   function assemblyTargets(node,id,input,seen=new Set()){
     if(seen.has(id))return [];const item=spec(node,id);if(!item)return [];
     if(item.kind==='join' && joinWorkInputs(node,item).length>1)return [{id,input}];
-    if(['outPort','Palletizing','DePalletizing','recovery'].includes(item.kind))return [];
+    if(['outPort','entitySink','Palletizing','DePalletizing','recovery'].includes(item.kind))return [];
     const next=new Set(seen);next.add(id);const signals=App.FlowModel.signalLinks(flow(node));
     return flow(node).links.filter(l=>l.from===id && !signals.has(l)).flatMap(l=>assemblyTargets(node,l.to,l.input,next));
   }
@@ -82,21 +82,30 @@
       return flow(node).links.filter(l=>l.from===id).some(l=>{const target=spec(node,l.to);if(target?.kind==='Palletizing'){if(l.input!==target.inputs[1].id)return false;childPath=true;return r.cells.some(c=>c.nodeId===target.id && c.input===target.inputs[0].id && store(node).canAttach(entity,c.entity).ok && store(node).childrenOf(c.entity).length+r.cells.filter(other=>other!==c).length<store(node).typeOf(c.entity).capacity);}return target && !['outPort','DePalletizing'].includes(target.kind) && reaches(target.id);});}
     const availableChild=reaches(entry.id);return !r.cells.length && !r.offers.length ? !childPath : availableChild;
   }
+  // A Join is ready to open a work input once its siblings have delivered
+  // cells for the arriving entity: signals present, work cells buffered.
+  function joinSiblingsReady(node,item,incomingInput,entity){
+    if(!joinSignalsReady(node,item))return false;
+    for(const p of joinWorkInputs(node,item)){
+      if(p.id===incomingInput)continue;
+      const cell=runtime(node).cells.find(c=>c.nodeId===item.id && c.input===p.id);
+      if(!cell || (entity && !sameWork(cell.entity,entity)))return false;
+    }
+    return true;
+  }
   function canAccept(node,slot,entity){
-    if(node.properties.role==='sink')return true;
-    if(node.properties.role==='source')return false;
     const entry=flow(node)?.nodes.find(n=>n.kind==='inPort' && n.config.portId===node.inputs?.[slot]?.portId);
     if(!entry || runtime(node).error || runtime(node).cells.some(c=>c.nodeId===entry.id))return false;
     if(entity && runtime(node).last[slot]===entity.instanceId)return false;
     initializeControls(node);
     // Readiness reaches upstream without moving the work into this equipment.
     // In particular, recovery cannot be hidden by buffering a new work at Join.
-    const visited=new Set();function readyPath(item){
+    const visited=new Set();function readyPath(item,incomingInput){
       if(!item || visited.has(item.id))return true;visited.add(item.id);
-      if(item.kind==='join')return joinSignalsReady(node,item);
+      if(item.kind==='join')return joinSiblingsReady(node,item,incomingInput,entity);
       if(['process','recovery','outPort','fork'].includes(item.kind))return true;
       const links=item.kind==='entityRouter' && entity ? [outgoing(node,item,routerPort(node,item,{entity}))].filter(Boolean) : flow(node).links.filter(l=>l.from===item.id);
-      return links.every(l=>readyPath(spec(node,l.to)));
+      return links.every(l=>readyPath(spec(node,l.to),l.input));
     }
     if(!readyPath(entry))return false;
     if(!batchInputAllowed(node,entry,entity))return false;
@@ -116,14 +125,9 @@
     for(const {slot,entity} of candidates){
       if(!node.canAcceptEntityInput(slot,entity))continue;
       const input=node.inputs[slot],link=node.graph.links[input.link];r.last[slot]=entity.instanceId;
-      if(node.properties.role==='sink'){
-        node._recv ||= [];node._recv.push({id:entity.id,type:entity.type,typeId:entity.typeId,instanceId:entity.instanceId,t:now(),completedAt:now(),children:store(node).descendantsOf(entity).map(e=>e.instanceId)});
-        store(node).destroy(entity,{completed:true,sinkNodeId:node.id,completedAt:now()});
-      }else{
-        const entry=flow(node).nodes.find(n=>n.kind==='inPort' && n.config.portId===input.portId);
-        if(!r.cells.length && !r.offers.length)r.cycle++;
-        store(node).moveRoot(entity,node.id);r.cells.push({id:++r.sequence,nodeId:entry.id,input:'',entity,incomingLink:input.link,arrival:entity.arrivalSequence});
-      }
+      const entry=flow(node).nodes.find(n=>n.kind==='inPort' && n.config.portId===input.portId);
+      if(!r.cells.length && !r.offers.length)r.cycle++;
+      store(node).moveRoot(entity,node.id);r.cells.push({id:++r.sequence,nodeId:entry.id,input:'',entity,incomingLink:input.link,arrival:entity.arrivalSequence});
       node.graph.getNodeById(link?.origin_id)?.acknowledgeEntityOutput?.(entity,node.id,link.origin_slot);mark(node);
     }
   }
@@ -134,7 +138,7 @@
       if(links.length!==1){r.reason=links.length ? 'Use entityRouter instead of multiple output connections.' : 'Connect an output destination.';return false;}
       // Publish a held offer even when blocked. Its arrival time stays stable,
       // so a receiver with multiple inputs can honor FIFO and port-order ties.
-      offer={cellId:cell.id,slot,entity:cell.entity,pending:links.map(l=>l.target_id),at:now(),...(plan || {}),linkId:links[0].id};r.offers.push(offer);node.setOutputData(slot,cell.entity);
+      offer={cellId:cell.id,slot,entity:cell.entity,pending:links.map(l=>l.target_id),at:now(),...(plan || {}),...(cell.sourceNodeId ? {sourceNodeId:cell.sourceNodeId} : {}),linkId:links[0].id};r.offers.push(offer);node.setOutputData(slot,cell.entity);
     }
     if(offer.pending.length)return false;
     node.setOutputData(slot,null);r.offers=r.offers.filter(o=>o!==offer);return true;
@@ -184,12 +188,9 @@
       const links=node.outputs[leaf.slot]?.links || [],link=links.length===1 && node.graph.links[links[0]],receiver=link && node.graph.getNodeById(link.target_id);
       const available=!!receiver && receiver.canAcceptEntityInput?.(link.target_slot,cell.entity);
       if(available){
-        ready++;
-        if(receiver.properties.role!=='sink'){
-          const rr=runtime(receiver),entry=flow(receiver).nodes.find(n=>n.kind==='inPort' && n.config.portId===receiver.inputs[link.target_slot]?.portId);
-          if(!reserved.has(receiver))reserved.set(receiver,rr.cells);
-          rr.cells=[...rr.cells,{nodeId:entry.id,input:'',entity:cell.entity}];
-        }
+        ready++;const rr=runtime(receiver),entry=flow(receiver).nodes.find(n=>n.kind==='inPort' && n.config.portId===receiver.inputs[link.target_slot]?.portId);
+        if(!reserved.has(receiver))reserved.set(receiver,rr.cells);
+        rr.cells=[...rr.cells,{nodeId:entry.id,input:'',entity:cell.entity}];
       }
       targets.push({...leaf,link,receiver});
     }}finally{for(const [receiver,cells] of reserved)runtime(receiver).cells=cells;}
@@ -201,13 +202,8 @@
     r.cells=r.cells.filter(c=>c!==cell);r.duplicated=(r.duplicated || 0)+entities.length-1;
     for(const [index,target] of targets.entries()){
       const entity=entities[index],receiver=target.receiver,rr=runtime(receiver);rr.last[target.link.target_slot]=entity.instanceId;
-      if(receiver.properties.role==='sink'){
-        receiver._recv ||= [];receiver._recv.push({instanceId:entity.instanceId,id:entity.id,type:entity.type,typeId:entity.typeId,t:now(),completedAt:now(),children:store(node).descendantsOf(entity).map(c=>c.instanceId)});
-        store(node).destroy(entity,{completed:true,sinkNodeId:receiver.id,completedAt:now()});
-      }else{
-        const entry=flow(receiver).nodes.find(n=>n.kind==='inPort' && n.config.portId===receiver.inputs[target.link.target_slot]?.portId);
-        if(!rr.cells.length && !rr.offers.length)rr.cycle++;store(node).moveRoot(entity,receiver.id);rr.cells.push({id:++rr.sequence,nodeId:entry.id,input:'',entity,incomingLink:target.link.id,arrival:entity.arrivalSequence});
-      }
+      const entry=flow(receiver).nodes.find(n=>n.kind==='inPort' && n.config.portId===receiver.inputs[target.link.target_slot]?.portId);
+      if(!rr.cells.length && !rr.offers.length)rr.cycle++;store(node).moveRoot(entity,receiver.id);rr.cells.push({id:++rr.sequence,nodeId:entry.id,input:'',entity,incomingLink:target.link.id,arrival:entity.arrivalSequence});
       recordActivity(node,spec(node,target.flowOutId));mark(receiver);
     }
     for(const f of plan.forks){r.forkStatus[f.id]={waiting:false,ready,total:targets.length};fireForkSignals(node,f,entities[0],targets[0]?.link.id);}
@@ -226,7 +222,7 @@
     // Internal work branches also receive distinct instances, all at the same time.
     if(!branches.length || !branches.every(l=>free(node,spec(node,l.to),l.input,cell.entity)))return false;
     const entities=[cell.entity,...branches.slice(1).map(()=>cloneEntityTree(node,cell.entity))],r=runtime(node);
-    r.cells=r.cells.filter(c=>c!==cell);branches.forEach((l,i)=>r.cells.push({id:++r.sequence,nodeId:l.to,input:l.input,entity:entities[i],incomingLink:cell.incomingLink}));
+    r.cells=r.cells.filter(c=>c!==cell);branches.forEach((l,i)=>r.cells.push({id:++r.sequence,nodeId:l.to,input:l.input,entity:entities[i],incomingLink:cell.incomingLink,...(cell.sourceNodeId ? {sourceNodeId:cell.sourceNodeId} : {})}));
     r.duplicated=(r.duplicated || 0)+entities.length-1;fireForkSignals(node,item,entities[0],null);mark(node);return true;
   }
   function drainSignals(node){
@@ -266,15 +262,19 @@
     if(!visual){visual={id:`${node.id}:${r.cycle}:${cell.id}:${item.kind}`,entityId:cell.entity.instanceId,entity:cell.entity,cellId:cell.id,linkId,kind:item.kind,phaseNodes:path.filter(n=>n.kind===item.kind).map(n=>n.id),history:[]};r.visuals.push(visual);if(r.visuals.length>128)r.visuals.splice(0,r.visuals.length-128);}
     cell.visualId=visual.id;
   }
-  function source(node){
-    const r=runtime(node),config=node.properties.source || {},entries=config.entries || [],list=entries.flatMap(e=>Array(Math.max(1,e.count || 1)).fill(e));
-    const occupied=r.cells[0];
-    if(occupied){if(release(node,occupied,0)){r.cells=[];r.nextAt=now()+Math.max(0,(config.intervalSec || 0)*1000);node._sent=(node._sent || 0)+1;mark(node);}return;}
-    if(!list.length || now()<r.nextAt || config.repeat===false && r.created>=list.length)return;
-    const entry=list[r.created%list.length],type=App.entityModelForGraph(node.graph).get(entry.typeId);if(!type){r.error='Select a valid source Entity Type.';return;}
+  function seedSourceSequence(node){
+    const r=runtime(node),item=flow(node)?.nodes.find(entry=>entry.kind==='sourceSequence');if(!item)return;
+    const config=node.properties.source || {},entries=config.entries || [],list=entries.flatMap(e=>Array(Math.max(1,e.count || 1)).fill(e)),state=r.sourceSequence ||= {active:false,nextAt:Number(r.nextAt) || 0,created:Number(r.created) || 0};
+    if(state.active || !list.length || now()<state.nextAt || config.repeat===false && state.created>=list.length)return;
+    const entry=list[state.created%list.length],type=App.entityModelForGraph(node.graph).get(entry.typeId);if(!type){r.error='Select a valid source Entity Type.';return;}
     const entity=store(node).create(type.typeId,{locationNodeId:node.id,createdAt:now()});
     function children(parent,rows){for(const row of rows || [])for(let i=0;i<(row.count || row.quantity || 1);i++){const child=store(node).create(row.typeId,{createdAt:now(),creationNodeId:node.id});const result=store(node).attach(child,parent);if(!result.ok)throw new Error(result.reason);children(child,row.children);}}
-    children(entity,entry.children);r.created++;r.cells.push({id:++r.sequence,nodeId:'source',entity});mark(node);
+    children(entity,entry.children);state.created++;r.created=state.created;state.active=true;r.cells.push({id:++r.sequence,nodeId:item.id,sourceNodeId:item.id,entity});mark(node);
+  }
+  function finishSourceSequence(node){
+    const r=runtime(node),state=r.sourceSequence;if(!state?.active)return;
+    const active=r.cells.some(cell=>cell.sourceNodeId) || r.offers.some(offer=>offer.sourceNodeId);if(active)return;
+    const config=node.properties.source || {};state.active=false;state.nextAt=now()+Math.max(0,(Number(config.intervalSec) || 0)*1000);r.nextAt=state.nextAt;node._sent=(node._sent || 0)+1;mark(node);
   }
   function syncGroups(graph){
     if(graph.__flowSyncCommitting)return;graph.__flowSyncCommitting=true;
@@ -309,8 +309,7 @@
       for(const p of plans)if(!p.internal){recordActivity(p.node,p.item,p.cell);runtime(p.node).cells=runtime(p.node).cells.filter(c=>c!==p.cell);}
       for(const p of plans)if(!p.internal && p.fork){fireForkSignals(p.node,p.fork,p.cell.entity,p.link.id);for(const choice of p.output.routeChoices){runtime(p.node).routerCursors ||= {};runtime(p.node).routerCursors[choice.id]=choice.next;}}
       for(const p of plans){if(p.internal){move(p.node,p.cell);continue;}const rr=runtime(p.receiver),entity=p.cell.entity;
-        if(p.receiver.properties.role==='sink'){p.receiver._recv ||= [];p.receiver._recv.push({instanceId:entity.instanceId,id:entity.id,type:entity.type,typeId:entity.typeId,t:now(),completedAt:now(),children:store(p.node).descendantsOf(entity).map(c=>c.instanceId)});store(p.node).destroy(entity,{completed:true,sinkNodeId:p.receiver.id,completedAt:now()});}
-        else{store(p.node).moveRoot(entity,p.receiver.id);rr.cycle++;rr.cells.push({id:++rr.sequence,nodeId:p.entry.id,input:'',entity,incomingLink:p.link.id});}mark(p.node);mark(p.receiver);
+        store(p.node).moveRoot(entity,p.receiver.id);rr.cycle++;rr.cells.push({id:++rr.sequence,nodeId:p.entry.id,input:'',entity,incomingLink:p.link.id});mark(p.node);mark(p.receiver);
       }
     }}finally{graph.__flowSyncCommitting=false;}
   }
@@ -322,17 +321,15 @@
   }
   function execute(node){
     const r=runtime(node);r.reason='';r.lastTime=now();
-    if(node.properties.role==='source'){source(node);updateState(node);return;}
-    if(node.properties.role==='sink'){receive(node);updateState(node);return;}
     if(!r.checked){r.error=App.FlowModel.validate(flow(node),node).join(' ');r.checked=true;}if(r.error){updateState(node);return;}
     initializeControls(node);drainSignals(node);
     if(!r.initialized){r.initialized=true;const entry=flow(node).nodes.find(n=>n.id===node.properties.initialFlowNodeId) || flow(node).nodes.find(n=>n.kind==='inPort');if(entry)for(const entity of store(node).rootsAt(node.id))r.cells.push({id:++r.sequence,nodeId:entry.id,input:entry.inputs[0]?.id || '',entity});}
-    receive(node);
+    receive(node);seedSourceSequence(node);
     let progress=true,budget=512;
     while(progress && budget-->0){progress=false;
       for(const cell of r.cells.slice()){
         if(!r.cells.includes(cell))continue;const item=spec(node,cell.nodeId);if(!item){r.error='Flow node is missing. Reset the simulation.';break;}
-        if(item.kind==='inPort')progress=move(node,cell) || progress;
+        if(item.kind==='inPort' || item.kind==='sourceSequence')progress=move(node,cell) || progress;
         else if(item.kind==='join'){
           progress=runJoin(node,cell,item) || progress;
         }else if(item.kind==='fork')progress=runFork(node,cell,item) || progress;
@@ -348,6 +345,8 @@
           }
         }else if(item.kind==='outPort'){
           const slot=node.outputs.findIndex(p=>p.portId===item.config.portId);if(release(node,cell,slot)){r.cells=r.cells.filter(c=>c!==cell);mark(node);progress=true;}
+        }else if(item.kind==='entitySink'){
+          node._recv ||= [];node._recv.push({id:cell.entity.id,type:cell.entity.type,typeId:cell.entity.typeId,instanceId:cell.entity.instanceId,t:now(),completedAt:now(),children:store(node).descendantsOf(cell.entity).map(entity=>entity.instanceId)});store(node).destroy(cell.entity,{completed:true,sinkNodeId:node.id,completedAt:now()});r.cells=r.cells.filter(entry=>entry!==cell);recordActivity(node,item,cell);mark(node);progress=true;
         }else if(item.kind==='Palletizing'){
           if(cell.input!==item.inputs[0].id)continue;
           const type=store(node).typeOf(cell.entity),child=r.cells.find(c=>c.nodeId===item.id && c.input===item.inputs[1].id);
@@ -357,23 +356,23 @@
         }else if(item.kind==='DePalletizing'){
           const child=store(node).childrenOf(cell.entity)[0];
           if(child){const link=outgoing(node,item,1),target=link && spec(node,link.to);if(target && free(node,target,link.input,child)){
-            store(node).detach(child);r.cells.push({id:++r.sequence,nodeId:target.id,input:link.input,entity:child,incomingLink:cell.incomingLink});progress=true;
+            store(node).detach(child);r.cells.push({id:++r.sequence,nodeId:target.id,input:link.input,entity:child,incomingLink:cell.incomingLink,...(cell.sourceNodeId ? {sourceNodeId:cell.sourceNodeId} : {})});progress=true;
           }}else if(!r.cells.some(c=>c!==cell) && !r.offers.length)progress=move(node,cell,0) || progress;
         }
       }
     }
     if(budget<=0)r.error='Flow exceeded the same-time transition limit.';
-    syncGroups(node.graph);updateState(node);
+    finishSourceSequence(node);syncGroups(node.graph);updateState(node);
   }
   function retime(node){
     const r=runtime(node);r.checked=false;
     for(const cell of activeCells(node)){const item=spec(node,cell.nodeId);if(cell.startedAt===undefined || !item || !['process','recovery'].includes(item.kind))continue;cell.ready=false;cell.until=cell.startedAt+item.config.seconds*1000;}
     execute(node);mark(node);
   }
-  function eventUntil(node){const r=runtime(node);if(r.error)return NaN;const times=activeCells(node).filter(c=>!c.ready && Number.isFinite(c.until)).map(c=>Math.max(now(),c.until));const config=node.properties.source,quantity=config?.entries.reduce((n,e)=>n+(e.count || 1),0) || 0;if(node.properties.role==='source' && !r.cells.length && quantity && (config.repeat!==false || r.created<quantity))times.push(Math.max(now(),r.nextAt));return times.length ? Math.min(...times) : NaN;}
+  function eventUntil(node){const r=runtime(node);if(r.error)return NaN;const times=activeCells(node).filter(c=>!c.ready && Number.isFinite(c.until)).map(c=>Math.max(now(),c.until)),sourceItem=flow(node)?.nodes.find(item=>item.kind==='sourceSequence'),config=node.properties.source,quantity=config?.entries.reduce((n,e)=>n+(e.count || 1),0) || 0,state=r.sourceSequence;if(sourceItem && !state?.active && quantity && (config.repeat!==false || (state?.created || r.created || 0)<quantity))times.push(Math.max(now(),state?.nextAt || r.nextAt || 0));return times.length ? Math.min(...times) : NaN;}
   function capture(graph,data={}){const s=App.runtimeInstancesForGraph(graph);data.__factSimEntityModel=App.entityModelForGraph(graph).serialize();data.__flowRuntime={time:now(),instances:[...s.instances.values()],typeSequences:[...s.typeSequences],arrivalSequence:s.arrivalSequence,completed:s.completed,nodes:(graph._nodes || []).filter(n=>n.type==='factory/basic').map(n=>({id:n.id,state:n._state,stateName:n._stateName,until:n._until,runtime:n._flowRuntime,recv:n._recv,sent:n._sent,outputs:(n.outputs || []).map((p,slot)=>n._flowRuntime?.offers.find(o=>o.slot===slot && o.pending.length)?.entity || p._data)}))};return App.FlowModel.clone(data);}
   function restore(graph,data){const snapshot=data?.__flowRuntime;if(!snapshot)return;const s=App.runtimeInstancesForGraph(graph);s.clear();s.instances=new Map(snapshot.instances.map(e=>[e.instanceId,e]));s.typeSequences=new Map(snapshot.typeSequences);s.arrivalSequence=snapshot.arrivalSequence;s.completed=snapshot.completed;for(const e of s.instances.values())if(e.parentId===null && e.locationNodeId!=null)s._addRoot(e.locationNodeId,e.instanceId);
-    for(const row of snapshot.nodes){const node=graph.getNodeById(row.id);if(!node)continue;node._flowRuntime=row.runtime;node._recv=row.recv;node._sent=row.sent;for(const c of node._flowRuntime?.cells || [])c.entity=s.get(c.entity);for(const o of node._flowRuntime?.offers || [])o.entity=s.get(o.entity);row.outputs.forEach((e,i)=>node.setOutputData(i,e ? s.get(e) : null));node._state=row.state;node._stateName=row.stateName;node._until=row.until;node._payload=node._flowRuntime?.cells[0]?.entity || null;node._currentWork=node._payload;root.applyNodeStateTheme?.(node,node._state);}s.revision++;
+    for(const row of snapshot.nodes){const node=graph.getNodeById(row.id);if(!node)continue;node._flowRuntime=row.runtime;node._recv=row.recv;node._sent=row.sent;for(const c of node._flowRuntime?.cells || [])c.entity=s.get(c.entity);for(const o of node._flowRuntime?.offers || [])o.entity=s.get(o.entity);const sourceItem=flow(node)?.nodes.find(item=>item.kind==='sourceSequence'),legacyCells=(node._flowRuntime?.cells || []).filter(cell=>cell.nodeId==='source');if(sourceItem && legacyCells.length){for(const cell of legacyCells){cell.nodeId=sourceItem.id;cell.sourceNodeId=sourceItem.id;}node._flowRuntime.sourceSequence ||= {active:true,nextAt:Number(node._flowRuntime.nextAt) || 0,created:Number(node._flowRuntime.created) || 0};}row.outputs.forEach((e,i)=>node.setOutputData(i,e ? s.get(e) : null));node._state=row.state;node._stateName=row.stateName;node._until=row.until;node._payload=node._flowRuntime?.cells[0]?.entity || null;node._currentWork=node._payload;root.applyNodeStateTheme?.(node,node._state);}s.revision++;
   }
   App.FlowRuntime={runtime,execute,canAccept,acknowledge,retime,eventUntil,updateState,capture,restore,activeCells,isActive,joinWorkInputs,sameWork};
 })(typeof window==='undefined' ? globalThis : window);

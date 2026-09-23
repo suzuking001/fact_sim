@@ -476,176 +476,101 @@ if(renderFpsSelect){
   };
 })();
 
-// Add Group (stop groups)
+// Stop Group manager
 (function(){
-  const typeSel = document.getElementById('groupKindSelect');
-  const propsWrap = document.getElementById('addGroupProps');
-  const rateEl = document.getElementById('groupStopRate');
+  const host = document.getElementById('stopGroupsPanelBody');
   const btn = document.getElementById('btnAddGroup');
-  const settingsDetails = document.getElementById('groupSettingsDetails');
-  const descriptionEl = document.getElementById('groupKindDescription');
-  if(!typeSel || !propsWrap || !rateEl || !btn) return;
-  if(!App.stopGroups || typeof App.stopGroups.getTypeDefinitions !== 'function') return;
+  if(!host || !btn || !App.stopGroups) return;
 
-  const defs = App.stopGroups.getTypeDefinitions()
-    .filter((d)=> d && d.key && Array.isArray(d.uiFields))
-    .sort((a, b)=> String(a.label || a.key).localeCompare(String(b.label || b.key)));
-
-  if(!defs.length) return;
-
-  const GROUP_DESCRIPTIONS = {
-    random: 'Stop all nodes inside the group using randomized interval and duration distributions.',
-    scheduled: 'Stop all nodes inside the group at fixed intervals for planned pauses and breaks.'
+  const running = ()=> typeof window.isSimRunning === 'function' && window.isSimRunning();
+  let lastLocked = null;
+  const button = (label, action, className)=>{
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = className || 'selectionInspectorBtn is-muted';
+    el.textContent = label;
+    el.addEventListener('click', action);
+    return el;
   };
 
-  typeSel.innerHTML = '';
-  defs.forEach((def)=>{
-    const opt = document.createElement('option');
-    opt.value = def.key;
-    opt.textContent = def.label || def.key;
-    typeSel.appendChild(opt);
-  });
+  const render = ()=>{
+    host.replaceChildren();
+    const rows = (typeof App.stopGroups.listStopGroups === 'function')
+      ? App.stopGroups.listStopGroups(App.graph)
+      : [];
+    const locked = running();
+    lastLocked = locked;
 
-  const makeField = (def)=>{
-    const wrap = document.createElement('div');
-    wrap.className = 'field';
-    const label = document.createElement('label');
-    label.textContent = def.label || def.key;
-    wrap.appendChild(label);
-
-    let input = null;
-    if(def.type === 'textarea'){
-      input = document.createElement('textarea');
-      if(def.rows) input.rows = def.rows;
-      input.value = def.default ?? '';
-    }else if(def.type === 'number'){
-      input = document.createElement('input');
-      input.type = 'number';
-      if(typeof def.step !== 'undefined') input.step = String(def.step);
-      if(typeof def.min !== 'undefined') input.min = String(def.min);
-      if(typeof def.max !== 'undefined') input.max = String(def.max);
-      input.value = def.default ?? 0;
-    }else if(def.type === 'color'){
-      input = document.createElement('input');
-      input.type = 'color';
-      input.value = def.default ?? '#ffffff';
+    if(!rows.length){
+      const empty = document.createElement('div');
+      empty.className = 'stopGroupsEmptyState';
+      empty.textContent = 'No stop groups in this project.';
+      host.appendChild(empty);
     }else{
-      input = document.createElement('input');
-      input.type = 'text';
-      input.value = def.default ?? '';
+      const list = document.createElement('div');
+      list.className = 'stopGroupList';
+      rows.forEach(({ group, meta })=>{
+        const def = App.stopGroups.getTypeDefinition?.(meta.type);
+        const row = document.createElement('div');
+        row.className = 'stopGroupRow';
+
+        const marker = document.createElement('span');
+        marker.className = 'stopGroupMarker';
+        marker.style.setProperty('--stop-group-color', String(group.color || def?.groupColor || '#f59e0b'));
+        marker.setAttribute('aria-hidden', 'true');
+
+        const summary = document.createElement('div');
+        summary.className = 'stopGroupSummary';
+        const title = document.createElement('strong');
+        title.textContent = meta.title || group.title || 'Stop Group';
+        title.title = title.textContent;
+        const detail = document.createElement('small');
+        const nodeCount = App.stopGroups.countNodesInGroup?.(group, App.graph) || 0;
+        const rate = App.stopGroups.estimateStopRatePercent?.(meta.type, meta.props);
+        const rateText = Number.isFinite(rate) ? ` · ${rate.toFixed(1)}% down` : '';
+        detail.textContent = `${def?.label || meta.type} · ${nodeCount} node${nodeCount === 1 ? '' : 's'}${rateText}`;
+        summary.append(title, detail);
+
+        const actions = document.createElement('div');
+        actions.className = 'stopGroupActionsInline';
+        const edit = button('Edit', ()=>{
+          if(running()) return;
+          App.stopGroups.openGroupEditor?.(group);
+        }, 'selectionInspectorBtn is-muted');
+        const remove = button('Delete', ()=>{
+          if(running() || !window.confirm(`Delete stop group "${title.textContent}"?`)) return;
+          App.stopGroups.removeGroup?.(group);
+        }, 'selectionInspectorBtn is-danger');
+        edit.disabled = remove.disabled = locked;
+        actions.append(edit, remove);
+        row.append(marker, summary, actions);
+        list.appendChild(row);
+      });
+      host.appendChild(list);
     }
-    input.dataset.field = def.key;
-    wrap.appendChild(input);
-    return wrap;
+
+    const placing = !!(App.placement?.active && App.placement.kind === 'group');
+    btn.disabled = locked;
+    btn.classList.toggle('is-cancel', placing);
+    btn.textContent = placing ? 'Cancel Placement' : 'Add Stop Group';
   };
 
-  const getDef = ()=>{
-    const key = typeSel.value || defs[0].key;
-    return defs.find((d)=> d.key === key) || defs[0];
+  App.refreshStopGroupsManager = render;
+  App.refreshGroupBuilderUI = render;
+  App.syncStopGroupsManagerState = ()=>{
+    if(lastLocked !== running()) render();
   };
-
-  const formatRecoveryTimeEstimate = (meta)=>{
-    try{
-      const pct = App.stopGroups.estimateStopRatePercent(meta.type, meta.props);
-      return `${pct.toFixed(1)}%`;
-    }catch(_e){
-      return '-';
-    }
-  };
-
-  const readMeta = ()=>{
-    const def = getDef();
-    const meta = {
-      type: def.key,
-      title: def.defaultTitle || 'Stop Group',
-      props: {}
-    };
-    for(const field of def.uiFields){
-      const el = propsWrap.querySelector(`[data-field="${field.key}"]`);
-      if(!el) continue;
-      let value = null;
-      if(field.type === 'number'){
-        const parsed = parseFloat(el.value);
-        value = isNaN(parsed) ? (field.default ?? 0) : parsed;
-      }else{
-        value = el.value;
-      }
-      if(field.target === 'title'){
-        const t = String(value == null ? '' : value).trim();
-        if(t) meta.title = t;
-      }else{
-        meta.props[field.key] = value;
-      }
-    }
-    return App.stopGroups.normalizeMeta(meta);
-  };
-
-  const updateStopRate = ()=>{
-    try{
-      const meta = readMeta();
-      const rateText = formatRecoveryTimeEstimate(meta);
-      rateEl.dataset.rateText = rateText;
-      rateEl.textContent = `Recovery time: ${rateText}`;
-    }catch(_e){
-      rateEl.dataset.rateText = '-';
-      rateEl.textContent = 'Recovery time: -';
-    }
-  };
-
-  const updateGroupBuilderUi = ()=>{
-    const def = getDef();
-    const active = !!(App.placement && App.placement.active && App.placement.kind === 'group');
-    const label = active
-      ? _getPlacementItemLabel('group', App.placement.item)
-      : String(def.label || 'Stop Group');
-    btn.classList.toggle('is-cancel', active);
-    btn.textContent = active ? 'Cancel Placement' : `Place ${label}`;
-    if(descriptionEl){
-      descriptionEl.textContent = active
-        ? `Place ${label} on the canvas. Right-click or Esc cancels.`
-        : (GROUP_DESCRIPTIONS[def.key] || 'Choose a pattern. Open settings only when timing needs tuning.');
-    }
-    if(active && settingsDetails) settingsDetails.open = true;
-  };
-  App.refreshGroupBuilderUI = updateGroupBuilderUi;
-
-  const renderFields = ()=>{
-    const def = getDef();
-    propsWrap.innerHTML = '';
-    for(const field of def.uiFields){
-      propsWrap.appendChild(makeField(field));
-    }
-    propsWrap.querySelectorAll('input,textarea,select').forEach((el)=>{
-      el.addEventListener('input', updateStopRate);
-      el.addEventListener('change', updateStopRate);
-    });
-    if(settingsDetails){
-      settingsDetails.hidden = !def.uiFields.length;
-      const summary = settingsDetails.querySelector('summary');
-      if(summary) summary.textContent = `Pattern Settings (${def.uiFields.length})`;
-    }
-    updateStopRate();
-    updateGroupBuilderUi();
-  };
-
-  typeSel.addEventListener('change', renderFields);
-  renderFields();
-
   btn.addEventListener('click', ()=>{
-    if(App.placement && App.placement.active && App.placement.kind === 'group'){
-      App.finishPlacement(false);
-      if(App.canvas && typeof App.canvas.setDirty === 'function') App.canvas.setDirty(true, true);
+    if(App.placement?.active && App.placement.kind === 'group'){
+      App.finishPlacement?.(false);
+      App.canvas?.setDirty?.(true, true);
       return;
     }
-    if(!App.graph || !App.canvas) return;
-    try{
-      const meta = readMeta();
-      const group = App.stopGroups.createGroup(meta);
-      beginGroupPlacement(group);
-    }catch(err){
-      console.error(err);
-    }
+    if(running() || !App.graph || !App.canvas) return;
+    App.stopGroups.openCreateGroupEditor?.({ type:'random_stop' });
   });
+  window.addEventListener('factsim:graph-applied', render);
+  render();
 })();
 
 const btnBenchmark = document.getElementById('btnBenchmark');
@@ -1407,7 +1332,7 @@ window.beginGroupPlacement = beginGroupPlacement;
     basic:{description:'Build a Flow using ports, timed operations and routing.'},
     note:{description:'Add a note to the layout.'},
     shuttle:{description:'Wait for every member of a named SyncroGroup before moving together.'},
-    source:{description:'Generate Entities from the sequence in Contents.'},
+    source:{description:'Generate Entities from the Source Sequence node in Flow.'},
     sink:{description:'Record completed Entities.'}
   };
   function getNodeMeta(kind){
@@ -1421,8 +1346,9 @@ window.beginGroupPlacement = beginGroupPlacement;
       : Object.keys(NODE_SCHEMAS).map((kind)=>({ kind, label:getNodeMeta(kind).label }));
   }
 
-  function populateNodeSelect(){
+  function populateNodeSelect(preferredKind){
     const catalog = nodeCatalog();
+    const preferred = String(preferredKind || sel.value || '');
     sel.innerHTML = '';
     catalog.forEach((item)=>{
       const opt = document.createElement('option');
@@ -1431,7 +1357,7 @@ window.beginGroupPlacement = beginGroupPlacement;
       sel.appendChild(opt);
     });
     const kinds = catalog.map((item)=>item.kind);
-    sel.value = kinds.includes('equip') ? 'equip' : (kinds[0] || '');
+    sel.value = kinds.includes(preferred) ? preferred : (kinds.includes('equip') ? 'equip' : (kinds[0] || ''));
   }
 
   function pickerOptions(){
@@ -1511,12 +1437,14 @@ window.beginGroupPlacement = beginGroupPlacement;
       option.dataset.kind = item.kind;
       option.setAttribute('role', 'option');
       option.setAttribute('aria-selected', 'false');
-      option.innerHTML = [
-        '<span class="nodeKindPickerOptionIcon" aria-hidden="true">',
-        typeof App.nodeIconSvg === 'function' ? App.nodeIconSvg(item.kind, { className:'factNodeTypeIcon' }) : '',
-        '</span>',
-        `<span class="nodeKindPickerOptionLabel">${item.label}</span>`
-      ].join('');
+      const icon = document.createElement('span');
+      icon.className = 'nodeKindPickerOptionIcon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = typeof App.nodeIconSvg === 'function' ? App.nodeIconSvg(item.kind, { className:'factNodeTypeIcon' }) : '';
+      const label = document.createElement('span');
+      label.className = 'nodeKindPickerOptionLabel';
+      label.textContent = item.label;
+      option.append(icon, label);
       option.addEventListener('click', ()=>chooseNodeKind(item.kind, true));
       option.addEventListener('keydown', (event)=>{
         if(event.key === 'ArrowDown') return movePickerFocus(event, 1);
@@ -1539,26 +1467,29 @@ window.beginGroupPlacement = beginGroupPlacement;
     });
     updatePickerSelection();
 
-    pickerTrigger.addEventListener('click', ()=>{
-      setPickerOpen(pickerTrigger.getAttribute('aria-expanded') !== 'true');
-    });
-    pickerTrigger.addEventListener('keydown', (event)=>{
-      if(event.key === 'ArrowDown' || event.key === 'ArrowUp'){
-        event.preventDefault();
-        const options = pickerOptions();
-        const selectedIndex = Math.max(0, options.findIndex((option)=>option.dataset.kind === sel.value));
-        setPickerOpen(true, event.key === 'ArrowDown' ? selectedIndex : Math.max(0, selectedIndex - 1));
-      }else if(event.key === 'Enter' || event.key === ' '){
-        event.preventDefault();
+    if(!picker.__factNodePickerEventsBound){
+      pickerTrigger.addEventListener('click', ()=>{
         setPickerOpen(pickerTrigger.getAttribute('aria-expanded') !== 'true');
-      }else if(event.key === 'Escape'){
-        setPickerOpen(false);
-      }
-    });
-    document.addEventListener('pointerdown', (event)=>{
-      if(pickerTrigger.getAttribute('aria-expanded') === 'true' && !picker.contains(event.target)) setPickerOpen(false);
-    });
-    sel.addEventListener('change', updatePickerSelection);
+      });
+      pickerTrigger.addEventListener('keydown', (event)=>{
+        if(event.key === 'ArrowDown' || event.key === 'ArrowUp'){
+          event.preventDefault();
+          const options = pickerOptions();
+          const selectedIndex = Math.max(0, options.findIndex((option)=>option.dataset.kind === sel.value));
+          setPickerOpen(true, event.key === 'ArrowDown' ? selectedIndex : Math.max(0, selectedIndex - 1));
+        }else if(event.key === 'Enter' || event.key === ' '){
+          event.preventDefault();
+          setPickerOpen(pickerTrigger.getAttribute('aria-expanded') !== 'true');
+        }else if(event.key === 'Escape'){
+          setPickerOpen(false);
+        }
+      });
+      document.addEventListener('pointerdown', (event)=>{
+        if(pickerTrigger.getAttribute('aria-expanded') === 'true' && !picker.contains(event.target)) setPickerOpen(false);
+      });
+      sel.addEventListener('change', updatePickerSelection);
+      picker.__factNodePickerEventsBound = true;
+    }
   }
 
   function updateNodeBuilderUi(){
@@ -1568,6 +1499,12 @@ window.beginGroupPlacement = beginGroupPlacement;
     btn.textContent = active ? 'Cancel Placement' : 'Place Node';
   }
   App.refreshNodeBuilderUI = updateNodeBuilderUi;
+  App.refreshNodeCatalogUI = function(preferredKind){
+    populateNodeSelect(preferredKind);
+    buildNodePicker();
+    updateNodeBuilderUi();
+    sel.dispatchEvent(new Event('change', { bubbles:true }));
+  };
 
   populateNodeSelect();
   buildNodePicker();
@@ -1618,8 +1555,6 @@ window.beginGroupPlacement = beginGroupPlacement;
   const btnAddNode = document.getElementById('btnAddNode');
   const btnAddGroup = document.getElementById('btnAddGroup');
   const nodeKindSelect = document.getElementById('nodeKindSelect');
-  const groupKindSelect = document.getElementById('groupKindSelect');
-  const groupStopRate = document.getElementById('groupStopRate');
   const overviewQuickTip = document.getElementById('overviewQuickTip');
   const bgLayoutEnabled = document.getElementById('bgLayoutEnabled');
   if(!sidebar) return;
@@ -1629,12 +1564,13 @@ window.beginGroupPlacement = beginGroupPlacement;
     entityTypesPanel: true,
     addNodePanel: true,
     addGroupPanel: true,
+    addSyncroGroupPanel: true,
     advancedPanel: true,
     shortcutPanel: true,
     fileControls: true
   };
-  const collapsibleIds = ['controls', 'backgroundPanel', 'entityTypesPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
-  const accordionIds = ['backgroundPanel', 'entityTypesPanel', 'addNodePanel', 'addGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
+  const collapsibleIds = ['controls', 'backgroundPanel', 'entityTypesPanel', 'addNodePanel', 'addGroupPanel', 'addSyncroGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
+  const accordionIds = ['backgroundPanel', 'entityTypesPanel', 'addNodePanel', 'addGroupPanel', 'addSyncroGroupPanel', 'advancedPanel', 'shortcutPanel', 'fileControls'];
   const collapseKey = 'fact_sim_sidebar_panels_v6';
 
   function readCollapseState(){
@@ -1834,10 +1770,8 @@ window.beginGroupPlacement = beginGroupPlacement;
     if(App.placement?.active && App.placement.kind === 'group'){
       setPanelMeta('addGroupPanel', `Placing ${_getPlacementItemLabel('group', App.placement.item)}`);
     }else{
-      const groupLabel = getSelectedOptionLabel(groupKindSelect, 'Stop Group');
-      const rateText = String(groupStopRate?.dataset?.rateText || '')
-        || String(groupStopRate?.textContent || '').replace(/^Recovery time:\s*/i, '').trim();
-      setPanelMeta('addGroupPanel', rateText && rateText !== '-' ? `${groupLabel} · ${rateText} down` : groupLabel);
+      const count = App.stopGroups?.listStopGroups?.(App.graph)?.length || 0;
+      setPanelMeta('addGroupPanel', `${count} group${count === 1 ? '' : 's'}`);
     }
 
     const configuredFps = (typeof App.getRenderFps === 'function') ? App.getRenderFps() : (Number(renderFpsSelect?.value) || 60);
@@ -1865,6 +1799,7 @@ window.beginGroupPlacement = beginGroupPlacement;
 
   function updateSimulationSummary(){
     const running = (typeof window.isSimRunning === 'function') ? !!window.isSimRunning() : false;
+    App.syncStopGroupsManagerState?.();
     if(typeof App.updateAdaptiveRenderMode === 'function') App.updateAdaptiveRenderMode();
     if(btnStart){
       btnStart.textContent = running ? 'Stop' : 'Start';
@@ -1917,10 +1852,6 @@ window.beginGroupPlacement = beginGroupPlacement;
   if(nodeKindSelect && !nodeKindSelect.__summaryHooked){
     nodeKindSelect.addEventListener('change', updateSidebarSummaries);
     nodeKindSelect.__summaryHooked = true;
-  }
-  if(groupKindSelect && !groupKindSelect.__summaryHooked){
-    groupKindSelect.addEventListener('change', updateSidebarSummaries);
-    groupKindSelect.__summaryHooked = true;
   }
   if(bgLayoutEnabled && !bgLayoutEnabled.__summaryHooked){
     bgLayoutEnabled.addEventListener('change', updateSidebarSummaries);

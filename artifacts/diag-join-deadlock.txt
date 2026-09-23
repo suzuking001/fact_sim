@@ -1,0 +1,722 @@
+================ PART A: equipment flow topology ================
+
+# 2  [equipment]  ports: in=5 out=5
+   inPort1 inPort  IN:   OUT: o0->
+   inPort2 inPort  IN:   OUT: o0->
+   outPort1 outPort  IN: inPort(WORK)<-[entityRouter3]  OUT: 
+   outPort2 outPort  IN: inPort(WORK)<-[entityRouter4]  OUT: 
+   outPort3 outPort  IN: inPort(WORK)<-[entityRouter3]  OUT: 
+   outPort4 outPort  IN: inPort(WORK)<-[entityRouter4]  OUT: 
+   entityRouter1 entityRouter  IN: inPort1(WORK)<-[inPort1] inPort2(WORK)<-[inPort2]  OUT: o0->
+   process1 process [1s]  IN: inPort(WORK)<-[join1]  OUT: o0->
+   dePalletizing1 DePalletizing  IN: inPort(WORK)<-[process1]  OUT: o0-> o1->
+   entityRouter2 entityRouter  IN: inPort1(WORK)<-[dePalletizing1]  OUT: o0->
+   entityRouter3 entityRouter  IN: inPort1(WORK)<-[entityRouter2]  OUT: o0-> o1->
+   recovery1 recovery [0.3s]  IN: inPort(SIG)<-[fork1]  OUT: o0->
+   entityRouter4 entityRouter  IN: inPort1(WORK)<-[fork1]  OUT: o0-> o1->
+   join1 join  IN: inPort1(WORK)<-[entityRouter1] inPort2(SIG)<-[recovery1]  OUT: o0->
+   fork1 fork  IN: inPort(WORK)<-[dePalletizing1]  OUT: o0-> o1->
+
+# 17  [equipment]  ports: in=3 out=1
+   inPort1 inPort  IN:   OUT: o0->
+   inPort2 inPort  IN:   OUT: o0->
+   inPort3 inPort  IN:   OUT: o0->
+   outPort1 outPort  IN: inPort(WORK)<-[fork1]  OUT: 
+   palletizing1 Palletizing  IN: parentInPort(WORK)<-[inPort3] childInPort(WORK)<-[entityRouter1]  OUT: o0->
+   entityRouter1 entityRouter  IN: inPort1(WORK)<-[inPort1] inPort2(WORK)<-[inPort2]  OUT: o0->
+   process1 process [5s]  IN: inPort(WORK)<-[join1]  OUT: o0->
+   recovery1 recovery [6s]  IN: inPort(SIG)<-[fork1]  OUT: o0->
+   join1 join  IN: inPort1(WORK)<-[palletizing1] inPort2(SIG)<-[recovery1]  OUT: o0->
+   fork1 fork  IN: inPort(WORK)<-[process1]  OUT: o0-> o1->
+
+# 36  [equipment]  ports: in=1 out=1
+   inPort1 inPort  IN:   OUT: o0->
+   outPort1 outPort  IN: inPort(WORK)<-[fork1]  OUT: 
+   process1 process [2s]  IN: inPort(WORK)<-[join1]  OUT: o0->
+   recovery1 recovery [3s]  IN: inPort(SIG)<-[fork1]  OUT: o0->
+   join1 join  IN: inPort1(WORK)<-[inPort1] inPort2(SIG)<-[recovery1]  OUT: o0->
+   fork1 fork  IN: inPort(WORK)<-[process1]  OUT: o0-> o1->
+
+# 65  [equipment]  ports: in=2 out=1
+   inPort1 inPort  IN:   OUT: o0->
+   inPort2 inPort  IN:   OUT: o0->
+   outPort1 outPort  IN: inPort(WORK)<-[fork1]  OUT: 
+   process1 process [2s]  IN: inPort(WORK)<-[join1]  OUT: o0->
+   recovery1 recovery [3s]  IN: inPort(SIG)<-[fork1]  OUT: o0->
+   join1 join  IN: inPort1(WORK)<-[inPort1] inPort2(SIG)<-[recovery1]  OUT: o0->
+   fork1 fork  IN: inPort(WORK)<-[process2]  OUT: o0-> o1->
+   process2 process [0s]  IN: inPort(WORK)<-[join2]  OUT: o0->
+   join2 join  IN: inPort1(WORK)<-[process1] inPort2(WORK)<-[inPort2]  OUT: o0->
+
+================ PART B: all joins & AND requirements ================
+  #7 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #16 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #10 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #4 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #26 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #27 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #28 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #29 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #30 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #33 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #34 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #35 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #36 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #37 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #38 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #39 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #42 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #43 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #44 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #45 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #47 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #48 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #49 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #50 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #51 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #52 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #54 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #55 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #56 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #57 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #58 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #59 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #60 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #62 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #63 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #67 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #32 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #120 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #127 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #128 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #129 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #130 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #125 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #126 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #124 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #110 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #107 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #123 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #61 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #133 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #134 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #135 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #136 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #137 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #138 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #139 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #140 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #143 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #144 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #145 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #146 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #147 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #148 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #149 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #150 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #151 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #152 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #153 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #154 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #155 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #156 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #157 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #158 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #159 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #160 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #162 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #166 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #170 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #172 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #173 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #174 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #175 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #176 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #177 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #178 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #179 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #163 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #165 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #161 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #6 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #64 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #24 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #23 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #17 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #13 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #182 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #184 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #185 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #186 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #2 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #187 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #183 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #191 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #190 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #192 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #14 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #21 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #193 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #11 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #188 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #189 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #121 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #141 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #142 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #117 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #169 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #181 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #205 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #65 join[join1] workInputs=inPort1 sigInputs=inPort2 (AND needs 1 work + 1 signals)
+  #65 join[join2] workInputs=inPort1,inPort2 sigInputs= (AND needs 2 work + 0 signals)
+
+================ PART C: run 300s steady-state ================
+t=300s  sinks=[{"id":3,"count":6,"last":267000}]
+activeInstances=267  completed=6
+
+--- where are the ACTIVE entities? ---
+  node null [?]: 217  (e.g. type-carrier-2:199:1,type-carrier-2:200:1)
+  node 6 [equipment]: 1  (e.g. type-carrier-2:197:4)
+  node 11 [equipment]: 1  (e.g. type-carrier-2:4:1)
+  node 14 [equipment]: 1  (e.g. type-carrier-2:202:10)
+  node 16 [equipment]: 1  (e.g. type-carrier-1:10:1)
+  node 17 [equipment]: 1  (e.g. type-carrier-2:204:6)
+  node 23 [equipment]: 1  (e.g. type-carrier-2:197:5)
+  node 24 [equipment]: 1  (e.g. type-carrier-2:197:6)
+  node 27 [equipment]: 1  (e.g. type-carrier-2:204:5)
+  node 28 [equipment]: 1  (e.g. type-carrier-2:204:4)
+  node 29 [equipment]: 1  (e.g. type-carrier-2:204:3)
+  node 30 [equipment]: 1  (e.g. type-carrier-2:204:2)
+  node 39 [equipment]: 1  (e.g. type-a:117:58)
+  node 43 [equipment]: 1  (e.g. type-a:117:61)
+  node 45 [equipment]: 1  (e.g. type-carrier-2:194:13)
+  node 48 [equipment]: 1  (e.g. type-a:117:65)
+  node 50 [equipment]: 1  (e.g. type-carrier-2:195:13)
+  node 56 [equipment]: 1  (e.g. type-carrier-2:196:13)
+  node 59 [equipment]: 1  (e.g. type-carrier-2:196:12)
+  node 60 [equipment]: 1  (e.g. type-carrier-2:197:11)
+  node 61 [equipment]: 1  (e.g. type-carrier-2:197:9)
+  node 62 [equipment]: 1  (e.g. type-carrier-2:197:8)
+  node 63 [equipment]: 1  (e.g. type-carrier-2:197:10)
+  node 64 [equipment]: 1  (e.g. type-carrier-2:197:7)
+  node 116 [source]: 1  (e.g. type-a:116:15)
+  node 117 [equipment]: 1  (e.g. type-a:116:14)
+  node 120 [equipment]: 1  (e.g. type-a:116:13)
+  node 123 [equipment]: 1  (e.g. type-carrier-1:110:1)
+  node 126 [equipment]: 1  (e.g. type-carrier-1:126:1)
+  node 128 [equipment]: 1  (e.g. type-a:117:63)
+  node 133 [equipment]: 1  (e.g. type-b:205:63)
+  node 153 [equipment]: 1  (e.g. type-carrier-2:201:13)
+  node 158 [equipment]: 1  (e.g. type-carrier-2:202:11)
+  node 160 [equipment]: 1  (e.g. type-carrier-2:202:12)
+  node 162 [equipment]: 1  (e.g. type-carrier-2:203:13)
+  node 166 [equipment]: 1  (e.g. type-carrier-1:166:1)
+  node 175 [equipment]: 1  (e.g. type-carrier-1:175:1)
+  node 188 [equipment]: 1  (e.g. type-carrier-1:11:1)
+  node 189 [equipment]: 1  (e.g. type-carrier-1:189:1)
+  node 193 [equipment]: 1  (e.g. type-carrier-1:190:1)
+  node 194 [source]: 1  (e.g. type-carrier-2:194:14)
+  node 195 [source]: 1  (e.g. type-carrier-2:195:14)
+  node 196 [source]: 1  (e.g. type-carrier-2:196:14)
+  node 197 [source]: 1  (e.g. type-carrier-2:197:12)
+  node 199 [source]: 1  (e.g. type-carrier-2:199:14)
+  node 200 [source]: 1  (e.g. type-carrier-2:200:14)
+  node 201 [source]: 1  (e.g. type-carrier-2:201:14)
+  node 202 [source]: 1  (e.g. type-carrier-2:202:13)
+  node 203 [source]: 1  (e.g. type-carrier-2:203:14)
+  node 204 [source]: 1  (e.g. type-carrier-2:204:7)
+  node 205 [equipment]: 1  (e.g. type-b:116:14)
+
+================ PART D: runtime detail (cells/sigs/offers/reason) ================
+  #7 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #16 [equipment] state=WAIT cells=[palletizing1/parentInPort] sig=[] offers=[] reason=""
+  #10 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #4 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #26 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #27 [equipment] state=WAIT cells=[syncroJudgment1/inPort] sig=[] offers=[] reason=""
+  #28 [equipment] state=WAIT cells=[syncroJudgment1/inPort] sig=[] offers=[] reason=""
+  #29 [equipment] state=WAIT cells=[syncroJudgment1/inPort] sig=[] offers=[] reason=""
+  #30 [equipment] state=WAIT cells=[syncroJudgment1/inPort] sig=[] offers=[] reason=""
+  #33 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #34 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #35 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #36 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #37 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=300s)] offers=[] reason=""
+  #38 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=302s)] offers=[] reason=""
+  #39 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #42 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=301s)] offers=[] reason=""
+  #43 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #44 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #45 [equipment] state=WAIT cells=[palletizing1/parentInPort] sig=[join1/inPort2] offers=[] reason=""
+  #47 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #48 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #49 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=301s)] offers=[] reason=""
+  #50 [equipment] state=WAIT cells=[palletizing1/parentInPort] sig=[join1/inPort2] offers=[] reason=""
+  #51 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #52 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #54 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #55 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #56 [equipment] state=WAIT cells=[palletizing1/parentInPort] sig=[join1/inPort2] offers=[] reason=""
+  #57 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #58 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #59 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@24->pend[60]] reason=""
+  #60 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@42->pend[63]] reason=""
+  #62 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@16->pend[64]] reason=""
+  #63 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@20->pend[61]] reason=""
+  #67 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #32 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #120 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@26->pend[107]] reason=""
+  #127 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #128 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@26->pend[123]] reason=""
+  #129 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #130 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #125 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #126 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #124 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #110 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #107 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #123 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #61 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@18->pend[62]] reason=""
+  #133 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #134 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #135 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #136 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #137 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #138 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #139 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #140 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #143 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #144 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=300s)] offers=[] reason=""
+  #145 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #146 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #147 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #148 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=300s)] offers=[] reason=""
+  #149 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #150 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #151 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=302s)] offers=[] reason=""
+  #152 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=302s)] offers=[] reason=""
+  #153 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #154 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #155 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #156 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #157 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=300s)] offers=[] reason=""
+  #158 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #159 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #160 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@24->pend[158]] reason=""
+  #162 [equipment] state=WAIT cells=[palletizing1/parentInPort] sig=[join1/inPort2] offers=[] reason=""
+  #166 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #170 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #172 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #173 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #174 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #175 [equipment] state=WAIT cells=[palletizing1/parentInPort] sig=[] offers=[] reason=""
+  #176 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #177 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #178 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #179 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #163 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #165 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=301s)] offers=[] reason=""
+  #161 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #6 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@8->pend[10]] reason=""
+  #64 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@14->pend[24]] reason=""
+  #24 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@12->pend[23]] reason=""
+  #23 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@10->pend[6]] reason=""
+  #17 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #13 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #182 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #184 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #185 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #186 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #2 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #187 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #183 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #191 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #190 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #192 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #14 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #21 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #193 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #11 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@20->pend[16]] reason=""
+  #188 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@20->pend[11]] reason=""
+  #189 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[offer@22->pend[188]] reason=""
+  #121 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #194 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@14->pend[45]] reason=""
+  #195 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@14->pend[50]] reason=""
+  #196 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@14->pend[56]] reason=""
+  #197 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@12->pend[60]] reason=""
+  #199 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@14->pend[144]] reason=""
+  #200 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@14->pend[148]] reason=""
+  #201 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@14->pend[153]] reason=""
+  #202 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@13->pend[157]] reason=""
+  #203 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@14->pend[162]] reason=""
+  #204 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@7->pend[17]] reason=""
+  #141 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #142 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #117 [equipment] state=WAIT cells=[fork1/inPort] sig=[] offers=[] reason="Waiting for all Fork outputs (4/6 ready)."
+  #169 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=300s)] offers=[] reason=""
+  #181 [equipment] state=RECOVERY cells=[] sig=[recovery1/inPort(until=300s)] offers=[] reason=""
+  #205 [equipment] state=PROCESS cells=[process1/inPort] sig=[] offers=[] reason=""
+  #65 [equipment] state=IDLE cells=[] sig=[join1/inPort2] offers=[] reason=""
+  #116 [source] state=WAIT cells=[outPort1/inPort] sig=[] offers=[offer@29->pend[181]] reason=""
+
+================ PART E: join readiness diagnosis ================
+  #7 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #16 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #10 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #4 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #26 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #27 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #28 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #29 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #30 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #33 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #34 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #35 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #36 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #37 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #38 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #39 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #42 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #43 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #44 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #45 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #47 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #48 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #49 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #50 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #51 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #52 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #54 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #55 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #56 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #57 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #58 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #59 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #60 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #62 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #63 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #67 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #32 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #120 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #127 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #128 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #129 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #130 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #125 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #126 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #124 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #110 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #107 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #123 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #61 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #133 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #134 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #135 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #136 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #137 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #138 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #139 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #140 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #143 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #144 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #145 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #146 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #147 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #148 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #149 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #150 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #151 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #152 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #153 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #154 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #155 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #156 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #157 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #158 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #159 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #160 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #162 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #166 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #170 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #172 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #173 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #174 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #175 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #176 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #177 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #178 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #179 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #163 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #165 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #161 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #6 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #64 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #24 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #23 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #17 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #13 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #182 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #184 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #185 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #186 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #2 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #187 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #183 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #191 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #190 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #192 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #14 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #21 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #193 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #11 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #188 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #189 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #121 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #141 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #142 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #117 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #169 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #181 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #205 join[join1]: workFull=false sigFull=false
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=MISSING
+  #65 join[join1]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING
+     sigInputs  : inPort2=HAS
+  #65 join[join2]: workFull=false sigFull=true
+     workInputs: inPort1=MISSING, inPort2=MISSING
+     sigInputs  : 

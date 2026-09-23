@@ -17,9 +17,21 @@ var App = window.App || (window.App = {});
   let activeRuntime = null;
   let pausedNodeIds = new Set();
   let hasPausedNodes = false;
+  let uiRefreshQueued = false;
+
+  function scheduleUiRefresh(){
+    if(uiRefreshQueued) return;
+    uiRefreshQueued = true;
+    Promise.resolve().then(()=>{
+      uiRefreshQueued = false;
+      App.refreshStopGroupsManager?.();
+      App.refreshSidebarChrome?.();
+    });
+  }
 
   function bumpRevision(draw){
     groupRevision++;
+    scheduleUiRefresh();
     if(draw && App.canvas && typeof App.canvas.draw === 'function'){
       App.canvas.draw(true, true);
     }
@@ -178,10 +190,36 @@ var App = window.App || (window.App = {});
     return group.__stopGroupMeta;
   }
 
+  function makeMovementIndependent(group){
+    if(!group || group.__stopGroupIndependentMove || typeof group.move !== 'function') return group;
+    const baseMove = group.move;
+    const independentMove = function(dx, dy, skipNodes){
+      // LiteGraph's third argument keeps contained nodes in place while the group moves.
+      return baseMove.call(this, dx, dy, this.__stopGroupMeta ? true : skipNodes);
+    };
+    try{
+      Object.defineProperty(group, 'move', {
+        configurable: true,
+        writable: true,
+        value: independentMove
+      });
+      Object.defineProperty(group, '__stopGroupIndependentMove', {
+        configurable: true,
+        writable: true,
+        value: true
+      });
+    }catch(_e){
+      group.move = independentMove;
+      group.__stopGroupIndependentMove = true;
+    }
+    return group;
+  }
+
   function setGroupMeta(group, meta, draw){
     if(!group) return null;
     const normalized = normalizeMeta(meta);
     group.__stopGroupMeta = normalized;
+    makeMovementIndependent(group);
     applyVisual(group, normalized, false);
     bumpRevision(draw !== false);
     return normalized;
@@ -695,6 +733,7 @@ var App = window.App || (window.App = {});
     const group = new LiteGraph.LGraphGroup(meta.title);
     setGroupBounds(group, 40, 160, GROUP_DEFAULT_W, GROUP_DEFAULT_H);
     group.__stopGroupMeta = meta;
+    makeMovementIndependent(group);
     applyVisual(group, meta, false);
     return { group, meta };
   }
@@ -875,7 +914,9 @@ var App = window.App || (window.App = {});
         title: refs.nameEl.value,
         props: {}
       };
-      const fields = Array.isArray(def?.uiFields) ? def.uiFields : [];
+      const fields = Array.isArray(def?.uiFields)
+        ? def.uiFields.filter((field)=> field?.target !== 'title')
+        : [];
       for(const field of fields){
         if(!field || !field.key) continue;
         const input = refs.propsEl.querySelector(`[data-field="${field.key}"]`);
@@ -904,7 +945,9 @@ var App = window.App || (window.App = {});
       }
       refs.propsEl.innerHTML = '';
       const def = currentTypeDef();
-      const fields = Array.isArray(def?.uiFields) ? def.uiFields : [];
+      const fields = Array.isArray(def?.uiFields)
+        ? def.uiFields.filter((field)=> field?.target !== 'title')
+        : [];
       for(const field of fields){
         const value = Object.prototype.hasOwnProperty.call(meta.props || {}, field.key)
           ? meta.props[field.key]

@@ -15,6 +15,10 @@ inPort → Join → Process → Fork → outPort
 
 例えば Process 2秒・Recovery 3秒なら、時刻0秒に受け取ったワークを最短2秒で搬送し、5秒に次の受け取りが可能になります。後工程が10秒まで受け取れなければ、搬送は10秒、Recovery 完了は13秒です。後工程の Process と前工程の Recovery は並行して進みます。
 
+## Source Flow
+
+Source は `Source Sequence → outPort` の固定 Flow で表現します。Source Sequence ノード内で生成する Entity、個数、生成間隔、繰り返しを設定できます。実行中は生成数と次に生成する Entity を同じノードに表示します。旧ファイルの空 Source Flow は読み込み時にこの構成へ移行します。
+
 ## 接続と初回起動
 
 ワークの接続は実線、完了信号の接続は紫色の破線で表示します。Fork の出力の種類は接続先から決まり、番号の順番には依存しません。outPort へ向かう出力はワーク、Recovery や Join の追加入力へ向かう出力は完了信号です。複数の Entity の格納には Palletizing を使います。

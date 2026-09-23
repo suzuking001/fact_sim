@@ -57,15 +57,40 @@
               ],
               "outputs": [],
               "pos": [
-                30,
-                60
+                430,
+                16
+              ]
+            },
+            {
+              "id": "sourceSequence1",
+              "kind": "sourceSequence",
+              "config": {},
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
               ]
             }
           ],
-          "links": [],
+          "links": [
+            {
+              "from": "sourceSequence1",
+              "output": "outPort",
+              "to": "outPort1",
+              "input": "inPort"
+            }
+          ],
           "counters": {
-            "outPort": 1
-          }
+            "outPort": 1,
+            "sourceSequence": 1
+          },
+          "__signalCache": null,
+          "__feedbackCache": null
         },
         "source": {
           "entries": [
@@ -496,7 +521,16 @@
             "fork": 2,
             "recovery": 1,
             "outPort": 6
-          }
+          },
+          "__signalCache": {},
+          "__feedbackCache": [
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ]
         }
       }
     },
@@ -553,15 +587,40 @@
                 }
               ],
               "pos": [
-                30,
-                60
+                16,
+                16
+              ]
+            },
+            {
+              "id": "entitySink1",
+              "kind": "entitySink",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                276,
+                16
               ]
             }
           ],
-          "links": [],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "entitySink1",
+              "input": "inPort"
+            }
+          ],
           "counters": {
-            "inPort": 1
-          }
+            "inPort": 1,
+            "entitySink": 1
+          },
+          "__signalCache": null,
+          "__feedbackCache": null
         }
       }
     },
@@ -618,15 +677,40 @@
                 }
               ],
               "pos": [
-                30,
-                60
+                16,
+                16
+              ]
+            },
+            {
+              "id": "entitySink1",
+              "kind": "entitySink",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                276,
+                16
               ]
             }
           ],
-          "links": [],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "entitySink1",
+              "input": "inPort"
+            }
+          ],
           "counters": {
-            "inPort": 1
-          }
+            "inPort": 1,
+            "entitySink": 1
+          },
+          "__signalCache": null,
+          "__feedbackCache": null
         }
       }
     },
@@ -683,15 +767,40 @@
                 }
               ],
               "pos": [
-                30,
-                60
+                16,
+                16
+              ]
+            },
+            {
+              "id": "entitySink1",
+              "kind": "entitySink",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                276,
+                16
               ]
             }
           ],
-          "links": [],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "entitySink1",
+              "input": "inPort"
+            }
+          ],
           "counters": {
-            "inPort": 1
-          }
+            "inPort": 1,
+            "entitySink": 1
+          },
+          "__signalCache": null,
+          "__feedbackCache": null
         }
       }
     },
@@ -748,15 +857,40 @@
                 }
               ],
               "pos": [
-                30,
-                60
+                16,
+                16
+              ]
+            },
+            {
+              "id": "entitySink1",
+              "kind": "entitySink",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                276,
+                16
               ]
             }
           ],
-          "links": [],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "entitySink1",
+              "input": "inPort"
+            }
+          ],
           "counters": {
-            "inPort": 1
-          }
+            "inPort": 1,
+            "entitySink": 1
+          },
+          "__signalCache": null,
+          "__feedbackCache": null
         }
       }
     },
@@ -813,15 +947,40 @@
                 }
               ],
               "pos": [
-                30,
-                60
+                16,
+                16
+              ]
+            },
+            {
+              "id": "entitySink1",
+              "kind": "entitySink",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                276,
+                16
               ]
             }
           ],
-          "links": [],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "entitySink1",
+              "input": "inPort"
+            }
+          ],
           "counters": {
-            "inPort": 1
-          }
+            "inPort": 1,
+            "entitySink": 1
+          },
+          "__signalCache": null,
+          "__feedbackCache": null
         }
       }
     },
@@ -878,15 +1037,40 @@
                 }
               ],
               "pos": [
-                30,
-                60
+                16,
+                16
+              ]
+            },
+            {
+              "id": "entitySink1",
+              "kind": "entitySink",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                276,
+                16
               ]
             }
           ],
-          "links": [],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "entitySink1",
+              "input": "inPort"
+            }
+          ],
           "counters": {
-            "inPort": 1
-          }
+            "inPort": 1,
+            "entitySink": 1
+          },
+          "__signalCache": null,
+          "__feedbackCache": null
         }
       }
     }

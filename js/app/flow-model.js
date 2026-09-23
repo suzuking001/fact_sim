@@ -4,6 +4,8 @@
   const definitions={
     inPort:{label:'inPort',inputs:[],outputs:['outPort']},
     outPort:{label:'outPort',inputs:['inPort'],outputs:[]},
+    sourceSequence:{label:'Source Sequence',inputs:[],outputs:['outPort'],source:true},
+    entitySink:{label:'Entity Sink',inputs:['inPort'],outputs:[],sink:true},
     process:{label:'Process',inputs:['inPort'],outputs:['outPort'],timed:true},
     recovery:{label:'Recovery',inputs:['inPort'],outputs:['outPort'],timed:true},
     join:{label:'Join',inputs:['inPort1','inPort2'],outputs:['outPort'],expand:'inputs'},
@@ -40,8 +42,6 @@
   }
   function validate(flow,node){
     if(flow?.version!==2 || !Array.isArray(flow.nodes) || !Array.isArray(flow.links))return ['Unsupported Flow format. Open a Flow v2 file.'];
-    if(node?.properties.role==='source')return App.validateSource?.(node) || [];
-    if(node?.properties.role==='sink')return [];
     const errors=[],ids=new Set(),nodes=new Map(),registry=node?.graph && App.entityModelForGraph?.(node.graph);
     if(flow.nodes.length>512 || flow.links.length>2048)return ['Flow exceeds the supported graph size.'];
     for(const item of flow.nodes){
@@ -64,6 +64,9 @@
       }
       if(item.kind==='syncroJudgment' && node?.graph && !(node.graph.extra?.syncroGroups || []).some(g=>g.id===item.config?.groupId))errors.push(`${item.id}: select a SyncroGroup.`);
     }
+    const sourceSequences=flow.nodes.filter(item=>item.kind==='sourceSequence');
+    if(sourceSequences.length>1)errors.push('Use at most one Source Sequence node in a Flow.');
+    if(sourceSequences.length)errors.push(...(App.validateSource?.(node) || []));
     const occupied=new Set(),outgoing=new Set();
     for(const link of flow.links){
       if(!nodes.get(link.from)?.outputs?.some(p=>p.id===link.output) || !nodes.get(link.to)?.inputs?.some(p=>p.id===link.input)){errors.push('A connection refers to a missing port.');continue;}
@@ -81,9 +84,9 @@
       if(signals.has(link) && ['inPort','outPort','entityRouter','Palletizing','DePalletizing','syncroJudgment'].includes(target?.kind))errors.push(`${link.to}: completion signals must connect to Join, Fork, Process or Recovery.`);
     }
     const reachable=new Set();function visit(id,path){if(path.has(id)){errors.push(`${id}: only Recovery feedback into a Join is supported.`);return;}if(reachable.has(id))return;reachable.add(id);const next=new Set(path);next.add(id);for(const l of flow.links.filter(l=>l.from===id && !feedback.has(l)))visit(l.to,next);}
-    for(const item of flow.nodes.filter(n=>n.kind==='inPort'))visit(item.id,new Set());
+    for(const item of flow.nodes.filter(n=>n.kind==='inPort' || n.kind==='sourceSequence'))visit(item.id,new Set());
     for(const item of flow.nodes)if(!reachable.has(item.id))errors.push(`${item.id}: connect an inPort path.`);
-    if(!flow.nodes.length)errors.push('Add an inPort and an outPort to begin.');
+    if(!flow.nodes.length)errors.push('Add an inPort or Source Sequence and an outPort to begin.');
     return [...new Set(errors)];
   }
   // signalLinks/feedbackLinks derive purely from a flow's node/link topology
@@ -163,6 +166,12 @@
   function template(node,kind='machine'){
     const flow=empty(),inputs=(node.inputs || []).filter(p=>p.channel!=='signal'),outputs=(node.outputs || []).filter(p=>p.channel!=='signal');
     const entry=inputs.map(p=>add(flow,'inPort',{portId:p.portId})),exit=outputs.map(p=>add(flow,'outPort',{portId:p.portId}));
+    if(kind==='source'){
+      const source=add(flow,'sourceSequence');source.pos=[16,16];exit.forEach((output,index)=>{connect(flow,source,output);output.pos=[430,16+index*160];});return flow;
+    }
+    if(kind==='sink'){
+      const sink=add(flow,'entitySink');entry.forEach((input,index)=>{connect(flow,input,sink);input.pos=[16,16+index*160];});sink.pos=[276,16];return flow;
+    }
     if(!entry.length || !exit.length)return flow;
     let first=entry[0];
     if(kind==='pack' || kind==='merge'){
@@ -208,7 +217,7 @@
     if(flow?.version!==2 || !Array.isArray(flow.nodes) || !Array.isArray(flow.links) || flow.nodes.some(n=>!n || !n.config || !Array.isArray(n.inputs) || !Array.isArray(n.outputs)))throw new Error('A Flow v2 definition with nodes, configurations, ports and links is required.');
     const changed=topology(old)!==topology(flow);
     if(App.FlowRuntime?.isActive(node) && changed)throw new Error('Reset before changing an active Flow.');
-    node.graph?.beforeChange?.();node.properties.flow=clone(flow);
+    node.graph?.beforeChange?.();if(flow.nodes.some(item=>item.kind==='sourceSequence'))node.properties.source ||= {entries:[],intervalSec:0,repeat:true};node.properties.flow=clone(flow);
     if(changed && node._flowRuntime){node._flowRuntime.signals=[];node._flowRuntime.flowActivity={};node._flowRuntime.forkStatus={};delete node._flowRuntime.controlInitialized;}
     if(App.FlowRuntime?.isActive(node))App.FlowRuntime.retime(node);
     else if(node._flowRuntime){node._flowRuntime.checked=false;node._flowRuntime.error='';}

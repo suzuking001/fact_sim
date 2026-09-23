@@ -46,7 +46,7 @@
     ['sink', 'Sink', 'sink', 'sink'],
   ];
 
-  const CATALOG = Object.freeze(rows.map((row)=>Object.freeze({
+  const BUILTIN_CATALOG = Object.freeze(rows.map((row)=>Object.freeze({
     kind: row[0],
     label: row[1],
     templateId: row[2],
@@ -54,7 +54,52 @@
     nodeType: row[4] || 'factory/basic',
     variant: row[5] || ''
   })));
-  const BY_KIND = new Map(CATALOG.map((item)=>[item.kind, item]));
+  const BUILTIN_BY_KIND = new Map(BUILTIN_CATALOG.map((item)=>[item.kind, item]));
+  const CATALOG = [];
+  let BY_KIND = new Map();
+  let overrides = [];
+
+  function clone(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(_e){ return null; }
+  }
+
+  function normalizeOverride(value){
+    if(!value || typeof value !== 'object') return null;
+    const kind = String(value.kind || '').trim().toLowerCase();
+    if(!/^[a-z][a-z0-9_-]{1,63}$/.test(kind)) return null;
+    const base = BUILTIN_BY_KIND.get(kind) || BUILTIN_BY_KIND.get(String(value.baseKind || '').trim().toLowerCase()) || BUILTIN_BY_KIND.get('basic');
+    const snapshot = value.snapshot && typeof value.snapshot === 'object' ? clone(value.snapshot) : null;
+    return {
+      kind,
+      label: String(value.label || base.label || kind).trim() || kind,
+      templateId: String(value.templateId || base.templateId || 'basic'),
+      icon: String(value.icon || base.icon || 'basic'),
+      nodeType: String(value.nodeType || snapshot?.type || base.nodeType || 'factory/basic'),
+      variant: String(value.variant || base.variant || ''),
+      baseKind: String(value.baseKind || base.kind || 'basic'),
+      ...(snapshot ? { snapshot } : {})
+    };
+  }
+
+  function rebuildCatalog(){
+    const merged = new Map(BUILTIN_CATALOG.map((item)=>[item.kind, { ...item }]));
+    for(const raw of overrides){
+      const item = normalizeOverride(raw);
+      if(item) merged.set(item.kind, item);
+    }
+    CATALOG.splice(0, CATALOG.length, ...merged.values());
+    BY_KIND = new Map(CATALOG.map((item)=>[item.kind, item]));
+  }
+
+  function replaceOverrides(payload){
+    const items = Array.isArray(payload) ? payload : payload?.items;
+    overrides = (Array.isArray(items) ? items : []).map(normalizeOverride).filter(Boolean);
+    root.NODE_DEFINITIONS = { version:1, items:clone(overrides) || [] };
+    rebuildCatalog();
+    return { version:1, items:clone(overrides) || [] };
+  }
+
+  replaceOverrides(root.NODE_DEFINITIONS || { version:1, items:[] });
 
   function itemFor(kind){
     return BY_KIND.get(String(kind || '').toLowerCase()) || null;
@@ -77,16 +122,25 @@
     if(!item || !root.LiteGraph) return null;
     const node = root.LiteGraph.createNode(item.nodeType);
     if(!node) return null;
-    if(node.type === 'factory/basic'){
+    if(item.snapshot && typeof node.configure === 'function'){
+      const snapshot = clone(item.snapshot) || {};
+      if(Array.isArray(snapshot.inputs)) snapshot.inputs.forEach((port)=>{ port.link = null; });
+      if(Array.isArray(snapshot.outputs)) snapshot.outputs.forEach((port)=>{ port.links = null; });
+      node.configure(snapshot);
+    }else if(node.type === 'factory/basic'){
       App.applyBasicTemplate?.(node, item.templateId);
-
     }
-    node.title = item.label;
+    if(!item.snapshot?.title) node.title = item.label;
     return node;
   }
 
   App.NODE_CREATION_CATALOG = CATALOG;
+  App.BUILTIN_NODE_CREATION_CATALOG = BUILTIN_CATALOG;
   App.getNodeCreationItem = itemFor;
+  App.getNodeDefinitionOverrides = ()=>({ version:1, items:clone(overrides) || [] });
+  App.replaceNodeDefinitionOverrides = replaceOverrides;
+  App.hasNodeDefinitionOverride = kind=>overrides.some((item)=>item.kind === String(kind || '').toLowerCase());
+  App.isBuiltinNodeDefinition = kind=>BUILTIN_BY_KIND.has(String(kind || '').toLowerCase());
   App.nodeIconSvg = nodeIconSvg;
   App.createNodeFromCatalog = createNodeFromCatalog;
 })(typeof self !== 'undefined' ? self : window);

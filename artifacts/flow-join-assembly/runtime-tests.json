@@ -45,6 +45,7 @@
   },
   {
     "name": "dt, event and event-fast match on Fork-to-Join output IDs, timing and counts",
-    "ok": true
+    "ok": false,
+    "error": "AssertionError [ERR_ASSERTION]: dt\n\n1 !== 3\n\n    at G:\\マイドライブ\\プログラミング\\github\\fact_sim\\mcp\\scripts\\test-flow-v2-join.cjs:80:223\n    at test (G:\\マイドライブ\\プログラミング\\github\\fact_sim\\mcp\\scripts\\test-flow-v2-join.cjs:5:28)\n    at Object.<anonymous> (G:\\マイドライブ\\プログラミング\\github\\fact_sim\\mcp\\scripts\\test-flow-v2-join.cjs:78:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47"
   }
 ]

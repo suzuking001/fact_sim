@@ -233,6 +233,42 @@ function initTimeline(){
             makePopupActionButton(doc, 'Return to Dock', close)
           ]
         };
+      },
+      onOpen(state){
+        try{
+          const doc = state.popup.document;
+          const header = doc.querySelector('.workspacePopoutHeader');
+          const nameHeader = state.panel && state.panel.querySelector('#nodeDetailsHeader');
+          if(!header || !nameHeader || header.querySelector('.workspacePopoutNameSlot')) return;
+          header.dataset.view = 'inspector';
+          const slot = doc.createElement('div');
+          slot.className = 'workspacePopoutNameSlot';
+          slot.appendChild(nameHeader);
+          header.insertBefore(slot, header.querySelector('.workspacePopoutActions') || null);
+          if(state.metaEl) state.metaEl.hidden = true;
+          const mirror = ()=>{ slot.hidden = nameHeader.hidden; };
+          let observer = null;
+          if(typeof MutationObserver !== 'undefined'){
+            observer = new MutationObserver(mirror);
+            observer.observe(nameHeader, { attributes:true, attributeFilter:['hidden'] });
+          }
+          mirror();
+          state.nameHeaderSlot = slot;
+          state.nameHeaderObserver = observer;
+        }catch(_e){}
+      },
+      onClose(state){
+        try{
+          if(state.metaEl) state.metaEl.hidden = false;
+          if(state.nameHeaderObserver){ state.nameHeaderObserver.disconnect(); state.nameHeaderObserver = null; }
+          const slot = state.nameHeaderSlot;
+          const nameHeader = slot && slot.querySelector('#nodeDetailsHeader');
+          if(nameHeader && state.panel){
+            const contentEl = state.panel.querySelector('#selectionInspectorContent') || null;
+            state.panel.insertBefore(nameHeader, contentEl);
+          }
+          state.nameHeaderSlot = null;
+        }catch(_e){}
       }
     }
   };

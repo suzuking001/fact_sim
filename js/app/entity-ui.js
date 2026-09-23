@@ -331,33 +331,45 @@
     current.section.appendChild(instancesHost); wrapper.appendChild(current.card); return wrapper;
   }
 
-  function sourceEditor(node){
-    const card=makeCard('Source sequence','Generates one Entity at a time. The next destination controls admission.'),config=node.properties.source;
-    const types=App.entityModelForGraph(node.graph).list();
-    config.entries.forEach((entry,index)=>{const row=document.createElement('div');row.className='flowSourceRow';const type=select(types.map(t=>[t.typeId,t.name]),entry.typeId),count=document.createElement('input');count.type='number';count.min='1';count.value=entry.count || 1;type.onfocus=count.onfocus=App.FlowModel.pause;
-      type.onchange=()=>changed(()=>{entry.typeId=type.value;});count.onchange=()=>{if(Number.isInteger(Number(count.value)) && Number(count.value)>0)changed(()=>{entry.count=Number(count.value);});};
-      row.append(type,count,button('Delete',()=>{changed(()=>config.entries.splice(index,1));App.selectionInspector.refresh();}));card.section.append(row);
-    });
-    card.section.append(button('Add Entity',()=>{if(!types.length)return;changed(()=>config.entries.push({typeId:types[0].typeId,count:1}));App.selectionInspector.refresh();}));
-    const interval=document.createElement('input');interval.type='number';interval.min='0';interval.step='any';interval.value=config.intervalSec;interval.onfocus=App.FlowModel.pause;interval.onchange=()=>{if(interval.value!=='' && Number(interval.value)>=0)changed(()=>{config.intervalSec=Number(interval.value);});};const label=document.createElement('label');label.textContent='Interval (s) ';label.append(interval);card.section.append(label);
-    const repeat=document.createElement('input');repeat.type='checkbox';repeat.checked=config.repeat!==false;repeat.onchange=()=>changed(()=>{config.repeat=repeat.checked;});const repeated=document.createElement('label');repeated.append(repeat,document.createTextNode(' Repeat'));card.section.append(repeated);return card.card;
+  function sourceEditor(node,options={}){
+    node.properties.source ||= {entries:[],intervalSec:0,repeat:true};
+    const config=node.properties.source,card=makeCard('Source sequence','Generates one Entity at a time. The next destination controls admission.'),types=App.entityModelForGraph(node.graph).list();
+    if(options.compact){card.card.classList.add('flowSourceCompact');card.section.querySelector('.selectionInspectorSectionTitle')?.remove();card.section.querySelector('.selectionInspectorHint')?.remove();}
+    const mutate=mutator=>{
+      if(options.draft){App.FlowModel.pause();mutator();node.setDirtyCanvas?.(true,true);options.onChange?.(config);}
+      else changed(mutator);
+    };
+    const rows=document.createElement('div');rows.className='flowSourceRows';card.section.append(rows);
+    const renderRows=()=>{
+      rows.replaceChildren();config.entries ||= [];
+      config.entries.forEach((entry,index)=>{const row=document.createElement('div');row.className='flowSourceRow';const type=select(types.map(t=>[t.typeId,t.name]),entry.typeId),count=document.createElement('input');count.type='number';count.min='1';count.value=entry.count || 1;type.onfocus=count.onfocus=App.FlowModel.pause;
+        type.setAttribute('aria-label',`Source Entity ${index+1}`);count.setAttribute('aria-label',`Source quantity ${index+1}`);
+        type.onchange=()=>mutate(()=>{entry.typeId=type.value;});count.onchange=()=>{if(Number.isInteger(Number(count.value)) && Number(count.value)>0)mutate(()=>{entry.count=Number(count.value);});};
+        row.append(type,count,button('Delete',()=>{mutate(()=>config.entries.splice(index,1));renderRows();}));rows.append(row);
+      });
+      if(!config.entries.length){const empty=document.createElement('p');empty.className='flowSourceEmpty';empty.textContent=types.length ? 'No Entities in the sequence. Add one to define what this Source generates.' : 'Add an Entity Type before defining the Source sequence.';rows.append(empty);}options.onLayout?.();
+    };
+    const add=button('Add Entity',()=>{if(!types.length)return;mutate(()=>config.entries.push({typeId:types[0].typeId,count:1}));renderRows();});add.disabled=!types.length;card.section.append(add);
+    const interval=document.createElement('input');interval.type='number';interval.min='0';interval.step='any';interval.value=config.intervalSec;interval.setAttribute('aria-label','Source interval seconds');interval.onfocus=App.FlowModel.pause;interval.onchange=()=>{if(interval.value!=='' && Number(interval.value)>=0)mutate(()=>{config.intervalSec=Number(interval.value);});};const label=document.createElement('label');label.className='flowSourceField';label.append(document.createTextNode('Interval (s)'),interval);card.section.append(label);
+    const repeat=document.createElement('input');repeat.type='checkbox';repeat.checked=config.repeat!==false;repeat.setAttribute('aria-label','Repeat Source sequence');repeat.onchange=()=>mutate(()=>{config.repeat=repeat.checked;});const repeated=document.createElement('label');repeated.className='flowSourceRepeat';repeated.append(repeat,document.createTextNode(' Repeat sequence'));card.section.append(repeated);renderRows();return card.card;
   }
+  App.createSourceSequenceEditor=sourceEditor;
   function enhanceInspector(){
     const Ctor=App.SelectionInspector;if(!Ctor || Ctor.prototype.__entityTabsInstalled)return;Ctor.prototype.__entityTabsInstalled=true;const raw=Ctor.prototype.renderNode;
     Ctor.prototype.renderNode=function(node){
       if(node.type!=='factory/basic')return raw.call(this,node);
-      this.setMeta(`Details: ${node.title} #${node.id}`);const main=document.createElement('div');main.className='selectionInspectorMain flowDetailsMain';const tabs=document.createElement('div');tabs.className='entityInspectorTabs';main.append(tabs);this.root.append(main);
+      this.setMeta(`Details: ${node.title} #${node.id}`);const main=document.createElement('div');main.className='selectionInspectorMain flowDetailsMain';const tabs=document.createElement('div');tabs.className='entityInspectorTabs';main.append(tabs);(this.content || this.root).append(main);
       const panels={};for(const name of ['Flow','Contents','Advanced']){const panel=document.createElement('div');panel.className='entityInspectorTabPanel';panel.dataset.tab=name.toLowerCase();panels[name]=panel;main.append(panel);const tab=button(name,()=>activate(name),'entityInspectorTab');tab.dataset.tab=name.toLowerCase();tabs.append(tab);}
       const activate=name=>{this._entityTab=name;this.root.dataset.entityTab=name.toLowerCase();for(const [key,panel] of Object.entries(panels))panel.hidden=key!==name;Array.from(tabs.children).forEach(b=>b.classList.toggle('is-active',b.dataset.tab===name.toLowerCase()));if(panels[name].childElementCount)return;
         if(name==='Flow')panels.Flow.append(App.createFlowView(node));
-        if(name==='Contents'){if(node.properties.role==='source')panels.Contents.append(sourceEditor(node));panels.Contents.append(renderContentsEditor(node));}
-        if(name==='Advanced'){const settings=document.createElement('div');settings.className='flowAdvanced';const title=document.createElement('input');title.value=node.title;title.setAttribute('aria-label','Equipment name');title.onfocus=App.FlowModel.pause;title.onchange=()=>changed(()=>{node.title=title.value;});const label=document.createElement('label');label.textContent='Name';label.append(title);const description=document.createElement('textarea');description.value=node.properties.description || '';description.setAttribute('aria-label','Description');description.onfocus=App.FlowModel.pause;description.onchange=()=>changed(()=>{node.properties.description=description.value;});settings.append(label,description);panels.Advanced.append(settings);}
+        if(name==='Contents')panels.Contents.append(renderContentsEditor(node));
+        if(name==='Advanced'){const settings=document.createElement('div');settings.className='flowAdvanced';const description=document.createElement('textarea');description.value=node.properties.description || '';description.setAttribute('aria-label','Description');description.onfocus=App.FlowModel.pause;description.onchange=()=>changed(()=>{node.properties.description=description.value;});settings.append(description);panels.Advanced.append(settings);}
       };activate(['Flow','Contents','Advanced'].includes(this._entityTab) ? this._entityTab : 'Flow');
     };
   }
   function installSyncroGroups(){
     const list=document.getElementById('syncroGroupsList');if(!list)return;
-    const render=()=>{list.replaceChildren();for(const group of App.graph?.extra?.syncroGroups || []){const row=document.createElement('div');row.textContent=group.name;list.append(row);}};
+    const render=()=>{list.replaceChildren();for(const group of App.graph?.extra?.syncroGroups || []){const row=document.createElement('div');row.className='syncroGroupRow';const marker=document.createElement('span');marker.className='syncroGroupMarker';marker.setAttribute('aria-hidden','true');if(typeof App.workspaceIconSvg==='function')marker.innerHTML=App.workspaceIconSvg('syncro');const name=document.createElement('strong');name.className='syncroGroupName';name.textContent=group.name;name.title=group.name;row.append(marker,name);list.append(row);}};
     document.getElementById('btnAddSyncroGroup').onclick=()=>{const input=document.getElementById('syncroGroupName'),name=input.value.trim();if(!name){App.showToast?.('Enter a SyncroGroup name.');return;}try{App.FlowModel.addSyncroGroup(App.graph,name);}catch(error){App.showToast?.(error.message);return;}input.value='';render();App.selectionInspector?.refresh();};render();root.addEventListener('factsim:graph-applied',render);App.registerSidebarCollapsiblePanel?.('addSyncroGroupPanel');
   }
   App.refreshEntityTypeManager=renderTypeManager;

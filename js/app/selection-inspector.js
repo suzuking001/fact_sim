@@ -401,9 +401,22 @@ var App = window.App || (window.App = {});
   class SelectionInspector{
     constructor(root){
       this.root = root;
+      this.content = root ? (root.querySelector('#selectionInspectorContent') || root) : null;
+      this.header = root ? root.querySelector('#nodeDetailsHeader') : null;
+      this.headerInput = root ? root.querySelector('#nodeDetailsTitleInput') : null;
+      this.headerId = root ? root.querySelector('#nodeDetailsTitleId') : null;
       this.graph = null;
       this.canvas = null;
       this.target = { kind: 'empty', nodeId: null, group: null };
+      if(this.headerInput){
+        this.headerInput.addEventListener('focus', ()=>{
+          try{ if(typeof App.FlowModel?.pause === 'function') App.FlowModel.pause(); }catch(_e){}
+        });
+        this.headerInput.addEventListener('change', ()=> this.commitHeaderTitle());
+        this.headerInput.addEventListener('keydown', (e)=>{
+          if(e.key === 'Enter'){ e.preventDefault(); this.headerInput.blur(); }
+        });
+      }
     }
 
     attachGraph(graph){
@@ -424,6 +437,35 @@ var App = window.App || (window.App = {});
     setMeta(text){
       const meta = document.getElementById('timelinePropsMeta');
       if(meta) meta.textContent = text;
+    }
+
+    updateNodeHeader(node){
+      if(!this.header) return;
+      if(node){
+        this.header.hidden = false;
+        if(this.headerInput && document.activeElement !== this.headerInput) this.headerInput.value = String(node.title || node.type || 'Node');
+        if(this.headerId) this.headerId.textContent = '#' + String(node.id);
+      }else{
+        this.header.hidden = true;
+        if(this.headerInput) this.headerInput.value = '';
+      }
+    }
+
+    commitHeaderTitle(){
+      if(!this.headerInput) return false;
+      const node = this.currentNode();
+      if(!node) return false;
+      const nextTitle = String(this.headerInput.value || '').trim() || String(node.type || 'Node');
+      this.headerInput.value = nextTitle;
+      if(nextTitle !== node.title){
+        withGraphChange(()=>{
+          node.title = nextTitle;
+          if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
+        });
+      }
+      this.setMeta(`Details: ${nextTitle} #${node.id}`);
+      this.refresh();
+      return true;
     }
 
     field(label, span2){
@@ -582,7 +624,7 @@ var App = window.App || (window.App = {});
 
     renderEmpty(){
       delete this.root.dataset.entityTab;
-      this.root.innerHTML = '<div class="selectionInspectorEmpty"><h3>Details</h3><p>Select a node or group to edit it in one consistent place.</p><p>Right click, use Open Details, or double click the hover card action to jump here directly.</p></div>';
+      this.content.innerHTML = '<div class="selectionInspectorEmpty"><h3>Details</h3><p>Select a node or group to edit it in one consistent place.</p><p>Right click, use Open Details, or double click the hover card action to jump here directly.</p></div>';
     }
 
     renderNodeProp(container, node, key, value){
@@ -740,7 +782,7 @@ var App = window.App || (window.App = {});
       this.setMeta(`Details: ${node.title || node.type || 'Node'} #${node.id}`);
       const layout = document.createElement('div');
       layout.className = 'selectionInspectorLayout';
-      this.root.appendChild(layout);
+      this.content.appendChild(layout);
       const side = document.createElement('div');
       side.className = 'selectionInspectorSidebar';
       const main = document.createElement('div');
@@ -757,10 +799,6 @@ var App = window.App || (window.App = {});
         '</div>',
         `<div class="selectionInspectorPills"><span class="selectionInspectorPill">#${escapeHtml(node.id)}</span></div>`,
         '</div>',
-        '<label class="selectionInspectorField nodeDetailsTitleField">',
-        '<span class="selectionInspectorFieldLabel">Title</span>',
-        '<input type="text" class="selectionInspectorInput nodeDetailsTitleInput" aria-label="Node title">',
-        '</label>',
         '<div class="selectionInspectorStatGrid">',
         `<div class="selectionInspectorStat"><span class="selectionInspectorStatLabel">State</span><span class="selectionInspectorStatValue">${escapeHtml(String(node._stateName || node._state || 'N/A'))}</span></div>`,
         `<div class="selectionInspectorStat"><span class="selectionInspectorStatLabel">Properties</span><span class="selectionInspectorStatValue">${propKeys.length}</span></div>`,
@@ -769,24 +807,6 @@ var App = window.App || (window.App = {});
         '</div>',
         '</section>'
       ].join('');
-
-      const titleInput = side.querySelector('.nodeDetailsTitleInput');
-      titleInput.value = String(node.title || node.type || 'Node');
-      const titleEl = side.querySelector('.selectionInspectorTitle');
-      const applyTitle = ()=>{
-        const nextTitle = titleInput.value.trim() || node.type || 'Node';
-        if(nextTitle !== node.title){
-          withGraphChange(()=>{
-            node.title = nextTitle;
-            if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
-          });
-        }
-        if(titleEl) titleEl.textContent = nextTitle;
-        this.setMeta(`Details: ${nextTitle} #${node.id}`);
-        return true;
-      };
-      titleInput.addEventListener('input', applyTitle);
-      titleInput.addEventListener('change', applyTitle);
 
       const actionsCard = document.createElement('section');
       actionsCard.className = 'selectionInspectorCard';
@@ -822,7 +842,7 @@ var App = window.App || (window.App = {});
       this.setMeta(`Details: ${group.title || meta?.title || 'Group'}`);
       const layout = document.createElement('div');
       layout.className = 'selectionInspectorLayout';
-      this.root.appendChild(layout);
+      this.content.appendChild(layout);
       const side = document.createElement('div');
       side.className = 'selectionInspectorSidebar';
       const main = document.createElement('div');
@@ -856,6 +876,7 @@ var App = window.App || (window.App = {});
       side.appendChild(actionsCard);
       [
         { label: 'Edit Nodes', cls: ' is-primary', onClick: ()=>{ const count = selectGroupNodes(group); if(count && App.setTimelineDockView) App.setTimelineDockView('props'); } },
+        { label: 'Edit Group', cls: '', onClick: ()=>{ if(meta && typeof stopGroups().openGroupEditor === 'function') stopGroups().openGroupEditor(group); } },
         { label: 'Fit View', cls: '', onClick: ()=> fitGroup(group) },
         { label: 'Delete', cls: ' is-danger', onClick: ()=>{ if(window.confirm('Delete this group?')){ removeGroup(group); if(App.showToast) App.showToast('Group deleted'); this.clear(true); } } }
       ].forEach((def)=>{
@@ -871,23 +892,6 @@ var App = window.App || (window.App = {});
       general.className = 'selectionInspectorCard';
       general.innerHTML = '<div class="selectionInspectorSection"><h3 class="selectionInspectorSectionTitle">General</h3><div class="selectionInspectorFields"></div></div>';
       const generalFields = general.querySelector('.selectionInspectorFields');
-      const titleField = this.field('Title', true);
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text';
-      titleInput.className = 'selectionInspectorInput';
-      titleInput.value = String(group.title || meta?.title || 'Group');
-      titleInput.addEventListener('change', ()=>{
-        withGraphChange(()=>{
-          if(meta && typeof stopGroups().setGroupMeta === 'function'){
-            stopGroups().setGroupMeta(group, { ...meta, title: titleInput.value.trim() || meta.title }, false);
-          }else{
-            group.title = titleInput.value.trim() || group.title || 'Group';
-          }
-        });
-        this.refresh();
-      });
-      titleField.appendChild(titleInput);
-      generalFields.appendChild(titleField);
 
       if(meta && typeof stopGroups().getTypeDefinitions === 'function'){
         const typeField = this.field('Type', false);
@@ -905,7 +909,7 @@ var App = window.App || (window.App = {});
             const next = stopGroups().normalizeMeta({
               ...meta,
               type: typeSelect.value,
-              title: titleInput.value.trim() || meta.title,
+              title: meta.title,
               props: meta.props
             });
             stopGroups().setGroupMeta(group, next, false);
@@ -968,7 +972,7 @@ var App = window.App || (window.App = {});
               withGraphChange(()=>{
                 const next = stopGroups().normalizeMeta({
                   ...meta,
-                  title: titleInput.value.trim() || meta.title,
+                  title: meta.title,
                   props: {
                     ...(meta.props || {}),
                     [fieldDef.key]: fieldDef.type === 'number'
@@ -990,10 +994,15 @@ var App = window.App || (window.App = {});
 
     refresh(){
       if(!this.root) return;
-      this.root.querySelectorAll('.flowView').forEach(view=>view.flowView?.dispose());
-      this.root.innerHTML = '';
+      this.content = this.content || (this.root.querySelector('#selectionInspectorContent') || this.root);
+      this.content.querySelectorAll('.flowView').forEach(view=>view.flowView?.dispose());
+      this.content.innerHTML = '';
       const node = this.currentNode();
-      if(node) return this.renderNode(node);
+      if(node){
+        this.updateNodeHeader(node);
+        return this.renderNode(node);
+      }
+      this.updateNodeHeader(null);
       const group = this.currentGroup();
       if(group) return this.renderGroup(group);
       this.setMeta('Select a node or group to inspect and edit it.');

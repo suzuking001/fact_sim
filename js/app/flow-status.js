@@ -7,7 +7,14 @@
     const result={state:cell ? 'WAIT' : 'IDLE',rows:[],inputs:{},outputs:{},progress:0};
     const row=(label,value,ready)=>result.rows.push({label,value,ready});
     if(r.error){result.state='ERROR';row('Error',r.error);return result;}
-    if(item.kind==='process' || item.kind==='recovery'){
+    if(item.kind==='sourceSequence'){
+      const sourceCell=(r.cells || []).find(entry=>entry.sourceNodeId===item.id || entry.nodeId===item.id),config=node.properties.source || {},entries=config.entries || [],sequence=entries.flatMap(entry=>Array(Math.max(1,Number(entry.count) || 1)).fill(entry)),registry=App.entityModelForGraph(node.graph),created=r.sourceSequence?.created || r.created || 0,next=sequence.length ? sequence[created%sequence.length] : null;
+      result.state=r.error ? 'ERROR' : sourceCell ? 'READY' : 'IDLE';
+      row('Generated',String(created));row('Next Entity',next ? registry.get(next.typeId)?.name || next.typeId : 'Not configured',!!next);row('Interval',`${Math.max(0,Number(config.intervalSec) || 0)} s`);row('Repeat',config.repeat===false ? 'Off' : 'On');
+      result.outputs[item.outputs?.[0]?.id]=!!sourceCell;
+    }else if(item.kind==='entitySink'){
+      result.state=cell ? 'READY' : last ? 'DONE' : 'IDLE';row('Input',cell ? 'Ready' : 'Waiting',!!cell);row('Completed',String(node._recv?.length || 0));
+    }else if(item.kind==='process' || item.kind==='recovery'){
       const started=cell?.startedAt,active=Number.isFinite(started),duration=Math.max(0,Number(item.config.seconds) || 0);
       const elapsed=active ? Math.max(0,(time-started)/1000) : last?.durationSec || 0,remaining=active ? Math.max(0,(cell.until-time)/1000) : 0;
       const done=active ? time>=cell.until : !!last;

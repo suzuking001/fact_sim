@@ -13,7 +13,7 @@
 | Flow 設定・Add メニュー・配線のドラッグ編集 | `js/app/flow-view.js`, `js/app/flow-model.js` | `js/app/sim.js`（開始後の編集時に実行状態を初期化）、`css/flow-view.css`, `docs/flow-cycle-ja.md`（Join / Fork・接続操作）、`mcp/scripts/test-flow-v2-wiring.cjs` |
 | Flow 実行・搬送・Recovery・Fork の複製出力・Joinでの同一Type/ID合流 | `js/app/flow-runtime.js` | `js/nodes/basic_node.js`, `js/link-anim.js`, `mcp/scripts/test-flow-v2-runtime.cjs`, `mcp/scripts/test-flow-v2-fanout.cjs`, `mcp/scripts/test-flow-v2-join.cjs` |
 | Flow ノード内の状態・条件成立・経過時間 | `js/app/flow-status.js` | `js/app/flow-view.js`, `mcp/scripts/test-flow-v2-status.cjs` |
-| ノード定義・追加メニュー | `js/nodes/<対象ノード>.js`, `js/app/node-catalog.js` | `js/nodes/register.js`, `js/nodes/menu.js`, `js/nodes-config.js` |
+| ノード定義・追加メニュー | `js/nodes/<対象ノード>.js`, `js/app/node-catalog.js` | `js/app/node-definition-editor.js`, `config/node-definitions.json`, `js/nodes/register.js`, `js/nodes/menu.js`, `js/nodes-config.js` |
 | リンク・編集履歴・表示位置 | `js/app/graph-links.js`, `js/app/history.js` | `js/app/fit.js`, `js/app/background-layout.js` |
 | 保存・読込・example | `js/app/file-io.js`, `js/app/examples.js` | `sample/<対象example>.json`, `sample/<対象example>.js`, `docs/sample-line2-ja.md`（4型の構成・分岐設定） |
 | シミュレーション操作・基準 engine | `js/app/sim.js`, `js/app/engine.js` | `js/app/stop-groups.js`。自動最適化では基準 engine を変更しない |

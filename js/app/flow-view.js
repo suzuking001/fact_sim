@@ -4,18 +4,18 @@
   function element(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
   function button(text,action){const b=element('button','',text);b.type='button';b.onclick=action;return b;}
   function options(rows,value){const select=element('select');for(const [id,text] of rows){const option=element('option','',text);option.value=id;select.append(option);}select.value=value || '';select.onfocus=model.pause;return select;}
-  App.createFlowView=function(node){
+  App.createFlowView=function(node,viewOptions={}){
+    const editorOptions=viewOptions && typeof viewOptions==='object' ? viewOptions : {};
     const host=element('section','flowEditor'),toolbar=element('div','flowToolbar'),viewport=element('div','flowViewport'),scene=element('div','flowScene'),notice=element('div','flowNotice');
     notice.setAttribute('role','status');host.tabIndex=-1;host.append(toolbar,viewport,notice);viewport.append(scene);
     const wiringHint='Drag between the round ports to connect. Drag an existing wire or its input end to reconnect. Esc cancels.';
-    const hint=node.properties.role==='sink' ? 'Entities delivered here are recorded as completed.' : node.properties.role==='source' ? 'Set the Entity sequence in Contents. Source generates one Entity when the destination is ready.' : wiringHint;
+    const hint=node.properties.role==='sink' ? 'Connect the Flow to Entity Sink to record completed Entities.' : node.properties.role==='source' ? 'Configure and connect Source Sequence like any other Flow node.' : wiringHint;
     function showChecks(message='',editError=false){
       const errors=model.graphErrors(node.graph);
       notice.textContent=[message,errors.length ? `Start check: ${errors.length} error(s)\n${errors.join('\n')}` : `Start check: no errors. ${hint}`].filter(Boolean).join('\n');
       notice.classList.toggle('is-error',editError || !!errors.length);
     }
     toolbar.append(button('Check Start',()=>showChecks()));
-    if(node.properties.role==='sink' || node.properties.role==='source'){showChecks();return host;}
     let flow=model.clone(node.properties.flow),zoom=1,pan=[16,16],pending=null,menu=null,drag=null,autoFit=true,connectionDrag=null,pointer=null,selectedLink=null;
     const elements=new Map(),ports=new Map(),progress=new Map(),liveViews=new Map();let svg,snapTarget=null,boundaryEdits=[];
     const selection=options(Object.entries(model.definitions).map(([id,d])=>[id,d.label]),'process');selection.setAttribute('aria-label','Flow node type');
@@ -23,18 +23,23 @@
     const zoomReadout=element('span','flowZoomReadout','100%');zoomReadout.setAttribute('aria-label','Flow zoom');
     const zoomTo=next=>{autoFit=false;const x=viewport.clientWidth/2,y=viewport.clientHeight/2;next=Math.max(.05,Math.min(2.5,next));pan=[x-(x-pan[0])*next/zoom,y-(y-pan[1])*next/zoom];zoom=next;transform();};
     const expand=button('Expand Flow',()=>{const expanded=host.classList.toggle('is-expanded');expand.textContent=expanded ? 'Close expanded view' : 'Expand Flow';expand.setAttribute('aria-pressed',String(expanded));});expand.setAttribute('aria-pressed','false');
-    toolbar.append(button('Fit All',fit),button('−',()=>zoomTo(zoom/1.25)),zoomReadout,button('+',()=>zoomTo(zoom*1.25)),button('100%',()=>zoomTo(1)),expand,selection,button('Add',()=>edit(()=>{const item=model.add(flow,selection.value,{},[(40-pan[0])/zoom,(40-pan[1])/zoom]);boundary(item);})));
+    const addNode=button('Add',()=>edit(()=>{const item=model.add(flow,selection.value,{},[(40-pan[0])/zoom,(40-pan[1])/zoom]);boundary(item);}));
+    toolbar.append(button('Fit All',fit),button('−',()=>zoomTo(zoom/1.25)),zoomReadout,button('+',()=>zoomTo(zoom*1.25)),button('100%',()=>zoomTo(1)),expand,selection,addNode);
     function transform(){scene.style.transform=`translate(${pan[0]}px,${pan[1]}px) scale(${zoom})`;zoomReadout.textContent=`${Math.round(zoom*100)}%`;}
     function boundary(item){if(!['inPort','outPort'].includes(item.kind))return;item.config.portId=item.id;boundaryEdits.push(()=>{const input=item.kind==='inPort',method=input ? 'addInput' : 'addOutput',list=input ? node.inputs : node.outputs;node[method](item.id,'entity');const port=list[list.length-1];port.portId=item.id;port.channel='entity';});}
     function edit(action,render=true){
       model.pause();const previous=model.clone(flow);boundaryEdits=[];
       try{
         action();
+        if(editorOptions.draft && flow.nodes.some(item=>item.kind==='sourceSequence'))node.properties.source ||= {entries:[],intervalSec:0,repeat:true};
         const topology=f=>JSON.stringify(f,(key,value)=>['seconds','pos','flipIO','counters','portCounters'].includes(key) ? undefined : value);
         const changed=topology(previous)!==topology(flow);
-        const reset=changed && App.resetSimulationForFlowEdit(node.graph);
+        const reset=!editorOptions.draft && changed && App.resetSimulationForFlowEdit(node.graph);
         for(const apply of boundaryEdits)apply();
-        model.commit(node,flow);const message=reset ? 'Flow changed. Simulation reset to 0 s; Start runs the edited Flow.' : '';
+        if(editorOptions.draft){
+          node.properties.flow=model.clone(flow);model.invalidateFlowCaches(node.properties.flow);node.setDirtyCanvas?.(true,true);editorOptions.onChange?.(node.properties.flow);
+        }else model.commit(node,flow);
+        const message=reset ? 'Flow changed. Simulation reset to 0 s; Start runs the edited Flow.' : '';
         showChecks(message);
         if(reset)App.showToast?.(message);
         if(render)draw();
@@ -99,12 +104,9 @@
       for(const dot of ports.values()){const e=endpoint(dot);dot.classList.toggle('is-connecting',!!pending && e.nodeId===pending.nodeId && e.direction===pending.direction && e.portId===pending.portId);dot.classList.toggle('is-connect-target',!!pending && e.direction!==pending.direction && e.nodeId!==pending.nodeId);dot.classList.toggle('is-drop-target',dot===snapTarget);}
       for(const link of flow.links){const a=ports.get(portKey(link.from,'outputs',link.output)),b=ports.get(portKey(link.to,'inputs',link.input));if(!a || !b)continue;
         const d=curve(anchor(a),anchor(b));
-        const hit=document.createElementNS(NS,'path'),path=document.createElementNS(NS,'path');
-        hit.setAttribute('d',d);hit.setAttribute('class','flowWireHit');hit.setAttribute('tabindex','0');hit.setAttribute('role','button');hit.setAttribute('aria-label',`Disconnect ${link.from} ${link.output} ? ${link.to} ${link.input}`);
+        const path=document.createElementNS(NS,'path');
         path.setAttribute('d',d);path.setAttribute('class','flowWire'+(signals.has(link) ? ' is-completion' : '')+(selectedLink===link ? ' is-selected' : ''));
-        Object.assign(hit.dataset,{nodeId:link.from,direction:'outputs',portId:link.output});hit.onpointerdown=e=>beginConnection(e,hit,link);hit.onclick=e=>{if(e.detail===0)selectWire(link);};
-        hit.onkeydown=e=>{if(['Delete','Backspace','Enter',' '].includes(e.key)){e.preventDefault();e.stopPropagation();disconnect(l=>l===link);}};
-        hit.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();disconnect(l=>l===link);};svg.append(hit,path);
+        const hit=document.createElementNS(NS,'path');hit.setAttribute('d',d);hit.setAttribute('class','flowWireHit');hit.setAttribute('tabindex','0');hit.setAttribute('role','button');hit.setAttribute('aria-label',`Disconnect ${link.from} ${link.output} ? ${link.to} ${link.input}`);Object.assign(hit.dataset,{nodeId:link.from,direction:'outputs',portId:link.output});hit.onpointerdown=e=>beginConnection(e,hit,link);hit.onclick=e=>{if(e.detail===0)selectWire(link);};hit.onkeydown=e=>{if(['Delete','Backspace','Enter',' '].includes(e.key)){e.preventDefault();e.stopPropagation();disconnect(l=>l===link);}};hit.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();disconnect(l=>l===link);};svg.append(hit,path);
       }
       if(pending){const dot=ports.get(portKey(pending.nodeId,pending.direction,pending.portId));if(dot){const a=anchor(dot),r=scene.getBoundingClientRect(),b=snapTarget ? anchor(snapTarget) : pointer ? {x:(pointer[0]-r.left)/zoom,y:(pointer[1]-r.top)/zoom,left:!a.left} : {...a,x:a.x+(a.left ? -70 : 70),left:!a.left};const preview=document.createElementNS(NS,'path');preview.setAttribute('d',curve(a,b));preview.setAttribute('class','flowWire is-preview');svg.append(preview);}}
     }
@@ -144,11 +146,14 @@
       scene.replaceChildren();elements.clear();ports.clear();progress.clear();liveViews.clear();svg=document.createElementNS(NS,'svg');svg.classList.add('flowWires');scene.append(svg);
       for(const item of flow.nodes){
         const card=element('article','flowNode');card.dataset.flowId=item.id;card.dataset.kind=item.kind;card.classList.toggle('is-flipped',!!item.flipIO);card.style.left=item.pos[0]+'px';card.style.top=item.pos[1]+'px';
-        const header=element('header','flowNodeHeader'),title=element('span','flowNodeTitle',model.definitions[item.kind].label),badge=element('span','flowNodeBadge','IDLE');title.append(element('small','flowNodeId',item.id));header.append(title,badge);card.append(header);card.oncontextmenu=e=>context(e,item);elements.set(item.id,card);
+        const header=element('header','flowNodeHeader'),title=element('span','flowNodeTitle',item.id),badge=element('span','flowNodeBadge','IDLE');header.append(title,badge);card.append(header);card.oncontextmenu=e=>context(e,item);elements.set(item.id,card);
         header.onpointerdown=e=>{if(e.button!==0)return;model.pause();drag={item,start:[e.clientX,e.clientY],pos:item.pos.slice()};header.setPointerCapture(e.pointerId);e.stopPropagation();};
         header.onpointermove=e=>{if(!drag?.item)return;autoFit=false;item.pos=[drag.pos[0]+(e.clientX-drag.start[0])/zoom,drag.pos[1]+(e.clientY-drag.start[1])/zoom];card.style.left=item.pos[0]+'px';card.style.top=item.pos[1]+'px';drawLinks();};header.onpointerup=()=>{if(drag?.item){drag=null;edit(()=>{},false);}};
         const content=element('div','flowNodeContent');
-        if(model.definitions[item.kind].timed){
+        if(item.kind==='sourceSequence'){
+          const editor=App.createSourceSequenceEditor?.(node,{...editorOptions,compact:true,onLayout:()=>requestAnimationFrame(()=>{if(svg?.isConnected){if(autoFit)fit();drawLinks();}})});
+          if(editor)content.append(editor);else content.append(element('small','','Source sequence settings are unavailable.'));
+        }else if(model.definitions[item.kind].timed){
           const label=element('label','flowTime'),input=element('input');input.type='number';input.min='0';input.step='any';input.value=item.config.seconds;input.setAttribute('aria-label',`${item.id} seconds`);input.onfocus=model.pause;
           input.onchange=()=>{const value=Number(input.value);if(input.value.trim()==='' || !Number.isFinite(value) || value<0){input.setCustomValidity('Enter zero or more seconds.');input.reportValidity();return;}input.setCustomValidity('');edit(()=>{item.config.seconds=value;},false);};input.onkeydown=e=>{if(e.key==='Enter')input.blur();};
           label.append(element('span','flowTimeLabel','Duration'),input,element('span','','s'));const bar=element('progress');bar.max=1;bar.value=0;bar.setAttribute('aria-label',`${item.id} progress`);progress.set(item.id,bar);content.append(label,bar);
@@ -162,7 +167,7 @@
         }else if(['inPort','outPort'].includes(item.kind))content.append(element('small','',item.config.portId));
         const io=element('div','flowNodeIO');
         for(const direction of ['inputs','outputs']){const column=element('div','flowPorts '+direction);for(const port of item[direction]){const row=element('div','flowPortRow'),dot=button('',()=>{});dot.append(element('span','flowPortDot'),element('span','flowPortLabel',port.id));dot.className='flowPort';Object.assign(dot.dataset,{nodeId:item.id,direction,portId:port.id});portEvents(dot);dot.setAttribute('aria-label',`${item.id} ${port.id}`);ports.set(portKey(item.id,direction,port.id),dot);row.append(dot);
-          if(item.kind==='entityRouter' && direction==='outputs' && item.config.dispatch!=='round-robin'){const select=options([['','Select Type'],['anyType','anyType'],...App.entityModelForGraph(node.graph).list().map(t=>[t.typeId,t.name])],port.typeId);select.onchange=()=>edit(()=>{if(item.outputs.some(p=>p!==port && p.typeId===select.value))throw new Error('Each Entity Type can be assigned to only one output.');port.typeId=select.value;});select.setAttribute('aria-label',`${item.id} ${port.id} Entity Type`);row.append(select);}column.append(row);}io.append(column);}const live=element('div','flowLive');card.append(io,content,live,element('div','flowNodeReason'));liveViews.set(item.id,{card,badge,live,signature:''});scene.append(card);
+          if(item.kind==='entityRouter' && direction==='outputs' && item.config.dispatch!=='round-robin'){const select=options([['','Select Type'],['anyType','anyType'],...App.entityModelForGraph(node.graph).list().map(t=>[t.typeId,t.name])],port.typeId);select.onchange=()=>edit(()=>{if(item.outputs.some(p=>p!==port && p.typeId===select.value))throw new Error('Each Entity Type can be assigned to only one output.');port.typeId=select.value;});select.setAttribute('aria-label',`${item.id} ${port.id} Entity Type`);row.append(select);}column.append(row);}io.append(column);}const live=element('div','flowLive');if(item.kind==='sourceSequence')card.append(content,io,live,element('div','flowNodeReason'));else card.append(io,content,live,element('div','flowNodeReason'));liveViews.set(item.id,{card,badge,live,signature:''});scene.append(card);
       }
       transform();requestAnimationFrame(drawLinks);
     }

@@ -28,11 +28,12 @@
   <link rel="stylesheet" href="js/vendor/litegraph.min.css?v=0.7.13" />
   <script src="js/vendor/litegraph.min.js?v=0.7.13"></script>
   <script src="js/nodes-config.js?v=20260226a"></script>
+  <script src="config/node-definitions.js?v=20260920a"></script>
 
-  <link rel="stylesheet" href="css/app.css?v=20260919developermenu" />
-  <link rel="stylesheet" href="css/workspace.css?v=20260905c" />
-  <link rel="stylesheet" href="css/details.css?v=20260905a" />
-  <link rel="stylesheet" href="css/flow-view.css?v=20260917fanout" />
+  <link rel="stylesheet" href="css/app.css?v=20260920stopgroupsmenu" />
+  <link rel="stylesheet" href="css/workspace.css?v=20260920nodedefs" />
+  <link rel="stylesheet" href="css/details.css?v=20260920nameheader" />
+  <link rel="stylesheet" href="css/flow-view.css?v=20260920sourcenode" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -201,10 +202,11 @@
         <img class="appLogo" src="img/fact_sim_logo.png" alt="fact sim logo">
         <span class="appBrandText">FACT_SIM</span>
         <button id="workspaceHelp" type="button" aria-label="Quick guide" data-help="Choose an example or add nodes to build a flow. Press Start to simulate. Select a node and open Details to edit it. Scroll to zoom; drag the canvas to pan.">?</button>
+        <button id="btnAbout" type="button" aria-label="About FACT SIM">i</button>
       </div>
     </div>
     <div id="controls">
-      <div class="panelHeader">Example</div>
+      <div class="panelHeader">Examples</div>
       <div class="control-group">
         <label for="exampleSelect">Example</label>
         <select id="exampleSelect" title="Examples">
@@ -225,6 +227,47 @@
           </div>
           <div id="exampleSaveHint" class="fieldHint">Each overwrite asks for the fact_sim project root or sample folder.</div>
         </details>
+      </div>
+    </div>
+    <!-- Add Node panel -->
+    <div id="addNodePanel">
+      <div class="panelHeader">Nodes</div>
+      <div class="field">
+        <label id="nodeKindPickerLabel" for="nodeKindPickerTrigger">Node Type</label>
+        <select id="nodeKindSelect" hidden aria-hidden="true" tabindex="-1"></select>
+        <div id="nodeKindPicker" class="nodeKindPicker">
+          <button id="nodeKindPickerTrigger" class="nodeKindPickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="nodeKindPickerLabel nodeKindPickerValue">
+            <span id="nodeKindPickerIcon" class="nodeKindPickerIcon" aria-hidden="true"></span>
+            <span id="nodeKindPickerValue" class="nodeKindPickerValue">Equipment</span>
+            <span class="nodeKindPickerChevron" aria-hidden="true">⌄</span>
+          </button>
+          <div id="nodeKindPickerList" class="nodeKindPickerList" role="listbox" aria-labelledby="nodeKindPickerLabel" hidden></div>
+        </div>
+      </div>
+      <button id="btnAddNode">Place Node</button>
+      <details class="panelDetails nodeDefinitionDetails">
+        <summary>Developer menu</summary>
+        <div class="nodeDefinitionActions">
+          <button id="btnEditNodeDefinition" type="button">Edit Definition</button>
+          <button id="btnDuplicateNodeDefinition" type="button">Duplicate as New</button>
+          <button id="btnRemoveNodeDefinition" type="button" class="button-secondary">Reset Definition</button>
+        </div>
+        <div id="nodeDefinitionHint" class="fieldHint">Edit the selected type. Saved changes apply to newly placed nodes.</div>
+      </details>
+    </div>
+    <div id="addGroupPanel">
+      <div class="panelHeader">Stop Groups</div>
+      <div id="stopGroupsPanelBody" class="stopGroupsPanelBody" aria-live="polite"></div>
+      <button id="btnAddGroup" type="button" class="selectionInspectorBtn is-primary">Add Stop Group</button>
+    </div>
+    <div id="addSyncroGroupPanel">
+      <div class="panelHeader">Syncro Groups</div>
+      <div class="syncroGroupPanelBody">
+        <div id="syncroGroupsList" class="flowSyncGroups" aria-live="polite"></div>
+        <div class="syncroGroupAddRow">
+          <input id="syncroGroupName" aria-label="SyncroGroup name" placeholder="Group name">
+          <button id="btnAddSyncroGroup" type="button">Add</button>
+        </div>
       </div>
     </div>
     <div id="backgroundPanel">
@@ -271,38 +314,6 @@
         </div>
       </details>
     </div>
-    <!-- Add Node panel -->
-    <div id="addNodePanel">
-      <div class="panelHeader">Add Node</div>
-      <div class="field">
-        <label id="nodeKindPickerLabel" for="nodeKindPickerTrigger">Node Type</label>
-        <select id="nodeKindSelect" hidden aria-hidden="true" tabindex="-1"></select>
-        <div id="nodeKindPicker" class="nodeKindPicker">
-          <button id="nodeKindPickerTrigger" class="nodeKindPickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="nodeKindPickerLabel nodeKindPickerValue">
-            <span id="nodeKindPickerIcon" class="nodeKindPickerIcon" aria-hidden="true"></span>
-            <span id="nodeKindPickerValue" class="nodeKindPickerValue">Equipment</span>
-            <span class="nodeKindPickerChevron" aria-hidden="true">⌄</span>
-          </button>
-          <div id="nodeKindPickerList" class="nodeKindPickerList" role="listbox" aria-labelledby="nodeKindPickerLabel" hidden></div>
-        </div>
-      </div>
-      <button id="btnAddNode">Place Node</button>
-    </div>
-    <div id="addGroupPanel">
-      <div class="panelHeader">Add Stop Group</div>
-      <div class="field">
-        <label for="groupKindSelect">Pattern</label>
-        <select id="groupKindSelect"></select>
-      </div>
-      <div id="groupStopRate" class="group-stop-rate">Recovery time: -</div>
-      <div id="groupKindDescription" class="panel-help panel-help-compact">Choose a pattern. Open settings only when timing needs tuning.</div>
-      <details id="groupSettingsDetails" class="panelDetails">
-        <summary>Pattern Settings</summary>
-        <div id="addGroupProps" class="propFields"></div>
-      </details>
-      <button id="btnAddGroup">Draw on Canvas</button>
-    </div>
-    <div id="addSyncroGroupPanel"><div class="panelHeader">Add SyncroGroup</div><input id="syncroGroupName" aria-label="SyncroGroup name" placeholder="Group name"><button id="btnAddSyncroGroup">Add SyncroGroup</button><div id="syncroGroupsList" class="flowSyncGroups"></div></div>
     <div id="advancedPanel">
       <div class="panelHeader">Performance</div>
       <div class="control-group">
@@ -331,7 +342,7 @@
         <div id="simModeHint" class="fieldHint"><strong>Recommended.</strong> Event scheduling skips unchanged nodes and preserves strict parity with dt.</div>
       </div>
       <details id="performanceDiagnosticsDetails" class="panelDetails">
-        <summary>Diagnostics</summary>
+        <summary>Developer menu</summary>
         <div class="performanceActionsRow">
           <button id="btnBenchmark">Speed Test</button>
           <button id="btnEngineTest" class="button-secondary">Validate Engines</button>
@@ -433,7 +444,6 @@
         <button id="btnExportHtml">Export HTML</button>
       </div>
       <input type="file" id="fileInput" accept=".json">
-      <button id="btnAbout" class="button-secondary">About</button>
     </div>
   </div>
   <div id="fastestModeOverlay" aria-hidden="true"></div>
@@ -496,7 +506,15 @@
           </table>
         </div>
       </div>
-      <div id="selectionInspectorPanel" aria-label="Selection details"></div>
+      <div id="selectionInspectorPanel" aria-label="Selection details">
+        <div class="nodeDetailsHeader" id="nodeDetailsHeader" hidden>
+          <label class="nodeDetailsHeaderLabel" for="nodeDetailsTitleInput">name:</label>
+          <input type="text" id="nodeDetailsTitleInput" class="nodeDetailsHeaderInput" aria-label="Node title" placeholder="name" autocomplete="off" spellcheck="false" />
+          <span class="nodeDetailsHeaderLabel">id:</span>
+          <span class="nodeDetailsHeaderId" id="nodeDetailsTitleId" aria-hidden="true"></span>
+        </div>
+        <div id="selectionInspectorContent" class="selectionInspectorContent"></div>
+      </div>
     </div>
   </div>
   <div id="timelineRevealHandle" aria-label="Drag up to show bottom panel"></div>
@@ -784,16 +802,17 @@ SOFTWARE.
     <script src="js/nodes/menu.js?v=20260914flow2"></script>
     <script src="js/nodes/ioflip.js?v=20260914flow2"></script>
     <script src="js/litegraph-fliplabels.js"></script>
+    <script src="js/litegraph-node-title.js?v=20260921titleid"></script>
     <script src="js/work-highlight.js"></script>
     <script src="js/link-anim.js?v=20260919waitoutput"></script>
     <script src="js/vendor/lz-string.min.js"></script>
   <script src="js/nodes/note.js?v=20260914flow2"></script>
   <script src="js/nodes/signal.js?v=20260914flow2"></script>
-  <script src="js/app/flow-model.js?v=20260919cachelinks"></script>
+  <script src="js/app/flow-model.js?v=20260920sourcenode"></script>
   <script src="js/app/flow-runtime.js?v=20260918join"></script>
-  <script src="js/nodes/basic_node.js?v=20260916recovery"></script>
+  <script src="js/nodes/basic_node.js?v=20260920sourcenode"></script>
   <script src="js/nodes/register.js?v=20260914flow2"></script>
-  <script src="js/app/node-catalog.js?v=20260914flow2"></script>
+  <script src="js/app/node-catalog.js?v=20260920definitions"></script>
   <script src="sample/simple.js?v=20260916recovery"></script>
   <script src="sample/branch.js?v=20260916recovery"></script>
   <script src="sample/parallel_benchmark.js?v=20260916recovery"></script>
@@ -806,7 +825,7 @@ SOFTWARE.
   <script src="js/app/state.js?v=20260914flow2"></script>
   <script src="js/app/background-layout.js?v=20260914flow2"></script>
   <script src="js/app/graph-links.js?v=20260914flow2"></script>
-  <script src="js/app/stop-groups.js?v=20260914flow2"></script>
+  <script src="js/app/stop-groups.js?v=20260920independentmove"></script>
   <script src="js/app/script-editor.js?v=20260914flow2"></script>
   <script src="js/app/engine.js?v=20260919dtbudget"></script>
   <script src="js/app/engine-fast-kernels.js?v=20260914flow2"></script>
@@ -826,16 +845,17 @@ SOFTWARE.
   <script src="js/app/selection.js?v=20260914flow2"></script>
   <script src="js/app/fit.js?v=20260919sourcefocus2"></script>
   <script src="js/app/node-props-panel.js?v=20260914flow2"></script>
-  <script src="js/app/selection-inspector.js?v=20260914flow2"></script>
-  <script src="js/app/flow-status.js?v=20260918join"></script>
-  <script src="js/app/flow-view.js?v=20260918join"></script>
-  <script src="js/app/entity-ui.js?v=20260914flow2"></script>
+  <script src="js/app/selection-inspector.js?v=20260922nodeheader"></script>
+  <script src="js/app/flow-status.js?v=20260920sourcenode"></script>
+  <script src="js/app/flow-view.js?v=20260920sourcenode"></script>
+  <script src="js/app/entity-ui.js?v=20260922nodeheader"></script>
+  <script src="js/app/node-definition-editor.js?v=20260920a"></script>
   <script src="js/app/timeline-init.js?v=20260914flow2"></script>
   <script src="js/app/graph-init.js?v=20260914flow2"></script>
   <script src="js/app/examples.js?v=20260919folderstart"></script>
   <script src="js/app/file-io.js?v=20260914flow2"></script>
-  <script src="js/app/workspace-ui.js?v=20260919example"></script>
-  <script src="js/app/ui.js?v=20260919example"></script>
+  <script src="js/app/workspace-ui.js?v=20260920stopgroupsmenu"></script>
+  <script src="js/app/ui.js?v=20260920stopgroupsmenu"></script>
   <script src="js/app/details-ui.js?v=20260914flow2"></script>
   <script src="js/app.js?v=20260213"></script>
 

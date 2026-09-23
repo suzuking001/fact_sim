@@ -812,6 +812,30 @@ function _formatCompactSeconds(value){
   return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)} s`;
 }
 
+function _compactActiveDurationSec(node, state){
+  const direct = state === 'PROCESS' ? Number(node?.properties?.processTime)
+    : state === 'RECOVERY' ? Number(node?.properties?.recoveryTime)
+    : NaN;
+  if(isFinite(direct) && direct > 0) return direct;
+  const until = Number(node && node._until);
+  if(!isFinite(until) || until <= 0) return 0;
+  let cells = [];
+  try{
+    const rt = node?._flowRuntime;
+    if(rt && (Array.isArray(rt.cells) || Array.isArray(rt.signals))){
+      cells = (Array.isArray(rt.cells) ? rt.cells : []).concat(Array.isArray(rt.signals) ? rt.signals : []);
+    }else if(typeof window!=='undefined' && typeof window.App?.FlowRuntime?.activeCells==='function'){
+      cells = window.App.FlowRuntime.activeCells(node) || [];
+    }
+  }catch(_e){ cells = []; }
+  for(const cell of cells){
+    if(!cell || cell.until === undefined || cell.startedAt === undefined) continue;
+    if(cell.until !== until || cell.until <= 0) continue;
+    return Math.max(0, (cell.until - cell.startedAt) / 1000);
+  }
+  return 0;
+}
+
 function _buildCompactOverlayModel(node, lines){
   const state = _compactOverlayState(node, lines);
   const work = _compactOverlayWork(node, lines);
@@ -820,10 +844,7 @@ function _buildCompactOverlayModel(node, lines){
   const until = Number(node && node._until);
   const remainingSec = isFinite(until) ? Math.max(0, until - now) / 1000 : 0;
   const processSec = Number(node?.properties?.processTime);
-  const recoverySec = Number(node?.properties?.recoveryTime);
-  const activeDuration = state === 'PROCESS'
-    ? (isFinite(processSec) ? Math.max(0, processSec) : 0)
-    : (state === 'RECOVERY' && isFinite(recoverySec) ? Math.max(0, recoverySec) : 0);
+  const activeDuration = _compactActiveDurationSec(node, state);
   const progress = activeDuration > 0
     ? _overlayClamp(1 - (remainingSec / activeDuration), 0, 1)
     : (state === 'WAIT' ? 1 : 0);
@@ -1097,17 +1118,23 @@ function _drawCompactLinesInsideNode(ctx, node, lines){
     ctx.font = '8.5px Inter, ui-sans-serif, system-ui, sans-serif';
     ctx.fillText(_trimOverlayText(ctx, model.secondary, layout.textMaxWidth), contentX, layout.boxY + 38, layout.textMaxWidth);
 
-    const trackX = contentX;
-    const trackY = layout.boxY + layout.boxHeight - 5;
-    const trackWidth = Math.max(8, layout.boxWidth - layout.padX * 2);
-    ctx.fillStyle = 'rgba(148,163,184,0.20)';
-    _drawCanvasCard(ctx, trackX, trackY, trackWidth, 2.5, 999);
-    ctx.fill();
-    const fillWidth = trackWidth * _overlayClamp(model.progress, 0, 1);
-    if(fillWidth > 0.5){
-      ctx.fillStyle = palette.accent;
-      _drawCanvasCard(ctx, trackX, trackY, fillWidth, 2.5, 999);
+    // The progress bar is a thin (2.5px) line: when zoomed out it renders
+    // sub-pixel and unreadable, so skip drawing it to save canvas work. The
+    // remaining-time status text above still conveys progress at low scale.
+    const progressBarMinScale = 0.6;
+    if(scale >= progressBarMinScale){
+      const trackX = contentX;
+      const trackY = layout.boxY + layout.boxHeight - 5;
+      const trackWidth = Math.max(8, layout.boxWidth - layout.padX * 2);
+      ctx.fillStyle = 'rgba(148,163,184,0.20)';
+      _drawCanvasCard(ctx, trackX, trackY, trackWidth, 2.5, 999);
       ctx.fill();
+      const fillWidth = trackWidth * _overlayClamp(model.progress, 0, 1);
+      if(fillWidth > 0.5){
+        ctx.fillStyle = palette.accent;
+        _drawCanvasCard(ctx, trackX, trackY, fillWidth, 2.5, 999);
+        ctx.fill();
+      }
     }
   }finally{
     ctx.restore();

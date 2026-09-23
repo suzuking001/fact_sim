@@ -1931,6 +1931,16 @@ body.timeline-hidden #timelineRevealHandle{
 .entityTypeSummary{ flex:1 1 auto; }
 .entityTypeSummary strong{ overflow:hidden; text-overflow:ellipsis; }
 .entityTypeSummary small{ color:#64748b; }
+.stopGroupsPanelBody{ display:grid; gap:10px; padding:0; }
+.stopGroupList{ display:grid; gap:7px; }
+.stopGroupRow{ display:flex; align-items:center; gap:8px; min-width:0; padding:8px; border:1px solid rgba(100,116,139,.18); border-radius:9px; background:rgba(255,255,255,.72); }
+.stopGroupMarker{ display:block; flex:0 0 auto; width:18px; height:18px; border:3px solid color-mix(in srgb, var(--stop-group-color) 76%, #111827); border-radius:5px; background:color-mix(in srgb, var(--stop-group-color) 22%, white); box-shadow:0 2px 4px rgba(15,23,42,.12); }
+.stopGroupSummary{ display:grid; flex:1 1 auto; min-width:0; }
+.stopGroupSummary strong{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.stopGroupSummary small{ overflow:hidden; color:#64748b; font-size:10px; line-height:1.35; text-overflow:ellipsis; white-space:nowrap; }
+.stopGroupActionsInline{ display:flex; flex:0 0 auto; align-items:center; gap:6px; }
+.stopGroupActionsInline .selectionInspectorBtn{ min-height:30px !important; padding:0 8px !important; margin:0 !important; font-size:11px !important; }
+.stopGroupsEmptyState{ padding:12px 10px; border:1px dashed rgba(100,116,139,.28); border-radius:9px; color:#64748b; background:rgba(248,250,252,.68); font-size:12px; text-align:center; }
 .entityAppearancePreview{
   --entity-preview-fill:#f8fafc;
   --entity-preview-stroke:#64748b;
@@ -5519,10 +5529,8 @@ body.sim-running.performance-adaptive #tabletActionBar{
 
 
 
-/* Compact Details sidebar: title, tools, cycle summary, then properties. */
-.nodeDetailsTitleField{
-  margin:14px 18px 0;
-}
+/* Compact Details sidebar: tools, cycle summary, then properties.
+   The node title field now lives in the shared #nodeDetailsHeader (css/details.css). */
 
 body:not(.mobile-ui):not(.tablet-ui) #sidebar{
   width: var(--sidebar-width);
