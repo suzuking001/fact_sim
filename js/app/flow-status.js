@@ -27,12 +27,12 @@
     }else if(item.kind==='join'){
       const initial=!r.controlInitialized ? App.FlowModel.feedbackLinks(node.properties.flow) : [];
       let count=0;
-      for(const p of item.inputs){const ready=here.some(c=>c.input===p.id) || initial.some(l=>l.to===item.id && l.input===p.id);result.inputs[p.id]=ready;if(ready)count++;row(p.id,ready ? 'Ready' : 'Waiting',ready);}
+      for(const p of item.inputs){const ready=here.some(c=>c.input===p.id) || initial.some(l=>l.to===item.id && l.input===p.id);result.inputs[p.id]=ready;if(ready)count++;row(App.FlowModel.portLabel(p.id),ready ? 'Ready' : 'Waiting',ready);}
       const workInputs=App.FlowRuntime.joinWorkInputs(node,item),works=workInputs.map(p=>here.find(c=>c.input===p.id)?.entity);
       const matching=workInputs.length<2 || works.every(e=>App.FlowRuntime.sameWork(e,works[0]));
       result.state=count===item.inputs.length && matching ? 'READY' : 'WAIT';row('All inputs',`${count} / ${item.inputs.length}`,count===item.inputs.length);
       if(workInputs.length>1){
-        workInputs.forEach((p,i)=>row(p.id+' work',works[i] ? `${works[i].type} / ${works[i].id}` : 'Waiting'));
+        workInputs.forEach((p,i)=>row(App.FlowModel.portLabel(p.id)+' work',works[i] ? `${works[i].type} / ${works[i].id}` : 'Waiting'));
         row('Type / ID match',matching ? 'Matched' : works.every(Boolean) ? 'Mismatch' : 'Waiting for matching work',matching);
       }
     }else if(item.kind==='fork'){
@@ -55,7 +55,7 @@
       row('Remaining contents',cell?.entity ? String(App.runtimeInstancesForGraph(node.graph).childrenOf(cell.entity).length) : '—');
     }else if(item.kind==='entityRouter'){
       const port=item.config.dispatch==='round-robin' ? item.outputs[(r.routerCursors?.[item.id] || 0)%item.outputs.length] : cell?.entity && (item.outputs.find(p=>p.typeId===cell.entity.typeId) || item.outputs.find(p=>p.typeId==='anyType'));
-      row('Route',port?.id || 'Waiting for input');
+      row('Route',port ? App.FlowModel.portLabel(port.id) : 'Waiting for input');
     }else row('Input',cell ? 'Received' : 'Waiting',!!cell);
     if(cell?.entity)row('Work',cell.entity.id || cell.entity.type || cell.entity.typeId);
     if(last?.firedAt!==undefined)row('Last fired',`${(last.firedAt/1000).toFixed(1)} s`);

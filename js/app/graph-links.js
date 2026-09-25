@@ -16,6 +16,13 @@ App.repairGraphLinks = function(graphLike){
     };
   }
 
+  // Flow boundary nodes are authoritative. Reconcile equipment ports before
+  // rebuilding link slot metadata so loaded/legacy graphs cannot retain stale
+  // IN/OUT connectors that no longer exist in their Flow definition.
+  if(typeof App.syncBasicNodePortsForGraph === 'function'){
+    App.syncBasicNodePortsForGraph(graph);
+  }
+
   const nodes = Array.isArray(graph._nodes) ? graph._nodes : [];
   const sourceLinks = (graph.links && typeof graph.links === 'object') ? graph.links : {};
 

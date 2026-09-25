@@ -15,6 +15,12 @@
     Palletizing:{label:'Palletizing',inputs:['parentInPort','childInPort'],outputs:['outPort']},
     DePalletizing:{label:'DePalletizing',inputs:['inPort'],outputs:['parentOutPort','childOutPort']}
   };
+  function portLabel(id){
+    const value=String(id ?? ''),match=value.match(/^(parent|child)?(in|out)Port(\d*)$/i);
+    if(!match)return value;
+    const qualifier=match[1] ? match[1][0].toUpperCase()+match[1].slice(1).toLowerCase()+' ' : '';
+    return qualifier+match[2].toUpperCase()+match[3];
+  }
   function empty(){return {version:2,nodes:[],links:[],counters:{}};}
   function add(flow,kind,config={},pos){
     const def=definitions[kind];if(!def)throw new Error('Unknown Flow node type.');
@@ -74,8 +80,8 @@
       if(occupied.has(b) || outgoing.has(a))errors.push('Each port accepts one connection. Use entityRouter for multiple paths.');occupied.add(b);outgoing.add(a);
     }
     for(const item of flow.nodes){
-      for(const port of item.inputs || [])if(!occupied.has(`${item.id}/${port.id}`))errors.push(`${item.id}: connect ${port.id}.`);
-      for(const port of item.outputs || [])if(!outgoing.has(`${item.id}/${port.id}`))errors.push(`${item.id}: connect ${port.id}.`);
+      for(const port of item.inputs || [])if(!occupied.has(`${item.id}/${port.id}`))errors.push(`${item.id}: connect ${portLabel(port.id)}.`);
+      for(const port of item.outputs || [])if(!outgoing.has(`${item.id}/${port.id}`))errors.push(`${item.id}: connect ${portLabel(port.id)}.`);
     }
     const signals=signalLinks(flow),feedback=new Set(feedbackLinks(flow));
     for(const link of flow.links){
@@ -217,7 +223,7 @@
     if(flow?.version!==2 || !Array.isArray(flow.nodes) || !Array.isArray(flow.links) || flow.nodes.some(n=>!n || !n.config || !Array.isArray(n.inputs) || !Array.isArray(n.outputs)))throw new Error('A Flow v2 definition with nodes, configurations, ports and links is required.');
     const changed=topology(old)!==topology(flow);
     if(App.FlowRuntime?.isActive(node) && changed)throw new Error('Reset before changing an active Flow.');
-    node.graph?.beforeChange?.();if(flow.nodes.some(item=>item.kind==='sourceSequence'))node.properties.source ||= {entries:[],intervalSec:0,repeat:true};node.properties.flow=clone(flow);
+    node.graph?.beforeChange?.();if(flow.nodes.some(item=>item.kind==='sourceSequence'))node.properties.source ||= {entries:[],intervalSec:0,repeat:true};node.properties.flow=clone(flow);App.syncBasicNodePortsFromFlow?.(node,node.properties.flow);
     if(changed && node._flowRuntime){node._flowRuntime.signals=[];node._flowRuntime.flowActivity={};node._flowRuntime.forkStatus={};delete node._flowRuntime.controlInitialized;}
     if(App.FlowRuntime?.isActive(node))App.FlowRuntime.retime(node);
     else if(node._flowRuntime){node._flowRuntime.checked=false;node._flowRuntime.error='';}
@@ -225,5 +231,5 @@
     node.graph?.change?.();node.graph?.afterChange?.();root.flushHistory?.();node.setDirtyCanvas?.(true,true);
     return validate(node.properties.flow,node);
   }
-  App.FlowModel={definitions,clone,empty,add,connect,rewire,validate,template,layout,graphErrors,pause,commit,addSyncroGroup,signalLinks,feedbackLinks,addRecoveryCycle,invalidateFlowCaches};
+  App.FlowModel={definitions,portLabel,clone,empty,add,connect,rewire,validate,template,layout,graphErrors,pause,commit,addSyncroGroup,signalLinks,feedbackLinks,addRecoveryCycle,invalidateFlowCaches};
 })(typeof window==='undefined' ? globalThis : window);

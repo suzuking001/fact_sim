@@ -37,7 +37,7 @@
         const reset=!editorOptions.draft && changed && App.resetSimulationForFlowEdit(node.graph);
         for(const apply of boundaryEdits)apply();
         if(editorOptions.draft){
-          node.properties.flow=model.clone(flow);model.invalidateFlowCaches(node.properties.flow);node.setDirtyCanvas?.(true,true);editorOptions.onChange?.(node.properties.flow);
+          node.properties.flow=model.clone(flow);App.syncBasicNodePortsFromFlow?.(node,node.properties.flow);model.invalidateFlowCaches(node.properties.flow);node.setDirtyCanvas?.(true,true);editorOptions.onChange?.(node.properties.flow);
         }else model.commit(node,flow);
         const message=reset ? 'Flow changed. Simulation reset to 0 s; Start runs the edited Flow.' : '';
         showChecks(message);
@@ -106,7 +106,7 @@
         const d=curve(anchor(a),anchor(b));
         const path=document.createElementNS(NS,'path');
         path.setAttribute('d',d);path.setAttribute('class','flowWire'+(signals.has(link) ? ' is-completion' : '')+(selectedLink===link ? ' is-selected' : ''));
-        const hit=document.createElementNS(NS,'path');hit.setAttribute('d',d);hit.setAttribute('class','flowWireHit');hit.setAttribute('tabindex','0');hit.setAttribute('role','button');hit.setAttribute('aria-label',`Disconnect ${link.from} ${link.output} ? ${link.to} ${link.input}`);Object.assign(hit.dataset,{nodeId:link.from,direction:'outputs',portId:link.output});hit.onpointerdown=e=>beginConnection(e,hit,link);hit.onclick=e=>{if(e.detail===0)selectWire(link);};hit.onkeydown=e=>{if(['Delete','Backspace','Enter',' '].includes(e.key)){e.preventDefault();e.stopPropagation();disconnect(l=>l===link);}};hit.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();disconnect(l=>l===link);};svg.append(hit,path);
+        const hit=document.createElementNS(NS,'path');hit.setAttribute('d',d);hit.setAttribute('class','flowWireHit');hit.setAttribute('tabindex','0');hit.setAttribute('role','button');hit.setAttribute('aria-label',`Disconnect ${link.from} ${model.portLabel(link.output)} → ${link.to} ${model.portLabel(link.input)}`);Object.assign(hit.dataset,{nodeId:link.from,direction:'outputs',portId:link.output});hit.onpointerdown=e=>beginConnection(e,hit,link);hit.onclick=e=>{if(e.detail===0)selectWire(link);};hit.onkeydown=e=>{if(['Delete','Backspace','Enter',' '].includes(e.key)){e.preventDefault();e.stopPropagation();disconnect(l=>l===link);}};hit.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();disconnect(l=>l===link);};svg.append(hit,path);
       }
       if(pending){const dot=ports.get(portKey(pending.nodeId,pending.direction,pending.portId));if(dot){const a=anchor(dot),r=scene.getBoundingClientRect(),b=snapTarget ? anchor(snapTarget) : pointer ? {x:(pointer[0]-r.left)/zoom,y:(pointer[1]-r.top)/zoom,left:!a.left} : {...a,x:a.x+(a.left ? -70 : 70),left:!a.left};const preview=document.createElementNS(NS,'path');preview.setAttribute('d',curve(a,b));preview.setAttribute('class','flowWire is-preview');svg.append(preview);}}
     }
@@ -121,21 +121,22 @@
       row('Flip IO',()=>{item.flipIO=!item.flipIO;});
       for(const [direction,prefix] of [['inputs','inPort'],['outputs','outPort']]){
         const definition=model.definitions[item.kind],expandable=dynamic || definition.expand===direction;
+        const connectorLabel=direction==='inputs' ? 'IN' : 'OUT';
         const rememberCounter=()=>{
           item.portCounters ||= {};
           item.portCounters[direction]=Math.max(item.portCounters[direction] || 0,item[direction].length,...item[direction].map(p=>p.id.startsWith(prefix) ? Number(p.id.slice(prefix.length)) || 0 : 0));
         };
-        row('Add '+prefix,()=>{
+        row('Add '+connectorLabel,()=>{
           rememberCounter();const n=++item.portCounters[direction];
           item[direction].push({id:prefix+n,...(dynamic && direction==='outputs' ? {typeId:''} : {})});
         },expandable);
-        row('Remove '+prefix,()=>{
+        row('Remove '+connectorLabel,()=>{
           if(!expandable || item[direction].length<=definition[direction].length)return;
           rememberCounter();const removed=item[direction].pop();
           flow.links=flow.links.filter(l=>direction==='inputs' ? !(l.to===item.id && l.input===removed.id) : !(l.from===item.id && l.output===removed.id));model.invalidateFlowCaches(flow);
           pending=null;pointer=null;connectionDrag=null;snapTarget=null;selectedLink=null;
         },expandable && item[direction].length>definition[direction].length);
-        menu.children[menu.children.length-1].title='Remove the last '+prefix+' and its connections';
+        menu.children[menu.children.length-1].title='Remove the last '+connectorLabel+' and its connections';
       }
       row('Delete',()=>{flow.nodes=flow.nodes.filter(n=>n!==item);flow.links=flow.links.filter(l=>l.from!==item.id && l.to!==item.id);model.invalidateFlowCaches(flow);if(['inPort','outPort'].includes(item.kind)){const input=item.kind==='inPort';boundaryEdits.push(()=>{const slot=(input ? node.inputs : node.outputs).findIndex(p=>p.portId===item.config.portId);if(slot>=0)node[input ? 'removeInput' : 'removeOutput'](slot);});}});
       row('Duplicate',()=>{const copy=model.add(flow,item.kind,model.clone(item.config),[item.pos[0]+30,item.pos[1]+150]);copy.inputs=model.clone(item.inputs);copy.outputs=model.clone(item.outputs);copy.flipIO=item.flipIO;boundary(copy);});
@@ -166,8 +167,8 @@
           const select=options([['','Select SyncroGroup'],...(node.graph.extra?.syncroGroups || []).map(g=>[g.id,g.name])],item.config.groupId);select.setAttribute('aria-label','SyncroGroup');select.onchange=()=>edit(()=>{item.config.groupId=select.value;},false);content.append(select);
         }else if(['inPort','outPort'].includes(item.kind))content.append(element('small','',item.config.portId));
         const io=element('div','flowNodeIO');
-        for(const direction of ['inputs','outputs']){const column=element('div','flowPorts '+direction);for(const port of item[direction]){const row=element('div','flowPortRow'),dot=button('',()=>{});dot.append(element('span','flowPortDot'),element('span','flowPortLabel',port.id));dot.className='flowPort';Object.assign(dot.dataset,{nodeId:item.id,direction,portId:port.id});portEvents(dot);dot.setAttribute('aria-label',`${item.id} ${port.id}`);ports.set(portKey(item.id,direction,port.id),dot);row.append(dot);
-          if(item.kind==='entityRouter' && direction==='outputs' && item.config.dispatch!=='round-robin'){const select=options([['','Select Type'],['anyType','anyType'],...App.entityModelForGraph(node.graph).list().map(t=>[t.typeId,t.name])],port.typeId);select.onchange=()=>edit(()=>{if(item.outputs.some(p=>p!==port && p.typeId===select.value))throw new Error('Each Entity Type can be assigned to only one output.');port.typeId=select.value;});select.setAttribute('aria-label',`${item.id} ${port.id} Entity Type`);row.append(select);}column.append(row);}io.append(column);}const live=element('div','flowLive');if(item.kind==='sourceSequence')card.append(content,io,live,element('div','flowNodeReason'));else card.append(io,content,live,element('div','flowNodeReason'));liveViews.set(item.id,{card,badge,live,signature:''});scene.append(card);
+        for(const direction of ['inputs','outputs']){const column=element('div','flowPorts '+direction);for(const port of item[direction]){const row=element('div','flowPortRow'),dot=button('',()=>{}),label=model.portLabel(port.id);dot.append(element('span','flowPortDot'),element('span','flowPortLabel',label));dot.className='flowPort';Object.assign(dot.dataset,{nodeId:item.id,direction,portId:port.id});portEvents(dot);dot.setAttribute('aria-label',`${item.id} ${label}`);ports.set(portKey(item.id,direction,port.id),dot);row.append(dot);
+          if(item.kind==='entityRouter' && direction==='outputs' && item.config.dispatch!=='round-robin'){const select=options([['','Select Type'],['anyType','anyType'],...App.entityModelForGraph(node.graph).list().map(t=>[t.typeId,t.name])],port.typeId);select.onchange=()=>edit(()=>{if(item.outputs.some(p=>p!==port && p.typeId===select.value))throw new Error('Each Entity Type can be assigned to only one output.');port.typeId=select.value;});select.setAttribute('aria-label',`${item.id} ${label} Entity Type`);row.append(select);}column.append(row);}io.append(column);}const live=element('div','flowLive');if(item.kind==='sourceSequence')card.append(content,io,live,element('div','flowNodeReason'));else card.append(io,content,live,element('div','flowNodeReason'));liveViews.set(item.id,{card,badge,live,signature:''});scene.append(card);
       }
       transform();requestAnimationFrame(drawLinks);
     }

@@ -3,12 +3,16 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const results=[];
 for(const name of ['simple','branch','shuttle_line5','carrier','pallet_station_demo','sample_line1','sample_line2','parallel_benchmark']){
  try{
-  setSimTime(0);const data=JSON.parse(fs.readFileSync(path.join(root,'sample',name+'.json'),'utf8')),g=new LGraph();g.configure(data);App.restoreEntityModel(g,data,true);App.graph=g;
+  setSimTime(0);const data=JSON.parse(fs.readFileSync(path.join(root,'sample',name+'.json'),'utf8')),g=new LGraph();g.configure(data);App.restoreEntityModel(g,data,true);App.repairGraphLinks(g);App.graph=g;
+  for(const node of g._nodes.filter(n=>n.type==='factory/basic')){
+   assert.equal(node.inputs.length,node.properties.flow.nodes.filter(item=>item.kind==='inPort').length,`${node.id}: main IN count must match Flow inPort count`);
+   assert.equal(node.outputs.length,node.properties.flow.nodes.filter(item=>item.kind==='outPort').length,`${node.id}: main OUT count must match Flow outPort count`);
+  }
   assert.deepEqual(App.FlowModel.graphErrors(g),[]);const store=App.runtimeInstancesForGraph(g);assert.deepEqual(store.initializationErrors,[]);
   if(name==='sample_line2'){
    assert.deepEqual(App.entityModelForGraph(g).list().map(t=>t.name),['workA','workB','carryer1','carryer2']);
    const embedded=fs.readFileSync(path.join(root,'sample',name+'.js'),'utf8');
-   const context={window:{}};require('node:vm').runInNewContext(embedded,context);assert.deepEqual(JSON.parse(JSON.stringify(context.window.EXAMPLES[name])),JSON.parse(fs.readFileSync(path.join(root,'sample',name+'.json'),'utf8')),'JSON and embedded example must match');
+   const context={window:{},atob:value=>Buffer.from(value,'base64').toString('binary'),TextDecoder,Uint8Array};require('node:vm').runInNewContext(embedded,context);assert.deepEqual(JSON.parse(JSON.stringify(context.window.EXAMPLES[name])),JSON.parse(fs.readFileSync(path.join(root,'sample',name+'.json'),'utf8')),'JSON and embedded example must match');
   }
   const engine=App.createSimEngine('event-fast',g);engine.reset();let packChecks=0;const deliveredLinks=new Set(),previousLocations=new Map();
   for(let i=0;i<12000;i++){

@@ -6,6 +6,38 @@
       port.portId ||= `${direction}-${index+1}`;port.type='entity';port.channel='entity';
     });
   }
+  function syncPortsFromFlow(node,flow=node?.properties?.flow){
+    if(!node || flow?.version!==2 || !Array.isArray(flow.nodes))return {inputs:0,outputs:0,removed:0,added:0};
+    ensurePorts(node);let removed=0,added=0;
+    for(const spec of [
+      {kind:'inPort',key:'inputs',prefix:'in',add:'addInput',remove:'removeInput',name:'inPort'},
+      {kind:'outPort',key:'outputs',prefix:'out',add:'addOutput',remove:'removeOutput',name:'outPort'}
+    ]){
+      const boundaries=flow.nodes.filter(item=>item?.kind===spec.kind),ports=node[spec.key] || (node[spec.key]=[]),claimed=new Set(),ids=new Set(),assignments=[];
+      const nextId=base=>{base=String(base || spec.prefix).trim() || spec.prefix;let id=base,n=1;while(ids.has(id) || ports.some(port=>port.portId===id && !claimed.has(port)))id=`${base}-${++n}`;return id;};
+      for(const [index,item] of boundaries.entries()){
+        item.config ||= {};const requested=String(item.config.portId || '').trim();
+        let port=requested && !ids.has(requested) ? ports.find(candidate=>!claimed.has(candidate) && candidate.portId===requested) : null;
+        if(!port)port=(!claimed.has(ports[index]) && ports[index]) || ports.find(candidate=>!claimed.has(candidate)) || null;
+        let portId;
+        if(port){claimed.add(port);portId=String(port.portId || '').trim();if(!portId || ids.has(portId)){portId=nextId(item.id || `${spec.prefix}-${index+1}`);port.portId=portId;}}
+        else portId=requested && !ids.has(requested) ? requested : nextId(item.id || `${spec.prefix}-${index+1}`);
+        ids.add(portId);item.config.portId=portId;assignments.push({item,port,portId});
+      }
+      for(let index=ports.length-1;index>=0;index--)if(!claimed.has(ports[index])){node[spec.remove](index);removed++;}
+      for(const assignment of assignments)if(!assignment.port){node[spec.add](assignment.item.id || `${spec.name}${node[spec.key].length+1}`,'entity');assignment.port=node[spec.key][node[spec.key].length-1];assignment.port.portId=assignment.portId;added++;}
+      for(const [index,port] of node[spec.key].entries()){port.name=`${spec.name}${index+1}`;port.type='entity';port.channel='entity';port.flowManaged=true;}
+    }
+    node.setDirtyCanvas?.(true,true);
+    return {inputs:node.inputs.length,outputs:node.outputs.length,removed,added};
+  }
+  function syncGraphPorts(graph){
+    const result={nodes:0,removed:0,added:0};
+    for(const node of graph?._nodes || [])if(node?.type==='factory/basic'){
+      const change=syncPortsFromFlow(node);result.nodes++;result.removed+=change.removed;result.added+=change.added;
+    }
+    return result;
+  }
   const templates={source:['Source',0,1],sink:['Sink',1,0],pack:['Palletizing',2,1],merge:['Palletizing',2,1],unpack:['DePalletizing',1,2],router:['Router',1,2],machine:['Machine',1,1],inspection:['Inspection',1,1],buffer:['Buffer',1,1],conveyor:['Conveyor',1,1],shuttle:['Shuttle',1,1],basic:['Equipment',1,1]};
   class BasicNode extends root.LiteGraph.LGraphNode{
     constructor(){
@@ -56,7 +88,7 @@
     for(const node of data.nodes)if(node.type==='factory/basic' && (node.properties?.basicNodeVersion!==3 || node.properties?.flow?.version!==2))throw new Error('Unsupported node format. All equipment must use Flow v2.');
     return data;
   }
-  App.ensureBasicNodePortIds=ensurePorts;App.applyBasicTemplate=(node,kind)=>node.applyTemplate(kind);App.basicNodeBehavior=node=>node?.properties?.role || 'equipment';
+  App.ensureBasicNodePortIds=ensurePorts;App.syncBasicNodePortsFromFlow=syncPortsFromFlow;App.syncBasicNodePortsForGraph=syncGraphPorts;App.applyBasicTemplate=(node,kind)=>node.applyTemplate(kind);App.basicNodeBehavior=node=>node?.properties?.role || 'equipment';
   App.assertFlowFileFormat=assertFormat;
   App.prepareSerializedGraphForSave=data=>({data:{...model.clone(data),__factSimFormat:2}});
   root.BasicNode=BasicNode;

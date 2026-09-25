@@ -35,7 +35,7 @@ Recoveryの戻り信号も同じJoinに接続できます。その入力にはID
 
 outPort へ続く Fork / entityRouter の連なりでは、全出力の後工程が受け取れるまで待ちます。待機中には複製も部分出力も行わず、全出力の搬送と Recovery を同じ時刻に開始します。Fork のノード内には、受け取り可能な出力数も表示します。通常の「outPort 1本＋Recovery 1本」のサイクルは、ワークを増やしません。
 
-ノード本体の右クリックメニューで Join の入力、Fork の出力、entityRouter の入出力を増減できます。`Remove inPort` / `Remove outPort` は末尾のポートと接続線を削除します。Join の入力は2個、Fork の出力は2個、entityRouter の入出力は各1個を最小として残します。開始後の構造変更では実行状態を自動で初期化します。複数の Recovery を Fork から開始した場合、Join はすべての完了を待ちます。
+ノード本体の右クリックメニューで Join の入力、Fork の出力、entityRouter の入出力を増減できます。`Remove IN` / `Remove OUT` は末尾のポートと接続線を削除します。Join の入力は2個、Fork の出力は2個、entityRouter の入出力は各1個を最小として残します。開始後の構造変更では実行状態を自動で初期化します。複数の Recovery を Fork から開始した場合、Join はすべての完了を待ちます。
 
 ### 線の接続・付け替え
 

@@ -34,6 +34,15 @@ function tap(port){const viewport=port.closest('.flowViewport');port.onpointerdo
 function dragPort(port,target,shiftKey=false){const viewport=port.closest('.flowViewport');port.onpointerdown(event(port,{shiftKey}));document.dropTarget=target;viewport.onpointermove(event(port,{clientX:80,clientY:40}));viewport.onpointerup(event(port,{clientX:80,clientY:40}));}
 const results=[];
 function test(name,fn){try{frames.length=0;fn();results.push({name,ok:true});}catch(e){results.push({name,ok:false,error:e.stack});}}
+test('Connector labels use IN and OUT while serialized port IDs stay compatible',()=>{
+ const e=editor();
+ assert.equal(e.port('process1','inputs').querySelector('.flowPortLabel').textContent,'IN');
+ assert.equal(e.port('join1','inputs','inPort2').querySelector('.flowPortLabel').textContent,'IN2');
+ assert.equal(e.port('fork1','outputs','outPort2').querySelector('.flowPortLabel').textContent,'OUT2');
+ assert.equal(App.FlowModel.portLabel('parentInPort'),'Parent IN');
+ assert.equal(App.FlowModel.portLabel('childOutPort'),'Child OUT');
+ assert.equal(e.n.properties.flow.nodes.find(n=>n.id==='process1').inputs[0].id,'inPort');
+});
 test('Dragging replaces an occupied output and input in one commit',()=>{
  const e=editor();dragPort(e.port('inPort1','outputs'),e.port('process1','inputs'));
  const links=e.n.properties.flow.links;assert.equal(links.filter(l=>l.from==='inPort1').length,1);assert.equal(links.filter(l=>l.to==='process1').length,1);assert(links.some(l=>l.from==='inPort1'&&l.to==='process1'));assert(!links.some(l=>l.from==='join1'&&l.to==='process1'));
@@ -88,28 +97,28 @@ test('Dropping near a compatible port snaps to it without requiring a direct hit
 });
 test('Removing added Join/Fork ports deletes only their wires and re-add uses a fresh ID',()=>{
  for(const [id,direction,prefix] of [['join1','inputs','inPort'],['fork1','outputs','outPort']]){
-  const e=editor();menuAction(e,id,'Add '+prefix).onclick();
+  const connectorLabel=direction==='inputs'?'IN':'OUT',e=editor();menuAction(e,id,'Add '+connectorLabel).onclick();
   const extra=e.port(id,direction,prefix+'3');
   dragPort(extra,direction==='inputs' ? e.port('inPort1','outputs') : e.port('outPort1','inputs'),true);
   const affected=l=>direction==='inputs' ? l.to===id&&l.input===prefix+'3' : l.from===id&&l.output===prefix+'3';
   assert(e.n.properties.flow.links.some(affected));const kept=e.n.properties.flow.links.filter(l=>!affected(l));
-  menuAction(e,id,'Remove '+prefix).onclick();assert.deepEqual(e.n.properties.flow.links,kept);
-  assert.equal(e.port(id,direction,prefix+'3'),undefined);assert(menuAction(e,id,'Remove '+prefix).disabled);
-  menuAction(e,id,'Add '+prefix).onclick();assert(e.port(id,direction,prefix+'4'));
+  menuAction(e,id,'Remove '+connectorLabel).onclick();assert.deepEqual(e.n.properties.flow.links,kept);
+  assert.equal(e.port(id,direction,prefix+'3'),undefined);assert(menuAction(e,id,'Remove '+connectorLabel).disabled);
+  menuAction(e,id,'Add '+connectorLabel).onclick();assert(e.port(id,direction,prefix+'4'));
  }
 });
 test('Router ports can shrink to one per side, clearing connections and preserving other port IDs',()=>{
  const e=editor('router'),id=e.n.properties.flow.nodes.find(n=>n.kind==='entityRouter').id;
  const original=e.n.properties.flow.nodes.find(n=>n.id===id).outputs[0].id;
- menuAction(e,id,'Remove outPort').onclick();
+ menuAction(e,id,'Remove OUT').onclick();
  assert.deepEqual(e.n.properties.flow.nodes.find(n=>n.id===id).outputs.map(p=>p.id),[original]);
  assert(!e.n.properties.flow.links.some(l=>l.from===id&&l.output==='outPort2'));
- assert(menuAction(e,id,'Remove outPort').disabled);assert(menuAction(e,id,'Remove inPort').disabled);
- menuAction(e,id,'Add inPort').onclick();menuAction(e,id,'Remove inPort').onclick();assert(menuAction(e,id,'Remove inPort').disabled);
- menuAction(e,id,'Add outPort').onclick();assert(e.port(id,'outputs','outPort3'),'Imported ports without a counter must not reuse the removed ID');
+ assert(menuAction(e,id,'Remove OUT').disabled);assert(menuAction(e,id,'Remove IN').disabled);
+ menuAction(e,id,'Add IN').onclick();menuAction(e,id,'Remove IN').onclick();assert(menuAction(e,id,'Remove IN').disabled);
+ menuAction(e,id,'Add OUT').onclick();assert(e.port(id,'outputs','outPort3'),'Imported ports without a counter must not reuse the removed ID');
 });
 test('Fixed ports and minimum Join/Fork ports cannot be removed',()=>{
- const e=editor();for(const id of ['inPort1','outPort1','process1','recovery1','join1','fork1'])for(const label of ['Remove inPort','Remove outPort'])assert(menuAction(e,id,label).disabled,`${id}: ${label}`);
+ const e=editor();for(const id of ['inPort1','outPort1','process1','recovery1','join1','fork1'])for(const label of ['Remove IN','Remove OUT'])assert(menuAction(e,id,label).disabled,`${id}: ${label}`);
 });
 test('Port removal during Process or Recovery resets the run and removes the port',()=>{
  for(const time of [0,2000]){
@@ -118,7 +127,7 @@ test('Port removal during Process or Recovery resets the run and removes the por
   j.inputs.push({id:'inPort3'});fork.outputs.push({id:'outPort3'});App.FlowModel.connect(f,fork,r,2);App.FlowModel.connect(f,r,j,0,2);
  });
  const s=source(e.g,'a',1),sink=node(e.g,'sink');s.connect(0,e.n,0);e.n.connect(0,sink,0);
- at(e.g,0);at(e.g,time);menuAction(e,'fork1','Remove outPort').onclick();assert.equal(e.n.properties.flow.nodes.find(n=>n.id==='fork1').outputs.length,2);assert.match(e.notice(),/reset to 0 s/);assert.equal(simNow(),0);assert.equal(App.FlowRuntime.isActive(e.n),false);
+ at(e.g,0);at(e.g,time);menuAction(e,'fork1','Remove OUT').onclick();assert.equal(e.n.properties.flow.nodes.find(n=>n.id==='fork1').outputs.length,2);assert.match(e.notice(),/reset to 0 s/);assert.equal(simNow(),0);assert.equal(App.FlowRuntime.isActive(e.n),false);
  }
 });
 test('Cancelled, invalid and unchanged wiring preserve runtime; moving and timing edits do too',()=>{
@@ -144,6 +153,18 @@ test('Wiring while running stops the engine, restores Initial Contents and clear
 test('Boundary port deletion after Start updates the same equipment and disconnects external links',()=>{
  const e=editor(),s=source(e.g,'a',1);s.connect(0,e.n,0);at(e.g,0);
  menuAction(e,'inPort1','Delete').onclick();assert.equal(e.n.inputs.length,0);assert.equal(s.outputs[0].links?.length||0,0);assert(!e.n.properties.flow.nodes.some(n=>n.id==='inPort1'));assert.equal(e.g.getNodeById(e.n.id),e.n);assert.equal(simNow(),0);
+});
+test('Adding, duplicating and deleting Flow boundary nodes keeps equipment port counts synchronized',()=>{
+ const e=editor(),select=walk(e.host).find(x=>x.attributes['aria-label']==='Flow node type'),add=walk(e.host).find(x=>x.tagName==='BUTTON'&&x.textContent==='Add');
+ select.value='inPort';add.onclick();assert.equal(e.n.inputs.length,2);assert.equal(e.n.properties.flow.nodes.filter(n=>n.kind==='inPort').length,2);
+ const added=e.n.properties.flow.nodes.filter(n=>n.kind==='inPort').at(-1);menuAction(e,added.id,'Duplicate').onclick();assert.equal(e.n.inputs.length,3);assert.equal(e.n.properties.flow.nodes.filter(n=>n.kind==='inPort').length,3);
+ menuAction(e,added.id,'Delete').onclick();assert.equal(e.n.inputs.length,2);assert.equal(e.n.properties.flow.nodes.filter(n=>n.kind==='inPort').length,2);
+});
+test('Loading removes a stale middle port without losing a later port connection',()=>{
+ const g=graph(),n=node(g),s=source(g);n.addInput('stale','entity');n.addInput('kept','entity');App.ensureBasicNodePortIds(n);
+ const keptId=n.inputs[2].portId;App.FlowModel.add(n.properties.flow,'inPort',{portId:keptId});s.connect(0,n,2);
+ const linkId=n.inputs[2].link;App.repairGraphLinks(g);
+ assert.equal(n.inputs.length,2);assert.equal(n.inputs[1].portId,keptId);assert.equal(n.inputs[1].link,linkId);assert.equal(g.links[linkId].target_slot,1);
 });
 test('Context menu stays inside the editor when opened at its bottom right corner',()=>{
  const e=editor(),card=walk(e.host).find(x=>x.dataset.flowId==='fork1');card.oncontextmenu(event(card,{clientX:1399,clientY:499}));

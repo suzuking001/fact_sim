@@ -1,5 +1,9 @@
 [
   {
+    "name": "Connector labels use IN and OUT while serialized port IDs stay compatible",
+    "ok": true
+  },
+  {
     "name": "Dragging replaces an occupied output and input in one commit",
     "ok": true
   },
@@ -73,6 +77,14 @@
   },
   {
     "name": "Boundary port deletion after Start updates the same equipment and disconnects external links",
+    "ok": true
+  },
+  {
+    "name": "Adding, duplicating and deleting Flow boundary nodes keeps equipment port counts synchronized",
+    "ok": true
+  },
+  {
+    "name": "Loading removes a stale middle port without losing a later port connection",
     "ok": true
   },
   {
