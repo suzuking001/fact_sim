@@ -101,6 +101,12 @@
   const originalConfigure = LiteGraph.LGraphNode.prototype.configure;
   LiteGraph.LGraphNode.prototype.configure = function(info){
     const r = originalConfigure ? originalConfigure.call(this, info) : undefined;
+    const props = this.properties;
+    if(props && typeof props === 'object'
+      && !Object.prototype.hasOwnProperty.call(props, 'flipIO')
+      && (props.basicNodeVersion !== undefined || props.sigEnabled !== undefined || props.role !== undefined)){
+      props.flipIO = false;
+    }
     if(this.__flipResizePatched && this.properties && Object.prototype.hasOwnProperty.call(this.properties, 'flipIO')){
       if(window.refreshFlipIO) window.refreshFlipIO(this);
     }

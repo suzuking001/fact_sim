@@ -3,231 +3,6 @@
   "last_link_id": 344,
   "nodes": [
     {
-      "id": 7,
-      "type": "factory/basic",
-      "pos": [
-        8092.45458984375,
-        1669.462158203125
-      ],
-      "size": [
-        230,
-        110
-      ],
-      "order": 21,
-      "inputs": [
-        {
-          "name": "inPort1",
-          "type": "entity",
-          "link": 29,
-          "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "outputs": [
-        {
-          "name": "outPort1",
-          "type": "entity",
-          "links": [
-            46
-          ],
-          "slot_index": 0,
-          "__lastSet": null,
-          "__animToken": null,
-          "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "title": "Equipment",
-      "properties": {
-        "basicNodeVersion": 3,
-        "role": "equipment",
-        "initialContents": [],
-        "flow": {
-          "version": 2,
-          "nodes": [
-            {
-              "id": "inPort1",
-              "kind": "inPort",
-              "config": {
-                "portId": "in-1"
-              },
-              "inputs": [],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                16,
-                16
-              ]
-            },
-            {
-              "id": "outPort1",
-              "kind": "outPort",
-              "config": {
-                "portId": "out-1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [],
-              "pos": [
-                1056,
-                16
-              ]
-            },
-            {
-              "id": "process1",
-              "kind": "process",
-              "config": {
-                "seconds": 4
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                536,
-                16
-              ]
-            },
-            {
-              "id": "recovery1",
-              "kind": "recovery",
-              "config": {
-                "seconds": 2
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                536,
-                196
-              ],
-              "flipIO": true
-            },
-            {
-              "id": "join1",
-              "kind": "join",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort1"
-                },
-                {
-                  "id": "inPort2"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                276,
-                16
-              ]
-            },
-            {
-              "id": "fork1",
-              "kind": "fork",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort1"
-                },
-                {
-                  "id": "outPort2"
-                }
-              ],
-              "pos": [
-                796,
-                16
-              ]
-            }
-          ],
-          "links": [
-            {
-              "from": "inPort1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort1"
-            },
-            {
-              "from": "process1",
-              "output": "outPort",
-              "to": "fork1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort1",
-              "to": "outPort1",
-              "input": "inPort"
-            },
-            {
-              "from": "join1",
-              "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort2",
-              "to": "recovery1",
-              "input": "inPort"
-            },
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ],
-          "counters": {
-            "inPort": 1,
-            "outPort": 1,
-            "process": 1,
-            "recovery": 1,
-            "join": 1,
-            "fork": 1
-          },
-          "__signalCache": {},
-          "__feedbackCache": [
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ]
-        }
-      }
-    },
-    {
       "id": 16,
       "type": "factory/basic",
       "pos": [
@@ -1420,1306 +1195,6 @@
         },
         "flipIO": true,
         "initialFlowNodeId": "entityRouter1"
-      }
-    },
-    {
-      "id": 26,
-      "type": "factory/basic",
-      "pos": [
-        8289.498046875,
-        1680.934814453125
-      ],
-      "size": [
-        230,
-        110
-      ],
-      "order": 31,
-      "inputs": [
-        {
-          "name": "inPort1",
-          "type": "entity",
-          "link": 46,
-          "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "outputs": [
-        {
-          "name": "outPort1",
-          "type": "entity",
-          "links": [
-            47
-          ],
-          "slot_index": 0,
-          "__lastSet": null,
-          "__animToken": null,
-          "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "title": "Shuttle Stage 1",
-      "properties": {
-        "basicNodeVersion": 3,
-        "role": "equipment",
-        "initialContents": [
-          {
-            "typeId": "type-a",
-            "quantity": 1,
-            "load": "empty",
-            "children": []
-          }
-        ],
-        "flow": {
-          "version": 2,
-          "nodes": [
-            {
-              "id": "inPort1",
-              "kind": "inPort",
-              "config": {
-                "portId": "in-1"
-              },
-              "inputs": [],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                16,
-                16
-              ]
-            },
-            {
-              "id": "outPort1",
-              "kind": "outPort",
-              "config": {
-                "portId": "out-1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [],
-              "pos": [
-                1316,
-                16
-              ]
-            },
-            {
-              "id": "process1",
-              "kind": "process",
-              "config": {
-                "seconds": 5
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                536,
-                16
-              ]
-            },
-            {
-              "id": "recovery1",
-              "kind": "recovery",
-              "config": {
-                "seconds": 0
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                666,
-                196
-              ],
-              "flipIO": true
-            },
-            {
-              "id": "syncroJudgment1",
-              "kind": "syncroJudgment",
-              "config": {
-                "groupId": "syncroGroup1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                796,
-                16
-              ]
-            },
-            {
-              "id": "join1",
-              "kind": "join",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort1"
-                },
-                {
-                  "id": "inPort2"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                276,
-                16
-              ]
-            },
-            {
-              "id": "fork1",
-              "kind": "fork",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort1"
-                },
-                {
-                  "id": "outPort2"
-                }
-              ],
-              "pos": [
-                1056,
-                16
-              ]
-            }
-          ],
-          "links": [
-            {
-              "from": "inPort1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort1"
-            },
-            {
-              "from": "process1",
-              "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort1",
-              "to": "outPort1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "fork1",
-              "input": "inPort"
-            },
-            {
-              "from": "join1",
-              "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort2",
-              "to": "recovery1",
-              "input": "inPort"
-            },
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ],
-          "counters": {
-            "inPort": 1,
-            "outPort": 1,
-            "process": 1,
-            "recovery": 1,
-            "syncroJudgment": 1,
-            "join": 1,
-            "fork": 1
-          },
-          "__signalCache": {},
-          "__feedbackCache": [
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": 27,
-      "type": "factory/basic",
-      "pos": [
-        8502.4482421875,
-        1689.507080078125
-      ],
-      "size": [
-        230,
-        110
-      ],
-      "order": 32,
-      "inputs": [
-        {
-          "name": "inPort1",
-          "type": "entity",
-          "link": 47,
-          "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "outputs": [
-        {
-          "name": "outPort1",
-          "type": "entity",
-          "links": [
-            48
-          ],
-          "slot_index": 0,
-          "__lastSet": null,
-          "__animToken": null,
-          "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "title": "Shuttle Stage 2",
-      "properties": {
-        "basicNodeVersion": 3,
-        "role": "equipment",
-        "initialContents": [
-          {
-            "typeId": "type-a",
-            "quantity": 1,
-            "load": "empty",
-            "children": []
-          }
-        ],
-        "flow": {
-          "version": 2,
-          "nodes": [
-            {
-              "id": "inPort1",
-              "kind": "inPort",
-              "config": {
-                "portId": "in-1"
-              },
-              "inputs": [],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                16,
-                16
-              ]
-            },
-            {
-              "id": "outPort1",
-              "kind": "outPort",
-              "config": {
-                "portId": "out-1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [],
-              "pos": [
-                1316,
-                16
-              ]
-            },
-            {
-              "id": "process1",
-              "kind": "process",
-              "config": {
-                "seconds": 5
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                536,
-                16
-              ]
-            },
-            {
-              "id": "recovery1",
-              "kind": "recovery",
-              "config": {
-                "seconds": 0
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                666,
-                196
-              ],
-              "flipIO": true
-            },
-            {
-              "id": "syncroJudgment1",
-              "kind": "syncroJudgment",
-              "config": {
-                "groupId": "syncroGroup1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                796,
-                16
-              ]
-            },
-            {
-              "id": "join1",
-              "kind": "join",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort1"
-                },
-                {
-                  "id": "inPort2"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                276,
-                16
-              ]
-            },
-            {
-              "id": "fork1",
-              "kind": "fork",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort1"
-                },
-                {
-                  "id": "outPort2"
-                }
-              ],
-              "pos": [
-                1056,
-                16
-              ]
-            }
-          ],
-          "links": [
-            {
-              "from": "inPort1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort1"
-            },
-            {
-              "from": "process1",
-              "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort1",
-              "to": "outPort1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "fork1",
-              "input": "inPort"
-            },
-            {
-              "from": "join1",
-              "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort2",
-              "to": "recovery1",
-              "input": "inPort"
-            },
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ],
-          "counters": {
-            "inPort": 1,
-            "outPort": 1,
-            "process": 1,
-            "recovery": 1,
-            "syncroJudgment": 1,
-            "join": 1,
-            "fork": 1
-          },
-          "__signalCache": {},
-          "__feedbackCache": [
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": 28,
-      "type": "factory/basic",
-      "pos": [
-        8708.447265625,
-        1683.707275390625
-      ],
-      "size": [
-        230,
-        110
-      ],
-      "order": 33,
-      "inputs": [
-        {
-          "name": "inPort1",
-          "type": "entity",
-          "link": 48,
-          "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "outputs": [
-        {
-          "name": "outPort1",
-          "type": "entity",
-          "links": [
-            49
-          ],
-          "slot_index": 0,
-          "__lastSet": null,
-          "__animToken": null,
-          "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "title": "Shuttle Stage 3",
-      "properties": {
-        "basicNodeVersion": 3,
-        "role": "equipment",
-        "initialContents": [
-          {
-            "typeId": "type-a",
-            "quantity": 1,
-            "load": "empty",
-            "children": []
-          }
-        ],
-        "flow": {
-          "version": 2,
-          "nodes": [
-            {
-              "id": "inPort1",
-              "kind": "inPort",
-              "config": {
-                "portId": "in-1"
-              },
-              "inputs": [],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                16,
-                16
-              ]
-            },
-            {
-              "id": "outPort1",
-              "kind": "outPort",
-              "config": {
-                "portId": "out-1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [],
-              "pos": [
-                1316,
-                16
-              ]
-            },
-            {
-              "id": "process1",
-              "kind": "process",
-              "config": {
-                "seconds": 20
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                536,
-                16
-              ]
-            },
-            {
-              "id": "recovery1",
-              "kind": "recovery",
-              "config": {
-                "seconds": 0
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                666,
-                196
-              ],
-              "flipIO": true
-            },
-            {
-              "id": "syncroJudgment1",
-              "kind": "syncroJudgment",
-              "config": {
-                "groupId": "syncroGroup1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                796,
-                16
-              ]
-            },
-            {
-              "id": "join1",
-              "kind": "join",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort1"
-                },
-                {
-                  "id": "inPort2"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                276,
-                16
-              ]
-            },
-            {
-              "id": "fork1",
-              "kind": "fork",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort1"
-                },
-                {
-                  "id": "outPort2"
-                }
-              ],
-              "pos": [
-                1056,
-                16
-              ]
-            }
-          ],
-          "links": [
-            {
-              "from": "inPort1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort1"
-            },
-            {
-              "from": "process1",
-              "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort1",
-              "to": "outPort1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "fork1",
-              "input": "inPort"
-            },
-            {
-              "from": "join1",
-              "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort2",
-              "to": "recovery1",
-              "input": "inPort"
-            },
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ],
-          "counters": {
-            "inPort": 1,
-            "outPort": 1,
-            "process": 1,
-            "recovery": 1,
-            "syncroJudgment": 1,
-            "join": 1,
-            "fork": 1
-          },
-          "__signalCache": {},
-          "__feedbackCache": [
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": 29,
-      "type": "factory/basic",
-      "pos": [
-        8888.4462890625,
-        1678.707275390625
-      ],
-      "size": [
-        230,
-        110
-      ],
-      "order": 34,
-      "inputs": [
-        {
-          "name": "inPort1",
-          "type": "entity",
-          "link": 49,
-          "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "outputs": [
-        {
-          "name": "outPort1",
-          "type": "entity",
-          "links": [
-            50
-          ],
-          "slot_index": 0,
-          "__lastSet": null,
-          "__animToken": null,
-          "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "title": "Shuttle Stage 4",
-      "properties": {
-        "basicNodeVersion": 3,
-        "role": "equipment",
-        "initialContents": [
-          {
-            "typeId": "type-a",
-            "quantity": 1,
-            "load": "empty",
-            "children": []
-          }
-        ],
-        "flow": {
-          "version": 2,
-          "nodes": [
-            {
-              "id": "inPort1",
-              "kind": "inPort",
-              "config": {
-                "portId": "in-1"
-              },
-              "inputs": [],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                16,
-                16
-              ]
-            },
-            {
-              "id": "outPort1",
-              "kind": "outPort",
-              "config": {
-                "portId": "out-1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [],
-              "pos": [
-                1316,
-                16
-              ]
-            },
-            {
-              "id": "process1",
-              "kind": "process",
-              "config": {
-                "seconds": 5
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                536,
-                16
-              ]
-            },
-            {
-              "id": "recovery1",
-              "kind": "recovery",
-              "config": {
-                "seconds": 0
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                666,
-                196
-              ],
-              "flipIO": true
-            },
-            {
-              "id": "syncroJudgment1",
-              "kind": "syncroJudgment",
-              "config": {
-                "groupId": "syncroGroup1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                796,
-                16
-              ]
-            },
-            {
-              "id": "join1",
-              "kind": "join",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort1"
-                },
-                {
-                  "id": "inPort2"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                276,
-                16
-              ]
-            },
-            {
-              "id": "fork1",
-              "kind": "fork",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort1"
-                },
-                {
-                  "id": "outPort2"
-                }
-              ],
-              "pos": [
-                1056,
-                16
-              ]
-            }
-          ],
-          "links": [
-            {
-              "from": "inPort1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort1"
-            },
-            {
-              "from": "process1",
-              "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort1",
-              "to": "outPort1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "fork1",
-              "input": "inPort"
-            },
-            {
-              "from": "join1",
-              "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort2",
-              "to": "recovery1",
-              "input": "inPort"
-            },
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ],
-          "counters": {
-            "inPort": 1,
-            "outPort": 1,
-            "process": 1,
-            "recovery": 1,
-            "syncroJudgment": 1,
-            "join": 1,
-            "fork": 1
-          },
-          "__signalCache": {},
-          "__feedbackCache": [
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": 30,
-      "type": "factory/basic",
-      "pos": [
-        9071.8671875,
-        1686.368408203125
-      ],
-      "size": [
-        230,
-        110
-      ],
-      "order": 35,
-      "inputs": [
-        {
-          "name": "inPort1",
-          "type": "entity",
-          "link": 50,
-          "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "outputs": [
-        {
-          "name": "outPort1",
-          "type": "entity",
-          "links": [
-            51
-          ],
-          "slot_index": 0,
-          "__lastSet": null,
-          "__animToken": null,
-          "portId": "out-1",
-          "channel": "entity",
-          "flowManaged": true
-        }
-      ],
-      "title": "Shuttle Stage 5",
-      "properties": {
-        "basicNodeVersion": 3,
-        "role": "equipment",
-        "initialContents": [
-          {
-            "typeId": "type-a",
-            "quantity": 1,
-            "load": "empty",
-            "children": []
-          }
-        ],
-        "flow": {
-          "version": 2,
-          "nodes": [
-            {
-              "id": "inPort1",
-              "kind": "inPort",
-              "config": {
-                "portId": "in-1"
-              },
-              "inputs": [],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                16,
-                16
-              ]
-            },
-            {
-              "id": "outPort1",
-              "kind": "outPort",
-              "config": {
-                "portId": "out-1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [],
-              "pos": [
-                1316,
-                16
-              ]
-            },
-            {
-              "id": "process1",
-              "kind": "process",
-              "config": {
-                "seconds": 5
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                536,
-                16
-              ]
-            },
-            {
-              "id": "recovery1",
-              "kind": "recovery",
-              "config": {
-                "seconds": 0
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                666,
-                196
-              ],
-              "flipIO": true
-            },
-            {
-              "id": "syncroJudgment1",
-              "kind": "syncroJudgment",
-              "config": {
-                "groupId": "syncroGroup1"
-              },
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                796,
-                16
-              ]
-            },
-            {
-              "id": "join1",
-              "kind": "join",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort1"
-                },
-                {
-                  "id": "inPort2"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                276,
-                16
-              ]
-            },
-            {
-              "id": "fork1",
-              "kind": "fork",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "outPort1"
-                },
-                {
-                  "id": "outPort2"
-                }
-              ],
-              "pos": [
-                1056,
-                16
-              ]
-            }
-          ],
-          "links": [
-            {
-              "from": "inPort1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort1"
-            },
-            {
-              "from": "process1",
-              "output": "outPort",
-              "to": "syncroJudgment1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort1",
-              "to": "outPort1",
-              "input": "inPort"
-            },
-            {
-              "from": "syncroJudgment1",
-              "output": "outPort",
-              "to": "fork1",
-              "input": "inPort"
-            },
-            {
-              "from": "join1",
-              "output": "outPort",
-              "to": "process1",
-              "input": "inPort"
-            },
-            {
-              "from": "fork1",
-              "output": "outPort2",
-              "to": "recovery1",
-              "input": "inPort"
-            },
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ],
-          "counters": {
-            "inPort": 1,
-            "outPort": 1,
-            "process": 1,
-            "recovery": 1,
-            "syncroJudgment": 1,
-            "join": 1,
-            "fork": 1
-          },
-          "__signalCache": {},
-          "__feedbackCache": [
-            {
-              "from": "recovery1",
-              "output": "outPort",
-              "to": "join1",
-              "input": "inPort2"
-            }
-          ]
-        }
       }
     },
     {
@@ -9210,88 +7685,6 @@
               "input": "inPort2"
             }
           ]
-        }
-      }
-    },
-    {
-      "id": 3,
-      "type": "factory/basic",
-      "pos": [
-        9280.8623046875,
-        1679.890869140625
-      ],
-      "size": [
-        230,
-        110
-      ],
-      "order": 18,
-      "inputs": [
-        {
-          "name": "inPort1",
-          "type": "entity",
-          "link": 51,
-          "portId": "in-1",
-          "channel": "entity",
-          "flowManaged": true,
-          "entityRole": "item"
-        }
-      ],
-      "outputs": [],
-      "title": "Sink",
-      "properties": {
-        "basicNodeVersion": 3,
-        "role": "sink",
-        "initialContents": [],
-        "flow": {
-          "version": 2,
-          "nodes": [
-            {
-              "id": "inPort1",
-              "kind": "inPort",
-              "config": {
-                "portId": "in-1"
-              },
-              "inputs": [],
-              "outputs": [
-                {
-                  "id": "outPort"
-                }
-              ],
-              "pos": [
-                16,
-                16
-              ]
-            },
-            {
-              "id": "entitySink1",
-              "kind": "entitySink",
-              "config": {},
-              "inputs": [
-                {
-                  "id": "inPort"
-                }
-              ],
-              "outputs": [],
-              "pos": [
-                276,
-                16
-              ]
-            }
-          ],
-          "links": [
-            {
-              "from": "inPort1",
-              "output": "outPort",
-              "to": "entitySink1",
-              "input": "inPort"
-            }
-          ],
-          "counters": {
-            "inPort": 1,
-            "entitySink": 1
-          },
-          "__signalCache": {},
-          "__feedbackCache": []
         }
       }
     },
@@ -35024,6 +33417,1639 @@
         },
         "initialFlowNodeId": "inPort2"
       }
+    },
+    {
+      "id": 3,
+      "type": "factory/basic",
+      "pos": [
+        10252.3408203125,
+        1677.9622802734375
+      ],
+      "size": [
+        300,
+        228
+      ],
+      "order": 18,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 51,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true,
+          "entityRole": "item"
+        }
+      ],
+      "outputs": [],
+      "title": "Sink",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "sink",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                -203.9999745686849,
+                12.666666666666666
+              ]
+            },
+            {
+              "id": "entitySink1",
+              "kind": "entitySink",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                356.6666564941406,
+                10.666671752929688
+              ]
+            },
+            {
+              "id": "sensor1",
+              "kind": "sensor",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                82.58331553141278,
+                7.499987284342453
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "sensor1",
+              "input": "inPort"
+            },
+            {
+              "from": "sensor1",
+              "output": "outPort",
+              "to": "entitySink1",
+              "input": "inPort"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "entitySink": 1,
+            "sensor": 1
+          },
+          "__signalCache": {},
+          "__feedbackCache": []
+        }
+      }
+    },
+    {
+      "id": 30,
+      "type": "factory/basic",
+      "pos": [
+        9860.88671875,
+        1680.5738525390625
+      ],
+      "size": [
+        230,
+        110
+      ],
+      "order": 35,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 50,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            51
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "title": "Shuttle Stage 5",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "initialContents": [
+          {
+            "typeId": "type-a",
+            "quantity": 1,
+            "load": "empty",
+            "children": []
+          }
+        ],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                16
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                666,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "syncroJudgment1",
+              "kind": "syncroJudgment",
+              "config": {
+                "groupId": "syncroGroup1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort1"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1,
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
+          },
+          "__signalCache": {},
+          "__feedbackCache": [
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 29,
+      "type": "factory/basic",
+      "pos": [
+        9532.1259765625,
+        1679.1046142578125
+      ],
+      "size": [
+        230,
+        110
+      ],
+      "order": 34,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 49,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            50
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "title": "Shuttle Stage 4",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "initialContents": [
+          {
+            "typeId": "type-a",
+            "quantity": 1,
+            "load": "empty",
+            "children": []
+          }
+        ],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                16
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                666,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "syncroJudgment1",
+              "kind": "syncroJudgment",
+              "config": {
+                "groupId": "syncroGroup1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort1"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1,
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
+          },
+          "__signalCache": {},
+          "__feedbackCache": [
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 28,
+      "type": "factory/basic",
+      "pos": [
+        9221.9140625,
+        1683.2891845703125
+      ],
+      "size": [
+        230,
+        110
+      ],
+      "order": 33,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 48,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            49
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "title": "Shuttle Stage 3",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "initialContents": [
+          {
+            "typeId": "type-a",
+            "quantity": 1,
+            "load": "empty",
+            "children": []
+          }
+        ],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                16
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 20
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                666,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "syncroJudgment1",
+              "kind": "syncroJudgment",
+              "config": {
+                "groupId": "syncroGroup1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort1"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1,
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
+          },
+          "__signalCache": {},
+          "__feedbackCache": [
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 27,
+      "type": "factory/basic",
+      "pos": [
+        8894.68359375,
+        1679.6968994140625
+      ],
+      "size": [
+        230,
+        110
+      ],
+      "order": 32,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 47,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            48
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "title": "Shuttle Stage 2",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "initialContents": [
+          {
+            "typeId": "type-a",
+            "quantity": 1,
+            "load": "empty",
+            "children": []
+          }
+        ],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                16
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                666,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "syncroJudgment1",
+              "kind": "syncroJudgment",
+              "config": {
+                "groupId": "syncroGroup1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort1"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1,
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
+          },
+          "__signalCache": {},
+          "__feedbackCache": [
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 26,
+      "type": "factory/basic",
+      "pos": [
+        8549.4326171875,
+        1675.7161865234375
+      ],
+      "size": [
+        230,
+        110
+      ],
+      "order": 31,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 46,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            47
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "title": "Shuttle Stage 1",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "initialContents": [
+          {
+            "typeId": "type-a",
+            "quantity": 1,
+            "load": "empty",
+            "children": []
+          }
+        ],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1316,
+                16
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 5
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 0
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                666,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "syncroJudgment1",
+              "kind": "syncroJudgment",
+              "config": {
+                "groupId": "syncroGroup1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                1056,
+                16
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort1"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "syncroJudgment1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "syncroJudgment1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1,
+            "syncroJudgment": 1,
+            "join": 1,
+            "fork": 1
+          },
+          "__signalCache": {},
+          "__feedbackCache": [
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "factory/basic",
+      "pos": [
+        8245,
+        1675
+      ],
+      "size": [
+        230,
+        110
+      ],
+      "order": 21,
+      "inputs": [
+        {
+          "name": "inPort1",
+          "type": "entity",
+          "link": 29,
+          "portId": "in-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "outPort1",
+          "type": "entity",
+          "links": [
+            46
+          ],
+          "slot_index": 0,
+          "__lastSet": null,
+          "__animToken": null,
+          "portId": "out-1",
+          "channel": "entity",
+          "flowManaged": true
+        }
+      ],
+      "title": "Equipment",
+      "properties": {
+        "basicNodeVersion": 3,
+        "role": "equipment",
+        "initialContents": [],
+        "flow": {
+          "version": 2,
+          "nodes": [
+            {
+              "id": "inPort1",
+              "kind": "inPort",
+              "config": {
+                "portId": "in-1"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                16,
+                16
+              ]
+            },
+            {
+              "id": "outPort1",
+              "kind": "outPort",
+              "config": {
+                "portId": "out-1"
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [],
+              "pos": [
+                1056,
+                16
+              ]
+            },
+            {
+              "id": "process1",
+              "kind": "process",
+              "config": {
+                "seconds": 4
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                16
+              ]
+            },
+            {
+              "id": "recovery1",
+              "kind": "recovery",
+              "config": {
+                "seconds": 2
+              },
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                536,
+                196
+              ],
+              "flipIO": true
+            },
+            {
+              "id": "join1",
+              "kind": "join",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort1"
+                },
+                {
+                  "id": "inPort2"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort"
+                }
+              ],
+              "pos": [
+                276,
+                16
+              ]
+            },
+            {
+              "id": "fork1",
+              "kind": "fork",
+              "config": {},
+              "inputs": [
+                {
+                  "id": "inPort"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "outPort1"
+                },
+                {
+                  "id": "outPort2"
+                }
+              ],
+              "pos": [
+                796,
+                16
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "inPort1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort1"
+            },
+            {
+              "from": "process1",
+              "output": "outPort",
+              "to": "fork1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort1",
+              "to": "outPort1",
+              "input": "inPort"
+            },
+            {
+              "from": "join1",
+              "output": "outPort",
+              "to": "process1",
+              "input": "inPort"
+            },
+            {
+              "from": "fork1",
+              "output": "outPort2",
+              "to": "recovery1",
+              "input": "inPort"
+            },
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ],
+          "counters": {
+            "inPort": 1,
+            "outPort": 1,
+            "process": 1,
+            "recovery": 1,
+            "join": 1,
+            "fork": 1
+          },
+          "__signalCache": {},
+          "__feedbackCache": [
+            {
+              "from": "recovery1",
+              "output": "outPort",
+              "to": "join1",
+              "input": "inPort2"
+            }
+          ]
+        }
+      }
     }
   ],
   "links": [
@@ -36492,10 +36518,10 @@
   "__factSimView": {
     "version": 1,
     "graph": {
-      "scale": 0.13513057093103975,
+      "scale": 0.35049389948139237,
       "offset": [
-        4007.6636506436225,
-        1605.3744923644554
+        -702.8251237700326,
+        -986.4311424746629
       ]
     },
     "ui": {

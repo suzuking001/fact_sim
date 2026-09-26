@@ -84,6 +84,10 @@
     "ok": true
   },
   {
+    "name": "Sensor is available from Add and uses stable, never-reused sequential IDs",
+    "ok": true
+  },
+  {
     "name": "Loading removes a stale middle port without losing a later port connection",
     "ok": true
   },

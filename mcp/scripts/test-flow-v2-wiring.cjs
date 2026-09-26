@@ -160,6 +160,10 @@ test('Adding, duplicating and deleting Flow boundary nodes keeps equipment port 
  const added=e.n.properties.flow.nodes.filter(n=>n.kind==='inPort').at(-1);menuAction(e,added.id,'Duplicate').onclick();assert.equal(e.n.inputs.length,3);assert.equal(e.n.properties.flow.nodes.filter(n=>n.kind==='inPort').length,3);
  menuAction(e,added.id,'Delete').onclick();assert.equal(e.n.inputs.length,2);assert.equal(e.n.properties.flow.nodes.filter(n=>n.kind==='inPort').length,2);
 });
+test('Sensor is available from Add and uses stable, never-reused sequential IDs',()=>{
+ const e=editor(),select=walk(e.host).find(x=>x.attributes['aria-label']==='Flow node type'),add=walk(e.host).find(x=>x.tagName==='BUTTON'&&x.textContent==='Add');select.value='sensor';add.onclick();assert(e.n.properties.flow.nodes.some(n=>n.id==='sensor1'&&n.kind==='sensor'));
+ menuAction(e,'sensor1','Duplicate').onclick();assert(e.n.properties.flow.nodes.some(n=>n.id==='sensor2'));menuAction(e,'sensor1','Delete').onclick();add.onclick();assert(e.n.properties.flow.nodes.some(n=>n.id==='sensor3'));assert(!e.n.properties.flow.nodes.some(n=>n.id==='sensor1'));
+});
 test('Loading removes a stale middle port without losing a later port connection',()=>{
  const g=graph(),n=node(g),s=source(g);n.addInput('stale','entity');n.addInput('kept','entity');App.ensureBasicNodePortIds(n);
  const keptId=n.inputs[2].portId;App.FlowModel.add(n.properties.flow,'inPort',{portId:keptId});s.connect(0,n,2);

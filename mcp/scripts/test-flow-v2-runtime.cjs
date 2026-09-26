@@ -1,6 +1,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {root,graph,node,source,times,at,run,flow,App}=require('./flow-v2-test-harness.cjs');
 const results=[];function test(name,fn){try{fn();results.push({name,ok:true});}catch(error){results.push({name,ok:false,error:error.stack});}}
+function insertSensor(n,match){
+ const f=n.properties.flow,edge=f.links.find(match);assert(edge,'Sensor insertion edge was not found');const target=f.nodes.find(item=>item.id===edge.to),input=edge.input,sensor=App.FlowModel.add(f,'sensor');edge.to=sensor.id;edge.input=sensor.inputs[0].id;App.FlowModel.connect(f,sensor,target,0,target.inputs.findIndex(port=>port.id===input));App.FlowModel.invalidateFlowCaches(f);return sensor;
+}
 test('Recovery starts at downstream acceptance, never during downstream waiting',()=>{
  const g=graph(),s=source(g,'a',2),m=node(g),sink=node(g,'sink');s.connect(0,m,0);m.connect(0,sink,0);times(m,2,3);
  let open=false;sink.canAcceptEntityInput=()=>open;
@@ -140,6 +143,25 @@ test('Entity waits at the selected output of a multi-output router',()=>{
  const waiting=WorkLinkAnimator.sample(g).find(row=>row.nodeId===m.id);
  assert.equal(waiting.waitingOutputSlot,1);
  assert.deepEqual(WorkLinkAnimator.position({graph:g},waiting),m.getConnectionPos(false,1));
+});
+test('Sensor is transparent, counts exact passages and survives runtime snapshots',()=>{
+ const g=graph(),s=source(g,'a',2),m=node(g),sink=node(g,'sink');s.connect(0,m,0);m.connect(0,sink,0);times(m,1,0);
+ const process=m.properties.flow.nodes.find(item=>item.kind==='process'),sensor1=insertSensor(m,link=>link.from===process.id),sensor2=insertSensor(m,link=>link.from===sensor1.id);
+ assert.equal(sensor1.id,'sensor1');assert.equal(sensor2.id,'sensor2');assert.deepEqual(App.FlowModel.validate(m.properties.flow,m),[]);
+ at(g,0);assert.equal(App.FlowRuntime.getSensorSummary(m,sensor1.id).count,0);at(g,1000);at(g,2000);
+ for(const sensor of [sensor1,sensor2]){const summary=App.FlowRuntime.getSensorSummary(m,sensor.id,2000);assert.equal(summary.count,2);assert.deepEqual(summary.history.map(row=>row.cycleMs),[0,1000]);assert.equal(summary.throughputPerHour,3600);}
+ assert.equal(sink._recv.length,2);const snapshot=App.FlowRuntime.capture(g,g.serialize()),copy=new LGraph();copy.configure(snapshot);App.restoreEntityModel(copy,snapshot,true);App.FlowRuntime.restore(copy,snapshot);assert.equal(App.FlowRuntime.getSensorSummary(copy.getNodeById(m.id),sensor2.id,2000).count,2);
+});
+test('Sensor waits for an atomic Fork handoff and never becomes a buffer',()=>{
+ const g=graph(),s=source(g,'a',1),m=node(g),sink=node(g,'sink');s.connect(0,m,0);m.connect(0,sink,0);times(m,0,0);const fork=m.properties.flow.nodes.find(item=>item.kind==='fork'),sensor=insertSensor(m,link=>link.from===fork.id && !App.FlowModel.signalLinks(m.properties.flow).has(link));
+ let open=false;sink.canAcceptEntityInput=()=>open;at(g,0);assert.equal(App.FlowRuntime.getSensorSummary(m,sensor.id).count,0);assert(!m._flowRuntime.cells.some(cell=>cell.nodeId===sensor.id));
+ open=true;at(g,5000);assert.equal(App.FlowRuntime.getSensorSummary(m,sensor.id).count,1);assert.equal(sink._recv[0].t,5000);assert(!m._flowRuntime.cells.some(cell=>cell.nodeId===sensor.id));
+});
+test('Sensor rolling TPH, 60-sample cap and completion-signal validation are deterministic',()=>{
+ const g=graph(),s=source(g,'a',2),m=node(g),sink=node(g,'sink');s.properties.source.intervalSec=1800;s.connect(0,m,0);m.connect(0,sink,0);times(m,0,0);const process=m.properties.flow.nodes.find(item=>item.kind==='process'),sensor=insertSensor(m,link=>link.from===process.id);at(g,0);at(g,1800000);
+ assert.equal(App.FlowRuntime.getSensorSummary(m,sensor.id,1800000).throughputPerHour,4);assert.equal(App.FlowRuntime.getSensorSummary(m,sensor.id,3600000).throughputPerHour,2);assert.equal(App.FlowRuntime.getSensorSummary(m,sensor.id,3600001).throughputPerHour,1);
+ const many=graph(),manySource=source(many,'a',61),manyNode=node(many),manySink=node(many,'sink');manySource.connect(0,manyNode,0);manyNode.connect(0,manySink,0);times(manyNode,0,0);const manyProcess=manyNode.properties.flow.nodes.find(item=>item.kind==='process'),manySensor=insertSensor(manyNode,link=>link.from===manyProcess.id);at(many,0);at(many,0);const manySummary=App.FlowRuntime.getSensorSummary(manyNode,manySensor.id);assert.equal(manySummary.count,61);assert.equal(manySummary.history.length,60);
+ const invalid=App.FlowModel.clone(manyNode.properties.flow),fork=invalid.nodes.find(item=>item.kind==='fork'),recovery=invalid.nodes.find(item=>item.kind==='recovery'),signal=invalid.links.find(link=>link.from===fork.id && link.to===recovery.id),bad=App.FlowModel.add(invalid,'sensor');signal.to=bad.id;signal.input=bad.inputs[0].id;App.FlowModel.connect(invalid,bad,recovery);assert(App.FlowModel.validate(invalid,manyNode).some(error=>error.includes('completion signals')));
 });
 test('IDs never reuse deleted numbers; old files are rejected',()=>{const f=App.FlowModel.empty();assert.equal(App.FlowModel.add(f,'process').id,'process1');f.nodes=[];assert.equal(App.FlowModel.add(f,'process').id,'process2');assert.throws(()=>App.assertFlowFileFormat({nodes:[]}),/Unsupported file format/);});
 fs.mkdirSync(path.join(root,'artifacts/flow-v2'),{recursive:true});fs.writeFileSync(path.join(root,'artifacts/flow-v2/runtime-tests.json'),JSON.stringify(results,null,2));console.log(JSON.stringify(results.map(r=>r.ok ? {name:r.name,ok:true} : r)));if(results.some(r=>!r.ok))process.exitCode=1;

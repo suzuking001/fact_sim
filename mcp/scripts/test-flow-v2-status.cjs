@@ -19,6 +19,10 @@ test('Join shows first-cycle readiness and each Recovery completion condition',(
 test('Completed timing and firing history survive snapshot and clear on Reset',()=>{
  const e=setup();at(e.g,0);at(e.g,2500);const data=App.FlowRuntime.capture(e.g,e.g.serialize()),copy=new LGraph();copy.configure(App.FlowModel.clone(data));App.restoreEntityModel(copy,data,true);App.FlowRuntime.restore(copy,data);const m=copy.getNodeById(e.m.id),process=m.properties.flow.nodes.find(n=>n.kind==='process');assert.equal(value(App.flowNodeStatus(m,process),'Elapsed'),'2.0 s');assert.equal(value(App.flowNodeStatus(m,process),'Time condition'),'Met');m.onConfigure();assert.equal(App.flowNodeStatus(m,process).state,'IDLE');
 });
+test('Sensor status reports the shared runtime Count, Last CT and TPH values',()=>{
+ const e=setup(),f=e.m.properties.flow,process=f.nodes.find(n=>n.kind==='process'),edge=f.links.find(link=>link.from===process.id),target=f.nodes.find(n=>n.id===edge.to),input=edge.input,sensor=App.FlowModel.add(f,'sensor');edge.to=sensor.id;edge.input=sensor.inputs[0].id;App.FlowModel.connect(f,sensor,target,0,target.inputs.findIndex(port=>port.id===input));App.FlowModel.invalidateFlowCaches(f);
+ at(e.g,0);at(e.g,2000);const status=App.flowNodeStatus(e.m,sensor,2000);assert.equal(status.state,'DONE');assert.equal(value(status,'Count'),'1');assert.equal(value(status,'Last CT'),'0.0 s');assert.equal(value(status,'TPH(1h)'),'1800');
+});
 test('Synchronization displays all group members, without changing simulation state',()=>{
  const g=graph(),a=node(g,'shuttle'),b=node(g,'shuttle');g.extra.syncroGroups=[{id:'sync1',name:'Shuttle'}];const sa=a.properties.flow.nodes.find(n=>n.kind==='syncroJudgment'),sb=b.properties.flow.nodes.find(n=>n.kind==='syncroJudgment');sa.config.groupId=sb.config.groupId='sync1';App.FlowRuntime.runtime(a).cells=[{nodeId:sa.id}];const before=JSON.stringify(a._flowRuntime);assert.equal(value(App.flowNodeStatus(a,sa),'Group ready'),'1 / 2');assert.equal(JSON.stringify(a._flowRuntime),before);App.FlowRuntime.runtime(b).cells=[{nodeId:sb.id}];assert.equal(value(App.flowNodeStatus(a,sa),'Condition'),'Met');
 });

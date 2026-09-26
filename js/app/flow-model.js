@@ -6,6 +6,7 @@
     outPort:{label:'outPort',inputs:['inPort'],outputs:[]},
     sourceSequence:{label:'Source Sequence',inputs:[],outputs:['outPort'],source:true},
     entitySink:{label:'Entity Sink',inputs:['inPort'],outputs:[],sink:true},
+    sensor:{label:'Sensor',inputs:['inPort'],outputs:['outPort'],sensor:true},
     process:{label:'Process',inputs:['inPort'],outputs:['outPort'],timed:true},
     recovery:{label:'Recovery',inputs:['inPort'],outputs:['outPort'],timed:true},
     join:{label:'Join',inputs:['inPort1','inPort2'],outputs:['outPort'],expand:'inputs'},
@@ -87,7 +88,7 @@
     for(const link of flow.links){
       const target=nodes.get(link.to);
       if(target?.kind==='recovery' && !signals.has(link))errors.push(`${target.id}: connect Recovery to a Fork completion output, then return it to Join.`);
-      if(signals.has(link) && ['inPort','outPort','entityRouter','Palletizing','DePalletizing','syncroJudgment'].includes(target?.kind))errors.push(`${link.to}: completion signals must connect to Join, Fork, Process or Recovery.`);
+      if(signals.has(link) && ['inPort','outPort','sensor','entityRouter','Palletizing','DePalletizing','syncroJudgment'].includes(target?.kind))errors.push(`${link.to}: completion signals must connect to Join, Fork, Process or Recovery.`);
     }
     const reachable=new Set();function visit(id,path){if(path.has(id)){errors.push(`${id}: only Recovery feedback into a Join is supported.`);return;}if(reachable.has(id))return;reachable.add(id);const next=new Set(path);next.add(id);for(const l of flow.links.filter(l=>l.from===id && !feedback.has(l)))visit(l.to,next);}
     for(const item of flow.nodes.filter(n=>n.kind==='inPort' || n.kind==='sourceSequence'))visit(item.id,new Set());

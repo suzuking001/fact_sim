@@ -61,8 +61,8 @@ function normalizeMenuLabel(label){
     'Background Color...': 'Change Background Color...',
     'Text Color...': 'Change Text Color...',
     'Reset Style': 'Reset Memo Style',
-    'Ports: flip horizontally': 'Flip Ports Horizontally',
-    'Ports: reset alignment': 'Reset Port Alignment',
+    'Ports: flip horizontally': 'Flip IO',
+    'Ports: reset alignment': 'Reset IO',
     'Close subgraph': 'Close Subgraph'
   };
   return map[text] || text;
@@ -309,11 +309,7 @@ window.runNodeMutation = runNodeMutation;
           label === 'Disable Signals' ||
           label === 'Enable Signals' ||
           label === 'Add Signal Ports' ||
-          label === 'Remove Signal Ports' ||
-          label === 'Ports: flip horizontally' ||
-          label === 'Ports: reset alignment' ||
-          normalizedLabel === 'Flip Ports Horizontally' ||
-          normalizedLabel === 'Reset Port Alignment'
+          label === 'Remove Signal Ports'
         ){
           continue;
         }

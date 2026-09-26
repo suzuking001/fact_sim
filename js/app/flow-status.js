@@ -14,6 +14,9 @@
       result.outputs[item.outputs?.[0]?.id]=!!sourceCell;
     }else if(item.kind==='entitySink'){
       result.state=cell ? 'READY' : last ? 'DONE' : 'IDLE';row('Input',cell ? 'Ready' : 'Waiting',!!cell);row('Completed',String(node._recv?.length || 0));
+    }else if(item.kind==='sensor'){
+      const sensor=App.FlowRuntime.getSensorSummary(node,item.id,time);result.state=last ? 'DONE' : 'IDLE';
+      row('Count',String(sensor.count));row('Last CT',`${(sensor.lastCycleMs/1000).toFixed(1)} s`);row('TPH(1h)',sensor.throughputPerHour.toFixed(sensor.throughputPerHour>=1000 ? 0 : sensor.throughputPerHour>=100 ? 1 : 2));
     }else if(item.kind==='process' || item.kind==='recovery'){
       const started=cell?.startedAt,active=Number.isFinite(started),duration=Math.max(0,Number(item.config.seconds) || 0);
       const elapsed=active ? Math.max(0,(time-started)/1000) : last?.durationSec || 0,remaining=active ? Math.max(0,(cell.until-time)/1000) : 0;

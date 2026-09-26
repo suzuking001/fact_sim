@@ -1,6 +1,7 @@
 (function(root){
   'use strict';
   const App=root.App=root.App || {},now=()=>Number(root.simNow?.()) || 0;
+  const SENSOR_WINDOW_MS=60*60*1000,SENSOR_MAX_SAMPLES=60;
   const store=node=>App.runtimeInstancesForGraph(node.graph);
   const flow=node=>node?.properties?.flow;
   const spec=(node,id)=>flow(node)?.nodes.find(n=>n.id===id);
@@ -12,6 +13,32 @@
     for(const link of App.FlowModel.feedbackLinks(flow(node)))r.signals.push({id:++r.sequence,nodeId:link.to,input:link.input,initial:true});
   }
   function sameWork(a,b){return !!a && !!b && a.typeId===b.typeId && a.id===b.id;}
+  function sensorState(node,sensorId,create=false){
+    const r=create ? runtime(node) : node?._flowRuntime;
+    if(!r)return null;
+    if(create)r.sensorMetrics ||= {};
+    let state=r.sensorMetrics?.[sensorId];
+    if(!state && create)state=r.sensorMetrics[sensorId]={count:0,previousAt:null,recentTimes:[],history:[]};
+    return state || null;
+  }
+  function sensorThroughput(state,time=now()){
+    const current=Number(time),count=Math.max(0,Number(state?.count) || 0);
+    if(!Number.isFinite(current) || current<=0 || !count)return 0;
+    if(current<SENSOR_WINDOW_MS)return count/(current/SENSOR_WINDOW_MS);
+    const cutoff=current-SENSOR_WINDOW_MS;
+    return (state.recentTimes || []).reduce((total,value)=>total+(Number(value)>=cutoff && Number(value)<=current ? 1 : 0),0);
+  }
+  function sensorSummary(node,sensorId,time=now()){
+    const state=sensorState(node,sensorId,false),history=Array.isArray(state?.history) ? state.history : [];
+    return {id:sensorId,count:Math.max(0,Number(state?.count) || 0),lastCycleMs:history.length ? Math.max(0,Number(history[history.length-1]?.cycleMs) || 0) : 0,throughputPerHour:sensorThroughput(state,time),history};
+  }
+  function recordSensorPassage(node,item){
+    const state=sensorState(node,item.id,true),time=now(),previous=Number(state.previousAt),cycleMs=state.previousAt==null || !Number.isFinite(previous) ? 0 : Math.max(0,time-previous);
+    state.previousAt=time;state.count=Math.max(0,Number(state.count) || 0)+1;state.recentTimes ||= [];state.recentTimes.push(time);
+    const cutoff=time-SENSOR_WINDOW_MS;while(state.recentTimes.length && Number(state.recentTimes[0])<cutoff)state.recentTimes.shift();
+    const throughputPerHour=sensorThroughput(state,time);state.history ||= [];state.history.push({time,cycleMs,throughputPerHour});if(state.history.length>SENSOR_MAX_SAMPLES)state.history.splice(0,state.history.length-SENSOR_MAX_SAMPLES);
+    const r=runtime(node);r.flowActivity ||= {};r.flowActivity[item.id]={firedAt:time};
+  }
   function joinWorkInputs(node,item){
     const signals=App.FlowModel.signalLinks(flow(node));
     return item.inputs.filter(p=>flow(node).links.some(l=>l.to===item.id && l.input===p.id && !signals.has(l)));
@@ -47,6 +74,14 @@
   }
   function mark(node){runtime(node).revision=(runtime(node).revision || 0)+1;if(!node.graph)return;node.graph.__outputDirty=true;node.graph.__dirtyNodeIds ||= new Set();node.graph.__dirtyNodeIds.add(node.id);for(const input of node.inputs || []){const link=node.graph.links[input.link];if(link)node.graph.__dirtyNodeIds.add(link.origin_id);}}
   function outgoing(node,item,port=0){return flow(node).links.find(l=>l.from===item.id && l.output===item.outputs[port]?.id);}
+  function routeLink(node,link,sensors=[]){
+    const crossed=sensors.slice(),seen=new Set();let edge=link,target=edge && spec(node,edge.to);
+    while(target?.kind==='sensor'){
+      if(seen.has(target.id))return null;seen.add(target.id);crossed.push(target);edge=outgoing(node,target);target=edge && spec(node,edge.to);
+    }
+    return edge && target ? {link:edge,target,sensors:crossed} : null;
+  }
+  function routedEdge(node,item,port=0){return routeLink(node,outgoing(node,item,port),item?.kind==='sensor' ? [item] : []);}
   function routerPort(node,item,cell){
     if(item.config.dispatch==='round-robin')return (runtime(node).routerCursors?.[item.id] || 0)%item.outputs.length;
     const port=item.outputs.findIndex(p=>p.typeId===cell.entity.typeId);
@@ -64,14 +99,14 @@
     }
     return cells.length===0;
   }
-  function canMove(node,cell,port=0){const item=spec(node,cell.nodeId),link=item && outgoing(node,item,port);return !!link && free(node,spec(node,link.to),link.input,cell.entity,cell);}
+  function canMove(node,cell,port=0){const item=spec(node,cell.nodeId),route=item && routedEdge(node,item,port);return !!route && free(node,route.target,route.link.input,cell.entity,cell);}
   function recordActivity(node,item,cell){
     const r=runtime(node);r.flowActivity ||= {};r.flowActivity[item.id]={firedAt:now(),...(cell?.startedAt!==undefined ? {durationSec:Math.max(0,(cell.until-cell.startedAt)/1000)} : {})};
   }
   function move(node,cell,port=0){
-    const item=spec(node,cell.nodeId),link=item && outgoing(node,item,port);if(!link || !free(node,spec(node,link.to),link.input,cell.entity,cell))return false;
+    const item=spec(node,cell.nodeId),route=item && routedEdge(node,item,port);if(!route || !free(node,route.target,route.link.input,cell.entity,cell))return false;
     if(cell.startedAt!==undefined && cell.visualId){const visual=runtime(node).visuals.find(v=>v.id===cell.visualId);if(visual)visual.history.push({nodeId:cell.nodeId,startedAt:cell.startedAt,until:cell.until});}
-    recordActivity(node,item,cell);cell.nodeId=link.to;cell.input=link.input;delete cell.startedAt;delete cell.until;delete cell.ready;delete cell.visualId;mark(node);return true;
+    recordActivity(node,item,cell);for(const sensor of route.sensors)recordSensorPassage(node,sensor);cell.nodeId=route.link.to;cell.input=route.link.input;delete cell.startedAt;delete cell.until;delete cell.ready;delete cell.visualId;mark(node);return true;
   }
   function batchInputAllowed(node,entry,entity){
     const r=runtime(node);
@@ -109,7 +144,7 @@
     }
     if(!readyPath(entry))return false;
     if(!batchInputAllowed(node,entry,entity))return false;
-    const first=outgoing(node,entry);return !!first && free(node,spec(node,first.to),first.input,entity);
+    const route=routedEdge(node,entry);return !!route && free(node,route.target,route.link.input,entity);
   }
   function acknowledge(node,entity,targetId,slot){
     const r=runtime(node),offer=r.offers.find(o=>o.entity.instanceId===entity.instanceId && o.slot===slot);
@@ -152,10 +187,11 @@
     recordActivity(node,item);r.lastForkAt=now();drainSignals(node);mark(node);
   }
   function outputPlan(node,cell,first){
-    let item=first;const seen=new Set(),routeChoices=[];
+    let item=first;const seen=new Set(),routeChoices=[],sensors=[];
     while(item && !seen.has(item.id)){
       seen.add(item.id);
-      if(item.kind==='outPort')return {slot:node.outputs.findIndex(p=>p.portId===item.config.portId),flowOutId:item.id,routeChoices};
+      if(item.kind==='outPort')return {slot:node.outputs.findIndex(p=>p.portId===item.config.portId),flowOutId:item.id,routeChoices,sensors};
+      if(item.kind==='sensor'){sensors.push(item);const edge=outgoing(node,item);item=edge && spec(node,edge.to);continue;}
       if(item.kind!=='entityRouter')return null;
       const port=routerPort(node,item,cell);if(port<0)return null;
       if(item.config.dispatch==='round-robin')routeChoices.push({id:item.id,next:(port+1)%item.outputs.length});
@@ -170,15 +206,16 @@
   }
   function forkTransferPlan(node,cell,item){
     const leaves=[],forks=[],choices=[];
-    function visit(current,path){
+    function visit(current,path,sensors=[]){
       if(!current || path.has(current.id))return false;const next=new Set(path);next.add(current.id);
-      if(current.kind==='outPort'){leaves.push({slot:node.outputs.findIndex(p=>p.portId===current.config.portId),flowOutId:current.id});return true;}
+      if(current.kind==='outPort'){leaves.push({slot:node.outputs.findIndex(p=>p.portId===current.config.portId),flowOutId:current.id,sensors});return true;}
+      if(current.kind==='sensor'){const edge=outgoing(node,current);return !!edge && visit(spec(node,edge.to),next,[...sensors,current]);}
       if(current.kind==='entityRouter'){
         const port=routerPort(node,current,cell),edge=port>=0 && outgoing(node,current,port);if(!edge)return false;
-        if(current.config.dispatch==='round-robin')choices.push({id:current.id,next:(port+1)%current.outputs.length});return visit(spec(node,edge.to),next);
+        if(current.config.dispatch==='round-robin')choices.push({id:current.id,next:(port+1)%current.outputs.length});return visit(spec(node,edge.to),next,sensors);
       }
       if(current.kind!=='fork')return false;
-      forks.push(current);const branches=workBranches(node,current);return branches.length>0 && branches.every(l=>visit(spec(node,l.to),next));
+      forks.push(current);const branches=workBranches(node,current);return branches.length>0 && branches.every(l=>visit(spec(node,l.to),next,sensors));
     }
     return visit(item,new Set()) ? {leaves,forks:[...new Set(forks)],choices} : null;
   }
@@ -204,7 +241,7 @@
       const entity=entities[index],receiver=target.receiver,rr=runtime(receiver);rr.last[target.link.target_slot]=entity.instanceId;
       const entry=flow(receiver).nodes.find(n=>n.kind==='inPort' && n.config.portId===receiver.inputs[target.link.target_slot]?.portId);
       if(!rr.cells.length && !rr.offers.length)rr.cycle++;store(node).moveRoot(entity,receiver.id);rr.cells.push({id:++rr.sequence,nodeId:entry.id,input:'',entity,incomingLink:target.link.id,arrival:entity.arrivalSequence});
-      recordActivity(node,spec(node,target.flowOutId));mark(receiver);
+      for(const sensor of target.sensors || [])recordSensorPassage(node,sensor);recordActivity(node,spec(node,target.flowOutId));mark(receiver);
     }
     for(const f of plan.forks){r.forkStatus[f.id]={waiting:false,ready,total:targets.length};fireForkSignals(node,f,entities[0],targets[0]?.link.id);}
     for(const choice of plan.choices){r.routerCursors ||= {};r.routerCursors[choice.id]=choice.next;}
@@ -217,12 +254,12 @@
     const edge=branches[0],plan=edge && outputPlan(node,cell,spec(node,edge.to));
     if(plan){
       if(!release(node,cell,plan.slot,{...plan,forkId:item.id}))return false;
-      runtime(node).cells=runtime(node).cells.filter(c=>c!==cell);mark(node);return true;
+      for(const sensor of plan.sensors || [])recordSensorPassage(node,sensor);runtime(node).cells=runtime(node).cells.filter(c=>c!==cell);mark(node);return true;
     }
     // Internal work branches also receive distinct instances, all at the same time.
-    if(!branches.length || !branches.every(l=>free(node,spec(node,l.to),l.input,cell.entity)))return false;
+    const routes=branches.map(link=>routeLink(node,link));if(!routes.length || routes.some(route=>!route || !free(node,route.target,route.link.input,cell.entity)))return false;
     const entities=[cell.entity,...branches.slice(1).map(()=>cloneEntityTree(node,cell.entity))],r=runtime(node);
-    r.cells=r.cells.filter(c=>c!==cell);branches.forEach((l,i)=>r.cells.push({id:++r.sequence,nodeId:l.to,input:l.input,entity:entities[i],incomingLink:cell.incomingLink,...(cell.sourceNodeId ? {sourceNodeId:cell.sourceNodeId} : {})}));
+    r.cells=r.cells.filter(c=>c!==cell);routes.forEach((route,i)=>{for(const sensor of route.sensors)recordSensorPassage(node,sensor);r.cells.push({id:++r.sequence,nodeId:route.link.to,input:route.link.input,entity:entities[i],incomingLink:cell.incomingLink,...(cell.sourceNodeId ? {sourceNodeId:cell.sourceNodeId} : {})});});
     r.duplicated=(r.duplicated || 0)+entities.length-1;fireForkSignals(node,item,entities[0],null);mark(node);return true;
   }
   function drainSignals(node){
@@ -288,10 +325,12 @@
       const members=[];for(const node of graph._nodes || [])for(const item of flow(node)?.nodes || [])if(item.kind==='syncroJudgment' && item.config.groupId===group.id)members.push({node,item,cell:runtime(node).cells.find(c=>c.nodeId===item.id)});
       if(!members.length || members.some(m=>!m.cell || runtime(m.node).error || !canMove(m.node,m.cell)))continue;
       const plans=members.map(m=>{
-        const edge=outgoing(m.node,m.item),target=spec(m.node,edge.to),fork=target.kind==='fork' ? target : null;
+        const route=routedEdge(m.node,m.item),target=route?.target,fork=target?.kind==='fork' ? target : null;
+        if(!route)return null;
         if(fork && !branchesFree(m.node,fork))return null;
         const first=fork ? spec(m.node,outgoing(m.node,fork)?.to) : target,output=outputPlan(m.node,m.cell,first);
         if(!output)return {...m,internal:true};
+        output.sensors=[...route.sensors,...(output.sensors || [])];
         const links=m.node.outputs[output.slot]?.links || [];if(links.length!==1)return null;
         const link=graph.links[links[0]],receiver=graph.getNodeById(link.target_id),entry=flow(receiver)?.nodes.find(n=>n.kind==='inPort' && n.config.portId===receiver.inputs[link.target_slot]?.portId);
         return {...m,receiver,entry,link,fork,output};
@@ -315,7 +354,7 @@
       for(const p of plans)if(!p.internal){recordActivity(p.node,p.item,p.cell);runtime(p.node).cells=runtime(p.node).cells.filter(c=>c!==p.cell);}
       for(const p of plans)if(!p.internal && p.fork){fireForkSignals(p.node,p.fork,p.cell.entity,p.link.id);for(const choice of p.output.routeChoices){runtime(p.node).routerCursors ||= {};runtime(p.node).routerCursors[choice.id]=choice.next;}}
       for(const p of plans){if(p.internal){move(p.node,p.cell);continue;}const rr=runtime(p.receiver),entity=p.cell.entity;
-        store(p.node).moveRoot(entity,p.receiver.id);rr.cycle++;rr.cells.push({id:++rr.sequence,nodeId:p.entry.id,input:'',entity,incomingLink:p.link.id});mark(p.node);mark(p.receiver);
+        for(const sensor of p.output.sensors || [])recordSensorPassage(p.node,sensor);store(p.node).moveRoot(entity,p.receiver.id);rr.cycle++;rr.cells.push({id:++rr.sequence,nodeId:p.entry.id,input:'',entity,incomingLink:p.link.id});mark(p.node);mark(p.receiver);
       }
     }}finally{graph.__flowSyncCommitting=false;}
   }
@@ -335,7 +374,7 @@
     while(progress && budget-->0){progress=false;
       for(const cell of r.cells.slice()){
         if(!r.cells.includes(cell))continue;const item=spec(node,cell.nodeId);if(!item){r.error='Flow node is missing. Reset the simulation.';break;}
-        if(item.kind==='inPort' || item.kind==='sourceSequence')progress=move(node,cell) || progress;
+        if(item.kind==='inPort' || item.kind==='sourceSequence' || item.kind==='sensor')progress=move(node,cell) || progress;
         else if(item.kind==='join'){
           progress=runJoin(node,cell,item) || progress;
         }else if(item.kind==='fork')progress=runFork(node,cell,item) || progress;
@@ -361,8 +400,8 @@
           if(store(node).childrenOf(cell.entity).length>=type.capacity)progress=move(node,cell) || progress;
         }else if(item.kind==='DePalletizing'){
           const child=store(node).childrenOf(cell.entity)[0];
-          if(child){const link=outgoing(node,item,1),target=link && spec(node,link.to);if(target && free(node,target,link.input,child)){
-            store(node).detach(child);r.cells.push({id:++r.sequence,nodeId:target.id,input:link.input,entity:child,incomingLink:cell.incomingLink,...(cell.sourceNodeId ? {sourceNodeId:cell.sourceNodeId} : {})});progress=true;
+          if(child){const route=routeLink(node,outgoing(node,item,1));if(route && free(node,route.target,route.link.input,child)){
+            store(node).detach(child);for(const sensor of route.sensors)recordSensorPassage(node,sensor);r.cells.push({id:++r.sequence,nodeId:route.link.to,input:route.link.input,entity:child,incomingLink:cell.incomingLink,...(cell.sourceNodeId ? {sourceNodeId:cell.sourceNodeId} : {})});progress=true;
           }}else if(!r.cells.some(c=>c!==cell) && !r.offers.length)progress=move(node,cell,0) || progress;
         }
       }
@@ -380,5 +419,5 @@
   function restore(graph,data){const snapshot=data?.__flowRuntime;if(!snapshot)return;const s=App.runtimeInstancesForGraph(graph);s.clear();s.instances=new Map(snapshot.instances.map(e=>[e.instanceId,e]));s.typeSequences=new Map(snapshot.typeSequences);s.arrivalSequence=snapshot.arrivalSequence;s.completed=snapshot.completed;for(const e of s.instances.values())if(e.parentId===null && e.locationNodeId!=null)s._addRoot(e.locationNodeId,e.instanceId);
     for(const row of snapshot.nodes){const node=graph.getNodeById(row.id);if(!node)continue;node._flowRuntime=row.runtime;node._recv=row.recv;node._sent=row.sent;for(const c of node._flowRuntime?.cells || [])c.entity=s.get(c.entity);for(const o of node._flowRuntime?.offers || [])o.entity=s.get(o.entity);const sourceItem=flow(node)?.nodes.find(item=>item.kind==='sourceSequence'),legacyCells=(node._flowRuntime?.cells || []).filter(cell=>cell.nodeId==='source');if(sourceItem && legacyCells.length){for(const cell of legacyCells){cell.nodeId=sourceItem.id;cell.sourceNodeId=sourceItem.id;}node._flowRuntime.sourceSequence ||= {active:true,nextAt:Number(node._flowRuntime.nextAt) || 0,created:Number(node._flowRuntime.created) || 0};}row.outputs.forEach((e,i)=>node.setOutputData(i,e ? s.get(e) : null));node._state=row.state;node._stateName=row.stateName;node._until=row.until;node._payload=node._flowRuntime?.cells[0]?.entity || null;node._currentWork=node._payload;root.applyNodeStateTheme?.(node,node._state);}s.revision++;
   }
-  App.FlowRuntime={runtime,execute,canAccept,acknowledge,retime,eventUntil,updateState,capture,restore,activeCells,isActive,joinWorkInputs,sameWork};
+  App.FlowRuntime={runtime,execute,canAccept,acknowledge,retime,eventUntil,updateState,capture,restore,activeCells,isActive,joinWorkInputs,sameWork,getSensorSummary:sensorSummary};
 })(typeof window==='undefined' ? globalThis : window);

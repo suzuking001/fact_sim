@@ -160,6 +160,8 @@
           label.append(element('span','flowTimeLabel','Duration'),input,element('span','','s'));const bar=element('progress');bar.max=1;bar.value=0;bar.setAttribute('aria-label',`${item.id} progress`);progress.set(item.id,bar);content.append(label,bar);
         }else if(item.kind==='join' || item.kind==='fork'){
           content.append(element('small','',item.kind==='join' ? 'Wait for all inputs. Same Type / ID work copies merge into input 1.' : 'Work outputs receive separate copies; all outputs fire together'));
+        }else if(item.kind==='sensor'){
+          content.append(element('small','','Counts passing Entities without delay or buffering.'));
         }else if(item.kind==='entityRouter'){
           const select=options([['type','By Entity Type'],['round-robin','Round robin']],item.config.dispatch || 'type');
           select.setAttribute('aria-label',`${item.id} dispatch`);select.onchange=()=>edit(()=>{item.config.dispatch=select.value;});content.append(select);

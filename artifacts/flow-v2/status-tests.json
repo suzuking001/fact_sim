@@ -16,6 +16,10 @@
     "ok": true
   },
   {
+    "name": "Sensor status reports the shared runtime Count, Last CT and TPH values",
+    "ok": true
+  },
+  {
     "name": "Synchronization displays all group members, without changing simulation state",
     "ok": true
   }

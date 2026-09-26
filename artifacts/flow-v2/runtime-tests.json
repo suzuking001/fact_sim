@@ -88,6 +88,18 @@
     "ok": true
   },
   {
+    "name": "Sensor is transparent, counts exact passages and survives runtime snapshots",
+    "ok": true
+  },
+  {
+    "name": "Sensor waits for an atomic Fork handoff and never becomes a buffer",
+    "ok": true
+  },
+  {
+    "name": "Sensor rolling TPH, 60-sample cap and completion-signal validation are deterministic",
+    "ok": true
+  },
+  {
     "name": "IDs never reuse deleted numbers; old files are rejected",
     "ok": true
   }

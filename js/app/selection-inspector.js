@@ -405,9 +405,13 @@ var App = window.App || (window.App = {});
       this.header = root ? root.querySelector('#nodeDetailsHeader') : null;
       this.headerInput = root ? root.querySelector('#nodeDetailsTitleInput') : null;
       this.headerId = root ? root.querySelector('#nodeDetailsTitleId') : null;
+      this.headerFlip = root ? root.querySelector('#nodeDetailsFlipIO') : null;
       this.graph = null;
       this.canvas = null;
       this.target = { kind: 'empty', nodeId: null, group: null };
+      if(this.headerFlip){
+        this.headerFlip.addEventListener('click', ()=>this.toggleNodeFlipIO());
+      }
       if(this.headerInput){
         this.headerInput.addEventListener('focus', ()=>{
           try{ if(typeof App.FlowModel?.pause === 'function') App.FlowModel.pause(); }catch(_e){}
@@ -439,15 +443,45 @@ var App = window.App || (window.App = {});
       if(meta) meta.textContent = text;
     }
 
+    nodeFlipIOOn(node){
+      return !!(node && node.properties && node.properties.flipIO === true);
+    }
+
+    syncNodeFlipIOButton(node){
+      if(!this.headerFlip) return;
+      const on = this.nodeFlipIOOn(node);
+      this.headerFlip.textContent = on ? 'flipped' : 'normal';
+      this.headerFlip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      this.headerFlip.classList.toggle('is-on', on);
+      this.headerFlip.disabled = !node;
+    }
+
+    toggleNodeFlipIO(){
+      const node = this.currentNode();
+      if(!node) return;
+      node.properties = node.properties || {};
+      const next = !this.nodeFlipIOOn(node);
+      withGraphChange(()=>{
+        node.properties.flipIO = next;
+      });
+      if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged('flipIO');
+      if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
+      if(typeof window.refreshFlipIO === 'function') window.refreshFlipIO(node);
+      if(node.graph && typeof node.graph.change === 'function') node.graph.change();
+      this.syncNodeFlipIOButton(node);
+    }
+
     updateNodeHeader(node){
       if(!this.header) return;
       if(node){
         this.header.hidden = false;
         if(this.headerInput && document.activeElement !== this.headerInput) this.headerInput.value = String(node.title || node.type || 'Node');
         if(this.headerId) this.headerId.textContent = '#' + String(node.id);
+        this.syncNodeFlipIOButton(node);
       }else{
         this.header.hidden = true;
         if(this.headerInput) this.headerInput.value = '';
+        this.syncNodeFlipIOButton(null);
       }
     }
 
@@ -647,6 +681,7 @@ var App = window.App || (window.App = {});
           if(key === 'script') node._compiled = null;
           if(typeof node.onPropertyChanged === 'function') node.onPropertyChanged(key);
           if(key === 'flipIO' && typeof window.refreshFlipIO === 'function') window.refreshFlipIO(node);
+          if(key === 'flipIO') this.syncNodeFlipIOButton(node);
           if(typeof node.setDirtyCanvas === 'function') node.setDirtyCanvas(true, true);
         });
         value = next;
