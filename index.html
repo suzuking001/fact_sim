@@ -467,6 +467,7 @@
         <div data-ai-provider-fields="ollama" hidden>
           <label>Endpoint<input id="aiOllamaEndpoint" type="url" spellcheck="false"></label>
           <label>Model<input id="aiOllamaModel" type="text" list="aiOllamaModels" spellcheck="false"><datalist id="aiOllamaModels"></datalist></label>
+          <label>Thinking<select id="aiOllamaThinking"><option value="off">Fast · thinking off</option><option value="on">Detailed · thinking on</option></select></label>
           <button id="aiOllamaRefresh" class="aiSecondaryButton" type="button">Get Models</button>
         </div>
         <div data-ai-provider-fields="openai-compatible" hidden>
@@ -902,16 +903,17 @@ SOFTWARE.
   <script src="js/app/ui.js?v=20260920stopgroupsmenu"></script>
   <script src="js/app/details-ui.js?v=20260914flow2"></script>
   <script src="js/ai/providers/ai-provider.js?v=20260927vision"></script>
-  <script src="js/ai/models/model-registry.js?v=20260926a"></script>
-  <script src="js/ai/providers/webllm-provider.js?v=20260927geometry"></script>
-  <script src="js/ai/providers/ollama-provider.js?v=20260927vision"></script>
+  <script src="js/ai/models/model-registry.js?v=20260927models"></script>
+  <script src="js/ai/providers/webllm-provider.js?v=20260927context"></script>
+  <script src="js/ai/providers/ollama-provider.js?v=20260927extended"></script>
   <script src="js/ai/providers/openai-compatible-provider.js?v=20260926a"></script>
-  <script src="js/ai/tools/tool-registry.js?v=20260927diagnostics"></script>
-  <script src="js/ai/tools/factsim-tools.js?v=20260927diagnostics"></script>
+  <script src="js/ai/tools/tool-registry.js?v=20260927editing"></script>
+  <script src="js/ai/tools/editing-tools.js?v=20260927editing"></script>
+  <script src="js/ai/tools/factsim-tools.js?v=20260927editing"></script>
   <script src="js/ai/tools/simulation-diagnostics.js?v=20260927diagnostics"></script>
-  <script src="js/ai/agent/system-prompt.js?v=20260927diagnostics"></script>
-  <script src="js/ai/agent/factsim-agent.js?v=20260927diagnostics"></script>
-  <script src="js/ai/ui/ai-chat-panel.js?v=20260927diagnostics"></script>
+  <script src="js/ai/agent/system-prompt.js?v=20260927editing"></script>
+  <script src="js/ai/agent/factsim-agent.js?v=20260927editing"></script>
+  <script src="js/ai/ui/ai-chat-panel.js?v=20260927extended"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

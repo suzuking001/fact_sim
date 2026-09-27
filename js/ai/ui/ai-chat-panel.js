@@ -34,7 +34,8 @@
     const providerSelect=$('aiProviderSelect'),modelSelect=$('aiModelSelect');
     for(const model of AI.WebLLMModelRegistry.list())modelSelect.append(option(model.id,`${model.label} · ${model.category}`));
     providerSelect.value=saved.provider || 'webllm';modelSelect.value=saved.webllmModel || AI.WebLLMModelRegistry.defaultId;$('aiOllamaEndpoint').value=saved.ollamaEndpoint || 'http://localhost:11434';$('aiOllamaModel').value=saved.ollamaModel || '';$('aiApiBaseUrl').value=saved.apiBaseUrl || '';$('aiApiModel').value=saved.apiModel || '';$('aiConfirmationPolicy').value=saved.confirmationPolicy || 'ask';
-    function persist(){try{localStorage.setItem('factsim-ai-settings',JSON.stringify({provider:providerSelect.value,webllmModel:modelSelect.value,ollamaEndpoint:$('aiOllamaEndpoint').value,ollamaModel:$('aiOllamaModel').value,apiBaseUrl:$('aiApiBaseUrl').value,apiModel:$('aiApiModel').value,confirmationPolicy:$('aiConfirmationPolicy').value}));}catch(_e){}}
+    $('aiOllamaThinking').value=saved.ollamaThinking ? 'on' : 'off';
+    function persist(){try{localStorage.setItem('factsim-ai-settings',JSON.stringify({provider:providerSelect.value,webllmModel:modelSelect.value,ollamaEndpoint:$('aiOllamaEndpoint').value,ollamaModel:$('aiOllamaModel').value,ollamaThinking:$('aiOllamaThinking').value==='on',apiBaseUrl:$('aiApiBaseUrl').value,apiModel:$('aiApiModel').value,confirmationPolicy:$('aiConfirmationPolicy').value}));}catch(_e){}}
     function syncProviderUi(){const id=providerSelect.value;panel.dataset.provider=id;document.querySelectorAll('[data-ai-provider-fields]').forEach(el=>el.hidden=el.dataset.aiProviderFields!==id);$('aiConnectBtn').textContent=id==='webllm' ? 'Load Model' : id==='ollama' ? 'Test & Use' : 'Use Provider';updateModelInfo();persist();}
     function updateModelInfo(){if(providerSelect.value!=='webllm'){$('aiModelInfo').textContent=providerSelect.value==='ollama' ? 'Runs through your local Ollama service.' : 'API key stays in this browser tab and is not saved.';return;}const model=AI.WebLLMModelRegistry.get(modelSelect.value);$('aiModelInfo').textContent=model ? `${model.category[0].toUpperCase()+model.category.slice(1)} · ${model.description} Recommended: ${model.recommendedFor.join(' / ')}. Approx. VRAM ${model.estimatedMemoryGB} GB.` : '';}
     async function connect(){
@@ -42,7 +43,7 @@
       try{
         await provider?.dispose?.();const id=providerSelect.value;
         if(id==='webllm'){provider=new AI.WebLLMProvider();await provider.initialize({modelId:modelSelect.value,onProgress:progress=>{const percent=Math.round(progress.progress*100);$('aiLoadProgress').hidden=false;$('aiLoadProgress').value=percent;$('aiLoadProgressText').textContent=`${progress.text} ${percent}%`;setStatus(`Loading ${percent}%`,'loading');}});}
-        else if(id==='ollama'){provider=new AI.OllamaProvider();await provider.initialize({endpoint:$('aiOllamaEndpoint').value,modelId:$('aiOllamaModel').value});}
+        else if(id==='ollama'){provider=new AI.OllamaProvider();await provider.initialize({endpoint:$('aiOllamaEndpoint').value,modelId:$('aiOllamaModel').value,think:$('aiOllamaThinking').value==='on'});}
         else{provider=new AI.OpenAICompatibleProvider();await provider.initialize({baseUrl:$('aiApiBaseUrl').value,apiKey:$('aiApiKey').value,modelId:$('aiApiModel').value});}
         agent.setProvider(provider);$('aiLoadProgress').hidden=true;$('aiLoadProgressText').textContent='';setStatus(`${provider.name} · ${provider.modelId}`,'ready');appendMessage('tool',`${provider.name} is ready with ${provider.modelId}. Layout inspection: ${provider.supportsVision ? 'graph images + geometry' : 'geometry only (no image input)'}.`);
       }catch(error){setStatus(String(error?.message || error),'error');appendMessage('error',error?.message || error);}finally{$('aiConnectBtn').disabled=false;}
@@ -79,6 +80,8 @@
     });
     agent.addEventListener('clear',()=>{attachmentEpoch++;pendingImages=[];renderAttachments();});
     agent.addEventListener('assistant-start',e=>{streamBody=null;setStatus(e.detail.finalTurn ? '調査上限：取得済みの結果を要約しています…' : `AI回答生成中…（ツール実行 ${e.detail.toolCalls || 0}回）`,'loading');});
+    agent.addEventListener('provider-progress',e=>setStatus(`AI応答待ち・生成中… ${Number(e.detail.elapsedSeconds || 0).toFixed(0)}秒（読込・待ち行列・推論を含みます）`,'loading'));
+    $('aiOllamaThinking').addEventListener('change',()=>{persist();if(provider?.id==='ollama')provider.think=$('aiOllamaThinking').value==='on';});
     agent.addEventListener('assistant-delta',e=>{if(!streamBody)streamBody=appendMessage('assistant','');streamBody.textContent+=e.detail.delta;$('aiChatMessages').scrollTop=$('aiChatMessages').scrollHeight;});
     agent.addEventListener('assistant-final',e=>{if(!streamBody && e.detail.content)streamBody=appendMessage('assistant',e.detail.content);streamBody=null;});
     agent.addEventListener('tool-start',e=>{appendMessage('tool',`Running ${e.detail.call.name}…`);setStatus(`ツール実行中: ${e.detail.call.name}`,'loading');});

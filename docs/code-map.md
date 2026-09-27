@@ -10,7 +10,9 @@
 | ダブルクリックでローカル HTTP 起動 | `Start_FactSim.bat` | `scripts/start-factsim.ps1`（Python 3・localhost 限定サーバー・既存サーバー再利用） |
 | 全体 UI・画面切替 | `js/app/ui.js`, `js/app/workspace-ui.js` | `js/app/landing.js`, `css/app.css`, `css/workspace.css` |
 | AI Assistant・Provider・Tool | `js/ai/ui/ai-chat-panel.js`, `js/ai/agent/factsim-agent.js` | `js/ai/providers/*`, `js/ai/tools/*`, `js/ai/models/model-registry.js`, `css/ai-assistant.css`, `docs/ai-assistant.md` |
-| AI 停滞調査・全体状態・実時間計測 | `js/ai/tools/simulation-diagnostics.js` | `js/ai/agent/system-prompt.js`, `mcp/scripts/test-ai-assistant.mjs` |
+| AI 停滞調査・全体状態・実時間計測 | `js/ai/tools/simulation-diagnostics.js` | `js/ai/agent/system-prompt.js`, `mcp/scripts/test-ai-assistant.mjs`, `mcp/scripts/test-ai-scenarios.mjs`（実Ollama・10質問） |
+| AI 取り消し保護・テンプレート検査・追加10指示 | `js/ai/tools/tool-registry.js`, `js/ai/tools/factsim-tools.js` | `mcp/scripts/test-ai-scenarios.mjs --suite=extended`、`docs/ai-assistant.md` |
+| AI 一括編集・接続解除・削除再接続・複製・相対移動 | `js/ai/tools/editing-tools.js` | `mcp/scripts/test-ai-scenarios.mjs --suite=editing`（編集指示21–30）、`js/ai/tools/tool-registry.js` |
 | 選択・プロパティ・詳細 | `js/app/selection-inspector.js`, `js/app/details-ui.js` | `js/app/selection.js`, `js/app/node-props-panel.js`, `css/details.css` |
 | Entity・内容物・型 | `js/app/entity-ui.js`, `js/nodes/entity_model.js` | `js/nodes/basic_node.js`, `js/nodes/entity_source.js`, `js/nodes/entity_store.js`, `docs/entity-model-ja.md`, `docs/entity-hierarchy-ja.md` |
 | Flow 設定・Add メニュー・配線のドラッグ編集 | `js/app/flow-view.js`, `js/app/flow-model.js` | `js/app/sim.js`（開始後の編集時に実行状態を初期化）、`css/flow-view.css`, `docs/flow-cycle-ja.md`（Join / Fork・接続操作）、`mcp/scripts/test-flow-v2-wiring.cjs` |

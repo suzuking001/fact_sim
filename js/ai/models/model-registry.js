@@ -13,9 +13,24 @@
       recommendedFor:['Tool calling','FactSim operation'],estimatedMemoryGB:5.0,supportsTools:true
     },
     {
-      id:'DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC',label:'DeepSeek R1 Distill 7B',category:'reasoning',
+      id:'Hermes-3-Llama-3.1-8B-q4f16_1-MLC',label:'Hermes-3 Llama 3.1 8B',category:'standard',
+      description:'Instruction-following model for conversation and structured FactSim operations.',
+      recommendedFor:['General chat','FactSim operation'],estimatedMemoryGB:4.9,supportsTools:true
+    },
+    {
+      id:'DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC',label:'DeepSeek-R1-Distill-Qwen-7B',category:'reasoning',
       description:'Analysis-oriented model with higher memory requirements.',
       recommendedFor:['Analysis','Improvement hypotheses'],estimatedMemoryGB:5.1,supportsTools:false
+    },
+    {
+      id:'Llama-3.1-8B-Instruct-q4f16_1-MLC',label:'Llama 3.1 8B Instruct',category:'standard',
+      description:'General-purpose instruction model using the structured FactSim conversation protocol.',
+      recommendedFor:['General chat','Model explanations'],estimatedMemoryGB:5.0,supportsTools:false
+    },
+    {
+      id:'Phi-4-mini-instruct-q4f16_1-MLC',label:'Phi-4-mini-instruct',category:'fast',
+      description:'Compact instruction model using the structured FactSim conversation protocol.',
+      recommendedFor:['General chat','Quick explanations'],estimatedMemoryGB:3.4,supportsTools:false
     }
   ];
   AI.WebLLMModelRegistry={

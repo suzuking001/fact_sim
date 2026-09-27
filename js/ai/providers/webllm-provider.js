@@ -34,7 +34,10 @@
   }
   function boundedMessages(messages,retry){
     const copy=JSON.parse(JSON.stringify(messages));
-    const systems=copy.filter(message=>message.role==='system');
+    const systems=copy.filter(message=>message.role==='system').map(message=>({
+      ...message,content:AI.SYSTEM_PROMPT && AI.WEBLLM_SYSTEM_PROMPT && message.content.startsWith(AI.SYSTEM_PROMPT)
+        ? AI.WEBLLM_SYSTEM_PROMPT+message.content.slice(AI.SYSTEM_PROMPT.length) : message.content
+    }));
     // Keep the latest user turn; old tool results can otherwise fill a 4k model.
     let userIndex=-1;for(let i=0;i<copy.length;i++)if(copy[i].role==='user')userIndex=i;
     // Preserve complete recent turns for references such as "make that 45 s".
@@ -59,7 +62,13 @@
     return [...systems,...turn];
   }
   function toolProtocol(tools){
-    const definitions=tools.map(tool=>({name:tool.name,description:tool.description,input:tool.inputSchema}));
+    // Remove duplicate prose, but preserve every tool and schema constraint.
+    function schema(value){
+      if(Array.isArray(value))return value.map(schema);
+      if(value && typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>key!=='description').map(([key,item])=>[key,key==='properties' ? Object.fromEntries(Object.entries(item).map(([name,property])=>[name,schema(property)])) : schema(item)]));
+      return value;
+    }
+    const definitions=tools.map(tool=>({name:tool.name,input:schema(tool.inputSchema)}));
     return `\nRespond with one JSON object: {"reply":"your natural conversational answer","tool_calls":[]}.
 Keep reply concise (2-4 sentences). For greetings, general questions, design discussion, or clarifications, answer in reply and leave tool_calls empty. For a requested FactSim operation or model facts, use tool_calls entries {"name":"registered tool name","arguments":{...}}. Never fabricate tool results. After a tool result, explain it in reply or call the next needed tool. Do not repeat a successful write. When a call needs an ID from an earlier call, wait for that result first. Available tools:\n${JSON.stringify(definitions)}`;
   }

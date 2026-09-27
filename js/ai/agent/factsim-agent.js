@@ -14,6 +14,14 @@
     for(const candidate of candidates){try{const parsed=JSON.parse(candidate),items=Array.isArray(parsed) ? parsed : [parsed];const calls=items.map((item,index)=>({id:`fallback_${Date.now()}_${index}`,name:String(item.tool || item.name || ''),arguments:item.arguments || item.input || {}})).filter(call=>call.name);if(calls.length)return calls;}catch(_e){}}
     return [];
   }
+  function editAccounting(messages){
+    const turns=[];let current;
+    for(const message of messages){
+      if(message.role==='user'){current={beforeUserTurn:message.modelCountsAtStart,created:[],undoEvents:[]};turns.push(current);}
+      if(message.role==='tool' && current){try{const result=JSON.parse(message.content);if(result.success){if(['add_node','insert_node_on_link','duplicate_node'].includes(message.name))current.created.push({id:result.nodeId,name:result.node?.name});if(message.name==='undo_last_ai_edit')current.undoEvents.push(result.undoneTool);}}catch(_e){}}
+    }
+    return turns.slice(-3);
+  }
   function finalEvidence(messages,start){
     const evidence=messages.slice(start).filter(message=>message.role==='tool').slice(-4).map(message=>{
       const result=JSON.parse(message.content),report=result.report || result;
@@ -36,7 +44,8 @@
         if(images.length>4)throw new Error('画像は一度に4枚まで送信できます。');
         for(const image of images)if(!['image/png','image/jpeg','image/webp','image/gif'].includes(image.mimeType) || typeof image.data!=='string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(image.data) || image.data.length>8*1024*1024)throw new Error('Invalid or oversized image attachment.');
       }catch(error){this.dispatchEvent(event('error',{error}));throw error;}
-      this.running=true;this._controller=new AbortController();this.messages.push({role:'user',content,...(images.length ? {images} : {})});
+      let modelCountsAtStart;try{const model=AI.FactSimTools.modelSummary();modelCountsAtStart={nodeCount:model.nodeCount,edgeCount:model.edgeCount};}catch(_e){}
+      this.running=true;this._controller=new AbortController();this.messages.push({role:'user',content,modelCountsAtStart,...(images.length ? {images} : {})});
       const requestStart=this.messages.length-1,started=performance.now(),stats=this.runStats={modelCalls:0,modelWallMs:0,toolCalls:0,toolWallMs:0,toolTimings:[],budgetReached:false};
       let retained=0;for(let index=this.messages.length-1;index>=0;index--){const message=this.messages[index];if(message.images){message.images=message.images.slice(0,Math.max(0,4-retained));retained+=message.images.length;}}
       this.dispatchEvent(event('user',{content,images}));
@@ -45,18 +54,19 @@
         for(let iteration=0;iteration<=this.maxToolIterations;iteration++){
           if(this._controller.signal.aborted)throw new DOMException('AI request was stopped.','AbortError');
           const finalTurn=iteration===this.maxToolIterations;stats.budgetReached=finalTurn;
-          const requestMessages=finalTurn ? [{role:'system',content:`${AI.buildSystemPrompt()}\nTool budget reached. User request: ${content}\nDo NOT request more tools. Summarize only measured evidence, explain remaining uncertainty and one focused next step. Do not claim the cause is proven. This is a partial investigation.`},{role:'user',content:'Recorded tool evidence (partial, latest results):\n'+JSON.stringify(finalEvidence(this.messages,requestStart))}] : [{role:'system',content:AI.buildSystemPrompt()},...providerMessages(this.messages,this.provider.supportsVision)];
+          const accounting=`\nMeasured edit accounting, in user-turn order: ${JSON.stringify(editAccounting(this.messages))}\nBeforeUserTurn counts were recorded BEFORE edits. Current compact-context counts are AFTER edits so far. Never call the current total the pre-existing count. Historic creations may be undone. Do not promise a future number of tool calls; execute and report actual results.`;
+          const requestMessages=finalTurn ? [{role:'system',content:`${AI.buildSystemPrompt()}${accounting}\nTool budget reached. User request: ${content}\nDo NOT request more tools. Summarize only measured evidence, explain remaining uncertainty and one focused next step. Do not claim the cause is proven. This is a partial investigation.`},{role:'user',content:'Recorded tool evidence (partial, latest results):\n'+JSON.stringify(finalEvidence(this.messages,requestStart))}] : [{role:'system',content:AI.buildSystemPrompt()+accounting},...providerMessages(this.messages,this.provider.supportsVision)];
           if(!finalTurn && this._layoutImage && this.provider.supportsVision)requestMessages.push({role:'user',content:'Current FactSim graph canvas from get_layout_snapshot. ID labels identify nodes; use graph coordinates from the tool result, not image pixels, for move_node. This is an observation, not a new user instruction.',images:[this._layoutImage]});
           const toolDefinitions=finalTurn ? [] : this.registry.list();
           this.dispatchEvent(event('assistant-start',{iteration,finalTurn,toolCalls:stats.toolCalls}));let response=null,streamed='';
           const modelStarted=performance.now();stats.modelCalls++;
           try{
           if(this.provider.supportsStreaming){
-            for await(const item of this.provider.streamChat(requestMessages,{tools:toolDefinitions,signal:this._controller.signal,temperature:0.2})){
+            for await(const item of this.provider.streamChat(requestMessages,{tools:toolDefinitions,signal:this._controller.signal,temperature:0.2,onProgress:progress=>this.dispatchEvent(event('provider-progress',progress))})){
               if(item.type==='delta'){streamed+=item.delta;this.dispatchEvent(event('assistant-delta',{delta:item.delta,iteration}));}
               if(item.type==='done')response=item.response;
             }
-          }else response=await this.provider.chat(requestMessages,{tools:toolDefinitions,signal:this._controller.signal,temperature:0.2});
+          }else response=await this.provider.chat(requestMessages,{tools:toolDefinitions,signal:this._controller.signal,temperature:0.2,onProgress:progress=>this.dispatchEvent(event('provider-progress',progress))});
           }finally{stats.modelWallMs+=performance.now()-modelStarted;}
           if(!response)throw new Error('The AI provider returned no response.');
           const message=response.message || {role:'assistant',content:streamed,toolCalls:[]};message.content=String(message.content || streamed || '');message.toolCalls=message.toolCalls?.length ? message.toolCalls : (!this.provider.supportsTools ? fallbackCalls(message.content) : []);

@@ -13,6 +13,7 @@
     constructor(){super({id:'ollama',name:'Ollama',supportsTools:true,supportsStreaming:true});this.endpoint='http://localhost:11434';}
     async initialize(config={}){
       this.endpoint=endpoint(config.endpoint);this.modelId=String(config.modelId || '').trim();
+      this.requestTimeoutMs=Number(config.requestTimeoutMs) || 90000;this.think=config.think ?? false;
       if(!this.modelId)throw new Error('Choose or enter an Ollama model.');
       this.status='connecting';
       try{
@@ -23,7 +24,7 @@
           if(!response.ok)throw new Error(`Cannot inspect Ollama model: HTTP ${response.status}`);
           capabilities=(await response.json()).capabilities || [];
         }
-        this.supportsVision=capabilities.includes('vision');this.status='ready';
+        this.supportsVision=capabilities.includes('vision');this.supportsThinking=capabilities.includes('thinking');this.status='ready';
       }catch(error){this.status='error';throw AI.providerError(error,'Ollama connection failed');}
     }
     async getModels(){
@@ -33,22 +34,28 @@
     }
     _body(messages,options,stream){
       const body={model:this.modelId,messages:ollamaMessages(messages),stream,options:{temperature:options?.temperature ?? 0.2}};
+      if(this.supportsThinking)body.think=options?.think ?? this.think;
       if(options?.tools?.length)body.tools=AI.toOpenAITools(options.tools);
       return body;
     }
+    _requestControl(options){
+      const controller=new AbortController(),started=performance.now(),abort=()=>controller.abort();this._controller=controller;
+      options.signal?.addEventListener('abort',abort,{once:true});if(options.signal?.aborted)abort();
+      let timedOut=false;const limit=this.requestTimeoutMs || 90000;
+      const timeout=setTimeout(()=>{timedOut=true;abort();},limit),progress=setInterval(()=>options.onProgress?.({phase:'waiting',elapsedSeconds:(performance.now()-started)/1000}),4000);
+      return {controller,timeoutError:()=>timedOut ? new Error(`Ollamaの応答が${Math.round(limit/1000)}秒以内に完了しませんでした。モデル読込・他の実行待ち・推論負荷を確認し、再試行してください。取得済みのツール結果はチャットに残っています。`) : null,close:()=>{clearTimeout(timeout);clearInterval(progress);options.signal?.removeEventListener('abort',abort);if(this._controller===controller)this._controller=null;}};
+    }
     async chat(messages,options={}){
-      const controller=new AbortController();this._controller=controller;
-      options.signal?.addEventListener('abort',()=>controller.abort(),{once:true});
+      const control=this._requestControl(options),controller=control.controller;
       try{
         const response=await fetch(`${this.endpoint}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this._body(messages,options,false)),signal:controller.signal});
         if(!response.ok)throw new Error(`HTTP ${response.status}: ${await response.text()}`);
         const data=await response.json(),message=data.message || {};
         return {message:{role:'assistant',content:String(message.content || ''),toolCalls:AI.normalizeToolCalls(message.tool_calls)},finishReason:data.done_reason || null,usage:null,raw:data};
-      }catch(error){throw AI.providerError(error,'Ollama request failed');}finally{this._controller=null;}
+      }catch(error){throw AI.providerError(control.timeoutError() || error,'Ollama request failed');}finally{control.close();}
     }
     async *streamChat(messages,options={}){
-      const controller=new AbortController();this._controller=controller;
-      options.signal?.addEventListener('abort',()=>controller.abort(),{once:true});
+      const control=this._requestControl(options),controller=control.controller;
       let content='',calls=[],finishReason=null;
       try{
         const response=await fetch(`${this.endpoint}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this._body(messages,options,true)),signal:controller.signal});
@@ -62,7 +69,7 @@
         }
         if(buffer.trim()){const data=JSON.parse(buffer),message=data.message || {};if(message.content){content+=message.content;yield {type:'delta',delta:message.content};}if(message.tool_calls?.length)calls.push(...message.tool_calls);finishReason=data.done_reason || finishReason;}
         yield {type:'done',response:{message:{role:'assistant',content,toolCalls:AI.normalizeToolCalls(calls)},finishReason}};
-      }catch(error){throw AI.providerError(error,'Ollama request failed');}finally{this._controller=null;}
+      }catch(error){throw AI.providerError(control.timeoutError() || error,'Ollama request failed');}finally{control.close();}
     }
     abort(){this._controller?.abort();}
   }

@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from 'node:http';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
-const outputPath=path.join(root,'artifacts','ai-assistant',process.argv.includes('--real-webllm') ? 'browser-test-real.json' : 'browser-test.json');
+const outputPath=path.join(root,'artifacts','ai-assistant',process.argv.includes('--real-webllm') ? 'browser-test-real.json' : process.argv.includes('--webllm-tokenizers') ? 'browser-test-tokenizers.json' : 'browser-test.json');
 const screenshotPath=path.join(root,'tmp','ai-assistant-panel.png');
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml'};
 const screenProtocolChecks=[];
@@ -20,7 +20,7 @@ const server=createServer(async(req,res)=>{
       else{res.setHeader('Content-Type','application/json');res.end(JSON.stringify({choices:[{message:{role:'assistant',content:'OpenAI reply'},finish_reason:'stop'}]}));}
       return;
     }
-    if(relative==='/mock-ollama/api/tags'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({models:[{name:'mock-ollama',size:1,capabilities:['completion','tools','vision']},{name:'mock-text',size:1,capabilities:['completion','tools']}]}));return;}
+    if(relative==='/mock-ollama/api/tags'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({models:[{name:'mock-ollama',size:1,capabilities:['completion','tools','vision','thinking']},{name:'mock-text',size:1,capabilities:['completion','tools']}]}));return;}
     if(relative==='/mock-ollama/api/chat'){
       let raw='';for await(const chunk of req)raw+=chunk;const body=JSON.parse(raw || '{}');res.setHeader('Content-Type','application/json');
       if(body.messages.some(message=>message.role==='user' && message.content.includes('[test-uploaded-image]'))){
@@ -76,9 +76,77 @@ try{
   check('panel loads independently',initial.panelVisible && initial.panelOpen,initial);
   check('all providers are selectable',initial.providers.join(',')==='webllm,ollama,openai-compatible',initial.providers);
   check('webllm model registry has profiles',initial.models.length>=3,initial.models);
-  check('MVP and graph-building tools registered',initial.tools.map(tool=>tool.name).join(',')==='get_model_summary,get_node,set_node_parameter,run_simulation,get_kpis,add_node,connect_nodes,insert_node_on_link,move_node,auto_layout,get_layout_snapshot,get_simulation_report,get_nodes,profile_simulation',initial.tools);
+  const requestedBrowserModels=[
+    ['Hermes-3-Llama-3.1-8B-q4f16_1-MLC','Hermes-3 Llama 3.1 8B'],
+    ['DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC','DeepSeek-R1-Distill-Qwen-7B'],
+    ['Llama-3.1-8B-Instruct-q4f16_1-MLC','Llama 3.1 8B Instruct'],
+    ['Phi-4-mini-instruct-q4f16_1-MLC','Phi-4-mini-instruct']
+  ];
+  check('requested WebLLM models are selectable once without replacing existing models',requestedBrowserModels.every(([id])=>initial.models.filter(value=>value===id).length===1) && initial.models.includes('Llama-3.2-1B-Instruct-q4f16_1-MLC') && initial.models.includes('Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC'),initial.models);
+  const browserModelLoading=await page.evaluate(async requested=>{
+    const provider=new App.AI.WebLLMProvider(),loads=[];let unloads=0;
+    provider.isWebGPUAvailable=()=>true;
+    // Exercise adapter routing without downloading multi-GB model weights.
+    provider._module={CreateMLCEngine:async(id,options)=>{loads.push(id);options.initProgressCallback({progress:1,text:'Ready'});return {unload:async()=>{unloads++;}};}};
+    const results=[];
+    for(const [id,label] of requested){
+      const select=document.getElementById('aiModelSelect');select.value=id;select.dispatchEvent(new Event('change'));
+      let progress=false;await provider.initialize({modelId:select.value,onProgress:report=>{progress=report.progress===1;}});
+      const request=provider._request([{role:'user',content:'こんにちは'}],{tools:[{name:'get_model_summary',description:'Inspect model',inputSchema:{type:'object',properties:{}}}]},false);
+      results.push({id:provider.modelId,ready:provider.status==='ready',label:select.selectedOptions[0].textContent.includes(label),memory:document.getElementById('aiModelInfo').textContent.includes('VRAM'),progress,protocol:request.response_format?.type==='json_object' && !request.tools});
+    }
+    await provider.dispose();
+    document.getElementById('aiModelSelect').value=App.AI.WebLLMModelRegistry.defaultId;document.getElementById('aiModelSelect').dispatchEvent(new Event('change'));
+    return {loads,unloads,results};
+  },requestedBrowserModels);
+  check('requested WebLLM selections pass exact IDs to loader and retain conversation protocol',browserModelLoading.loads.join(',')===requestedBrowserModels.map(([id])=>id).join(',') && browserModelLoading.unloads===4 && browserModelLoading.results.every(result=>result.ready && result.label && result.memory && result.progress && result.protocol),browserModelLoading);
+  check('MVP and graph-building tools registered',initial.tools.map(tool=>tool.name).join(',')==='get_model_summary,get_node,set_node_parameter,run_simulation,get_kpis,add_node,connect_nodes,insert_node_on_link,move_node,auto_layout,get_layout_snapshot,get_simulation_report,get_nodes,profile_simulation,undo_last_ai_edit,get_node_catalog,batch_set_node_parameters,disconnect_nodes,remove_node,duplicate_node,move_nodes',initial.tools);
   check('tool metadata includes classification',initial.tools.every(tool=>tool.mode && tool.risk),initial.tools);
   check('summary uses live graph',initial.summary.nodeCount===4 && initial.summary.edgeCount===3,initial.summary);
+
+  const editingSafety=await page.evaluate(async()=>{
+    const AI=App.AI,semantic=()=>JSON.stringify(App.graph.serialize(),(key,value)=>['__signalCache','__feedbackCache'].includes(key)?undefined:value);
+    let confirmations=0;const registry=new AI.ToolRegistry({policy:()=> 'allow-safe',confirm:async()=>{confirmations++;return true;}});AI.FactSimTools.register(registry);
+    const source=App.graph._nodes.find(n=>n.properties.role==='source'),equipment=App.graph._nodes.filter(n=>n.properties.role==='equipment'),first=equipment[0],second=equipment[1],key=Object.keys(AI.FactSimTools.editableParameters(first)).find(k=>k.endsWith('.seconds'));
+    const invalidBefore=semantic(),invalid=await registry.execute('batch_set_node_parameters',{changes:[{nodeId:String(first.id),parameter:key,value:5},{nodeId:String(second.id),parameter:key,value:-1}]});
+    const invalidAtomic=!invalid.success && semantic()===invalidBefore && confirmations===0;
+    const paramsBefore=equipment.map(n=>AI.FactSimTools.editableParameters(n)[key].value),depth=App.history.undo.length;
+    const batch=await registry.execute('batch_set_node_parameters',{changes:equipment.map(n=>({nodeId:String(n.id),parameter:key,value:5}))});
+    const singleHistory=batch.success && App.history.undo.length===depth+1 && batch.changes.every(item=>item.success && item.newValue===5);
+    const undo=await registry.execute('undo_last_ai_edit',{}),batchUndo=undo.success && equipment.every((n,i)=>AI.FactSimTools.editableParameters(App.graph.getNodeById(n.id))[key].value===paramsBefore[i]);
+    const setter=AI.FactSimTools.setNodeParameter;let attempts=0,rollback;
+    AI.FactSimTools.setNodeParameter=async change=>{if(++attempts===2)throw new Error('Injected second write failure');return setter(change);};
+    try{rollback=await registry.execute('batch_set_node_parameters',{changes:equipment.map(n=>({nodeId:String(n.id),parameter:key,value:6}))});}finally{AI.FactSimTools.setNodeParameter=setter;}
+    const failureRolledBack=!rollback.success && equipment.every((n,i)=>AI.FactSimTools.editableParameters(App.graph.getNodeById(n.id))[key].value===paramsBefore[i]);
+    const dupTargets=await registry.execute('batch_set_node_parameters',{changes:[{nodeId:String(first.id),parameter:'cycleTime',value:7},{nodeId:String(first.id),parameter:key,value:8}]});
+    const deleteConnected=await registry.execute('remove_node',{nodeId:String(first.id)}),denied=new AI.ToolRegistry({policy:()=> 'allow-safe',confirm:async()=>false});AI.FactSimTools.register(denied);
+    const deniedDelete=await denied.execute('remove_node',{nodeId:String(first.id),disconnectAttached:true}),deniedEdge=await denied.execute('disconnect_nodes',{fromNodeId:String(source.id),toNodeId:String(first.id)});
+    const guards=!dupTargets.success && !deleteConnected.success && deniedDelete.cancelled && deniedEdge.cancelled && App.graph._nodes.length===4 && Object.keys(App.graph.links).length===3;
+    const disconnected=await registry.execute('disconnect_nodes',{fromNodeId:String(source.id),toNodeId:String(first.id)}),destructiveUndo=await registry.execute('undo_last_ai_edit',{});
+    const edgeUndo=disconnected.success && destructiveUndo.success && Object.keys(App.graph.links).length===3 && confirmations===1;
+    const inserted=await registry.execute('insert_node_on_link',{fromNodeId:String(source.id),toNodeId:String(first.id),kind:'buffer',name:'Bypass guard'});
+    const removed=await registry.execute('remove_node',{nodeId:String(inserted.nodeId),reconnect:true});
+    const bypass=removed.success && App.graph._nodes.length===4 && Object.values(App.graph.links).some(l=>l.origin_id===source.id && l.target_id===first.id);
+    await registry.execute('set_node_parameter',{nodeId:String(first.id),parameter:key,value:2.5});
+    App.graph.getNodeById(first.id).properties.customCopyMetadata={label:'Custom fixture',values:[1,2,3]};
+    const customProperties=JSON.stringify(App.graph.getNodeById(first.id).properties,(key,value)=>['__signalCache','__feedbackCache'].includes(key)?undefined:value);
+    const copy=await registry.execute('duplicate_node',{nodeId:String(first.id),name:'Standalone copy'}),copyNode=App.graph.getNodeById(copy.nodeId);
+    const standalone=copy.success && copyNode.properties.role==='equipment' && copyNode.inputs.every(p=>p.link==null) && copyNode.outputs.every(p=>!p.links?.length) && AI.FactSimTools.editableParameters(copyNode)[key].value===2.5 && JSON.stringify(copyNode.properties,(key,value)=>['__signalCache','__feedbackCache'].includes(key)?undefined:value)===customProperties;
+    await registry.execute('remove_node',{nodeId:String(copy.nodeId)});
+    await registry.execute('profile_simulation',{durationSeconds:5,resetBeforeRun:true});const runtimeBefore=JSON.stringify(AI.FactSimTools.getKpis());
+    const renamed=await registry.execute('batch_set_node_parameters',{changes:equipment.map((n,i)=>({nodeId:String(n.id),parameter:'title',value:`Rename ${i}`}))}),namesPreserveRuntime=renamed.success && !renamed.simulationReset && runtimeBefore===JSON.stringify(AI.FactSimTools.getKpis());
+    const positions=equipment.map(n=>Array.from(App.graph.getNodeById(n.id).pos)),view=JSON.stringify({scale:App.canvas.ds.scale,offset:Array.from(App.canvas.ds.offset)}),moved=await registry.execute('move_nodes',{nodeIds:equipment.map(n=>String(n.id)),dx:40,dy:30});
+    const translation=moved.success && moved.simulationReset===false && runtimeBefore===JSON.stringify(AI.FactSimTools.getKpis()) && equipment.every((n,i)=>{const p=App.graph.getNodeById(n.id).pos;return p[0]===positions[i][0]+40 && p[1]===positions[i][1]+30;}) && view===JSON.stringify({scale:App.canvas.ds.scale,offset:Array.from(App.canvas.ds.offset)});
+    const sourceBypass=await registry.execute('remove_node',{nodeId:String(source.id),reconnect:true});
+    const oldIsRunning=window.isSimRunning;window.isSimRunning=()=>true;let running;
+    try{running=await registry.execute('move_nodes',{nodeIds:[String(first.id)],dx:10,dy:10});}finally{window.isSimRunning=oldIsRunning;}
+    applyExampleData(EXAMPLES.simple,'simple');return {invalidAtomic,singleHistory,batchUndo,failureRolledBack,guards,edgeUndo,bypass,standalone,translation,namesPreserveRuntime,sourceProtected:!sourceBypass.success,runningProtected:!running.success};
+  });
+  check('batch edits prevalidate all targets and roll back mid-batch failures',editingSafety.invalidAtomic && editingSafety.failureRolledBack,editingSafety);
+  check('batch and destructive edge edits each support one guarded undo',editingSafety.singleHistory && editingSafety.batchUndo && editingSafety.edgeUndo,editingSafety);
+  check('deletion and disconnect require confirmation even under allow-safe; connected and duplicate targets are guarded',editingSafety.guards,editingSafety);
+  check('buffer bypass, standalone custom copy and relative group translation preserve the graph contract',editingSafety.bypass && editingSafety.standalone && editingSafety.translation,editingSafety);
+  check('name-only batches preserve measured runtime; Source bypass and running layout edits are rejected',editingSafety.namesPreserveRuntime && editingSafety.sourceProtected && editingSafety.runningProtected,editingSafety);
 
   const toolResults=await page.evaluate(async()=>{
     const registry=new App.AI.ToolRegistry({policy:()=> 'allow-safe'});App.AI.FactSimTools.register(registry);
@@ -103,6 +171,48 @@ try{
   check('AI writes enter undo history',toolResults.historyDepth>=2 && toolResults.restored===toolResults.previous,{historyDepth:toolResults.historyDepth,restored:toolResults.restored,previous:toolResults.previous});
   check('bounded simulation uses FactSim engine',toolResults.simulated.success && toolResults.simulated.durationSeconds===5 && toolResults.simulated.endTimeSeconds>=5,toolResults.simulated);
   check('KPI tool returns structured runtime facts',toolResults.measured.success && toolResults.measured.source==='FactSim runtime state' && Array.isArray(toolResults.measured.sinks),toolResults.measured);
+
+  const guardedUndo=await page.evaluate(async()=>{
+    applyExampleData(EXAMPLES.simple,'simple');const registry=new App.AI.ToolRegistry({policy:()=> 'allow-safe'});App.AI.FactSimTools.register(registry);
+    const original=JSON.stringify(App.graph.serialize().links),source=App.graph._nodes.find(n=>n.properties.role==='source'),target=App.graph._nodes.find(n=>n.properties.role==='equipment'),input={fromNodeId:String(source.id),toNodeId:String(target.id),kind:'buffer',name:'Undo test'};
+    const inserted=await registry.execute('insert_node_on_link',input);await new Promise(resolve=>setTimeout(resolve,30));
+    const undone=await registry.execute('undo_last_ai_edit',{}),restored=App.graph._nodes.length===4 && JSON.stringify(App.graph.serialize().links)===original;
+    const twice=await registry.execute('undo_last_ai_edit',{});
+    await registry.execute('insert_node_on_link',input);App.graph.getNodeById(target.id).title='manual edit';pushHistory();flushHistory();
+    const manual=await registry.execute('undo_last_ai_edit',{}),manualPreserved=App.graph._nodes.length===5 && App.graph.getNodeById(target.id).title==='manual edit';
+    applyExampleData(EXAMPLES.simple,'simple');const deniedRegistry=new App.AI.ToolRegistry({confirm:async()=>false});App.AI.FactSimTools.register(deniedRegistry);const denied=await deniedRegistry.execute('undo_last_ai_edit',{});
+    return {inserted:inserted.success,undone,restored,twice,manual,manualPreserved,denied};
+  });
+  check('AI undo restores inserted buffer and exact original links using one history step',guardedUndo.inserted && guardedUndo.undone.success && guardedUndo.restored,guardedUndo);
+  check('AI undo rejects repeated/unowned undo, respects confirmation, and preserves later manual edits',!guardedUndo.twice.success && !guardedUndo.manual.success && guardedUndo.manualPreserved && guardedUndo.denied.cancelled,guardedUndo);
+  const safePreflight=await page.evaluate(async()=>{
+    applyExampleData(EXAMPLES.simple,'simple');let confirmations=0;const controller=new AbortController();
+    const registry=new App.AI.ToolRegistry({confirm:async()=>{confirmations++;controller.abort();return true;}});App.AI.FactSimTools.register(registry);
+    const node=App.graph._nodes.find(n=>n.properties.role==='equipment'),initial=App.AI.FactSimTools.editableParameters(node).cycleTime.value,before=JSON.stringify(App.graph.serialize());
+    const invalid=await registry.execute('set_node_parameter',{nodeId:String(node.id),parameter:'cycleTime',value:-2}),beforeConfirmations=confirmations;
+    const stopped=await registry.execute('set_node_parameter',{nodeId:String(node.id),parameter:'cycleTime',value:5},{signal:controller.signal});
+    const catalog=await registry.execute('get_node_catalog',{kinds:['machine','source','no-such-kind']});
+    return {invalidRejected:!invalid.success,beforeConfirmations,stopped:stopped.cancelled,unchanged:App.AI.FactSimTools.editableParameters(node).cycleTime.value===initial,catalogReadOnly:before===JSON.stringify(App.graph.serialize()),catalog};
+  });
+  check('invalid timing is rejected before confirmation and stopping while confirming prevents mutation',safePreflight.invalidRejected && safePreflight.beforeConfirmations===0 && safePreflight.stopped && safePreflight.unchanged,safePreflight);
+  check('catalog inspection previews actual phases without creating nodes or changing the graph',safePreflight.catalogReadOnly && safePreflight.catalog.templates[0].processCount===safePreflight.catalog.templates[0].processIds.length && safePreflight.catalog.templates[0].processCount>0 && safePreflight.catalog.templates[2].success===false,safePreflight.catalog);
+  const accountingResult=await page.evaluate(async()=>{
+    applyExampleData(EXAMPLES.simple,'simple');const registry=new App.AI.ToolRegistry({policy:()=> 'allow-safe'});App.AI.FactSimTools.register(registry);let calls=0,accounting;
+    const provider={status:'ready',supportsTools:true,supportsStreaming:false,async chat(messages){calls++;if(calls===1)return {message:{content:'',toolCalls:[{id:'accounting',name:'add_node',arguments:{kind:'buffer',name:'Accounting test'}}]}};accounting=JSON.parse(messages[0].content.match(/Measured edit accounting, in user-turn order: (.*)\n/)[1]);return {message:{content:'Added one node.',toolCalls:[]}};}};
+    await new App.AI.FactSimAgent({provider,registry}).send('Add a named buffer');
+    App.graph._nodes[0].pos[0]+=77;const historyDepth=App.history.undo.length;const undo=await registry.execute('undo_last_ai_edit',{});
+    App.graph._nodes[0].pos[0]-=77;App.graph._nodes[0].outputs[0].name='uncaptured port edit';const portUndo=await registry.execute('undo_last_ai_edit',{});
+    return {accounting,nodeCount:App.graph._nodes.length,manualRejected:!undo.success && App.history.undo.length===historyDepth,portManualRejected:!portUndo.success && App.graph._nodes[0].outputs[0].name==='uncaptured port edit'};
+  });
+  check('agent records pre-edit counts separately from actual creation results; undo detects uncaptured manual edits',accountingResult.accounting[0].beforeUserTurn.nodeCount===4 && accountingResult.accounting[0].created.length===1 && accountingResult.accounting[0].created[0].name==='Accounting test' && accountingResult.nodeCount===5 && accountingResult.manualRejected && accountingResult.portManualRejected,accountingResult);
+  const ollamaDeadline=await page.evaluate(async()=>{
+    const provider=new App.AI.OllamaProvider();provider.status='ready';provider.modelId='test';provider.requestTimeoutMs=25;provider.supportsThinking=true;provider.think=false;
+    const fetchOriginal=window.fetch;let message='',streamMessage='';window.fetch=(_url,options)=>new Promise((_resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true}));
+    try{try{await provider.chat([{role:'user',content:'test'}]);}catch(e){message=e.message;}try{for await(const item of provider.streamChat([{role:'user',content:'test'}])){}}catch(e){streamMessage=e.message;}}finally{window.fetch=fetchOriginal;}
+    return {message,streamMessage,cleaned:provider._controller===null,body:provider._body([{role:'user',content:'test'}],{},true),thinkingOptIn:provider._body([], {think:true},true).think};
+  });
+  check('Ollama stalled chat/stream time out with actionable errors and clear timers; thinking can be explicitly enabled',ollamaDeadline.message.includes('モデル読込') && ollamaDeadline.streamMessage.includes('モデル読込') && ollamaDeadline.cleaned && ollamaDeadline.body.think===false && ollamaDeadline.thinkingOptIn===true,ollamaDeadline);
+  await page.evaluate(()=>applyExampleData(EXAMPLES.simple,'simple'));
 
   const diagnostics=await page.evaluate(async()=>{
     const registry=new App.AI.ToolRegistry({policy:()=> 'allow-safe'});App.AI.FactSimTools.register(registry);
@@ -202,6 +312,17 @@ try{
     return {text,resets,attempts,preserved:JSON.stringify(messages)===before,oldTurnRemoved:captured.every(request=>!JSON.stringify(request).includes('old turn')),boundedResult:captured.every(request=>request.messages.at(-1).content.length<=1900),measuredTotal:JSON.parse(captured.at(-1).messages.at(-1).content.split('\n').slice(1).join('\n')).totalCompleted,outputLimit:captured.every(request=>request.max_tokens===512)};
   });
   check('WebLLM bounds large tool history and recovers from streaming prefill overflow',contextResult.text==='Recovered' && contextResult.resets===2 && contextResult.attempts===2 && contextResult.preserved && contextResult.oldTurnRemoved && contextResult.boundedResult && contextResult.measuredTotal===42 && contextResult.outputLimit,contextResult);
+
+  const compactBrowserPrompt=await page.evaluate(()=>{
+    const provider=new App.AI.WebLLMProvider();provider.engine={};provider.status='ready';
+    const tools=App.AI.toolRegistry.list(),system=App.AI.buildSystemPrompt()+'\nMeasured edit accounting: beforeUserTurn nodeCount=4.\nDo NOT request more tools. This is a partial investigation.';
+    const messages=[{role:'system',content:system},{role:'user',content:'こんにちは'}],before=JSON.stringify(messages);
+    const request=provider._request(messages,{tools},false),content=request.messages[0].content;
+    const definitions=JSON.parse(content.split('Available tools:\n')[1]);
+    const stripped=value=>JSON.parse(JSON.stringify(value, (key,item)=>key==='description' ? undefined : item));
+    return {shorter:content.length<system.length,compact:content.startsWith(App.AI.WEBLLM_SYSTEM_PROMPT),facts:content.includes('Current compact context') && content.includes('beforeUserTurn nodeCount=4') && content.includes('Do NOT request more tools'),allTools:definitions.map(item=>item.name).join(',')===tools.map(item=>item.name).join(','),constraints:definitions.every((item,i)=>JSON.stringify(item.input)===JSON.stringify(stripped(tools[i].inputSchema))),preserved:JSON.stringify(messages)===before,systemChars:system.length,requestSystemChars:content.length};
+  });
+  check('full FactSim browser prompt is compact without losing live context, final-budget instruction or tool schema constraints',compactBrowserPrompt.shorter && compactBrowserPrompt.compact && compactBrowserPrompt.facts && compactBrowserPrompt.allTools && compactBrowserPrompt.constraints && compactBrowserPrompt.preserved,compactBrowserPrompt);
 
   const lengthResult=await page.evaluate(async()=>{
     const provider=new App.AI.WebLLMProvider();provider.status='ready';const requests=[];
@@ -443,6 +564,24 @@ try{
   check('OpenAI-compatible adapter supports models, chat, and SSE streaming',providerResults.openaiModels[0].id==='mock-model' && providerResults.openaiChat.message.content==='OpenAI reply' && providerResults.openaiStream.text==='OpenAI stream' && providerResults.openaiKeyCleared,providerResults);
   check('Ollama adapter supports discovery, chat, and NDJSON streaming',providerResults.ollamaModels[0].id==='mock-ollama' && providerResults.ollamaChat.message.content==='Ollama reply' && providerResults.ollamaStream.text==='Ollama stream',providerResults);
 
+  if(process.argv.includes('--webllm-tokenizers')){
+    await page.addScriptTag({url:'https://unpkg.com/@mlc-ai/web-tokenizers@0.1.6/lib/index.js'});
+    const counts=await page.evaluate(async requested=>{
+      const {Tokenizer}=window.tokenizers;
+      const provider=new App.AI.WebLLMProvider();provider.engine={};provider.status='ready';
+      const messages=[{role:'system',content:App.AI.buildSystemPrompt()},{role:'user',content:'こんにちは'}];
+      const request=provider._request(messages,{tools:App.AI.toolRegistry.list()},false),results=[];
+      for(const [id] of requested){
+        const response=await fetch(`https://huggingface.co/mlc-ai/${id}/resolve/main/tokenizer.json`);if(!response.ok)throw new Error(`Tokenizer fetch ${id}: ${response.status}`);
+        const tokenizer=await Tokenizer.fromJSON(await response.arrayBuffer());
+        try{results.push({id,contentTokens:request.messages.reduce((sum,message)=>sum+tokenizer.encode(message.content).length,0),outputReserve:768,templateReserve:128});}finally{tokenizer.dispose();}
+      }
+      return results;
+    },requestedBrowserModels);
+    report.webllmTokenizerCounts=counts;
+    check('actual requested model tokenizers fit full greeting prompt plus output and template reserves in 4096 tokens',counts.every(item=>item.contentTokens+item.outputReserve+item.templateReserve<=4096),counts);
+  }
+
   if(process.argv.includes('--real-webllm')){
     const gpu=await page.evaluate(async()=>({available:!!navigator.gpu,adapter:!!(await navigator.gpu?.requestAdapter())}));
     if(!gpu.adapter)report.realWebLLM={attempted:false,reason:'No WebGPU adapter available in the test browser.',gpu};
@@ -450,8 +589,12 @@ try{
       console.log('Loading real WebLLM model for conversational acceptance checks…');
       await page.exposeFunction('reportAIProgress',message=>console.log(message));
       const modelId=process.env.FACT_SIM_AI_TEST_MODEL || 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
-      const result=await page.evaluate(async modelId=>{
+      const result=await page.evaluate(async ({modelId,cacheBackend})=>{
         const provider=new App.AI.WebLLMProvider();let lastProgress=-1;
+        if(cacheBackend){
+          const module=await import('https://esm.run/@mlc-ai/web-llm@0.2.85');
+          provider._module={CreateMLCEngine:(id,config)=>module.CreateMLCEngine(id,{...config,appConfig:{...module.prebuiltAppConfig,cacheBackend}})};
+        }
         await provider.initialize({modelId,onProgress:report=>{const step=Math.floor(report.progress*10);if(step>lastProgress){lastProgress=step;window.reportAIProgress(`${modelId}: ${Math.round(report.progress*100)}% ${report.text}`);}}});
         const generated=[];const create=provider.engine.chat.completions.create.bind(provider.engine.chat.completions);
         provider.engine.chat.completions.create=async request=>{const response=await create(request);if(!request.stream)return response;return (async function*(){let raw='',finish=null;try{for await(const chunk of response){raw+=chunk.choices?.[0]?.delta?.content || '';finish=chunk.choices?.[0]?.finish_reason || finish;yield chunk;}}finally{generated.push({raw,finish});}})();};
@@ -466,12 +609,21 @@ try{
           return {greeting:greeting.content,help:help.content,discussion:discussion.content};
         }catch(error){throw new Error(`${error.message}\nGenerated test responses: ${JSON.stringify(generated)}`);
         }finally{await provider.dispose();}
-      },modelId);
+      },{modelId,cacheBackend:process.env.FACT_SIM_AI_TEST_CACHE_BACKEND || null});
       report.realWebLLM={attempted:true,modelId,...result};
       check('real WebLLM generates conversational replies',Object.values(result).every(reply=>typeof reply==='string' && reply.trim().length>2),result);
     }
   }
 
+  await page.locator('#aiProviderSelect').selectOption('ollama');
+  await page.locator('#aiOllamaEndpoint').fill(`http://127.0.0.1:${server.address().port}/mock-ollama`);
+  await page.locator('#aiOllamaModel').fill('mock-ollama');
+  await page.getByRole('button',{name:'Test & Use',exact:true}).click();
+  await page.waitForFunction(()=>!document.getElementById('aiConnectBtn').disabled && App.AI.agent.provider?.id==='ollama' && App.AI.agent.provider.status==='ready');
+  await page.locator('#aiOllamaThinking').selectOption('on');
+  const thinkingSetting=await page.evaluate(()=>({on:App.AI.agent.provider._body([],{},true).think,saved:JSON.parse(localStorage.getItem('factsim-ai-settings')).ollamaThinking}));
+  await page.locator('#aiOllamaThinking').selectOption('off');
+  check('Ollama UI exposes a persisted fast/detailed choice and applies it to the next generation',thinkingSetting.on && thinkingSetting.saved && await page.evaluate(()=>App.AI.agent.provider._body([],{},true).think===false),thinkingSetting);
   await page.screenshot({path:screenshotPath,fullPage:true});
   await page.getByRole('button',{name:'Toggle AI Assistant'}).click();
   check('panel collapses without stopping FactSim',await page.evaluate(()=>!document.body.classList.contains('ai-panel-open') && !isSimRunning()),null);

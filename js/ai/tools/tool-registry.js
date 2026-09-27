@@ -38,18 +38,38 @@
       this.tools.set(tool.name,tool);return tool;
     }
     get(name){return this.tools.get(String(name || '')) || null;}
-    list(){return [...this.tools.values()].map(({execute,...definition})=>definition);}
+    list(){return [...this.tools.values()].map(({execute,preflight,...definition})=>definition);}
+    _editSignature(){
+      const data=App.graph.serialize(),configuration={};App.injectEntityModel?.(configuration,App.graph);App.stopGroups?.injectSerializedData?.(configuration,App.graph);
+      const ports=items=>(items || []).map(({_data,_pos,_last_time,...config})=>config);
+      return JSON.stringify({nodes:data.nodes.map(({id,type,title,pos,properties,inputs,outputs,mode,flags})=>({id,type,title,pos,properties,inputs:ports(inputs),outputs:ports(outputs),mode,flags})),links:data.links,groups:data.groups,configuration},(key,value)=>['__signalCache','__feedbackCache'].includes(key)?undefined:value);
+    }
+    undoLastAIEdit(){
+      const mark=this.lastAIEdit;
+      if(!mark)throw new Error('There is no undoable AI edit in this tool session.');
+      if(root.isSimRunning?.() || App.graph?.status===root.LGraph?.STATUS_RUNNING)throw new Error('Stop simulation before undoing an AI edit.');
+      root.flushHistory?.();const history=App.history;
+      if(App.graph!==mark.graph || history?.undo.length!==mark.depth || history.last!==mark.after || history.undo.at(-2)!==mark.before || this._editSignature()!==mark.signature)throw new Error('The model/history changed after the AI edit. Refusing to undo a later manual or unrelated change.');
+      root.undo();if(history.last!==mark.before)throw new Error('History undo could not restore the previous AI-edit snapshot.');
+      this.lastAIEdit=null;return {success:true,undoneTool:mark.tool,restoredPreviousSnapshot:true,note:'Existing FactSim undo was used. Runtime results may be reset; rerun simulation if needed.'};
+    }
     async execute(name,input={},context={}){
       const tool=this.get(name);
       try{
         if(!tool)fail(`Unknown FactSim tool: ${name}`,'tool');
+        if(context.signal?.aborted)return {success:false,cancelled:true,stopReason:'cancelled',tool:tool.name,error:'AI request was stopped before tool execution.'};
         validate(tool.inputSchema,input);
+        tool.preflight?.(input);
         const policy=typeof this.policy==='function' ? this.policy(tool) : this.policy;
         const needsConfirmation=tool.mode===MODES.DESTRUCTIVE || (tool.mode===MODES.WRITE && policy!=='allow-safe');
         if(needsConfirmation){
           if(typeof this.confirm!=='function' || !(await this.confirm(tool,input)))return {success:false,cancelled:true,tool:tool.name,error:'User cancelled the operation.'};
         }
+        if(context.signal?.aborted)return {success:false,cancelled:true,stopReason:'cancelled',tool:tool.name,error:'AI request was stopped before tool execution.'};
+        let before,depth;
+        if([MODES.WRITE,MODES.DESTRUCTIVE].includes(tool.mode) && name!=='undo_last_ai_edit' && App.history){root.flushHistory?.();before=App.history.last;depth=App.history.undo.length;}
         const result=await tool.execute(input,context);
+        if(before && result?.success!==false){root.flushHistory?.();const h=App.history;this.lastAIEdit=h.undo.length===depth+1 && h.undo.at(-2)===before ? {graph:App.graph,before,after:h.last,depth:h.undo.length,tool:name,signature:this._editSignature()} : null;}
         return result && typeof result==='object' ? result : {success:true,value:result};
       }catch(error){
         return {success:false,tool:tool?.name || String(name),error:String(error?.message || error),errorType:error?.name || 'Error',path:error?.path || null};

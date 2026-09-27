@@ -15,10 +15,14 @@ The chat UI does not edit `App.graph` and does not invoke simulation internals d
 ## Providers
 
 - Browser AI (WebLLM): checks WebGPU, loads a selected registry model on demand, reports load progress, supports streaming, interruption, and unload.
+
+  Browser models include Llama 3.2 1B, Hermes 2 Pro 8B, Hermes-3 Llama 3.1 8B, DeepSeek-R1-Distill-Qwen-7B, Llama 3.1 8B Instruct, and Phi-4-mini-instruct. The four requested entries use their `q4f16_1-MLC` IDs from the [pinned WebLLM 0.2.85 model configuration](https://github.com/mlc-ai/web-llm/blob/v0.2.85/src/config.ts); approximate VRAM estimates are displayed when selected. DeepSeek was already registered and is not duplicated. All entries use the existing JSON conversation/tool protocol, not native function calling. Availability in the picker does not guarantee tool accuracy or sufficient GPU memory on every device.
 - Ollama: configurable endpoint and model, default endpoint `http://localhost:11434`, with model discovery through `/api/tags`.
 - OpenAI-compatible: configurable base URL, model, and API key. The key is held only in the active page/provider instance and is not written to source code or `localStorage`.
 
 Provider-specific code implements the common `AIProvider` interface. `FactSimAgent` has no WebLLM, Ollama, or OpenAI-specific branches.
+
+Ollama's Thinking selector defaults to Fast (`think: false`) for models advertising thinking capability; Detailed opts into `think: true`. This is per-request, not a change to the Ollama service or Modelfile, and unsupported non-thinking models omit the field. The preference is stored with other non-secret UI settings and applies to the next generation. The API behavior follows the [official Ollama chat API](https://docs.ollama.com/api/chat). Each generation has a 90-second wall-time deadline (programmatic `initialize({requestTimeoutMs})` can override it); the panel reports elapsed wait/generation time every four seconds. A timeout aborts only that request and gives guidance about loading, scheduling and inference load. It does not kill unrelated work or guarantee those external delays disappear. Thinking text is not displayed as a chat answer.
 
 ### User image attachments
 
@@ -31,6 +35,24 @@ User attachments remain available for follow-up questions within the active in-m
 All chat messages, including greetings and capability questions, go to the selected LLM. There are no canned chat answers. Browser AI uses a JSON envelope containing `reply` and `tool_calls`, allowing natural conversation and optional tool execution in the same response. This avoids WebLLM's native Hermes function-call-only schema. The panel displays only the generated reply; tool requests are parsed and validated by the registry. Browser AI preserves recent complete conversation turns within a bounded context budget; older turns may be omitted when the model context fills up. Structured browser responses are buffered until valid JSON is complete. If generation cuts an envelope off at the output limit, the provider retries once with instructions for a shorter response and a larger output budget; incomplete tool calls are never executed.
 
 ## MVP tools
+
+### Additional editing operations
+
+| Tool | Confirmation | Contract |
+| --- | --- | --- |
+| `batch_set_node_parameters` | Normal write policy | Up to 100 explicit changes; validate every target first, reject duplicate aliases, rollback the whole batch on failure; one undo. Name-only changes preserve simulation results. Relative changes are calculated by the LLM from inspected actual values. |
+| `disconnect_nodes` | Always | Exactly one directed edge; optional zero-based ports disambiguate. No node removal. |
+| `remove_node` | Always | Isolated deletion by default; attached edges require explicit `disconnectAttached=true`. `reconnect=true` atomically bypasses an intermediate Equipment node (including Buffer) with exactly one input/output edge; refuses Source/Sink, ambiguous branches, incompatible ports and self-links. |
+| `duplicate_node` | Normal write policy | Copies serialized custom node settings and Flow, with a unique name; no links or runtime results. No automatic parallel routing. |
+| `move_nodes` | Normal write policy | Moves up to 100 explicit IDs by graph dx/dy; preserves their relative positions, viewport, settings and links. Does not avoid obstacles automatically; inspect/recheck geometry. |
+
+These operations use normal FactSim graph/history APIs. A cancelled destructive operation is not retried via other tools. Running simulation is rejected before confirmation; validation is repeated after confirmation. Topology/timing edits reset simulation results, while group translation and name-only batches do not. A guarded undo can restore one completed destructive edit as well as one write/batch; it is not whole-conversation undo.
+
+`node mcp/scripts/test-ai-scenarios.mjs --suite=editing` tests ten real Ollama editing requests (21–30) in isolated fixture graphs. Destructive confirmations are explicitly accepted in the harness except case 29, which cancels; the user's app confirmation settings and model are not changed. Use `--case=25` for an individual request; raw attempts are in `artifacts/ai-assistant/scenarios-editing-real.json`.
+
+WebLLM replaces the long FactSim system playbook with a browser-specific compact safety/operation contract and removes duplicate tool/schema descriptions from its prompt. Live compact context, measured edit accounting, final tool-budget instructions, all tool names and schema constraints remain intact. Other providers retain the full prompt. This avoids sending the large-model playbook on top of tool definitions to 4096-token browser models; context retries still bound previous conversation/tool results. It does not increase GPU memory allocation or substitute canned greetings for model-generated conversation.
+
+`node mcp/scripts/test-ai-assistant.mjs --webllm-tokenizers` checks the greeting prompt with the four requested models' actual tokenizers, reserving 768 output tokens and 128 template tokens. `--real-webllm` runs real GPU inference; set `FACT_SIM_AI_TEST_MODEL` to select Phi-4 or another registry model. Test-only `FACT_SIM_AI_TEST_CACHE_BACKEND=indexeddb` can be used when the isolated browser's default Cache API fails during model downloads; production loading is unchanged.
 
 | Tool | Class | Risk | Purpose |
 | --- | --- | --- | --- |
@@ -48,6 +70,14 @@ All chat messages, including greetings and capability questions, go to the selec
 | `get_simulation_report` | READ | low | One bulk graph/runtime read, states, KPIs, pending-transfer cycles, runtime errors and ranked suspects |
 | `get_nodes` | READ | low | Focused batch of up to 100 nodes with ports/settings and runtime diagnostics |
 | `profile_simulation` | SIMULATION | low | Selected-engine stepping, actual wall-time measurements, progress samples and bounded partial reports |
+| `undo_last_ai_edit` | WRITE | medium | Undo the latest single AI edit only if the same graph/history/configuration still matches; reject later manual edits |
+| `get_node_catalog` | READ | low | Preview actual customized templates, editable defaults, Process phases and ports without adding live nodes |
+
+Ambiguous duplicate names require a target clarification; missing nodes are not created as a substitute. Invalid parameter values are rejected before confirmation, and an aborted request is checked again after confirmation so it cannot apply a late edit. Follow-up references use successful conversation tool results. Node-count accounting records counts before each user turn separately from current post-edit totals.
+
+`undo_last_ai_edit` uses the normal FactSim undo stack, requires the usual write confirmation, and applies to one tool edit in the same registry session. It rejects a changed graph, changed history, configuration/position differences (including uncaptured manual edits), running simulation, and repeated/unowned undo. It does not blindly roll back a multi-tool construction or restore over newer work. Runtime results can be reset by normal undo. Tracking AI ownership does not add extra history entries.
+
+Before constructing timed nodes, `get_node_catalog` exposes actual template overrides. A Machine may contain multiple Process phases; generic 'processing 2 seconds' then requires clarification about total versus per-phase time. Construction may be partially completed before clarification, but timing must not be claimed complete. With an explicit summed total/equal allocation, verify all Process values and preserve other phases. Returned preview nodes have no live graph IDs.
 
 ### Efficient freeze investigations
 
@@ -94,3 +124,13 @@ node mcp/scripts/test-ai-assistant.mjs --real-webllm
 Set `FACT_SIM_AI_TEST_MODEL` to a registry model ID to test another model. The report explicitly records when no WebGPU adapter is available and real inference was skipped.
 
 The report is written to `artifacts/ai-assistant/browser-test.json` (or `browser-test-real.json` for real inference); the visual QA screenshot is temporary and is written under `tmp/`.
+
+### Real Ollama scenario checks
+
+`node mcp/scripts/test-ai-scenarios.mjs` exercises ten realistic Japanese questions against the actual installed Ollama `qwen3.8:27b` model in an isolated headless Edge page. Set `FACT_SIM_AI_SCENARIO_MODEL` to test another installed model. Use `--case=9` (1–10) for an individual question and `FACT_SIM_AI_SCENARIO_TIMEOUT` for the per-question cancellation limit (milliseconds, default 120000). The script does not mock model replies, alter user tabs, download models, or change Ollama configuration. Test graph edits use automatic safe-write policy only inside the isolated test page, not the user's app settings.
+
+Each question starts from the simple four-node fixture; the overlap scenario intentionally overlaps two nodes, and the bottleneck scenario pre-runs 120 seconds. The harness records generated answers, actual tool calls/results, wall times, final graph facts and errors in `artifacts/ai-assistant/scenarios-real.json`, appending each attempt. A passing check requires the expected behavior and a response within 60 seconds on this test machine. These checks are scoped to that model, mode and fixture, not a guarantee for all models or large graphs. Text checks are heuristic; manually review causal claims, unsupported capabilities and topology-preserving improvement suggestions as well. The first model-load time cannot be compared directly with warm-model timings.
+
+The prompt restricts capability descriptions to available tools/parameters, avoids overclaiming UI causes from a successful stepping test, uses one focused parameter batch for bottleneck investigation, and labels theoretical gains separately from measured gains. Mandatory sequential operations must not be turned into alternative parallel routes in an improvement proposal.
+
+For ten additional instructions (test IDs 11–20), run `node mcp/scripts/test-ai-scenarios.mjs --suite=extended` or add `--case=18` for one case. Results append to `artifacts/ai-assistant/scenarios-extended-real.json`. The suite includes ambiguous/missing targets, invalid timing, multi-turn references and undo, customized multi-Process construction with an explicit clarification reply, before/after measured comparison, and a real annotated PNG sent as a user attachment. `--legacy-no-undo --suite=extended --case=17` reproduces the old missing-tool behavior against the real model by omitting only the new undo tool; it does not fake replies. Final passes validate meaningful settings and topology, not lazy rendering/Flow caches. Automated answer checks remain heuristic and are supplemented by manual review.

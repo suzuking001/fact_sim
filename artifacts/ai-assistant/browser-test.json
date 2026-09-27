@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T23:58:55.843Z",
+  "generatedAt": "2026-09-27T08:52:52.229Z",
   "checks": [
     {
       "name": "panel loads independently",
@@ -15,7 +15,10 @@
         "models": [
           "Llama-3.2-1B-Instruct-q4f16_1-MLC",
           "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
-          "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
+          "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+          "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
+          "Llama-3.1-8B-Instruct-q4f16_1-MLC",
+          "Phi-4-mini-instruct-q4f16_1-MLC"
         ],
         "tools": [
           {
@@ -87,6 +90,41 @@
             "name": "profile_simulation",
             "mode": "simulation",
             "risk": "low"
+          },
+          {
+            "name": "undo_last_ai_edit",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "get_node_catalog",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "batch_set_node_parameters",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "disconnect_nodes",
+            "mode": "destructive",
+            "risk": "medium"
+          },
+          {
+            "name": "remove_node",
+            "mode": "destructive",
+            "risk": "high"
+          },
+          {
+            "name": "duplicate_node",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "move_nodes",
+            "mode": "write",
+            "risk": "medium"
           }
         ],
         "summary": {
@@ -203,8 +241,70 @@
       "details": [
         "Llama-3.2-1B-Instruct-q4f16_1-MLC",
         "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
-        "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
+        "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+        "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
+        "Llama-3.1-8B-Instruct-q4f16_1-MLC",
+        "Phi-4-mini-instruct-q4f16_1-MLC"
       ]
+    },
+    {
+      "name": "requested WebLLM models are selectable once without replacing existing models",
+      "pass": true,
+      "details": [
+        "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+        "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
+        "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+        "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
+        "Llama-3.1-8B-Instruct-q4f16_1-MLC",
+        "Phi-4-mini-instruct-q4f16_1-MLC"
+      ]
+    },
+    {
+      "name": "requested WebLLM selections pass exact IDs to loader and retain conversation protocol",
+      "pass": true,
+      "details": {
+        "loads": [
+          "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+          "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
+          "Llama-3.1-8B-Instruct-q4f16_1-MLC",
+          "Phi-4-mini-instruct-q4f16_1-MLC"
+        ],
+        "unloads": 4,
+        "results": [
+          {
+            "id": "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+            "ready": true,
+            "label": true,
+            "memory": true,
+            "progress": true,
+            "protocol": true
+          },
+          {
+            "id": "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
+            "ready": true,
+            "label": true,
+            "memory": true,
+            "progress": true,
+            "protocol": true
+          },
+          {
+            "id": "Llama-3.1-8B-Instruct-q4f16_1-MLC",
+            "ready": true,
+            "label": true,
+            "memory": true,
+            "progress": true,
+            "protocol": true
+          },
+          {
+            "id": "Phi-4-mini-instruct-q4f16_1-MLC",
+            "ready": true,
+            "label": true,
+            "memory": true,
+            "progress": true,
+            "protocol": true
+          }
+        ]
+      }
     },
     {
       "name": "MVP and graph-building tools registered",
@@ -279,6 +379,41 @@
           "name": "profile_simulation",
           "mode": "simulation",
           "risk": "low"
+        },
+        {
+          "name": "undo_last_ai_edit",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "get_node_catalog",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "batch_set_node_parameters",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "disconnect_nodes",
+          "mode": "destructive",
+          "risk": "medium"
+        },
+        {
+          "name": "remove_node",
+          "mode": "destructive",
+          "risk": "high"
+        },
+        {
+          "name": "duplicate_node",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "move_nodes",
+          "mode": "write",
+          "risk": "medium"
         }
       ]
     },
@@ -355,6 +490,41 @@
           "name": "profile_simulation",
           "mode": "simulation",
           "risk": "low"
+        },
+        {
+          "name": "undo_last_ai_edit",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "get_node_catalog",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "batch_set_node_parameters",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "disconnect_nodes",
+          "mode": "destructive",
+          "risk": "medium"
+        },
+        {
+          "name": "remove_node",
+          "mode": "destructive",
+          "risk": "high"
+        },
+        {
+          "name": "duplicate_node",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "move_nodes",
+          "mode": "write",
+          "risk": "medium"
         }
       ]
     },
@@ -460,6 +630,96 @@
       }
     },
     {
+      "name": "batch edits prevalidate all targets and roll back mid-batch failures",
+      "pass": true,
+      "details": {
+        "invalidAtomic": true,
+        "singleHistory": true,
+        "batchUndo": true,
+        "failureRolledBack": true,
+        "guards": true,
+        "edgeUndo": true,
+        "bypass": true,
+        "standalone": true,
+        "translation": true,
+        "namesPreserveRuntime": true,
+        "sourceProtected": true,
+        "runningProtected": true
+      }
+    },
+    {
+      "name": "batch and destructive edge edits each support one guarded undo",
+      "pass": true,
+      "details": {
+        "invalidAtomic": true,
+        "singleHistory": true,
+        "batchUndo": true,
+        "failureRolledBack": true,
+        "guards": true,
+        "edgeUndo": true,
+        "bypass": true,
+        "standalone": true,
+        "translation": true,
+        "namesPreserveRuntime": true,
+        "sourceProtected": true,
+        "runningProtected": true
+      }
+    },
+    {
+      "name": "deletion and disconnect require confirmation even under allow-safe; connected and duplicate targets are guarded",
+      "pass": true,
+      "details": {
+        "invalidAtomic": true,
+        "singleHistory": true,
+        "batchUndo": true,
+        "failureRolledBack": true,
+        "guards": true,
+        "edgeUndo": true,
+        "bypass": true,
+        "standalone": true,
+        "translation": true,
+        "namesPreserveRuntime": true,
+        "sourceProtected": true,
+        "runningProtected": true
+      }
+    },
+    {
+      "name": "buffer bypass, standalone custom copy and relative group translation preserve the graph contract",
+      "pass": true,
+      "details": {
+        "invalidAtomic": true,
+        "singleHistory": true,
+        "batchUndo": true,
+        "failureRolledBack": true,
+        "guards": true,
+        "edgeUndo": true,
+        "bypass": true,
+        "standalone": true,
+        "translation": true,
+        "namesPreserveRuntime": true,
+        "sourceProtected": true,
+        "runningProtected": true
+      }
+    },
+    {
+      "name": "name-only batches preserve measured runtime; Source bypass and running layout edits are rejected",
+      "pass": true,
+      "details": {
+        "invalidAtomic": true,
+        "singleHistory": true,
+        "batchUndo": true,
+        "failureRolledBack": true,
+        "guards": true,
+        "edgeUndo": true,
+        "bypass": true,
+        "standalone": true,
+        "translation": true,
+        "namesPreserveRuntime": true,
+        "sourceProtected": true,
+        "runningProtected": true
+      }
+    },
+    {
       "name": "missing nodes are rejected",
       "pass": true,
       "details": {
@@ -518,29 +778,29 @@
         "completedDelta": 1,
         "mode": "event",
         "performance": {
-          "wallMs": 10.100000023841858,
-          "startupWallMs": 0.7999999821186066,
-          "updateWallMs": 4.800000011920929,
-          "maxUpdateWallMs": 3.4000000059604645,
-          "stopAndRenderWallMs": 3.699999988079071,
+          "wallMs": 3.300000011920929,
+          "startupWallMs": 0.20000001788139343,
+          "updateWallMs": 1.0999999940395355,
+          "maxUpdateWallMs": 0.3999999761581421,
+          "stopAndRenderWallMs": 1.9000000059604645,
           "steps": 5,
-          "simSecondsPerWallSecond": 495.0495037818911
+          "simSecondsPerWallSecond": 1515.1515096781777
         },
         "noActivitySeconds": 5,
         "samples": [
           {
             "simTimeSeconds": 0,
-            "wallSeconds": 0.001,
+            "wallSeconds": 0.00020000001788139342,
             "steps": 0,
             "completed": 0,
             "simSecondsPerWallSecond": 0
           },
           {
             "simTimeSeconds": 5,
-            "wallSeconds": 0.0095,
+            "wallSeconds": 0.0032000000178813936,
             "steps": 5,
             "completed": 1,
-            "simSecondsPerWallSecond": 526.3157894736843
+            "simSecondsPerWallSecond": 1562.4999912688509
           }
         ],
         "report": {
@@ -639,7 +899,7 @@
             "Snapshot does not measure real-time performance; use profile_simulation.",
             "Event heap/queue size is not exposed by this diagnostic; do not invent event counts."
           ],
-          "readWallMs": 0.4000000059604645
+          "readWallMs": 0.09999999403953552
         },
         "limitations": [
           "Time budgets and Stop are checked between engine.update calls; a single synchronous call that never returns cannot be preempted.",
@@ -693,6 +953,323 @@
       }
     },
     {
+      "name": "AI undo restores inserted buffer and exact original links using one history step",
+      "pass": true,
+      "details": {
+        "inserted": true,
+        "undone": {
+          "success": true,
+          "undoneTool": "insert_node_on_link",
+          "restoredPreviousSnapshot": true,
+          "note": "Existing FactSim undo was used. Runtime results may be reset; rerun simulation if needed."
+        },
+        "restored": true,
+        "twice": {
+          "success": false,
+          "tool": "undo_last_ai_edit",
+          "error": "There is no undoable AI edit in this tool session.",
+          "errorType": "Error",
+          "path": null
+        },
+        "manual": {
+          "success": false,
+          "tool": "undo_last_ai_edit",
+          "error": "The model/history changed after the AI edit. Refusing to undo a later manual or unrelated change.",
+          "errorType": "Error",
+          "path": null
+        },
+        "manualPreserved": true,
+        "denied": {
+          "success": false,
+          "cancelled": true,
+          "tool": "undo_last_ai_edit",
+          "error": "User cancelled the operation."
+        }
+      }
+    },
+    {
+      "name": "AI undo rejects repeated/unowned undo, respects confirmation, and preserves later manual edits",
+      "pass": true,
+      "details": {
+        "inserted": true,
+        "undone": {
+          "success": true,
+          "undoneTool": "insert_node_on_link",
+          "restoredPreviousSnapshot": true,
+          "note": "Existing FactSim undo was used. Runtime results may be reset; rerun simulation if needed."
+        },
+        "restored": true,
+        "twice": {
+          "success": false,
+          "tool": "undo_last_ai_edit",
+          "error": "There is no undoable AI edit in this tool session.",
+          "errorType": "Error",
+          "path": null
+        },
+        "manual": {
+          "success": false,
+          "tool": "undo_last_ai_edit",
+          "error": "The model/history changed after the AI edit. Refusing to undo a later manual or unrelated change.",
+          "errorType": "Error",
+          "path": null
+        },
+        "manualPreserved": true,
+        "denied": {
+          "success": false,
+          "cancelled": true,
+          "tool": "undo_last_ai_edit",
+          "error": "User cancelled the operation."
+        }
+      }
+    },
+    {
+      "name": "invalid timing is rejected before confirmation and stopping while confirming prevents mutation",
+      "pass": true,
+      "details": {
+        "invalidRejected": true,
+        "beforeConfirmations": 0,
+        "stopped": true,
+        "unchanged": true,
+        "catalogReadOnly": true,
+        "catalog": {
+          "success": true,
+          "source": "Current node catalog template previews (not live nodes)",
+          "templates": [
+            {
+              "kind": "machine",
+              "label": "Machine",
+              "role": "equipment",
+              "editableParameters": {
+                "title": {
+                  "type": "string",
+                  "value": "Machine"
+                },
+                "description": {
+                  "type": "string",
+                  "value": ""
+                },
+                "process1.seconds": {
+                  "type": "number",
+                  "minimum": 0.001,
+                  "value": 2,
+                  "kind": "process"
+                },
+                "process2.seconds": {
+                  "type": "number",
+                  "minimum": 0.001,
+                  "value": 3,
+                  "kind": "process"
+                }
+              },
+              "processIds": [
+                "process1",
+                "process2"
+              ],
+              "processCount": 2,
+              "ports": {
+                "inputs": [
+                  {
+                    "index": 0,
+                    "name": "inPort1",
+                    "type": "entity"
+                  },
+                  {
+                    "index": 1,
+                    "name": "inPort2",
+                    "type": "entity"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "index": 0,
+                    "name": "outPort1",
+                    "type": "entity"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "source",
+              "label": "Source",
+              "role": "source",
+              "editableParameters": {
+                "title": {
+                  "type": "string",
+                  "value": "Source"
+                },
+                "source.intervalSec": {
+                  "type": "number",
+                  "minimum": 0,
+                  "value": 0
+                }
+              },
+              "processIds": [],
+              "processCount": 0,
+              "ports": {
+                "inputs": [],
+                "outputs": [
+                  {
+                    "index": 0,
+                    "name": "outPort1",
+                    "type": "entity"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "no-such-kind",
+              "success": false,
+              "error": "Unknown node kind."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "catalog inspection previews actual phases without creating nodes or changing the graph",
+      "pass": true,
+      "details": {
+        "success": true,
+        "source": "Current node catalog template previews (not live nodes)",
+        "templates": [
+          {
+            "kind": "machine",
+            "label": "Machine",
+            "role": "equipment",
+            "editableParameters": {
+              "title": {
+                "type": "string",
+                "value": "Machine"
+              },
+              "description": {
+                "type": "string",
+                "value": ""
+              },
+              "process1.seconds": {
+                "type": "number",
+                "minimum": 0.001,
+                "value": 2,
+                "kind": "process"
+              },
+              "process2.seconds": {
+                "type": "number",
+                "minimum": 0.001,
+                "value": 3,
+                "kind": "process"
+              }
+            },
+            "processIds": [
+              "process1",
+              "process2"
+            ],
+            "processCount": 2,
+            "ports": {
+              "inputs": [
+                {
+                  "index": 0,
+                  "name": "inPort1",
+                  "type": "entity"
+                },
+                {
+                  "index": 1,
+                  "name": "inPort2",
+                  "type": "entity"
+                }
+              ],
+              "outputs": [
+                {
+                  "index": 0,
+                  "name": "outPort1",
+                  "type": "entity"
+                }
+              ]
+            }
+          },
+          {
+            "kind": "source",
+            "label": "Source",
+            "role": "source",
+            "editableParameters": {
+              "title": {
+                "type": "string",
+                "value": "Source"
+              },
+              "source.intervalSec": {
+                "type": "number",
+                "minimum": 0,
+                "value": 0
+              }
+            },
+            "processIds": [],
+            "processCount": 0,
+            "ports": {
+              "inputs": [],
+              "outputs": [
+                {
+                  "index": 0,
+                  "name": "outPort1",
+                  "type": "entity"
+                }
+              ]
+            }
+          },
+          {
+            "kind": "no-such-kind",
+            "success": false,
+            "error": "Unknown node kind."
+          }
+        ]
+      }
+    },
+    {
+      "name": "agent records pre-edit counts separately from actual creation results; undo detects uncaptured manual edits",
+      "pass": true,
+      "details": {
+        "accounting": [
+          {
+            "beforeUserTurn": {
+              "nodeCount": 4,
+              "edgeCount": 3
+            },
+            "created": [
+              {
+                "id": 5,
+                "name": "Accounting test"
+              }
+            ],
+            "undoEvents": []
+          }
+        ],
+        "nodeCount": 5,
+        "manualRejected": true,
+        "portManualRejected": true
+      }
+    },
+    {
+      "name": "Ollama stalled chat/stream time out with actionable errors and clear timers; thinking can be explicitly enabled",
+      "pass": true,
+      "details": {
+        "message": "Ollama request failed: Ollamaの応答が0秒以内に完了しませんでした。モデル読込・他の実行待ち・推論負荷を確認し、再試行してください。取得済みのツール結果はチャットに残っています。",
+        "streamMessage": "Ollama request failed: Ollamaの応答が0秒以内に完了しませんでした。モデル読込・他の実行待ち・推論負荷を確認し、再試行してください。取得済みのツール結果はチャットに残っています。",
+        "cleaned": true,
+        "body": {
+          "model": "test",
+          "messages": [
+            {
+              "role": "user",
+              "content": "test"
+            }
+          ],
+          "stream": true,
+          "options": {
+            "temperature": 0.2
+          },
+          "think": false
+        },
+        "thinkingOptIn": true
+      }
+    },
+    {
       "name": "one read retrieves 132 nodes / 178 edges with real pending dependencies and no runtime mutation",
       "pass": true,
       "details": {
@@ -731,13 +1308,13 @@
         "stopReason": "target_reached",
         "advancedSeconds": 1200,
         "performance": {
-          "wallMs": 343,
-          "startupWallMs": 0.19999998807907104,
-          "updateWallMs": 78.50000005960464,
-          "maxUpdateWallMs": 0.9000000059604645,
-          "stopAndRenderWallMs": 1.399999976158142,
+          "wallMs": 335.7999999821186,
+          "startupWallMs": 0.29999998211860657,
+          "updateWallMs": 76.29999986290932,
+          "maxUpdateWallMs": 0.5,
+          "stopAndRenderWallMs": 1.199999988079071,
           "steps": 1200,
-          "simSecondsPerWallSecond": 3498.542274052478
+          "simSecondsPerWallSecond": 3573.5556880997624
         }
       }
     },
@@ -749,13 +1326,13 @@
         "reason": "wall_time_budget",
         "advancedSeconds": 360,
         "performance": {
-          "wallMs": 105.59999999403954,
-          "startupWallMs": 0.19999998807907104,
-          "updateWallMs": 18.899999976158142,
-          "maxUpdateWallMs": 0.800000011920929,
+          "wallMs": 104.10000002384186,
+          "startupWallMs": 0.20000001788139343,
+          "updateWallMs": 17.30000004172325,
+          "maxUpdateWallMs": 0.20000001788139343,
           "stopAndRenderWallMs": 1.5,
           "steps": 360,
-          "simSecondsPerWallSecond": 3409.0909092833313
+          "simSecondsPerWallSecond": 3458.2132556921206
         }
       }
     },
@@ -785,7 +1362,7 @@
         "hasEvidence": true,
         "stats": {
           "modelCalls": 3,
-          "modelWallMs": 0,
+          "modelWallMs": 0.09999999403953552,
           "toolCalls": 2,
           "toolWallMs": 0.09999999403953552,
           "toolTimings": [
@@ -898,6 +1475,20 @@
         "boundedResult": true,
         "measuredTotal": 42,
         "outputLimit": true
+      }
+    },
+    {
+      "name": "full FactSim browser prompt is compact without losing live context, final-budget instruction or tool schema constraints",
+      "pass": true,
+      "details": {
+        "shorter": true,
+        "compact": true,
+        "facts": true,
+        "allTools": true,
+        "constraints": true,
+        "preserved": true,
+        "systemChars": 13065,
+        "requestSystemChars": 11121
       }
     },
     {
@@ -1544,7 +2135,8 @@
             "capabilities": [
               "completion",
               "tools",
-              "vision"
+              "vision",
+              "thinking"
             ]
           },
           {
@@ -1623,7 +2215,8 @@
             "capabilities": [
               "completion",
               "tools",
-              "vision"
+              "vision",
+              "thinking"
             ]
           },
           {
@@ -1657,6 +2250,14 @@
           "text": "Ollama stream",
           "content": "Ollama stream"
         }
+      }
+    },
+    {
+      "name": "Ollama UI exposes a persisted fast/detailed choice and applies it to the next generation",
+      "pass": true,
+      "details": {
+        "on": true,
+        "saved": true
       }
     },
     {
