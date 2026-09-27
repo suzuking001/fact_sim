@@ -524,7 +524,10 @@ var App = window.App || (window.App = {});
       if(opts.tab) this._entityTab = String(opts.tab);
       if(!this.setNode(node)) return false;
       if(App.canvas) App.canvas.selected_group = null;
-      if(activate && typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
+      if(activate){
+        if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
+        if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(false, { toast:false });
+      }
       if(highlight !== false){
         try{
           if(App.canvas && typeof App.canvas.selectNode === 'function') App.canvas.selectNode(node);
@@ -548,7 +551,10 @@ var App = window.App || (window.App = {});
     openGroup(group, activate){
       if(!this.setGroup(group)) return false;
       if(App.canvas) App.canvas.selected_group = group;
-      if(activate && typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
+      if(activate){
+        if(typeof App.setTimelineDockView === 'function') App.setTimelineDockView('inspector');
+        if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(false, { toast:false });
+      }
       return true;
     }
 

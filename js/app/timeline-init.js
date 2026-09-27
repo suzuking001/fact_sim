@@ -97,9 +97,10 @@ function initTimeline(){
     if(typeof App.syncWorkspacePopouts === 'function') App.syncWorkspacePopouts();
   };
   App.setTimelineDockView = setView;
-  if(tabChart) tabChart.addEventListener('click', ()=> setView('chart'));
-  if(tabProps) tabProps.addEventListener('click', ()=> setView('props'));
-  if(tabInspector) tabInspector.addEventListener('click', ()=> setView('inspector'));
+  const activateView = view=>{setView(view);setTimelineHidden(false,{toast:false});};
+  if(tabChart) tabChart.addEventListener('click', ()=> activateView('chart'));
+  if(tabProps) tabProps.addEventListener('click', ()=> activateView('props'));
+  if(tabInspector) tabInspector.addEventListener('click', ()=> activateView('inspector'));
   setView('chart');
   // Always show timeline by default on load.
   rootBody.classList.remove('timeline-hidden');

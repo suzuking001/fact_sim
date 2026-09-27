@@ -1,9 +1,67 @@
 (function(root){
   'use strict';
   const App=root.App,model=App.FlowModel,NS='http://www.w3.org/2000/svg';
+  const FLOW_NODE_ICONS=Object.freeze({
+    DePalletizing:'flow_unpack',Palletizing:'flow_pack',entityRouter:'flow_router',entitySink:'flow_sink',fork:'flow_fork',
+    inPort:'flow_in',join:'flow_join',outPort:'flow_out',process:'flow_process',recovery:'flow_recovery',sensor:'flow_sensor',
+    sourceSequence:'flow_sequence',syncroJudgment:'flow_sync'
+  });
+  const FLOW_NODE_DESCRIPTIONS=Object.freeze({
+    DePalletizing:'Unload contents from a parent',Palletizing:'Load children into a parent',entityRouter:'Route by type or round robin',
+    entitySink:'Complete and record entities',fork:'Send copies to every output',inPort:'Enter this equipment',join:'Wait for every input',
+    outPort:'Leave this equipment',process:'Run the work operation',recovery:'Wait for return / reset',sensor:'Measure count, CT and TPH',
+    sourceSequence:'Generate entities in sequence',syncroJudgment:'Wait for the whole sync group'
+  });
   function element(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
   function button(text,action){const b=element('button','',text);b.type='button';b.onclick=action;return b;}
   function options(rows,value){const select=element('select');for(const [id,text] of rows){const option=element('option','',text);option.value=id;select.append(option);}select.value=value || '';select.onfocus=model.pause;return select;}
+  function flowNodePicker(rows,value){
+    const sorted=rows.slice().sort((a,b)=>a[1].localeCompare(b[1],'en',{sensitivity:'base',numeric:true}));
+    const host=element('div','flowNodePicker'),select=options(sorted,value),trigger=button('',()=>setOpen(!host.classList.contains('is-open'))),list=element('div','flowNodePickerList');
+    const icon=element('span','flowNodePickerIcon'),label=element('span','flowNodePickerValue'),chevron=element('span','flowNodePickerChevron','⌄');
+    select.hidden=true;select.tabIndex=-1;select.setAttribute('aria-hidden','true');select.setAttribute('aria-label','Flow node type');
+    trigger.className='flowNodePickerTrigger';trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-label','Flow node type');
+    icon.setAttribute('aria-hidden','true');chevron.setAttribute('aria-hidden','true');trigger.append(icon,label,chevron);
+    list.setAttribute('role','listbox');list.setAttribute('aria-label','Flow node type');list.hidden=true;
+    const pickerOptions=()=>Array.from(list.children);
+    const itemFor=kind=>sorted.find(row=>row[0]===kind) || sorted[0];
+    function update(){
+      const item=itemFor(select.value);if(!item)return;
+      label.textContent=item[1];icon.dataset.kind=item[0];icon.innerHTML=typeof App.nodeIconSvg==='function' ? App.nodeIconSvg(FLOW_NODE_ICONS[item[0]] || 'basic',{className:'factNodeTypeIcon'}) : '';
+      for(const option of pickerOptions()){const selected=option.dataset.kind===item[0];option.classList.toggle('is-selected',selected);option.setAttribute('aria-selected',String(selected));}
+    }
+    function setOpen(open,focusIndex){
+      const next=!!open;host.classList.toggle('is-open',next);trigger.setAttribute('aria-expanded',String(next));list.hidden=!next;
+      if(!next)return;
+      const items=pickerOptions(),selected=Math.max(0,items.findIndex(item=>item.dataset.kind===select.value)),index=Number.isInteger(focusIndex) ? Math.max(0,Math.min(items.length-1,focusIndex)) : selected;
+      items[index]?.focus({preventScroll:true});items[index]?.scrollIntoView?.({block:'nearest'});
+    }
+    function choose(kind){select.value=kind;update();setOpen(false);trigger.focus();}
+    function move(event,delta){
+      const items=pickerOptions();if(!items.length)return;const current=Math.max(0,items.indexOf(document.activeElement));
+      const index=delta===-Infinity ? 0 : delta===Infinity ? items.length-1 : (current+delta+items.length)%items.length;
+      event.preventDefault();items[index].focus({preventScroll:true});items[index].scrollIntoView?.({block:'nearest'});
+    }
+    for(const [kind,text] of sorted){
+      const option=button('',()=>choose(kind)),optionIcon=element('span','flowNodePickerOptionIcon'),optionText=element('span','flowNodePickerOptionText'),optionLabel=element('span','flowNodePickerOptionLabel',text),description=element('span','flowNodePickerOptionDescription',FLOW_NODE_DESCRIPTIONS[kind] || 'Flow node');
+      option.className='flowNodePickerOption';option.dataset.kind=kind;option.setAttribute('role','option');option.setAttribute('aria-selected','false');
+      optionIcon.dataset.kind=kind;optionIcon.setAttribute('aria-hidden','true');optionIcon.innerHTML=typeof App.nodeIconSvg==='function' ? App.nodeIconSvg(FLOW_NODE_ICONS[kind] || 'basic',{className:'factNodeTypeIcon'}) : '';
+      optionText.append(optionLabel,description);option.append(optionIcon,optionText);option.addEventListener('keydown',event=>{
+        event.stopPropagation?.();
+        if(event.key==='ArrowDown')move(event,1);else if(event.key==='ArrowUp')move(event,-1);else if(event.key==='Home')move(event,-Infinity);else if(event.key==='End')move(event,Infinity);
+        else if(event.key==='Enter' || event.key===' '){event.preventDefault();choose(kind);}else if(event.key==='Escape'){event.preventDefault();setOpen(false);trigger.focus();}else if(event.key==='Tab')setOpen(false);
+      });list.append(option);
+    }
+    trigger.addEventListener('keydown',event=>{
+      event.stopPropagation?.();
+      if(event.key==='ArrowDown' || event.key==='ArrowUp'){event.preventDefault();const items=pickerOptions(),selected=Math.max(0,items.findIndex(item=>item.dataset.kind===select.value));setOpen(true,event.key==='ArrowDown' ? selected : Math.max(0,selected-1));}
+      else if(event.key==='Enter' || event.key===' '){event.preventDefault();setOpen(!host.classList.contains('is-open'));}else if(event.key==='Escape')setOpen(false);
+    });
+    host.addEventListener('focusout',event=>{if(!host.contains(event.relatedTarget))setOpen(false);});
+    const outside=event=>{if(host.classList.contains('is-open') && !host.contains(event.target))setOpen(false);};document.addEventListener?.('pointerdown',outside);
+    host.append(select,trigger,list);update();
+    return {host,select,close:()=>setOpen(false),destroy:()=>document.removeEventListener?.('pointerdown',outside)};
+  }
   App.createFlowView=function(node,viewOptions={}){
     const editorOptions=viewOptions && typeof viewOptions==='object' ? viewOptions : {};
     const host=element('section','flowEditor'),toolbar=element('div','flowToolbar'),viewport=element('div','flowViewport'),scene=element('div','flowScene'),notice=element('div','flowNotice');
@@ -18,13 +76,13 @@
     toolbar.append(button('Check Start',()=>showChecks()));
     let flow=model.clone(node.properties.flow),zoom=1,pan=[16,16],pending=null,menu=null,drag=null,autoFit=true,connectionDrag=null,pointer=null,selectedLink=null;
     const elements=new Map(),ports=new Map(),progress=new Map(),liveViews=new Map();let svg,snapTarget=null,boundaryEdits=[];
-    const selection=options(Object.entries(model.definitions).map(([id,d])=>[id,d.label]),'process');selection.setAttribute('aria-label','Flow node type');
+    const picker=flowNodePicker(Object.entries(model.definitions).map(([id,d])=>[id,d.label]),'process'),selection=picker.select;
     const fit=()=>{autoFit=true;if(!flow.nodes.length || viewport.clientWidth<=24 || viewport.clientHeight<=24)return;const minX=Math.min(...flow.nodes.map(n=>n.pos[0])),minY=Math.min(...flow.nodes.map(n=>n.pos[1]));const w=Math.max(...flow.nodes.map(n=>n.pos[0]+(elements.get(n.id)?.offsetWidth || 230)))-minX,h=Math.max(...flow.nodes.map(n=>n.pos[1]+(elements.get(n.id)?.offsetHeight || 160)))-minY;zoom=Math.max(.05,Math.min(1.2,(viewport.clientWidth-24)/w,(viewport.clientHeight-24)/h));pan=[(viewport.clientWidth-w*zoom)/2-minX*zoom,(viewport.clientHeight-h*zoom)/2-minY*zoom];transform();};
     const zoomReadout=element('span','flowZoomReadout','100%');zoomReadout.setAttribute('aria-label','Flow zoom');
     const zoomTo=next=>{autoFit=false;const x=viewport.clientWidth/2,y=viewport.clientHeight/2;next=Math.max(.05,Math.min(2.5,next));pan=[x-(x-pan[0])*next/zoom,y-(y-pan[1])*next/zoom];zoom=next;transform();};
     const expand=button('Expand Flow',()=>{const expanded=host.classList.toggle('is-expanded');expand.textContent=expanded ? 'Close expanded view' : 'Expand Flow';expand.setAttribute('aria-pressed',String(expanded));});expand.setAttribute('aria-pressed','false');
     const addNode=button('Add',()=>edit(()=>{const item=model.add(flow,selection.value,{},[(40-pan[0])/zoom,(40-pan[1])/zoom]);boundary(item);}));
-    toolbar.append(button('Fit All',fit),button('−',()=>zoomTo(zoom/1.25)),zoomReadout,button('+',()=>zoomTo(zoom*1.25)),button('100%',()=>zoomTo(1)),expand,selection,addNode);
+    toolbar.append(button('Fit All',fit),button('−',()=>zoomTo(zoom/1.25)),zoomReadout,button('+',()=>zoomTo(zoom*1.25)),button('100%',()=>zoomTo(1)),expand,picker.host,addNode);
     function transform(){scene.style.transform=`translate(${pan[0]}px,${pan[1]}px) scale(${zoom})`;zoomReadout.textContent=`${Math.round(zoom*100)}%`;}
     function boundary(item){if(!['inPort','outPort'].includes(item.kind))return;item.config.portId=item.id;boundaryEdits.push(()=>{const input=item.kind==='inPort',method=input ? 'addInput' : 'addOutput',list=input ? node.inputs : node.outputs;node[method](item.id,'entity');const port=list[list.length-1];port.portId=item.id;port.channel='entity';});}
     function edit(action,render=true){
@@ -174,12 +232,12 @@
       }
       transform();requestAnimationFrame(drawLinks);
     }
-    viewport.onpointerdown=e=>{menu?.remove();if(e.target!==viewport && e.target!==scene && e.target!==svg)return;selectedLink=null;cancelConnection();drag={start:[e.clientX,e.clientY],pan:pan.slice()};viewport.setPointerCapture(e.pointerId);};viewport.onpointermove=e=>{if(connectionDrag){moveConnection(e);return;}if(pending){pointer=[e.clientX,e.clientY];snapTarget=targetAt(e.clientX,e.clientY,pending);drawLinks();}if(!drag || drag.item)return;autoFit=false;pan=[drag.pan[0]+e.clientX-drag.start[0],drag.pan[1]+e.clientY-drag.start[1]];transform();};viewport.onpointerup=e=>{if(connectionDrag)endConnection(e);if(drag && !drag.item)drag=null;};viewport.onpointercancel=()=>cancelConnection();viewport.onlostpointercapture=()=>{if(connectionDrag)cancelConnection();};
+    viewport.onpointerdown=e=>{menu?.remove();picker.close();if(e.target!==viewport && e.target!==scene && e.target!==svg)return;selectedLink=null;cancelConnection();drag={start:[e.clientX,e.clientY],pan:pan.slice()};viewport.setPointerCapture(e.pointerId);};viewport.onpointermove=e=>{if(connectionDrag){moveConnection(e);return;}if(pending){pointer=[e.clientX,e.clientY];snapTarget=targetAt(e.clientX,e.clientY,pending);drawLinks();}if(!drag || drag.item)return;autoFit=false;pan=[drag.pan[0]+e.clientX-drag.start[0],drag.pan[1]+e.clientY-drag.start[1]];transform();};viewport.onpointerup=e=>{if(connectionDrag)endConnection(e);if(drag && !drag.item)drag=null;};viewport.onpointercancel=()=>cancelConnection();viewport.onlostpointercapture=()=>{if(connectionDrag)cancelConnection();};
     viewport.addEventListener('wheel',e=>{e.preventDefault();autoFit=false;const rect=viewport.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top,next=Math.max(.2,Math.min(2.5,zoom*Math.exp(-e.deltaY*.001)));pan=[x-(x-pan[0])*next/zoom,y-(y-pan[1])*next/zoom];zoom=next;transform();},{passive:false});
     // Dock resizing and Pop Out / Return to Dock can change dimensions after mount.
     const resizeObserver=new ResizeObserver(()=>{if(host.isConnected && viewport.clientWidth && viewport.clientHeight){if(autoFit)fit();drawLinks();}});resizeObserver.observe(viewport);
     function update(){
-      if(!host.isConnected){resizeObserver.disconnect();return;}
+      if(!host.isConnected){resizeObserver.disconnect();picker.destroy();return;}
       const time=Number(root.simNow?.()) || 0;let resized=false;
       for(const item of flow.nodes){
         const view=liveViews.get(item.id),status=App.flowNodeStatus(node,item,time),signature=JSON.stringify(status);if(!view || view.signature===signature)continue;

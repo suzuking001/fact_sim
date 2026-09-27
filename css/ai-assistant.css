@@ -1,0 +1,30 @@
+#aiPanel{
+  --ai-width:380px;
+  position:fixed;z-index:1720;top:0;right:0;bottom:0;width:var(--ai-width);
+  color:#202124;background:rgba(250,250,252,.98);border-left:1px solid #d7d8de;
+  box-shadow:-12px 0 30px rgba(28,32,40,.1);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
+  transition:transform .2s ease;
+}
+#aiPanel.is-collapsed{transform:translateX(100%)}
+#aiPanelToggle{position:absolute;right:100%;top:82px;width:48px;height:46px;border:1px solid #d7d8de;border-right:0;border-radius:12px 0 0 12px;background:#202124;color:#fff;font-weight:750;cursor:pointer;box-shadow:-5px 4px 14px rgba(28,32,40,.12)}
+#aiPanelBody{display:flex;flex-direction:column;height:100%;min-height:0}
+.aiPanelHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 16px 13px;border-bottom:1px solid #e2e3e7;background:#fff}
+.aiPanelHeader>div{display:grid;gap:2px}.aiPanelHeader strong{font-size:17px}.aiPanelHeader span{max-width:290px;color:#696d76;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aiPanelHeader span[data-state="ready"]{color:#18794e}.aiPanelHeader span[data-state="error"]{color:#b42318}.aiPanelHeader button{border:0;background:transparent;font-size:25px;color:#5f6368;cursor:pointer}
+.aiSettings{padding:10px 14px;border-bottom:1px solid #e2e3e7;background:#f7f7f9;max-height:46%;overflow:auto}
+.aiSettings summary{cursor:pointer;font-weight:650;margin-bottom:9px}.aiSettings label{display:grid;gap:4px;margin:8px 0;color:#555a64;font-size:12px;font-weight:600}
+.aiSettings :is(input,select,textarea){box-sizing:border-box;width:100%;min-height:36px;padding:7px 9px;border:1px solid #c9cbd2;border-radius:8px;background:#fff;color:#202124;font:inherit}
+.aiSettings button,.aiComposer button{min-height:35px;padding:7px 12px;border:1px solid #c9cbd2;border-radius:8px;background:#fff;color:#202124;font-weight:650;cursor:pointer}
+.aiSettings .aiPrimaryButton,.aiComposer .aiPrimaryButton{background:#202124;color:#fff;border-color:#202124}.aiSettings button:disabled,.aiComposer button:disabled{opacity:.45;cursor:not-allowed}
+.aiSecondaryButton{width:100%}.aiModelInfo{margin:8px 0;color:#676b74;font-size:12px}.aiSettings progress{width:100%;height:8px}.aiProgressText{display:block;margin:3px 0 7px;color:#676b74;font-size:11px}
+.aiChatMessages{flex:1;min-height:120px;overflow:auto;padding:15px;display:flex;flex-direction:column;gap:12px;background:#f1f2f5}
+.aiMessage{max-width:92%;display:grid;gap:4px}.aiMessage-user{align-self:flex-end}.aiMessageRole{padding:0 3px;color:#747781;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.aiMessage-user .aiMessageRole{text-align:right}
+.aiMessageBody{padding:10px 12px;border:1px solid #dfe0e5;border-radius:13px;background:#fff;white-space:pre-wrap;overflow-wrap:anywhere}.aiMessage-user .aiMessageBody{background:#202124;color:#fff;border-color:#202124}.aiMessage-tool .aiMessageBody{font:11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;background:#eef5f1;border-color:#cfe3d7;max-height:180px;overflow:auto}.aiMessage-error .aiMessageBody{color:#9f1d17;background:#fff0ef;border-color:#f2c8c5}
+.aiComposer{padding:12px;border-top:1px solid #dfe0e5;background:#fff}.aiComposer textarea{box-sizing:border-box;width:100%;resize:vertical;min-height:70px;max-height:180px;padding:10px;border:1px solid #c9cbd2;border-radius:10px;font:inherit}.aiComposer>div{display:flex;justify-content:flex-end;gap:7px;margin-top:8px}.aiComposer>div button:first-child{margin-right:auto}
+body.ai-panel-open #graph{right:380px;width:auto}body.ai-panel-open #editorTopHud{right:396px}body.ai-panel-open #timelineDock{right:380px}
+.aiComposer .aiImagePreviews{display:flex;justify-content:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:8px}.aiComposer .aiImagePreviews[hidden]{display:none}
+.aiImagePreviews figure{position:relative;margin:0;width:76px;height:68px}.aiImagePreviews img{width:100%;height:100%;object-fit:contain;background:#eef0f4;border:1px solid #c9cbd2;border-radius:6px}
+.aiComposer .aiImagePreviews button{position:absolute;right:-5px;top:-6px;min-height:22px;width:22px;padding:0;margin:0;border-radius:50%;background:#fff;font-size:17px;line-height:20px}
+.aiImageHint{display:block;margin:4px 0 8px;color:#676b74;font-size:11px}.aiMessageBody img{display:block;max-width:100%;max-height:220px;object-fit:contain;margin-top:8px;border-radius:6px}
+@media (max-width:900px){#aiPanel{--ai-width:min(92vw,380px)}body.ai-panel-open #graph,body.ai-panel-open #timelineDock{right:0}body.ai-panel-open #editorTopHud{right:16px}}
+@media (max-width:520px){#aiPanel{--ai-width:100vw}.aiSettings{max-height:42%}#aiPanelToggle{top:70px}}

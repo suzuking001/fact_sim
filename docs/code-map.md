@@ -7,10 +7,14 @@
 | 機能 | 最初に確認するファイル | 必要時の関連ファイル |
 | --- | --- | --- |
 | 起動・script 読込順 | `index.html` | `js/app.js`, `js/core.js`, `js/app/state.js`, `js/app/graph-init.js` |
+| ダブルクリックでローカル HTTP 起動 | `Start_FactSim.bat` | `scripts/start-factsim.ps1`（Python 3・localhost 限定サーバー・既存サーバー再利用） |
 | 全体 UI・画面切替 | `js/app/ui.js`, `js/app/workspace-ui.js` | `js/app/landing.js`, `css/app.css`, `css/workspace.css` |
+| AI Assistant・Provider・Tool | `js/ai/ui/ai-chat-panel.js`, `js/ai/agent/factsim-agent.js` | `js/ai/providers/*`, `js/ai/tools/*`, `js/ai/models/model-registry.js`, `css/ai-assistant.css`, `docs/ai-assistant.md` |
+| AI 停滞調査・全体状態・実時間計測 | `js/ai/tools/simulation-diagnostics.js` | `js/ai/agent/system-prompt.js`, `mcp/scripts/test-ai-assistant.mjs` |
 | 選択・プロパティ・詳細 | `js/app/selection-inspector.js`, `js/app/details-ui.js` | `js/app/selection.js`, `js/app/node-props-panel.js`, `css/details.css` |
 | Entity・内容物・型 | `js/app/entity-ui.js`, `js/nodes/entity_model.js` | `js/nodes/basic_node.js`, `js/nodes/entity_source.js`, `js/nodes/entity_store.js`, `docs/entity-model-ja.md`, `docs/entity-hierarchy-ja.md` |
 | Flow 設定・Add メニュー・配線のドラッグ編集 | `js/app/flow-view.js`, `js/app/flow-model.js` | `js/app/sim.js`（開始後の編集時に実行状態を初期化）、`css/flow-view.css`, `docs/flow-cycle-ja.md`（Join / Fork・接続操作）、`mcp/scripts/test-flow-v2-wiring.cjs` |
+| Flow Sensor のノード内グラフ・拡大モーダル・別ウィンドウ表示 | `js/nodes/basic_node.js`, `js/app/sensor-chart-ui.js` | `css/sensor-chart.css`, `js/app/flow-runtime.js` |
 | Flow 実行・搬送・Recovery・Fork の複製出力・Joinでの同一Type/ID合流 | `js/app/flow-runtime.js` | `js/nodes/basic_node.js`, `js/link-anim.js`, `mcp/scripts/test-flow-v2-runtime.cjs`, `mcp/scripts/test-flow-v2-fanout.cjs`, `mcp/scripts/test-flow-v2-join.cjs` |
 | Flow ノード内の状態・条件成立・経過時間 | `js/app/flow-status.js` | `js/app/flow-view.js`, `mcp/scripts/test-flow-v2-status.cjs` |
 | ノード定義・追加メニュー | `js/nodes/<対象ノード>.js`, `js/app/node-catalog.js` | `js/app/node-definition-editor.js`, `config/node-definitions.json`, `js/nodes/register.js`, `js/nodes/menu.js`, `js/nodes-config.js` |

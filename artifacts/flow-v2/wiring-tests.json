@@ -1,5 +1,9 @@
 [
   {
+    "name": "Flow node picker is alphabetical and shows the shared app-style icons",
+    "ok": true
+  },
+  {
     "name": "Connector labels use IN and OUT while serialized port IDs stay compatible",
     "ok": true
   },

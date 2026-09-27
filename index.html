@@ -33,7 +33,9 @@
   <link rel="stylesheet" href="css/app.css?v=20260920stopgroupsmenu" />
   <link rel="stylesheet" href="css/workspace.css?v=20260920nodedefs" />
   <link rel="stylesheet" href="css/details.css?v=20260926flipio" />
-  <link rel="stylesheet" href="css/flow-view.css?v=20260926sensor" />
+  <link rel="stylesheet" href="css/flow-view.css?v=20260926flowiconspacing" />
+  <link rel="stylesheet" href="css/sensor-chart.css?v=20260926modal" />
+  <link rel="stylesheet" href="css/ai-assistant.css?v=20260927attachments" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -449,6 +451,45 @@
   <div id="fastestModeOverlay" aria-hidden="true"></div>
   <div id="fastestModeNotice" aria-live="polite" role="status">FASTEST mode: Rendering disabled for maximum simulation speed.</div>
   <canvas id="graph"></canvas>
+  <aside id="aiPanel" aria-label="FactSim AI Assistant" data-provider="webllm">
+    <button id="aiPanelToggle" type="button" aria-label="Toggle AI Assistant" aria-controls="aiPanelBody" aria-expanded="true">AI</button>
+    <div id="aiPanelBody">
+      <header class="aiPanelHeader">
+        <div><strong>FactSim AI</strong><span id="aiProviderStatus" data-state="idle">Not connected</span></div>
+        <button id="aiPanelClose" type="button" aria-label="Close AI Assistant">×</button>
+      </header>
+      <details class="aiSettings" open>
+        <summary>Provider &amp; model</summary>
+        <label>AI Provider<select id="aiProviderSelect"><option value="webllm">Browser AI (WebLLM)</option><option value="ollama">Ollama</option><option value="openai-compatible">OpenAI-compatible</option></select></label>
+        <div data-ai-provider-fields="webllm">
+          <label>Model<select id="aiModelSelect"></select></label>
+        </div>
+        <div data-ai-provider-fields="ollama" hidden>
+          <label>Endpoint<input id="aiOllamaEndpoint" type="url" spellcheck="false"></label>
+          <label>Model<input id="aiOllamaModel" type="text" list="aiOllamaModels" spellcheck="false"><datalist id="aiOllamaModels"></datalist></label>
+          <button id="aiOllamaRefresh" class="aiSecondaryButton" type="button">Get Models</button>
+        </div>
+        <div data-ai-provider-fields="openai-compatible" hidden>
+          <label>Base URL<input id="aiApiBaseUrl" type="url" placeholder="https://host.example/v1" spellcheck="false"></label>
+          <label>API Key<input id="aiApiKey" type="password" autocomplete="off" placeholder="Kept in this tab only"></label>
+          <label>Model<input id="aiApiModel" type="text" spellcheck="false"></label>
+        </div>
+        <p id="aiModelInfo" class="aiModelInfo"></p>
+        <progress id="aiLoadProgress" max="100" value="0" hidden></progress>
+        <span id="aiLoadProgressText" class="aiProgressText"></span>
+        <button id="aiConnectBtn" class="aiPrimaryButton" type="button">Load Model</button>
+        <label>Confirmation<select id="aiConfirmationPolicy"><option value="ask">Ask for model edits</option><option value="allow-safe">Allow safe edits</option></select></label>
+      </details>
+      <div id="aiChatMessages" class="aiChatMessages" aria-live="polite"></div>
+      <div class="aiComposer">
+        <div id="aiImagePreviews" class="aiImagePreviews" aria-label="添付画像" hidden></div>
+        <textarea id="aiChatInput" rows="3" placeholder="Ask about this model or request a simulation…"></textarea>
+        <small class="aiImageHint">画像を貼り付け（Ctrl+V）またはドロップできます。最大4枚・画像対応モデルが必要です。</small>
+        <input id="aiImageFiles" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+        <div class="aiComposerActions"><button id="aiClearBtn" type="button">Clear</button><button id="aiAttachBtn" type="button">画像添付</button><button id="aiStopBtn" type="button" disabled>Stop</button><button id="aiSendBtn" class="aiPrimaryButton" type="button">Send</button></div>
+      </div>
+    </div>
+  </aside>
   <div id="stateLegend" aria-label="Simulation state colors" aria-hidden="true">
     <span class="stateLegendItem"><span class="stateLegendDot is-idle" aria-hidden="true"></span>IDLE</span>
     <span class="stateLegendItem"><span class="stateLegendDot is-process" aria-hidden="true"></span>PROCESS</span>
@@ -812,9 +853,9 @@ SOFTWARE.
   <script src="js/nodes/signal.js?v=20260914flow2"></script>
   <script src="js/app/flow-model.js?v=20260926sensor"></script>
   <script src="js/app/flow-runtime.js?v=20260926sensor"></script>
-  <script src="js/nodes/basic_node.js?v=20260926sensor"></script>
+  <script src="js/nodes/basic_node.js?v=20260926sensormodal"></script>
   <script src="js/nodes/register.js?v=20260914flow2"></script>
-  <script src="js/app/node-catalog.js?v=20260920definitions"></script>
+  <script src="js/app/node-catalog.js?v=20260926flowicons"></script>
   <script src="sample/simple.js?v=20260916recovery"></script>
   <script src="sample/branch.js?v=20260916recovery"></script>
   <script src="sample/parallel_benchmark.js?v=20260916recovery"></script>
@@ -847,18 +888,30 @@ SOFTWARE.
   <script src="js/app/selection.js?v=20260914flow2"></script>
   <script src="js/app/fit.js?v=20260919sourcefocus2"></script>
   <script src="js/app/node-props-panel.js?v=20260914flow2"></script>
-  <script src="js/app/selection-inspector.js?v=20260926flipio"></script>
+  <script src="js/app/selection-inspector.js?v=20260926flowreveal"></script>
   <script src="js/app/flow-status.js?v=20260926sensor"></script>
-  <script src="js/app/flow-view.js?v=20260926sensor"></script>
+  <script src="js/app/flow-view.js?v=20260926flowicons"></script>
+  <script src="js/app/sensor-chart-ui.js?v=20260926modal"></script>
   <script src="js/app/entity-ui.js?v=20260922nodeheader"></script>
   <script src="js/app/node-definition-editor.js?v=20260920a"></script>
-  <script src="js/app/timeline-init.js?v=20260914flow2"></script>
+  <script src="js/app/timeline-init.js?v=20260926dockreveal"></script>
   <script src="js/app/graph-init.js?v=20260914flow2"></script>
   <script src="js/app/examples.js?v=20260919folderstart"></script>
-  <script src="js/app/file-io.js?v=20260914flow2"></script>
+  <script src="js/app/file-io.js?v=20260926inspectorview"></script>
   <script src="js/app/workspace-ui.js?v=20260920stopgroupsmenu"></script>
   <script src="js/app/ui.js?v=20260920stopgroupsmenu"></script>
   <script src="js/app/details-ui.js?v=20260914flow2"></script>
+  <script src="js/ai/providers/ai-provider.js?v=20260927vision"></script>
+  <script src="js/ai/models/model-registry.js?v=20260926a"></script>
+  <script src="js/ai/providers/webllm-provider.js?v=20260927geometry"></script>
+  <script src="js/ai/providers/ollama-provider.js?v=20260927vision"></script>
+  <script src="js/ai/providers/openai-compatible-provider.js?v=20260926a"></script>
+  <script src="js/ai/tools/tool-registry.js?v=20260927diagnostics"></script>
+  <script src="js/ai/tools/factsim-tools.js?v=20260927diagnostics"></script>
+  <script src="js/ai/tools/simulation-diagnostics.js?v=20260927diagnostics"></script>
+  <script src="js/ai/agent/system-prompt.js?v=20260927diagnostics"></script>
+  <script src="js/ai/agent/factsim-agent.js?v=20260927diagnostics"></script>
+  <script src="js/ai/ui/ai-chat-panel.js?v=20260927diagnostics"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

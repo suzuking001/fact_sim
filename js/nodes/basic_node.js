@@ -71,41 +71,58 @@
     getEventUntil(){return App.FlowRuntime.eventUntil(this);}
     getInspectorSchema(){return {fields:[]};}
     onPropertyChanged(){if(this._isConfiguring)return;model.pause();ensurePorts(this);if(this.graph)App.FlowRuntime.retime(this);}
-    _sensorChartLayout(count){
-      const width=Math.max(300,Number(this.size?.[0]) || 0),inner=width-20,columnWidth=150,columns=Math.max(1,Math.floor(inner/columnWidth)),rows=Math.max(1,Math.ceil(count/columns)),legendHeight=rows*34,chartHeight=70,top=28,chartTop=top+legendHeight+6,gap=8;
-      return {width,columns,rows,legendHeight,chartHeight,top,chartTop,gap,minHeight:chartTop+chartHeight*2+gap+12};
+    _sensorChartLayout(count,options={}){
+      const fontScale=Math.max(1,Number(options.fontScale) || 1),width=Math.max(300,Number(options.width) || Number(this.size?.[0]) || 0),inner=width-20,columnWidth=150*fontScale,columns=Math.max(1,Math.floor(inner/columnWidth)),rows=Math.max(1,Math.ceil(count/columns)),legendRowHeight=34*fontScale,legendHeight=rows*legendRowHeight,top=Number.isFinite(Number(options.top)) ? Number(options.top) : 28,gap=8*fontScale,chartTop=top+legendHeight+6*fontScale;
+      const availableHeight=Number(options.height),chartHeight=Number.isFinite(availableHeight) ? Math.max(70*fontScale,(availableHeight-chartTop-gap-12*fontScale)/2) : 70*fontScale;
+      return {width,columns,rows,legendRowHeight,legendHeight,chartHeight,top,chartTop,gap,fontScale,minHeight:chartTop+chartHeight*2+gap+12*fontScale};
     }
     _ensureSensorChartSize(count){
       const layout=this._sensorChartLayout(count),width=Math.max(layout.width,Number(this.size?.[0]) || 0),height=Math.max(layout.minHeight,Number(this.size?.[1]) || 0);
       if(width===this.size[0] && height===this.size[1])return false;this.size[0]=width;this.size[1]=height;this.setDirtyCanvas?.(true,true);return true;
     }
     _drawSensorLegend(ctx,series,layout){
-      const gap=6,cellWidth=(layout.width-20-gap*(layout.columns-1))/layout.columns;
+      const scale=layout.fontScale || 1,gap=6*scale,cellWidth=(layout.width-20-gap*(layout.columns-1))/layout.columns;
       ctx.save();
       try{
         series.forEach((entry,index)=>{
-          const row=Math.floor(index/layout.columns),column=index%layout.columns,x=10+column*(cellWidth+gap),y=layout.top+row*34,color=sensorColors[index%sensorColors.length],summary=entry.summary;
-          ctx.fillStyle=sensorPalette.metricFill;ctx.strokeStyle=sensorPalette.metricStroke;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x,y,cellWidth,28,6);ctx.fill();ctx.stroke();
-          ctx.fillStyle=color;ctx.fillRect(x+6,y+6,7,16);ctx.fillStyle=sensorPalette.metricValue;ctx.font='bold 10px sans-serif';ctx.fillText(entry.item.id,x+18,y+11);
-          ctx.fillStyle=sensorPalette.metricLabel;ctx.font='9px sans-serif';ctx.fillText(`Count ${summary.count}  CT ${(summary.lastCycleMs/1000).toFixed(1)}s  TPH ${formatTph(summary.throughputPerHour)}`,x+18,y+23);
+          const row=Math.floor(index/layout.columns),column=index%layout.columns,x=10+column*(cellWidth+gap),y=layout.top+row*layout.legendRowHeight,color=sensorColors[index%sensorColors.length],summary=entry.summary,cardHeight=28*scale;
+          ctx.fillStyle=sensorPalette.metricFill;ctx.strokeStyle=sensorPalette.metricStroke;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x,y,cellWidth,cardHeight,6*scale);ctx.fill();ctx.stroke();
+          ctx.fillStyle=color;ctx.fillRect(x+6*scale,y+6*scale,7*scale,16*scale);ctx.fillStyle=sensorPalette.metricValue;ctx.font=`bold ${10*scale}px sans-serif`;ctx.fillText(entry.item.id,x+18*scale,y+11*scale);
+          ctx.fillStyle=sensorPalette.metricLabel;ctx.font=`${9*scale}px sans-serif`;ctx.fillText(`Count ${summary.count}  CT ${(summary.lastCycleMs/1000).toFixed(1)}s  TPH ${formatTph(summary.throughputPerHour)}`,x+18*scale,y+23*scale);
         });
       }finally{ctx.restore();}
     }
     _drawSensorSeriesChart(ctx,config){
-      const {x,y,width,height,label,maxValue,minTime,timeSpan,series,value,format}=config,plotTop=18,plotBottom=6,plotHeight=Math.max(18,height-plotTop-plotBottom),divisions=3;
-      ctx.save();ctx.translate(x,y);ctx.fillStyle=sensorPalette.chartFill;ctx.strokeStyle=sensorPalette.chartStroke;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(0,0,width,height,7);ctx.fill();ctx.stroke();ctx.fillStyle=sensorPalette.metricValue;ctx.font='bold 10px sans-serif';ctx.fillText(label,8,12);
-      for(let i=0;i<=divisions;i++){const yy=plotTop+(i/divisions)*plotHeight;ctx.strokeStyle=sensorPalette.chartGrid;ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(width,yy);ctx.stroke();ctx.fillStyle=sensorPalette.chartAxis;ctx.font='9px sans-serif';ctx.fillText(format(maxValue*(1-i/divisions)),width+5,Math.max(10,yy+3));}
+      const {x,y,width,height,label,maxValue,minTime,timeSpan,series,value,format}=config,scale=Math.max(1,Number(config.fontScale) || 1),plotTop=18*scale,plotBottom=6*scale,plotHeight=Math.max(18,height-plotTop-plotBottom),divisions=3;
+      ctx.save();ctx.translate(x,y);ctx.fillStyle=sensorPalette.chartFill;ctx.strokeStyle=sensorPalette.chartStroke;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(0,0,width,height,7*scale);ctx.fill();ctx.stroke();ctx.fillStyle=sensorPalette.metricValue;ctx.font=`bold ${10*scale}px sans-serif`;ctx.fillText(label,8*scale,12*scale);
+      for(let i=0;i<=divisions;i++){const yy=plotTop+(i/divisions)*plotHeight;ctx.strokeStyle=sensorPalette.chartGrid;ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(width,yy);ctx.stroke();ctx.fillStyle=sensorPalette.chartAxis;ctx.font=`${9*scale}px sans-serif`;ctx.fillText(format(maxValue*(1-i/divisions)),width+5*scale,Math.max(10*scale,yy+3*scale));}
       let points=0;series.forEach((entry,index)=>{const samples=entry.summary.history || [];if(!samples.length)return;ctx.strokeStyle=sensorColors[index%sensorColors.length];ctx.lineWidth=2;ctx.beginPath();samples.forEach((sample,sampleIndex)=>{const xx=((Number(sample.time) || 0)-minTime)/timeSpan*width,raw=Math.max(0,Number(value(sample)) || 0),yy=plotTop+plotHeight-(raw/maxValue)*Math.max(8,plotHeight-6)-3;if(sampleIndex===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);points++;});ctx.stroke();if(samples.length===1){const sample=samples[0],xx=((Number(sample.time) || 0)-minTime)/timeSpan*width,raw=Math.max(0,Number(value(sample)) || 0),yy=plotTop+plotHeight-(raw/maxValue)*Math.max(8,plotHeight-6)-3;ctx.fillStyle=sensorColors[index%sensorColors.length];ctx.beginPath();ctx.arc(xx,yy,2.5,0,Math.PI*2);ctx.fill();}});
-      if(!points){ctx.fillStyle=sensorPalette.chartEmpty;ctx.font='10px sans-serif';ctx.fillText('No samples yet',8,plotTop+16);}ctx.restore();
+      if(!points){ctx.fillStyle=sensorPalette.chartEmpty;ctx.font=`${10*scale}px sans-serif`;ctx.fillText('No samples yet',8*scale,plotTop+16*scale);}ctx.restore();
     }
-    _drawSensorCharts(ctx,series){
-      const layout=this._sensorChartLayout(series.length);this._drawSensorLegend(ctx,series,layout);
-      const samples=series.flatMap(entry=>entry.summary.history || []),times=samples.map(sample=>Number(sample.time) || 0),minTime=times.length ? Math.min(...times) : 0,maxTime=times.length ? Math.max(...times) : 1,timeSpan=Math.max(1,maxTime-minTime),axisWidth=38,chartWidth=Math.max(80,layout.width-20-axisWidth),cycles=samples.map(sample=>Number(sample.cycleMs) || 0),tph=samples.map(sample=>Number(sample.throughputPerHour) || 0);
-      this._drawSensorSeriesChart(ctx,{x:10,y:layout.chartTop,width:chartWidth,height:layout.chartHeight,label:'Cycle Time',maxValue:Math.max(1,...cycles),minTime,timeSpan,series,value:sample=>sample.cycleMs,format:value=>`${(value/1000).toFixed(1)}s`});
-      this._drawSensorSeriesChart(ctx,{x:10,y:layout.chartTop+layout.chartHeight+layout.gap,width:chartWidth,height:layout.chartHeight,label:'Throughput (1h)',maxValue:Math.max(1,...tph),minTime,timeSpan,series,value:sample=>sample.throughputPerHour,format:formatTph});
+    _drawSensorCharts(ctx,series,options={}){
+      const layout=this._sensorChartLayout(series.length,options);this._drawSensorLegend(ctx,series,layout);
+      const samples=series.flatMap(entry=>entry.summary.history || []),times=samples.map(sample=>Number(sample.time) || 0),minTime=times.length ? Math.min(...times) : 0,maxTime=times.length ? Math.max(...times) : 1,timeSpan=Math.max(1,maxTime-minTime),axisWidth=38*layout.fontScale,chartWidth=Math.max(80,layout.width-20-axisWidth),cycles=samples.map(sample=>Number(sample.cycleMs) || 0),tph=samples.map(sample=>Number(sample.throughputPerHour) || 0),common={minTime,timeSpan,series,fontScale:layout.fontScale};
+      this._drawSensorSeriesChart(ctx,{...common,x:10,y:layout.chartTop,width:chartWidth,height:layout.chartHeight,label:'Cycle Time',maxValue:Math.max(1,...cycles),value:sample=>sample.cycleMs,format:value=>`${(value/1000).toFixed(1)}s`});
+      this._drawSensorSeriesChart(ctx,{...common,x:10,y:layout.chartTop+layout.chartHeight+layout.gap,width:chartWidth,height:layout.chartHeight,label:'Throughput (1h)',maxValue:Math.max(1,...tph),value:sample=>sample.throughputPerHour,format:formatTph});
+      if(options.interactive){
+        this.__sensorChartRect={x:10,y:layout.chartTop,width:layout.width-20,height:layout.chartHeight*2+layout.gap};
+        ctx.save();ctx.fillStyle=sensorPalette.chartAxis;ctx.font='9px sans-serif';ctx.textAlign='right';ctx.fillText('Click to enlarge  ⛶',layout.width-14,layout.chartTop+12);ctx.restore();
+      }
+      return layout;
+    }
+    getSensorChartSeries(time=Number(root.simNow?.()) || 0){
+      return (this.properties.flow?.nodes || []).filter(item=>item.kind==='sensor').map(item=>({item,summary:App.FlowRuntime.getSensorSummary(this,item.id,time)}));
+    }
+    drawSensorChart(ctx,options={}){
+      const series=this.getSensorChartSeries(options.time);if(!series.length)return null;return {series,layout:this._drawSensorCharts(ctx,series,options)};
+    }
+    onMouseDown(event,position){
+      if((event?.button ?? 0)!==0 || !Array.isArray(position) || !this.__sensorChartRect)return false;
+      const rect=this.__sensorChartRect,x=Number(position[0]),y=Number(position[1]);if(x<rect.x || y<rect.y || x>rect.x+rect.width || y>rect.y+rect.height)return false;
+      if(typeof App.openSensorChart==='function'){event?.preventDefault?.();event?.stopPropagation?.();App.openSensorChart(this);return true;}return false;
     }
     onDrawForeground(ctx){
-      const sensorItems=(this.properties.flow?.nodes || []).filter(item=>item.kind==='sensor');this.__disableCompactOverlay=sensorItems.length>0;
+      const sensorItems=(this.properties.flow?.nodes || []).filter(item=>item.kind==='sensor');this.__disableCompactOverlay=sensorItems.length>0;this.__sensorChartRect=null;
       if(this.flags.collapsed)return;
       const r=this._flowRuntime,time=Number(root.simNow?.()) || 0;
       const cell=App.FlowRuntime.activeCells(this).find(c=>c.startedAt!==undefined && c.until>time),entity=this._payload;
@@ -116,7 +133,7 @@
         const registry=App.entityModelForGraph(this.graph);
         lines.push(`Sent: ${this._sent || 0}`,`Sequence: ${(this.properties.source.entries || []).map(e=>registry.get(e.typeId)?.name || e.typeId).join(' → ')}`);
       }else lines.push(`Work: ${entity ? entity.id+' Type='+entity.type : '(none)'}`,`Remain(s): ${(Math.max(0,(cell?.until || 0)-time)/1000).toFixed(1)}`,`Process(s): ${seconds('process')} / Recovery(s): ${seconds('recovery')}`);
-      if(sensorItems.length){const series=sensorItems.map(item=>({item,summary:App.FlowRuntime.getSensorSummary(this,item.id,time)}));if(this._ensureSensorChartSize(series.length))return;this._drawSensorCharts(ctx,series);for(const entry of series)lines.push(`${entry.item.id}: Count ${entry.summary.count} / CT ${(entry.summary.lastCycleMs/1000).toFixed(1)}s / TPH ${formatTph(entry.summary.throughputPerHour)}`);}
+      if(sensorItems.length){const series=this.getSensorChartSeries(time);if(this._ensureSensorChartSize(series.length))return;this._drawSensorCharts(ctx,series,{interactive:true});for(const entry of series)lines.push(`${entry.item.id}: Count ${entry.summary.count} / CT ${(entry.summary.lastCycleMs/1000).toFixed(1)}s / TPH ${formatTph(entry.summary.throughputPerHour)}`);}
       if(r?.error || r?.reason)lines.push(r.error || r.reason);
       root.drawStateBelow?.(ctx,this,lines,8,6);
     }

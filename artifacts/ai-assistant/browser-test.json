@@ -1,0 +1,1675 @@
+{
+  "generatedAt": "2026-09-26T23:58:55.843Z",
+  "checks": [
+    {
+      "name": "panel loads independently",
+      "pass": true,
+      "details": {
+        "panelVisible": true,
+        "panelOpen": true,
+        "providers": [
+          "webllm",
+          "ollama",
+          "openai-compatible"
+        ],
+        "models": [
+          "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+          "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
+          "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
+        ],
+        "tools": [
+          {
+            "name": "get_model_summary",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "get_node",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "set_node_parameter",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "run_simulation",
+            "mode": "simulation",
+            "risk": "low"
+          },
+          {
+            "name": "get_kpis",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "add_node",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "connect_nodes",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "insert_node_on_link",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "move_node",
+            "mode": "write",
+            "risk": "low"
+          },
+          {
+            "name": "auto_layout",
+            "mode": "write",
+            "risk": "low"
+          },
+          {
+            "name": "get_layout_snapshot",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "get_simulation_report",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "get_nodes",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "profile_simulation",
+            "mode": "simulation",
+            "risk": "low"
+          }
+        ],
+        "summary": {
+          "application": "FactSim",
+          "nodeCount": 4,
+          "edgeCount": 3,
+          "selectedNodeId": null,
+          "hasSimulationResult": false,
+          "simulation": {
+            "running": false,
+            "timeSeconds": 0,
+            "mode": "event"
+          },
+          "roleCounts": {
+            "source": 1,
+            "equipment": 2,
+            "sink": 1
+          },
+          "typeCounts": {
+            "factory/basic": 4
+          },
+          "availableNodeKinds": [
+            {
+              "kind": "machine",
+              "label": "Machine"
+            },
+            {
+              "kind": "inspection",
+              "label": "Inspection"
+            },
+            {
+              "kind": "buffer",
+              "label": "Buffer"
+            },
+            {
+              "kind": "conveyor",
+              "label": "Conveyor"
+            },
+            {
+              "kind": "router",
+              "label": "Router"
+            },
+            {
+              "kind": "pack",
+              "label": "Palletizing"
+            },
+            {
+              "kind": "unpack",
+              "label": "DePalletizing"
+            },
+            {
+              "kind": "basic",
+              "label": "Basic Node"
+            },
+            {
+              "kind": "note",
+              "label": "Memo"
+            },
+            {
+              "kind": "shuttle",
+              "label": "Shuttle Stage"
+            },
+            {
+              "kind": "source",
+              "label": "Source"
+            },
+            {
+              "kind": "sink",
+              "label": "Sink"
+            }
+          ],
+          "nodes": [
+            {
+              "id": 1,
+              "name": "Source",
+              "type": "factory/basic",
+              "role": "source"
+            },
+            {
+              "id": 2,
+              "name": "Equipment",
+              "type": "factory/basic",
+              "role": "equipment"
+            },
+            {
+              "id": 3,
+              "name": "Equipment",
+              "type": "factory/basic",
+              "role": "equipment"
+            },
+            {
+              "id": 4,
+              "name": "Sink",
+              "type": "factory/basic",
+              "role": "sink"
+            }
+          ],
+          "truncated": false
+        }
+      }
+    },
+    {
+      "name": "all providers are selectable",
+      "pass": true,
+      "details": [
+        "webllm",
+        "ollama",
+        "openai-compatible"
+      ]
+    },
+    {
+      "name": "webllm model registry has profiles",
+      "pass": true,
+      "details": [
+        "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+        "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
+        "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
+      ]
+    },
+    {
+      "name": "MVP and graph-building tools registered",
+      "pass": true,
+      "details": [
+        {
+          "name": "get_model_summary",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_node",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "set_node_parameter",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "run_simulation",
+          "mode": "simulation",
+          "risk": "low"
+        },
+        {
+          "name": "get_kpis",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "add_node",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "connect_nodes",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "insert_node_on_link",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "move_node",
+          "mode": "write",
+          "risk": "low"
+        },
+        {
+          "name": "auto_layout",
+          "mode": "write",
+          "risk": "low"
+        },
+        {
+          "name": "get_layout_snapshot",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_simulation_report",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_nodes",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "profile_simulation",
+          "mode": "simulation",
+          "risk": "low"
+        }
+      ]
+    },
+    {
+      "name": "tool metadata includes classification",
+      "pass": true,
+      "details": [
+        {
+          "name": "get_model_summary",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_node",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "set_node_parameter",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "run_simulation",
+          "mode": "simulation",
+          "risk": "low"
+        },
+        {
+          "name": "get_kpis",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "add_node",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "connect_nodes",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "insert_node_on_link",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "move_node",
+          "mode": "write",
+          "risk": "low"
+        },
+        {
+          "name": "auto_layout",
+          "mode": "write",
+          "risk": "low"
+        },
+        {
+          "name": "get_layout_snapshot",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_simulation_report",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_nodes",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "profile_simulation",
+          "mode": "simulation",
+          "risk": "low"
+        }
+      ]
+    },
+    {
+      "name": "summary uses live graph",
+      "pass": true,
+      "details": {
+        "application": "FactSim",
+        "nodeCount": 4,
+        "edgeCount": 3,
+        "selectedNodeId": null,
+        "hasSimulationResult": false,
+        "simulation": {
+          "running": false,
+          "timeSeconds": 0,
+          "mode": "event"
+        },
+        "roleCounts": {
+          "source": 1,
+          "equipment": 2,
+          "sink": 1
+        },
+        "typeCounts": {
+          "factory/basic": 4
+        },
+        "availableNodeKinds": [
+          {
+            "kind": "machine",
+            "label": "Machine"
+          },
+          {
+            "kind": "inspection",
+            "label": "Inspection"
+          },
+          {
+            "kind": "buffer",
+            "label": "Buffer"
+          },
+          {
+            "kind": "conveyor",
+            "label": "Conveyor"
+          },
+          {
+            "kind": "router",
+            "label": "Router"
+          },
+          {
+            "kind": "pack",
+            "label": "Palletizing"
+          },
+          {
+            "kind": "unpack",
+            "label": "DePalletizing"
+          },
+          {
+            "kind": "basic",
+            "label": "Basic Node"
+          },
+          {
+            "kind": "note",
+            "label": "Memo"
+          },
+          {
+            "kind": "shuttle",
+            "label": "Shuttle Stage"
+          },
+          {
+            "kind": "source",
+            "label": "Source"
+          },
+          {
+            "kind": "sink",
+            "label": "Sink"
+          }
+        ],
+        "nodes": [
+          {
+            "id": 1,
+            "name": "Source",
+            "type": "factory/basic",
+            "role": "source"
+          },
+          {
+            "id": 2,
+            "name": "Equipment",
+            "type": "factory/basic",
+            "role": "equipment"
+          },
+          {
+            "id": 3,
+            "name": "Equipment",
+            "type": "factory/basic",
+            "role": "equipment"
+          },
+          {
+            "id": 4,
+            "name": "Sink",
+            "type": "factory/basic",
+            "role": "sink"
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "name": "missing nodes are rejected",
+      "pass": true,
+      "details": {
+        "success": false,
+        "tool": "get_node",
+        "error": "Node does not exist: Process999.",
+        "errorType": "Error",
+        "path": null
+      }
+    },
+    {
+      "name": "invalid cycle time is rejected",
+      "pass": true,
+      "details": {
+        "success": false,
+        "tool": "set_node_parameter",
+        "error": "Value must be at least 0.001.",
+        "errorType": "Error",
+        "path": null
+      }
+    },
+    {
+      "name": "safe write returns before and after values",
+      "pass": true,
+      "details": {
+        "success": true,
+        "nodeId": 2,
+        "nodeName": "Equipment",
+        "parameter": "process1.seconds",
+        "previousValue": 1,
+        "newValue": 1.5
+      }
+    },
+    {
+      "name": "AI writes enter undo history",
+      "pass": true,
+      "details": {
+        "historyDepth": 2,
+        "restored": 1,
+        "previous": 1
+      }
+    },
+    {
+      "name": "bounded simulation uses FactSim engine",
+      "pass": true,
+      "details": {
+        "success": true,
+        "partial": false,
+        "stopReason": "target_reached",
+        "error": null,
+        "source": "Measured selected-engine stepping (not LLM estimates)",
+        "requestedDurationSeconds": 5,
+        "startTimeSeconds": 0,
+        "endTimeSeconds": 5,
+        "advancedSeconds": 5,
+        "completedDelta": 1,
+        "mode": "event",
+        "performance": {
+          "wallMs": 10.100000023841858,
+          "startupWallMs": 0.7999999821186066,
+          "updateWallMs": 4.800000011920929,
+          "maxUpdateWallMs": 3.4000000059604645,
+          "stopAndRenderWallMs": 3.699999988079071,
+          "steps": 5,
+          "simSecondsPerWallSecond": 495.0495037818911
+        },
+        "noActivitySeconds": 5,
+        "samples": [
+          {
+            "simTimeSeconds": 0,
+            "wallSeconds": 0.001,
+            "steps": 0,
+            "completed": 0,
+            "simSecondsPerWallSecond": 0
+          },
+          {
+            "simTimeSeconds": 5,
+            "wallSeconds": 0.0095,
+            "steps": 5,
+            "completed": 1,
+            "simSecondsPerWallSecond": 526.3157894736843
+          }
+        ],
+        "report": {
+          "success": true,
+          "source": "Measured FactSim graph/runtime snapshot",
+          "simTimeSeconds": 5,
+          "mode": "event",
+          "running": false,
+          "nodeCount": 4,
+          "edgeCount": 3,
+          "stateCounts": {
+            "WAIT": 1,
+            "PROCESS": 1,
+            "RECOVERY": 1,
+            "IDLE": 1
+          },
+          "kpis": {
+            "success": true,
+            "source": "FactSim runtime state",
+            "running": false,
+            "simTimeSeconds": 5,
+            "totalCompleted": 1,
+            "projectedThroughputPerHour": 720,
+            "sinkCount": 1,
+            "sinks": [
+              {
+                "nodeId": 4,
+                "name": "Sink",
+                "completedCount": 1,
+                "throughputPerHour": 720,
+                "firstCompletionSeconds": 2,
+                "lastCompletionSeconds": 2
+              }
+            ]
+          },
+          "runtimeTotals": {
+            "cells": 2,
+            "offers": 1,
+            "signals": 1,
+            "pendingTransfers": 1
+          },
+          "issues": {
+            "runtimeErrors": [],
+            "invalidLinkIds": [],
+            "unreachableFromSources": [],
+            "cannotReachSink": [],
+            "pendingTransferCycles": [],
+            "duplicateNames": [
+              {
+                "name": "Equipment",
+                "nodeIds": [
+                  2,
+                  3
+                ]
+              }
+            ]
+          },
+          "suspectCount": 1,
+          "suspects": [
+            {
+              "id": 1,
+              "name": "Source",
+              "role": "source",
+              "state": "WAIT",
+              "sent": 2,
+              "completed": 0,
+              "cells": 1,
+              "signals": 0,
+              "offers": 1,
+              "pendingNodeIds": [
+                2
+              ],
+              "reason": "",
+              "error": "",
+              "nextTimedSeconds": null,
+              "lastTransferSeconds": null,
+              "flowCells": [
+                {
+                  "flowNodeId": "outPort1",
+                  "kind": "outPort",
+                  "input": "inPort",
+                  "untilSeconds": null,
+                  "ready": false
+                }
+              ],
+              "source": {
+                "repeat": true,
+                "quantity": 2,
+                "created": 3
+              }
+            }
+          ],
+          "suspectsTruncated": false,
+          "limitations": [
+            "WAIT states, missing sink paths and pending transfer cycles are candidates, not proof of deadlock.",
+            "Snapshot does not measure real-time performance; use profile_simulation.",
+            "Event heap/queue size is not exposed by this diagnostic; do not invent event counts."
+          ],
+          "readWallMs": 0.4000000059604645
+        },
+        "limitations": [
+          "Time budgets and Stop are checked between engine.update calls; a single synchronous call that never returns cannot be preempted.",
+          "Intermediate normal UI rendering is not exercised. Stop/render time is measured separately; a fast stepping run does not rule out UI/render issues.",
+          "No-activity is a measured suspicion, not proof of deadlock or the exact root cause."
+        ],
+        "durationSeconds": 5,
+        "steps": 5,
+        "kpis": {
+          "success": true,
+          "source": "FactSim runtime state",
+          "running": false,
+          "simTimeSeconds": 5,
+          "totalCompleted": 1,
+          "projectedThroughputPerHour": 720,
+          "sinkCount": 1,
+          "sinks": [
+            {
+              "nodeId": 4,
+              "name": "Sink",
+              "completedCount": 1,
+              "throughputPerHour": 720,
+              "firstCompletionSeconds": 2,
+              "lastCompletionSeconds": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "KPI tool returns structured runtime facts",
+      "pass": true,
+      "details": {
+        "success": true,
+        "source": "FactSim runtime state",
+        "running": false,
+        "simTimeSeconds": 5,
+        "totalCompleted": 1,
+        "projectedThroughputPerHour": 720,
+        "sinkCount": 1,
+        "sinks": [
+          {
+            "nodeId": 4,
+            "name": "Sink",
+            "completedCount": 1,
+            "throughputPerHour": 720,
+            "firstCompletionSeconds": 2,
+            "lastCompletionSeconds": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "one read retrieves 132 nodes / 178 edges with real pending dependencies and no runtime mutation",
+      "pass": true,
+      "details": {
+        "nodes": 132,
+        "edges": 178,
+        "allNodes": 132,
+        "allEdges": 178,
+        "readOnly": true,
+        "cycles": [
+          [
+            2,
+            3
+          ]
+        ],
+        "errors": [
+          {
+            "nodeId": 2,
+            "error": "test-only runtime error"
+          }
+        ],
+        "duplicateCount": 132
+      }
+    },
+    {
+      "name": "focused batch node reads validate every array item",
+      "pass": true,
+      "details": {
+        "count": 3,
+        "invalidRejected": true
+      }
+    },
+    {
+      "name": "actual selected engine advances 1200 seconds with measured performance and bounded sampling",
+      "pass": true,
+      "details": {
+        "stopReason": "target_reached",
+        "advancedSeconds": 1200,
+        "performance": {
+          "wallMs": 343,
+          "startupWallMs": 0.19999998807907104,
+          "updateWallMs": 78.50000005960464,
+          "maxUpdateWallMs": 0.9000000059604645,
+          "stopAndRenderWallMs": 1.399999976158142,
+          "steps": 1200,
+          "simSecondsPerWallSecond": 3498.542274052478
+        }
+      }
+    },
+    {
+      "name": "real-engine wall budget returns partial measurements rather than looping indefinitely",
+      "pass": true,
+      "details": {
+        "partial": true,
+        "reason": "wall_time_budget",
+        "advancedSeconds": 360,
+        "performance": {
+          "wallMs": 105.59999999403954,
+          "startupWallMs": 0.19999998807907104,
+          "updateWallMs": 18.899999976158142,
+          "maxUpdateWallMs": 0.800000011920929,
+          "stopAndRenderWallMs": 1.5,
+          "steps": 360,
+          "simSecondsPerWallSecond": 3409.0909092833313
+        }
+      }
+    },
+    {
+      "name": "profiling reports non-advancing clock, engine failure and cancellation without leaving simulation running",
+      "pass": true,
+      "details": {
+        "stopped": "simulation_clock_not_advancing",
+        "error": {
+          "success": false,
+          "stopReason": "engine_error",
+          "error": "test-only engine failure"
+        },
+        "cancelled": "cancelled",
+        "running": false
+      }
+    },
+    {
+      "name": "tool budget ends with provider-generated partial evidence summary and measured timing, not iteration error",
+      "pass": true,
+      "details": {
+        "partial": true,
+        "content": "取得済みの全体状態を確認しました。原因は未確定です。",
+        "calls": 3,
+        "lastTools": 0,
+        "hasQuestion": true,
+        "hasEvidence": true,
+        "stats": {
+          "modelCalls": 3,
+          "modelWallMs": 0,
+          "toolCalls": 2,
+          "toolWallMs": 0.09999999403953552,
+          "toolTimings": [
+            {
+              "name": "get_simulation_report",
+              "wallMs": 0
+            },
+            {
+              "name": "get_simulation_report",
+              "wallMs": 0.09999999403953552
+            }
+          ],
+          "budgetReached": true,
+          "wallMs": 0.5
+        }
+      }
+    },
+    {
+      "name": "agent completes multi-step tool loop",
+      "pass": true,
+      "details": {
+        "content": "Verified from FactSim.",
+        "calls": 2,
+        "roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant"
+        ]
+      }
+    },
+    {
+      "name": "every greeting and capability question receives provider-generated text",
+      "pass": true,
+      "details": {
+        "greeting": "LLM response 1: こんにちは！",
+        "help": "LLM response 2: 何ができる？",
+        "alternate": "LLM response 3: なにができますか？",
+        "beforeModel": {
+          "providerCalls": 3,
+          "toolCalls": 0
+        },
+        "providerCalls": 4,
+        "offlineError": "Load or connect an AI provider first.",
+        "historyPreserved": true,
+        "roles": [
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant"
+        ]
+      }
+    },
+    {
+      "name": "conversation history is preserved and offline chat does not fake an AI answer",
+      "pass": true,
+      "details": {
+        "greeting": "LLM response 1: こんにちは！",
+        "help": "LLM response 2: 何ができる？",
+        "alternate": "LLM response 3: なにができますか？",
+        "beforeModel": {
+          "providerCalls": 3,
+          "toolCalls": 0
+        },
+        "providerCalls": 4,
+        "offlineError": "Load or connect an AI provider first.",
+        "historyPreserved": true,
+        "roles": [
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant"
+        ]
+      }
+    },
+    {
+      "name": "chat UI displays provider answers rather than canned greetings",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "Hermes chat and streaming accept tools while preserving FactSim instructions and history",
+      "pass": true,
+      "details": {
+        "chat": "こんにちは",
+        "streamed": "こんにちは",
+        "preserved": true,
+        "adapted": true,
+        "toolResultPreserved": true,
+        "normalSystemPreserved": true
+      }
+    },
+    {
+      "name": "WebLLM bounds large tool history and recovers from streaming prefill overflow",
+      "pass": true,
+      "details": {
+        "text": "Recovered",
+        "resets": 2,
+        "attempts": 2,
+        "preserved": true,
+        "oldTurnRemoved": true,
+        "boundedResult": true,
+        "measuredTotal": 42,
+        "outputLimit": true
+      }
+    },
+    {
+      "name": "truncated model replies are regenerated without exposing partial JSON or tool calls",
+      "pass": true,
+      "details": {
+        "chat": "Generated recovery",
+        "text": "Generated recovery",
+        "done": 1,
+        "attempts": 4,
+        "largerBudget": true
+      }
+    },
+    {
+      "name": "agent can correct invalid tool arguments without bypassing validation",
+      "pass": true,
+      "details": {
+        "reply": "入口を追加しました。",
+        "createdOnce": true,
+        "errorDelivered": true,
+        "unknownRejected": true
+      }
+    },
+    {
+      "name": "conversation can discuss a design then build and connect real nodes through WebLLM adapter",
+      "pass": true,
+      "details": {
+        "answer": "入口と出口を追加して接続しました。",
+        "discussedWithoutWrites": true,
+        "created": true,
+        "errors": 0,
+        "duplicateRejected": true,
+        "invalidKindRejected": true,
+        "missingRejected": true,
+        "invalidPortRejected": true,
+        "undoRemovedEdge": true,
+        "redoRestoredEdge": true,
+        "confirmationCancelled": true,
+        "previousTurnPreserved": true,
+        "toolResultsDelivered": true
+      }
+    },
+    {
+      "name": "graph tools validate targets, duplicate edges, kinds and port indices and support undo and confirmation",
+      "pass": true,
+      "details": {
+        "answer": "入口と出口を追加して接続しました。",
+        "discussedWithoutWrites": true,
+        "created": true,
+        "errors": 0,
+        "duplicateRejected": true,
+        "invalidKindRejected": true,
+        "missingRejected": true,
+        "invalidPortRejected": true,
+        "undoRemovedEdge": true,
+        "redoRestoredEdge": true,
+        "confirmationCancelled": true,
+        "previousTurnPreserved": true,
+        "toolResultsDelivered": true
+      }
+    },
+    {
+      "name": "buffer insertion atomically replaces one real link, preserves other links and runs simulation",
+      "pass": true,
+      "details": {
+        "result": {
+          "success": true,
+          "nodeId": 5,
+          "node": {
+            "id": 5,
+            "type": "factory/basic",
+            "name": "AI挿入バッファ",
+            "role": "equipment",
+            "position": {
+              "x": 210,
+              "y": 200
+            },
+            "size": {
+              "width": 164,
+              "height": 88
+            },
+            "editableParameters": {
+              "title": {
+                "type": "string",
+                "value": "AI挿入バッファ"
+              },
+              "process1.seconds": {
+                "type": "number",
+                "minimum": 0.001,
+                "value": 0,
+                "kind": "process"
+              },
+              "recovery1.seconds": {
+                "type": "number",
+                "minimum": 0,
+                "value": 0,
+                "kind": "recovery"
+              },
+              "cycleTime": {
+                "type": "number",
+                "minimum": 0.001,
+                "value": 0,
+                "aliasFor": "process1.seconds"
+              }
+            },
+            "ports": {
+              "inputs": [
+                {
+                  "index": 0,
+                  "name": "inPort1",
+                  "type": "entity",
+                  "connected": true
+                }
+              ],
+              "outputs": [
+                {
+                  "index": 0,
+                  "name": "outPort1",
+                  "type": "entity",
+                  "connected": true
+                }
+              ]
+            },
+            "connections": {
+              "inputs": [
+                {
+                  "linkId": 4,
+                  "nodeId": 1,
+                  "name": "Source",
+                  "fromPortIndex": 0,
+                  "toPortIndex": 0,
+                  "fromPort": "outPort1",
+                  "toPort": "inPort1"
+                }
+              ],
+              "outputs": [
+                {
+                  "linkId": 5,
+                  "nodeId": 2,
+                  "name": "Equipment",
+                  "fromPortIndex": 0,
+                  "toPortIndex": 0,
+                  "fromPort": "outPort1",
+                  "toPort": "inPort1"
+                }
+              ]
+            },
+            "runtime": {
+              "state": "IDLE",
+              "sent": 0
+            }
+          },
+          "removedLinkId": 1,
+          "links": [
+            {
+              "linkId": 4,
+              "fromNodeId": 1,
+              "toNodeId": 5,
+              "fromPort": 0,
+              "toPort": 0
+            },
+            {
+              "linkId": 5,
+              "fromNodeId": 5,
+              "toNodeId": 2,
+              "fromPort": 0,
+              "toPort": 0
+            }
+          ],
+          "simulationReset": true
+        },
+        "replaced": true,
+        "untouched": true,
+        "undoRestored": true,
+        "redoRestored": true,
+        "rolledBack": true,
+        "failed": {
+          "success": false,
+          "tool": "insert_node_on_link",
+          "error": "Insertion failed; original graph restored. FactSim rejected the replacement connections.",
+          "errorType": "Error",
+          "path": null
+        },
+        "cancelled": true,
+        "invalidRejected": true,
+        "connectionDTO": true,
+        "simulationSucceeded": true
+      }
+    },
+    {
+      "name": "buffer insertion supports single undo/redo, confirmation, validation and rollback after failed reconnect",
+      "pass": true,
+      "details": {
+        "result": {
+          "success": true,
+          "nodeId": 5,
+          "node": {
+            "id": 5,
+            "type": "factory/basic",
+            "name": "AI挿入バッファ",
+            "role": "equipment",
+            "position": {
+              "x": 210,
+              "y": 200
+            },
+            "size": {
+              "width": 164,
+              "height": 88
+            },
+            "editableParameters": {
+              "title": {
+                "type": "string",
+                "value": "AI挿入バッファ"
+              },
+              "process1.seconds": {
+                "type": "number",
+                "minimum": 0.001,
+                "value": 0,
+                "kind": "process"
+              },
+              "recovery1.seconds": {
+                "type": "number",
+                "minimum": 0,
+                "value": 0,
+                "kind": "recovery"
+              },
+              "cycleTime": {
+                "type": "number",
+                "minimum": 0.001,
+                "value": 0,
+                "aliasFor": "process1.seconds"
+              }
+            },
+            "ports": {
+              "inputs": [
+                {
+                  "index": 0,
+                  "name": "inPort1",
+                  "type": "entity",
+                  "connected": true
+                }
+              ],
+              "outputs": [
+                {
+                  "index": 0,
+                  "name": "outPort1",
+                  "type": "entity",
+                  "connected": true
+                }
+              ]
+            },
+            "connections": {
+              "inputs": [
+                {
+                  "linkId": 4,
+                  "nodeId": 1,
+                  "name": "Source",
+                  "fromPortIndex": 0,
+                  "toPortIndex": 0,
+                  "fromPort": "outPort1",
+                  "toPort": "inPort1"
+                }
+              ],
+              "outputs": [
+                {
+                  "linkId": 5,
+                  "nodeId": 2,
+                  "name": "Equipment",
+                  "fromPortIndex": 0,
+                  "toPortIndex": 0,
+                  "fromPort": "outPort1",
+                  "toPort": "inPort1"
+                }
+              ]
+            },
+            "runtime": {
+              "state": "IDLE",
+              "sent": 0
+            }
+          },
+          "removedLinkId": 1,
+          "links": [
+            {
+              "linkId": 4,
+              "fromNodeId": 1,
+              "toNodeId": 5,
+              "fromPort": 0,
+              "toPort": 0
+            },
+            {
+              "linkId": 5,
+              "fromNodeId": 5,
+              "toNodeId": 2,
+              "fromPort": 0,
+              "toPort": 0
+            }
+          ],
+          "simulationReset": true
+        },
+        "replaced": true,
+        "untouched": true,
+        "undoRestored": true,
+        "redoRestored": true,
+        "rolledBack": true,
+        "failed": {
+          "success": false,
+          "tool": "insert_node_on_link",
+          "error": "Insertion failed; original graph restored. FactSim rejected the replacement connections.",
+          "errorType": "Error",
+          "path": null
+        },
+        "cancelled": true,
+        "invalidRejected": true,
+        "connectionDTO": true,
+        "simulationSucceeded": true
+      }
+    },
+    {
+      "name": "Ollama tool-call streaming can inspect then insert a buffer into the live graph",
+      "pass": true,
+      "details": {
+        "reply": "既存の接続の間にバッファを挿入しました。",
+        "executed": [
+          {
+            "name": "get_node",
+            "success": true
+          },
+          {
+            "name": "insert_node_on_link",
+            "success": true
+          }
+        ],
+        "inserted": true
+      }
+    },
+    {
+      "name": "AI layout removes overlaps while preserving node settings, links and measured KPIs",
+      "pass": true,
+      "details": {
+        "result": {
+          "success": true,
+          "mode": "flow-group",
+          "nodeCount": 4,
+          "movedCount": 3,
+          "overlapPairsBefore": 6,
+          "overlapPairsAfter": 0,
+          "simulationReset": false
+        },
+        "preserved": true,
+        "undoRestored": true,
+        "redoRestored": true,
+        "cancelled": true,
+        "moved": true,
+        "moveUndone": true,
+        "invalidRejected": true,
+        "toolDelivered": true,
+        "answer": "配置を整えました。"
+      }
+    },
+    {
+      "name": "layout and coordinate movement support confirmation, validation and single undo/redo",
+      "pass": true,
+      "details": {
+        "result": {
+          "success": true,
+          "mode": "flow-group",
+          "nodeCount": 4,
+          "movedCount": 3,
+          "overlapPairsBefore": 6,
+          "overlapPairsAfter": 0,
+          "simulationReset": false
+        },
+        "preserved": true,
+        "undoRestored": true,
+        "redoRestored": true,
+        "cancelled": true,
+        "moved": true,
+        "moveUndone": true,
+        "invalidRejected": true,
+        "toolDelivered": true,
+        "answer": "配置を整えました。"
+      }
+    },
+    {
+      "name": "agent can fulfill a natural language graph appearance request with the layout tool",
+      "pass": true,
+      "details": {
+        "result": {
+          "success": true,
+          "mode": "flow-group",
+          "nodeCount": 4,
+          "movedCount": 3,
+          "overlapPairsBefore": 6,
+          "overlapPairsAfter": 0,
+          "simulationReset": false
+        },
+        "preserved": true,
+        "undoRestored": true,
+        "redoRestored": true,
+        "cancelled": true,
+        "moved": true,
+        "moveUndone": true,
+        "invalidRejected": true,
+        "toolDelivered": true,
+        "answer": "配置を整えました。"
+      }
+    },
+    {
+      "name": "screen observation captures actual graph pixels and accurate bounds while distinguishing text-only models",
+      "pass": true,
+      "details": {
+        "visionDetected": true,
+        "hadOverlap": true,
+        "geometryOnly": true,
+        "actualImage": true,
+        "hasTransform": true,
+        "blocked": true,
+        "overlapAfter": 0,
+        "unchangedNodes": true,
+        "preserved": true,
+        "viewportPreserved": true,
+        "steps": [
+          "get_layout_snapshot",
+          "move_node",
+          "get_layout_snapshot"
+        ],
+        "toolJSONClean": true,
+        "answer": "重なっていたノードだけ移動し、再確認しました。",
+        "attachmentCleared": true,
+        "textModelDetected": true
+      }
+    },
+    {
+      "name": "AI can inspect, move one overlapping node, and reinspect without automatic layout or changing unaffected nodes",
+      "pass": true,
+      "details": {
+        "visionDetected": true,
+        "hadOverlap": true,
+        "geometryOnly": true,
+        "actualImage": true,
+        "hasTransform": true,
+        "blocked": true,
+        "overlapAfter": 0,
+        "unchangedNodes": true,
+        "preserved": true,
+        "viewportPreserved": true,
+        "steps": [
+          "get_layout_snapshot",
+          "move_node",
+          "get_layout_snapshot"
+        ],
+        "toolJSONClean": true,
+        "answer": "重なっていたノードだけ移動し、再確認しました。",
+        "attachmentCleared": true,
+        "textModelDetected": true
+      }
+    },
+    {
+      "name": "Ollama receives PNG as an image attachment, never in tool JSON or retained chat history",
+      "pass": true,
+      "details": {
+        "visionDetected": true,
+        "hadOverlap": true,
+        "geometryOnly": true,
+        "actualImage": true,
+        "hasTransform": true,
+        "blocked": true,
+        "overlapAfter": 0,
+        "unchangedNodes": true,
+        "preserved": true,
+        "viewportPreserved": true,
+        "steps": [
+          "get_layout_snapshot",
+          "move_node",
+          "get_layout_snapshot"
+        ],
+        "toolJSONClean": true,
+        "answer": "重なっていたノードだけ移動し、再確認しました。",
+        "attachmentCleared": true,
+        "textModelDetected": true,
+        "protocol": [
+          {
+            "imageCount": 0,
+            "base64": true,
+            "toolJSONClean": true,
+            "model": "mock-ollama"
+          },
+          {
+            "imageCount": 1,
+            "base64": true,
+            "toolJSONClean": true,
+            "model": "mock-ollama"
+          },
+          {
+            "imageCount": 0,
+            "base64": true,
+            "toolJSONClean": true,
+            "model": "mock-ollama"
+          },
+          {
+            "imageCount": 1,
+            "base64": true,
+            "toolJSONClean": true,
+            "model": "mock-ollama"
+          }
+        ]
+      }
+    },
+    {
+      "name": "text-only bounded context preserves geometry for overlapping nodes instead of dropping all positions",
+      "pass": true,
+      "details": {
+        "bounded": true,
+        "hasOverlappingGeometry": true,
+        "count": 1,
+        "truncated": true
+      }
+    },
+    {
+      "name": "Browser AI diagnostic compression retains measured counts/KPIs at normal and retry context limits",
+      "pass": true,
+      "details": [
+        {
+          "bounded": true,
+          "factsPreserved": true,
+          "truncated": true
+        },
+        {
+          "bounded": true,
+          "factsPreserved": true,
+          "truncated": true
+        }
+      ]
+    },
+    {
+      "name": "image file selection previews attachments and supports removal",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "unsupported image models show guidance while retaining pasted image and text",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "pasted image and accompanying instruction reach Ollama and appear in the chat",
+      "pass": true,
+      "details": [
+        {
+          "count": 1,
+          "png": true,
+          "prompt": "この画像のここがおかしいです [test-uploaded-image]"
+        },
+        {
+          "count": 1,
+          "png": true,
+          "prompt": "その画像の問題について、もう少し説明して"
+        },
+        {
+          "count": 2,
+          "png": true,
+          "prompt": "添付画像を確認してください。"
+        }
+      ]
+    },
+    {
+      "name": "follow-up conversation retains the user image as a proper image attachment",
+      "pass": true,
+      "details": {
+        "count": 1,
+        "png": true,
+        "prompt": "その画像の問題について、もう少し説明して"
+      }
+    },
+    {
+      "name": "image-only messages receive a default inspection request instead of being silently ignored",
+      "pass": true,
+      "details": {
+        "count": 2,
+        "png": true,
+        "prompt": "添付画像を確認してください。"
+      }
+    },
+    {
+      "name": "dragged images preview correctly without intercepting ordinary text paste",
+      "pass": true,
+      "details": {
+        "textPasteNotIntercepted": true,
+        "dropHandled": true
+      }
+    },
+    {
+      "name": "image attachments are bounded, validated, cleared, and never sent to text-only models",
+      "pass": true,
+      "details": {
+        "bounded": true,
+        "noImageForText": true,
+        "invalidFilesRejected": true,
+        "tooMany": true,
+        "clearRemoved": true,
+        "resized": true
+      }
+    },
+    {
+      "name": "OpenAI-compatible adapter supports models, chat, and SSE streaming",
+      "pass": true,
+      "details": {
+        "openaiModels": [
+          {
+            "id": "mock-model",
+            "label": "mock-model"
+          }
+        ],
+        "openaiChat": {
+          "message": {
+            "role": "assistant",
+            "content": "OpenAI reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "choices": [
+              {
+                "message": {
+                  "role": "assistant",
+                  "content": "OpenAI reply"
+                },
+                "finish_reason": "stop"
+              }
+            ]
+          }
+        },
+        "openaiStream": {
+          "text": "OpenAI stream",
+          "content": "OpenAI stream"
+        },
+        "openaiKeyCleared": true,
+        "ollamaModels": [
+          {
+            "id": "mock-ollama",
+            "label": "mock-ollama",
+            "size": 1,
+            "capabilities": [
+              "completion",
+              "tools",
+              "vision"
+            ]
+          },
+          {
+            "id": "mock-text",
+            "label": "mock-text",
+            "size": 1,
+            "capabilities": [
+              "completion",
+              "tools"
+            ]
+          }
+        ],
+        "ollamaChat": {
+          "message": {
+            "role": "assistant",
+            "content": "Ollama reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "message": {
+              "role": "assistant",
+              "content": "Ollama reply"
+            },
+            "done": true,
+            "done_reason": "stop"
+          }
+        },
+        "ollamaStream": {
+          "text": "Ollama stream",
+          "content": "Ollama stream"
+        }
+      }
+    },
+    {
+      "name": "Ollama adapter supports discovery, chat, and NDJSON streaming",
+      "pass": true,
+      "details": {
+        "openaiModels": [
+          {
+            "id": "mock-model",
+            "label": "mock-model"
+          }
+        ],
+        "openaiChat": {
+          "message": {
+            "role": "assistant",
+            "content": "OpenAI reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "choices": [
+              {
+                "message": {
+                  "role": "assistant",
+                  "content": "OpenAI reply"
+                },
+                "finish_reason": "stop"
+              }
+            ]
+          }
+        },
+        "openaiStream": {
+          "text": "OpenAI stream",
+          "content": "OpenAI stream"
+        },
+        "openaiKeyCleared": true,
+        "ollamaModels": [
+          {
+            "id": "mock-ollama",
+            "label": "mock-ollama",
+            "size": 1,
+            "capabilities": [
+              "completion",
+              "tools",
+              "vision"
+            ]
+          },
+          {
+            "id": "mock-text",
+            "label": "mock-text",
+            "size": 1,
+            "capabilities": [
+              "completion",
+              "tools"
+            ]
+          }
+        ],
+        "ollamaChat": {
+          "message": {
+            "role": "assistant",
+            "content": "Ollama reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "message": {
+              "role": "assistant",
+              "content": "Ollama reply"
+            },
+            "done": true,
+            "done_reason": "stop"
+          }
+        },
+        "ollamaStream": {
+          "text": "Ollama stream",
+          "content": "Ollama stream"
+        }
+      }
+    },
+    {
+      "name": "panel collapses without stopping FactSim",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "no uncaught browser errors",
+      "pass": true,
+      "details": []
+    }
+  ],
+  "pageErrors": [],
+  "passed": true
+}

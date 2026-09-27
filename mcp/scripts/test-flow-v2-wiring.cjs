@@ -24,6 +24,7 @@ global.document={getElementById(){return null;},createElement(tag){return new El
 global.ResizeObserver=class{observe(){}disconnect(){}};
 global.requestAnimationFrame=fn=>frames.push(fn);
 vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/flow-status.js'),'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/node-catalog.js'),'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/flow-view.js'),'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root,'js/app/sim.js'),'utf8'));
 const walk=e=>[e,...e.children.flatMap(walk)];
@@ -34,6 +35,14 @@ function tap(port){const viewport=port.closest('.flowViewport');port.onpointerdo
 function dragPort(port,target,shiftKey=false){const viewport=port.closest('.flowViewport');port.onpointerdown(event(port,{shiftKey}));document.dropTarget=target;viewport.onpointermove(event(port,{clientX:80,clientY:40}));viewport.onpointerup(event(port,{clientX:80,clientY:40}));}
 const results=[];
 function test(name,fn){try{frames.length=0;fn();results.push({name,ok:true});}catch(e){results.push({name,ok:false,error:e.stack});}}
+test('Flow node picker is alphabetical and shows the shared app-style icons',()=>{
+ const e=editor(),picker=walk(e.host).find(x=>x.classList.contains('flowNodePicker')),labels=walk(picker).filter(x=>x.classList.contains('flowNodePickerOptionLabel')).map(x=>x.textContent);
+ assert.deepEqual(labels,['DePalletizing','Entity Sink','entityRouter','Fork','inPort','Join','outPort','Palletizing','Process','Recovery','Sensor','Source Sequence','syncroJudgment']);
+ const icons=walk(picker).filter(x=>x.classList.contains('flowNodePickerOptionIcon'));assert.equal(icons.length,labels.length);assert(icons.every(x=>x.innerHTML.includes('<svg')));assert.equal(new Set(icons.map(x=>x.innerHTML)).size,labels.length);
+ const descriptions=walk(picker).filter(x=>x.classList.contains('flowNodePickerOptionDescription'));assert.equal(descriptions.length,labels.length);assert(descriptions.every(x=>x.textContent.length>10));
+ const sensor=walk(picker).find(x=>x.classList.contains('flowNodePickerOption')&&x.dataset.kind==='sensor');sensor.onclick();assert(sensor.classList.contains('is-selected'));
+ walk(e.host).find(x=>x.tagName==='BUTTON'&&x.textContent==='Add').onclick();assert(e.n.properties.flow.nodes.some(n=>n.kind==='sensor'));
+});
 test('Connector labels use IN and OUT while serialized port IDs stay compatible',()=>{
  const e=editor();
  assert.equal(e.port('process1','inputs').querySelector('.flowPortLabel').textContent,'IN');

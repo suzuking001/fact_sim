@@ -1,0 +1,746 @@
+{
+  "generatedAt": "2026-09-26T14:05:41.316Z",
+  "checks": [
+    {
+      "name": "panel loads independently",
+      "pass": true,
+      "details": {
+        "panelVisible": true,
+        "panelOpen": true,
+        "providers": [
+          "webllm",
+          "ollama",
+          "openai-compatible"
+        ],
+        "models": [
+          "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+          "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
+          "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
+        ],
+        "tools": [
+          {
+            "name": "get_model_summary",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "get_node",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "set_node_parameter",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "run_simulation",
+            "mode": "simulation",
+            "risk": "low"
+          },
+          {
+            "name": "get_kpis",
+            "mode": "read",
+            "risk": "low"
+          },
+          {
+            "name": "add_node",
+            "mode": "write",
+            "risk": "medium"
+          },
+          {
+            "name": "connect_nodes",
+            "mode": "write",
+            "risk": "medium"
+          }
+        ],
+        "summary": {
+          "application": "FactSim",
+          "nodeCount": 4,
+          "edgeCount": 3,
+          "selectedNodeId": null,
+          "hasSimulationResult": false,
+          "simulation": {
+            "running": false,
+            "timeSeconds": 0,
+            "mode": "event"
+          },
+          "roleCounts": {
+            "source": 1,
+            "equipment": 2,
+            "sink": 1
+          },
+          "typeCounts": {
+            "factory/basic": 4
+          },
+          "availableNodeKinds": [
+            {
+              "kind": "machine",
+              "label": "Machine"
+            },
+            {
+              "kind": "inspection",
+              "label": "Inspection"
+            },
+            {
+              "kind": "buffer",
+              "label": "Buffer"
+            },
+            {
+              "kind": "conveyor",
+              "label": "Conveyor"
+            },
+            {
+              "kind": "router",
+              "label": "Router"
+            },
+            {
+              "kind": "pack",
+              "label": "Palletizing"
+            },
+            {
+              "kind": "unpack",
+              "label": "DePalletizing"
+            },
+            {
+              "kind": "basic",
+              "label": "Basic Node"
+            },
+            {
+              "kind": "note",
+              "label": "Memo"
+            },
+            {
+              "kind": "shuttle",
+              "label": "Shuttle Stage"
+            },
+            {
+              "kind": "source",
+              "label": "Source"
+            },
+            {
+              "kind": "sink",
+              "label": "Sink"
+            }
+          ],
+          "nodes": [
+            {
+              "id": 1,
+              "name": "Source",
+              "type": "factory/basic",
+              "role": "source"
+            },
+            {
+              "id": 2,
+              "name": "Equipment",
+              "type": "factory/basic",
+              "role": "equipment"
+            },
+            {
+              "id": 3,
+              "name": "Equipment",
+              "type": "factory/basic",
+              "role": "equipment"
+            },
+            {
+              "id": 4,
+              "name": "Sink",
+              "type": "factory/basic",
+              "role": "sink"
+            }
+          ],
+          "truncated": false
+        }
+      }
+    },
+    {
+      "name": "all providers are selectable",
+      "pass": true,
+      "details": [
+        "webllm",
+        "ollama",
+        "openai-compatible"
+      ]
+    },
+    {
+      "name": "webllm model registry has profiles",
+      "pass": true,
+      "details": [
+        "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+        "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
+        "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
+      ]
+    },
+    {
+      "name": "MVP and graph-building tools registered",
+      "pass": true,
+      "details": [
+        {
+          "name": "get_model_summary",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_node",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "set_node_parameter",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "run_simulation",
+          "mode": "simulation",
+          "risk": "low"
+        },
+        {
+          "name": "get_kpis",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "add_node",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "connect_nodes",
+          "mode": "write",
+          "risk": "medium"
+        }
+      ]
+    },
+    {
+      "name": "tool metadata includes classification",
+      "pass": true,
+      "details": [
+        {
+          "name": "get_model_summary",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "get_node",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "set_node_parameter",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "run_simulation",
+          "mode": "simulation",
+          "risk": "low"
+        },
+        {
+          "name": "get_kpis",
+          "mode": "read",
+          "risk": "low"
+        },
+        {
+          "name": "add_node",
+          "mode": "write",
+          "risk": "medium"
+        },
+        {
+          "name": "connect_nodes",
+          "mode": "write",
+          "risk": "medium"
+        }
+      ]
+    },
+    {
+      "name": "summary uses live graph",
+      "pass": true,
+      "details": {
+        "application": "FactSim",
+        "nodeCount": 4,
+        "edgeCount": 3,
+        "selectedNodeId": null,
+        "hasSimulationResult": false,
+        "simulation": {
+          "running": false,
+          "timeSeconds": 0,
+          "mode": "event"
+        },
+        "roleCounts": {
+          "source": 1,
+          "equipment": 2,
+          "sink": 1
+        },
+        "typeCounts": {
+          "factory/basic": 4
+        },
+        "availableNodeKinds": [
+          {
+            "kind": "machine",
+            "label": "Machine"
+          },
+          {
+            "kind": "inspection",
+            "label": "Inspection"
+          },
+          {
+            "kind": "buffer",
+            "label": "Buffer"
+          },
+          {
+            "kind": "conveyor",
+            "label": "Conveyor"
+          },
+          {
+            "kind": "router",
+            "label": "Router"
+          },
+          {
+            "kind": "pack",
+            "label": "Palletizing"
+          },
+          {
+            "kind": "unpack",
+            "label": "DePalletizing"
+          },
+          {
+            "kind": "basic",
+            "label": "Basic Node"
+          },
+          {
+            "kind": "note",
+            "label": "Memo"
+          },
+          {
+            "kind": "shuttle",
+            "label": "Shuttle Stage"
+          },
+          {
+            "kind": "source",
+            "label": "Source"
+          },
+          {
+            "kind": "sink",
+            "label": "Sink"
+          }
+        ],
+        "nodes": [
+          {
+            "id": 1,
+            "name": "Source",
+            "type": "factory/basic",
+            "role": "source"
+          },
+          {
+            "id": 2,
+            "name": "Equipment",
+            "type": "factory/basic",
+            "role": "equipment"
+          },
+          {
+            "id": 3,
+            "name": "Equipment",
+            "type": "factory/basic",
+            "role": "equipment"
+          },
+          {
+            "id": 4,
+            "name": "Sink",
+            "type": "factory/basic",
+            "role": "sink"
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "name": "missing nodes are rejected",
+      "pass": true,
+      "details": {
+        "success": false,
+        "tool": "get_node",
+        "error": "Node does not exist: Process999.",
+        "errorType": "Error",
+        "path": null
+      }
+    },
+    {
+      "name": "invalid cycle time is rejected",
+      "pass": true,
+      "details": {
+        "success": false,
+        "tool": "set_node_parameter",
+        "error": "Value must be at least 0.001.",
+        "errorType": "Error",
+        "path": null
+      }
+    },
+    {
+      "name": "safe write returns before and after values",
+      "pass": true,
+      "details": {
+        "success": true,
+        "nodeId": 2,
+        "nodeName": "Equipment",
+        "parameter": "process1.seconds",
+        "previousValue": 1,
+        "newValue": 1.5
+      }
+    },
+    {
+      "name": "AI writes enter undo history",
+      "pass": true,
+      "details": {
+        "historyDepth": 2,
+        "restored": 1,
+        "previous": 1
+      }
+    },
+    {
+      "name": "bounded simulation uses FactSim engine",
+      "pass": true,
+      "details": {
+        "success": true,
+        "startTimeSeconds": 0,
+        "endTimeSeconds": 5,
+        "durationSeconds": 5,
+        "steps": 5,
+        "kpis": {
+          "success": true,
+          "source": "FactSim runtime state",
+          "running": false,
+          "simTimeSeconds": 5,
+          "totalCompleted": 1,
+          "projectedThroughputPerHour": 720,
+          "sinkCount": 1,
+          "sinks": [
+            {
+              "nodeId": 4,
+              "name": "Sink",
+              "completedCount": 1,
+              "throughputPerHour": 720,
+              "firstCompletionSeconds": 2,
+              "lastCompletionSeconds": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "KPI tool returns structured runtime facts",
+      "pass": true,
+      "details": {
+        "success": true,
+        "source": "FactSim runtime state",
+        "running": false,
+        "simTimeSeconds": 5,
+        "totalCompleted": 1,
+        "projectedThroughputPerHour": 720,
+        "sinkCount": 1,
+        "sinks": [
+          {
+            "nodeId": 4,
+            "name": "Sink",
+            "completedCount": 1,
+            "throughputPerHour": 720,
+            "firstCompletionSeconds": 2,
+            "lastCompletionSeconds": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "agent completes multi-step tool loop",
+      "pass": true,
+      "details": {
+        "content": "Verified from FactSim.",
+        "calls": 2,
+        "roles": [
+          "user",
+          "assistant",
+          "tool",
+          "assistant"
+        ]
+      }
+    },
+    {
+      "name": "every greeting and capability question receives provider-generated text",
+      "pass": true,
+      "details": {
+        "greeting": "LLM response 1: こんにちは！",
+        "help": "LLM response 2: 何ができる？",
+        "alternate": "LLM response 3: なにができますか？",
+        "beforeModel": {
+          "providerCalls": 3,
+          "toolCalls": 0
+        },
+        "providerCalls": 4,
+        "offlineError": "Load or connect an AI provider first.",
+        "historyPreserved": true,
+        "roles": [
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant"
+        ]
+      }
+    },
+    {
+      "name": "conversation history is preserved and offline chat does not fake an AI answer",
+      "pass": true,
+      "details": {
+        "greeting": "LLM response 1: こんにちは！",
+        "help": "LLM response 2: 何ができる？",
+        "alternate": "LLM response 3: なにができますか？",
+        "beforeModel": {
+          "providerCalls": 3,
+          "toolCalls": 0
+        },
+        "providerCalls": 4,
+        "offlineError": "Load or connect an AI provider first.",
+        "historyPreserved": true,
+        "roles": [
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant"
+        ]
+      }
+    },
+    {
+      "name": "chat UI displays provider answers rather than canned greetings",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "Hermes chat and streaming accept tools while preserving FactSim instructions and history",
+      "pass": true,
+      "details": {
+        "chat": "こんにちは",
+        "streamed": "こんにちは",
+        "preserved": true,
+        "adapted": true,
+        "toolResultPreserved": true,
+        "normalSystemPreserved": true
+      }
+    },
+    {
+      "name": "WebLLM bounds large tool history and recovers from streaming prefill overflow",
+      "pass": true,
+      "details": {
+        "text": "Recovered",
+        "resets": 2,
+        "attempts": 2,
+        "preserved": true,
+        "oldTurnRemoved": true,
+        "boundedResult": true,
+        "measuredTotal": 42,
+        "outputLimit": true
+      }
+    },
+    {
+      "name": "conversation can discuss a design then build and connect real nodes through WebLLM adapter",
+      "pass": true,
+      "details": {
+        "answer": "入口と出口を追加して接続しました。",
+        "discussedWithoutWrites": true,
+        "created": true,
+        "errors": 0,
+        "duplicateRejected": true,
+        "invalidKindRejected": true,
+        "missingRejected": true,
+        "invalidPortRejected": true,
+        "undoRemovedEdge": true,
+        "redoRestoredEdge": true,
+        "confirmationCancelled": true,
+        "previousTurnPreserved": true,
+        "toolResultsDelivered": true
+      }
+    },
+    {
+      "name": "graph tools validate targets, duplicate edges, kinds and port indices and support undo and confirmation",
+      "pass": true,
+      "details": {
+        "answer": "入口と出口を追加して接続しました。",
+        "discussedWithoutWrites": true,
+        "created": true,
+        "errors": 0,
+        "duplicateRejected": true,
+        "invalidKindRejected": true,
+        "missingRejected": true,
+        "invalidPortRejected": true,
+        "undoRemovedEdge": true,
+        "redoRestoredEdge": true,
+        "confirmationCancelled": true,
+        "previousTurnPreserved": true,
+        "toolResultsDelivered": true
+      }
+    },
+    {
+      "name": "OpenAI-compatible adapter supports models, chat, and SSE streaming",
+      "pass": true,
+      "details": {
+        "openaiModels": [
+          {
+            "id": "mock-model",
+            "label": "mock-model"
+          }
+        ],
+        "openaiChat": {
+          "message": {
+            "role": "assistant",
+            "content": "OpenAI reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "choices": [
+              {
+                "message": {
+                  "role": "assistant",
+                  "content": "OpenAI reply"
+                },
+                "finish_reason": "stop"
+              }
+            ]
+          }
+        },
+        "openaiStream": {
+          "text": "OpenAI stream",
+          "content": "OpenAI stream"
+        },
+        "openaiKeyCleared": true,
+        "ollamaModels": [
+          {
+            "id": "mock-ollama",
+            "label": "mock-ollama",
+            "size": 1
+          }
+        ],
+        "ollamaChat": {
+          "message": {
+            "role": "assistant",
+            "content": "Ollama reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "message": {
+              "role": "assistant",
+              "content": "Ollama reply"
+            },
+            "done": true,
+            "done_reason": "stop"
+          }
+        },
+        "ollamaStream": {
+          "text": "Ollama stream",
+          "content": "Ollama stream"
+        }
+      }
+    },
+    {
+      "name": "Ollama adapter supports discovery, chat, and NDJSON streaming",
+      "pass": true,
+      "details": {
+        "openaiModels": [
+          {
+            "id": "mock-model",
+            "label": "mock-model"
+          }
+        ],
+        "openaiChat": {
+          "message": {
+            "role": "assistant",
+            "content": "OpenAI reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "choices": [
+              {
+                "message": {
+                  "role": "assistant",
+                  "content": "OpenAI reply"
+                },
+                "finish_reason": "stop"
+              }
+            ]
+          }
+        },
+        "openaiStream": {
+          "text": "OpenAI stream",
+          "content": "OpenAI stream"
+        },
+        "openaiKeyCleared": true,
+        "ollamaModels": [
+          {
+            "id": "mock-ollama",
+            "label": "mock-ollama",
+            "size": 1
+          }
+        ],
+        "ollamaChat": {
+          "message": {
+            "role": "assistant",
+            "content": "Ollama reply",
+            "toolCalls": []
+          },
+          "finishReason": "stop",
+          "usage": null,
+          "raw": {
+            "message": {
+              "role": "assistant",
+              "content": "Ollama reply"
+            },
+            "done": true,
+            "done_reason": "stop"
+          }
+        },
+        "ollamaStream": {
+          "text": "Ollama stream",
+          "content": "Ollama stream"
+        }
+      }
+    },
+    {
+      "name": "real WebLLM generates conversational replies",
+      "pass": true,
+      "details": {
+        "greeting": "こんにちは！私はFactSimのAI助手であり、日本語で話すことができます。どんな質問や助けが必要ですか？",
+        "help": "私はFactSimのシミュレーションアプリケーションを操作し、改善することができます。質問や要望に基づいて、モデルを理解し、変更や改善を提案できます。",
+        "discussion": "ラインの詳細を知りたいので、以下の質問に答えてください。1. 工作内容が異なる2つの工程は何ですか？ 2. どのノードがそれぞれの工程に関連していますか？ 3. どのような入出力フローが必要ですか？ 4. どのような制約がありますか？"
+      }
+    },
+    {
+      "name": "panel collapses without stopping FactSim",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "no uncaught browser errors",
+      "pass": true,
+      "details": []
+    }
+  ],
+  "pageErrors": [],
+  "realWebLLM": {
+    "attempted": true,
+    "greeting": "こんにちは！私はFactSimのAI助手であり、日本語で話すことができます。どんな質問や助けが必要ですか？",
+    "help": "私はFactSimのシミュレーションアプリケーションを操作し、改善することができます。質問や要望に基づいて、モデルを理解し、変更や改善を提案できます。",
+    "discussion": "ラインの詳細を知りたいので、以下の質問に答えてください。1. 工作内容が異なる2つの工程は何ですか？ 2. どのノードがそれぞれの工程に関連していますか？ 3. どのような入出力フローが必要ですか？ 4. どのような制約がありますか？"
+  },
+  "passed": true
+}

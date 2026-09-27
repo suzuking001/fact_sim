@@ -28,7 +28,20 @@
     agv_route: '<circle cx="4" cy="16" r="1.7"/><path d="M6 16c4 0 5-8 10-8h3"/><path d="M10 11h5l2 3H9z" fill="none"/><circle cx="11" cy="15" r="1"/><circle cx="16" cy="15" r="1"/><circle cx="20" cy="8" r="1.7"/>',
     carrier_route: '<circle cx="4" cy="16" r="1.7"/><path d="M6 16c4 0 5-8 10-8h3"/><circle cx="12" cy="11" r="3.2" fill="none"/><circle cx="11" cy="10" r="1"/><circle cx="14" cy="12" r="1.2"/><circle cx="20" cy="8" r="1.7"/>',
     station: '<path d="M7 5h10v14H7z" fill="none"/><circle cx="4" cy="12" r="1.7"/><circle cx="10" cy="9" r="1.3"/><circle cx="14" cy="9" r="1.3"/><circle cx="12" cy="15" r="1.6"/><circle cx="20" cy="12" r="1.7"/><path d="M5.5 12H7m10 0h1.5"/>',
-    transfer: '<circle cx="4" cy="8" r="1.7"/><circle cx="4" cy="16" r="1.7"/><path d="M6 8h5c3 0 3 8 7 8M6 16h5c3 0 3-8 7-8"/><circle cx="12" cy="12" r="2" fill="none"/><circle cx="20" cy="8" r="1.7"/><circle cx="20" cy="16" r="1.7"/>'
+    transfer: '<circle cx="4" cy="8" r="1.7"/><circle cx="4" cy="16" r="1.7"/><path d="M6 8h5c3 0 3 8 7 8M6 16h5c3 0 3-8 7-8"/><circle cx="12" cy="12" r="2" fill="none"/><circle cx="20" cy="8" r="1.7"/><circle cx="20" cy="16" r="1.7"/>',
+    flow_in: '<path d="M3 12h12m-4-4 4 4-4 4M19 4v16"/><circle cx="19" cy="12" r="2.2" fill="none"/>',
+    flow_out: '<path d="M5 4v16"/><circle cx="5" cy="12" r="2.2" fill="none"/><path d="M7 12h14m-4-4 4 4-4 4"/>',
+    flow_sequence: '<circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/><path d="M7 6h5M7 12h5M7 18h14M12 6v12m5-4 4 4-4 4"/>',
+    flow_sink: '<path d="M3 6h5l4 4M3 12h7M3 18h5l4-4M12 5h9v14h-9z"/><path d="m14.5 12 2 2 3-4"/>',
+    flow_sensor: '<path d="M3 17h18"/><circle cx="12" cy="17" r="2"/><path d="M9 12c1.5-1.8 4.5-1.8 6 0M7 9c3-3.5 7-3.5 10 0M12 4v2"/>',
+    flow_process: '<path d="M9 3h6l.7 3 2.8-1 2.5 5-2.5 2 2.5 2-2.5 5-2.8-1-.7 3H9l-.7-3-2.8 1L3 14l2.5-2L3 10l2.5-5 2.8 1z"/><circle cx="12" cy="12" r="3" fill="none"/>',
+    flow_recovery: '<path d="M8 3 5 6l3 3M6 6h8a6 6 0 0 1 0 12H9"/><circle cx="14" cy="12" r="3.5" fill="none"/><path d="M14 10v2l1.5 1"/>',
+    flow_join: '<path d="M3 6h4c3 0 3 6 7 6h7M3 18h4c3 0 3-6 7-6m3-4 4 4-4 4"/>',
+    flow_fork: '<path d="M3 12h7c4 0 4-6 8-6h3M10 12c4 0 4 6 8 6h3M18 3l3 3-3 3m0 6 3 3-3 3"/>',
+    flow_router: '<path d="M3 12h4m5-5 5 5-5 5-5-5zM17 12h4M15 9l4-4h2M15 15l4 4h2"/><path d="m19 3 2 2-2 2m0 3 2 2-2 2m0 3 2 2-2 2"/>',
+    flow_sync: '<circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/><path d="M6 6h4M6 12h4M6 18h4M10 6v12"/><circle cx="16" cy="12" r="5" fill="none"/><path d="m13.5 12 1.7 1.8 3.4-3.6"/>',
+    flow_pack: '<path d="M4 10h16v11H4zM4 10l4-4h8l4 4M8 6v4m8-4v4M12 2v4m-2-2 2 2 2-2"/><rect x="7" y="13" width="4" height="4" rx=".5"/><rect x="13" y="13" width="4" height="4" rx=".5"/>',
+    flow_unpack: '<path d="M4 11h16v10H4zM4 11l4-4h8l4 4"/><rect x="9.5" y="14" width="5" height="4" rx=".5"/><path d="m10 7-4-4m0 0v4m0-4h4m4 4 4-4m0 0v4m0-4h-4"/>'
   });
 
   const rows = [

@@ -118,7 +118,7 @@ function _applyViewState(view){
       }
 
       const timelineView = String(ui.timelineView || '').toLowerCase();
-      if((timelineView === 'chart' || timelineView === 'props') && typeof App.setTimelineDockView === 'function'){
+      if((timelineView === 'chart' || timelineView === 'props' || timelineView === 'inspector') && typeof App.setTimelineDockView === 'function'){
         App.setTimelineDockView(timelineView);
       }
     }
