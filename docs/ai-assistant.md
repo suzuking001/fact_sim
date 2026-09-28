@@ -17,12 +17,29 @@ The chat UI does not edit `App.graph` and does not invoke simulation internals d
 - Browser AI (WebLLM): checks WebGPU, loads a selected registry model on demand, reports load progress, supports streaming, interruption, and unload.
 
   Browser models include Llama 3.2 1B, Hermes 2 Pro 8B, Hermes-3 Llama 3.1 8B, DeepSeek-R1-Distill-Qwen-7B, Llama 3.1 8B Instruct, and Phi-4-mini-instruct. The four requested entries use their `q4f16_1-MLC` IDs from the [pinned WebLLM 0.2.85 model configuration](https://github.com/mlc-ai/web-llm/blob/v0.2.85/src/config.ts); approximate VRAM estimates are displayed when selected. DeepSeek was already registered and is not duplicated. All entries use the existing JSON conversation/tool protocol, not native function calling. Availability in the picker does not guarantee tool accuracy or sufficient GPU memory on every device.
-- Ollama: configurable endpoint and model, default endpoint `http://localhost:11434`, with model discovery through `/api/tags`.
+- Ollama: configurable endpoint and model, default endpoint `http://localhost:11434`, with model discovery through `/api/tags`. Selecting Ollama, reopening with saved Ollama settings, or changing the endpoint automatically refreshes the Installed models dropdown; Get Models refreshes it manually. This is the only model field and shows every returned model name/tag. Selecting a model saves the choice; click Test & Use to activate it. Refreshes preserve the chosen model when it is still installed, otherwise select the first available model.
 - OpenAI-compatible: configurable base URL, model, and API key. The key is held only in the active page/provider instance and is not written to source code or `localStorage`.
 
 Provider-specific code implements the common `AIProvider` interface. `FactSimAgent` has no WebLLM, Ollama, or OpenAI-specific branches.
 
-Ollama's Thinking selector defaults to Fast (`think: false`) for models advertising thinking capability; Detailed opts into `think: true`. This is per-request, not a change to the Ollama service or Modelfile, and unsupported non-thinking models omit the field. The preference is stored with other non-secret UI settings and applies to the next generation. The API behavior follows the [official Ollama chat API](https://docs.ollama.com/api/chat). Each generation has a 90-second wall-time deadline (programmatic `initialize({requestTimeoutMs})` can override it); the panel reports elapsed wait/generation time every four seconds. A timeout aborts only that request and gives guidance about loading, scheduling and inference load. It does not kill unrelated work or guarantee those external delays disappear. Thinking text is not displayed as a chat answer.
+Ollama's Thinking selector defaults to Fast (`think: false`) for models advertising thinking capability; Detailed opts into `think: true`. This is per-request, not a change to the Ollama service or Modelfile, and unsupported non-thinking models omit the field. The preference is stored with other non-secret UI settings and applies to the next generation. The API behavior follows the [official Ollama chat API](https://docs.ollama.com/api/chat). Each generation defaults to a 90-second wall-time deadline; the panel reports elapsed wait/generation time every four seconds. A timeout aborts only that request and gives guidance about loading, scheduling and inference load. It does not kill unrelated work or guarantee those external delays disappear. Thinking text is not displayed as a chat answer.
+
+### 詳細設定（応答時間・生成パラメータ）
+
+AIパネルの **Provider & model → 詳細設定** から以下を変更できます。設定は同じブラウザの `factsim-ai-settings` に保存され、再接続せずに次の送信から適用されます。応答途中の変更は進行中の送信には適用しません。APIキーは保存しません。
+
+| 設定 | 対象 | 既定値・意味 |
+| --- | --- | --- |
+| Temperature | 全プロバイダー | 0.2。0〜2で回答のばらつきを調整 |
+| 生成トークン上限 | 全プロバイダー | 空欄は既定値。Browser AIは512（切り詰め後の再試行時768）、他はサーバー既定。指定時は再試行にも同じ上限を使用 |
+| ツール呼び出しのラウンド上限 | 全プロバイダー | 16。1〜100。1ラウンドに複数ツールを呼ぶ場合あり。上限到達後、追加のAI生成で取得済みの結果を要約 |
+| 応答タイムアウト（秒） | Ollama | 90。0〜86400。**0は無制限**。読込・待ち行列・推論・ストリーム完了までを含む、AI生成1回ごとの上限 |
+| コンテキスト長・Top P・Top K・繰り返し抑制・乱数シード | Ollama | 空欄はOllama既定。`num_ctx` / `top_p` / `top_k` / `repeat_penalty` / `seed` として送信 |
+| モデル保持時間（秒） | Ollama | 空欄はOllama既定。0は生成後の解放、-1は保持を継続。`keep_alive` として送信 |
+
+今回の90秒エラーに対しては、応答タイムアウトを例えば **300秒** または **0（無制限）** に変更して再送信してください。無制限でも **Stop** で停止できます。これはOllama生成リクエストの時間設定であり、モデル一覧取得や接続確認の期限ではありません。空欄のOllama固有設定は送信しません。値の意味は [Ollamaのパラメータ仕様](https://docs.ollama.com/modelfile#valid-parameters-and-values) に従います。コンテキスト長を大きくするとメモリ使用量が増えます。
+
+「生成パラメータを既定値に戻す」は上記の設定だけを初期化します。プロバイダー・モデル・接続先・Thinking・編集確認設定は保持します。不正な値は保存・送信せず、入力欄の修正を促します。既存の保存設定に新項目がなければ上記の既定値を補います。プログラムからは `OllamaProvider.initialize({requestTimeoutMs:0})` でも期限を無効にできます。
 
 ### User image attachments
 

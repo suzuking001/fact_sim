@@ -301,8 +301,8 @@
 #selectionInspectorPanel .flowPorts.outputs .flowPort:after{content:'●';color:#308f80;margin-left:5px}
 #selectionInspectorPanel .flowNotice{color:#607086;flex:none;max-height:45px;font-size:11px;padding:0 3px;border-radius:6px;transition:background .15s,border-color .15s,box-shadow .15s}
 #selectionInspectorPanel .flowNotice:empty{display:none}
-#selectionInspectorPanel .flowNotice.is-error{display:block;color:#b71c1c;font-size:13px;font-weight:600;background:#fdecea;padding:10px 14px 10px 12px;max-height:140px;overflow:auto;border:1px solid #ef9a9a;border-left:5px solid #d32f2f;box-shadow:0 2px 10px rgba(198,40,40,.14);white-space:pre-line;line-height:1.6}
-#selectionInspectorPanel .flowNotice.is-error::before{content:'⚠  Error';display:block;font-size:14px;font-weight:700;margin-bottom:6px;color:#c62828;letter-spacing:.02em;border-bottom:1px solid #f5c6c4;padding-bottom:6px}
+#selectionInspectorPanel .flowNotice.is-error{display:block;color:#b71c1c;font-size:12px;font-weight:500;background:transparent;padding:0;max-height:none;overflow:visible;border:0;box-shadow:none;white-space:pre-line;line-height:1.45}
+#selectionInspectorPanel .flowNotice.is-error::before{content:none}
 #selectionInspectorPanel .flowContext{background:#fff;border-color:#adbbcf}
 #selectionInspectorPanel .flowContext button{min-height:28px;font-size:12px;padding:4px 9px}
 #timelineDock[data-view=inspector]{min-height:330px}

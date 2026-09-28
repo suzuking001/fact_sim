@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-09-28T13:18:16.714Z",
+  "models": [
+    {
+      "id": "hf.co/peculiar-ragdoll/Dirk-Qwen3.8-27B-GGUF:UD-Q6_K_XL",
+      "selected": true,
+      "connectionReady": true
+    },
+    {
+      "id": "hf.co/peculiar-ragdoll/Dirk-Qwen3.8-27B-GGUF:UD-Q5_K_XL",
+      "selected": true,
+      "connectionReady": true
+    },
+    {
+      "id": "qwen3.8:27b",
+      "selected": true,
+      "connectionReady": true
+    },
+    {
+      "id": "gemma4:latest",
+      "selected": true,
+      "connectionReady": true
+    },
+    {
+      "id": "qwen3.6:27b-mtp-q4_K_M",
+      "selected": true,
+      "connectionReady": true
+    }
+  ],
+  "checks": [
+    "All registered models appear in the native dropdown",
+    "Every registered model can be selected and activated without inference",
+    "Refresh and page reload preserve the selected model and full list"
+  ],
+  "passed": true
+}

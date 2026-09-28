@@ -32,10 +32,10 @@
 
   <link rel="stylesheet" href="css/app.css?v=20260920stopgroupsmenu" />
   <link rel="stylesheet" href="css/workspace.css?v=20260920nodedefs" />
-  <link rel="stylesheet" href="css/details.css?v=20260926flipio" />
-  <link rel="stylesheet" href="css/flow-view.css?v=20260926flowiconspacing" />
+  <link rel="stylesheet" href="css/details.css?v=20260927flowerrortext" />
+  <link rel="stylesheet" href="css/flow-view.css?v=20260927flowerrortext" />
   <link rel="stylesheet" href="css/sensor-chart.css?v=20260926modal" />
-  <link rel="stylesheet" href="css/ai-assistant.css?v=20260927attachments" />
+  <link rel="stylesheet" href="css/ai-assistant.css?v=20260928settings" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -452,6 +452,7 @@
   <div id="fastestModeNotice" aria-live="polite" role="status">FASTEST mode: Rendering disabled for maximum simulation speed.</div>
   <canvas id="graph"></canvas>
   <aside id="aiPanel" aria-label="FactSim AI Assistant" data-provider="webllm">
+    <div id="aiPanelResizeHandle" role="separator" tabindex="0" aria-label="AIメニューの幅を調整" aria-orientation="vertical" aria-controls="aiPanelBody" title="ドラッグして幅を調整（←・→キーでも調整できます）"></div>
     <button id="aiPanelToggle" type="button" aria-label="Toggle AI Assistant" aria-controls="aiPanelBody" aria-expanded="true">AI</button>
     <div id="aiPanelBody">
       <header class="aiPanelHeader">
@@ -466,7 +467,7 @@
         </div>
         <div data-ai-provider-fields="ollama" hidden>
           <label>Endpoint<input id="aiOllamaEndpoint" type="url" spellcheck="false"></label>
-          <label>Model<input id="aiOllamaModel" type="text" list="aiOllamaModels" spellcheck="false"><datalist id="aiOllamaModels"></datalist></label>
+          <label>Installed models<select id="aiOllamaModels" disabled><option value="">Get Models to list installed models</option></select></label>
           <label>Thinking<select id="aiOllamaThinking"><option value="off">Fast · thinking off</option><option value="on">Detailed · thinking on</option></select></label>
           <button id="aiOllamaRefresh" class="aiSecondaryButton" type="button">Get Models</button>
         </div>
@@ -480,6 +481,14 @@
         <span id="aiLoadProgressText" class="aiProgressText"></span>
         <button id="aiConnectBtn" class="aiPrimaryButton" type="button">Load Model</button>
         <label>Confirmation<select id="aiConfirmationPolicy"><option value="ask">Ask for model edits</option><option value="allow-safe">Allow safe edits</option></select></label>
+        <details id="aiAdvancedSettings" class="aiAdvancedSettings">
+          <summary>詳細設定（応答時間・生成パラメータ）</summary>
+          <p class="aiModelInfo">変更は保存され、次の送信から適用されます。再接続は不要です。</p>
+          <div id="aiCommonGenerationFields"></div>
+          <div id="aiOllamaGenerationFields" data-ai-provider-fields="ollama" hidden></div>
+          <p id="aiGenerationSettingsStatus" class="aiModelInfo" role="status"></p>
+          <button id="aiResetGenerationSettings" class="aiSecondaryButton" type="button">生成パラメータを既定値に戻す</button>
+        </details>
       </details>
       <div id="aiChatMessages" class="aiChatMessages" aria-live="polite"></div>
       <div class="aiComposer">
@@ -891,7 +900,7 @@ SOFTWARE.
   <script src="js/app/node-props-panel.js?v=20260914flow2"></script>
   <script src="js/app/selection-inspector.js?v=20260926flowreveal"></script>
   <script src="js/app/flow-status.js?v=20260926sensor"></script>
-  <script src="js/app/flow-view.js?v=20260926flowicons"></script>
+  <script src="js/app/flow-view.js?v=20260927flowerrortext"></script>
   <script src="js/app/sensor-chart-ui.js?v=20260926modal"></script>
   <script src="js/app/entity-ui.js?v=20260922nodeheader"></script>
   <script src="js/app/node-definition-editor.js?v=20260920a"></script>
@@ -903,17 +912,18 @@ SOFTWARE.
   <script src="js/app/ui.js?v=20260920stopgroupsmenu"></script>
   <script src="js/app/details-ui.js?v=20260914flow2"></script>
   <script src="js/ai/providers/ai-provider.js?v=20260927vision"></script>
+  <script src="js/ai/generation-settings.js?v=20260928settings"></script>
   <script src="js/ai/models/model-registry.js?v=20260927models"></script>
-  <script src="js/ai/providers/webllm-provider.js?v=20260927context"></script>
-  <script src="js/ai/providers/ollama-provider.js?v=20260927extended"></script>
-  <script src="js/ai/providers/openai-compatible-provider.js?v=20260926a"></script>
+  <script src="js/ai/providers/webllm-provider.js?v=20260928settings"></script>
+  <script src="js/ai/providers/ollama-provider.js?v=20260928settings"></script>
+  <script src="js/ai/providers/openai-compatible-provider.js?v=20260928settings"></script>
   <script src="js/ai/tools/tool-registry.js?v=20260927editing"></script>
   <script src="js/ai/tools/editing-tools.js?v=20260927editing"></script>
   <script src="js/ai/tools/factsim-tools.js?v=20260927editing"></script>
   <script src="js/ai/tools/simulation-diagnostics.js?v=20260927diagnostics"></script>
   <script src="js/ai/agent/system-prompt.js?v=20260927editing"></script>
-  <script src="js/ai/agent/factsim-agent.js?v=20260927editing"></script>
-  <script src="js/ai/ui/ai-chat-panel.js?v=20260927extended"></script>
+  <script src="js/ai/agent/factsim-agent.js?v=20260928settings"></script>
+  <script src="js/ai/ui/ai-chat-panel.js?v=20260928settings"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

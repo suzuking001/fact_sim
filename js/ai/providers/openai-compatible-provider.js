@@ -18,6 +18,7 @@
     }
     _body(messages,options,stream){
       const body={model:this.modelId,messages,stream,temperature:options?.temperature ?? 0.2};
+      if(options?.maxTokens!=null)body.max_tokens=options.maxTokens;
       if(options?.tools?.length){body.tools=AI.toOpenAITools(options.tools);body.tool_choice='auto';}
       return body;
     }

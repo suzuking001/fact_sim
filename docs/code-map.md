@@ -9,7 +9,7 @@
 | 起動・script 読込順 | `index.html` | `js/app.js`, `js/core.js`, `js/app/state.js`, `js/app/graph-init.js` |
 | ダブルクリックでローカル HTTP 起動 | `Start_FactSim.bat` | `scripts/start-factsim.ps1`（Python 3・localhost 限定サーバー・既存サーバー再利用） |
 | 全体 UI・画面切替 | `js/app/ui.js`, `js/app/workspace-ui.js` | `js/app/landing.js`, `css/app.css`, `css/workspace.css` |
-| AI Assistant・Provider・Tool | `js/ai/ui/ai-chat-panel.js`, `js/ai/agent/factsim-agent.js` | `js/ai/providers/*`, `js/ai/tools/*`, `js/ai/models/model-registry.js`, `css/ai-assistant.css`, `docs/ai-assistant.md` |
+| AI Assistant・Provider・Tool・生成設定 | `js/ai/ui/ai-chat-panel.js`, `js/ai/agent/factsim-agent.js` | `js/ai/generation-settings.js`, `js/ai/providers/*`, `js/ai/tools/*`, `js/ai/models/model-registry.js`, `css/ai-assistant.css`, `docs/ai-assistant.md` |
 | AI 停滞調査・全体状態・実時間計測 | `js/ai/tools/simulation-diagnostics.js` | `js/ai/agent/system-prompt.js`, `mcp/scripts/test-ai-assistant.mjs`, `mcp/scripts/test-ai-scenarios.mjs`（実Ollama・10質問） |
 | AI 取り消し保護・テンプレート検査・追加10指示 | `js/ai/tools/tool-registry.js`, `js/ai/tools/factsim-tools.js` | `mcp/scripts/test-ai-scenarios.mjs --suite=extended`、`docs/ai-assistant.md` |
 | AI 一括編集・接続解除・削除再接続・複製・相対移動 | `js/ai/tools/editing-tools.js` | `mcp/scripts/test-ai-scenarios.mjs --suite=editing`（編集指示21–30）、`js/ai/tools/tool-registry.js` |

@@ -1,0 +1,634 @@
+{
+  "generatedAt": "2026-09-28T13:29:24.330Z",
+  "checks": [
+    {
+      "name": "default width",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "380px",
+          "width": "1060px"
+        },
+        "panel": {
+          "left": 1060,
+          "right": 1440,
+          "width": 380
+        },
+        "graph": {
+          "left": 0,
+          "right": 1060,
+          "width": 1060
+        },
+        "hud": {
+          "left": 352,
+          "right": 1044,
+          "width": 692
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1060,
+          "width": 720
+        },
+        "canvasWidth": 1060,
+        "viewport": 1440,
+        "saved": null,
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "mouse expands panel and updates graph, HUD and timeline",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "600px",
+          "width": "840px"
+        },
+        "panel": {
+          "left": 840,
+          "right": 1440,
+          "width": 600
+        },
+        "graph": {
+          "left": 0,
+          "right": 840,
+          "width": 840
+        },
+        "hud": {
+          "left": 352,
+          "right": 824,
+          "width": 472
+        },
+        "timeline": {
+          "left": 340,
+          "right": 840,
+          "width": 500
+        },
+        "canvasWidth": 840,
+        "viewport": 1440,
+        "saved": "600",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "width saved on release",
+      "pass": true,
+      "details": "600"
+    },
+    {
+      "name": "reload restores width",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "600px",
+          "width": "840px"
+        },
+        "panel": {
+          "left": 840,
+          "right": 1440,
+          "width": 600
+        },
+        "graph": {
+          "left": 0,
+          "right": 840,
+          "width": 840
+        },
+        "hud": {
+          "left": 352,
+          "right": 824,
+          "width": 472
+        },
+        "timeline": {
+          "left": 340,
+          "right": 840,
+          "width": 500
+        },
+        "canvasWidth": 840,
+        "viewport": 1440,
+        "saved": "600",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "mouse shrinks panel",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "440px",
+          "width": "1000px"
+        },
+        "panel": {
+          "left": 1000,
+          "right": 1440,
+          "width": 440
+        },
+        "graph": {
+          "left": 0,
+          "right": 1000,
+          "width": 1000
+        },
+        "hud": {
+          "left": 352,
+          "right": 984,
+          "width": 632
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1000,
+          "width": 660
+        },
+        "canvasWidth": 1000,
+        "viewport": 1440,
+        "saved": "440",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "close releases canvas and hides resize handle",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "0px",
+          "width": "1440px"
+        },
+        "panel": {
+          "left": 1440,
+          "right": 1880,
+          "width": 440
+        },
+        "graph": {
+          "left": 0,
+          "right": 1440,
+          "width": 1440
+        },
+        "hud": {
+          "left": 352,
+          "right": 1049.75,
+          "width": 697.75
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1440,
+          "width": 1100
+        },
+        "canvasWidth": 1440,
+        "viewport": 1440,
+        "saved": "440",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "reopen retains width",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "440px",
+          "width": "1000px"
+        },
+        "panel": {
+          "left": 1000,
+          "right": 1440,
+          "width": 440
+        },
+        "graph": {
+          "left": 0,
+          "right": 1000,
+          "width": 1000
+        },
+        "hud": {
+          "left": 352,
+          "right": 984,
+          "width": 632
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1000,
+          "width": 660
+        },
+        "canvasWidth": 1000,
+        "viewport": 1440,
+        "saved": "440",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "minimum prevents collapsed content",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "280px",
+          "width": "1160px"
+        },
+        "panel": {
+          "left": 1160,
+          "right": 1440,
+          "width": 280
+        },
+        "graph": {
+          "left": 0,
+          "right": 1160,
+          "width": 1160
+        },
+        "hud": {
+          "left": 352,
+          "right": 1144,
+          "width": 792
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1160,
+          "width": 820
+        },
+        "canvasWidth": 1160,
+        "viewport": 1440,
+        "saved": "280",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "composer buttons fit minimum width",
+      "pass": true,
+      "details": false
+    },
+    {
+      "name": "keyboard expands",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "290px",
+          "width": "1150px"
+        },
+        "panel": {
+          "left": 1150,
+          "right": 1440,
+          "width": 290
+        },
+        "graph": {
+          "left": 0,
+          "right": 1150,
+          "width": 1150
+        },
+        "hud": {
+          "left": 352,
+          "right": 1134,
+          "width": 782
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1150,
+          "width": 810
+        },
+        "canvasWidth": 1150,
+        "viewport": 1440,
+        "saved": "290",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "maximum leaves canvas space",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "860px",
+          "width": "580px"
+        },
+        "panel": {
+          "left": 580,
+          "right": 1440,
+          "width": 860
+        },
+        "graph": {
+          "left": 0,
+          "right": 580,
+          "width": 580
+        },
+        "hud": {
+          "left": 352,
+          "right": 564,
+          "width": 212
+        },
+        "timeline": {
+          "left": 340,
+          "right": 580,
+          "width": 240
+        },
+        "canvasWidth": 580,
+        "viewport": 1440,
+        "saved": "860",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "cancel clears dragging cursor",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "280px",
+          "width": "1160px"
+        },
+        "panel": {
+          "left": 1160,
+          "right": 1440,
+          "width": 280
+        },
+        "graph": {
+          "left": 0,
+          "right": 1160,
+          "width": 1160
+        },
+        "hud": {
+          "left": 352,
+          "right": 1144,
+          "width": 792
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1160,
+          "width": 820
+        },
+        "canvasWidth": 1160,
+        "viewport": 1440,
+        "saved": "280",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "drag works after cancellation",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "360px",
+          "width": "1080px"
+        },
+        "panel": {
+          "left": 1080,
+          "right": 1440,
+          "width": 360
+        },
+        "graph": {
+          "left": 0,
+          "right": 1080,
+          "width": 1080
+        },
+        "hud": {
+          "left": 352,
+          "right": 1064,
+          "width": 712
+        },
+        "timeline": {
+          "left": 340,
+          "right": 1080,
+          "width": 740
+        },
+        "canvasWidth": 1080,
+        "viewport": 1440,
+        "saved": "360",
+        "dragging": false,
+        "min": 280,
+        "max": 860
+      }
+    },
+    {
+      "name": "tablet keeps graph overlay layout",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open tablet-ui sidebar-hidden timeline-hidden",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "0px",
+          "width": "800px"
+        },
+        "panel": {
+          "left": 440,
+          "right": 800,
+          "width": 360
+        },
+        "graph": {
+          "left": 0,
+          "right": 800,
+          "width": 800
+        },
+        "hud": {
+          "left": 32.953125,
+          "right": 784,
+          "width": 751.046875
+        },
+        "timeline": {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        "canvasWidth": 800,
+        "viewport": 800,
+        "saved": "360",
+        "dragging": false,
+        "min": 280,
+        "max": 736
+      }
+    },
+    {
+      "name": "tablet resizes",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open tablet-ui sidebar-hidden timeline-hidden",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "0px",
+          "width": "800px"
+        },
+        "panel": {
+          "left": 240,
+          "right": 800,
+          "width": 560
+        },
+        "graph": {
+          "left": 0,
+          "right": 800,
+          "width": 800
+        },
+        "hud": {
+          "left": 12,
+          "right": 784,
+          "width": 772
+        },
+        "timeline": {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        "canvasWidth": 800,
+        "viewport": 800,
+        "saved": "560",
+        "dragging": false,
+        "min": 280,
+        "max": 736
+      }
+    },
+    {
+      "name": "phone clamps panel to viewport",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open mobile-ui",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "0px",
+          "width": "390px"
+        },
+        "panel": {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        },
+        "graph": {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        },
+        "hud": {
+          "left": 7.484375,
+          "right": 374,
+          "width": 366.515625
+        },
+        "timeline": {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        },
+        "canvasWidth": 390,
+        "viewport": 390,
+        "saved": "560",
+        "dragging": false,
+        "min": 280,
+        "max": 390
+      }
+    },
+    {
+      "name": "phone drag can narrow panel",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open mobile-ui",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "0px",
+          "width": "390px"
+        },
+        "panel": {
+          "left": 90,
+          "right": 390,
+          "width": 300
+        },
+        "graph": {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        },
+        "hud": {
+          "left": 7,
+          "right": 374,
+          "width": 367
+        },
+        "timeline": {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        },
+        "canvasWidth": 390,
+        "viewport": 390,
+        "saved": "300",
+        "dragging": false,
+        "min": 280,
+        "max": 390
+      }
+    },
+    {
+      "name": "phone send button remains accessible above navigation",
+      "pass": true,
+      "details": true
+    },
+    {
+      "name": "desktop restores latest chosen width",
+      "pass": true,
+      "details": {
+        "classes": "landing-hidden ai-panel-open sidebar-hidden timeline-hidden",
+        "graphStyle": "touch-action: none;",
+        "graphComputed": {
+          "right": "300px",
+          "width": "1140px"
+        },
+        "panel": {
+          "left": 1140,
+          "right": 1440,
+          "width": 300
+        },
+        "graph": {
+          "left": 0,
+          "right": 1140,
+          "width": 1140
+        },
+        "hud": {
+          "left": 11.25,
+          "right": 1124,
+          "width": 1112.75
+        },
+        "timeline": {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        "canvasWidth": 1140,
+        "viewport": 1440,
+        "saved": "300",
+        "dragging": false,
+        "min": 280,
+        "max": 1200
+      }
+    },
+    {
+      "name": "no browser runtime errors",
+      "pass": true,
+      "details": []
+    }
+  ],
+  "pageErrors": []
+}

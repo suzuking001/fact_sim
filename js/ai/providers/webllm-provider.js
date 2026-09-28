@@ -117,7 +117,7 @@ Keep reply concise (2-4 sentences). For greetings, general questions, design dis
           return message;
         });
       }
-      const request={messages:requestMessages,stream,temperature:options?.responseRetry ? 0 : options?.temperature ?? 0.2,max_tokens:options?.responseRetry ? 768 : 512};
+      const request={messages:requestMessages,stream,temperature:options?.responseRetry ? 0 : options?.temperature ?? 0.2,max_tokens:options?.maxTokens ?? (options?.responseRetry ? 768 : 512)};
       if(useTools)request.response_format={type:'json_object',schema:JSON.stringify({type:'object',properties:{reply:{type:'string'},tool_calls:{type:'array',items:{type:'object',properties:{name:{type:'string',enum:options.tools.map(tool=>tool.name)},arguments:{type:'object'}},required:['name','arguments'],additionalProperties:false}}},required:['reply','tool_calls'],additionalProperties:false})};
       return request;
     }

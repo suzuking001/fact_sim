@@ -10,10 +10,11 @@
     return next;
   });}
   class OllamaProvider extends AI.AIProvider{
-    constructor(){super({id:'ollama',name:'Ollama',supportsTools:true,supportsStreaming:true});this.endpoint='http://localhost:11434';}
+    constructor(){super({id:'ollama',name:'Ollama',supportsTools:true,supportsStreaming:true});this.endpoint='http://localhost:11434';this.requestTimeoutMs=90000;this.generationOptions={};}
     async initialize(config={}){
       this.endpoint=endpoint(config.endpoint);this.modelId=String(config.modelId || '').trim();
-      this.requestTimeoutMs=Number(config.requestTimeoutMs) || 90000;this.think=config.think ?? false;
+      const timeout=Number(config.requestTimeoutMs ?? 90000);
+      this.requestTimeoutMs=Number.isFinite(timeout) && timeout>=0 && timeout<=2147483647 ? timeout : 90000;this.think=config.think ?? false;this.generationOptions=config.generationOptions || {};
       if(!this.modelId)throw new Error('Choose or enter an Ollama model.');
       this.status='connecting';
       try{
@@ -33,7 +34,10 @@
       const data=await response.json();return (data.models || []).map(model=>({id:model.name,label:model.name,size:model.size || null,capabilities:model.capabilities || null}));
     }
     _body(messages,options,stream){
-      const body={model:this.modelId,messages:ollamaMessages(messages),stream,options:{temperature:options?.temperature ?? 0.2}};
+      options={...this.generationOptions,...options};
+      const body={model:this.modelId,messages:ollamaMessages(messages),stream,options:{...options.ollamaOptions,temperature:options.temperature ?? 0.2}};
+      if(options.maxTokens!=null)body.options.num_predict=options.maxTokens;
+      if(options.keepAlive!=null)body.keep_alive=options.keepAlive;
       if(this.supportsThinking)body.think=options?.think ?? this.think;
       if(options?.tools?.length)body.tools=AI.toOpenAITools(options.tools);
       return body;
@@ -41,9 +45,9 @@
     _requestControl(options){
       const controller=new AbortController(),started=performance.now(),abort=()=>controller.abort();this._controller=controller;
       options.signal?.addEventListener('abort',abort,{once:true});if(options.signal?.aborted)abort();
-      let timedOut=false;const limit=this.requestTimeoutMs || 90000;
-      const timeout=setTimeout(()=>{timedOut=true;abort();},limit),progress=setInterval(()=>options.onProgress?.({phase:'waiting',elapsedSeconds:(performance.now()-started)/1000}),4000);
-      return {controller,timeoutError:()=>timedOut ? new Error(`Ollamaの応答が${Math.round(limit/1000)}秒以内に完了しませんでした。モデル読込・他の実行待ち・推論負荷を確認し、再試行してください。取得済みのツール結果はチャットに残っています。`) : null,close:()=>{clearTimeout(timeout);clearInterval(progress);options.signal?.removeEventListener('abort',abort);if(this._controller===controller)this._controller=null;}};
+      let timedOut=false;const requested=Number(options.requestTimeoutMs ?? this.requestTimeoutMs),limit=Number.isFinite(requested) && requested>=0 && requested<=2147483647 ? requested : 90000;
+      const timeout=limit>0 ? setTimeout(()=>{timedOut=true;abort();},limit) : null,progress=setInterval(()=>options.onProgress?.({phase:'waiting',elapsedSeconds:(performance.now()-started)/1000}),4000);
+      return {controller,timeoutError:()=>timedOut ? new Error(`Ollamaの応答が${limit/1000}秒以内に完了しませんでした。AIの詳細設定で応答タイムアウトを延長するか、0（無制限）に設定できます。モデル読込・他の実行待ち・推論負荷を確認し、再試行してください。取得済みのツール結果はチャットに残っています。`) : null,close:()=>{clearTimeout(timeout);clearInterval(progress);options.signal?.removeEventListener('abort',abort);if(this._controller===controller)this._controller=null;}};
     }
     async chat(messages,options={}){
       const control=this._requestControl(options),controller=control.controller;

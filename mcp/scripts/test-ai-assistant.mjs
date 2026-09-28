@@ -5,11 +5,12 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from 'node:http';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
-const outputPath=path.join(root,'artifacts','ai-assistant',process.argv.includes('--real-webllm') ? 'browser-test-real.json' : process.argv.includes('--webllm-tokenizers') ? 'browser-test-tokenizers.json' : 'browser-test.json');
+const outputPath=path.join(root,'artifacts','ai-assistant',process.argv.includes('--generation-settings') ? 'browser-test-generation-settings.json' : process.argv.includes('--real-webllm') ? 'browser-test-real.json' : process.argv.includes('--webllm-tokenizers') ? 'browser-test-tokenizers.json' : 'browser-test.json');
 const screenshotPath=path.join(root,'tmp','ai-assistant-panel.png');
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml'};
 const screenProtocolChecks=[];
 const chatAttachmentRequests=[];
+const generationRequests=[];
 const server=createServer(async(req,res)=>{
   try{
     const relative=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
@@ -23,6 +24,11 @@ const server=createServer(async(req,res)=>{
     if(relative==='/mock-ollama/api/tags'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({models:[{name:'mock-ollama',size:1,capabilities:['completion','tools','vision','thinking']},{name:'mock-text',size:1,capabilities:['completion','tools']}]}));return;}
     if(relative==='/mock-ollama/api/chat'){
       let raw='';for await(const chunk of req)raw+=chunk;const body=JSON.parse(raw || '{}');res.setHeader('Content-Type','application/json');
+      if(body.messages.some(message=>message.content?.includes('[test-generation-settings]')))generationRequests.push(body);
+      if(body.messages.some(message=>message.content?.includes('[test-delayed-generation]'))){
+        if(body.stream)res.write(JSON.stringify({message:{content:'Started '},done:false})+'\n');
+        const timer=setTimeout(()=>res.end(JSON.stringify({message:{content:'Delayed reply'},done:true})+(body.stream ? '\n' : '')),150);res.on('close',()=>clearTimeout(timer));return;
+      }
       if(body.messages.some(message=>message.role==='user' && message.content.includes('[test-uploaded-image]'))){
         const images=body.messages.flatMap(message=>message.images || []);
         chatAttachmentRequests.push({count:images.length,png:images.every(data=>typeof data==='string' && data.startsWith('iVBOR') && !data.startsWith('data:')),prompt:body.messages.filter(message=>message.role==='user').at(-1).content});
@@ -564,6 +570,39 @@ try{
   check('OpenAI-compatible adapter supports models, chat, and SSE streaming',providerResults.openaiModels[0].id==='mock-model' && providerResults.openaiChat.message.content==='OpenAI reply' && providerResults.openaiStream.text==='OpenAI stream' && providerResults.openaiKeyCleared,providerResults);
   check('Ollama adapter supports discovery, chat, and NDJSON streaming',providerResults.ollamaModels[0].id==='mock-ollama' && providerResults.ollamaChat.message.content==='Ollama reply' && providerResults.ollamaStream.text==='Ollama stream',providerResults);
 
+  const timeoutResults=await page.evaluate(async origin=>{
+    const provider=new App.AI.OllamaProvider();await provider.initialize({endpoint:origin+'/mock-ollama',modelId:'mock-ollama',requestTimeoutMs:0});
+    const zeroPreserved=provider.requestTimeoutMs===0,messages=[{role:'user',content:'[test-delayed-generation]'}];
+    let chatTimeout=false,streamTimeout=false,streamStarted=false;
+    try{await provider.chat(messages,{requestTimeoutMs:30});}catch(error){chatTimeout=error.message.includes('0.03秒') && error.message.includes('詳細設定');}
+    try{for await(const item of provider.streamChat(messages,{requestTimeoutMs:80}))if(item.type==='delta')streamStarted=true;}catch(error){streamTimeout=error.message.includes('0.08秒');}
+    const zeroResponse=await provider.chat(messages,{});
+    let zeroStreamDone=false;for await(const item of provider.streamChat(messages,{requestTimeoutMs:0}))if(item.type==='done')zeroStreamDone=item.response.message.content==='Started Delayed reply';
+    const controller=new AbortController(),abortTimer=setTimeout(()=>controller.abort(),30);let stopped=false;
+    try{await provider.chat(messages,{requestTimeoutMs:0,signal:controller.signal});}catch(error){stopped=error.message.includes('stopped');}finally{clearTimeout(abortTimer);}
+    const alreadyStopped=new AbortController();alreadyStopped.abort();let preAborted=false;
+    try{await provider.chat(messages,{signal:alreadyStopped.signal});}catch(error){preAborted=error.message.includes('stopped');}
+    return {zeroPreserved,chatTimeout,streamTimeout,streamStarted,zeroResponse:zeroResponse.message.content==='Delayed reply',zeroStreamDone,stopped,preAborted,cleaned:provider._controller===null};
+  },`http://127.0.0.1:${server.address().port}`);
+  check('Ollama deadlines cover chat and full streams; zero disables the deadline and Stop still aborts',Object.values(timeoutResults).every(Boolean),timeoutResults);
+
+  const generationRouting=await page.evaluate(async()=>{
+    const AI=App.AI,settings=AI.GenerationSettings.normalize({temperature:0.65,maxOutputTokens:1234,maxToolIterations:1,requestTimeoutSeconds:300,numCtx:8192,topP:0.8,topK:30,repeatPenalty:1.2,seed:0,keepAliveSeconds:-1}),options=AI.GenerationSettings.requestOptions(settings);
+    const ollama=new AI.OllamaProvider(),ollamaBody=ollama._body([] ,options,true),openai=new AI.OpenAICompatibleProvider(),apiBody=openai._body([],options,false),webllm=new AI.WebLLMProvider(),webBody=webllm._request([],options,false);
+    const defaults=AI.GenerationSettings.requestOptions({}),defaultBody=ollama._body([],defaults,false),invalid=AI.GenerationSettings.normalize({requestTimeoutSeconds:-1,maxToolIterations:1.5,numCtx:'invalid'});
+    const runs=[];
+    for(const streaming of [false,true]){
+      const requests=[],registry=new AI.ToolRegistry();registry.register({name:'inspect_test',description:'Read a test value',mode:AI.ToolModes.READ,inputSchema:{type:'object'},execute:()=>({success:true})});
+      const provider=new AI.AIProvider({supportsStreaming:streaming});provider.status='ready';
+      const agent=new AI.FactSimAgent({provider,registry,maxToolIterations:1,generationOptions:options});
+      provider.chat=async(messages,input)=>{requests.push({temperature:input.temperature,maxTokens:input.maxTokens,timeout:input.requestTimeoutMs,tools:input.tools.length});agent.maxToolIterations=7;agent.generationOptions={temperature:0.9};return {message:{content:input.tools.length ? '' : 'Recorded summary',toolCalls:input.tools.length ? [{id:'test',name:'inspect_test',arguments:{}}] : []}};};
+      const answer=await agent.send('Inspect test value');runs.push({requests,summary:answer.content,budget:agent.lastRunStats.budgetReached,toolCalls:agent.lastRunStats.toolCalls});
+    }
+    return {ollamaBody,apiBody,webBody,defaultsOmitOptional:Object.keys(defaultBody.options).join(',')==='temperature' && !('keep_alive' in defaultBody),invalidRestored:invalid.requestTimeoutSeconds===90 && invalid.maxToolIterations===16 && invalid.numCtx===null,runs};
+  });
+  check('generation settings route to all adapters and preserve defaults',generationRouting.ollamaBody.options.num_predict===1234 && generationRouting.ollamaBody.options.num_ctx===8192 && generationRouting.ollamaBody.options.seed===0 && generationRouting.ollamaBody.keep_alive===-1 && generationRouting.apiBody.max_tokens===1234 && generationRouting.webBody.max_tokens===1234 && generationRouting.defaultsOmitOptional && generationRouting.invalidRestored,generationRouting);
+  check('streaming and chat snapshot generation settings and summarize after the configured tool round limit',generationRouting.runs.every(run=>run.summary==='Recorded summary' && run.budget && run.toolCalls===1 && run.requests.length===2 && run.requests.every(request=>request.temperature===0.65 && request.maxTokens===1234 && request.timeout===300000) && run.requests[1].tools===0),generationRouting.runs);
+
   if(process.argv.includes('--webllm-tokenizers')){
     await page.addScriptTag({url:'https://unpkg.com/@mlc-ai/web-tokenizers@0.1.6/lib/index.js'});
     const counts=await page.evaluate(async requested=>{
@@ -615,18 +654,57 @@ try{
     }
   }
 
+  await page.evaluate(endpoint=>{document.getElementById('aiOllamaEndpoint').value=endpoint;},`http://127.0.0.1:${server.address().port}/mock-ollama`);
   await page.locator('#aiProviderSelect').selectOption('ollama');
-  await page.locator('#aiOllamaEndpoint').fill(`http://127.0.0.1:${server.address().port}/mock-ollama`);
-  await page.locator('#aiOllamaModel').fill('mock-ollama');
+  await page.waitForFunction(()=>!document.getElementById('aiOllamaModels').disabled);
+  const installedModels=await page.locator('#aiOllamaModels option').evaluateAll(options=>options.map(option=>option.value).filter(Boolean));
+  check('Ollama picker automatically lists every installed model in a single model field',installedModels.join(',')==='mock-ollama,mock-text' && await page.locator('#aiOllamaModels').inputValue()==='mock-ollama' && await page.locator('#aiOllamaModel').count()===0,installedModels);
+  await page.locator('#aiOllamaModels').selectOption('mock-text');
+  check('selecting another installed Ollama model saves the choice',await page.evaluate(()=>JSON.parse(localStorage.getItem('factsim-ai-settings')).ollamaModel==='mock-text'));
+  await page.getByRole('button',{name:'Test & Use',exact:true}).click();
+  await page.waitForFunction(()=>!document.getElementById('aiConnectBtn').disabled && App.AI.agent.provider?.modelId==='mock-text' && App.AI.agent.provider.status==='ready');
+  await page.getByRole('button',{name:'Get Models',exact:true}).click();
+  await page.waitForFunction(()=>!document.getElementById('aiOllamaRefresh').disabled);
+  check('refresh preserves the selected Ollama model and keeps the other models selectable',await page.locator('#aiOllamaModels').inputValue()==='mock-text' && await page.locator('#aiOllamaModels option[value="mock-ollama"]').count()===1);
+  await page.locator('#aiOllamaModels').selectOption('mock-ollama');
   await page.getByRole('button',{name:'Test & Use',exact:true}).click();
   await page.waitForFunction(()=>!document.getElementById('aiConnectBtn').disabled && App.AI.agent.provider?.id==='ollama' && App.AI.agent.provider.status==='ready');
   await page.locator('#aiOllamaThinking').selectOption('on');
   const thinkingSetting=await page.evaluate(()=>({on:App.AI.agent.provider._body([],{},true).think,saved:JSON.parse(localStorage.getItem('factsim-ai-settings')).ollamaThinking}));
   await page.locator('#aiOllamaThinking').selectOption('off');
   check('Ollama UI exposes a persisted fast/detailed choice and applies it to the next generation',thinkingSetting.on && thinkingSetting.saved && await page.evaluate(()=>App.AI.agent.provider._body([],{},true).think===false),thinkingSetting);
+  await page.locator('#aiAdvancedSettings summary').click();
+  for(const [id,value] of [['aiTemperature','0.65'],['aiMaxOutputTokens','1234'],['aiMaxToolIterations','2'],['aiRequestTimeoutSeconds','300'],['aiOllamaNumCtx','8192'],['aiOllamaTopP','0.8'],['aiOllamaTopK','30'],['aiOllamaRepeatPenalty','1.2'],['aiOllamaSeed','42'],['aiOllamaKeepAliveSeconds','120']]){await page.locator('#'+id).fill(value);await page.locator('#'+id).press('Tab');}
+  check('UI saves generation settings and updates an already connected Ollama provider without reconnecting',await page.evaluate(()=>App.AI.agent.provider.requestTimeoutMs===300000 && App.AI.agent.maxToolIterations===2 && JSON.parse(localStorage.getItem('factsim-ai-settings')).generation.numCtx===8192));
+  await page.locator('#aiClearBtn').click();await page.locator('#aiChatInput').fill('[test-generation-settings]');await page.locator('#aiSendBtn').click();
+  await page.waitForFunction(()=>!App.AI.agent.running && App.AI.agent.messages.some(message=>message.role==='assistant' && message.content==='Ollama stream'));
+  const generationBody=generationRequests.at(-1);
+  check('UI generation values reach the actual Ollama HTTP request',generationBody?.options.temperature===0.65 && generationBody.options.num_predict===1234 && generationBody.options.num_ctx===8192 && generationBody.options.top_p===0.8 && generationBody.options.top_k===30 && generationBody.options.repeat_penalty===1.2 && generationBody.options.seed===42 && generationBody.keep_alive==='120s',generationBody ? {options:generationBody.options,keep_alive:generationBody.keep_alive} : null);
+  const generationCount=generationRequests.length;
+  await page.locator('#aiRequestTimeoutSeconds').fill('-1');await page.locator('#aiRequestTimeoutSeconds').press('Tab');
+  await page.locator('#aiChatInput').fill('[test-generation-settings] invalid');await page.locator('#aiSendBtn').click();
+  check('invalid settings block sending, keep the draft and retain the previous saved value',generationRequests.length===generationCount && await page.locator('#aiChatInput').inputValue()==='[test-generation-settings] invalid' && await page.evaluate(()=>document.getElementById('aiGenerationSettingsStatus').dataset.state==='error' && JSON.parse(localStorage.getItem('factsim-ai-settings')).generation.requestTimeoutSeconds===300));
+  await page.locator('#aiRequestTimeoutSeconds').fill('0');await page.locator('#aiRequestTimeoutSeconds').press('Tab');
+  check('UI accepts and persists an unlimited Ollama timeout',await page.evaluate(()=>App.AI.agent.provider.requestTimeoutMs===0 && App.AI.agent.generationOptions.requestTimeoutMs===0 && JSON.parse(localStorage.getItem('factsim-ai-settings')).generation.requestTimeoutSeconds===0));
+  await page.locator('#aiRequestTimeoutSeconds').scrollIntoViewIfNeeded();
+  await page.screenshot({path:path.join(root,'tmp','ai-generation-settings-desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});await page.locator('#aiRequestTimeoutSeconds').scrollIntoViewIfNeeded();
+  const mobileSettings=await page.evaluate(()=>{const panel=document.getElementById('aiPanel').getBoundingClientRect(),input=document.getElementById('aiRequestTimeoutSeconds').getBoundingClientRect(),composer=document.querySelector('.aiComposer').getBoundingClientRect();return {inBounds:input.left>=panel.left && input.right<=panel.right && panel.right<=innerWidth,composerVisible:composer.bottom<=innerHeight && composer.height>0};});
+  check('advanced settings stay within the mobile panel and leave the composer accessible',mobileSettings.inBounds && mobileSettings.composerVisible,mobileSettings);
+  await page.screenshot({path:path.join(root,'tmp','ai-generation-settings-mobile.png'),fullPage:true});await page.setViewportSize({width:1440,height:960});
   await page.screenshot({path:screenshotPath,fullPage:true});
   await page.getByRole('button',{name:'Toggle AI Assistant'}).click();
   check('panel collapses without stopping FactSim',await page.evaluate(()=>!document.body.classList.contains('ai-panel-open') && !isSimRunning()),null);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.App?.AI?.agent && !document.getElementById('aiOllamaModels').disabled);
+  check('reopening saved Ollama settings restores the chosen model and automatically fetches the full list',await page.locator('#aiProviderSelect').inputValue()==='ollama' && await page.locator('#aiOllamaModels').inputValue()==='mock-ollama' && await page.locator('#aiOllamaModels option[value="mock-text"]').count()===1);
+  check('reopening restores zero timeout and all generation values',await page.evaluate(()=>document.getElementById('aiRequestTimeoutSeconds').value==='0' && document.getElementById('aiMaxOutputTokens').value==='1234' && document.getElementById('aiOllamaSeed').value==='42' && App.AI.agent.maxToolIterations===2));
+  await page.locator('#aiAdvancedSettings summary').click();await page.locator('#aiResetGenerationSettings').click();
+  check('reset restores generation defaults while retaining provider, model and endpoint',await page.evaluate(()=>{const settings=JSON.parse(localStorage.getItem('factsim-ai-settings'));return settings.generation.requestTimeoutSeconds===90 && settings.generation.temperature===0.2 && settings.generation.maxOutputTokens===null && settings.generation.numCtx===null && settings.provider==='ollama' && settings.ollamaModel==='mock-ollama' && settings.ollamaEndpoint.endsWith('/mock-ollama');}));
+  await page.evaluate(()=>{const settings=JSON.parse(localStorage.getItem('factsim-ai-settings'));settings.ollamaModel='removed-model:tag';localStorage.setItem('factsim-ai-settings',JSON.stringify(settings));});
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.App?.AI?.agent && !document.getElementById('aiOllamaModels').disabled);
+  check('a saved model that is no longer installed falls back to an available model',await page.locator('#aiOllamaModels').inputValue()==='mock-ollama' && await page.evaluate(()=>JSON.parse(localStorage.getItem('factsim-ai-settings')).ollamaModel==='mock-ollama'));
   check('no uncaught browser errors',pageErrors.length===0,pageErrors);
 }catch(error){report.error=String(error?.stack || error);process.exitCode=1;}
 finally{

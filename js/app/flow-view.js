@@ -68,10 +68,14 @@
     notice.setAttribute('role','status');host.tabIndex=-1;host.append(toolbar,viewport,notice);viewport.append(scene);
     const wiringHint='Drag between the round ports to connect. Drag an existing wire or its input end to reconnect. Esc cancels.';
     const hint=node.properties.role==='sink' ? 'Connect the Flow to Entity Sink to record completed Entities.' : node.properties.role==='source' ? 'Configure and connect Source Sequence like any other Flow node.' : wiringHint;
+    function setNotice(message,isError=false){
+      notice.textContent=message;notice.classList.toggle('is-error',isError);
+      const parent=isError ? viewport : host;
+      if(notice.parentElement!==parent){notice.remove();parent.append(notice);}
+    }
     function showChecks(message='',editError=false){
       const errors=model.graphErrors(node.graph);
-      notice.textContent=[message,errors.length ? `Start check: ${errors.length} error(s)\n${errors.join('\n')}` : `Start check: no errors. ${hint}`].filter(Boolean).join('\n');
-      notice.classList.toggle('is-error',editError || !!errors.length);
+      setNotice([message,errors.length ? `Start check: ${errors.length} error(s)\n${errors.join('\n')}` : `Start check: no errors. ${hint}`].filter(Boolean).join('\n'),editError || !!errors.length);
     }
     toolbar.append(button('Check Start',()=>showChecks()));
     let flow=model.clone(node.properties.flow),zoom=1,pan=[16,16],pending=null,menu=null,drag=null,autoFit=true,connectionDrag=null,pointer=null,selectedLink=null;
@@ -116,7 +120,7 @@
         if(flow.links.some(l=>l.from===output.nodeId && l.output===output.portId && l.to===input.nodeId && l.input===input.portId)){drawLinks();return;}
         edit(()=>model.rewire(flow,start,end));
       }
-      else{pending=end;pointer=null;notice.classList.remove('is-error');notice.textContent=`Select or drag to an ${end.direction==='outputs' ? 'input' : 'output'} port. Esc cancels.`;drawLinks();}
+      else{pending=end;pointer=null;setNotice(`Select or drag to an ${end.direction==='outputs' ? 'input' : 'output'} port. Esc cancels.`);drawLinks();}
     }
     function targetAt(x,y,start){
       const direct=host.ownerDocument.elementFromPoint(x,y)?.closest('.flowPort');
@@ -144,7 +148,7 @@
       const target=targetAt(e.clientX,e.clientY,gesture.start);snapTarget=null;
       if(target){pending=gesture.start;choosePort(endpoint(target));}else cancelConnection();
     }
-    function selectWire(link){pending=null;pointer=null;selectedLink=link;host.focus({preventScroll:true});notice.textContent='Drag this wire to a new input, or Delete / Backspace to disconnect.';drawLinks();}
+    function selectWire(link){pending=null;pointer=null;selectedLink=link;host.focus({preventScroll:true});setNotice('Drag this wire to a new input, or Delete / Backspace to disconnect.');drawLinks();}
     function portEvents(dot){
       dot.onclick=e=>{if(e.detail===0)choosePort(endpoint(dot));};
       dot.onpointerdown=e=>beginConnection(e,dot);

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T08:52:52.229Z",
+  "generatedAt": "2026-09-28T13:18:17.028Z",
   "checks": [
     {
       "name": "panel loads independently",
@@ -778,29 +778,29 @@
         "completedDelta": 1,
         "mode": "event",
         "performance": {
-          "wallMs": 3.300000011920929,
-          "startupWallMs": 0.20000001788139343,
-          "updateWallMs": 1.0999999940395355,
-          "maxUpdateWallMs": 0.3999999761581421,
-          "stopAndRenderWallMs": 1.9000000059604645,
+          "wallMs": 3.899999976158142,
+          "startupWallMs": 0.2999999523162842,
+          "updateWallMs": 1.600000023841858,
+          "maxUpdateWallMs": 0.6000000238418579,
+          "stopAndRenderWallMs": 1.7999999523162842,
           "steps": 5,
-          "simSecondsPerWallSecond": 1515.1515096781777
+          "simSecondsPerWallSecond": 1282.0512898888421
         },
         "noActivitySeconds": 5,
         "samples": [
           {
             "simTimeSeconds": 0,
-            "wallSeconds": 0.00020000001788139342,
+            "wallSeconds": 0.00029999995231628417,
             "steps": 0,
             "completed": 0,
             "simSecondsPerWallSecond": 0
           },
           {
             "simTimeSeconds": 5,
-            "wallSeconds": 0.0032000000178813936,
+            "wallSeconds": 0.003799999952316284,
             "steps": 5,
             "completed": 1,
-            "simSecondsPerWallSecond": 1562.4999912688509
+            "simSecondsPerWallSecond": 1315.7894901951927
           }
         ],
         "report": {
@@ -899,7 +899,7 @@
             "Snapshot does not measure real-time performance; use profile_simulation.",
             "Event heap/queue size is not exposed by this diagnostic; do not invent event counts."
           ],
-          "readWallMs": 0.09999999403953552
+          "readWallMs": 0.10000002384185791
         },
         "limitations": [
           "Time budgets and Stop are checked between engine.update calls; a single synchronous call that never returns cannot be preempted.",
@@ -1308,13 +1308,13 @@
         "stopReason": "target_reached",
         "advancedSeconds": 1200,
         "performance": {
-          "wallMs": 335.7999999821186,
-          "startupWallMs": 0.29999998211860657,
-          "updateWallMs": 76.29999986290932,
-          "maxUpdateWallMs": 0.5,
+          "wallMs": 351.69999998807907,
+          "startupWallMs": 0.30000001192092896,
+          "updateWallMs": 79.69999998807907,
+          "maxUpdateWallMs": 0.8999999761581421,
           "stopAndRenderWallMs": 1.199999988079071,
           "steps": 1200,
-          "simSecondsPerWallSecond": 3573.5556880997624
+          "simSecondsPerWallSecond": 3411.998862782696
         }
       }
     },
@@ -1324,15 +1324,15 @@
       "details": {
         "partial": true,
         "reason": "wall_time_budget",
-        "advancedSeconds": 360,
+        "advancedSeconds": 342,
         "performance": {
-          "wallMs": 104.10000002384186,
-          "startupWallMs": 0.20000001788139343,
-          "updateWallMs": 17.30000004172325,
-          "maxUpdateWallMs": 0.20000001788139343,
-          "stopAndRenderWallMs": 1.5,
-          "steps": 360,
-          "simSecondsPerWallSecond": 3458.2132556921206
+          "wallMs": 101.69999998807907,
+          "startupWallMs": 0.19999998807907104,
+          "updateWallMs": 19.09999990463257,
+          "maxUpdateWallMs": 0.30000001192092896,
+          "stopAndRenderWallMs": 1.600000023841858,
+          "steps": 342,
+          "simSecondsPerWallSecond": 3362.8318588012594
         }
       }
     },
@@ -1362,17 +1362,17 @@
         "hasEvidence": true,
         "stats": {
           "modelCalls": 3,
-          "modelWallMs": 0.09999999403953552,
+          "modelWallMs": 0,
           "toolCalls": 2,
-          "toolWallMs": 0.09999999403953552,
+          "toolWallMs": 0.10000002384185791,
           "toolTimings": [
             {
               "name": "get_simulation_report",
-              "wallMs": 0
+              "wallMs": 0.10000002384185791
             },
             {
               "name": "get_simulation_report",
-              "wallMs": 0.09999999403953552
+              "wallMs": 0
             }
           ],
           "budgetReached": true,
@@ -1487,8 +1487,8 @@
         "allTools": true,
         "constraints": true,
         "preserved": true,
-        "systemChars": 13065,
-        "requestSystemChars": 11121
+        "systemChars": 13083,
+        "requestSystemChars": 11139
       }
     },
     {
@@ -2253,6 +2253,24 @@
       }
     },
     {
+      "name": "Ollama picker automatically lists every installed model in a single model field",
+      "pass": true,
+      "details": [
+        "mock-ollama",
+        "mock-text"
+      ]
+    },
+    {
+      "name": "selecting another installed Ollama model saves the choice",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "refresh preserves the selected Ollama model and keeps the other models selectable",
+      "pass": true,
+      "details": null
+    },
+    {
       "name": "Ollama UI exposes a persisted fast/detailed choice and applies it to the next generation",
       "pass": true,
       "details": {
@@ -2262,6 +2280,16 @@
     },
     {
       "name": "panel collapses without stopping FactSim",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "reopening saved Ollama settings restores the chosen model and automatically fetches the full list",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "a saved model that is no longer installed falls back to an available model",
       "pass": true,
       "details": null
     },

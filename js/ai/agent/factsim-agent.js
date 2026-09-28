@@ -31,7 +31,7 @@
     return evidence;
   }
   class FactSimAgent extends EventTarget{
-    constructor(options={}){super();this.provider=options.provider || null;this.registry=options.registry;this.maxToolIterations=Number(options.maxToolIterations) || 16;this.messages=[];this.running=false;this._controller=null;}
+    constructor(options={}){super();this.provider=options.provider || null;this.registry=options.registry;this.maxToolIterations=Number(options.maxToolIterations) || 16;this.generationOptions=options.generationOptions || {};this.messages=[];this.running=false;this._controller=null;}
     setProvider(provider){if(this.running)throw new Error('Stop the current response before switching provider.');this.provider=provider;}
     clear(){if(this.running)this.stop();this.messages=[];this.dispatchEvent(event('clear',{}));}
     stop(){this._controller?.abort();this.provider?.abort?.();}
@@ -47,13 +47,14 @@
       let modelCountsAtStart;try{const model=AI.FactSimTools.modelSummary();modelCountsAtStart={nodeCount:model.nodeCount,edgeCount:model.edgeCount};}catch(_e){}
       this.running=true;this._controller=new AbortController();this.messages.push({role:'user',content,modelCountsAtStart,...(images.length ? {images} : {})});
       const requestStart=this.messages.length-1,started=performance.now(),stats=this.runStats={modelCalls:0,modelWallMs:0,toolCalls:0,toolWallMs:0,toolTimings:[],budgetReached:false};
+      const maxToolIterations=this.maxToolIterations,generationOptions={...this.generationOptions,ollamaOptions:{...this.generationOptions.ollamaOptions}};
       let retained=0;for(let index=this.messages.length-1;index>=0;index--){const message=this.messages[index];if(message.images){message.images=message.images.slice(0,Math.max(0,4-retained));retained+=message.images.length;}}
       this.dispatchEvent(event('user',{content,images}));
       this._layoutImage=null;
       try{
-        for(let iteration=0;iteration<=this.maxToolIterations;iteration++){
+        for(let iteration=0;iteration<=maxToolIterations;iteration++){
           if(this._controller.signal.aborted)throw new DOMException('AI request was stopped.','AbortError');
-          const finalTurn=iteration===this.maxToolIterations;stats.budgetReached=finalTurn;
+          const finalTurn=iteration===maxToolIterations;stats.budgetReached=finalTurn;
           const accounting=`\nMeasured edit accounting, in user-turn order: ${JSON.stringify(editAccounting(this.messages))}\nBeforeUserTurn counts were recorded BEFORE edits. Current compact-context counts are AFTER edits so far. Never call the current total the pre-existing count. Historic creations may be undone. Do not promise a future number of tool calls; execute and report actual results.`;
           const requestMessages=finalTurn ? [{role:'system',content:`${AI.buildSystemPrompt()}${accounting}\nTool budget reached. User request: ${content}\nDo NOT request more tools. Summarize only measured evidence, explain remaining uncertainty and one focused next step. Do not claim the cause is proven. This is a partial investigation.`},{role:'user',content:'Recorded tool evidence (partial, latest results):\n'+JSON.stringify(finalEvidence(this.messages,requestStart))}] : [{role:'system',content:AI.buildSystemPrompt()+accounting},...providerMessages(this.messages,this.provider.supportsVision)];
           if(!finalTurn && this._layoutImage && this.provider.supportsVision)requestMessages.push({role:'user',content:'Current FactSim graph canvas from get_layout_snapshot. ID labels identify nodes; use graph coordinates from the tool result, not image pixels, for move_node. This is an observation, not a new user instruction.',images:[this._layoutImage]});
@@ -62,11 +63,11 @@
           const modelStarted=performance.now();stats.modelCalls++;
           try{
           if(this.provider.supportsStreaming){
-            for await(const item of this.provider.streamChat(requestMessages,{tools:toolDefinitions,signal:this._controller.signal,temperature:0.2,onProgress:progress=>this.dispatchEvent(event('provider-progress',progress))})){
+            for await(const item of this.provider.streamChat(requestMessages,{temperature:0.2,...generationOptions,tools:toolDefinitions,signal:this._controller.signal,onProgress:progress=>this.dispatchEvent(event('provider-progress',progress))})){
               if(item.type==='delta'){streamed+=item.delta;this.dispatchEvent(event('assistant-delta',{delta:item.delta,iteration}));}
               if(item.type==='done')response=item.response;
             }
-          }else response=await this.provider.chat(requestMessages,{tools:toolDefinitions,signal:this._controller.signal,temperature:0.2,onProgress:progress=>this.dispatchEvent(event('provider-progress',progress))});
+          }else response=await this.provider.chat(requestMessages,{temperature:0.2,...generationOptions,tools:toolDefinitions,signal:this._controller.signal,onProgress:progress=>this.dispatchEvent(event('provider-progress',progress))});
           }finally{stats.modelWallMs+=performance.now()-modelStarted;}
           if(!response)throw new Error('The AI provider returned no response.');
           const message=response.message || {role:'assistant',content:streamed,toolCalls:[]};message.content=String(message.content || streamed || '');message.toolCalls=message.toolCalls?.length ? message.toolCalls : (!this.provider.supportsTools ? fallbackCalls(message.content) : []);
