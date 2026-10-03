@@ -36,6 +36,8 @@
   <link rel="stylesheet" href="css/flow-view.css?v=20260927flowerrortext" />
   <link rel="stylesheet" href="css/sensor-chart.css?v=20260926modal" />
   <link rel="stylesheet" href="css/ai-assistant.css?v=20260928settings" />
+  <link rel="stylesheet" href="css/design-system.css?v=20261003readablemenu" />
+  <link rel="stylesheet" href="css/view3d.css?v=20261003a" />
 </head>
 <body>
 <main id="landing" aria-labelledby="landingTitle">
@@ -451,6 +453,23 @@
   <div id="fastestModeOverlay" aria-hidden="true"></div>
   <div id="fastestModeNotice" aria-live="polite" role="status">FASTEST mode: Rendering disabled for maximum simulation speed.</div>
   <canvas id="graph"></canvas>
+  <div id="visualizationTabs" role="tablist" aria-label="Visualization">
+    <button id="visualizationTabGraph" class="is-active" type="button" role="tab" aria-selected="true" aria-controls="graph" data-visualization-view="graph">Graph</button>
+    <button id="visualizationTab3D" type="button" role="tab" aria-selected="false" aria-controls="view3dPanel" tabindex="-1" data-visualization-view="3d">3D</button>
+  </div>
+  <section id="view3dPanel" role="tabpanel" aria-labelledby="visualizationTab3D" hidden>
+    <canvas id="view3dCanvas" tabindex="0" aria-label="Factory 3D view. Drag to orbit, wheel to zoom, click equipment to select."></canvas>
+    <div id="view3dToolbar" aria-label="3D view controls">
+      <button type="button" data-camera3d="perspective" aria-pressed="true">Perspective</button>
+      <button type="button" data-camera3d="top" aria-pressed="false">Top</button>
+      <button type="button" data-camera3d="fit">Fit</button>
+      <button type="button" data-camera3d="focus">Focus selected</button>
+      <label><input id="view3dLabels" type="checkbox" checked> Labels</label>
+      <label><input id="view3dConnections" type="checkbox" checked> Connections</label>
+      <span id="view3dStatus" role="status">3D viewer ready</span>
+    </div>
+    <div id="view3dMessage" role="status"><p>Loading 3D viewer…</p><button id="view3dRetry" type="button" hidden>Retry</button></div>
+  </section>
   <aside id="aiPanel" aria-label="FactSim AI Assistant" data-provider="webllm">
     <div id="aiPanelResizeHandle" role="separator" tabindex="0" aria-label="AIメニューの幅を調整" aria-orientation="vertical" aria-controls="aiPanelBody" title="ドラッグして幅を調整（←・→キーでも調整できます）"></div>
     <button id="aiPanelToggle" type="button" aria-label="Toggle AI Assistant" aria-controls="aiPanelBody" aria-expanded="true">AI</button>
@@ -573,6 +592,7 @@
   <div id="timelineRevealHandle" aria-label="Drag up to show bottom panel"></div>
   <nav id="mobileNav" aria-label="Mobile workspace navigation">
     <button class="mobileNavBtn is-active" data-mobile-panel="graph" aria-pressed="true">Graph</button>
+    <button class="mobileNavBtn" data-mobile-panel="3d" aria-pressed="false">3D</button>
     <button class="mobileNavBtn" data-mobile-panel="run" aria-pressed="false">Run</button>
     <button class="mobileNavBtn" data-mobile-panel="timeline" aria-pressed="false">Timeline</button>
     <button class="mobileNavBtn" data-mobile-panel="nodes" aria-pressed="false">Nodes</button>
@@ -863,7 +883,7 @@ SOFTWARE.
   <script src="js/nodes/signal.js?v=20260914flow2"></script>
   <script src="js/app/flow-model.js?v=20260926sensor"></script>
   <script src="js/app/flow-runtime.js?v=20260929scheduling"></script>
-  <script src="js/nodes/basic_node.js?v=20260926sensormodal"></script>
+  <script src="js/nodes/basic_node.js?v=20261003view3d"></script>
   <script src="js/nodes/register.js?v=20260914flow2"></script>
   <script src="js/app/node-catalog.js?v=20260926flowicons"></script>
   <script src="sample/simple.js?v=20260916recovery"></script>
@@ -904,8 +924,20 @@ SOFTWARE.
   <script src="js/app/examples.js?v=20260919folderstart"></script>
   <script src="js/app/file-io.js?v=20260926inspectorview"></script>
   <script src="js/app/workspace-ui.js?v=20260920stopgroupsmenu"></script>
-  <script src="js/app/ui.js?v=20260929threeengines"></script>
+  <script src="js/app/ui.js?v=20261003view3d"></script>
   <script src="js/app/details-ui.js?v=20260914flow2"></script>
+  <script src="js/visualization/VisualizationAdapter.js?v=20261003a"></script>
+  <script src="js/view3d/CoordinateConverter.js?v=20261003a"></script>
+  <script src="js/view3d/ModelRegistry.js?v=20261003a"></script>
+  <script src="js/view3d/ModelLoader.js?v=20261003a"></script>
+  <script src="js/view3d/SceneManager.js?v=20261003a"></script>
+  <script src="js/view3d/CameraController.js?v=20261003a"></script>
+  <script src="js/view3d/LabelRenderer3D.js?v=20261003a"></script>
+  <script src="js/view3d/NodeRenderer3D.js?v=20261003a"></script>
+  <script src="js/view3d/ConnectionRenderer3D.js?v=20261003a"></script>
+  <script src="js/view3d/WorkRenderer3D.js?v=20261003a"></script>
+  <script src="js/view3d/Viewer3D.js?v=20261003a"></script>
+  <script src="js/view3d/View3DController.js?v=20261003a"></script>
   <script src="js/ai/providers/ai-provider.js?v=20260927vision"></script>
   <script src="js/ai/generation-settings.js?v=20260928settings"></script>
   <script src="js/ai/models/model-registry.js?v=20260927models"></script>
@@ -918,7 +950,7 @@ SOFTWARE.
   <script src="js/ai/tools/simulation-diagnostics.js?v=20260927diagnostics"></script>
   <script src="js/ai/agent/system-prompt.js?v=20260927editing"></script>
   <script src="js/ai/agent/factsim-agent.js?v=20260928settings"></script>
-  <script src="js/ai/ui/ai-chat-panel.js?v=20260928settings"></script>
+  <script src="js/ai/ui/ai-chat-panel.js?v=20261003uidesign"></script>
   <script src="js/app.js?v=20260213"></script>
 
 </body>

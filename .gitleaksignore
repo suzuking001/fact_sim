@@ -1,0 +1,5 @@
+# Babylon.js loaders 9.29.0: public internal namespace constant, not a credential.
+# Verified against the published npm asset; SHA-256:
+# 350dba38540a156dca50410ad459435e129f06023aec956328ae200b50ad1aeb
+# Scope this exception to the vendor file, rule, and minified line only.
+js/vendor/babylon/babylonjs.loaders.min.js:sourcegraph-access-token:1

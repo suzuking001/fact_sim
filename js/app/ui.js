@@ -851,7 +851,7 @@ if(btnBenchmark){
       if(view === 'inspector') return 'details';
       return 'timeline';
     }
-    return 'graph';
+    return body.classList.contains('view3d-active') ? '3d' : 'graph';
   };
 
   const syncButtons = ()=>{
@@ -872,7 +872,7 @@ if(btnBenchmark){
       if(panel === 'run'){
         if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
         if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(false, { persist:false, syncMobileUi:false });
-      }else if(panel === 'graph'){
+      }else if(panel === 'graph' || panel === '3d'){
         if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
         if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
       }else{
@@ -895,7 +895,7 @@ if(btnBenchmark){
     if(requestedPanel === 'run'){
       if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
       if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(false, { persist:false, syncMobileUi:false });
-    }else if(requestedPanel === 'graph'){
+    }else if(requestedPanel === 'graph' || requestedPanel === '3d'){
       if(typeof App.setSidebarHidden === 'function') App.setSidebarHidden(true, { persist:false, syncMobileUi:false });
       if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(true, { toast:false });
     }else{
@@ -904,6 +904,7 @@ if(btnBenchmark){
       if(typeof App.setTimelineHidden === 'function') App.setTimelineHidden(false, { toast:false });
     }
     activePanel = requestedPanel;
+    if(requestedPanel === 'graph' || requestedPanel === '3d') App.view3d?.setView(requestedPanel);
     syncButtons();
     schedulePanelEnforcement(requestedPanel);
     window.dispatchEvent(new Event('resize'));

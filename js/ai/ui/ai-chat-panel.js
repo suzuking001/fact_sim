@@ -184,7 +184,17 @@
     agent.addEventListener('idle',e=>{const stats=e.detail.stats;if(stats?.toolCalls)appendMessage('tool',`処理時間 ${(stats.wallMs/1000).toFixed(1)}秒：AI生成 ${(stats.modelWallMs/1000).toFixed(1)}秒 / ツール ${(stats.toolWallMs/1000).toFixed(1)}秒（${stats.toolCalls}回）${stats.budgetReached ? ' / 調査上限・部分結果' : ''}`);if(provider?.status==='ready')setStatus(`${provider.name} · ${provider.modelId}`,'ready');});
     document.body.classList.add('ai-panel-open');
     initPanelResize(panel);
-    $('aiPanelToggle').addEventListener('click',()=>{const closed=panel.classList.toggle('is-collapsed');document.body.classList.toggle('ai-panel-open',!closed);$('aiPanelToggle').setAttribute('aria-expanded',String(!closed));root.dispatchEvent(new Event('resize'));});
+    $('aiPanelToggle').addEventListener('click',()=>{
+      const closed=panel.classList.toggle('is-collapsed');
+      document.body.classList.toggle('ai-panel-open',!closed);
+      $('aiPanelToggle').setAttribute('aria-expanded',String(!closed));
+      root.dispatchEvent(new Event('resize'));
+      // Resizing the canvas clears its bitmap; redraw even while simulation is paused.
+      if(App.canvas && typeof App.canvas.setDirty==='function') App.canvas.setDirty(true,true);
+      root.setTimeout(()=>{
+        if(App.canvas && typeof App.canvas.setDirty==='function') App.canvas.setDirty(true,true);
+      },230);
+    });
     $('aiPanelClose').addEventListener('click',()=>$('aiPanelToggle').click());providerSelect.addEventListener('change',syncProviderUi);modelSelect.addEventListener('change',()=>{updateModelInfo();persist();});$('aiConfirmationPolicy').addEventListener('change',persist);$('aiConnectBtn').addEventListener('click',connect);$('aiOllamaRefresh').addEventListener('click',refreshOllamaModels);$('aiSendBtn').addEventListener('click',send);$('aiStopBtn').addEventListener('click',()=>agent.stop());$('aiClearBtn').addEventListener('click',()=>{$('aiChatMessages').innerHTML='';agent.clear();pendingImages=[];renderAttachments();});$('aiChatInput').addEventListener('keydown',event=>{if(event.key==='Enter' && !event.shiftKey){event.preventDefault();send();}});
     $('aiOllamaModels').addEventListener('change',()=>{selectedOllamaModel=$('aiOllamaModels').value;persist();});
     $('aiOllamaEndpoint').addEventListener('change',()=>{persist();refreshOllamaModels();});

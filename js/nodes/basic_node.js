@@ -58,7 +58,7 @@
     }
     configure(data){this._isConfiguring=true;this.inputs=[];this.outputs=[];try{return super.configure({...data,pos:data.pos ? Array.from(Object.values(data.pos)) : [0,0],size:data.size ? Array.from(Object.values(data.size)) : [230,110]});}finally{this._isConfiguring=false;}}
     onConfigure(){ensurePorts(this);if(this.properties.role==='source' && !this.properties.flow?.nodes?.some(node=>node.kind==='sourceSequence'))this.properties.flow=model.template(this,'source');else if(this.properties.role==='sink' && !this.properties.flow?.nodes?.some(node=>node.kind==='entitySink'))this.properties.flow=model.template(this,'sink');else model.addRecoveryCycle(this.properties.flow);delete this._flowRuntime;this._state='IDLE';this._stateName='idle';this._until=0;if(this.properties.role==='sink')this._recv=[];else delete this._recv;this._sent=0;}
-    onSerialize(data){data.properties=model.clone(this.properties);data.properties.basicNodeVersion=3;}
+    onSerialize(data){data.properties=model.clone(this.properties);data.properties.basicNodeVersion=3;if(this.view3d)data.view3d=model.clone(this.view3d);}
     onAdded(){if(this.properties.role==='source' && !this.properties.source.entries.length){const type=App.entityModelForGraph?.(this.graph)?.list()[0];if(type)this.properties.source.entries.push({typeId:type.typeId,count:1});}}
     removeInput(slot){if(App.FlowRuntime.isActive(this) && !this._isConfiguring)throw new Error('Reset before removing a port in an active Flow.');return super.removeInput(slot);}
     removeOutput(slot){if(App.FlowRuntime.isActive(this) && !this._isConfiguring)throw new Error('Reset before removing a port in an active Flow.');return super.removeOutput(slot);}

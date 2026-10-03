@@ -8,7 +8,8 @@
 | --- | --- | --- |
 | 起動・script 読込順 | `index.html` | `js/app.js`, `js/core.js`, `js/app/state.js`, `js/app/graph-init.js` |
 | ダブルクリックでローカル HTTP 起動 | `Start_FactSim.bat` | `scripts/start-factsim.ps1`（Python 3・localhost 限定サーバー・既存サーバー再利用） |
-| 全体 UI・画面切替 | `js/app/ui.js`, `js/app/workspace-ui.js` | `js/app/landing.js`, `css/app.css`, `css/workspace.css` |
+| 全体 UI・画面切替 | `js/app/ui.js`, `js/app/workspace-ui.js` | `js/app/landing.js`, `css/design-system.css`, `css/app.css`, `css/workspace.css` |
+| 3Dビュー・可視化状態・Camera・GLB | `js/view3d/View3DController.js`, `js/visualization/VisualizationAdapter.js` | `js/view3d/*Renderer3D.js`, `js/view3d/Viewer3D.js`, `js/view3d/CameraController.js`, `js/view3d/ModelLoader.js`, `css/view3d.css`, `docs/view3d.md` |
 | AI Assistant・Provider・Tool・生成設定 | `js/ai/ui/ai-chat-panel.js`, `js/ai/agent/factsim-agent.js` | `js/ai/generation-settings.js`, `js/ai/providers/*`, `js/ai/tools/*`, `js/ai/models/model-registry.js`, `css/ai-assistant.css`, `docs/ai-assistant.md` |
 | AI 停滞調査・全体状態・実時間計測 | `js/ai/tools/simulation-diagnostics.js` | `js/ai/agent/system-prompt.js`, `mcp/scripts/test-ai-assistant.mjs`, `mcp/scripts/test-ai-scenarios.mjs`（実Ollama・10質問） |
 | AI 取り消し保護・テンプレート検査・追加10指示 | `js/ai/tools/tool-registry.js`, `js/ai/tools/factsim-tools.js` | `mcp/scripts/test-ai-scenarios.mjs --suite=extended`、`docs/ai-assistant.md` |

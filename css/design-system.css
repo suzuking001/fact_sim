@@ -1,0 +1,316 @@
+/* FactSim interface primitives. The AI panel is the reference for this palette. */
+:root {
+  --ui-bg: #f5f5f7;
+  --ui-surface: #fff;
+  --ui-surface-secondary: #f7f7f9;
+  --ui-surface-hover: #f0f0f3;
+  --ui-surface-selected: #e9eaee;
+  --ui-panel-translucent: rgb(250 250 252 / 76%);
+  --ui-panel-translucent-light: rgb(255 255 255 / 58%);
+  --ui-text: #202124;
+  --ui-text-secondary: #555a64;
+  --ui-text-muted: #696d76;
+  --ui-border: #dfe0e5;
+  --ui-border-strong: #c9cbd2;
+  --ui-primary: #202124;
+  --ui-primary-hover: #3d4045;
+  --ui-on-primary: #fff;
+  --ui-success: #18794e;
+  --ui-warning: #966009;
+  --ui-danger: #b42318;
+  --ui-info: #176a91;
+  --ui-radius-xs: 4px;
+  --ui-radius-sm: 6px;
+  --ui-radius-md: 8px;
+  --ui-radius-lg: 12px;
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-5: 20px;
+  --ui-space-6: 24px;
+  --ui-shadow-sm: 0 1px 3px rgb(28 32 40 / 7%);
+  --ui-shadow-md: 0 12px 32px rgb(28 32 40 / 14%);
+  --ui-control-height-sm: 30px;
+  --ui-control-height: 34px;
+  --ui-menu-font-size: 13px;
+  --ui-menu-heading-size: 14px;
+  --ui-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ui-font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  /* Legacy component variables still used by app.css. */
+  --bg: var(--ui-bg);
+  --panel-bg: var(--ui-surface);
+  --panel-border: var(--ui-border);
+  --text: var(--ui-text);
+  --muted: var(--ui-text-muted);
+  --accent: var(--ui-primary);
+  --accent-2: var(--ui-primary-hover);
+  --input-bg: var(--ui-surface);
+  --input-border: var(--ui-border-strong);
+  --radius: var(--ui-radius-lg);
+  --radius-sm: var(--ui-radius-md);
+  --shadow: var(--ui-shadow-md);
+  --workspace-ink: var(--ui-text);
+  --workspace-muted: var(--ui-text-muted);
+  --workspace-line: var(--ui-border);
+  --sidebar-width: 280px;
+}
+
+/* Reusable classes for new panels, plus bridges for existing controls. */
+.ui-panel { background: var(--ui-panel-translucent); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); }
+.ui-toolbar { display: flex; align-items: center; gap: var(--ui-space-2); background: var(--ui-panel-translucent); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); }
+.ui-button,
+.ui-icon-button,
+.ui-field,
+.ui-tab { box-sizing: border-box; font-family: var(--ui-font); }
+.ui-button,
+.ui-icon-button { min-height: var(--ui-control-height); padding: 0 var(--ui-space-3); border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font-size: var(--ui-menu-font-size); font-weight: 600; cursor: pointer; }
+.ui-button:hover:not(:disabled),
+.ui-icon-button:hover:not(:disabled) { background: var(--ui-surface-hover); }
+.ui-button.is-primary { border-color: var(--ui-primary); background: var(--ui-primary); color: var(--ui-on-primary); }
+.ui-button.is-primary:hover:not(:disabled) { background: var(--ui-primary-hover); }
+.ui-button.is-ghost,
+.ui-icon-button { border-color: transparent; background: transparent; }
+.ui-button.is-danger { border-color: var(--ui-danger); color: var(--ui-danger); }
+.ui-field { min-height: var(--ui-control-height); padding: 6px 9px; border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font-size: var(--ui-menu-font-size); }
+.ui-tab { min-height: var(--ui-control-height-sm); padding: 0 10px; border: 0; border-radius: var(--ui-radius-sm); background: transparent; color: var(--ui-text-secondary); font-size: var(--ui-menu-font-size); cursor: pointer; }
+.ui-tab.is-active, .ui-tab[aria-selected="true"] { background: var(--ui-surface); color: var(--ui-text); box-shadow: var(--ui-shadow-sm); }
+.ui-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ui-table :is(th,td) { padding: 6px 9px; border-bottom: 1px solid var(--ui-border); }
+.ui-table th { color: var(--ui-text-secondary); background: var(--ui-surface-secondary); font-weight: 600; text-align: left; }
+.ui-table tbody tr:hover { background: var(--ui-surface-hover); }
+.ui-modal { border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface); box-shadow: var(--ui-shadow-md); }
+:is(.ui-button,.ui-icon-button,.ui-field,.ui-tab):focus-visible { outline: 2px solid var(--ui-text-secondary); outline-offset: 2px; }
+:is(.ui-button,.ui-icon-button,.ui-field,.ui-tab):disabled { opacity: .45; cursor: not-allowed; }
+.ui-field:invalid { border-color: var(--ui-danger); }
+
+html, body { font-family: var(--ui-font) !important; color: var(--ui-text); }
+:is(button,a,input,select,textarea,summary,[role="tab"],[role="separator"]):focus-visible {
+  outline: 2px solid var(--ui-text-secondary) !important;
+  outline-offset: 2px;
+}
+:is(input,select,textarea):not([type="checkbox"]):not([type="range"]):not([type="file"]):invalid { border-color: var(--ui-danger); }
+:is(button,input,select,textarea):disabled { opacity: .45; cursor: not-allowed; }
+
+/* Navigation sections share one sidebar surface and use dividers for hierarchy. */
+#appRoot #sidebar {
+  gap: 0;
+  padding: var(--ui-space-2);
+  color: var(--ui-text);
+  border-right: 1px solid var(--ui-border);
+  background: var(--ui-panel-translucent) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(2px);
+  font-family: var(--ui-font);
+}
+#appRoot #sidebar > :is(#sidebarHeader,#controls,#fileControls,#backgroundPanel,#entityTypesPanel,#addNodePanel,#addGroupPanel,#addSyncroGroupPanel,#advancedPanel,#shortcutPanel) {
+  flex-shrink: 0;
+  margin: 0;
+  padding: var(--ui-space-3) var(--ui-space-2);
+  gap: var(--ui-space-2);
+  border: 0;
+  border-bottom: 1px solid var(--ui-border);
+  border-radius: 0;
+  background: var(--ui-panel-translucent-light) !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+#appRoot #sidebar > .sidebar-panel-collapsible.is-collapsed { padding: var(--ui-space-2); background: transparent !important; }
+#appRoot #sidebar > .sidebar-panel-collapsible.is-collapsed:hover { background: var(--ui-panel-translucent-light) !important; }
+#appRoot #sidebarHeader { height: auto; min-height: 42px; padding: 2px var(--ui-space-2) var(--ui-space-2); margin: 0; }
+#appRoot #sidebarHeader .appLogo { width: 30px; height: 30px; }
+#appRoot #sidebarHeader .appBrandText { font-size: 15px; letter-spacing: .06em; }
+#appRoot #sidebar .panelHeader { min-height: 26px; gap: var(--ui-space-2); color: var(--ui-text-secondary); font-size: var(--ui-menu-heading-size); font-weight: 700; letter-spacing: .01em; }
+#appRoot .workspacePanelIcon { width: 24px; height: 24px; flex-basis: 24px; border-radius: var(--ui-radius-sm); background: var(--ui-surface-hover); }
+#appRoot .workspacePanelIcon .workspaceIcon { width: 18px; height: 18px; }
+#appRoot #sidebar :is(.control-group,.field) { gap: var(--ui-space-1); }
+#appRoot #sidebar label { color: var(--ui-text-secondary); font-size: var(--ui-menu-font-size); }
+#appRoot #sidebar :is(input,select,textarea):not([type="checkbox"]):not([type="range"]):not([type="file"]) {
+  min-height: var(--ui-control-height); padding: 6px 9px; border: 1px solid var(--ui-border-strong);
+  border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font-size: var(--ui-menu-font-size);
+}
+#appRoot #sidebar input[type="checkbox"] { width: 16px; height: 16px; min-height: 16px; accent-color: var(--ui-primary); }
+#appRoot #sidebar :is(input,select,textarea):focus-visible { border-color: var(--ui-text-secondary); box-shadow: none; }
+#appRoot #sidebar button { min-height: var(--ui-control-height); padding: 6px 10px; border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font-size: var(--ui-menu-font-size); box-shadow: none !important; }
+#appRoot #sidebar button:hover:not(:disabled) { background: var(--ui-surface-hover); border-color: var(--ui-border-strong); }
+#appRoot #sidebar :is(#btnAddNode,#btnAddGroup),
+#appRoot #editorRunHud #btnStart[data-run-state="start"] { min-height: var(--ui-control-height); border-color: var(--ui-primary) !important; background: var(--ui-primary) !important; color: var(--ui-on-primary) !important; }
+#appRoot #sidebar :is(#btnAddNode,#btnAddGroup):hover:not(:disabled),
+#appRoot #editorRunHud #btnStart[data-run-state="start"]:hover:not(:disabled) { background: var(--ui-primary-hover) !important; }
+#appRoot #sidebar .nodeKindPickerTrigger { min-height: var(--ui-control-height); padding: 4px 8px; }
+#appRoot :is(.nodeKindPickerValue,.nodeKindPickerOptionLabel) { font-size: var(--ui-menu-font-size); }
+#appRoot #sidebar .panelDetails { border: 0; border-top: 1px solid var(--ui-border); border-radius: 0; background: transparent; }
+#appRoot #sidebar .panelDetails > summary { min-height: var(--ui-control-height-sm); padding: 4px 0; color: var(--ui-text-secondary); font-size: var(--ui-menu-font-size); }
+#appRoot #sidebar .fieldHint { color: var(--ui-text-muted); font-size: 12px; line-height: 1.4; }
+#appRoot #sidebar .simStatusCard { padding: var(--ui-space-2); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-panel-translucent-light) !important; }
+#appRoot .simStatusItem strong { font-size: var(--ui-menu-font-size); }
+
+/* One compact simulation toolbar leaves the canvas as the visual focus. */
+#appRoot #editorTopHud { top: var(--ui-space-2); gap: 0; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-panel-translucent); box-shadow: var(--ui-shadow-sm); backdrop-filter: blur(2px); }
+#appRoot #editorTopHud #simTimeHud,
+#appRoot #editorRunHud { border: 0; border-radius: 0; background: transparent !important; box-shadow: none !important; backdrop-filter: none; text-shadow: none; }
+#appRoot #editorTopHud #simTimeHud { min-width: 110px; padding: 5px 9px; border-right: 1px solid var(--ui-border); color: var(--ui-text-secondary); font-size: 12px; }
+#appRoot #simTime { color: var(--ui-text); font-size: 14px; }
+#appRoot #editorRunHud { gap: var(--ui-space-1); padding: 3px; }
+#appRoot #editorRunHud :is(#btnStart,#btnReset), #appRoot .editorRunSpeed { min-height: var(--ui-control-height-sm); border-radius: var(--ui-radius-sm); }
+#appRoot #editorRunHud :is(#btnStart,#btnReset) { padding: 0 10px !important; font-size: var(--ui-menu-font-size); }
+#appRoot #editorRunHud #btnReset,
+#appRoot .editorRunSpeed { border: 1px solid var(--ui-border) !important; background: var(--ui-surface) !important; }
+#appRoot .editorRunSpeed { padding: 0 8px; }
+#appRoot .editorRunSpeedLabel { font-size: 11px; }
+#appRoot #speedFactor { font-size: 12px; }
+body.sim-running #appRoot :is(#editorRunHud,#simTimeHud) { background: transparent !important; box-shadow: none !important; }
+
+/* Workspace tabs and dense tables. */
+#appRoot #timelineDock { border-top: 1px solid var(--ui-border); background: var(--ui-panel-translucent); box-shadow: none; backdrop-filter: blur(2px); }
+#appRoot #timelineDock[data-view="props"] { min-height: min(240px, 40vh); }
+#appRoot #timelineDock[data-view="inspector"] { min-height: min(260px, 40vh); }
+#appRoot #timelineHeader { height: 42px; min-height: 42px; padding: 4px var(--ui-space-2); gap: var(--ui-space-2); border-bottom: 1px solid var(--ui-border); background: var(--ui-panel-translucent-light); }
+#appRoot #timelineHeader .timelineTabs,
+#selectionInspectorPanel .entityInspectorTabs { gap: 2px; padding: 2px; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-surface-hover); }
+#appRoot #timelineHeader .timelineTab { min-height: var(--ui-control-height-sm); padding: 0 10px; border-radius: var(--ui-radius-sm); color: var(--ui-text-secondary); font-size: var(--ui-menu-font-size); }
+#appRoot #timelineHeader .timelineTab.is-active,
+#selectionInspectorPanel .entityInspectorTab.is-active { background: var(--ui-surface) !important; color: var(--ui-text) !important; box-shadow: var(--ui-shadow-sm) !important; }
+#appRoot #timelineHeader .timelineBtn { min-height: var(--ui-control-height-sm); padding: 0 8px; border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-sm); background: var(--ui-surface); color: var(--ui-text); font-size: 12px; }
+#appRoot #timelineHeader :is(.timelineSelection,.timelinePropsMeta) { color: var(--ui-text-muted); font-size: 12px; }
+#appRoot :is(#timelineBody,#timelineChartPanel,#nodePropsPanel,#selectionInspectorPanel) { background: var(--ui-panel-translucent-light); backdrop-filter: none; }
+body.sim-running #appRoot :is(#timelineDock,#timelineBody,#timelineChartPanel,#nodePropsPanel,#selectionInspectorPanel) { background: var(--ui-panel-translucent-light) !important; box-shadow: none !important; }
+#nodePropsTable { font-size: 12px; }
+#nodePropsTable :is(th,td) { padding: 5px 8px; border-bottom: 1px solid var(--ui-border); }
+#nodePropsTable thead th { background: var(--ui-surface-secondary); color: var(--ui-text-secondary); }
+#nodePropsTable tbody tr:nth-child(even) { background: transparent; }
+#nodePropsTable tbody tr:hover { background: var(--ui-surface-hover); }
+#nodePropsTable tbody tr.is-node-selected td { background: var(--ui-surface-selected); }
+#nodePropsTable :is(.col-id,.col-connected) { font-variant-numeric: tabular-nums; }
+.nodePropsToolbar { border-color: var(--ui-border); background: var(--ui-panel-translucent); backdrop-filter: none; }
+.nodePropsInspectBtn { border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-sm); background: var(--ui-surface); color: var(--ui-text); box-shadow: none; }
+.nodePropsInspectBtn:hover { border-color: var(--ui-border-strong); background: var(--ui-surface-hover); transform: none; }
+
+/* Inspector uses sections and dividers instead of nested cards. */
+#selectionInspectorPanel { color: var(--ui-text); font-family: var(--ui-font); background: var(--ui-panel-translucent-light); }
+#selectionInspectorPanel .selectionInspectorLayout { grid-template-columns: minmax(170px, 210px) minmax(0,1fr); gap: var(--ui-space-3); padding: var(--ui-space-3); }
+#selectionInspectorPanel .selectionInspectorMain { gap: 0; }
+#selectionInspectorPanel .selectionInspectorCard { border: 0; border-radius: 0; border-bottom: 1px solid var(--ui-border); background: transparent; box-shadow: none; }
+#selectionInspectorPanel .selectionInspectorHeader,
+#selectionInspectorPanel .selectionInspectorSection { padding: var(--ui-space-3); }
+#selectionInspectorPanel .selectionInspectorSectionTitle { margin-bottom: var(--ui-space-2); color: var(--ui-text); font-size: 13px; }
+#selectionInspectorPanel :is(.selectionInspectorFieldLabel,.entityRuleFieldLabel) { color: var(--ui-text-secondary); font-size: 11px; }
+#selectionInspectorPanel :is(.selectionInspectorFields,.entityRuleBody) { gap: var(--ui-space-2); }
+#selectionInspectorPanel :is(input,select,textarea):not([type="checkbox"]):not([type="range"]) { min-height: var(--ui-control-height); padding: 6px 9px; border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font-size: 12px; }
+#selectionInspectorPanel input[type="checkbox"] { width: 16px; height: 16px; min-height: 16px; accent-color: var(--ui-primary); }
+#selectionInspectorPanel button { min-height: var(--ui-control-height-sm); padding: 5px 9px; border-radius: var(--ui-radius-md) !important; font-size: 12px; }
+#selectionInspectorPanel button.is-primary { background: var(--ui-primary) !important; border-color: var(--ui-primary) !important; color: var(--ui-on-primary) !important; }
+#selectionInspectorPanel .entityInspectorTab { padding: 5px 10px; font-size: 12px; }
+#selectionInspectorPanel .nodeDetailsHeader { padding: var(--ui-space-2) var(--ui-space-3); border-bottom: 1px solid var(--ui-border); }
+#selectionInspectorPanel .nodeDetailsHeaderLabel { font-size: 11px; }
+#selectionInspectorPanel .nodeDetailsHeaderInput { min-height: var(--ui-control-height); font-size: 13px; }
+#selectionInspectorPanel .nodeDetailsHeaderId { min-height: var(--ui-control-height); padding: 5px 9px; border-radius: var(--ui-radius-sm); font-size: 12px; }
+#selectionInspectorPanel .nodeDetailsHeaderFlip { min-height: var(--ui-control-height); border-radius: var(--ui-radius-md); }
+#selectionInspectorPanel .nodeDetailsHeaderFlip[aria-pressed="true"] { background: var(--ui-primary) !important; border-color: var(--ui-primary) !important; }
+#selectionInspectorPanel .entityRuleCard { border-color: var(--ui-border); border-radius: var(--ui-radius-md); }
+#selectionInspectorPanel .entityRuleHeader { background: var(--ui-surface-secondary); border-color: var(--ui-border); }
+
+/* Existing dialogs keep their behavior and stacking order. */
+:is(#scriptEditorModal,#benchmarkModal,#engineTestModal,#shareUrlModal,#stopGroupModal,#aboutModal,.entityModalBackdrop) { background: rgb(32 33 36 / 40%); backdrop-filter: none; }
+:is(#scriptEditorContainer,#benchmarkContainer,#engineTestContainer,#shareUrlContainer,#stopGroupContainer,#aboutContainer,.entityModal) { border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface); box-shadow: var(--ui-shadow-md); padding: var(--ui-space-4); color: var(--ui-text); }
+:is(.benchmarkHeader,.shareUrlHeader,.aboutHeader) { padding-bottom: var(--ui-space-2); border-bottom: 1px solid var(--ui-border); }
+:is(.benchmarkHeader,.shareUrlHeader,.aboutHeader) h2 { font-size: 15px; letter-spacing: 0; }
+#shareUrlContainer button { min-height: var(--ui-control-height); border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font-size: 12px; }
+#shareUrlContainer button:hover { background: var(--ui-surface-hover); filter: none; }
+#shareUrlValue, .entityModalField :is(input,select,textarea) { border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); }
+:is(#benchmarkTable,#engineTestCasesTable,#engineTestFailuresTable) thead th { background: var(--ui-surface-secondary); }
+:is(#benchmarkTable,#engineTestCasesTable,#engineTestFailuresTable) tbody tr:hover { background: var(--ui-surface-hover); }
+.benchmarkProgressBar, .benchBarFill { background: var(--ui-primary); }
+.litegraph.litecontextmenu { border-color: var(--ui-border) !important; border-radius: var(--ui-radius-lg) !important; background: var(--ui-surface) !important; box-shadow: var(--ui-shadow-md) !important; backdrop-filter: none; font-family: var(--ui-font) !important; }
+.litegraph.litecontextmenu .litemenu-entry { font-size: var(--ui-menu-font-size) !important; }
+.litegraph.litecontextmenu .litemenu-entry:hover { background: var(--ui-surface-hover) !important; border-color: var(--ui-border); color: var(--ui-text) !important; }
+
+/* Flow controls follow the interface palette; state colors remain meaningful. */
+#selectionInspectorPanel .flowToolbar :is(button,select),
+#selectionInspectorPanel .flowContext button { border-color: var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); }
+#selectionInspectorPanel .flowViewport { border-color: var(--ui-border); background-color: var(--ui-surface-secondary); }
+#selectionInspectorPanel .flowNode { border-color: var(--ui-border-strong); box-shadow: var(--ui-shadow-sm); }
+#selectionInspectorPanel .flowNodeHeader { border-color: var(--ui-border); }
+#selectionInspectorPanel .flowContext { border-color: var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-surface); box-shadow: var(--ui-shadow-md); }
+
+.sensorChartModalOverlay { background: rgb(32 33 36 / 40%); backdrop-filter: none; }
+.sensorChartModal { border-color: var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface-secondary); color: var(--ui-text); box-shadow: var(--ui-shadow-md); }
+.sensorChartModalHeader { border-color: var(--ui-border); background: var(--ui-surface); }
+.sensorChartModalEyebrow { color: var(--ui-text-muted); }
+.sensorChartModalHeading h2 { color: var(--ui-text); font-size: 15px; }
+.sensorChartModalSubtitle { color: var(--ui-text-muted); }
+.sensorChartButton { min-height: var(--ui-control-height); border-color: var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font: 600 12px var(--ui-font); }
+.sensorChartButton:hover { border-color: var(--ui-border-strong); background: var(--ui-surface-hover); }
+.sensorChartButton.is-primary { border-color: var(--ui-primary); background: var(--ui-primary); color: var(--ui-on-primary); }
+.sensorChartButton.is-primary:hover { background: var(--ui-primary-hover); }
+.sensorChartModalCanvas { border-color: var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-surface); box-shadow: none; }
+
+/* The AI panel now consumes the same tokens without changing its layout. */
+#aiPanel { color: var(--ui-text); background: var(--ui-panel-translucent); border-color: var(--ui-border); font-family: var(--ui-font); }
+#aiPanelToggle { border-color: var(--ui-border); background: var(--ui-primary); color: var(--ui-on-primary); }
+.aiPanelHeader, .aiComposer { border-color: var(--ui-border); background: var(--ui-surface); }
+.aiPanelHeader span, .aiModelInfo, .aiImageHint { color: var(--ui-text-muted); }
+.aiSettings { border-color: var(--ui-border); background: var(--ui-panel-translucent-light); }
+.aiSettings label { color: var(--ui-text-secondary); font-size: var(--ui-menu-font-size); }
+.aiSettings :is(input,select,textarea), .aiComposer textarea { border-color: var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); }
+.aiSettings :is(input,select) { min-height: var(--ui-control-height); padding: 6px 9px; }
+.aiSettings button, .aiComposer button { min-height: var(--ui-control-height); border-color: var(--ui-border-strong); border-radius: var(--ui-radius-md); background: var(--ui-surface); color: var(--ui-text); font-size: var(--ui-menu-font-size); }
+.aiSettings button:hover:not(:disabled), .aiComposer button:hover:not(:disabled) { background: var(--ui-surface-hover); }
+.aiSettings .aiPrimaryButton, .aiComposer .aiPrimaryButton { border-color: var(--ui-primary); background: var(--ui-primary); color: var(--ui-on-primary); }
+.aiSettings .aiPrimaryButton:hover:not(:disabled), .aiComposer .aiPrimaryButton:hover:not(:disabled) { background: var(--ui-primary-hover); }
+.aiChatMessages { background: var(--ui-panel-translucent-light); }
+.aiMessageBody { border-color: var(--ui-border); background: var(--ui-surface); }
+.aiMessage-user .aiMessageBody { border-color: var(--ui-primary); background: var(--ui-primary); color: var(--ui-on-primary); }
+.aiAdvancedSettings { border-color: var(--ui-border); }
+.aiAdvancedSettings input:invalid, .aiAdvancedSettings [data-state="error"], .aiPanelHeader span[data-state="error"] { color: var(--ui-danger); border-color: var(--ui-danger); }
+.aiPanelHeader span[data-state="ready"] { color: var(--ui-success); }
+
+/* The opening screen uses the same restrained palette while keeping its live graph preview. */
+body:not(.landing-hidden) #appRoot :is(#sidebar,#editorTopHud,#timelineDock,#aiPanel,#mobileNav,#tabletActionBar) { visibility: hidden; }
+body:not(.landing-hidden) #landing { background: rgb(245 245 247 / 78%); }
+body:not(.landing-hidden) #landing::before,
+body:not(.landing-hidden) #landing::after,
+body:not(.landing-hidden) .landingHero::before { content: none; }
+body:not(.landing-hidden) .landingTopbar { border-color: var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface); box-shadow: var(--ui-shadow-sm); }
+.landingNav a { border-radius: var(--ui-radius-sm); }
+.landingNav a:hover { background: var(--ui-surface-hover); color: var(--ui-text); }
+body:not(.landing-hidden) .landingHero { border-color: var(--ui-border); border-radius: var(--ui-radius-lg); background: transparent; box-shadow: none; }
+.landingHeroMain { border-color: var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface); box-shadow: var(--ui-shadow-sm); }
+.landingEyebrow, .landingSectionKicker { color: var(--ui-text-secondary); }
+#landingTitle span { color: var(--ui-text); }
+.landingQuickFlow b { color: var(--ui-text-secondary); }
+.landingLiveDot, .landingLiveBadge i { background: var(--ui-success); box-shadow: none; animation: none; }
+.landingNoInstall { border-color: var(--ui-border); background: var(--ui-surface-secondary); color: var(--ui-text-secondary); }
+.landingChoiceBtn { border-color: var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-surface); box-shadow: none; }
+.landingChoiceBtn:hover:not(:disabled) { transform: none; border-color: var(--ui-border-strong); background: var(--ui-surface-hover); box-shadow: none; }
+.landingChoiceBtn:focus-visible { border-color: var(--ui-text-secondary); box-shadow: none; }
+.landingChoiceBtnPrimary { border-color: var(--ui-primary); background: var(--ui-primary); color: var(--ui-on-primary); box-shadow: none; }
+.landingChoiceBtnPrimary:hover:not(:disabled) { border-color: var(--ui-primary-hover); background: var(--ui-primary-hover); box-shadow: none; }
+body:not(.landing-hidden) .landingChoiceBtn:not(.landingChoiceBtnPrimary) :is(.landingChoiceArrow,.landingChoiceNumber) { color: var(--ui-text-secondary); }
+.landingChoiceIcon, .landingSignal > span, .landingStepIcon { background: var(--ui-surface-hover); color: var(--ui-text); }
+.landingChoiceBtnPrimary .landingChoiceIcon { background: rgb(255 255 255 / 14%); color: var(--ui-on-primary); }
+.landingProgressFill { background: var(--ui-primary); }
+.landingLiveViewport { border-color: var(--ui-border); border-radius: var(--ui-radius-lg); background: transparent; box-shadow: none; }
+.landingLiveChrome, .landingSignal { border-color: var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-surface); box-shadow: var(--ui-shadow-sm); }
+.landingLiveCaption { border-color: var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-primary); box-shadow: none; }
+body:not(.landing-hidden) .landingSection { border-color: var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface); box-shadow: none; }
+.landingStep, .landingUseGrid article, .landingCardMini { border-color: var(--ui-border); border-radius: var(--ui-radius-md); background: var(--ui-surface-secondary); box-shadow: none; }
+.landingStepIcon { border-radius: var(--ui-radius-md); }
+
+@media (min-width: 781px) {
+  body:not(.landing-hidden) .landingHero { min-height: 560px; }
+  #landingTitle { font-size: clamp(38px, 4vw, 52px); line-height: 1.05; }
+  .landingHeroMain { padding: var(--ui-space-6); }
+}
+
+@media (max-width: 760px) {
+  #appRoot #sidebar { padding: var(--ui-space-2); background: rgb(250 250 252 / 92%) !important; }
+  #aiPanel { background: rgb(250 250 252 / 94%); }
+  body.mobile-ui.sidebar-hidden #sidebar { visibility: hidden; }
+  #appRoot #editorTopHud { max-width: calc(100vw - 16px); flex-wrap: wrap; }
+  #appRoot #editorTopHud #simTimeHud { min-width: 0; }
+  #appRoot #timelineHeader { min-height: var(--timeline-header); }
+  #appRoot #timelineHeader .timelineTab { padding-inline: 7px; }
+  #selectionInspectorPanel .selectionInspectorLayout { grid-template-columns: 1fr; }
+}

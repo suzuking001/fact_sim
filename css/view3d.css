@@ -1,0 +1,29 @@
+#view3dPanel { position:absolute; top:196px; left:var(--sidebar-width,280px); right:0; bottom:var(--timeline-height,260px); z-index:1; background:var(--ui-bg,#f7f7f8); }
+body.sidebar-hidden #view3dPanel { left:0; }
+body.timeline-hidden #view3dPanel { bottom:0; }
+body.ai-panel-open #view3dPanel { right:var(--ai-panel-width,380px); }
+#view3dPanel[hidden], #view3dMessage[hidden], #view3dRetry[hidden] { display:none; }
+#view3dCanvas { width:100%; height:100%; display:block; touch-action:none; outline:none; }
+body.view3d-active #graph { visibility:hidden; pointer-events:none; }
+#visualizationTabs { position:absolute; z-index:15; top:68px; left:calc(var(--sidebar-width,280px) + 16px); display:flex; gap:4px; padding:4px; background:var(--ui-panel-translucent,white); border:1px solid var(--ui-border,#dfe0e5); border-radius:var(--ui-radius-md,8px); }
+body.sidebar-hidden #visualizationTabs { left:16px; }
+#visualizationTabs button, #view3dToolbar button { font:inherit; font-size:13px; color:var(--ui-text,#202124); border:1px solid transparent; border-radius:6px; background:transparent; cursor:pointer; min-height:30px; padding:4px 12px; }
+#visualizationTabs button.is-active, #view3dToolbar button[aria-pressed="true"] { background:var(--ui-surface-selected,#e9eaee); border-color:var(--ui-border,#dfe0e5); }
+#visualizationTabs button:hover, #view3dToolbar button:hover { background:var(--ui-surface-hover,#f0f0f3); }
+#visualizationTabs button:focus-visible, #view3dToolbar button:focus-visible, #view3dCanvas:focus-visible { outline:2px solid var(--ui-info,#176a91); outline-offset:2px; }
+#view3dToolbar { position:fixed; z-index:15; top:116px; left:calc(var(--sidebar-width,280px) + 16px); right:72px; max-width:650px; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding:8px; font:13px var(--ui-font,system-ui); background:var(--ui-panel-translucent,white); border:1px solid var(--ui-border,#dfe0e5); border-radius:var(--ui-radius-md,8px); box-shadow:var(--ui-shadow-sm); }
+body.sidebar-hidden #view3dToolbar { left:16px; }
+#view3dToolbar label { display:flex; align-items:center; gap:5px; cursor:pointer; }
+#view3dToolbar input { accent-color:var(--ui-primary,#202124); }
+#view3dStatus { flex-basis:100%; color:var(--ui-text-muted,#696d76); font-variant-numeric:tabular-nums; padding:2px 4px; }
+#view3dMessage { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:20px; text-align:center; color:var(--ui-text,#202124); background:var(--ui-bg,#f7f7f8); }
+#view3dMessage p { max-width:500px; }
+body:not(.landing-hidden) #visualizationTabs { display:none; }
+body.mobile-ui #visualizationTabs, body.tablet-ui #visualizationTabs { left:16px; }
+body.mobile-ui #view3dToolbar, body.tablet-ui #view3dToolbar { left:16px; right:60px; }
+body.mobile-ui #view3dPanel { left:0; right:0; top:224px; bottom:calc(var(--mobile-nav-height,72px) + env(safe-area-inset-bottom,0px)); }
+body.tablet-ui #view3dPanel { left:0; right:0; bottom:var(--tablet-actionbar-height,64px); }
+body.tablet-ui:not(.timeline-hidden) #view3dPanel { bottom:var(--timeline-height,260px); }
+body.mobile-ui:not(.sidebar-hidden) #visualizationTabs, body.mobile-ui:not(.timeline-hidden) #visualizationTabs { display:none; }
+body.mobile-ui #mobileNav { grid-template-columns:repeat(6,minmax(0,1fr)); }
+@media (max-width:760px) { #view3dToolbar button { padding:4px 7px; } #view3dToolbar { gap:4px; } }

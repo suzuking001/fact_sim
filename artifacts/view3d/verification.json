@@ -1,0 +1,117 @@
+{
+  "date": "2026-10-03T14:41:57.219Z",
+  "checks": [
+    {
+      "name": "lazy Babylon load and empty Scene",
+      "ok": true,
+      "detail": {
+        "nodes": 0,
+        "ground": true,
+        "camera": true,
+        "lights": 1
+      }
+    },
+    {
+      "name": "legacy layout, connections, shared palette, read-only plain snapshots",
+      "ok": true,
+      "detail": {
+        "unchanged": true,
+        "plain": true,
+        "noGraph": true,
+        "correctPositions": true,
+        "nodes": 4,
+        "links": 3,
+        "colors": true
+      }
+    },
+    {
+      "name": "2D selection → highlight and 3D click → existing inspector",
+      "ok": true,
+      "detail": {
+        "selectedNodeId": 1
+      }
+    },
+    {
+      "name": "camera, labels and connection controls",
+      "ok": true
+    },
+    {
+      "name": "live Work motion, node state and final snapshot",
+      "ok": true,
+      "detail": {
+        "fromTime": 0.008400000071525483,
+        "toTime": 0.25840000007152547,
+        "works": 2
+      }
+    },
+    {
+      "name": "FASTEST stops snapshot / render and restores final state",
+      "ok": true,
+      "detail": {
+        "pausedFrames": 50,
+        "pausedSnapshots": 16
+      }
+    },
+    {
+      "name": "hidden view has zero 3D update and tab switches reuse resources",
+      "ok": true,
+      "detail": {
+        "switches": 8,
+        "resources": {
+          "frames": 69,
+          "snapshots": 36,
+          "meshes": 13,
+          "textures": 4,
+          "materials": 12,
+          "loops": 1
+        }
+      }
+    },
+    {
+      "name": "optional view3d save/load and reset compatibility",
+      "ok": true,
+      "detail": {
+        "rootAttributes": {
+          "height": 1.7,
+          "rotation": 35,
+          "scale": 1.1
+        },
+        "restored": {
+          "height": 1.7,
+          "rotation": 35,
+          "scale": 1.1
+        },
+        "buffer": "buffer"
+      }
+    },
+    {
+      "name": "actual GLB loader, optional model replacement and disposal",
+      "ok": true
+    },
+    {
+      "name": "resize and mobile Graph / 3D / Run / Timeline navigation",
+      "ok": true,
+      "detail": {
+        "width": 390,
+        "height": 555,
+        "aspect": 0.7027027027027027
+      }
+    },
+    {
+      "name": "existing docks and Graph editing still work",
+      "ok": true
+    },
+    {
+      "name": "resource and browser console cleanliness",
+      "ok": true
+    },
+    {
+      "name": "failed Babylon load is isolated; Retry recovers",
+      "ok": true
+    }
+  ],
+  "pageErrors": [],
+  "resourceErrors": [],
+  "consoleErrors": [],
+  "status": "PASS"
+}
