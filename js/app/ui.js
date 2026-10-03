@@ -308,11 +308,13 @@ if(simModeSelect){
       hint.innerHTML = 'Fast engines are useful for benchmarks and large models. Validate changes against dt before release.';
     }
   };
-  const preferredMode = readPreferredMode() || App.simMode || 'event';
+  const savedMode = readPreferredMode() || App.simMode || 'event';
+  const preferredMode = App.normalizeSimMode ? App.normalizeSimMode(savedMode) : savedMode;
   const supportedValues = Array.from(simModeSelect.options || []).map((option)=>option.value);
   const initialMode = supportedValues.includes(preferredMode) ? preferredMode : 'event';
   let currentMode = (App.setSimMode ? App.setSimMode(initialMode) : initialMode);
   simModeSelect.value = currentMode;
+  savePreferredMode(currentMode);
   updateModeHint(currentMode);
   simModeSelect.addEventListener('change', ()=>{
     const mode = (App.setSimMode ? App.setSimMode(simModeSelect.value) : simModeSelect.value);

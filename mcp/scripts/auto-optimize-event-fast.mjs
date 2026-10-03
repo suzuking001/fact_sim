@@ -50,9 +50,9 @@ function parseArgs(argv) {
   const out = {
     label: "",
     profile: "nightly",
-    engines: ["dt", "event", "event-fast", "event-fast-worker", "event-fast-par"],
-    optimizeEngines: ["event-fast-par"],
-    targetEngine: "event-fast-par",
+    engines: ["dt", "event", "event-fast"],
+    optimizeEngines: ["event-fast"],
+    targetEngine: "event-fast",
     examples: null,
     benchmarkExample: "",
     seeds: [1],
@@ -202,14 +202,14 @@ function parseArgs(argv) {
     out.optimizeEngines = [String(out.targetEngine).trim()].filter(Boolean);
   }
   if (!out.benchmarkExample) {
-    out.benchmarkExample = out.targetEngine === "event-fast-par" ? "parallel_benchmark" : "";
+    out.benchmarkExample = "parallel_benchmark";
   }
   return applyProfileDefaults(out);
 }
 
 function applyProfileDefaults(cli) {
   const explicit = cli._explicit || new Set();
-  const targetEngine = String(cli.targetEngine || "").trim() || "event-fast-par";
+  const targetEngine = String(cli.targetEngine || "").trim() || "event-fast";
   const focusedEngines = Array.from(new Set(["dt", targetEngine]));
   const presets = {
     cheap: {
@@ -308,56 +308,25 @@ function normalizeFileList(values) {
   return out;
 }
 
-function allowedPathsForEngine(engine, scopeMode = "broad") {
+function allowedPathsForEngine(engine) {
   const base = new Set();
   const value = String(engine || "").trim();
-  const focused = String(scopeMode || "").trim().toLowerCase() === "focused";
   if (value === "event-fast") {
     base.add("js/app/engine-fast-runtime.js");
     base.add("js/app/engine-fast-compat.js");
     base.add("js/app/engine-fast-kernels.js");
-  } else if (value === "event-fast-worker") {
-    base.add("js/app/engine-fast-worker.js");
-    base.add("js/app/engine-fast-worker-host.js");
-    if (!focused) {
-      base.add("js/app/engine-fast-runtime.js");
-      base.add("js/app/engine-fast-compat.js");
-      base.add("js/app/engine-fast-kernels.js");
-    }
-  } else if (value === "event-fast-par") {
-    base.add("js/app/engine-fast-par-worker.js");
-    base.add("js/app/engine-fast-par-host.js");
-    base.add("js/app/engine-fast-par-partitioner.js");
-    if (!focused) {
-      base.add("js/app/engine-fast-worker.js");
-      base.add("js/app/engine-fast-worker-host.js");
-      base.add("js/app/engine-fast-runtime.js");
-      base.add("js/app/engine-fast-compat.js");
-      base.add("js/app/engine-fast-kernels.js");
-    }
+    base.add("js/app/engine-fast-compiler.js");
   }
   return Array.from(base);
 }
 
 function recommendedFilesForEngine(engine) {
-  const value = String(engine || "").trim();
-  if (value === "event-fast-par") {
-    return [
-      "js/app/engine-fast-par-host.js",
-      "js/app/engine-fast-par-worker.js",
-      "js/app/engine-fast-par-partitioner.js"
-    ];
-  }
-  if (value === "event-fast-worker") {
-    return [
-      "js/app/engine-fast-worker-host.js",
-      "js/app/engine-fast-worker.js"
-    ];
-  }
+  if (String(engine || "").trim() !== "event-fast") return [];
   return [
     "js/app/engine-fast-runtime.js",
     "js/app/engine-fast-compat.js",
-    "js/app/engine-fast-kernels.js"
+    "js/app/engine-fast-kernels.js",
+    "js/app/engine-fast-compiler.js"
   ];
 }
 
@@ -1369,7 +1338,7 @@ async function main() {
 
   const statusFile = cli.statusFile
     ? (path.isAbsolute(cli.statusFile) ? cli.statusFile : path.resolve(repoRoot, cli.statusFile))
-    : path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-par-status.json");
+    : path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-status.json");
   const statusMarkdownFile = statusFile.replace(/\.json$/i, ".md");
   const statusHtmlFile = statusFile.replace(/\.json$/i, ".html");
   const persistSession = async () => {

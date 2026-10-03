@@ -1,11 +1,11 @@
 # Overnight Auto-Optimize Guide
 
-This document explains the overnight optimization flow for `event-fast-par` in `fact_sim`.
+This document explains the overnight optimization flow for `event-fast` in `fact_sim`.
 
 The goal is simple:
 
 - keep `dt` as the correctness baseline
-- optimize only `event-fast-par`
+- optimize only `event-fast`
 - run for at least 5 hours
 - keep only patches that pass engine tests and improve benchmark speed
 
@@ -23,7 +23,7 @@ Longer exploration requires explicit command-line overrides.
 
 The optimizer currently targets:
 
-- engine: `event-fast-par`
+- engine: `event-fast`
 - benchmark example: `parallel_benchmark`
 - verification suites: `quick`, `standard`
 - baseline engine: `dt`
@@ -66,7 +66,7 @@ flowchart LR
   CODEX --> PATCH
   PATCH --> OPT
   OPT --> ART[artifacts/auto-optimize]
-  OPT --> STAT[latest-event-fast-par-status.json]
+  OPT --> STAT[latest-event-fast-status.json]
 ```
 
 ## Why `dt` Is the Baseline
@@ -81,18 +81,18 @@ Every accepted optimization must preserve parity against `dt` through:
 - timing chart parity
 - strict final parity when enabled
 
-This keeps the optimizer from making `event-fast-par` faster by silently changing behavior.
+This keeps the optimizer from making `event-fast` faster by silently changing behavior.
 
 ## Guard Rails
 
 Only a narrow set of files is allowed to change during optimization.
 
-For `event-fast-par`, the optimizer is restricted to:
+For `event-fast`, the optimizer is restricted to:
 
-- `js/app/engine-fast-par-host.js`
-- `js/app/engine-fast-par-worker.js`
-- `js/app/engine-fast-par-partitioner.js`
-- related `event-fast*` runtime files when explicitly allowed
+- `js/app/engine-fast-runtime.js`
+- `js/app/engine-fast-compat.js`
+- `js/app/engine-fast-kernels.js`
+- `js/app/engine-fast-compiler.js`
 
 Protected engines are never auto-patched:
 
@@ -128,7 +128,7 @@ These artifacts make it possible to inspect why a patch was accepted or rejected
 The latest status file is always updated here:
 
 ```text
-artifacts/auto-optimize/latest-event-fast-par-status.json
+artifacts/auto-optimize/latest-event-fast-status.json
 ```
 
 Use the monitor to watch the job in real time:
@@ -141,7 +141,7 @@ npm run watch:auto-optimize
 Windows shortcut:
 
 ```bat
-scripts/watch_event_fast_par_status.bat
+scripts/watch_event_fast_status.bat
 ```
 
 The monitor shows:
@@ -218,7 +218,7 @@ Common cases:
 
 After an overnight run, check these in order:
 
-1. `latest-event-fast-par-status.json`
+1. `latest-event-fast-status.json`
 2. the newest `artifacts/auto-optimize/<session>/summary.md`
 3. accepted iteration entries in `session.json`
 4. any `benchmark-delta.iteration-<n>.json`
@@ -249,5 +249,5 @@ npm run watch:auto-optimize
 Windows watch shortcut:
 
 ```bat
-scripts/watch_event_fast_par_status.bat
+scripts/watch_event_fast_status.bat
 ```

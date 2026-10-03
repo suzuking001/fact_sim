@@ -189,6 +189,16 @@ var App = window.App || (window.App = {});
       this.legacyEngine = (this.runtimeMode === 'legacy-compat')
         ? App.createLegacySimEngine('event', graph)
         : null;
+      this.flowSyncPlan = null;
+      this.flowFastContext = {
+        allocations: this.options.fastFlowAllocations !== false,
+        visuals: this.options.fastVisualLookup !== false ? new WeakMap() : null,
+        admission: this.options.fastFlowAdmission !== false,
+        topology: this.options.fastFlowTopology !== false ? new WeakMap() : null,
+        sourceSelection: this.options.fastSourceSelection !== false
+      };
+      this.outputRefs = this.flowFastContext.allocations ? new Array(this.compiled.nodeCount) : null;
+      this._updateWithFastContext = ()=>this._update(this._fastDeltaMs);
       this.stats = this._createStats();
     }
 
@@ -223,6 +233,10 @@ var App = window.App || (window.App = {});
     }
 
     reset(){
+      this.flowSyncPlan = null;
+      if(this.flowFastContext.visuals)this.flowFastContext.visuals = new WeakMap();
+      if(this.flowFastContext.topology)this.flowFastContext.topology = new WeakMap();
+      if(this.outputRefs)this.outputRefs.fill(null);
       this.heap.clear();
       this.untilMs.fill(Infinity);
       this.stateFlags.fill(0);
@@ -265,6 +279,15 @@ var App = window.App || (window.App = {});
     }
 
     update(simDeltaMs){
+      if(this.runtimeMode === 'legacy-compat' || typeof App.FlowRuntime?.withFastContext !== 'function'){
+        return this._update(simDeltaMs);
+      }
+      const previous=this._fastDeltaMs;this._fastDeltaMs=simDeltaMs;
+      try{return App.FlowRuntime.withFastContext(this.flowFastContext,this._updateWithFastContext);}
+      finally{this._fastDeltaMs=previous;}
+    }
+
+    _update(simDeltaMs){
       const graph = this.graph;
       if(!graph) return;
       let budgetMs = Number(simDeltaMs);
@@ -279,6 +302,15 @@ var App = window.App || (window.App = {});
         this.stats.lastUpdateWallMs = Math.max(0, finishedLegacy - started);
         this.stats.simTimeMs = nowSimMs();
         return;
+      }
+
+      // Validate topology once per update, never once per equipment event.
+      App.prepareFastFlowTopology?.(graph, this.flowFastContext);
+      if(this.options.compiledFlowSync !== false && typeof App.compileFastFlowSync === 'function'){
+        if(!graph.extra?.syncroGroups?.length) this.flowSyncPlan = null;
+        else if(!App.isFastFlowSyncCurrent(graph, this.flowSyncPlan)){
+          this.flowSyncPlan = App.compileFastFlowSync(graph);
+        }
       }
 
       let loops = 0;

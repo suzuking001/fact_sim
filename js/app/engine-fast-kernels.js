@@ -7,9 +7,16 @@ var App=window.App || (window.App={});
   const common={
     execute(index,time,ctx){
       const node=getNode(ctx,index);if(!node)return {nextUntil:NaN,stateChanged:false,outputsChanged:false};
-      const state=node._state,until=node._until,refs=(node.outputs || []).map(p=>p._data),revision=node._flowRuntime?.revision;
-      App.FlowRuntime.execute(node);
-      return {nextUntil:App.FlowRuntime.eventUntil(node),stateChanged:state!==node._state || until!==node._until || revision!==node._flowRuntime?.revision,outputsChanged:refs.some((ref,i)=>ref!==node.outputs[i]._data)};
+      const state=node._state,until=node._until,outputs=node.outputs || [],revision=node._flowRuntime?.revision;
+      let refs;
+      if(ctx.outputRefs){
+        refs=ctx.outputRefs[index] || (ctx.outputRefs[index]=[]);refs.length=outputs.length;
+        for(let i=0;i<outputs.length;i++)refs[i]=outputs[i]._data;
+      }else refs=outputs.map(p=>p._data);
+      App.FlowRuntime.execute(node,ctx.flowSyncPlan?.memberships);
+      let outputsChanged=false;
+      for(let i=0;i<refs.length;i++)if(refs[i]!==node.outputs[i]._data){outputsChanged=true;break;}
+      return {nextUntil:App.FlowRuntime.eventUntil(node),stateChanged:state!==node._state || until!==node._until || revision!==node._flowRuntime?.revision,outputsChanged};
     },
     getEventUntil(index,time,ctx){return App.FlowRuntime.eventUntil(getNode(ctx,index));}
   };

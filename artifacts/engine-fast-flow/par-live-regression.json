@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-28T15:42:31.760Z",
+  "cases": [
+    {
+      "example": "simple",
+      "ok": true,
+      "completed": 7,
+      "nodeCount": 4
+    },
+    {
+      "example": "parallel_benchmark",
+      "ok": true,
+      "completed": 56,
+      "nodeCount": 32
+    },
+    {
+      "example": "sample_line2",
+      "ok": true,
+      "completed": 2,
+      "nodeCount": 145
+    }
+  ],
+  "fastest": {
+    "simTimeMs": 1200000,
+    "stopMs": 70.69999998807907,
+    "queueBounded": true,
+    "timeStableAfterStop": true,
+    "stoppedGraph": true
+  },
+  "speed128": {
+    "simTimeMs": 64000,
+    "finalSimTimeMs": 68275.19999999995
+  },
+  "speedChanges": [
+    {
+      "name": "1024x to 1x",
+      "low": 1,
+      "queuedBefore": 595300,
+      "queuedAfter": 0,
+      "factorAfterChange": "measuring...",
+      "measured": 0.994344664741508,
+      "factor": "1.00x",
+      "resumedDelta": 16500,
+      "queueAfterSecondReduction": 0
+    },
+    {
+      "name": "FASTEST to 1x",
+      "low": 1,
+      "queuedBefore": 20000,
+      "queuedAfter": 0,
+      "factorAfterChange": "measuring...",
+      "measured": 0.9309253397808618,
+      "factor": "1.00x",
+      "resumedDelta": 24200,
+      "queueAfterSecondReduction": 0
+    },
+    {
+      "name": "128x to 0.25x",
+      "low": 0.25,
+      "queuedBefore": 49000,
+      "queuedAfter": 0,
+      "factorAfterChange": "measuring...",
+      "measured": 0.18737118230937025,
+      "factor": "0.20x",
+      "resumedDelta": 20500,
+      "queueAfterSecondReduction": 0
+    }
+  ],
+  "clockTransition": {
+    "firstDelta": 1.0999999880805262,
+    "maxDelta": 16.700000000000728,
+    "count": 7
+  },
+  "ok": true,
+  "errors": []
+}

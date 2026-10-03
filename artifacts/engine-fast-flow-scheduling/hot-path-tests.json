@@ -1,0 +1,18 @@
+[
+  {
+    "name": "State and deadline scans match for empty, ready, past, future and non-finite timers",
+    "ok": true
+  },
+  {
+    "name": "Source deadlines match on repeat, completed quantity, active source and delayed admission",
+    "ok": true
+  },
+  {
+    "name": "Nested contexts and exceptions restore the previous engine and the baseline path",
+    "ok": true
+  },
+  {
+    "name": "Duplicate visual IDs retain the first history; eviction and snapshot restore preserve every visual",
+    "ok": true
+  }
+]

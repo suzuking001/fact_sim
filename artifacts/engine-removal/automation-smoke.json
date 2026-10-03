@@ -1,0 +1,20 @@
+{
+  "status": "DRY-RUN",
+  "targetEngine": "event-fast",
+  "examples": [
+    "simple",
+    "parallel_benchmark"
+  ],
+  "engines": [
+    "dt",
+    "event",
+    "event-fast"
+  ],
+  "allowedPaths": [
+    "js/app/engine-fast-runtime.js",
+    "js/app/engine-fast-compat.js",
+    "js/app/engine-fast-kernels.js",
+    "js/app/engine-fast-compiler.js"
+  ],
+  "sessionDir": "artifacts/auto-optimize/2026-09-29T13-28-51-475Z__three-engines-smoke/"
+}

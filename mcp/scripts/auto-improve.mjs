@@ -192,7 +192,7 @@ function buildOptimizeArgs(job, cli) {
   const profile = pick(cli.profile, defaults.profile, "nightly");
   const profileChanged = Boolean(cli.profile) && String(cli.profile).trim() !== String(defaults.profile || "").trim();
   const label = cli.label || job.key || job.name || "";
-  const targetEngine = pick(cli.targetEngine, target.engine, "event-fast-par");
+  const targetEngine = pick(cli.targetEngine, target.engine, "event-fast");
   const optimizeEngines = cli.optimizeEngines !== null
     ? cli.optimizeEngines
     : (profileChanged ? null : (defaults.optimizeEngines ?? [targetEngine]));

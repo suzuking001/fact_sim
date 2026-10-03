@@ -25,7 +25,9 @@ const server=createServer(async(req,res)=>{
     if(relative==='/mock-ollama/api/chat'){
       let raw='';for await(const chunk of req)raw+=chunk;const body=JSON.parse(raw || '{}');res.setHeader('Content-Type','application/json');
       if(body.messages.some(message=>message.content?.includes('[test-generation-settings]')))generationRequests.push(body);
-      if(body.messages.some(message=>message.content?.includes('[test-delayed-generation]'))){
+      const timeoutAfterTool=body.messages.some(message=>message.content?.includes('[test-timeout-after-tool]'));
+      if(timeoutAfterTool && !body.messages.some(message=>message.role==='tool')){res.end(JSON.stringify({message:{content:'',tool_calls:[{function:{name:'inspect_test',arguments:{}}}]},done:true})+(body.stream ? '\n' : ''));return;}
+      if(timeoutAfterTool || body.messages.some(message=>message.content?.includes('[test-delayed-generation]'))){
         if(body.stream)res.write(JSON.stringify({message:{content:'Started '},done:false})+'\n');
         const timer=setTimeout(()=>res.end(JSON.stringify({message:{content:'Delayed reply'},done:true})+(body.stream ? '\n' : '')),150);res.on('close',()=>clearTimeout(timer));return;
       }
@@ -582,14 +584,21 @@ try{
     try{await provider.chat(messages,{requestTimeoutMs:0,signal:controller.signal});}catch(error){stopped=error.message.includes('stopped');}finally{clearTimeout(abortTimer);}
     const alreadyStopped=new AbortController();alreadyStopped.abort();let preAborted=false;
     try{await provider.chat(messages,{signal:alreadyStopped.signal});}catch(error){preAborted=error.message.includes('stopped');}
-    return {zeroPreserved,chatTimeout,streamTimeout,streamStarted,zeroResponse:zeroResponse.message.content==='Delayed reply',zeroStreamDone,stopped,preAborted,cleaned:provider._controller===null};
+    const stopTimer=setTimeout(()=>provider.abort(),30);let streamStopped=false;
+    try{for await(const _item of provider.streamChat(messages,{requestTimeoutMs:0})){} }catch(error){streamStopped=error.message.includes('stopped');}finally{clearTimeout(stopTimer);}
+    const registry=new App.AI.ToolRegistry();registry.register({name:'inspect_test',description:'Read a test value',mode:App.AI.ToolModes.READ,inputSchema:{type:'object'},execute:()=>({success:true,observed:42})});
+    const agent=new App.AI.FactSimAgent({provider,registry,generationOptions:{requestTimeoutMs:60}});let failedAfterTool=false;
+    try{await agent.send('[test-timeout-after-tool]');}catch(error){failedAfterTool=error.message.includes('0.06秒') && agent.messages.some(message=>message.role==='tool' && JSON.parse(message.content).observed===42) && agent.running===false;}
+    agent.generationOptions={requestTimeoutMs:500};const retry=await agent.send('Continue with the recorded evidence');
+    return {zeroPreserved,chatTimeout,streamTimeout,streamStarted,zeroResponse:zeroResponse.message.content==='Delayed reply',zeroStreamDone,stopped,preAborted,streamStopped,failedAfterTool,retry:retry.content==='Started Delayed reply',cleaned:provider._controller===null};
   },`http://127.0.0.1:${server.address().port}`);
   check('Ollama deadlines cover chat and full streams; zero disables the deadline and Stop still aborts',Object.values(timeoutResults).every(Boolean),timeoutResults);
 
   const generationRouting=await page.evaluate(async()=>{
     const AI=App.AI,settings=AI.GenerationSettings.normalize({temperature:0.65,maxOutputTokens:1234,maxToolIterations:1,requestTimeoutSeconds:300,numCtx:8192,topP:0.8,topK:30,repeatPenalty:1.2,seed:0,keepAliveSeconds:-1}),options=AI.GenerationSettings.requestOptions(settings);
-    const ollama=new AI.OllamaProvider(),ollamaBody=ollama._body([] ,options,true),openai=new AI.OpenAICompatibleProvider(),apiBody=openai._body([],options,false),webllm=new AI.WebLLMProvider(),webBody=webllm._request([],options,false);
+    const ollama=new AI.OllamaProvider(),ollamaBody=ollama._body([],options,true),openai=new AI.OpenAICompatibleProvider(),apiBody=openai._body([],options,false),webllm=new AI.WebLLMProvider();webllm.engine={};webllm.status='ready';const webBody=webllm._request([],options,false);
     const defaults=AI.GenerationSettings.requestOptions({}),defaultBody=ollama._body([],defaults,false),invalid=AI.GenerationSettings.normalize({requestTimeoutSeconds:-1,maxToolIterations:1.5,numCtx:'invalid'});
+    ollama.generationOptions=options;const snapshotBody=ollama._body([],defaults,false),blankSnapshotPreserved=!('num_predict' in snapshotBody.options) && !('keep_alive' in snapshotBody);
     const runs=[];
     for(const streaming of [false,true]){
       const requests=[],registry=new AI.ToolRegistry();registry.register({name:'inspect_test',description:'Read a test value',mode:AI.ToolModes.READ,inputSchema:{type:'object'},execute:()=>({success:true})});
@@ -598,9 +607,9 @@ try{
       provider.chat=async(messages,input)=>{requests.push({temperature:input.temperature,maxTokens:input.maxTokens,timeout:input.requestTimeoutMs,tools:input.tools.length});agent.maxToolIterations=7;agent.generationOptions={temperature:0.9};return {message:{content:input.tools.length ? '' : 'Recorded summary',toolCalls:input.tools.length ? [{id:'test',name:'inspect_test',arguments:{}}] : []}};};
       const answer=await agent.send('Inspect test value');runs.push({requests,summary:answer.content,budget:agent.lastRunStats.budgetReached,toolCalls:agent.lastRunStats.toolCalls});
     }
-    return {ollamaBody,apiBody,webBody,defaultsOmitOptional:Object.keys(defaultBody.options).join(',')==='temperature' && !('keep_alive' in defaultBody),invalidRestored:invalid.requestTimeoutSeconds===90 && invalid.maxToolIterations===16 && invalid.numCtx===null,runs};
+    return {ollamaBody,apiBody,webBody,blankSnapshotPreserved,defaultsOmitOptional:Object.keys(defaultBody.options).join(',')==='temperature' && !('keep_alive' in defaultBody),invalidRestored:invalid.requestTimeoutSeconds===90 && invalid.maxToolIterations===16 && invalid.numCtx===null,runs};
   });
-  check('generation settings route to all adapters and preserve defaults',generationRouting.ollamaBody.options.num_predict===1234 && generationRouting.ollamaBody.options.num_ctx===8192 && generationRouting.ollamaBody.options.seed===0 && generationRouting.ollamaBody.keep_alive===-1 && generationRouting.apiBody.max_tokens===1234 && generationRouting.webBody.max_tokens===1234 && generationRouting.defaultsOmitOptional && generationRouting.invalidRestored,generationRouting);
+  check('generation settings route to all adapters and preserve defaults',generationRouting.ollamaBody.options.num_predict===1234 && generationRouting.ollamaBody.options.num_ctx===8192 && generationRouting.ollamaBody.options.seed===0 && generationRouting.ollamaBody.keep_alive===-1 && generationRouting.apiBody.max_tokens===1234 && generationRouting.webBody.max_tokens===1234 && generationRouting.defaultsOmitOptional && generationRouting.invalidRestored && generationRouting.blankSnapshotPreserved,generationRouting);
   check('streaming and chat snapshot generation settings and summarize after the configured tool round limit',generationRouting.runs.every(run=>run.summary==='Recorded summary' && run.budget && run.toolCalls===1 && run.requests.length===2 && run.requests.every(request=>request.temperature===0.65 && request.maxTokens===1234 && request.timeout===300000) && run.requests[1].tools===0),generationRouting.runs);
 
   if(process.argv.includes('--webllm-tokenizers')){
@@ -686,9 +695,9 @@ try{
   check('invalid settings block sending, keep the draft and retain the previous saved value',generationRequests.length===generationCount && await page.locator('#aiChatInput').inputValue()==='[test-generation-settings] invalid' && await page.evaluate(()=>document.getElementById('aiGenerationSettingsStatus').dataset.state==='error' && JSON.parse(localStorage.getItem('factsim-ai-settings')).generation.requestTimeoutSeconds===300));
   await page.locator('#aiRequestTimeoutSeconds').fill('0');await page.locator('#aiRequestTimeoutSeconds').press('Tab');
   check('UI accepts and persists an unlimited Ollama timeout',await page.evaluate(()=>App.AI.agent.provider.requestTimeoutMs===0 && App.AI.agent.generationOptions.requestTimeoutMs===0 && JSON.parse(localStorage.getItem('factsim-ai-settings')).generation.requestTimeoutSeconds===0));
-  await page.locator('#aiRequestTimeoutSeconds').scrollIntoViewIfNeeded();
+  await page.locator('#aiRequestTimeoutSeconds').evaluate(input=>input.parentElement.scrollIntoView({block:'start'}));
   await page.screenshot({path:path.join(root,'tmp','ai-generation-settings-desktop.png'),fullPage:true});
-  await page.setViewportSize({width:390,height:844});await page.locator('#aiRequestTimeoutSeconds').scrollIntoViewIfNeeded();
+  await page.setViewportSize({width:390,height:844});await page.locator('#aiRequestTimeoutSeconds').evaluate(input=>input.parentElement.scrollIntoView({block:'start'}));
   const mobileSettings=await page.evaluate(()=>{const panel=document.getElementById('aiPanel').getBoundingClientRect(),input=document.getElementById('aiRequestTimeoutSeconds').getBoundingClientRect(),composer=document.querySelector('.aiComposer').getBoundingClientRect();return {inBounds:input.left>=panel.left && input.right<=panel.right && panel.right<=innerWidth,composerVisible:composer.bottom<=innerHeight && composer.height>0};});
   check('advanced settings stay within the mobile panel and leave the composer accessible',mobileSettings.inBounds && mobileSettings.composerVisible,mobileSettings);
   await page.screenshot({path:path.join(root,'tmp','ai-generation-settings-mobile.png'),fullPage:true});await page.setViewportSize({width:1440,height:960});

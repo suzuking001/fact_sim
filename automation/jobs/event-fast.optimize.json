@@ -1,12 +1,15 @@
 {
   "version": 1,
   "kind": "engine-optimize",
-  "name": "event-fast-par optimize",
-  "key": "event-fast-par-optimize",
-  "goal": "Maximize event-fast-par speed while preserving dt parity.",
+  "name": "event-fast optimize",
+  "key": "event-fast-optimize",
+  "goal": "Maximize event-fast speed while preserving dt parity.",
   "target": {
-    "engine": "event-fast-par",
-    "protectedEngines": ["dt", "event"]
+    "engine": "event-fast",
+    "protectedEngines": [
+      "dt",
+      "event"
+    ]
   },
   "delegate": {
     "type": "auto-patch-event-fast",
@@ -14,10 +17,18 @@
   },
   "defaults": {
     "profile": "nightly",
-    "engines": ["dt", "event", "event-fast", "event-fast-worker", "event-fast-par"],
-    "optimizeEngines": ["event-fast-par"],
+    "engines": [
+      "dt",
+      "event",
+      "event-fast"
+    ],
+    "optimizeEngines": [
+      "event-fast"
+    ],
     "examples": null,
-    "seeds": [1],
+    "seeds": [
+      1
+    ],
     "includeCurrentGraph": false,
     "strict": true,
     "reruns": 1,
@@ -34,5 +45,5 @@
     "minRuntimeHours": 0,
     "maxNoImprovementIterations": 3
   },
-  "statusFile": "artifacts/auto-optimize/latest-event-fast-par-status.json"
+  "statusFile": "artifacts/auto-optimize/latest-event-fast-status.json"
 }

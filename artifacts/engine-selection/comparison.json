@@ -1,0 +1,270 @@
+{
+  "date": "2026-09-28T14:03:04.808Z",
+  "wallMs": 1000,
+  "examples": [
+    {
+      "example": "sample_line2",
+      "setup": {
+        "loaded": {
+          "example": "sample_line2",
+          "nodeCount": 145
+        },
+        "modeResult": {
+          "previousMode": "event",
+          "mode": "dt",
+          "restarted": false
+        },
+        "speedResult": {
+          "fastestMode": true,
+          "speedLabel": "FASTEST"
+        },
+        "status": {
+          "running": false,
+          "mode": "dt",
+          "simTimeMs": 0,
+          "fastestMode": true,
+          "nodeCount": 145,
+          "linkCount": 172
+        }
+      },
+      "benchmark": {
+        "wallMs": 1000,
+        "realStepMs": 16,
+        "results": [
+          {
+            "mode": "dt",
+            "renderCase": "headless",
+            "speed": 80.76,
+            "simSec": 80.8,
+            "wallMs": 1000.5
+          },
+          {
+            "mode": "dt",
+            "renderCase": "render",
+            "speed": 82.151,
+            "simSec": 82.2,
+            "wallMs": 1000.5999999642372
+          },
+          {
+            "mode": "event",
+            "renderCase": "headless",
+            "speed": 3552.051,
+            "simSec": 3553.472,
+            "wallMs": 1000.4000000357628
+          },
+          {
+            "mode": "event",
+            "renderCase": "render",
+            "speed": 3388.128,
+            "simSec": 3388.128,
+            "wallMs": 1000
+          },
+          {
+            "mode": "event-fast",
+            "renderCase": "headless",
+            "speed": 14804.334,
+            "simSec": 14810.256,
+            "wallMs": 1000.4000000357628
+          },
+          {
+            "mode": "event-fast",
+            "renderCase": "render",
+            "speed": 12250.464,
+            "simSec": 12250.464,
+            "wallMs": 1000
+          },
+          {
+            "mode": "event-fast-worker",
+            "renderCase": "headless",
+            "speed": 1214.765,
+            "simSec": 1215.008,
+            "wallMs": 1000.2000000476837
+          },
+          {
+            "mode": "event-fast-par",
+            "renderCase": "headless",
+            "speed": 1444.016,
+            "simSec": 1444.016,
+            "wallMs": 1000
+          }
+        ]
+      }
+    },
+    {
+      "example": "sample_line1",
+      "setup": {
+        "loaded": {
+          "example": "sample_line1",
+          "nodeCount": 63
+        },
+        "modeResult": {
+          "previousMode": "dt",
+          "mode": "dt",
+          "restarted": false
+        },
+        "speedResult": {
+          "fastestMode": true,
+          "speedLabel": "FASTEST"
+        },
+        "status": {
+          "running": false,
+          "mode": "dt",
+          "simTimeMs": 0,
+          "fastestMode": true,
+          "nodeCount": 63,
+          "linkCount": 64
+        }
+      },
+      "benchmark": {
+        "wallMs": 1000,
+        "realStepMs": 16,
+        "results": [
+          {
+            "mode": "dt",
+            "renderCase": "headless",
+            "speed": 757.188,
+            "simSec": 758.4,
+            "wallMs": 1001.6000000238419
+          },
+          {
+            "mode": "dt",
+            "renderCase": "render",
+            "speed": 767.946,
+            "simSec": 768.1,
+            "wallMs": 1000.1999999880791
+          },
+          {
+            "mode": "event",
+            "renderCase": "headless",
+            "speed": 4548.241,
+            "simSec": 4557.792,
+            "wallMs": 1002.1000000238419
+          },
+          {
+            "mode": "event",
+            "renderCase": "render",
+            "speed": 4329.86,
+            "simSec": 4341.984,
+            "wallMs": 1002.8000000119209
+          },
+          {
+            "mode": "event-fast",
+            "renderCase": "headless",
+            "speed": 5719.7,
+            "simSec": 5720.272,
+            "wallMs": 1000.1000000238419
+          },
+          {
+            "mode": "event-fast",
+            "renderCase": "render",
+            "speed": 5620.096,
+            "simSec": 5620.096,
+            "wallMs": 1000
+          },
+          {
+            "mode": "event-fast-worker",
+            "renderCase": "headless",
+            "speed": 5145.008,
+            "simSec": 5145.008,
+            "wallMs": 1000
+          },
+          {
+            "mode": "event-fast-par",
+            "renderCase": "headless",
+            "speed": 4949.521,
+            "simSec": 4950.016,
+            "wallMs": 1000.1000000238419
+          }
+        ]
+      }
+    },
+    {
+      "example": "parallel_benchmark",
+      "setup": {
+        "loaded": {
+          "example": "parallel_benchmark",
+          "nodeCount": 32
+        },
+        "modeResult": {
+          "previousMode": "dt",
+          "mode": "dt",
+          "restarted": false
+        },
+        "speedResult": {
+          "fastestMode": true,
+          "speedLabel": "FASTEST"
+        },
+        "status": {
+          "running": false,
+          "mode": "dt",
+          "simTimeMs": 0,
+          "fastestMode": true,
+          "nodeCount": 32,
+          "linkCount": 24
+        }
+      },
+      "benchmark": {
+        "wallMs": 1000,
+        "realStepMs": 16,
+        "results": [
+          {
+            "mode": "dt",
+            "renderCase": "headless",
+            "speed": 2297.1,
+            "simSec": 2297.1,
+            "wallMs": 1000
+          },
+          {
+            "mode": "dt",
+            "renderCase": "render",
+            "speed": 2255.1,
+            "simSec": 2255.1,
+            "wallMs": 1000
+          },
+          {
+            "mode": "event",
+            "renderCase": "headless",
+            "speed": 4033.747,
+            "simSec": 4041.008,
+            "wallMs": 1001.8000000119209
+          },
+          {
+            "mode": "event",
+            "renderCase": "render",
+            "speed": 3669.649,
+            "simSec": 3670.016,
+            "wallMs": 1000.1000000238419
+          },
+          {
+            "mode": "event-fast",
+            "renderCase": "headless",
+            "speed": 3881.44,
+            "simSec": 3881.44,
+            "wallMs": 1000
+          },
+          {
+            "mode": "event-fast",
+            "renderCase": "render",
+            "speed": 3752.762,
+            "simSec": 3758.016,
+            "wallMs": 1001.4000000357628
+          },
+          {
+            "mode": "event-fast-worker",
+            "renderCase": "headless",
+            "speed": 4390.528,
+            "simSec": 4390.528,
+            "wallMs": 1000
+          },
+          {
+            "mode": "event-fast-par",
+            "renderCase": "headless",
+            "speed": 6540.016,
+            "simSec": 6540.016,
+            "wallMs": 1000
+          }
+        ]
+      }
+    }
+  ]
+}

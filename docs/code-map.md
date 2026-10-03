@@ -22,11 +22,9 @@
 | ノード定義・追加メニュー | `js/nodes/<対象ノード>.js`, `js/app/node-catalog.js` | `js/app/node-definition-editor.js`, `config/node-definitions.json`, `js/nodes/register.js`, `js/nodes/menu.js`, `js/nodes-config.js` |
 | リンク・編集履歴・表示位置 | `js/app/graph-links.js`, `js/app/history.js` | `js/app/fit.js`, `js/app/background-layout.js` |
 | 保存・読込・example | `js/app/file-io.js`, `js/app/examples.js` | `sample/<対象example>.json`, `sample/<対象example>.js`, `docs/sample-line2-ja.md`（4型の構成・分岐設定） |
-| シミュレーション操作・基準 engine | `js/app/sim.js`, `js/app/engine.js` | `js/app/stop-groups.js`。自動最適化では基準 engine を変更しない |
-| event-fast 共通 | `js/app/engine-fast-runtime.js`, `js/app/engine-fast-mode.js` | `js/app/engine-fast-compiler.js`, `js/app/engine-fast-kernels.js`, `js/app/engine-fast-compat.js` |
-| event-fast-worker | `js/app/engine-fast-worker-host.js`, `js/app/engine-fast-worker.js` | `js/app/engine-fast-worker-protocol.js`, event-fast 共通 |
-| event-fast-par | `js/app/engine-fast-par-host.js`, `js/app/engine-fast-par-worker.js` | `js/app/engine-fast-par-partitioner.js`, `js/app/engine-fast-par-protocol.js`, event-fast 共通 |
-| Engine Test・benchmark | `js/app/engine-test.js`, `js/app/benchmark.js` | runtime group 01、`docs/agent-operations.md` の Engine Test 節 |
+| シミュレーション操作・基準 engine | `js/app/sim.js`, `js/app/engine.js` | `js/core.js`（速度変更・時計・実時間倍率）, `js/app/stop-groups.js`。自動最適化では基準 engine を変更しない |
+| event-fast | `js/app/engine-fast-runtime.js`, `js/app/engine-fast-mode.js` | `js/app/engine-fast-compiler.js`（Flow 同期メンバー・接続索引の事前計算）, `js/app/engine-fast-kernels.js`（出力参照の再利用）, `js/app/engine-fast-compat.js`, `js/app/flow-runtime.js`（同期表・状態/空き確認・表示履歴・静的経路・数量を展開しない Source 選択） |
+| Engine Test・benchmark | `js/app/engine-test.js`, `js/app/benchmark.js` | runtime group 01、`docs/agent-operations.md` の Engine Test 節、`mcp/scripts/test-engine-selection.mjs`（3エンジン登録・旧設定の移行・MCP・全 engine parity）、`mcp/scripts/test-engine-fast-flow.mjs`（Flow 同期・全 engine parity、`--hot-paths` / `--topology` / `--scheduling` で追加高速化も検証）、`mcp/scripts/test-engine-fast-hot-paths.cjs`（境界時刻・履歴の重複/退避/復元）、`mcp/scripts/test-engine-fast-topology.cjs`（配線変更・動的設定・空き確認・復元・Reset）、`mcp/scripts/test-engine-fast-scheduling.cjs`（Source 数量・順序・内容・編集・復元・Reset）、`mcp/scripts/benchmark-engine-fast-flow.mjs`（各5回、追加オプションで方式を比較。`--scheduling` は数量10万の Source も測定） |
 | タイミングチャート | `js/app/timeline-init.js`, `js/timeline.js` | runtime group 01 / 05 の CSV 処理 |
 
 ## MCP・自動運用
@@ -35,7 +33,7 @@
 | --- | --- | --- |
 | ツール名・引数・登録 | `mcp/src/server/register-ai-tools.ts` | `mcp/src/server/tool-helpers.ts`, `mcp/src/server/create-mcp-server.ts`, `mcp/src/index.ts` |
 | runtime 組立・型 | `mcp/src/fact-sim-runtime.ts` | `mcp/src/runtime/runtime-types.ts`, `mcp/src/runtime/runtime-advanced-types.ts` |
-| 夜間最適化 | `mcp/package.json`, `mcp/scripts/auto-improve.mjs` | `automation/jobs/event-fast-par.optimize.json`, `mcp/scripts/auto-optimize-event-fast.mjs`, `mcp/scripts/auto-patch-event-fast.mjs` |
+| 夜間最適化 | `mcp/package.json`, `mcp/scripts/auto-improve.mjs` | `automation/jobs/event-fast.optimize.json`, `mcp/scripts/auto-optimize-event-fast.mjs`, `mcp/scripts/auto-patch-event-fast.mjs` |
 | 夜間修正・監視 | `mcp/scripts/auto-fix-runner.mjs` | `mcp/scripts/watch-auto-improve-status.mjs`, `mcp/scripts/watch-auto-optimize-status.mjs` |
 
 ### 番号付き runtime の対応表
@@ -64,9 +62,9 @@
 ```powershell
 # 名前を探し、ヒットしたファイルの必要範囲だけ読む
 rg -n 'runEngineTests' mcp/src/runtime/runtime-methods-group-01.ts
-rg -n 'キーワード' js/app -g 'engine-fast-par-*.js'
+rg -n 'キーワード' js/app -g 'engine-fast*.js'
 ```
 
 必須検証は root の `AGENTS.md` に従う。MCP の型チェックは `mcp/` で `npm run check`、build は `npm run build`。engine/parity は MCP の `engine_test` で quick を実行する。フロー専用の確認スクリプトは `mcp/scripts/test-flow-{view,program,ports,engines}.mjs` にあるため、使用時は該当スクリプトの実行条件を確認する。
 
-`index.html` は script を直接参照し、worker も URL で読み込む。ファイル移動時は読込順・worker URL・export 内の参照・この案内を確認する。通常の修正でフォルダ全体を再編しない。
+`index.html` は script を直接参照する。ファイル移動時は読込順・export 内の参照・この案内を確認する。通常の修正でフォルダ全体を再編しない。

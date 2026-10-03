@@ -25,7 +25,9 @@
     const settings=normalize(values),ollamaOptions={};
     for(const [key,name] of [['numCtx','num_ctx'],['topP','top_p'],['topK','top_k'],['repeatPenalty','repeat_penalty'],['seed','seed']])if(settings[key]!==null)ollamaOptions[name]=settings[key];
     if(settings.maxOutputTokens!==null)ollamaOptions.num_predict=settings.maxOutputTokens;
-    return {temperature:settings.temperature,...(settings.maxOutputTokens===null ? {} : {maxTokens:settings.maxOutputTokens}),requestTimeoutMs:settings.requestTimeoutSeconds*1000,ollamaOptions,...(settings.keepAliveSeconds===null ? {} : {keepAlive:settings.keepAliveSeconds===-1 ? -1 : `${settings.keepAliveSeconds}s`})};
+    // Keep explicit nulls so a request snapshot also preserves blank/default fields
+    // when the UI changes provider defaults during an active multi-round response.
+    return {temperature:settings.temperature,maxTokens:settings.maxOutputTokens,requestTimeoutMs:settings.requestTimeoutSeconds*1000,ollamaOptions,keepAlive:settings.keepAliveSeconds===null ? null : settings.keepAliveSeconds===-1 ? -1 : `${settings.keepAliveSeconds}s`};
   }
   AI.GenerationSettings={fields,normalize,requestOptions};
 })(typeof window==='undefined' ? globalThis : window);

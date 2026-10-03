@@ -1,0 +1,135 @@
+{
+  "run": {
+    "elapsedMs": 22430.399999976158,
+    "timeMs": 30000000,
+    "stats": {
+      "engine": "event-fast",
+      "simTimeMs": 30000000,
+      "updateCalls": 3000,
+      "nodeExec": 1558663,
+      "kernelExec": 1558663,
+      "compatExec": 0,
+      "heapPush": 242637,
+      "heapPop": 242610,
+      "heapReschedule": 476568,
+      "sameTimeBatches": 147954,
+      "sameTimeNodes": 1558663,
+      "sameTimeOverflows": 0,
+      "dirtyEnqueue": 1558663,
+      "boundaryHits": 0,
+      "runtimeMode": "compiled",
+      "fallbackNodeCount": 0,
+      "executableFallbackCount": 0,
+      "executableFallbackTypes": [],
+      "lastCompileMs": 0,
+      "lastUpdateWallMs": 6.899999976158142,
+      "maxQueueA": 145,
+      "maxQueueB": 0,
+      "maxHeapSize": 46,
+      "heapSize": 27
+    },
+    "completed": 4021
+  },
+  "hottest": [
+    {
+      "functionName": "syncGroups flow-runtime.js?v=20260926sensor:322",
+      "ms": 8907.758
+    },
+    {
+      "functionName": "flow flow-runtime.js?v=20260926sensor:6",
+      "ms": 2380.85
+    },
+    {
+      "functionName": "(anonymous) flow-runtime.js?v=20260926sensor:304",
+      "ms": 958.468
+    },
+    {
+      "functionName": "execute flow-runtime.js?v=20260926sensor:367",
+      "ms": 904.409
+    },
+    {
+      "functionName": "(anonymous) flow-runtime.js?v=20260926sensor:108",
+      "ms": 829.706
+    },
+    {
+      "functionName": "activeCells flow-runtime.js?v=20260926sensor:9",
+      "ms": 705.277
+    },
+    {
+      "functionName": "execute engine-fast-kernels.js?v=20260914flow2:8",
+      "ms": 529.944
+    },
+    {
+      "functionName": "runtime flow-runtime.js?v=20260926sensor:8",
+      "ms": 430.48
+    },
+    {
+      "functionName": "(garbage collector) :0",
+      "ms": 402.76
+    },
+    {
+      "functionName": "updateState flow-runtime.js?v=20260926sensor:361",
+      "ms": 297.639
+    },
+    {
+      "functionName": "receive flow-runtime.js?v=20260926sensor:153",
+      "ms": 265.548
+    },
+    {
+      "functionName": "(anonymous) flow-runtime.js?v=20260926sensor:7",
+      "ms": 256.408
+    },
+    {
+      "functionName": "eventUntil flow-runtime.js?v=20260926sensor:417",
+      "ms": 254.659
+    },
+    {
+      "functionName": "(anonymous) flow-runtime.js?v=20260926sensor:76",
+      "ms": 220.512
+    },
+    {
+      "functionName": "assemblyTargets flow-runtime.js?v=20260926sensor:68",
+      "ms": 204.59
+    },
+    {
+      "functionName": "startVisual flow-runtime.js?v=20260926sensor:293",
+      "ms": 201.816
+    },
+    {
+      "functionName": "move flow-runtime.js?v=20260926sensor:106",
+      "ms": 194.504
+    },
+    {
+      "functionName": "routeLink flow-runtime.js?v=20260926sensor:77",
+      "ms": 183.591
+    },
+    {
+      "functionName": "drainSignals flow-runtime.js?v=20260926sensor:265",
+      "ms": 167.182
+    },
+    {
+      "functionName": "spec flow-runtime.js?v=20260926sensor:7",
+      "ms": 167.073
+    },
+    {
+      "functionName": "_runDirtyBatches engine-fast-runtime.js?v=20260914flow2:485",
+      "ms": 166.57
+    },
+    {
+      "functionName": "mark flow-runtime.js?v=20260926sensor:75",
+      "ms": 162.046
+    },
+    {
+      "functionName": "release flow-runtime.js?v=20260926sensor:169",
+      "ms": 153.177
+    },
+    {
+      "functionName": "_pullGraphDirtyIds engine-fast-runtime.js?v=20260914flow2:365",
+      "ms": 146.637
+    },
+    {
+      "functionName": "q.getInputData litegraph.min.js?v=0.7.13:78",
+      "ms": 127.233
+    }
+  ]
+}

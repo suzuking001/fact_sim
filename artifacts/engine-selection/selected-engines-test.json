@@ -1,0 +1,123 @@
+{
+  "ok": false,
+  "status": "FAIL",
+  "startedAt": "2026-09-28T14:04:19.988Z",
+  "finishedAt": "2026-09-28T14:04:21.451Z",
+  "engines": [
+    "dt",
+    "event",
+    "event-fast"
+  ],
+  "summary": {
+    "passed": 24,
+    "warned": 0,
+    "failed": 8,
+    "passedCases": 24,
+    "warnedCases": 0,
+    "failedCases": 0,
+    "caseCount": 24,
+    "failureCount": 8,
+    "warningCount": 0,
+    "engineCount": 3,
+    "suite": "quick",
+    "seedCount": 1,
+    "exampleCount": 8,
+    "includesCurrentGraph": false,
+    "stoppedEarly": false,
+    "reruns": 0,
+    "stopOnFirstFailure": false
+  },
+  "issues": [
+    {
+      "severity": "error",
+      "code": "FINAL_STATE_DELTA",
+      "engine": "event",
+      "scenario": "branch",
+      "path": null,
+      "nodeId": null,
+      "message": "Final node states differ from dt on branch, changed=1:Source: idle|IDLE != wait|WAIT",
+      "artifacts": null
+    },
+    {
+      "severity": "error",
+      "code": "FINAL_ENTITY_SET_DELTA",
+      "engine": "event",
+      "scenario": "branch",
+      "path": null,
+      "nodeId": null,
+      "message": "Final entity set differs from dt on branch, extra=A #009:A",
+      "artifacts": null
+    },
+    {
+      "severity": "error",
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event",
+      "scenario": "branch",
+      "path": null,
+      "nodeId": null,
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on branch",
+      "artifacts": null
+    },
+    {
+      "severity": "error",
+      "code": "FINAL_STATE_DELTA",
+      "engine": "event-fast",
+      "scenario": "branch",
+      "path": null,
+      "nodeId": null,
+      "message": "Final node states differ from dt on branch, changed=1:Source: idle|IDLE != wait|WAIT",
+      "artifacts": null
+    },
+    {
+      "severity": "error",
+      "code": "FINAL_ENTITY_SET_DELTA",
+      "engine": "event-fast",
+      "scenario": "branch",
+      "path": null,
+      "nodeId": null,
+      "message": "Final entity set differs from dt on branch, extra=A #009:A",
+      "artifacts": null
+    },
+    {
+      "severity": "error",
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event-fast",
+      "scenario": "branch",
+      "path": null,
+      "nodeId": null,
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on branch",
+      "artifacts": null
+    },
+    {
+      "severity": "error",
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event",
+      "scenario": "pallet_station_demo",
+      "path": null,
+      "nodeId": null,
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on pallet_station_demo",
+      "artifacts": null
+    },
+    {
+      "severity": "error",
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event-fast",
+      "scenario": "pallet_station_demo",
+      "path": null,
+      "nodeId": null,
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on pallet_station_demo",
+      "artifacts": null
+    }
+  ],
+  "artifactDir": "artifacts/engine-test/2026-09-28T14-04-19-988Z__engine-selection",
+  "artifactFiles": {
+    "session": "artifacts/engine-test/2026-09-28T14-04-19-988Z__engine-selection/session.json",
+    "summary": "artifacts/engine-test/2026-09-28T14-04-19-988Z__engine-selection/summary.json",
+    "cases": "artifacts/engine-test/2026-09-28T14-04-19-988Z__engine-selection/cases.json",
+    "failures": "artifacts/engine-test/2026-09-28T14-04-19-988Z__engine-selection/failures.json"
+  },
+  "mcpHint": {
+    "tool": "engine_test",
+    "action": "latest"
+  }
+}

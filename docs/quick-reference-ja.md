@@ -122,16 +122,10 @@
 - `event-fast (compiled)`
   高速化系の基本形
 
-環境や graph により利用されることがあるもの:
-- `event-fast-worker`
-  Web Worker を使う高速化系
-- `event-fast-par`
-  並列実行を使う高速化系
-
 迷ったときの目安:
 - 挙動確認をしたい: `dt`
 - 通常利用: `event (heap)`
-- 高速化を試したい: `event-fast*`
+- 高速化を試したい: `event-fast`。今後の高速化もこのエンジンを対象にする
 
 ## 7. よく使う操作
 

@@ -1,0 +1,147 @@
+{
+  "date": "2026-09-28T15:42:54.843Z",
+  "flowScenarios": {
+    "count": 26,
+    "failures": []
+  },
+  "topology": [
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "sample exercises synchronization",
+      "ok": true
+    },
+    {
+      "name": "Flow replacement invalidates",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "Flow topology edits invalidate",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "group assignment edits invalidate without a graph revision",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "membership edits invalidate",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "graph order changes invalidate",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "group replacement invalidates",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "group additions invalidate",
+      "ok": true
+    },
+    {
+      "name": "compiled membership matches original order",
+      "ok": true
+    },
+    {
+      "name": "fresh plan is valid",
+      "ok": true
+    },
+    {
+      "name": "graph edits invalidate",
+      "ok": true
+    }
+  ],
+  "lifecycle": {
+    "reused": true,
+    "cleared": true,
+    "rebuilt": true
+  },
+  "parity": {
+    "status": "PASS",
+    "summary": {
+      "passed": 80,
+      "warned": 0,
+      "failed": 0,
+      "passedCases": 80,
+      "warnedCases": 0,
+      "failedCases": 0,
+      "caseCount": 80,
+      "failureCount": 0,
+      "warningCount": 0,
+      "engineCount": 5,
+      "suite": "quick",
+      "seedCount": 2,
+      "exampleCount": 8,
+      "includesCurrentGraph": false,
+      "stoppedEarly": false,
+      "reruns": 0,
+      "stopOnFirstFailure": false
+    },
+    "failures": [],
+    "warnings": []
+  },
+  "ok": true
+}

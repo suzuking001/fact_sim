@@ -9,7 +9,7 @@ const mcpRoot = path.resolve(scriptDir, "..");
 const child = spawn(process.execPath, [
   path.join(scriptDir, "watch-auto-improve-status.mjs"),
   "--status-file",
-  path.join("..", "artifacts", "auto-optimize", "latest-event-fast-par-status.json"),
+  path.join("..", "artifacts", "auto-optimize", "latest-event-fast-status.json"),
   ...process.argv.slice(2)
 ], {
   cwd: mcpRoot,

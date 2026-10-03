@@ -1,0 +1,540 @@
+{
+  "inputLinks": 32,
+  "baselineLinks": 20,
+  "finalLinks": 20,
+  "repair": {
+    "nodeCount": 14,
+    "linkCount": 20,
+    "repairedInputCount": 20,
+    "repairedOutputCount": 20,
+    "droppedDanglingLinks": 0,
+    "droppedInvalidSlotLinks": 0,
+    "droppedDuplicateInputLinks": 0
+  },
+  "partitionCount": 2,
+  "missingRuntimeLinks": [
+    {
+      "id": 6,
+      "type": 0,
+      "origin_id": 1,
+      "origin_slot": 0,
+      "target_id": 6,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 11,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 1,
+      "target_id": 11,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 14,
+      "type": 0,
+      "origin_id": 7,
+      "origin_slot": 0,
+      "target_id": 3,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 15,
+      "type": 0,
+      "origin_id": 10,
+      "origin_slot": 0,
+      "target_id": 13,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 16,
+      "type": 0,
+      "origin_id": 13,
+      "origin_slot": 0,
+      "target_id": 2,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 17,
+      "type": 0,
+      "origin_id": 4,
+      "origin_slot": 0,
+      "target_id": 10,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 18,
+      "type": 0,
+      "origin_id": 13,
+      "origin_slot": 1,
+      "target_id": 2,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 19,
+      "type": 0,
+      "origin_id": 10,
+      "origin_slot": 1,
+      "target_id": 13,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 20,
+      "type": 0,
+      "origin_id": 6,
+      "origin_slot": 0,
+      "target_id": 10,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 21,
+      "type": 0,
+      "origin_id": 15,
+      "origin_slot": 0,
+      "target_id": 14,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 22,
+      "type": 0,
+      "origin_id": 11,
+      "origin_slot": 0,
+      "target_id": 16,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 23,
+      "type": 0,
+      "origin_id": 16,
+      "origin_slot": 0,
+      "target_id": 4,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 24,
+      "type": 0,
+      "origin_id": 16,
+      "origin_slot": 1,
+      "target_id": 4,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 25,
+      "type": 0,
+      "origin_id": 11,
+      "origin_slot": 1,
+      "target_id": 16,
+      "target_slot": 2,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 26,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 3,
+      "target_id": 11,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 27,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 0,
+      "target_id": 17,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 28,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 2,
+      "target_id": 17,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 29,
+      "type": 0,
+      "origin_id": 17,
+      "origin_slot": 0,
+      "target_id": 7,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 30,
+      "type": 0,
+      "origin_id": 14,
+      "origin_slot": 0,
+      "target_id": 16,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 31,
+      "type": "entity",
+      "origin_id": 18,
+      "origin_slot": 0,
+      "target_id": 17,
+      "target_slot": 2,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    }
+  ],
+  "changedSlots": [],
+  "missingAfterRepair": [
+    {
+      "id": 6,
+      "type": 0,
+      "origin_id": 1,
+      "origin_slot": 0,
+      "target_id": 6,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 11,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 1,
+      "target_id": 11,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 14,
+      "type": 0,
+      "origin_id": 7,
+      "origin_slot": 0,
+      "target_id": 3,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 15,
+      "type": 0,
+      "origin_id": 10,
+      "origin_slot": 0,
+      "target_id": 13,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 16,
+      "type": 0,
+      "origin_id": 13,
+      "origin_slot": 0,
+      "target_id": 2,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 17,
+      "type": 0,
+      "origin_id": 4,
+      "origin_slot": 0,
+      "target_id": 10,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 18,
+      "type": 0,
+      "origin_id": 13,
+      "origin_slot": 1,
+      "target_id": 2,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 19,
+      "type": 0,
+      "origin_id": 10,
+      "origin_slot": 1,
+      "target_id": 13,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 20,
+      "type": 0,
+      "origin_id": 6,
+      "origin_slot": 0,
+      "target_id": 10,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 21,
+      "type": 0,
+      "origin_id": 15,
+      "origin_slot": 0,
+      "target_id": 14,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 22,
+      "type": 0,
+      "origin_id": 11,
+      "origin_slot": 0,
+      "target_id": 16,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 23,
+      "type": 0,
+      "origin_id": 16,
+      "origin_slot": 0,
+      "target_id": 4,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 24,
+      "type": 0,
+      "origin_id": 16,
+      "origin_slot": 1,
+      "target_id": 4,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 25,
+      "type": 0,
+      "origin_id": 11,
+      "origin_slot": 1,
+      "target_id": 16,
+      "target_slot": 2,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 26,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 3,
+      "target_id": 11,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 27,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 0,
+      "target_id": 17,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 28,
+      "type": 0,
+      "origin_id": 2,
+      "origin_slot": 2,
+      "target_id": 17,
+      "target_slot": 1,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 29,
+      "type": 0,
+      "origin_id": 17,
+      "origin_slot": 0,
+      "target_id": 7,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 30,
+      "type": 0,
+      "origin_id": 14,
+      "origin_slot": 0,
+      "target_id": 16,
+      "target_slot": 0,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    },
+    {
+      "id": 31,
+      "type": "entity",
+      "origin_id": 18,
+      "origin_slot": 0,
+      "target_id": 17,
+      "target_slot": 2,
+      "_data": null,
+      "_pos": {
+        "0": 0,
+        "1": 0
+      }
+    }
+  ]
+}

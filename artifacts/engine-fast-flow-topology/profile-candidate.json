@@ -1,0 +1,135 @@
+{
+  "run": {
+    "elapsedMs": 5254.600000023842,
+    "timeMs": 30000000,
+    "stats": {
+      "engine": "event-fast",
+      "simTimeMs": 30000000,
+      "updateCalls": 3000,
+      "nodeExec": 1558663,
+      "kernelExec": 1558663,
+      "compatExec": 0,
+      "heapPush": 242637,
+      "heapPop": 242610,
+      "heapReschedule": 476568,
+      "sameTimeBatches": 147954,
+      "sameTimeNodes": 1558663,
+      "sameTimeOverflows": 0,
+      "dirtyEnqueue": 1558663,
+      "boundaryHits": 0,
+      "runtimeMode": "compiled",
+      "fallbackNodeCount": 0,
+      "executableFallbackCount": 0,
+      "executableFallbackTypes": [],
+      "lastCompileMs": 0,
+      "lastUpdateWallMs": 1.5,
+      "maxQueueA": 145,
+      "maxQueueB": 0,
+      "maxHeapSize": 46,
+      "heapSize": 27
+    },
+    "completed": 4021
+  },
+  "hottest": [
+    {
+      "functionName": "execute flow-runtime.js?v=20260929topology:478",
+      "ms": 456.966
+    },
+    {
+      "functionName": "execute engine-fast-kernels.js?v=20260929hotpaths:8",
+      "ms": 348.48
+    },
+    {
+      "functionName": "runtime flow-runtime.js?v=20260929topology:68",
+      "ms": 304.898
+    },
+    {
+      "functionName": "syncGroups flow-runtime.js?v=20260929topology:415",
+      "ms": 244.627
+    },
+    {
+      "functionName": "updateState flow-runtime.js?v=20260929topology:460",
+      "ms": 223.892
+    },
+    {
+      "functionName": "topology flow-runtime.js?v=20260929topology:7",
+      "ms": 213.192
+    },
+    {
+      "functionName": "receive flow-runtime.js?v=20260929topology:246",
+      "ms": 174.294
+    },
+    {
+      "functionName": "appendVisual flow-runtime.js?v=20260929topology:46",
+      "ms": 135.469
+    },
+    {
+      "functionName": "move flow-runtime.js?v=20260929topology:199",
+      "ms": 128.469
+    },
+    {
+      "functionName": "eventUntil flow-runtime.js?v=20260929topology:528",
+      "ms": 125.845
+    },
+    {
+      "functionName": "drainSignals flow-runtime.js?v=20260929topology:358",
+      "ms": 122.623
+    },
+    {
+      "functionName": "_runDirtyBatches engine-fast-runtime.js?v=20260929topology:516",
+      "ms": 121.186
+    },
+    {
+      "functionName": "flow flow-runtime.js?v=20260929topology:6",
+      "ms": 111.657
+    },
+    {
+      "functionName": "mark flow-runtime.js?v=20260929topology:146",
+      "ms": 104.997
+    },
+    {
+      "functionName": "free flow-runtime.js?v=20260929topology:167",
+      "ms": 103.53
+    },
+    {
+      "functionName": "canAccept flow-runtime.js?v=20260929topology:224",
+      "ms": 102.422
+    },
+    {
+      "functionName": "(program) :0",
+      "ms": 99.22
+    },
+    {
+      "functionName": "q.getInputData litegraph.min.js?v=0.7.13:78",
+      "ms": 94.527
+    },
+    {
+      "functionName": "release flow-runtime.js?v=20260929topology:262",
+      "ms": 92.087
+    },
+    {
+      "functionName": "_pullGraphDirtyIds engine-fast-runtime.js?v=20260929topology:396",
+      "ms": 86.56
+    },
+    {
+      "functionName": "visit flow-runtime.js?v=20260929topology:302",
+      "ms": 82.147
+    },
+    {
+      "functionName": "reaches flow-runtime.js?v=20260929topology:212",
+      "ms": 73.366
+    },
+    {
+      "functionName": "routeLink flow-runtime.js?v=20260929topology:148",
+      "ms": 72.854
+    },
+    {
+      "functionName": "(garbage collector) :0",
+      "ms": 68.702
+    },
+    {
+      "functionName": "outgoing flow-runtime.js?v=20260929topology:147",
+      "ms": 68.275
+    }
+  ]
+}

@@ -19,7 +19,7 @@ FACT SIM は、ブラウザ上で動作するノードベースの汎用離散�
 
 の 2 つへ集中させている点にある。`WAIT` や `IDLE` は独立の時間パラメータを持つのではなく、上下流の接続関係、滞留、受入可否から内生的に決まる。これにより、詳細作業を過剰に分解せずに、詰まり、待ち、同期、搬送制約を含む系全体の挙動を比較的少数のパラメータで再現できる。
 
-さらに FACT SIM は、固定刻み時間で進む `dt` エンジン、次イベント時刻へジャンプする `event` エンジン、compiled 実行系である `event-fast`、その worker 分離版 `event-fast-worker`、並列 worker 実行版 `event-fast-par` を備える。現行実装では `dt` が比較基準の意味論を与え、`event` および `event-fast*` はその意味論を保ちながら実行効率を高める方向で設計されている。
+さらに FACT SIM は、固定刻み時間で進む `dt` エンジン、次イベント時刻へジャンプする `event` エンジン、compiled 実行系である `event-fast` の3種類を備える。現行実装では `dt` が比較基準の意味論を与え、`event` および `event-fast` はその意味論を保ちながら実行効率を高める方向で設計されている。今後の高速化は `event-fast` を対象にする。
 
 ---
 
@@ -311,8 +311,6 @@ FACT SIM には複数の実行エンジンがある。
 - `dt`
 - `event`
 - `event-fast`
-- `event-fast-worker`
-- `event-fast-par`
 
 ### 7.1 dt エンジン
 
@@ -350,26 +348,7 @@ $$
 
 `event-fast` は `event` の意味論を保ちながら、compiled graph、typed array 寄りの実行状態、軽量 kernel、compat fallback を用いてオーバーヘッドを削減する高速化バリアントである。意味論的には `event` 系の一種であり、`dt` との parity を `Engine Test` で確認する前提になっている。
 
-### 7.4 event-fast-worker
-
-`event-fast-worker` は `event-fast` を Web Worker 側へ移して UI thread と分離する構成である。主目的は UI の応答性改善であり、graph が worker 実行に不向きな場合は安全側へ fallback する。
-
-### 7.5 event-fast-par
-
-`event-fast-par` は graph partition と multi-worker 実行を用いる並列版である。概念的には partition ごとに局所イベント列を持ち、境界イベントを coordinator が同期する構成である。ただし現行実装では、graph 構造や fallback ノード種別によっては parallel 実行を避け、安全な `event-fast-worker` または `event-fast` 相当へ落とす。
-
-したがって `event-fast-par` は
-
-- 常に並列で動くエンジン
-
-ではなく、
-
-- 並列化可能な graph では multi-worker 実行
-- そうでない graph では parity 優先で fallback
-
-する実装と捉えるのが正確である。
-
-### 7.6 計算量の見方
+### 7.4 計算量の見方
 
 固定刻み幅法では、おおむね
 
@@ -455,7 +434,6 @@ FACT SIM は単なるアニメーションではなく、
 2. script による条件分岐は柔軟だが、形式検証を難しくする。
 3. `event-fast` の compiled kernel と compat fallback の境界は、理論モデルとしてさらに整理の余地がある。
 4. `Carrier Route` や `Shuttle Stage` は Equipment より複雑であり、別節での詳細定式化が望ましい。
-5. `event-fast-worker` と `event-fast-par` は意味論優先で fallback を含むため、常に同一の実行戦略で動くわけではない。
 
 ---
 
@@ -497,5 +475,3 @@ FACT SIM は、ブラウザ上で動作する実用的なノードベース離�
 | `dt` | 基準意味論 | parity 比較のベースライン |
 | `event` | 単一スレッド event heap | `_until` に基づくジャンプ |
 | `event-fast` | compiled event 実行 | kernel + compat fallback |
-| `event-fast-worker` | worker 分離 | UI thread と simulation 分離 |
-| `event-fast-par` | 並列 worker 実行 | graph 条件により fallback あり |

@@ -1,0 +1,135 @@
+{
+  "run": {
+    "elapsedMs": 6965.900000035763,
+    "timeMs": 30000000,
+    "stats": {
+      "engine": "event-fast",
+      "simTimeMs": 30000000,
+      "updateCalls": 3000,
+      "nodeExec": 1558663,
+      "kernelExec": 1558663,
+      "compatExec": 0,
+      "heapPush": 242637,
+      "heapPop": 242610,
+      "heapReschedule": 476568,
+      "sameTimeBatches": 147954,
+      "sameTimeNodes": 1558663,
+      "sameTimeOverflows": 0,
+      "dirtyEnqueue": 1558663,
+      "boundaryHits": 0,
+      "runtimeMode": "compiled",
+      "fallbackNodeCount": 0,
+      "executableFallbackCount": 0,
+      "executableFallbackTypes": [],
+      "lastCompileMs": 0,
+      "lastUpdateWallMs": 2.100000023841858,
+      "maxQueueA": 145,
+      "maxQueueB": 0,
+      "maxHeapSize": 46,
+      "heapSize": 27
+    },
+    "completed": 4021
+  },
+  "hottest": [
+    {
+      "functionName": "execute flow-runtime.js?v=20260929hotpaths:441",
+      "ms": 467.194
+    },
+    {
+      "functionName": "activeCells flow-runtime.js?v=20260929hotpaths:65",
+      "ms": 407.721
+    },
+    {
+      "functionName": "execute engine-fast-kernels.js?v=20260929hotpaths:8",
+      "ms": 382.106
+    },
+    {
+      "functionName": "runtime flow-runtime.js?v=20260929hotpaths:64",
+      "ms": 314.75
+    },
+    {
+      "functionName": "syncGroups flow-runtime.js?v=20260929hotpaths:378",
+      "ms": 258.442
+    },
+    {
+      "functionName": "updateState flow-runtime.js?v=20260929hotpaths:423",
+      "ms": 252.672
+    },
+    {
+      "functionName": "(anonymous) flow-runtime.js?v=20260929hotpaths:7",
+      "ms": 209.615
+    },
+    {
+      "functionName": "receive flow-runtime.js?v=20260929hotpaths:209",
+      "ms": 190.643
+    },
+    {
+      "functionName": "assemblyTargets flow-runtime.js?v=20260929hotpaths:124",
+      "ms": 176.925
+    },
+    {
+      "functionName": "flow flow-runtime.js?v=20260929hotpaths:6",
+      "ms": 167.545
+    },
+    {
+      "functionName": "eventUntil flow-runtime.js?v=20260929hotpaths:491",
+      "ms": 165.318
+    },
+    {
+      "functionName": "appendVisual flow-runtime.js?v=20260929hotpaths:42",
+      "ms": 159.49
+    },
+    {
+      "functionName": "(anonymous) flow-runtime.js?v=20260929hotpaths:132",
+      "ms": 153.261
+    },
+    {
+      "functionName": "spec flow-runtime.js?v=20260929hotpaths:7",
+      "ms": 143.446
+    },
+    {
+      "functionName": "move flow-runtime.js?v=20260929hotpaths:162",
+      "ms": 136.38
+    },
+    {
+      "functionName": "_runDirtyBatches engine-fast-runtime.js?v=20260929hotpaths:512",
+      "ms": 118.993
+    },
+    {
+      "functionName": "drainSignals flow-runtime.js?v=20260929hotpaths:321",
+      "ms": 106.199
+    },
+    {
+      "functionName": "_pullGraphDirtyIds engine-fast-runtime.js?v=20260929hotpaths:392",
+      "ms": 103.462
+    },
+    {
+      "functionName": "routeLink flow-runtime.js?v=20260929hotpaths:133",
+      "ms": 101.548
+    },
+    {
+      "functionName": "mark flow-runtime.js?v=20260929hotpaths:131",
+      "ms": 99.569
+    },
+    {
+      "functionName": "(program) :0",
+      "ms": 97.135
+    },
+    {
+      "functionName": "startVisual flow-runtime.js?v=20260929hotpaths:349",
+      "ms": 94.068
+    },
+    {
+      "functionName": "release flow-runtime.js?v=20260929hotpaths:225",
+      "ms": 93.751
+    },
+    {
+      "functionName": "q.getInputData litegraph.min.js?v=0.7.13:78",
+      "ms": 91.808
+    },
+    {
+      "functionName": "canAccept flow-runtime.js?v=20260929hotpaths:187",
+      "ms": 91.367
+    }
+  ]
+}

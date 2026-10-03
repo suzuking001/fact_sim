@@ -1,0 +1,816 @@
+{
+  "date": "2026-09-29T13:39:59.466Z",
+  "targetSimMs": 300000,
+  "stepMs": 10000,
+  "repeats": 5,
+  "engineChanged": false,
+  "render": false,
+  "timeline": false,
+  "examples": [
+    {
+      "example": "sample_line2",
+      "nodeCount": 145,
+      "syncGroupCount": 1,
+      "completed": 32,
+      "exactFlowStateMatch": true,
+      "medians": {
+        "baseline": 4591.099999964237,
+        "sync": 1207.300000011921,
+        "flow": 4361.300000011921,
+        "combined": 990.6999999880791
+      },
+      "ratios": {
+        "baseline": 1,
+        "sync": 3.8027830695924,
+        "flow": 1.0526907114740303,
+        "combined": 4.634198041808299
+      },
+      "runs": [
+        {
+          "round": 0,
+          "config": "baseline",
+          "wallMs": 4471.800000011921,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 0,
+          "config": "sync",
+          "wallMs": 1217.199999988079,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 0,
+          "config": "flow",
+          "wallMs": 4158,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 0,
+          "config": "combined",
+          "wallMs": 1046,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 1,
+          "config": "combined",
+          "wallMs": 1085.3999999761581,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 1,
+          "config": "flow",
+          "wallMs": 4327,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 1,
+          "config": "sync",
+          "wallMs": 1314.8999999761581,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 1,
+          "config": "baseline",
+          "wallMs": 4877.299999952316,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 2,
+          "config": "baseline",
+          "wallMs": 4786.699999988079,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 2,
+          "config": "sync",
+          "wallMs": 1207.300000011921,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 2,
+          "config": "flow",
+          "wallMs": 4474.699999988079,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 2,
+          "config": "combined",
+          "wallMs": 988.0999999642372,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 3,
+          "config": "combined",
+          "wallMs": 990.6999999880791,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 3,
+          "config": "flow",
+          "wallMs": 4659.300000011921,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 3,
+          "config": "sync",
+          "wallMs": 1158.199999988079,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 3,
+          "config": "baseline",
+          "wallMs": 4591.099999964237,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 4,
+          "config": "baseline",
+          "wallMs": 4296.800000011921,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 4,
+          "config": "sync",
+          "wallMs": 1065.5,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 4,
+          "config": "flow",
+          "wallMs": 4361.300000011921,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        },
+        {
+          "round": 4,
+          "config": "combined",
+          "wallMs": 904.4000000357628,
+          "simTimeMs": 300000,
+          "nodeCount": 145,
+          "syncGroupCount": 1,
+          "completed": 32
+        }
+      ]
+    },
+    {
+      "example": "sample_line1",
+      "nodeCount": 63,
+      "syncGroupCount": 0,
+      "completed": 44,
+      "exactFlowStateMatch": true,
+      "medians": {
+        "baseline": 437.2000000476837,
+        "sync": 439.0999999642372,
+        "flow": 326.5999999642372,
+        "combined": 327.5
+      },
+      "ratios": {
+        "baseline": 1,
+        "sync": 0.9956729676230739,
+        "flow": 1.3386405391780687,
+        "combined": 1.3349618322066679
+      },
+      "runs": [
+        {
+          "round": 0,
+          "config": "baseline",
+          "wallMs": 426.5,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 0,
+          "config": "sync",
+          "wallMs": 420.4000000357628,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 0,
+          "config": "flow",
+          "wallMs": 326.5999999642372,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 0,
+          "config": "combined",
+          "wallMs": 348.30000001192093,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 1,
+          "config": "combined",
+          "wallMs": 327,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 1,
+          "config": "flow",
+          "wallMs": 322,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 1,
+          "config": "sync",
+          "wallMs": 418.39999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 1,
+          "config": "baseline",
+          "wallMs": 437.2000000476837,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 2,
+          "config": "baseline",
+          "wallMs": 408.89999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 2,
+          "config": "sync",
+          "wallMs": 439.0999999642372,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 2,
+          "config": "flow",
+          "wallMs": 340.39999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 2,
+          "config": "combined",
+          "wallMs": 324.69999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 3,
+          "config": "combined",
+          "wallMs": 327.5,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 3,
+          "config": "flow",
+          "wallMs": 325.9000000357628,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 3,
+          "config": "sync",
+          "wallMs": 519.1000000238419,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 3,
+          "config": "baseline",
+          "wallMs": 539.1000000238419,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 4,
+          "config": "baseline",
+          "wallMs": 528,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 4,
+          "config": "sync",
+          "wallMs": 581,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 4,
+          "config": "flow",
+          "wallMs": 338.39999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        },
+        {
+          "round": 4,
+          "config": "combined",
+          "wallMs": 334.69999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 63,
+          "syncGroupCount": 0,
+          "completed": 44
+        }
+      ]
+    },
+    {
+      "example": "parallel_benchmark",
+      "nodeCount": 32,
+      "syncGroupCount": 0,
+      "completed": 600,
+      "exactFlowStateMatch": true,
+      "medians": {
+        "baseline": 128.80000001192093,
+        "sync": 132.30000001192093,
+        "flow": 105.40000003576279,
+        "combined": 107.19999998807907
+      },
+      "ratios": {
+        "baseline": 1,
+        "sync": 0.9735449735473573,
+        "flow": 1.2220113848977077,
+        "combined": 1.2014925375582448
+      },
+      "runs": [
+        {
+          "round": 0,
+          "config": "baseline",
+          "wallMs": 135.89999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 0,
+          "config": "sync",
+          "wallMs": 132.30000001192093,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 0,
+          "config": "flow",
+          "wallMs": 107.5,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 0,
+          "config": "combined",
+          "wallMs": 102.30000001192093,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 1,
+          "config": "combined",
+          "wallMs": 107.19999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 1,
+          "config": "flow",
+          "wallMs": 107.80000001192093,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 1,
+          "config": "sync",
+          "wallMs": 145.39999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 1,
+          "config": "baseline",
+          "wallMs": 138.29999995231628,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 2,
+          "config": "baseline",
+          "wallMs": 128.0999999642372,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 2,
+          "config": "sync",
+          "wallMs": 126.10000002384186,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 2,
+          "config": "flow",
+          "wallMs": 105.40000003576279,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 2,
+          "config": "combined",
+          "wallMs": 105.20000004768372,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 3,
+          "config": "combined",
+          "wallMs": 111.19999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 3,
+          "config": "flow",
+          "wallMs": 101.89999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 3,
+          "config": "sync",
+          "wallMs": 127.19999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 3,
+          "config": "baseline",
+          "wallMs": 127,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 4,
+          "config": "baseline",
+          "wallMs": 128.80000001192093,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 4,
+          "config": "sync",
+          "wallMs": 133.5,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 4,
+          "config": "flow",
+          "wallMs": 104.69999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        },
+        {
+          "round": 4,
+          "config": "combined",
+          "wallMs": 113.39999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 32,
+          "syncGroupCount": 0,
+          "completed": 600
+        }
+      ]
+    },
+    {
+      "example": "carrier",
+      "nodeCount": 14,
+      "syncGroupCount": 0,
+      "completed": 18,
+      "exactFlowStateMatch": true,
+      "medians": {
+        "baseline": 79.80000001192093,
+        "sync": 76.60000002384186,
+        "flow": 59.19999998807907,
+        "combined": 61.19999998807907
+      },
+      "ratios": {
+        "baseline": 1,
+        "sync": 1.0417754567504316,
+        "flow": 1.3479729734457773,
+        "combined": 1.3039215690762236
+      },
+      "runs": [
+        {
+          "round": 0,
+          "config": "baseline",
+          "wallMs": 76.30000001192093,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 0,
+          "config": "sync",
+          "wallMs": 79,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 0,
+          "config": "flow",
+          "wallMs": 59.19999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 0,
+          "config": "combined",
+          "wallMs": 61.19999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 1,
+          "config": "combined",
+          "wallMs": 61.69999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 1,
+          "config": "flow",
+          "wallMs": 62.19999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 1,
+          "config": "sync",
+          "wallMs": 76.60000002384186,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 1,
+          "config": "baseline",
+          "wallMs": 81.10000002384186,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 2,
+          "config": "baseline",
+          "wallMs": 73.39999997615814,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 2,
+          "config": "sync",
+          "wallMs": 73.90000003576279,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 2,
+          "config": "flow",
+          "wallMs": 59.69999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 2,
+          "config": "combined",
+          "wallMs": 59.10000002384186,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 3,
+          "config": "combined",
+          "wallMs": 65.60000002384186,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 3,
+          "config": "flow",
+          "wallMs": 58.90000003576279,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 3,
+          "config": "sync",
+          "wallMs": 81.20000004768372,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 3,
+          "config": "baseline",
+          "wallMs": 79.80000001192093,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 4,
+          "config": "baseline",
+          "wallMs": 81.90000003576279,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 4,
+          "config": "sync",
+          "wallMs": 76.20000004768372,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 4,
+          "config": "flow",
+          "wallMs": 56.19999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        },
+        {
+          "round": 4,
+          "config": "combined",
+          "wallMs": 56.69999998807907,
+          "simTimeMs": 300000,
+          "nodeCount": 14,
+          "syncGroupCount": 0,
+          "completed": 18
+        }
+      ]
+    }
+  ],
+  "ok": true
+}

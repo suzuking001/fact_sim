@@ -22,7 +22,7 @@
 
 - `dt`、`event (heap)`、`js/app/engine.js` は原則変更しない。無関係な UI / docs / sample も編集しない。
 - 原則編集可能なのは `js/app/engine-fast*`、`js/app/engine-test.js`、`mcp/scripts/auto-*`、`mcp/src/runtime/*` のうち自動最適化・engine test に直接関係する部分。
-- 性能改善の対象は `event-fast` / `event-fast-worker` / `event-fast-par`。夜間最適化の既定対象は `event-fast-par`。
+- 性能改善・夜間最適化の対象は `event-fast`。
 
 ## 検証
 
@@ -32,11 +32,11 @@
 4. 夜間最適化や MCP 変更は `mcp/` で `npm run build`。
 
 - 性能改善を主張する場合は benchmark を取り、改善率を明示する。
-- `index.html`・script version・worker・`event-fast*`・`engine-test` を変更したら runtime を再読み込みして検証する。UI と MCP の不一致や古い page の疑いがある場合も同様。古い runtime は false failure や古い benchmark の原因になる。
+- `index.html`・script version・`event-fast*`・`engine-test` を変更したら runtime を再読み込みして検証する。UI と MCP の不一致や古い page の疑いがある場合も同様。古い runtime は false failure や古い benchmark の原因になる。
 - 必須検証が通った後の再実行は、新しい変更・失敗・未解決の懸念がある場合に行う。
 
 ## 出力先
 
 - 一時スクリーンショット・確認画像は `tmp/`。root 直下には置かない。
 - 恒久的な test / optimization / benchmark / report / export は `artifacts/`。
-- 夜間進捗はまず `artifacts/auto-optimize/latest-event-fast-par-status.json` を読み、必要時だけ該当 iteration のログを調べる。
+- 夜間進捗はまず `artifacts/auto-optimize/latest-event-fast-status.json` を読み、必要時だけ該当 iteration のログを調べる。

@@ -1,11 +1,11 @@
 # 夜間ジョブ / 自動最適化ガイド
 
-このドキュメントでは、`fact_sim` における `event-fast-par` 向け夜間最適化ジョブの仕組みを、日本語で整理して説明します。
+このドキュメントでは、`fact_sim` における `event-fast` 向け夜間最適化ジョブの仕組みを、日本語で整理して説明します。
 
 目的は次の 4 つです。
 
 - `dt` を正しさの基準として固定する
-- 最適化対象を `event-fast-par` に限定する
+- 最適化対象を `event-fast` に限定する
 - 5 時間以上の長時間ジョブとして安全に回す
 - 正しさを壊さず、速度が改善した patch だけを採用する
 
@@ -22,7 +22,7 @@ npm run nightly:optimize
 
 現在の既定設定は次のとおりです。
 
-- 対象エンジン: `event-fast-par`
+- 対象エンジン: `event-fast`
 - ベンチマーク用 example: `parallel_benchmark`
 - 検証スイート: `quick`, `standard`
 - 正しさの基準エンジン: `dt`
@@ -65,14 +65,14 @@ flowchart LR
   CODEX --> PATCH
   PATCH --> OPT
   OPT --> ART[artifacts/auto-optimize]
-  OPT --> STAT[latest-event-fast-par-status.json]
+  OPT --> STAT[latest-event-fast-status.json]
 ```
 
 ## なぜ `dt` を基準にするのか
 
 `dt` はこのリポジトリでは「正しさ確認用の基準エンジン」として扱います。
 
-つまり、`event-fast-par` の patch は速くなるだけでは不十分で、少なくとも `dt` に対して次の parity を維持する必要があります。
+つまり、`event-fast` の patch は速くなるだけでは不十分で、少なくとも `dt` に対して次の parity を維持する必要があります。
 
 - 完了数 parity
 - work flow parity
@@ -91,12 +91,12 @@ flowchart LR
 
 夜間最適化では、触ってよいファイルを厳しく制限しています。
 
-`event-fast-par` 向けの主な対象は次です。
+`event-fast` 向けの主な対象は次です。
 
-- `js/app/engine-fast-par-host.js`
-- `js/app/engine-fast-par-worker.js`
-- `js/app/engine-fast-par-partitioner.js`
-- 必要に応じて許可された `event-fast*` runtime 周辺
+- `js/app/engine-fast-runtime.js`
+- `js/app/engine-fast-compat.js`
+- `js/app/engine-fast-kernels.js`
+- `js/app/engine-fast-compiler.js`
 
 一方、次は保護対象です。
 
@@ -138,7 +138,7 @@ artifacts/auto-optimize/<timestamp>__<label>/
 最新 status は常に次へ出力されます。
 
 ```text
-artifacts/auto-optimize/latest-event-fast-par-status.json
+artifacts/auto-optimize/latest-event-fast-status.json
 ```
 
 リアルタイム監視は次で起動できます。
@@ -151,7 +151,7 @@ npm run watch:auto-optimize
 Windows では次のバッチでも開けます。
 
 ```bat
-scripts/watch_event_fast_par_status.bat
+scripts/watch_event_fast_status.bat
 ```
 
 監視画面で見られるもの:
@@ -230,7 +230,7 @@ patch は次をすべて満たしたときだけ採用されます。
 
 夜間ジョブの結果確認は次の順が効率的です。
 
-1. `latest-event-fast-par-status.json`
+1. `latest-event-fast-status.json`
 2. 最新 session の `summary.md`
 3. `session.json`
 4. `benchmark-delta.iteration-<n>.json`
@@ -263,5 +263,5 @@ npm run watch:auto-optimize
 Windows 監視バッチ:
 
 ```bat
-scripts/watch_event_fast_par_status.bat
+scripts/watch_event_fast_status.bat
 ```

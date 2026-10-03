@@ -156,7 +156,7 @@ async function resolveStatusFile(cli) {
       : path.resolve(repoRoot, cli.statusFile);
   }
   if (!cli.job) {
-    return path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-par-status.json");
+    return path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-status.json");
   }
   const jobPath = path.isAbsolute(cli.job) ? cli.job : path.resolve(repoRoot, cli.job);
   const job = await readJson(jobPath);
@@ -164,7 +164,7 @@ async function resolveStatusFile(cli) {
   if (fromJob) {
     return path.isAbsolute(fromJob) ? fromJob : path.resolve(repoRoot, fromJob);
   }
-  return path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-par-status.json");
+  return path.join(repoRoot, "artifacts", "auto-optimize", "latest-event-fast-status.json");
 }
 
 async function render(cli, statusFile) {

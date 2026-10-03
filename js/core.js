@@ -122,11 +122,26 @@ function reflectSpeedUI(v){
   }catch(e){}
 }
 
+function onPlaybackSpeedChanged(previousSpeed, previousFastest){
+  if(speed === previousSpeed && fastMode === previousFastest) return;
+  // Restart elapsed-time and factor measurements at the new playback setting.
+  lastRealMs = wallNowMs();
+  lastUiUpdateMs = 0;
+  resetRealtimeFactorSamples();
+  const engine = window.App && window.App.engine;
+  if(engine && typeof engine.onPlaybackSpeedChanged === 'function'){
+    engine.onPlaybackSpeedChanged({ speed, fastest: fastMode, previousSpeed, previousFastest });
+  }
+}
+
 function setSpeed(v){
   const n = Number(v);
   if(!isFinite(n)) return;
+  const previousSpeed = speed;
+  const previousFastest = fastMode;
   speed = clampSpeed(n);
   fastMode = false;
+  onPlaybackSpeedChanged(previousSpeed, previousFastest);
   applyRenderSuppression(simRunning && fastMode);
   updateSimTime();
   reflectSpeedUI(speed);
@@ -134,7 +149,9 @@ function setSpeed(v){
 }
 
 function setFastestMode(enabled){
+  const previousFastest = fastMode;
   fastMode = !!enabled;
+  onPlaybackSpeedChanged(speed, previousFastest);
   applyRenderSuppression(simRunning && fastMode);
   updateSimTime();
   reflectSpeedUI(speed);
@@ -287,6 +304,7 @@ function startSimLoop(stepFn){
   const tick = (ts)=>{
     if(!simRunning) return;
     if(fastMode){
+      lastRealMs = ts;
       const simDeltaMs = FASTEST_STEP_REAL_MS * FASTEST_BASE_SPEED;
       const begin = performance.now();
       let loops = 0;

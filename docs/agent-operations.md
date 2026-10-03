@@ -72,8 +72,8 @@ npm run nightly:optimize
 
 最新ステータス:
 
-- `artifacts/auto-optimize/latest-event-fast-par-status.json`
-- `artifacts/auto-optimize/latest-event-fast-par-status.md`
+- `artifacts/auto-optimize/latest-event-fast-status.json`
+- `artifacts/auto-optimize/latest-event-fast-status.md`
 
 
 ## リアルタイム監視
@@ -88,7 +88,7 @@ npm run watch:auto-optimize
 Windows では root のバッチも使えます。
 
 ```bat
-scripts/watch_event_fast_par_status.bat
+scripts/watch_event_fast_status.bat
 ```
 
 監視画面には次が出ます。
@@ -125,7 +125,7 @@ scripts/watch_event_fast_par_status.bat
 - `Use fact-sim-ai MCP to add an equipment node after node 12 and connect work ports.`
 - `Use fact-sim-ai MCP to build a small blueprint, run 1000ms, and report throughput.`
 - `Use fact-sim-ai MCP to run engine_test in standard suite with saveArtifacts=true and summarize failures only.`
-- `Use fact-sim-ai MCP to benchmark event-fast-par on parallel_benchmark and compare it with the latest baseline.`
+- `Use fact-sim-ai MCP to benchmark event-fast on parallel_benchmark and compare it with the latest baseline.`
 
 
 ## プロンプトテンプレート
@@ -143,7 +143,7 @@ scripts/watch_event_fast_par_status.bat
   `Use fact-sim-ai MCP. Run engine_test with suite=<quick|standard|soak>, seeds=<...>, strictFinalParity=<true|false>, saveArtifacts=true, and summarize only failures and warnings.`
 
 - overnight optimization status  
-  `Read artifacts/auto-optimize/latest-event-fast-par-status.json and summarize current improvement %, iteration, status, and whether the delegate is making progress.`
+  `Read artifacts/auto-optimize/latest-event-fast-status.json and summarize current improvement %, iteration, status, and whether the delegate is making progress.`
 
 - export workflow  
   `Use fact-sim-ai MCP. Save the current graph JSON, snapshot PNG, and embedded HTML, then return only the saved paths.`

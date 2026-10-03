@@ -1,0 +1,2245 @@
+{
+  "originalEngineTest": "HEAD:js/app/engine-test.js",
+  "sameIssues": true,
+  "baseline": {
+    "kind": "engine-test-report",
+    "version": 1,
+    "ok": false,
+    "status": "FAIL",
+    "startedAt": "2026-09-29T13:28:17.083Z",
+    "finishedAt": "2026-09-29T13:28:17.356Z",
+    "options": {
+      "suite": "standard",
+      "engines": [
+        "dt",
+        "event",
+        "event-fast"
+      ],
+      "includeCurrentGraph": false,
+      "includeExamples": true,
+      "examples": [
+        "branch",
+        "pallet_station_demo"
+      ],
+      "targetSimMs": 30000,
+      "maxWallMs": 2500,
+      "realStepMs": 16,
+      "maxLoops": 25000,
+      "liveProbeTargetSimMs": 5000,
+      "liveProbeMaxWallMs": 1200,
+      "liveProbeMaxLoops": 320,
+      "liveStateSampleStepMs": 250,
+      "strictFinalParity": true,
+      "seed": 1,
+      "seeds": [
+        1
+      ],
+      "reruns": 0,
+      "stopOnFirstFailure": false,
+      "saveArtifacts": false,
+      "artifactLabel": ""
+    },
+    "engines": [
+      "dt",
+      "event",
+      "event-fast"
+    ],
+    "failures": [
+      {
+        "severity": "error",
+        "code": "FINAL_STATE_DELTA",
+        "message": "Final node states differ from dt on branch, changed=1:Source: idle|IDLE != wait|WAIT",
+        "engine": "event",
+        "scenario": "branch"
+      },
+      {
+        "severity": "error",
+        "code": "FINAL_ENTITY_SET_DELTA",
+        "message": "Final entity set differs from dt on branch, extra=A #009:A",
+        "engine": "event",
+        "scenario": "branch"
+      },
+      {
+        "severity": "error",
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on branch",
+        "engine": "event",
+        "scenario": "branch"
+      },
+      {
+        "severity": "error",
+        "code": "FINAL_STATE_DELTA",
+        "message": "Final node states differ from dt on branch, changed=1:Source: idle|IDLE != wait|WAIT",
+        "engine": "event-fast",
+        "scenario": "branch"
+      },
+      {
+        "severity": "error",
+        "code": "FINAL_ENTITY_SET_DELTA",
+        "message": "Final entity set differs from dt on branch, extra=A #009:A",
+        "engine": "event-fast",
+        "scenario": "branch"
+      },
+      {
+        "severity": "error",
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on branch",
+        "engine": "event-fast",
+        "scenario": "branch"
+      },
+      {
+        "severity": "error",
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on pallet_station_demo",
+        "engine": "event",
+        "scenario": "pallet_station_demo"
+      },
+      {
+        "severity": "error",
+        "code": "FINAL_CANONICAL_ENTITY_DELTA",
+        "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on pallet_station_demo",
+        "engine": "event-fast",
+        "scenario": "pallet_station_demo"
+      }
+    ],
+    "warnings": [],
+    "results": [
+      {
+        "engine": "dt",
+        "seed": 1,
+        "scenario": "branch",
+        "sourceKind": "example",
+        "ok": true,
+        "status": "PASS",
+        "failures": [],
+        "warnings": [],
+        "metrics": {
+          "simTimeMs": 30100,
+          "wallMs": 102.5,
+          "loops": 1875,
+          "nodeCount": 6,
+          "linkCount": 5,
+          "sinkCount": 2,
+          "totalCompleted": 13,
+          "liveProbeSimTimeMs": 5000,
+          "liveProbeWallMs": 81,
+          "liveProbeLoops": 313,
+          "liveTimelineEntries": 5,
+          "liveTimelineSegments": 12
+        },
+        "liveFlowProbe": {
+          "nonEmptySteps": 0,
+          "maxActiveLinks": 0,
+          "maxPayloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "liveStateProbe": {
+          "sampleStepMs": 250,
+          "sampleTimesSec": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1,
+            1.25,
+            1.5,
+            1.75,
+            2,
+            2.25,
+            2.5,
+            2.75,
+            3,
+            3.25,
+            3.5,
+            3.75,
+            4,
+            4.25,
+            4.5,
+            4.75,
+            5
+          ],
+          "sampleCount": 21,
+          "nodeCount": 6,
+          "changingNodeCount": 4,
+          "nodeStates": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "sequence": [
+                "idle|IDLE",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT"
+              ]
+            },
+            {
+              "key": "2:Split",
+              "nodeId": 2,
+              "label": "Split",
+              "sequence": [
+                "idle|IDLE",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT"
+              ]
+            },
+            {
+              "key": "3:Line A",
+              "nodeId": 3,
+              "label": "Line A",
+              "sequence": [
+                "idle|IDLE",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS"
+              ]
+            },
+            {
+              "key": "4:Line B",
+              "nodeId": 4,
+              "label": "Line B",
+              "sequence": [
+                "idle|IDLE",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY"
+              ]
+            },
+            {
+              "key": "5:Sink A",
+              "nodeId": 5,
+              "label": "Sink A",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            },
+            {
+              "key": "6:Sink B",
+              "nodeId": 6,
+              "label": "Sink B",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            }
+          ]
+        },
+        "liveTimelineSignature": {
+          "quantMs": 250,
+          "rowCount": 5,
+          "activeRowCount": 3,
+          "rows": [
+            {
+              "key": "2",
+              "label": "Split #2",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "wait",
+                  "durationBins": 20
+                }
+              ]
+            },
+            {
+              "key": "3",
+              "label": "Line A #3",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "process",
+                  "durationBins": 4
+                },
+                {
+                  "state": "recovery",
+                  "durationBins": 12
+                },
+                {
+                  "state": "process",
+                  "durationBins": 4
+                }
+              ]
+            },
+            {
+              "key": "4",
+              "label": "Line B #4",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "process",
+                  "durationBins": 8
+                },
+                {
+                  "state": "recovery",
+                  "durationBins": 12
+                }
+              ]
+            },
+            {
+              "key": "5",
+              "label": "Sink A #5",
+              "meaningful": false,
+              "signature": []
+            },
+            {
+              "key": "6",
+              "label": "Sink B #6",
+              "meaningful": false,
+              "signature": []
+            }
+          ]
+        },
+        "sinks": [
+          {
+            "id": 5,
+            "title": "Sink A",
+            "completedCount": 7,
+            "throughputPerHour": 0
+          },
+          {
+            "id": 6,
+            "title": "Sink B",
+            "completedCount": 6,
+            "throughputPerHour": 0
+          }
+        ],
+        "finalStateSnapshot": {
+          "nodeCount": 6,
+          "rows": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "2:Split",
+              "nodeId": 2,
+              "label": "Split",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "3:Line A",
+              "nodeId": 3,
+              "label": "Line A",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "4:Line B",
+              "nodeId": 4,
+              "label": "Line B",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "5:Sink A",
+              "nodeId": 5,
+              "label": "Sink A",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "6:Sink B",
+              "nodeId": 6,
+              "label": "Sink B",
+              "state": "idle|IDLE"
+            }
+          ]
+        },
+        "finalWorkSnapshot": {
+          "activeLinkCount": 0,
+          "payloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "finalSinkSnapshot": [
+          {
+            "key": "5:Sink A",
+            "id": 5,
+            "title": "Sink A",
+            "completedCount": 7
+          },
+          {
+            "key": "6:Sink B",
+            "id": 6,
+            "title": "Sink B",
+            "completedCount": 6
+          }
+        ],
+        "finalEntityLedger": {
+          "uniqueCount": 16,
+          "refs": [
+            "A #001:A",
+            "A #002:A",
+            "A #003:A",
+            "A #004:A",
+            "A #005:A",
+            "A #006:A",
+            "A #007:A",
+            "A #008:A",
+            "B #001:B",
+            "B #002:B",
+            "B #003:B",
+            "B #004:B",
+            "B #005:B",
+            "B #006:B",
+            "B #007:B",
+            "B #008:B"
+          ],
+          "duplicateRefs": [],
+          "canonicalInstances": [
+            {
+              "instanceId": "type-a:1:8",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 3,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            },
+            {
+              "instanceId": "type-b:1:7",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 4,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            },
+            {
+              "instanceId": "type-b:1:8",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            }
+          ]
+        },
+        "attempts": 1,
+        "maxAttempts": 1,
+        "attemptStatuses": [
+          "PASS"
+        ],
+        "flaky": false
+      },
+      {
+        "engine": "event",
+        "seed": 1,
+        "scenario": "branch",
+        "sourceKind": "example",
+        "ok": true,
+        "status": "PASS",
+        "failures": [],
+        "warnings": [],
+        "metrics": {
+          "simTimeMs": 30100,
+          "wallMs": 9.2,
+          "loops": 1875,
+          "nodeCount": 6,
+          "linkCount": 5,
+          "sinkCount": 2,
+          "totalCompleted": 13,
+          "liveProbeSimTimeMs": 0,
+          "liveProbeWallMs": 0,
+          "liveProbeLoops": 0,
+          "liveTimelineEntries": 0,
+          "liveTimelineSegments": 0
+        },
+        "liveFlowProbe": null,
+        "liveStateProbe": null,
+        "liveTimelineSignature": null,
+        "sinks": [
+          {
+            "id": 5,
+            "title": "Sink A",
+            "completedCount": 7,
+            "throughputPerHour": 0
+          },
+          {
+            "id": 6,
+            "title": "Sink B",
+            "completedCount": 6,
+            "throughputPerHour": 0
+          }
+        ],
+        "finalStateSnapshot": {
+          "nodeCount": 6,
+          "rows": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "2:Split",
+              "nodeId": 2,
+              "label": "Split",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "3:Line A",
+              "nodeId": 3,
+              "label": "Line A",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "4:Line B",
+              "nodeId": 4,
+              "label": "Line B",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "5:Sink A",
+              "nodeId": 5,
+              "label": "Sink A",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "6:Sink B",
+              "nodeId": 6,
+              "label": "Sink B",
+              "state": "idle|IDLE"
+            }
+          ]
+        },
+        "finalWorkSnapshot": {
+          "activeLinkCount": 0,
+          "payloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "finalSinkSnapshot": [
+          {
+            "key": "5:Sink A",
+            "id": 5,
+            "title": "Sink A",
+            "completedCount": 7
+          },
+          {
+            "key": "6:Sink B",
+            "id": 6,
+            "title": "Sink B",
+            "completedCount": 6
+          }
+        ],
+        "finalEntityLedger": {
+          "uniqueCount": 17,
+          "refs": [
+            "A #001:A",
+            "A #002:A",
+            "A #003:A",
+            "A #004:A",
+            "A #005:A",
+            "A #006:A",
+            "A #007:A",
+            "A #008:A",
+            "A #009:A",
+            "B #001:B",
+            "B #002:B",
+            "B #003:B",
+            "B #004:B",
+            "B #005:B",
+            "B #006:B",
+            "B #007:B",
+            "B #008:B"
+          ],
+          "duplicateRefs": [],
+          "canonicalInstances": [
+            {
+              "instanceId": "type-a:1:8",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 3,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            },
+            {
+              "instanceId": "type-a:1:9",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 1,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-b:1:7",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 4,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            },
+            {
+              "instanceId": "type-b:1:8",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            }
+          ]
+        },
+        "attempts": 1,
+        "maxAttempts": 1,
+        "attemptStatuses": [
+          "PASS"
+        ],
+        "flaky": false
+      },
+      {
+        "engine": "event-fast",
+        "seed": 1,
+        "scenario": "branch",
+        "sourceKind": "example",
+        "ok": true,
+        "status": "PASS",
+        "failures": [],
+        "warnings": [],
+        "metrics": {
+          "simTimeMs": 30100,
+          "wallMs": 10.4,
+          "loops": 1875,
+          "nodeCount": 6,
+          "linkCount": 5,
+          "sinkCount": 2,
+          "totalCompleted": 13,
+          "liveProbeSimTimeMs": 0,
+          "liveProbeWallMs": 0,
+          "liveProbeLoops": 0,
+          "liveTimelineEntries": 0,
+          "liveTimelineSegments": 0
+        },
+        "liveFlowProbe": null,
+        "liveStateProbe": null,
+        "liveTimelineSignature": null,
+        "sinks": [
+          {
+            "id": 5,
+            "title": "Sink A",
+            "completedCount": 7,
+            "throughputPerHour": 0
+          },
+          {
+            "id": 6,
+            "title": "Sink B",
+            "completedCount": 6,
+            "throughputPerHour": 0
+          }
+        ],
+        "finalStateSnapshot": {
+          "nodeCount": 6,
+          "rows": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "2:Split",
+              "nodeId": 2,
+              "label": "Split",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "3:Line A",
+              "nodeId": 3,
+              "label": "Line A",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "4:Line B",
+              "nodeId": 4,
+              "label": "Line B",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "5:Sink A",
+              "nodeId": 5,
+              "label": "Sink A",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "6:Sink B",
+              "nodeId": 6,
+              "label": "Sink B",
+              "state": "idle|IDLE"
+            }
+          ]
+        },
+        "finalWorkSnapshot": {
+          "activeLinkCount": 0,
+          "payloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "finalSinkSnapshot": [
+          {
+            "key": "5:Sink A",
+            "id": 5,
+            "title": "Sink A",
+            "completedCount": 7
+          },
+          {
+            "key": "6:Sink B",
+            "id": 6,
+            "title": "Sink B",
+            "completedCount": 6
+          }
+        ],
+        "finalEntityLedger": {
+          "uniqueCount": 17,
+          "refs": [
+            "A #001:A",
+            "A #002:A",
+            "A #003:A",
+            "A #004:A",
+            "A #005:A",
+            "A #006:A",
+            "A #007:A",
+            "A #008:A",
+            "A #009:A",
+            "B #001:B",
+            "B #002:B",
+            "B #003:B",
+            "B #004:B",
+            "B #005:B",
+            "B #006:B",
+            "B #007:B",
+            "B #008:B"
+          ],
+          "duplicateRefs": [],
+          "canonicalInstances": [
+            {
+              "instanceId": "type-a:1:8",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 3,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            },
+            {
+              "instanceId": "type-a:1:9",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 1,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-b:1:7",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 4,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            },
+            {
+              "instanceId": "type-b:1:8",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 30000
+              }
+            }
+          ]
+        },
+        "attempts": 1,
+        "maxAttempts": 1,
+        "attemptStatuses": [
+          "PASS"
+        ],
+        "flaky": false
+      },
+      {
+        "engine": "dt",
+        "seed": 1,
+        "scenario": "pallet_station_demo",
+        "sourceKind": "example",
+        "ok": true,
+        "status": "PASS",
+        "failures": [],
+        "warnings": [],
+        "metrics": {
+          "simTimeMs": 30100,
+          "wallMs": 125.3,
+          "loops": 1875,
+          "nodeCount": 11,
+          "linkCount": 12,
+          "sinkCount": 1,
+          "totalCompleted": 6,
+          "liveProbeSimTimeMs": 5000,
+          "liveProbeWallMs": 104.40000003576279,
+          "liveProbeLoops": 313,
+          "liveTimelineEntries": 9,
+          "liveTimelineSegments": 19
+        },
+        "liveFlowProbe": {
+          "nonEmptySteps": 0,
+          "maxActiveLinks": 0,
+          "maxPayloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "liveStateProbe": {
+          "sampleStepMs": 250,
+          "sampleTimesSec": [
+            0,
+            0.25,
+            0.5,
+            0.75,
+            1,
+            1.25,
+            1.5,
+            1.75,
+            2,
+            2.25,
+            2.5,
+            2.75,
+            3,
+            3.25,
+            3.5,
+            3.75,
+            4,
+            4.25,
+            4.5,
+            4.75,
+            5
+          ],
+          "sampleCount": 21,
+          "nodeCount": 11,
+          "changingNodeCount": 6,
+          "nodeStates": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "sequence": [
+                "idle|IDLE",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT"
+              ]
+            },
+            {
+              "key": "2:Carrier Route IN",
+              "nodeId": 2,
+              "label": "Carrier Route IN",
+              "sequence": [
+                "idle|IDLE",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT"
+              ]
+            },
+            {
+              "key": "3:Carrier Route OUT",
+              "nodeId": 3,
+              "label": "Carrier Route OUT",
+              "sequence": [
+                "idle|IDLE",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "recovery|RECOVERY",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            },
+            {
+              "key": "6:Store",
+              "nodeId": 6,
+              "label": "Store",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT",
+                "wait|WAIT"
+              ]
+            },
+            {
+              "key": "7:Sink",
+              "nodeId": 7,
+              "label": "Sink",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            },
+            {
+              "key": "8:Transport Route",
+              "nodeId": 8,
+              "label": "Transport Route",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS"
+              ]
+            },
+            {
+              "key": "9:Transport Route",
+              "nodeId": 9,
+              "label": "Transport Route",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            },
+            {
+              "key": "10:Transport Route",
+              "nodeId": 10,
+              "label": "Transport Route",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            },
+            {
+              "key": "11:Transport Route",
+              "nodeId": 11,
+              "label": "Transport Route",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            },
+            {
+              "key": "12:Equipment",
+              "nodeId": 12,
+              "label": "Equipment",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "process|PROCESS",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY",
+                "recovery|RECOVERY"
+              ]
+            },
+            {
+              "key": "13:Returned pallet buffer",
+              "nodeId": 13,
+              "label": "Returned pallet buffer",
+              "sequence": [
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE",
+                "idle|IDLE"
+              ]
+            }
+          ]
+        },
+        "liveTimelineSignature": {
+          "quantMs": 250,
+          "rowCount": 9,
+          "activeRowCount": 5,
+          "rows": [
+            {
+              "key": "2",
+              "label": "Carrier Route IN #2",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "process",
+                  "durationBins": 4
+                },
+                {
+                  "state": "wait",
+                  "durationBins": 16
+                }
+              ]
+            },
+            {
+              "key": "3",
+              "label": "Carrier Route OUT #3",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "process",
+                  "durationBins": 4
+                },
+                {
+                  "state": "recovery",
+                  "durationBins": 1
+                }
+              ]
+            },
+            {
+              "key": "6",
+              "label": "Store #6",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "process",
+                  "durationBins": 4
+                },
+                {
+                  "state": "wait",
+                  "durationBins": 12
+                }
+              ]
+            },
+            {
+              "key": "8",
+              "label": "Transport Route #8",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "process",
+                  "durationBins": 16
+                }
+              ]
+            },
+            {
+              "key": "9",
+              "label": "Transport Route #9",
+              "meaningful": false,
+              "signature": []
+            },
+            {
+              "key": "10",
+              "label": "Transport Route #10",
+              "meaningful": false,
+              "signature": []
+            },
+            {
+              "key": "11",
+              "label": "Transport Route #11",
+              "meaningful": false,
+              "signature": []
+            },
+            {
+              "key": "12",
+              "label": "Equipment #12",
+              "meaningful": true,
+              "signature": [
+                {
+                  "state": "process",
+                  "durationBins": 8
+                },
+                {
+                  "state": "recovery",
+                  "durationBins": 4
+                }
+              ]
+            },
+            {
+              "key": "13",
+              "label": "Returned pallet buffer #13",
+              "meaningful": false,
+              "signature": []
+            }
+          ]
+        },
+        "sinks": [
+          {
+            "id": 7,
+            "title": "Sink",
+            "completedCount": 6,
+            "throughputPerHour": 0
+          }
+        ],
+        "finalStateSnapshot": {
+          "nodeCount": 11,
+          "rows": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "2:Carrier Route IN",
+              "nodeId": 2,
+              "label": "Carrier Route IN",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "3:Carrier Route OUT",
+              "nodeId": 3,
+              "label": "Carrier Route OUT",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "6:Store",
+              "nodeId": 6,
+              "label": "Store",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "7:Sink",
+              "nodeId": 7,
+              "label": "Sink",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "8:Transport Route",
+              "nodeId": 8,
+              "label": "Transport Route",
+              "state": "recovery|RECOVERY"
+            },
+            {
+              "key": "9:Transport Route",
+              "nodeId": 9,
+              "label": "Transport Route",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "10:Transport Route",
+              "nodeId": 10,
+              "label": "Transport Route",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "11:Transport Route",
+              "nodeId": 11,
+              "label": "Transport Route",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "12:Equipment",
+              "nodeId": 12,
+              "label": "Equipment",
+              "state": "recovery|RECOVERY"
+            },
+            {
+              "key": "13:Returned pallet buffer",
+              "nodeId": 13,
+              "label": "Returned pallet buffer",
+              "state": "idle|IDLE"
+            }
+          ]
+        },
+        "finalWorkSnapshot": {
+          "activeLinkCount": 0,
+          "payloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "finalSinkSnapshot": [
+          {
+            "key": "7:Sink",
+            "id": 7,
+            "title": "Sink",
+            "completedCount": 6
+          }
+        ],
+        "finalEntityLedger": {
+          "uniqueCount": 8,
+          "refs": [
+            "A #001:A",
+            "A #002:A",
+            "A #003:A",
+            "A #004:A",
+            "B #002:B",
+            "Carrier-IN #001:Carrier-IN",
+            "Carrier-OUT #001:Carrier-OUT",
+            "Pallet 4 #001:Pallet 4"
+          ],
+          "duplicateRefs": [],
+          "canonicalInstances": [
+            {
+              "instanceId": "type-a:1:1",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-a:1:2",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17100
+              }
+            },
+            {
+              "instanceId": "type-a:3:3",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 22000
+              }
+            },
+            {
+              "instanceId": "type-a:3:4",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 27000
+              }
+            },
+            {
+              "instanceId": "type-a:3:5",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:6",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:7",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:8",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-b:1:1",
+              "typeId": "type-b",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-b:1:2",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 1,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-c:1:1",
+              "typeId": "type-c",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17100
+              }
+            },
+            {
+              "instanceId": "type-carrier-in:2:1",
+              "typeId": "type-carrier-in",
+              "parentId": null,
+              "locationNodeId": 10,
+              "attributes": {
+                "__arrivedAtMs": 28100
+              }
+            },
+            {
+              "instanceId": "type-carrier-out:3:1",
+              "typeId": "type-carrier-out",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 17400
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:2:1",
+              "typeId": "type-pallet-4",
+              "parentId": "type-carrier-in:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17100
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:3:1",
+              "typeId": "type-pallet-4",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 18400
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:3:2",
+              "typeId": "type-pallet-4",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 18400
+              }
+            }
+          ]
+        },
+        "attempts": 1,
+        "maxAttempts": 1,
+        "attemptStatuses": [
+          "PASS"
+        ],
+        "flaky": false
+      },
+      {
+        "engine": "event",
+        "seed": 1,
+        "scenario": "pallet_station_demo",
+        "sourceKind": "example",
+        "ok": true,
+        "status": "PASS",
+        "failures": [],
+        "warnings": [],
+        "metrics": {
+          "simTimeMs": 30100,
+          "wallMs": 7.7,
+          "loops": 1875,
+          "nodeCount": 11,
+          "linkCount": 12,
+          "sinkCount": 1,
+          "totalCompleted": 6,
+          "liveProbeSimTimeMs": 0,
+          "liveProbeWallMs": 0,
+          "liveProbeLoops": 0,
+          "liveTimelineEntries": 0,
+          "liveTimelineSegments": 0
+        },
+        "liveFlowProbe": null,
+        "liveStateProbe": null,
+        "liveTimelineSignature": null,
+        "sinks": [
+          {
+            "id": 7,
+            "title": "Sink",
+            "completedCount": 6,
+            "throughputPerHour": 0
+          }
+        ],
+        "finalStateSnapshot": {
+          "nodeCount": 11,
+          "rows": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "2:Carrier Route IN",
+              "nodeId": 2,
+              "label": "Carrier Route IN",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "3:Carrier Route OUT",
+              "nodeId": 3,
+              "label": "Carrier Route OUT",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "6:Store",
+              "nodeId": 6,
+              "label": "Store",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "7:Sink",
+              "nodeId": 7,
+              "label": "Sink",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "8:Transport Route",
+              "nodeId": 8,
+              "label": "Transport Route",
+              "state": "recovery|RECOVERY"
+            },
+            {
+              "key": "9:Transport Route",
+              "nodeId": 9,
+              "label": "Transport Route",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "10:Transport Route",
+              "nodeId": 10,
+              "label": "Transport Route",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "11:Transport Route",
+              "nodeId": 11,
+              "label": "Transport Route",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "12:Equipment",
+              "nodeId": 12,
+              "label": "Equipment",
+              "state": "recovery|RECOVERY"
+            },
+            {
+              "key": "13:Returned pallet buffer",
+              "nodeId": 13,
+              "label": "Returned pallet buffer",
+              "state": "idle|IDLE"
+            }
+          ]
+        },
+        "finalWorkSnapshot": {
+          "activeLinkCount": 0,
+          "payloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "finalSinkSnapshot": [
+          {
+            "key": "7:Sink",
+            "id": 7,
+            "title": "Sink",
+            "completedCount": 6
+          }
+        ],
+        "finalEntityLedger": {
+          "uniqueCount": 8,
+          "refs": [
+            "A #001:A",
+            "A #002:A",
+            "A #003:A",
+            "A #004:A",
+            "B #002:B",
+            "Carrier-IN #001:Carrier-IN",
+            "Carrier-OUT #001:Carrier-OUT",
+            "Pallet 4 #001:Pallet 4"
+          ],
+          "duplicateRefs": [],
+          "canonicalInstances": [
+            {
+              "instanceId": "type-a:1:1",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-a:1:2",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-a:3:3",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 22000
+              }
+            },
+            {
+              "instanceId": "type-a:3:4",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 27000
+              }
+            },
+            {
+              "instanceId": "type-a:3:5",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:6",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:7",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:8",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-b:1:1",
+              "typeId": "type-b",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-b:1:2",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 1,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-c:1:1",
+              "typeId": "type-c",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-carrier-in:2:1",
+              "typeId": "type-carrier-in",
+              "parentId": null,
+              "locationNodeId": 10,
+              "attributes": {
+                "__arrivedAtMs": 28000
+              }
+            },
+            {
+              "instanceId": "type-carrier-out:3:1",
+              "typeId": "type-carrier-out",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 17300
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:2:1",
+              "typeId": "type-pallet-4",
+              "parentId": "type-carrier-in:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:3:1",
+              "typeId": "type-pallet-4",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 18300
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:3:2",
+              "typeId": "type-pallet-4",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 18300
+              }
+            }
+          ]
+        },
+        "attempts": 1,
+        "maxAttempts": 1,
+        "attemptStatuses": [
+          "PASS"
+        ],
+        "flaky": false
+      },
+      {
+        "engine": "event-fast",
+        "seed": 1,
+        "scenario": "pallet_station_demo",
+        "sourceKind": "example",
+        "ok": true,
+        "status": "PASS",
+        "failures": [],
+        "warnings": [],
+        "metrics": {
+          "simTimeMs": 30100,
+          "wallMs": 10.1,
+          "loops": 1875,
+          "nodeCount": 11,
+          "linkCount": 12,
+          "sinkCount": 1,
+          "totalCompleted": 6,
+          "liveProbeSimTimeMs": 0,
+          "liveProbeWallMs": 0,
+          "liveProbeLoops": 0,
+          "liveTimelineEntries": 0,
+          "liveTimelineSegments": 0
+        },
+        "liveFlowProbe": null,
+        "liveStateProbe": null,
+        "liveTimelineSignature": null,
+        "sinks": [
+          {
+            "id": 7,
+            "title": "Sink",
+            "completedCount": 6,
+            "throughputPerHour": 0
+          }
+        ],
+        "finalStateSnapshot": {
+          "nodeCount": 11,
+          "rows": [
+            {
+              "key": "1:Source",
+              "nodeId": 1,
+              "label": "Source",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "2:Carrier Route IN",
+              "nodeId": 2,
+              "label": "Carrier Route IN",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "3:Carrier Route OUT",
+              "nodeId": 3,
+              "label": "Carrier Route OUT",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "6:Store",
+              "nodeId": 6,
+              "label": "Store",
+              "state": "wait|WAIT"
+            },
+            {
+              "key": "7:Sink",
+              "nodeId": 7,
+              "label": "Sink",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "8:Transport Route",
+              "nodeId": 8,
+              "label": "Transport Route",
+              "state": "recovery|RECOVERY"
+            },
+            {
+              "key": "9:Transport Route",
+              "nodeId": 9,
+              "label": "Transport Route",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "10:Transport Route",
+              "nodeId": 10,
+              "label": "Transport Route",
+              "state": "process|PROCESS"
+            },
+            {
+              "key": "11:Transport Route",
+              "nodeId": 11,
+              "label": "Transport Route",
+              "state": "idle|IDLE"
+            },
+            {
+              "key": "12:Equipment",
+              "nodeId": 12,
+              "label": "Equipment",
+              "state": "recovery|RECOVERY"
+            },
+            {
+              "key": "13:Returned pallet buffer",
+              "nodeId": 13,
+              "label": "Returned pallet buffer",
+              "state": "idle|IDLE"
+            }
+          ]
+        },
+        "finalWorkSnapshot": {
+          "activeLinkCount": 0,
+          "payloadCount": 0,
+          "observedLinkKeys": [],
+          "observedWorkRefs": []
+        },
+        "finalSinkSnapshot": [
+          {
+            "key": "7:Sink",
+            "id": 7,
+            "title": "Sink",
+            "completedCount": 6
+          }
+        ],
+        "finalEntityLedger": {
+          "uniqueCount": 8,
+          "refs": [
+            "A #001:A",
+            "A #002:A",
+            "A #003:A",
+            "A #004:A",
+            "B #002:B",
+            "Carrier-IN #001:Carrier-IN",
+            "Carrier-OUT #001:Carrier-OUT",
+            "Pallet 4 #001:Pallet 4"
+          ],
+          "duplicateRefs": [],
+          "canonicalInstances": [
+            {
+              "instanceId": "type-a:1:1",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-a:1:2",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-a:3:3",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 22000
+              }
+            },
+            {
+              "instanceId": "type-a:3:4",
+              "typeId": "type-a",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 27000
+              }
+            },
+            {
+              "instanceId": "type-a:3:5",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:6",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:7",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-a:3:8",
+              "typeId": "type-a",
+              "parentId": "type-pallet-4:3:2",
+              "locationNodeId": null,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-b:1:1",
+              "typeId": "type-b",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-b:1:2",
+              "typeId": "type-b",
+              "parentId": null,
+              "locationNodeId": 1,
+              "attributes": {}
+            },
+            {
+              "instanceId": "type-c:1:1",
+              "typeId": "type-c",
+              "parentId": "type-pallet-4:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-carrier-in:2:1",
+              "typeId": "type-carrier-in",
+              "parentId": null,
+              "locationNodeId": 10,
+              "attributes": {
+                "__arrivedAtMs": 28000
+              }
+            },
+            {
+              "instanceId": "type-carrier-out:3:1",
+              "typeId": "type-carrier-out",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 17300
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:2:1",
+              "typeId": "type-pallet-4",
+              "parentId": "type-carrier-in:2:1",
+              "locationNodeId": null,
+              "attributes": {
+                "__arrivedAtMs": 17000
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:3:1",
+              "typeId": "type-pallet-4",
+              "parentId": null,
+              "locationNodeId": 6,
+              "attributes": {
+                "__arrivedAtMs": 18300
+              }
+            },
+            {
+              "instanceId": "type-pallet-4:3:2",
+              "typeId": "type-pallet-4",
+              "parentId": null,
+              "locationNodeId": 2,
+              "attributes": {
+                "__arrivedAtMs": 18300
+              }
+            }
+          ]
+        },
+        "attempts": 1,
+        "maxAttempts": 1,
+        "attemptStatuses": [
+          "PASS"
+        ],
+        "flaky": false
+      }
+    ],
+    "comparisons": [
+      {
+        "scenario": "branch",
+        "seed": 1,
+        "baselineEngine": "dt",
+        "candidateEngine": "event",
+        "completedDelta": 0
+      },
+      {
+        "scenario": "branch",
+        "seed": 1,
+        "baselineEngine": "dt",
+        "candidateEngine": "event-fast",
+        "completedDelta": 0
+      },
+      {
+        "scenario": "pallet_station_demo",
+        "seed": 1,
+        "baselineEngine": "dt",
+        "candidateEngine": "event",
+        "completedDelta": 0
+      },
+      {
+        "scenario": "pallet_station_demo",
+        "seed": 1,
+        "baselineEngine": "dt",
+        "candidateEngine": "event-fast",
+        "completedDelta": 0
+      }
+    ],
+    "summary": {
+      "passed": 6,
+      "warned": 0,
+      "failed": 8,
+      "passedCases": 6,
+      "warnedCases": 0,
+      "failedCases": 0,
+      "caseCount": 6,
+      "failureCount": 8,
+      "warningCount": 0,
+      "engineCount": 3,
+      "suite": "standard",
+      "seedCount": 1,
+      "exampleCount": 2,
+      "includesCurrentGraph": false,
+      "stoppedEarly": false,
+      "reruns": 0,
+      "stopOnFirstFailure": false
+    },
+    "mcpHint": {
+      "tool": "engine_test",
+      "action": "latest"
+    }
+  },
+  "currentIssues": [
+    {
+      "code": "FINAL_STATE_DELTA",
+      "engine": "event",
+      "scenario": "branch",
+      "message": "Final node states differ from dt on branch, changed=1:Source: idle|IDLE != wait|WAIT"
+    },
+    {
+      "code": "FINAL_ENTITY_SET_DELTA",
+      "engine": "event",
+      "scenario": "branch",
+      "message": "Final entity set differs from dt on branch, extra=A #009:A"
+    },
+    {
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event",
+      "scenario": "branch",
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on branch"
+    },
+    {
+      "code": "FINAL_STATE_DELTA",
+      "engine": "event-fast",
+      "scenario": "branch",
+      "message": "Final node states differ from dt on branch, changed=1:Source: idle|IDLE != wait|WAIT"
+    },
+    {
+      "code": "FINAL_ENTITY_SET_DELTA",
+      "engine": "event-fast",
+      "scenario": "branch",
+      "message": "Final entity set differs from dt on branch, extra=A #009:A"
+    },
+    {
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event-fast",
+      "scenario": "branch",
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on branch"
+    },
+    {
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event",
+      "scenario": "pallet_station_demo",
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on pallet_station_demo"
+    },
+    {
+      "code": "FINAL_CANONICAL_ENTITY_DELTA",
+      "engine": "event-fast",
+      "scenario": "pallet_station_demo",
+      "message": "Canonical Entity Instances (typeId/parentId/locationNodeId/attributes) differ from dt on pallet_station_demo"
+    }
+  ]
+}

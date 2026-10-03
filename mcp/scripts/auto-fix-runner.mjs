@@ -185,17 +185,11 @@ function recommendFilesForFailure(targetFailure) {
   const engine = String(targetFailure?.engine ?? "");
   const code = String(targetFailure?.code ?? "");
   const files = new Set();
-  if (engine.startsWith("event-fast-par")) {
-    files.add("js/app/engine-fast-par-host.js");
-    files.add("js/app/engine-fast-par-worker.js");
-    files.add("js/app/engine-fast-par-partitioner.js");
-  } else if (engine.startsWith("event-fast-worker")) {
-    files.add("js/app/engine-fast-worker-host.js");
-    files.add("js/app/engine-fast-worker.js");
-  } else if (engine.startsWith("event-fast")) {
+  if (engine === "event-fast") {
     files.add("js/app/engine-fast-runtime.js");
     files.add("js/app/engine-fast-compat.js");
     files.add("js/app/engine-fast-kernels.js");
+    files.add("js/app/engine-fast-compiler.js");
   }
   if (/LIVE_|TIMELINE|WORKFLOW|STATE/.test(code)) {
     files.add("js/app/engine-test.js");
@@ -217,11 +211,7 @@ function buildPatchRequest(session, targetFailure, stage) {
         "js/app/engine-fast-runtime.js",
         "js/app/engine-fast-compat.js",
         "js/app/engine-fast-kernels.js",
-        "js/app/engine-fast-worker.js",
-        "js/app/engine-fast-worker-host.js",
-        "js/app/engine-fast-par-worker.js",
-        "js/app/engine-fast-par-host.js",
-        "js/app/engine-fast-par-partitioner.js",
+        "js/app/engine-fast-compiler.js",
         "js/app/engine-test.js"
       ]
     },

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Weighted sequence order, non-repeat completion, repeat wrap and hierarchy retain all intermediate histories",
+    "ok": true
+  },
+  {
+    "name": "Live counts, entry identity/order, array replacement and type/child edits refresh the selected work",
+    "ok": true
+  },
+  {
+    "name": "Backpressure and snapshot restore preserve active Source and its position in a counted entry",
+    "ok": true
+  },
+  {
+    "name": "Large quantity avoids expanded arrays and produces exactly the same small executed prefix",
+    "ok": true
+  },
+  {
+    "name": "Invalid Source counts still report validation errors, and checked legacy data retains RangeError behavior",
+    "ok": true
+  },
+  {
+    "name": "Engine update detects direct count edits and reset clears pending events",
+    "ok": true
+  }
+]

@@ -1,0 +1,4413 @@
+{
+  "date": "2026-09-28T14:12:14.825Z",
+  "targetSimMs": 3000000,
+  "plans": [
+    {
+      "example": "sample_line2",
+      "plans": [
+        {
+          "requested": "auto",
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 2,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            128,
+            17
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 2,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 2,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            128,
+            17
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 4,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 2,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            128,
+            17
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 8,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 2,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            128,
+            17
+          ],
+          "executableFallbackCount": 0
+        }
+      ]
+    },
+    {
+      "example": "sample_line1",
+      "plans": [
+        {
+          "requested": "auto",
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 1,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            63
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 2,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 1,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            63
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 4,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 1,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            63
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 8,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 1,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            63
+          ],
+          "executableFallbackCount": 0
+        }
+      ]
+    },
+    {
+      "example": "parallel_benchmark",
+      "plans": [
+        {
+          "requested": "auto",
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 4,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 2,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 2,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            16,
+            16
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 4,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 4,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "executableFallbackCount": 0
+        },
+        {
+          "requested": 8,
+          "canParallelize": true,
+          "reason": null,
+          "partitionCount": 8,
+          "cutEdgeCount": 0,
+          "partitionSizes": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "executableFallbackCount": 0
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "repeat": 0,
+      "config": {
+        "name": "single-worker-16",
+        "mode": "event-fast-worker",
+        "realStepMs": 16
+      },
+      "initMs": 116,
+      "totalMs": 724.3000000119209,
+      "workerMs": 696.1000000238419,
+      "simTimeMs": 3000000,
+      "updateCalls": 187500,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ]
+    },
+    {
+      "repeat": 0,
+      "config": {
+        "name": "par-default-16",
+        "mode": "event-fast-par",
+        "realStepMs": 16
+      },
+      "initMs": 126.80000001192093,
+      "totalMs": 505.39999997615814,
+      "workerMs": 487.89999997615814,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 375000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "config": {
+        "name": "par-4-16",
+        "mode": "event-fast-par",
+        "partitionCount": 4,
+        "realStepMs": 16
+      },
+      "initMs": 155.5,
+      "totalMs": 551.2999999523163,
+      "workerMs": 541.0999999642372,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 4,
+      "updateCalls": 750000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "config": {
+        "name": "par-8-16",
+        "mode": "event-fast-par",
+        "partitionCount": 8,
+        "realStepMs": 16
+      },
+      "initMs": 282.89999997615814,
+      "totalMs": 598,
+      "workerMs": 589,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 8,
+      "updateCalls": 1500000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "config": {
+        "name": "par-2-100",
+        "mode": "event-fast-par",
+        "partitionCount": 2,
+        "realStepMs": 100
+      },
+      "initMs": 121.69999998807907,
+      "totalMs": 570.3999999761581,
+      "workerMs": 542.3999999761581,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 60000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 30000,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 30000,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "config": {
+        "name": "par-2-1000",
+        "mode": "event-fast-par",
+        "partitionCount": 2,
+        "realStepMs": 1000
+      },
+      "initMs": 128.60000002384186,
+      "totalMs": 503.5,
+      "workerMs": 480.0999999642372,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 6000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 3000,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 3000,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "config": {
+        "name": "single-worker-1000",
+        "mode": "event-fast-worker",
+        "realStepMs": 1000
+      },
+      "initMs": 127.79999995231628,
+      "totalMs": 648.5,
+      "workerMs": 617.5,
+      "simTimeMs": 3000000,
+      "updateCalls": 3000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ]
+    },
+    {
+      "repeat": 1,
+      "config": {
+        "name": "single-worker-1000",
+        "mode": "event-fast-worker",
+        "realStepMs": 1000
+      },
+      "initMs": 108.60000002384186,
+      "totalMs": 659.3000000119209,
+      "workerMs": 629.0999999642372,
+      "simTimeMs": 3000000,
+      "updateCalls": 3000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ]
+    },
+    {
+      "repeat": 1,
+      "config": {
+        "name": "par-2-1000",
+        "mode": "event-fast-par",
+        "partitionCount": 2,
+        "realStepMs": 1000
+      },
+      "initMs": 118,
+      "totalMs": 467.0999999642372,
+      "workerMs": 447.7999999523163,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 6000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 3000,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 3000,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "config": {
+        "name": "par-2-100",
+        "mode": "event-fast-par",
+        "partitionCount": 2,
+        "realStepMs": 100
+      },
+      "initMs": 125.80000001192093,
+      "totalMs": 544.6999999880791,
+      "workerMs": 522.5,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 60000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 30000,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 30000,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "config": {
+        "name": "par-8-16",
+        "mode": "event-fast-par",
+        "partitionCount": 8,
+        "realStepMs": 16
+      },
+      "initMs": 270.4000000357628,
+      "totalMs": 606.3999999761581,
+      "workerMs": 599.8000000119209,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 8,
+      "updateCalls": 1500000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "config": {
+        "name": "par-4-16",
+        "mode": "event-fast-par",
+        "partitionCount": 4,
+        "realStepMs": 16
+      },
+      "initMs": 171.80000001192093,
+      "totalMs": 703.8999999761581,
+      "workerMs": 692,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 4,
+      "updateCalls": 750000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "config": {
+        "name": "par-default-16",
+        "mode": "event-fast-par",
+        "realStepMs": 16
+      },
+      "initMs": 119,
+      "totalMs": 909.1999999880791,
+      "workerMs": 889.1999999880791,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 375000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "config": {
+        "name": "single-worker-16",
+        "mode": "event-fast-worker",
+        "realStepMs": 16
+      },
+      "initMs": 125.19999998807907,
+      "totalMs": 918.2000000476837,
+      "workerMs": 886.3000000119209,
+      "simTimeMs": 3000000,
+      "updateCalls": 187500,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ]
+    },
+    {
+      "repeat": 2,
+      "config": {
+        "name": "single-worker-16",
+        "mode": "event-fast-worker",
+        "realStepMs": 16
+      },
+      "initMs": 104.19999998807907,
+      "totalMs": 904.4000000357628,
+      "workerMs": 872.5,
+      "simTimeMs": 3000000,
+      "updateCalls": 187500,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ]
+    },
+    {
+      "repeat": 2,
+      "config": {
+        "name": "par-default-16",
+        "mode": "event-fast-par",
+        "realStepMs": 16
+      },
+      "initMs": 124.09999996423721,
+      "totalMs": 853,
+      "workerMs": 823.5,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 375000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "config": {
+        "name": "par-4-16",
+        "mode": "event-fast-par",
+        "partitionCount": 4,
+        "realStepMs": 16
+      },
+      "initMs": 163.5,
+      "totalMs": 691.1999999880791,
+      "workerMs": 677.8000000119209,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 4,
+      "updateCalls": 750000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 8,
+          "nodeExec": 36004,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "config": {
+        "name": "par-8-16",
+        "mode": "event-fast-par",
+        "partitionCount": 8,
+        "realStepMs": 16
+      },
+      "initMs": 277.5,
+      "totalMs": 608.5999999642372,
+      "workerMs": 600.5,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 8,
+      "updateCalls": 1500000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 4,
+          "nodeExec": 18002,
+          "updateCalls": 187500,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "config": {
+        "name": "par-2-100",
+        "mode": "event-fast-par",
+        "partitionCount": 2,
+        "realStepMs": 100
+      },
+      "initMs": 124.5,
+      "totalMs": 540.5,
+      "workerMs": 522.5,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 60000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 30000,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 30000,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "config": {
+        "name": "par-2-1000",
+        "mode": "event-fast-par",
+        "partitionCount": 2,
+        "realStepMs": 1000
+      },
+      "initMs": 127.69999998807907,
+      "totalMs": 475.10000002384186,
+      "workerMs": 445.80000001192093,
+      "simTimeMs": 3000000,
+      "runtimeMode": "parallel-independent",
+      "partitionCount": 2,
+      "updateCalls": 6000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ],
+      "perPartition": [
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 3000,
+          "simTimeMs": 3000000
+        },
+        {
+          "ownedNodeCount": 16,
+          "nodeExec": 72008,
+          "updateCalls": 3000,
+          "simTimeMs": 3000000
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "config": {
+        "name": "single-worker-1000",
+        "mode": "event-fast-worker",
+        "realStepMs": 1000
+      },
+      "initMs": 118.40000003576279,
+      "totalMs": 633.3000000119209,
+      "workerMs": 603.6999999880791,
+      "simTimeMs": 3000000,
+      "updateCalls": 3000,
+      "nodeExec": 144016,
+      "kernelExec": 144016,
+      "compatExec": 0,
+      "fallbackNodeCount": 0,
+      "nodeCount": 32,
+      "linkCount": 24,
+      "completed": 6000,
+      "instanceCount": 8,
+      "states": [
+        [
+          1,
+          "WAIT",
+          "wait"
+        ],
+        [
+          2,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          3,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          4,
+          "IDLE",
+          "idle"
+        ],
+        [
+          5,
+          "WAIT",
+          "wait"
+        ],
+        [
+          6,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          7,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          8,
+          "IDLE",
+          "idle"
+        ],
+        [
+          9,
+          "WAIT",
+          "wait"
+        ],
+        [
+          10,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          11,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          12,
+          "IDLE",
+          "idle"
+        ],
+        [
+          13,
+          "WAIT",
+          "wait"
+        ],
+        [
+          14,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          15,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          16,
+          "IDLE",
+          "idle"
+        ],
+        [
+          17,
+          "WAIT",
+          "wait"
+        ],
+        [
+          18,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          19,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          20,
+          "IDLE",
+          "idle"
+        ],
+        [
+          21,
+          "WAIT",
+          "wait"
+        ],
+        [
+          22,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          23,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          24,
+          "IDLE",
+          "idle"
+        ],
+        [
+          25,
+          "WAIT",
+          "wait"
+        ],
+        [
+          26,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          27,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          28,
+          "IDLE",
+          "idle"
+        ],
+        [
+          29,
+          "WAIT",
+          "wait"
+        ],
+        [
+          30,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          31,
+          "RECOVERY",
+          "recovery"
+        ],
+        [
+          32,
+          "IDLE",
+          "idle"
+        ]
+      ]
+    }
+  ],
+  "hardwareConcurrency": 32
+}

@@ -276,7 +276,7 @@ function buildOptimizePrompt(patchRequest) {
   const scopeMode = String(patchRequest?.scopeMode || "").trim() || "focused";
   const lines = [];
   lines.push("Use the existing AGENTS.md instructions in this repo.");
-  lines.push("Optimize the target event-fast* engine for speed while preserving dt parity.");
+  lines.push("Optimize the target event-fast engine for speed while preserving dt parity.");
   lines.push("This is an optimization request, not a failure-fix request.");
   lines.push("Only edit allowed paths. Do not modify protected engines, engine-test, benchmark harnesses, or unrelated files.");
   lines.push("");

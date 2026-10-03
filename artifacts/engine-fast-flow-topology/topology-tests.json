@@ -1,0 +1,18 @@
+[
+  {
+    "name": "In-place rewiring, array replacement, added sensors and restore retain exact transfer/visual histories",
+    "ok": true
+  },
+  {
+    "name": "Live router type/dispatch and timing edits are read after index compilation",
+    "ok": true
+  },
+  {
+    "name": "Occupancy is live when cells/signals are replaced and admission is preflighted",
+    "ok": true
+  },
+  {
+    "name": "Engine reset discards indexes and a subsequent Flow commit uses the new plan",
+    "ok": true
+  }
+]

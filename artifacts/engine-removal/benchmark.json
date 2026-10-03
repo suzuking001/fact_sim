@@ -1,0 +1,72 @@
+{
+  "wallMs": 100,
+  "realStepMs": 16,
+  "results": [
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 100.10000002384186,
+      "simMs": 69500,
+      "loops": 4344,
+      "simSec": 69.5,
+      "speed": 694.3056941403242
+    },
+    {
+      "mode": "dt",
+      "modeLabel": "dt",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 100,
+      "simMs": 72700,
+      "loops": 4544,
+      "simSec": 72.7,
+      "speed": 727
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 100.09999996423721,
+      "simMs": 397008,
+      "loops": 24813,
+      "simSec": 397.008,
+      "speed": 3966.113887530862
+    },
+    {
+      "mode": "event",
+      "modeLabel": "event",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 100,
+      "simMs": 400400,
+      "loops": 25025,
+      "simSec": 400.4,
+      "speed": 4004
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "headless",
+      "renderLabel": "render:off",
+      "wallMs": 100,
+      "simMs": 364176,
+      "loops": 22761,
+      "simSec": 364.176,
+      "speed": 3641.76
+    },
+    {
+      "mode": "event-fast",
+      "modeLabel": "event-fast",
+      "renderCase": "render",
+      "renderLabel": "render:on",
+      "wallMs": 100,
+      "simMs": 357760,
+      "loops": 22360,
+      "simSec": 357.76,
+      "speed": 3577.6
+    }
+  ]
+}

@@ -19,7 +19,7 @@ while the main measurable time parameters are concentrated into only two quantit
 
 `WAIT` and `IDLE` do not normally require independent duration parameters. Instead, they emerge endogenously from upstream/downstream connectivity, congestion, and acceptance conditions. This design allows FACT SIM to reproduce blocking, waiting, synchronization, and transport constraints without excessively decomposing each operation into fine-grained substeps.
 
-FACT SIM also provides multiple execution engines: the fixed-step `dt` engine, the event-driven `event` engine, the compiled execution variant `event-fast`, its worker-isolated form `event-fast-worker`, and the multi-worker parallel engine `event-fast-par`. In the current implementation, `dt` acts as the semantic baseline, while `event` and `event-fast*` aim to preserve the same observable behavior with lower execution overhead.
+FACT SIM provides three execution engines: the fixed-step `dt` engine, the event-driven `event` engine, and the compiled execution variant `event-fast`. In the current implementation, `dt` acts as the semantic baseline, while `event` and `event-fast` aim to preserve the same observable behavior with lower execution overhead. Further performance improvements target `event-fast`.
 
 ---
 
@@ -299,8 +299,6 @@ FACT SIM currently provides multiple simulation engines:
 - `dt`
 - `event`
 - `event-fast`
-- `event-fast-worker`
-- `event-fast-par`
 
 ### 7.1 The dt Engine
 
@@ -338,20 +336,7 @@ In the implementation, this is supported by a heap together with dirty queues an
 
 `event-fast` is a performance-oriented variant that preserves the semantics of `event` while reducing overhead using a compiled graph representation, typed-array-oriented runtime data, lightweight kernels, and compatibility fallback logic. Semantically, it remains an event-driven engine and is validated against `dt` through engine parity testing.
 
-### 7.4 event-fast-worker
-
-`event-fast-worker` moves `event-fast` execution into a Web Worker, separating simulation from the UI thread. Its primary purpose is responsiveness rather than a change of semantics. When a graph is unsuitable for worker execution, the implementation falls back to a safer runtime path.
-
-### 7.5 event-fast-par
-
-`event-fast-par` is the parallel multi-worker variant based on graph partitioning. Conceptually, each partition maintains a local event sequence while a coordinator synchronizes boundary events across partitions. In the current implementation, however, not all graphs are executed in fully parallel form. Depending on graph structure and fallback node types, the runtime may downgrade to `event-fast-worker` or `event-fast` in order to preserve parity.
-
-Thus, `event-fast-par` should be understood not as "always parallel," but rather as:
-
-- multi-worker execution when the graph is parallelizable
-- parity-first fallback when it is not
-
-### 7.6 Computational Viewpoint
+### 7.4 Computational Viewpoint
 
 Under fixed-step simulation, the number of updates is on the order of
 
@@ -427,7 +412,6 @@ The current model and implementation still have several limitations.
 2. Script-based branching is flexible, but it also makes formal verification harder.
 3. The theoretical boundary between compiled kernels and compatibility fallback in `event-fast` can be further clarified.
 4. `Carrier Route` and `Shuttle Stage` are more complex than Equipment nodes and deserve dedicated formal treatment.
-5. `event-fast-worker` and `event-fast-par` include fallback paths, so a single graph does not always execute under one uniform runtime strategy.
 
 ---
 
@@ -469,5 +453,3 @@ Accordingly, FACT SIM should be understood not merely as a visualization tool, b
 | `dt` | baseline semantics | reference for parity comparison |
 | `event` | single-thread event heap | jumps according to `_until` |
 | `event-fast` | compiled event execution | kernels plus compatibility fallback |
-| `event-fast-worker` | worker-isolated execution | separates UI thread and simulation |
-| `event-fast-par` | parallel multi-worker execution | may fall back depending on graph conditions |

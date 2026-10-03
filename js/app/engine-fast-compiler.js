@@ -120,6 +120,88 @@ var App = window.App || (window.App = {});
     return { groupWordCount, groupBits: bits };
   }
 
+  // Compile static synchronization membership in original graph/Flow order.
+  // Cells and admission decisions remain live and are evaluated on every call.
+  App.compileFastFlowSync = function(graph){
+    const groups = graph.extra?.syncroGroups || [];
+    const membersByGroup = new Map(groups.map(group=> [group.id, []]));
+    const flows = [];
+    const syncItems = [];
+    for(const node of graph._nodes || []){
+      const flow = node.properties?.flow;
+      flows.push({ node, flow, nodes: flow?.nodes, links: flow?.links,
+        nodeCount: flow?.nodes?.length, linkCount: flow?.links?.length,
+        signalCache: flow?.__signalCache });
+      for(const item of flow?.nodes || []){
+        if(item.kind !== 'syncroJudgment') continue;
+        syncItems.push({ flow, item, groupId: item.config.groupId });
+        const members = membersByGroup.get(item.config.groupId);
+        if(members) members.push({ node, item });
+      }
+    }
+    return { nodes: graph._nodes, version: graph._version, flows, syncItems,
+      memberships: groups.map(group=> ({ group, id: group.id, members: membersByGroup.get(group.id) })) };
+  };
+
+  App.isFastFlowSyncCurrent = function(graph, plan){
+    const groups = graph.extra?.syncroGroups || [];
+    if(!plan || plan.nodes !== graph._nodes || plan.version !== graph._version
+      || plan.flows.length !== graph._nodes.length || groups.length !== plan.memberships.length) return false;
+    for(let i = 0; i < groups.length; i++){
+      if(groups[i] !== plan.memberships[i].group || groups[i].id !== plan.memberships[i].id) return false;
+    }
+    for(let i = 0; i < plan.flows.length; i++){
+      const row = plan.flows[i], node = graph._nodes[i], flow = node.properties?.flow;
+      if(row.node !== node || row.flow !== flow || row.nodes !== flow?.nodes || row.links !== flow?.links
+        || row.nodeCount !== flow?.nodes?.length || row.linkCount !== flow?.links?.length
+        || row.signalCache !== flow?.__signalCache) return false;
+    }
+    for(const row of plan.syncItems){
+      if(row.item.kind !== 'syncroJudgment' || row.item.config.groupId !== row.groupId
+        || !row.flow.nodes.includes(row.item)) return false;
+    }
+    return true;
+  };
+
+  // Topology is immutable between FlowModel commits. Keep these indexes in
+  // the engine, outside the serialized Flow/runtime, and refresh after edits.
+  App.prepareFastFlowTopology = function(graph, context){
+    if(!context.topology) return;
+    context.currentFlow = null; context.currentTopology = null;
+    for(const node of graph._nodes || []){
+      const flow = node.properties?.flow;
+      if(!flow?.nodes || !flow.links) continue;
+      let plan = context.topology.get(flow);
+      if(plan && plan.nodes === flow.nodes && plan.links === flow.links
+        && plan.nodeCount === flow.nodes.length && plan.linkCount === flow.links.length
+        && plan.signalCache === flow.__signalCache) continue;
+      const signals = App.FlowModel.signalLinks(flow);
+      plan = { nodes: flow.nodes, links: flow.links, nodeCount: flow.nodes.length,
+        linkCount: flow.links.length, signalCache: signals, byId: new Map(),
+        firstByKind: new Map(), outgoing: new Map(), linksFrom: new Map(),
+        workLinksFrom: new Map(), joinInputs: new WeakMap(), routes: new WeakMap(),
+        assembly: new Map(), signalBranches: new WeakMap(), workBranches: new WeakMap() };
+      for(const item of flow.nodes){
+        // Array.find uses strict equality and returns the first match.
+        if(!Number.isNaN(item.id) && !plan.byId.has(item.id)) plan.byId.set(item.id,item);
+        if(!plan.firstByKind.has(item.kind)) plan.firstByKind.set(item.kind,item);
+      }
+      for(const link of flow.links){
+        if(Number.isNaN(link.from)) continue;
+        if(!plan.linksFrom.has(link.from)) plan.linksFrom.set(link.from,[]);
+        plan.linksFrom.get(link.from).push(link);
+        if(!signals.has(link)){
+          if(!plan.workLinksFrom.has(link.from)) plan.workLinksFrom.set(link.from,[]);
+          plan.workLinksFrom.get(link.from).push(link);
+        }
+        if(!plan.outgoing.has(link.from)) plan.outgoing.set(link.from,new Map());
+        const ports = plan.outgoing.get(link.from);
+        if(!Number.isNaN(link.output) && !ports.has(link.output)) ports.set(link.output,link);
+      }
+      context.topology.set(flow,plan);
+    }
+  };
+
   App.compileFastGraph = function(graph){
     const g = graph || App.graph;
     if(!g || !Array.isArray(g._nodes)) throw new Error('graph is not initialized');

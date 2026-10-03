@@ -69,7 +69,7 @@ var App = window.App || (window.App = {});
   const FINAL_SNAPSHOT_SETTLE_EPS_MS = 0.001;
   const STRICT_FINAL_SNAPSHOT_SETTLE_MS = 100;
   const SCAN_SKIP = new Set(['app', 'canvas', 'constructor', 'flags', 'graph', 'inputs', 'outputs', 'parent', 'widgets', 'widgets_values']);
-  const LIVE_PROBE_ENGINES = new Set(['dt', 'event-fast-worker', 'event-fast-par']);
+  const LIVE_PROBE_ENGINES = new Set(['dt', 'event-fast']);
 
   function nowSimMs(){ return (typeof window.simNow === 'function') ? Number(window.simNow()) : 0; }
   function getLinkCount(graph){ return (graph && graph.links && typeof graph.links === 'object') ? Object.keys(graph.links).length : 0; }
@@ -194,7 +194,7 @@ var App = window.App || (window.App = {});
     const requestedSuite = String(raw.suite || DEFAULTS.suite || 'standard').trim().toLowerCase();
     const suite = Object.prototype.hasOwnProperty.call(SUITE_PRESETS, requestedSuite) ? requestedSuite : DEFAULTS.suite;
     const preset = SUITE_PRESETS[suite] || SUITE_PRESETS.standard;
-    const engines = uniq(raw.engines && raw.engines.length ? raw.engines : defaultEngineTestEngines()).map(normalizeEngineMode);
+    const engines = uniq((raw.engines && raw.engines.length ? raw.engines : defaultEngineTestEngines()).map(normalizeEngineMode));
     if(engines.some((engine)=> LIVE_PROBE_ENGINES.has(engine) && engine !== 'dt') && engines.indexOf('dt') < 0){
       engines.unshift('dt');
     }

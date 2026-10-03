@@ -3,9 +3,13 @@
 var App = window.App || (window.App = {});
 
 (function(){
+  // Migrate persisted preferences and old MCP requests to the remaining fast
+  // engine; these names are never advertised as available engines.
+  const retiredFastModes = new Set(['event-fast-worker','event_fast_worker','eventfastworker','fast-worker',
+    'event-fast-par','event_fast_par','eventfastpar','fast-par','par']);
   function normalizeFastMode(mode){
     const raw = String(mode || '').trim().toLowerCase();
-    if(raw === 'event-fast' || raw === 'event_fast' || raw === 'eventfast' || raw === 'fast'){
+    if(raw === 'event-fast' || raw === 'event_fast' || raw === 'eventfast' || raw === 'fast' || retiredFastModes.has(raw)){
       return 'event-fast';
     }
     return null;
@@ -69,5 +73,29 @@ var App = window.App || (window.App = {});
       return new App.EventFastEngine(graph);
     }
     return legacyCreateSimEngine(normalized, graph);
+  };
+
+  // Benchmark/MCP capabilities belong to the common engine registration,
+  // independently of any worker implementation.
+  App.normalizeHeadlessSimMode = App.normalizeSimMode;
+  App.getHeadlessModeLabel = App.getSimModeLabel;
+  App.isHeadlessOnlyBenchmarkMode = function(){ return false; };
+  App.getBenchmarkSimModes = App.getSupportedSimModes;
+  App.getEngineTestModes = App.getSupportedSimModes;
+  App.createHeadlessSimRunner = function(mode, graphOrData, options){
+    let graph = graphOrData;
+    if(!graph || typeof graph.serialize !== 'function'){
+      const data = typeof graphOrData === 'string' ? JSON.parse(graphOrData) : graphOrData;
+      graph = new LGraph(); graph.configure(data);
+      App.restoreEntityModel?.(graph, data, true);
+      App.repairGraphLinks?.(graph);
+      App.stopGroups?.restoreSerializedData?.(graph, data, false);
+      window.configureGraphClock?.(graph);
+      App.FlowRuntime?.restore(graph, data);
+    }
+    if(App.normalizeSimMode(mode) === 'event-fast'){
+      return new App.EventFastEngine(graph, options?.engineOptions || options);
+    }
+    return App.createSimEngine(mode, graph);
   };
 })();

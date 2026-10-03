@@ -1,0 +1,250 @@
+{
+  "date": "2026-09-29T13:26:03.157Z",
+  "modes": [
+    "dt",
+    "event",
+    "event-fast"
+  ],
+  "pageErrors": [],
+  "failedScripts": [],
+  "registration": {
+    "supported": [
+      "dt",
+      "event",
+      "event-fast"
+    ],
+    "benchmark": [
+      "dt",
+      "event",
+      "event-fast"
+    ],
+    "test": [
+      "dt",
+      "event",
+      "event-fast"
+    ],
+    "ui": [
+      "dt",
+      "event",
+      "event-fast"
+    ],
+    "scripts": [
+      "http://127.0.0.1:52606/js/vendor/litegraph.min.js?v=0.7.13",
+      "http://127.0.0.1:52606/js/nodes-config.js?v=20260226a",
+      "http://127.0.0.1:52606/config/node-definitions.js?v=20260920a",
+      "http://127.0.0.1:52606/js/app/landing.js?v=20260919preview8x",
+      "http://127.0.0.1:52606/js/core.js?v=20260928speedchange",
+      "http://127.0.0.1:52606/js/nodes/work.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/nodes/entity_model.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/nodes/sigports.js",
+      "http://127.0.0.1:52606/js/nodes/menu.js?v=20260926flipio",
+      "http://127.0.0.1:52606/js/nodes/ioflip.js?v=20260926flipio",
+      "http://127.0.0.1:52606/js/litegraph-fliplabels.js",
+      "http://127.0.0.1:52606/js/litegraph-node-title.js?v=20260921titleid",
+      "http://127.0.0.1:52606/js/work-highlight.js",
+      "http://127.0.0.1:52606/js/link-anim.js?v=20260919waitoutput",
+      "http://127.0.0.1:52606/js/vendor/lz-string.min.js",
+      "http://127.0.0.1:52606/js/nodes/note.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/nodes/signal.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/flow-model.js?v=20260926sensor",
+      "http://127.0.0.1:52606/js/app/flow-runtime.js?v=20260929scheduling",
+      "http://127.0.0.1:52606/js/nodes/basic_node.js?v=20260926sensormodal",
+      "http://127.0.0.1:52606/js/nodes/register.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/node-catalog.js?v=20260926flowicons",
+      "http://127.0.0.1:52606/sample/simple.js?v=20260916recovery",
+      "http://127.0.0.1:52606/sample/branch.js?v=20260916recovery",
+      "http://127.0.0.1:52606/sample/parallel_benchmark.js?v=20260916recovery",
+      "http://127.0.0.1:52606/sample/shuttle_line5.js?v=20260916recovery",
+      "http://127.0.0.1:52606/sample/carrier.js?v=20260916recovery",
+      "http://127.0.0.1:52606/sample/pallet_station_demo.js?v=20260916recovery",
+      "http://127.0.0.1:52606/sample/sample_line1.js?v=20260916recovery",
+      "http://127.0.0.1:52606/sample/sample_line2.js?v=20260916recovery",
+      "http://127.0.0.1:52606/js/timeline.js?v=20260731a",
+      "http://127.0.0.1:52606/js/app/state.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/background-layout.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/graph-links.js?v=20260926portsync",
+      "http://127.0.0.1:52606/js/app/stop-groups.js?v=20260920independentmove",
+      "http://127.0.0.1:52606/js/app/script-editor.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/engine.js?v=20260919dtbudget",
+      "http://127.0.0.1:52606/js/app/engine-fast-kernels.js?v=20260929scheduling",
+      "http://127.0.0.1:52606/js/app/engine-fast-compiler.js?v=20260929scheduling",
+      "http://127.0.0.1:52606/js/app/engine-fast-compat.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/engine-fast-runtime.js?v=20260929scheduling",
+      "http://127.0.0.1:52606/js/app/engine-fast-mode.js?v=20260929threeengines",
+      "http://127.0.0.1:52606/js/app/sim.js?v=20260919liveredraw",
+      "http://127.0.0.1:52606/js/app/benchmark.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/engine-test.js?v=20260929threeengines",
+      "http://127.0.0.1:52606/js/app/history.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/selection.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/fit.js?v=20260919sourcefocus2",
+      "http://127.0.0.1:52606/js/app/node-props-panel.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/selection-inspector.js?v=20260926flowreveal",
+      "http://127.0.0.1:52606/js/app/flow-status.js?v=20260926sensor",
+      "http://127.0.0.1:52606/js/app/flow-view.js?v=20260927flowerrortext",
+      "http://127.0.0.1:52606/js/app/sensor-chart-ui.js?v=20260926modal",
+      "http://127.0.0.1:52606/js/app/entity-ui.js?v=20260922nodeheader",
+      "http://127.0.0.1:52606/js/app/node-definition-editor.js?v=20260920a",
+      "http://127.0.0.1:52606/js/app/timeline-init.js?v=20260926dockreveal",
+      "http://127.0.0.1:52606/js/app/graph-init.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/app/examples.js?v=20260919folderstart",
+      "http://127.0.0.1:52606/js/app/file-io.js?v=20260926inspectorview",
+      "http://127.0.0.1:52606/js/app/workspace-ui.js?v=20260920stopgroupsmenu",
+      "http://127.0.0.1:52606/js/app/ui.js?v=20260929threeengines",
+      "http://127.0.0.1:52606/js/app/details-ui.js?v=20260914flow2",
+      "http://127.0.0.1:52606/js/ai/providers/ai-provider.js?v=20260927vision",
+      "http://127.0.0.1:52606/js/ai/generation-settings.js?v=20260928settings",
+      "http://127.0.0.1:52606/js/ai/models/model-registry.js?v=20260927models",
+      "http://127.0.0.1:52606/js/ai/providers/webllm-provider.js?v=20260928settings",
+      "http://127.0.0.1:52606/js/ai/providers/ollama-provider.js?v=20260928settings",
+      "http://127.0.0.1:52606/js/ai/providers/openai-compatible-provider.js?v=20260928settings",
+      "http://127.0.0.1:52606/js/ai/tools/tool-registry.js?v=20260927editing",
+      "http://127.0.0.1:52606/js/ai/tools/editing-tools.js?v=20260927editing",
+      "http://127.0.0.1:52606/js/ai/tools/factsim-tools.js?v=20260927editing",
+      "http://127.0.0.1:52606/js/ai/tools/simulation-diagnostics.js?v=20260927diagnostics",
+      "http://127.0.0.1:52606/js/ai/agent/system-prompt.js?v=20260927editing",
+      "http://127.0.0.1:52606/js/ai/agent/factsim-agent.js?v=20260928settings",
+      "http://127.0.0.1:52606/js/ai/ui/ai-chat-panel.js?v=20260928settings",
+      "http://127.0.0.1:52606/js/app.js?v=20260213"
+    ],
+    "retiredApis": []
+  },
+  "migrations": [
+    {
+      "oldMode": "event-fast-worker",
+      "mode": "event-fast",
+      "ui": "event-fast",
+      "persisted": "event-fast",
+      "normalized": "event-fast",
+      "fastEngine": true
+    },
+    {
+      "oldMode": "event-fast-par",
+      "mode": "event-fast",
+      "ui": "event-fast",
+      "persisted": "event-fast",
+      "normalized": "event-fast",
+      "fastEngine": true
+    }
+  ],
+  "factory": [
+    {
+      "mode": "dt",
+      "inputKind": "data",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "dt",
+      "inputKind": "json",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "dt",
+      "inputKind": "graph",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "event",
+      "inputKind": "data",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "event",
+      "inputKind": "json",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "event",
+      "inputKind": "graph",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "event-fast",
+      "inputKind": "data",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "event-fast",
+      "inputKind": "json",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    },
+    {
+      "mode": "event-fast",
+      "inputKind": "graph",
+      "nodeCount": 63,
+      "simTimeMs": 16000
+    }
+  ],
+  "benchmark": {
+    "cases": 6,
+    "modes": [
+      "dt",
+      "event",
+      "event-fast"
+    ]
+  },
+  "migratedTest": {
+    "status": "PASS",
+    "summary": {
+      "passed": 2,
+      "warned": 0,
+      "failed": 0,
+      "passedCases": 2,
+      "warnedCases": 0,
+      "failedCases": 0,
+      "caseCount": 2,
+      "failureCount": 0,
+      "warningCount": 0,
+      "engineCount": 2,
+      "suite": "quick",
+      "seedCount": 1,
+      "exampleCount": 1,
+      "includesCurrentGraph": false,
+      "stoppedEarly": false,
+      "reruns": 0,
+      "stopOnFirstFailure": false
+    }
+  },
+  "parity": {
+    "status": "PASS",
+    "summary": {
+      "passed": 48,
+      "warned": 0,
+      "failed": 0,
+      "passedCases": 48,
+      "warnedCases": 0,
+      "failedCases": 0,
+      "caseCount": 48,
+      "failureCount": 0,
+      "warningCount": 0,
+      "engineCount": 3,
+      "suite": "quick",
+      "seedCount": 2,
+      "exampleCount": 8,
+      "includesCurrentGraph": false,
+      "stoppedEarly": false,
+      "reruns": 0,
+      "stopOnFirstFailure": false
+    },
+    "failures": [],
+    "warnings": []
+  },
+  "export": {
+    "length": 188632,
+    "retiredScriptReferences": false,
+    "hasSharedRegistration": true,
+    "modes": [
+      "dt",
+      "event",
+      "event-fast"
+    ]
+  },
+  "ok": true
+}

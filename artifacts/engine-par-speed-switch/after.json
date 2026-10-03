@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-28T14:54:31.445Z",
+  "label": "after",
+  "cases": [
+    {
+      "high": "FASTEST",
+      "changed": {
+        "sim": 650000,
+        "queued": 10000,
+        "factor": "820.5x"
+      },
+      "lowStart": {
+        "wall": 1449.800000011921,
+        "sim": 660200,
+        "queued": 0
+      },
+      "lowEnd": {
+        "wall": 2663.199999988079,
+        "sim": 661400,
+        "queued": 0,
+        "factor": "1.00x",
+        "speed": 1,
+        "fastest": false
+      },
+      "measuredLowFactor": 0.988956650752908,
+      "stop": 661464.7999999642
+    },
+    {
+      "high": "1024x",
+      "changed": {
+        "sim": 150000,
+        "queued": 710400,
+        "factor": "180.5x"
+      },
+      "lowStart": {
+        "wall": 3957.600000023842,
+        "sim": 160200,
+        "queued": 0
+      },
+      "lowEnd": {
+        "wall": 5170.300000011921,
+        "sim": 161400,
+        "queued": 0,
+        "factor": "1.00x",
+        "speed": 1,
+        "fastest": false
+      },
+      "measuredLowFactor": 0.9895275006281818,
+      "stop": 161468.99999996423
+    }
+  ]
+}
